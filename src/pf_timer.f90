@@ -121,12 +121,12 @@ contains
             t-pf%timers(timer), t-pf%timers(TTOTAL)
     end if
 
-    if (pf%log > 0) then
-       write (pf%log, '("timer:",a16,", block: ",i3,", step: ",i3,' &
-            // '", iter: ",i3,", cycle: ",i3,", time (rate ",i12,"Hz): ",i18,i18)'), &
-            timer_names(timer), pf%state%block, pf%state%step, pf%state%iter, pf%state%cycle, rate, &
-            t-pf%timers(timer), t-pf%timers(TTOTAL)
-    end if
+    ! if (pf%log > 0) then
+    !    write (pf%log, '("timer:",a16,", block: ",i3,", step: ",i3,' &
+    !         // '", iter: ",i3,", cycle: ",i3,", time (rate ",i12,"Hz): ",i18,i18)'), &
+    !         timer_names(timer), pf%state%block, pf%state%step, pf%state%iter, pf%state%cycle, rate, &
+    !         t-pf%timers(timer), t-pf%timers(TTOTAL)
+    ! end if
   end subroutine end_timer
 
 end module pf_mod_timer

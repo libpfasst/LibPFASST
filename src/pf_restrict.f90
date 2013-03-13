@@ -29,7 +29,6 @@ contains
   subroutine restrict_time_space_fas(pf, t0, dt, F, G)
     use pf_mod_dtype
     use pf_mod_utils
-    use pf_mod_sweep
     use pf_mod_timer
     use transfer, only: restrict
 
@@ -55,14 +54,14 @@ contains
 
     !!!! create workspaces
     do m = 1, G%nnodes-1
-       call create(CofG(m), G%level, .false., G%nvars, G%shape, G%ctx)
-       call create(CofF(m), G%level, .false., G%nvars, G%shape, G%ctx)
+       call G%encap%create(CofG(m), G%level, .false., G%nvars, G%shape, G%ctx)
+       call G%encap%create(CofF(m), G%level, .false., G%nvars, G%shape, G%ctx)
     end do
 
-    call create(tmp, G%level, .false., G%nvars, G%shape, G%ctx)
+    call G%encap%create(tmp, G%level, .false., G%nvars, G%shape, G%ctx)
 
     do m = 1, F%nnodes-1
-       call create(FofF(m), F%level, .false., F%nvars, F%shape, F%ctx)
+       call F%encap%create(FofF(m), F%level, .false., F%nvars, F%shape, F%ctx)
     end do
 
     !!!! restrict qs and recompute fs
@@ -70,30 +69,30 @@ contains
     do m = 1, G%nnodes
        ! XXX: use rmat here...
        call restrict(F%qSDC(trat*(m-1)+1), G%qSDC(m), F%level, F%ctx, G%level, G%ctx)
-       call sdceval(tm(m), m, G)
+       call G%sweeper%evaluate(G, tm(m), m)
     end do
 
     !!!! bring down fas correction from level above
     do m = 1, G%nnodes-1
-       call setval(G%tau(m), 0.0_pfdp)
+       call G%encap%setval(G%tau(m), 0.0_pfdp)
     end do
 
     if (associated(F%tau)) then
        ! restrict fine fas corrections and sum between coarse nodes
-       call setval(tmp, 0.0_pfdp) ! needed for amr
+       call G%encap%setval(tmp, 0.0_pfdp) ! needed for amr
        do m = 1, F%nnodes-1
           mc = int(ceiling(1.0_pfdp*m/trat))
           call restrict(F%tau(m), tmp, F%level, F%ctx, G%level, G%ctx)
-          call axpy(G%tau(mc), 1.0_pfdp, tmp)
+          call G%encap%axpy(G%tau(mc), 1.0_pfdp, tmp)
        end do
     end if
 
     !!!! fas correction
-    call sdc_integrate(G%qSDC, G%fSDC, dt, G, CofG)
-    call sdc_integrate(F%qSDC, F%fSDC, dt, F, FofF)
+    call G%sweeper%integrate(G%qSDC, G%fSDC, dt, G, CofG)
+    call F%sweeper%integrate(F%qSDC, F%fSDC, dt, F, FofF)
 
     do m = 1, G%nnodes-1
-       call setval(CofF(m), 0.0_pfdp)
+       call G%encap%setval(CofF(m), 0.0_pfdp)
     end do
 
     ! restrict fine function values and sum between coarse nodes
@@ -101,24 +100,24 @@ contains
     do m = 1, F%nnodes-1
        mc = int(ceiling(1.0_pfdp*m/trat))
        call restrict(FofF(m), tmp, F%level, F%ctx, G%level, G%ctx)
-       call axpy(CofF(mc), 1.0_pfdp, tmp)
+       call G%encap%axpy(CofF(mc), 1.0_pfdp, tmp)
     end do
 
     do m = 1, G%nnodes-1
-       call axpy(G%tau(m),  1.0_pfdp, CofF(m))
-       call axpy(G%tau(m), -1.0_pfdp, CofG(m))
+       call G%encap%axpy(G%tau(m),  1.0_pfdp, CofF(m))
+       call G%encap%axpy(G%tau(m), -1.0_pfdp, CofG(m))
     end do
 
     !!!! destroy workspaces
     do m = 1, G%nnodes-1
-       call destroy(CofG(m))
-       call destroy(CofF(m))
+       call G%encap%destroy(CofG(m))
+       call G%encap%destroy(CofF(m))
     end do
 
-    call destroy(tmp)
+    call G%encap%destroy(tmp)
 
     do m = 1, F%nnodes-1
-       call destroy(FofF(m))
+       call F%encap%destroy(FofF(m))
     end do
 
     call end_timer(pf, TRESTRICT + F%level - 1)

@@ -23,7 +23,7 @@ module pf_mod_mpi
   include "mpif.h"
 end module pf_mod_mpi
 
-module pf_mod_comm
+module pf_mod_comm_mpi
   use encap
   use pf_mod_mpi
   use pf_mod_dtype
@@ -46,7 +46,7 @@ module pf_mod_comm
 contains
 
   ! Create an MPI based PFASST communicator
-  subroutine pf_comm_create(pf_comm, mpi_comm)
+  subroutine pf_comm_mpi_create(pf_comm, mpi_comm)
     type(pf_comm_t), intent(out) :: pf_comm
     integer,         intent(in)  :: mpi_comm
 
@@ -54,10 +54,10 @@ contains
 
     pf_comm%comm = mpi_comm
     call mpi_comm_size(mpi_comm, pf_comm%nproc, ierror)
-  end subroutine pf_comm_create
+  end subroutine pf_comm_mpi_create
 
   ! Setup
-  subroutine pf_comm_setup(pf_comm, pf)
+  subroutine pf_comm_mpi_setup(pf_comm, pf)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
 
     type(pf_comm_t),   intent(inout) :: pf_comm
@@ -71,18 +71,18 @@ contains
     allocate(pf_comm%sendreq(pf%nlevels))
 
     pf_comm%sendreq = MPI_REQUEST_NULL
-  end subroutine pf_comm_setup
+  end subroutine pf_comm_mpi_setup
 
   ! Destroy
-  subroutine pf_comm_destroy(pf_comm)
+  subroutine pf_comm_mpi_destroy(pf_comm)
     type(pf_comm_t), intent(inout) :: pf_comm
 
     deallocate(pf_comm%recvreq)
     deallocate(pf_comm%sendreq)
-  end subroutine pf_comm_destroy
+  end subroutine pf_comm_mpi_destroy
 
   ! Post
-  subroutine post(pf, level, tag)
+  subroutine pf_comm_mpi_post(pf, level, tag)
     use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(in)    :: pf
@@ -95,10 +95,10 @@ contains
        call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
             pf%rank-1, tag, pf%comm%comm, pf%comm%recvreq(level%level), ierror)
     end if
-  end subroutine post
+  end subroutine pf_comm_mpi_post
 
   ! Receive
-  subroutine recv(pf, level, tag, blocking)
+  subroutine pf_comm_mpi_recv(pf, level, tag, blocking)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
@@ -126,10 +126,10 @@ contains
     end if
 
     call end_timer(pf, TRECEIVE + level%level - 1)
-  end subroutine recv
+  end subroutine pf_comm_mpi_recv
 
   ! Send
-  subroutine send(pf, level, tag, blocking)
+  subroutine pf_comm_mpi_send(pf, level, tag, blocking)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
@@ -156,10 +156,10 @@ contains
     end if
 
     call end_timer(pf, TSEND + level%level - 1)
-  end subroutine send
+  end subroutine pf_comm_mpi_send
 
   ! Send
-  subroutine wait(pf, level)
+  subroutine pf_comm_mpi_wait(pf, level)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(in) :: pf
@@ -168,11 +168,11 @@ contains
     integer :: ierror, stat(MPI_STATUS_SIZE)
 
     call mpi_wait(pf%comm%sendreq(level), stat, ierror)
-  end subroutine wait
+  end subroutine pf_comm_mpi_wait
 
 
   ! Broadcast
-  subroutine broadcast(pf, y, nvar, root)
+  subroutine pf_comm_mpi_broadcast(pf, y, nvar, root)
     use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(inout) :: pf
@@ -186,6 +186,6 @@ contains
     call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)
 
     call end_timer(pf, TSEND)
-  end subroutine broadcast
+  end subroutine pf_comm_mpi_broadcast
 
-end module pf_mod_comm
+end module pf_mod_comm_mpi

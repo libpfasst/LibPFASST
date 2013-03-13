@@ -17,16 +17,61 @@
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-module pf_mod_sweep
+module pf_mod_implicit
   use pf_mod_dtype
   implicit none
   integer, parameter :: npieces = 1
+
+  interface
+     subroutine pf_f1eval_p(y, t, level, ctx, f1)
+       type(c_ptr),    intent(in), value :: y, f1, ctx
+       real(pfdp),     intent(in)        :: t
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f1eval_p
+  end interface
+
+  interface
+     subroutine pf_f2eval_p(y, t, level, ctx, f2)
+       type(c_ptr),    intent(in), value :: y, f2, ctx
+       real(pfdp),     intent(in)        :: t
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f2eval_p
+  end interface
+
+  interface
+     subroutine pf_f2comp_p(y, t, dt, rhs, level, ctx, f2)
+       type(c_ptr),    intent(in), value :: y, rhs, f2, ctx
+       real(pfdp),     intent(in)        :: t, dt
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f2comp_p
+  end interface
+
+  ! interface
+  !    subroutine imp_rhs_proc(rhs, q0, S, level, ctx)
+  !      use iso_c_binding
+  !      use encap
+  !      type(pf_encap_t), intent(inout) :: rhs
+  !      type(pf_encap_t), intent(in)    :: q0, S
+  !      integer,          intent(in)    :: level
+  !      type(c_ptr),      intent(in)    :: ctx
+  !    end subroutine imp_rhs_proc
+  ! end interface
+
+
+     ! ! rhs
+     ! procedure(imp_rhs_proc), pointer, nopass  :: gen_imp_rhs => null()
+     ! procedure(imex_rhs_proc), pointer, nopass :: gen_imex_rhs => null()
+
+
+  type :: pf_implicit_t
+     type(c_funptr) :: f1eval, f2eval, f2comp, gen_rhs
+  end type pf_implicit_t
+
 contains
 
   ! Perform one SDC sweep on level F and set qend appropriately.
-  subroutine sweep(pf, t0, dt, F)
+  subroutine implicit_sweep(pf, t0, dt, F)
     use pf_mod_timer
-    use feval, only : eval_f2, comp_f2
 
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: dt, t0
@@ -82,22 +127,21 @@ contains
     end do
 
     call end_timer(pf, TLEVEL+F%level-1)
-  end subroutine sweep
+  end subroutine implicit_sweep
 
   ! Evaluate function values
-  subroutine sdceval(t, m, F)
+  subroutine implicit_evaluate(t, m, F)
     use pf_mod_dtype
-    use feval, only: eval_f2
 
     real(pfdp),       intent(in)    :: t
     integer,          intent(in)    :: m
     type(pf_level_t), intent(inout) :: F
 
     call eval_f2(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,1))
-  end subroutine sdceval
+  end subroutine implicit_evaluate
 
   ! Initialize smats
-  subroutine sdcinit(F)
+  subroutine implicit_initialize(F)
     use pf_mod_dtype
     type(pf_level_t), intent(inout) :: F
     real(pfdp) :: dsdc(F%nnodes-1)
@@ -112,11 +156,11 @@ contains
     do m = 1, F%nnodes-1
        F%smat(m,m+1,1) = F%smat(m,m+1,1) - dsdc(m)
     end do
-  end subroutine sdcinit
+  end subroutine implicit_initialize
 
 
   ! Compute SDC integral
-  subroutine sdc_integrate(qSDC, fSDC, dt, F, fintSDC)
+  subroutine implicit_integrate(qSDC, fSDC, dt, F, fintSDC)
     type(pf_level_t),  intent(in)    :: F
     type(pf_encap_t),  intent(in)    :: qSDC(F%nnodes,npieces) ! Solution
     type(pf_encap_t),  intent(in)    :: fSDC(F%nnodes,npieces) ! Function values
@@ -133,7 +177,23 @@ contains
           end do
        end do
     end do
-  end subroutine sdc_integrate
+  end subroutine implicit_integrate
 
-end module pf_mod_sweep
+  ! Compute SDC integral
+    subroutine implicit_create(sweeper, f1eval, f2eval, f2comp)
+    type(pf_sweeper_t),  intent(inout) :: sweeper
+
+    type(pf_implicit_t), pointer :: imp
+
+    allocate(imp)
+    imp%f1eval = f1eval
+    imp%f2eval = f2eval
+    imp%f2comp = f2comp
+
+    sweeper%sweep = implicit_sweep
+
+    sweeper%ctx = c_loc(tmp)
+  end function implicit_create
+
+end module pf_mod_implicit
 

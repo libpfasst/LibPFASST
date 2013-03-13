@@ -52,24 +52,23 @@ contains
 
   ! Spread initial condition
   subroutine spreadq0(F, t0)
-    use pf_mod_sweep
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: t0
 
     integer :: m, p
 
-    call unpack(F%qSDC(1), F%q0)
-    call sdceval(t0, 1, F)
+    call F%encap%unpack(F%qSDC(1), F%q0)
+    call F%sweeper%evaluate(F, t0, 1)
 
     do m = 2, F%nnodes
-       call copy(F%qSDC(m), F%qSDC(1))
-       do p = 1, npieces
-          call copy(F%fSDC(m,p), F%fSDC(1,p))
+       call F%encap%copy(F%qSDC(m), F%qSDC(1))
+       do p = 1, F%sweeper%npieces
+          call F%encap%copy(F%fSDC(m,p), F%fSDC(1,p))
        end do
     end do
   end subroutine spreadq0
 
-
+  ! Save current qSDC and fSDC
   subroutine save(F)
     type(pf_level_t), intent(inout) :: F
 
@@ -79,15 +78,15 @@ contains
        if (associated(F%pfSDC)) then
           do m = 1, F%nnodes
              do p = 1,size(F%fSDC(1,:))
-                call copy(F%pfSDC(m,p), F%fSDC(m,p))
+                call F%encap%copy(F%pfSDC(m,p), F%fSDC(m,p))
              end do
           end do
-          call copy(F%pSDC(1), F%qSDC(1))
+          call F%encap%copy(F%pSDC(1), F%qSDC(1))
        end if
     else
        if (associated(F%pSDC)) then
           do m = 1, F%nnodes
-             call copy(F%pSDC(m), F%qSDC(m))
+             call F%encap%copy(F%pSDC(m), F%qSDC(m))
           end do
        end if
     end if
@@ -95,29 +94,28 @@ contains
 
   ! Compute residual (generic but probably inefficient)
   subroutine pf_residual(F, t0, dt, residual)
-    use pf_mod_sweep
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: t0, dt
-    type(pf_encap_t), intent(inout) :: residual
+    type(c_ptr),      intent(in)    :: residual
 
-    type(pf_encap_t) :: fintSDC(F%nnodes-1)
+    type(c_ptr) :: fintSDC(F%nnodes-1)
     integer :: n
 
     do n = 1, F%nnodes-1
-       call create(fintSDC(n), F%level, .true., F%nvars, F%shape, F%ctx)
+       call F%encap%create(fintSDC(n), F%level, .true., F%nvars, F%shape, F%ctx)
     end do
 
     ! integrate and compute residual
-    call sdc_integrate(F%qSDC, F%fSDC, dt, F, fintSDC)
+    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, fintSDC)
 
-    call copy(residual, F%qSDC(1))
+    call F%encap%copy(residual, F%qSDC(1))
     do n = 1, F%nnodes-1
-       call axpy(residual, 1.0_pfdp, fintSDC(n))
+       call F%encap%axpy(residual, 1.0_pfdp, fintSDC(n))
     end do
-    call axpy(residual, -1.0_pfdp, F%qSDC(F%nnodes))
+    call F%encap%axpy(residual, -1.0_pfdp, F%qSDC(F%nnodes))
 
     do n = 1, F%nnodes-1
-       call destroy(fintSDC(n))
+       call F%encap%destroy(fintSDC(n))
     end do
   end subroutine pf_residual
 

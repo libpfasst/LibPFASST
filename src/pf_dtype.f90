@@ -19,9 +19,14 @@
 
 module pf_mod_dtype
   use iso_c_binding
-  use encap
   implicit none
 
+  integer, parameter :: pfdp = c_double
+
+  real(pfdp), parameter :: ZERO  = 0.0_pfdp
+  real(pfdp), parameter :: ONE   = 1.0_pfdp
+  real(pfdp), parameter :: TWO   = 2.0_pfdp
+  real(pfdp), parameter :: HALF  = 0.5_pfdp
 
   integer, parameter :: PF_MAX_HOOKS = 8
 
@@ -30,6 +35,7 @@ module pf_mod_dtype
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
+
 
   ! state type
   type :: pf_state_t
@@ -41,8 +47,32 @@ module pf_mod_dtype
   ! hook type
   type :: pf_hook_t
      integer :: hook = -1               ! hook type (see pf_mod_hooks)
-     procedure(hook_proc), pointer, nopass :: proc
+     procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
+
+
+  ! sweeper type
+  type :: pf_sweeper_t
+     type(c_ptr) :: ctx
+     integer     :: npieces
+     procedure(pf_sweep_p),      pointer, nopass :: sweep
+     procedure(pf_initialize_p), pointer, nopass :: initialize
+     procedure(pf_evaluate_p),   pointer, nopass :: evaluate
+     procedure(pf_integrate_p),  pointer, nopass :: integrate
+  end type pf_sweeper_t
+
+
+  ! encap type
+  type :: pf_encap_t
+     type(c_ptr) :: ctx
+     procedure(pf_encap_create_p),  pointer, nopass :: create
+     procedure(pf_encap_destroy_p), pointer, nopass :: destroy
+     procedure(pf_encap_setval_p),  pointer, nopass :: setval
+     procedure(pf_encap_copy_p),    pointer, nopass :: copy
+     procedure(pf_encap_pack_p),    pointer, nopass :: pack
+     procedure(pf_encap_unpack_p),  pointer, nopass :: unpack
+     procedure(pf_encap_axpy_p),    pointer, nopass :: axpy
+  end type pf_encap_t
 
 
   ! level type
@@ -52,10 +82,10 @@ module pf_mod_dtype
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
      integer     :: level = -1          ! level number (1=finest)
      logical     :: Finterp = .false.   ! Interpolate functions instead of solution
-     ! tolerances
-     real(pfdp)  :: residual_tol = 0.0_pfdp
 
-     ! arrays
+     type(pf_encap_t) :: encap
+     type(pf_sweeper_t) :: sweeper
+
      real(pfdp), pointer :: &
           q0(:), &                      ! initial condition (packed)
           send(:), &                    ! send buffer
@@ -67,28 +97,19 @@ module pf_mod_dtype
           rmat(:,:) => null(), &        ! time restriction matrix
           tmat(:,:) => null()           ! time interpolation matrix
 
-     logical, pointer :: nmask(:)       ! sdc node mask
+     integer(c_int), pointer :: &
+          nflags(:)                     ! sdc node flags
 
-     type(pf_encap_t) :: qend           ! end value
-     type(pf_encap_t) :: qex            ! exact value for diagnostics
-
-     type(pf_encap_t), pointer :: &
-          qSDC(:) => null(), &          ! unknowns at sdc nodes
-          pSDC(:) => null(), &          ! unknowns at sdc nodes, previous sweep
-          fSDC(:,:) => null(), &        ! functions values at sdc nodes
-          pfSDC(:,:) => null(), &       ! functions at sdc nodes, previous sweep
-          tau(:) => null()              ! fas correction
+     type(c_ptr), pointer :: &
+          qSDC(:), &                    ! unknowns at sdc nodes
+          pSDC(:), &                    ! unknowns at sdc nodes, previous sweep
+          fSDC(:,:), &                  ! functions values at sdc nodes
+          pfSDC(:,:), &                 ! functions at sdc nodes, previous sweep
+          tau(:), &                     ! fas correction
+          qend                          ! solution at last node
 
      type(c_ptr) :: ctx  = c_null_ptr   ! user context
-     type(c_ptr) :: dctx = c_null_ptr   ! dump context
-
-     integer, pointer :: shape(:) => null() ! user shape
-
-     ! rhs
-     procedure(imp_rhs_proc), pointer, nopass  :: gen_imp_rhs => null()
-     procedure(imex_rhs_proc), pointer, nopass :: gen_imex_rhs => null()
-
-     logical :: allocated = .false.
+     integer, pointer :: shape(:)       ! user shape
   end type pf_level_t
 
 
@@ -114,7 +135,7 @@ module pf_mod_dtype
      integer :: niters  = 5             ! number of iterations
      integer :: qtype   = 1             ! type of quadrature nodes
      integer :: rank    = -1            ! rank of current processor
-     real(pfdp)        :: Htol          ! Hamiltonian tol in Verlet
+
      ! pf objects
      type(pf_state_t)          :: state
      type(pf_level_t), pointer :: levels(:)
@@ -124,51 +145,135 @@ module pf_mod_dtype
      type(pf_hook_t), pointer :: hooks(:,:)
      integer, pointer         :: nhooks(:)
 
-     ! logging, timer
-     logical :: echo_timings = .false.
+     ! timing
+     logical    :: echo_timings  = .false.
      integer(8) :: timers(100)   = 0
      integer(8) :: runtimes(100) = 0
-     integer :: log = -1 ! log file unit number
   end type pf_pfasst_t
 
 
   ! hook interface
   interface
-     subroutine hook_proc(pf, level, state, ctx)
+     subroutine pf_hook_p(pf, level, state, ctx)
        use iso_c_binding
-       import pf_pfasst_t
-       import pf_level_t
-       import pf_state_t
+       import pf_pfasst_t, pf_level_t, pf_state_t
        type(pf_pfasst_t), intent(inout) :: pf
        type(pf_level_t),  intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
        type(c_ptr),       intent(in)    :: ctx
-     end subroutine hook_proc
+     end subroutine pf_hook_p
   end interface
 
+  ! ! gen rhs interfaces
+  ! interface
+  !    subroutine imex_rhs_proc(rhs, q0, dt, f1, S, level, ctx)
+  !      use iso_c_binding
+  !      use encap
+  !      type(pf_encap_t), intent(inout) :: rhs
+  !      type(pf_encap_t), intent(in)    :: q0, f1, S
+  !      real(pfdp),       intent(in)    :: dt
+  !      integer,          intent(in)    :: level
+  !      type(c_ptr),      intent(in)    :: ctx
+  !    end subroutine imex_rhs_proc
+  ! end interface
 
-  ! gen rhs interfaces
+  ! sweeper interfaces
   interface
-     subroutine imex_rhs_proc(rhs, q0, dt, f1, S, level, ctx)
-       use iso_c_binding
-       use encap
-       type(pf_encap_t), intent(inout) :: rhs
-       type(pf_encap_t), intent(in)    :: q0, f1, S
-       real(pfdp),       intent(in)    :: dt
-       integer,          intent(in)    :: level
-       type(c_ptr),      intent(in)    :: ctx
-     end subroutine imex_rhs_proc
+     subroutine pf_sweep_p(pf, F, t0, dt)
+       import pf_pfasst_t, pf_level_t, pfdp, c_ptr
+       type(pf_pfasst_t), intent(inout) :: pf
+       real(pfdp),        intent(in)    :: dt, t0
+       type(pf_level_t),  intent(inout) :: F
+     end subroutine pf_sweep_p
   end interface
 
   interface
-     subroutine imp_rhs_proc(rhs, q0, S, level, ctx)
-       use iso_c_binding
-       use encap
-       type(pf_encap_t), intent(inout) :: rhs
-       type(pf_encap_t), intent(in)    :: q0, S
-       integer,          intent(in)    :: level
-       type(c_ptr),      intent(in)    :: ctx
-     end subroutine imp_rhs_proc
+     subroutine pf_evaluate_p(F, t, m)
+       import pf_level_t, pfdp, c_ptr
+       type(pf_level_t), intent(inout) :: F
+       real(pfdp),       intent(in)    :: t
+       integer,          intent(in)    :: m
+     end subroutine pf_evaluate_p
   end interface
+
+  interface
+     subroutine pf_initialize_p(F)
+       import pf_level_t, c_ptr
+       type(pf_level_t), intent(inout) :: F
+     end subroutine pf_initialize_p
+  end interface
+
+  interface
+     subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
+       import pf_level_t, c_ptr, pfdp
+       type(pf_level_t),  intent(in) :: F
+       type(c_ptr),       intent(in) :: qSDC(:,:)
+       type(c_ptr),       intent(in) :: fSDC(:,:)
+       type(c_ptr),       intent(in) :: fintSDC(:)
+       real(pfdp),        intent(in) :: dt
+     end subroutine pf_integrate_p
+  end interface
+
+
+  ! encapsulation interfaces
+  interface
+     subroutine pf_encap_create_p(sol, level, feval, nvars, shape, ctx)
+       import c_ptr
+       type(c_ptr),  intent(in), value :: sol, ctx
+       integer,      intent(in)        :: level, nvars, shape(:)
+       logical,      intent(in)        :: feval
+     end subroutine pf_encap_create_p
+  end interface
+
+  interface
+     subroutine pf_encap_destroy_p(sol)
+       import c_ptr
+       type(c_ptr), intent(in), value :: sol
+     end subroutine pf_encap_destroy_p
+  end interface
+
+  interface
+     subroutine pf_encap_setval_p(sol, val)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value :: sol
+       real(pfdp),  intent(in)        :: val
+     end subroutine pf_encap_setval_p
+  end interface
+
+  interface
+     subroutine pf_encap_copy_p(dst, src)
+       import c_ptr
+       type(c_ptr), intent(in), value :: dst, src
+     end subroutine pf_encap_copy_p
+  end interface
+
+  interface
+     subroutine pf_encap_pack_p(z, q)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value :: q
+       real(pfdp),  intent(out)       :: z(:)
+     end subroutine pf_encap_pack_p
+  end interface
+
+  interface
+     subroutine pf_encap_unpack_p(q, z)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value :: q
+       real(pfdp),  intent(in)        :: z(:)
+     end subroutine pf_encap_unpack_p
+  end interface
+
+  interface
+     subroutine pf_encap_axpy_p(y, a, x)
+       import c_ptr, pfdp
+       real(pfdp),  intent(in)        :: a
+       type(c_ptr), intent(in), value :: x, y
+     end subroutine pf_encap_axpy_p
+  end interface
+
+
+  ! communicator interfaces
+  ! XXX
+
 
 end module pf_mod_dtype

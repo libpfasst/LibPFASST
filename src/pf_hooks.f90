@@ -26,7 +26,7 @@ module pf_mod_hooks
        PF_POST_ITERATION = 2, & ! call hooks after each pfasst iteration
        PF_POST_STEP = 3, &      ! call hooks after each time step
        PF_PRE_ITERATION = 4, &  ! call hooks before each pfasst iteration
-       PF_POST_PREDICTOR = 5, &    
+       PF_POST_PREDICTOR = 5, &
        PF_PRE_BLOCK = 6
 
   interface add_hook
@@ -40,7 +40,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: level
     integer,           intent(in)    :: hook
-    procedure(hook_proc)             :: proc
+    procedure(pf_hook_p)             :: proc
 
     pf%nhooks(level) = pf%nhooks(level) + 1
     pf%hooks(level,pf%nhooks(level))%proc => proc
