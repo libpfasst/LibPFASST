@@ -94,12 +94,12 @@ contains
 
              ! get new initial value (skip on first iteration)
              if (k > 1) &
-                  call recv(pf, G, k-1, .true.)
+                  call pf%comm%recv(pf, G, k-1, .true.)
 
              do j = 1, G%nsweeps
                 call G%sweeper%sweep(pf, G, t0, dt)
              end do
-             call send(pf, G, k, .true.)
+             call pf%comm%send(pf, G, k, .true.)
           end do
 
           ! interpolate
@@ -132,7 +132,7 @@ contains
           ! post receive requests
           do l = 2, pf%nlevels
              F => pf%levels(l)
-             call post(pf, F, F%level*100+k)
+             call pf%comm%post(pf, F, F%level*100+k)
           end do
 
           !! go down the v-cycle
@@ -144,7 +144,7 @@ contains
              do j = 1, F%nsweeps
                 call F%sweeper%sweep(pf, F, t0, dt)
              end do
-             call send(pf, F, F%level*100+k, .false.)
+             call pf%comm%send(pf, F, F%level*100+k, .false.)
 
              call call_hooks(pf, F%level, PF_POST_SWEEP)
              call restrict_time_space_fas(pf, t0, dt, F, G)
@@ -155,11 +155,11 @@ contains
           pf%state%cycle = pf%state%cycle + 1
           F => pf%levels(1)
 
-          call recv(pf, F, F%level*100+k, .true.)
+          call pf%comm%recv(pf, F, F%level*100+k, .true.)
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, t0, dt)
           end do
-          call send(pf, F, F%level*100+k, .true.)
+          call pf%comm%send(pf, F, F%level*100+k, .true.)
 
           call call_hooks(pf, F%level, PF_POST_SWEEP)
 
@@ -171,7 +171,7 @@ contains
 
              call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
 
-             call recv(pf, F, F%level*100+k, .false.)
+             call pf%comm%recv(pf, F, F%level*100+k, .false.)
 
              if (pf%rank > 0) then
                 ! Interpolate increment to q0
@@ -212,9 +212,9 @@ contains
        if (nblock > 1) then
           F => pf%levels(pf%nlevels)
 
-          call wait(pf, pf%nlevels)
+          call pf%comm%wait(pf, pf%nlevels)
           call pack(F%send, F%qend)
-          call broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
+          call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
 

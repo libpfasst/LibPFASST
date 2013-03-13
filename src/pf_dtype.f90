@@ -129,6 +129,12 @@ module pf_mod_dtype
      ! pthreads
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
      type(c_ptr), pointer :: pfpth(:,:) ! mutexes and conditions (indexed by rank, level)
+
+     procedure(pf_post_p), pointer, nopass :: post
+     procedure(pf_recv_p), pointer, nopass :: recv
+     procedure(pf_send_p), pointer, nopass :: send
+     procedure(pf_wait_p), pointer, nopass :: wait
+     procedure(pf_broadcast_p), pointer, nopass :: broadcast
   end type pf_comm_t
 
 
@@ -273,7 +279,50 @@ module pf_mod_dtype
 
 
   ! communicator interfaces
-  ! XXX
+  interface
+     subroutine pf_post_p(pf, level, tag)
+       import pf_pfasst_t, pf_level_t
+       type(pf_pfasst_t), intent(in)    :: pf
+       type(pf_level_t),  intent(inout) :: level
+       integer,           intent(in)    :: tag
+     end subroutine pf_post_p
+  end interface
 
+  interface
+     subroutine pf_recv_p(pf, level, tag, blocking)
+       import pf_pfasst_t, pf_level_t
+       type(pf_pfasst_t), intent(inout) :: pf
+       type(pf_level_t),  intent(inout) :: level
+       integer,           intent(in)    :: tag
+       logical,           intent(in)    :: blocking
+     end subroutine pf_recv_p
+  end interface
+
+  interface
+     subroutine pf_send_p(pf, level, tag, blocking)
+       import pf_pfasst_t, pf_level_t
+       type(pf_pfasst_t), intent(inout) :: pf
+       type(pf_level_t),  intent(inout) :: level
+       integer,           intent(in)    :: tag
+       logical,           intent(in)    :: blocking
+     end subroutine pf_send_p
+  end interface
+
+  interface
+     subroutine pf_wait_p(pf, level)
+       import pf_pfasst_t
+       type(pf_pfasst_t), intent(in) :: pf
+       integer,           intent(in) :: level
+     end subroutine pf_wait_p
+  end interface
+
+  interface
+     subroutine pf_broadcast_p(pf, y, nvar, root)
+       import pf_pfasst_t, pfdp
+       type(pf_pfasst_t), intent(inout) :: pf
+       real(pfdp)  ,      intent(in)    :: y(nvar)
+       integer,           intent(in)    :: nvar, root
+     end subroutine pf_broadcast_p
+  end interface
 
 end module pf_mod_dtype
