@@ -20,7 +20,6 @@
 ! This module implements communications on the fake communicator
 
 module pf_mod_comm
-  use encap
   use pf_mod_dtype
   use pf_mod_pfasst
   use pf_mod_timer

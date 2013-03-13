@@ -16,9 +16,9 @@ def configure(cnf):
   # cnf.env.FCFLAGS   = [ '-O3' ]
   # cnf.env.CFLAGS    = [ '-O3' ]
 
-  cnf.env.FCFLAGS   = [ '-Wall', '-g', '-pg' ]
-  cnf.env.CFLAGS    = [ '-Wall' ]
-  cnf.env.LINKFLAGS = [ '-g' ]
+  cnf.env.FCFLAGS   += [ '-Wall', '-g', '-pg' ]
+  cnf.env.CFLAGS    += [ '-Wall' ]
+  cnf.env.LINKFLAGS += [ '-g' ]
 
 
 def build(bld):

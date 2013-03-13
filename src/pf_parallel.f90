@@ -25,21 +25,18 @@ contains
 
   ! Run in parallel using PFASST (old way for now).
   subroutine pfasst_run(pf, q0, dt, tend, nsteps, qend)
-    use encap
-    use pf_mod_comm
+    use pf_mod_dtype
     use pf_mod_interpolate
     use pf_mod_restrict
-    use pf_mod_sweep
     use pf_mod_utils
     use pf_mod_timer
     use pf_mod_hooks
-    use transfer, only: interpolate
 
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_encap_t),  intent(in)    :: q0
+    type(c_ptr),       intent(in)    :: q0
     real(pfdp),        intent(in)    :: dt, tend
-    type(pf_encap_t),  intent(inout), optional :: qend
-    integer,           intent(in), optional    :: nsteps
+    type(c_ptr),       intent(in), optional :: qend
+    integer,           intent(in), optional :: nsteps
 
     real(pfdp) :: t0
     integer    :: nblock, b, k, j, l
@@ -53,7 +50,7 @@ contains
 
     !!!! set initial conditions
     F => pf%levels(pf%nlevels)
-    call pack(F%q0, q0)
+    call F%encap%pack(F%q0, q0)
 
     if(present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -86,7 +83,7 @@ contains
           F => pf%levels(l); G => pf%levels(l-1)
           call restrict_time_space_fas(pf, t0, dt, F, G)
           call save(G)
-          call pack(G%q0, G%qSDC(1))
+          call G%encap%pack(G%q0, G%qSDC(1))
        end do
 
        if (pf%comm%nproc > 1) then
@@ -100,7 +97,7 @@ contains
                   call recv(pf, G, k-1, .true.)
 
              do j = 1, G%nsweeps
-                call sweep(pf, t0, dt, G)
+                call G%sweeper%sweep(pf, G, t0, dt)
              end do
              call send(pf, G, k, .true.)
           end do
@@ -110,7 +107,7 @@ contains
              F => pf%levels(l+1)
              G => pf%levels(l)
              call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
-             call pack(F%q0, F%qSDC(1))
+             call G%encap%pack(F%q0, F%qSDC(1))
           end do
 
        end if
@@ -145,7 +142,7 @@ contains
              G => pf%levels(l-1)
 
              do j = 1, F%nsweeps
-                call sweep(pf, t0, dt, F)
+                call F%sweeper%sweep(pf, F, t0, dt)
              end do
              call send(pf, F, F%level*100+k, .false.)
 
@@ -160,7 +157,7 @@ contains
 
           call recv(pf, F, F%level*100+k, .true.)
           do j = 1, F%nsweeps
-             call sweep(pf, t0, dt, F)
+             call F%sweeper%sweep(pf, F, t0, dt)
           end do
           call send(pf, F, F%level*100+k, .true.)
 
@@ -189,7 +186,7 @@ contains
              if (l < pf%nlevels .or. k .eq. pf%niters) then
 !             if (l < pf%nlevels) then
                 do j = 1, F%nsweeps
-                   call sweep(pf, t0, dt, F)
+                   call F%sweeper%sweep(pf, F, t0, dt)
                 end do
                 call call_hooks(pf, F%level, PF_POST_SWEEP)
              end if
@@ -228,7 +225,7 @@ contains
 
     if (present(qend)) then
        F => pf%levels(pf%nlevels)
-       call copy(qend, F%qend)
+       call F%encap%copy(qend, F%qend)
     end if
   end subroutine pfasst_run
 

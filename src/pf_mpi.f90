@@ -24,7 +24,6 @@ module pf_mod_mpi
 end module pf_mod_mpi
 
 module pf_mod_comm_mpi
-  use encap
   use pf_mod_mpi
   use pf_mod_dtype
   use pf_mod_timer
@@ -32,15 +31,15 @@ module pf_mod_comm_mpi
   implicit none
 
   interface create
-     module procedure pf_comm_create
+     module procedure pf_comm_mpi_create
   end interface create
 
   interface setup
-     module procedure pf_comm_setup
+     module procedure pf_comm_mpi_setup
   end interface setup
 
   interface destroy
-     module procedure pf_comm_destroy
+     module procedure pf_comm_mpi_destroy
   end interface destroy
 
 contains

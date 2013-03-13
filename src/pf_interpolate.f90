@@ -28,9 +28,7 @@ contains
   subroutine interpolate_time_space(pf, t0, dt, F, G, Finterp)
     use pf_mod_dtype
     use pf_mod_restrict
-    use pf_mod_sweep
     use pf_mod_timer
-    use transfer
 
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
@@ -40,7 +38,7 @@ contains
     integer    :: m, n, p, trat
     real(pfdp) :: tm(F%nnodes)
 
-    type(pf_encap_t) :: &
+    type(c_ptr) :: &
          delG(G%nnodes), &
          delGF(G%nnodes)
 
@@ -48,8 +46,8 @@ contains
 
     ! create workspaces
     do m = 1, G%nnodes
-       call create(delG(m),   G%level, .true., G%nvars, G%shape, G%ctx)
-       call create(delGF(m),  F%level, .true., F%nvars, F%shape, F%ctx)
+       call G%encap%create(delG(m),   G%level, .true., G%nvars, G%shape, G%ctx)
+       call F%encap%create(delGF(m),  F%level, .true., F%nvars, F%shape, F%ctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
@@ -57,39 +55,39 @@ contains
        do p = 1,size(G%fSDC(1,:))
           ! needed for amr
           do m = 1, G%nnodes
-             call setval(delG(m),   0.0_pfdp)
-             call setval(delGF(m),  0.0_pfdp)
+             call G%encap%setval(delG(m),   0.0_pfdp)
+             call F%encap%setval(delGF(m),  0.0_pfdp)
           end do
 
           do m = 1, G%nnodes
-             call copy(delG(m), G%fSDC(m,p))
-             call axpy(delG(m), -1.0_pfdp, G%pfSDC(m,p))
+             call G%encap%copy(delG(m), G%fSDC(m,p))
+             call G%encap%axpy(delG(m), -1.0_pfdp, G%pfSDC(m,p))
 
-             call interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+             call G%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
           end do
 
           ! interpolate corrections
           trat = (F%nnodes-1) / (G%nnodes-1)
           do n = 1, F%nnodes
              do m = 1, G%nnodes
-                call axpy(F%fSDC(n,p), F%tmat(n,m), delGF(m))
+                call G%encap%axpy(F%fSDC(n,p), F%tmat(n,m), delGF(m))
              end do
           end do
        end do !  Loop on npieces
 
        !  Do interpolation of qSDC(1) to update initial condition
-       call setval(delG(1),   0.0_pfdp)
-       call setval(delGF(1),  0.0_pfdp)
-       call copy(delG(1), G%qSDC(1))
-       call axpy(delG(1), -1.0_pfdp, G%pSDC(1))
+       call G%encap%setval(delG(1),   0.0_pfdp)
+       call G%encap%setval(delGF(1),  0.0_pfdp)
+       call G%encap%copy(delG(1), G%qSDC(1))
+       call G%encap%axpy(delG(1), -1.0_pfdp, G%pSDC(1))
 
-       call interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
+       call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
 
        ! interpolate corrections
        trat = (F%nnodes-1) / (G%nnodes-1)
 
        do n = 1, F%nnodes
-          call axpy(F%qSDC(n), F%tmat(n,1), delGF(1))
+          call F%encap%axpy(F%qSDC(n), F%tmat(n,1), delGF(1))
        end do
 
        ! ! recompute fs
@@ -100,15 +98,15 @@ contains
        ! create workspaces
        do m = 1, G%nnodes
           ! needed for amr
-          call setval(delG(m),   0.0_pfdp)
-          call setval(delGF(m),  0.0_pfdp)
+          call G%encap%setval(delG(m),   0.0_pfdp)
+          call G%encap%setval(delGF(m),  0.0_pfdp)
        end do
 
        do m = 1, G%nnodes
-          call copy(delG(m), G%qSDC(m))
-          call axpy(delG(m), -1.0_pfdp, G%pSDC(m))
+          call G%encap%copy(delG(m), G%qSDC(m))
+          call G%encap%axpy(delG(m), -1.0_pfdp, G%pSDC(m))
 
-          call interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+          call F%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
        end do
 
        ! interpolate corrections
@@ -116,21 +114,21 @@ contains
 
        do n = 1, F%nnodes
           do m = 1, G%nnodes
-             call axpy(F%qSDC(n), F%tmat(n,m), delGF(m))
+             call G%encap%axpy(F%qSDC(n), F%tmat(n,m), delGF(m))
           end do
        end do
 
        ! recompute fs
        tm = t0 + dt*F%nodes
        do m = 1, F%nnodes
-          call sdceval(tm(m), m, F)
+          call F%sweeper%evaluate(F, tm(m), m)
        end do
     end if  !  Feval
 
     ! destroy workspaces
     do m = 1, G%nnodes
-       call destroy(delG(m))
-       call destroy(delGF(m))
+       call G%encap%destroy(delG(m))
+       call G%encap%destroy(delGF(m))
     end do
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
@@ -140,46 +138,44 @@ contains
     !  Use to update the fine initial condition from increment
     use pf_mod_dtype
     use pf_mod_restrict
-    use pf_mod_sweep
     use pf_mod_timer
-    use transfer
 
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: F, G
 
-    type(pf_encap_t) ::    delG, delF
-    type(pf_encap_t) ::    q0F,q0G
+    type(c_ptr) ::    delG, delF
+    type(c_ptr) ::    q0F,q0G
 
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
-    call create(q0G,  F%level, .true., G%nvars, G%shape, G%ctx)
-    call create(q0F,  F%level, .true., F%nvars, F%shape, F%ctx)
-    call create(delG,   G%level, .true., G%nvars, G%shape, G%ctx)
-    call create(delF,  F%level, .true., F%nvars, F%shape, F%ctx)
+    call G%encap%create(q0G,  F%level, .true., G%nvars, G%shape, G%ctx)
+    call F%encap%create(q0F,  F%level, .true., F%nvars, F%shape, F%ctx)
+    call G%encap%create(delG,   G%level, .true., G%nvars, G%shape, G%ctx)
+    call F%encap%create(delF,  F%level, .true., F%nvars, F%shape, F%ctx)
 
     ! needed for amr
-    call setval(q0F,  0.0_pfdp)
-    call setval(q0G,  0.0_pfdp)
-    call setval(delG,   0.0_pfdp)
-    call setval(delF,  0.0_pfdp)
+    call F%encap%setval(q0F,  0.0_pfdp)
+    call G%encap%setval(q0G,  0.0_pfdp)
+    call G%encap%setval(delG,   0.0_pfdp)
+    call F%encap%setval(delF,  0.0_pfdp)
 
-    call unpack(q0G,G%q0)
-    call unpack(q0F,F%q0)
+    call G%encap%unpack(q0G,G%q0)
+    call F%encap%unpack(q0F,F%q0)
 
-    call restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
 
-    call axpy(delG, -1.0_pfdp, q0G)
+    call G%encap%axpy(delG, -1.0_pfdp, q0G)
 
-    call interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
 
-    call axpy(q0F, -1.0_pfdp, delF)
+    call F%encap%axpy(q0F, -1.0_pfdp, delF)
 
-    call pack(F%q0, q0F)
-    call destroy(delG)
-    call destroy(delF)
-    call destroy(q0F)
-    call destroy(q0G)
+    call F%encap%pack(F%q0, q0F)
+    call G%encap%destroy(delG)
+    call F%encap%destroy(delF)
+    call F%encap%destroy(q0F)
+    call G%encap%destroy(q0G)
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
   end subroutine interpolate_q0

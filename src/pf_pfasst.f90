@@ -94,25 +94,21 @@ contains
 
 
   ! Setup (allocate) PFASST object
-  subroutine pf_pfasst_setup(pf, logunit, logname)
+  subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
     use pf_mod_version
 
-    type(pf_pfasst_t), intent(inout)        :: pf
-    integer,           intent(in), optional :: logunit
-    character(len=*),  intent(in), optional :: logname
+    type(pf_pfasst_t), intent(inout) :: pf
 
     type(pf_level_t), pointer :: F, G
     integer :: l
-
-    character(len=128) :: fname
 
     if (pf%rank < 0) then
        stop 'invalid PF rank: did you call setup correctly?'
     end if
 
     do l = 1, pf%nlevels
-       call setup(pf%levels(l), pf)
+       call setup(pf, pf%levels(l))
     end do
 
     do l = pf%nlevels, 2, -1
@@ -126,14 +122,6 @@ contains
        call pf_time_interpolation_matrix(G%nodes, G%nnodes, F%nodes, F%nnodes, F%rmat)
     end do
 
-    if (present(logunit)) then
-       pf%log = logunit
-       write (fname, "(a,i0)"), logname // '.', pf%rank
-       open(unit=pf%log, file=fname)
-
-       write (pf%log, *) 'PFASST RUN STARTED AT: ', ctime(time8())
-       write (pf%log, *) 'PFASST GIT VERSION:    ', PF_GIT_VERSION
-    end if
   end subroutine pf_pfasst_setup
 
 
@@ -141,91 +129,89 @@ contains
   !
   ! If the level is already setup, calling this again will allocate
   ! (or deallocate) tau appropriately.
-  subroutine pf_level_setup(level, pf)
+  subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
-    use pf_mod_sweep
-    use pf_mod_sweep, only: npieces
-    type(pf_level_t),  intent(inout) :: level
+
     type(pf_pfasst_t), intent(in)    :: pf
+    type(pf_level_t),  intent(inout) :: F
 
-    integer :: m, p, nvars, nnodes
+    integer :: m, p, nvars, nnodes, npieces
 
-    nvars   = level%nvars
-    nnodes  = level%nnodes
+    nvars   = F%nvars
+    nnodes  = F%nnodes
+    npieces = F%sweeper%npieces
 
-    if (.not. level%allocated) then
+    if (.not. F%allocated) then
 
-       allocate(level%q0(nvars))
-       allocate(level%send(nvars))
-       allocate(level%recv(nvars))
-       allocate(level%qSDC(nnodes))
-       allocate(level%fSDC(nnodes,npieces))
-       allocate(level%nodes(nnodes))
-       allocate(level%nmask(nnodes))
-       allocate(level%s0mat(nnodes-1,nnodes))
-       allocate(level%qmat(nnodes-1,nnodes))
+       allocate(F%q0(nvars))
+       allocate(F%send(nvars))
+       allocate(F%recv(nvars))
+       allocate(F%qSDC(nnodes))
+       allocate(F%fSDC(nnodes,npieces))
+       allocate(F%nodes(nnodes))
+       allocate(F%nflags(nnodes))
+       allocate(F%s0mat(nnodes-1,nnodes))
+       allocate(F%qmat(nnodes-1,nnodes))
 
-       if (level%Finterp) then
-          if (level%level < pf%nlevels) then
-             allocate(level%pfSDC(nnodes,npieces))
-             allocate(level%pSDC(1))
+       if (F%Finterp) then
+          if (F%level < pf%nlevels) then
+             allocate(F%pfSDC(nnodes,npieces))
+             allocate(F%pSDC(1))
           end if
        else
-          if (level%level < pf%nlevels) then
-             allocate(level%pSDC(nnodes))
+          if (F%level < pf%nlevels) then
+             allocate(F%pSDC(nnodes))
           end if
        end if
 
-
-
-       call create(level%qend, level%level, .false., nvars, level%shape, level%ctx)
-       call create(level%qex, level%level, .false., nvars, level%shape, level%ctx)
+       call F%encap%create(F%qend, F%level, .false., nvars, F%shape, F%ctx)
+       ! call F%encap%create(F%qex, F%level, .false., nvars, F%shape, F%ctx)
 
        do m = 1, nnodes
-          call create(level%qSDC(m), level%level, .false., nvars, level%shape, level%ctx)
+          call F%encap%create(F%qSDC(m), F%level, .false., nvars, F%shape, F%ctx)
           do p = 1, npieces
-             call create(level%fSDC(m,p), level%level, .true., nvars, level%shape, level%ctx)
+             call F%encap%create(F%fSDC(m,p), F%level, .true., nvars, F%shape, F%ctx)
           end do
        end do
 
-       ! Create space to store previous iteration info
-       if (level%level < pf%nlevels) then
-          if (level%Finterp) then  !  Doing store of f and qSDC(1) only
+       ! create space to store previous iteration info
+       if (F%level < pf%nlevels) then
+          if (F%Finterp) then  !  Doing store of f and qSDC(1) only
              do m = 1, nnodes
                 do p = 1, npieces
-                   call create(level%pfSDC(m,p), level%level, .true., nvars, level%shape, level%ctx)
+                   call F%encap%create(F%pfSDC(m,p), F%level, .true., nvars, F%shape, F%ctx)
                 end do
              end do
-             call create(level%pSDC(1), level%level, .false., nvars, level%shape, level%ctx)
+             call F%encap%create(F%pSDC(1), F%level, .false., nvars, F%shape, F%ctx)
           else   !  Storing all qSDC
              do m = 1, nnodes
-                call create(level%pSDC(m), level%level, .false., nvars, level%shape, level%ctx)
+                call F%encap%create(F%pSDC(m), F%level, .false., nvars, F%shape, F%ctx)
              end do
           end if
        end if
 
 
        call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            level%nodes, level%nmask, level%s0mat, level%qmat)
+            F%nodes, F%nflags, F%s0mat, F%qmat)
 
-       call sdcinit(level)
+       call F%sweeper%initialize(F)
 
     end if
 
-    if ((level%level < pf%nlevels) .and. (.not. associated(level%tau))) then
-       allocate(level%tau(nnodes-1))
+    if ((F%level < pf%nlevels) .and. (.not. associated(F%tau))) then
+       allocate(F%tau(nnodes-1))
        do m = 1, nnodes-1
-          call create(level%tau(m), level%level, .false., nvars, level%shape, level%ctx)
+          call F%encap%create(F%tau(m), F%level, .false., nvars, F%shape, F%ctx)
        end do
-    else if ((level%level >= pf%nlevels) .and. (associated(level%tau))) then
+    else if ((F%level >= pf%nlevels) .and. (associated(F%tau))) then
        do m = 1, nnodes-1
-          call destroy(level%tau(m))
+          call F%encap%destroy(F%tau(m))
        end do
-       deallocate(level%tau)
-       nullify(level%tau)
+       deallocate(F%tau)
+       nullify(F%tau)
     end if
 
-    level%allocated = .true.
+    F%allocated = .true.
   end subroutine pf_level_setup
 
   ! Deallocate PFASST object
@@ -242,93 +228,91 @@ contains
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
 
-    if (pf%log > 0) then
-       close(pf%log)
-    end if
+    ! if (pf%log > 0) then
+    !    close(pf%log)
+    ! end if
   end subroutine pf_pfasst_destroy
 
   ! Deallocate PFASST level object
-  subroutine pf_level_destroy(level)
-    type(pf_level_t), intent(inout) :: level
+  subroutine pf_level_destroy(F)
+    type(pf_level_t), intent(inout) :: F
 
     integer :: m, p
 
-    if (level%allocated) then
-       deallocate(level%q0)
-       deallocate(level%send)
-       deallocate(level%recv)
-       deallocate(level%nodes)
-       deallocate(level%nmask)
-       deallocate(level%qmat)
-       deallocate(level%s0mat)
+    if (F%allocated) then
+       deallocate(F%q0)
+       deallocate(F%send)
+       deallocate(F%recv)
+       deallocate(F%nodes)
+       deallocate(F%nflags)
+       deallocate(F%qmat)
+       deallocate(F%s0mat)
 
-       if (associated(level%shape)) then
-          deallocate(level%shape)
+       if (associated(F%shape)) then
+          deallocate(F%shape)
        end if
 
-       if (associated(level%smat)) then
-          deallocate(level%smat)
+       if (associated(F%smat)) then
+          deallocate(F%smat)
        end if
 
-       call destroy(level%qend)
-       call destroy(level%qex)
+       call F%encap%destroy(F%qend)
+       ! call F%encap%destroy(F%qex)
 
-       do m = 1, level%nnodes
-          call destroy(level%qSDC(m))
-          do p = 1, size(level%fSDC(m,:))
-             call destroy(level%fSDC(m,p))
+       do m = 1, F%nnodes
+          call F%encap%destroy(F%qSDC(m))
+          do p = 1, size(F%fSDC(m,:))
+             call F%encap%destroy(F%fSDC(m,p))
           end do
        end do
 
-       if (level%Finterp) then
-          do m = 1, level%nnodes
-             do p = 1, size(level%fSDC(m,:))
-                if (associated(level%pfSDC)) then
-                   call destroy(level%pfSDC(m,p))
+       if (F%Finterp) then
+          do m = 1, F%nnodes
+             do p = 1, size(F%fSDC(m,:))
+                if (associated(F%pfSDC)) then
+                   call F%encap%destroy(F%pfSDC(m,p))
                 end if
              end do
           end do
-          if (associated(level%pSDC)) then
-             call destroy(level%pSDC(1))
+          if (associated(F%pSDC)) then
+             call F%encap%destroy(F%pSDC(1))
           end if
        else
-          do m = 1, level%nnodes
-             if (associated(level%pSDC)) then
-                call destroy(level%pSDC(m))
+          do m = 1, F%nnodes
+             if (associated(F%pSDC)) then
+                call F%encap%destroy(F%pSDC(m))
              end if
           end do
        end if
 
 
-       deallocate(level%qSDC)
-       deallocate(level%fSDC)
-       if (level%Finterp) then
-          if (associated(level%pfSDC)) deallocate(level%pfSDC)
+       deallocate(F%qSDC)
+       deallocate(F%fSDC)
+       if (F%Finterp) then
+          if (associated(F%pfSDC)) deallocate(F%pfSDC)
        else
-          if (associated(level%pSDC)) deallocate(level%pSDC)
+          if (associated(F%pSDC)) deallocate(F%pSDC)
        end if
 
-       if (associated(level%tau)) then
-          do m = 1, level%nnodes-1
-             call destroy(level%tau(m))
+       if (associated(F%tau)) then
+          do m = 1, F%nnodes-1
+             call F%encap%destroy(F%tau(m))
           end do
-          deallocate(level%tau)
-          nullify(level%tau)
+          deallocate(F%tau)
+          nullify(F%tau)
        end if
 
-       if (associated(level%tmat)) then
-          deallocate(level%tmat)
-          nullify(level%tmat)
+       if (associated(F%tmat)) then
+          deallocate(F%tmat)
+          nullify(F%tmat)
        end if
 
-       if (associated(level%rmat)) then
-          deallocate(level%rmat)
-          nullify(level%rmat)
+       if (associated(F%rmat)) then
+          deallocate(F%rmat)
+          nullify(F%rmat)
        end if
 
     end if
-
-    level%allocated = .false.
 
   end subroutine pf_level_destroy
 

@@ -17,16 +17,59 @@
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-module pf_mod_sweep
+module pf_mod_imex
   use pf_mod_dtype
   implicit none
   integer, parameter :: npieces = 2
+
+  interface
+     subroutine pf_f1eval_p(y, t, level, ctx, f1)
+       import c_ptr, c_int, pfdp
+       type(c_ptr),    intent(in), value :: y, f1, ctx
+       real(pfdp),     intent(in)        :: t
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f1eval_p
+  end interface
+
+  interface
+     subroutine pf_f2eval_p(y, t, level, ctx, f2)
+       import c_ptr, c_int, pfdp
+       type(c_ptr),    intent(in), value :: y, f2, ctx
+       real(pfdp),     intent(in)        :: t
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f2eval_p
+  end interface
+
+  interface
+     subroutine pf_f2comp_p(y, t, dt, rhs, level, ctx, f2)
+       import c_ptr, c_int, pfdp
+       type(c_ptr),    intent(in), value :: y, rhs, f2, ctx
+       real(pfdp),     intent(in)        :: t, dt
+       integer(c_int), intent(in)        :: level
+     end subroutine pf_f2comp_p
+  end interface
+
+  interface
+     subroutine pf_imex_rhs_p(rhs, q0, dt, f1, S, level, ctx)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value :: rhs, q0, f1, S, ctx
+       real(pfdp),  intent(in)        :: dt
+       integer,     intent(in)        :: level
+     end subroutine pf_imex_rhs_p
+  end interface
+
+  type :: pf_imex_t
+     procedure(pf_f1eval_p),   pointer, nopass :: f1eval
+     procedure(pf_f2eval_p),   pointer, nopass :: f2eval
+     procedure(pf_f2comp_p),   pointer, nopass :: f2comp
+     procedure(pf_imex_rhs_p), pointer, nopass :: gen_rhs
+  end type pf_imex_t
+
 contains
 
   ! Perform on SDC sweep on level F and set qend appropriately.
-  subroutine sweep(pf, t0, dt, F)
+  subroutine imex_sweep(pf, F, t0, dt)
     use pf_mod_timer
-    use feval, only : eval_f1, eval_f2, comp_f2
 
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: dt, t0
@@ -35,73 +78,78 @@ contains
     integer    :: m, n
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:F%nnodes-1)
-    type(pf_encap_t) :: S(F%nnodes-1), rhs
+    type(c_ptr) :: S(F%nnodes-1), rhs
+
+    type(pf_imex_t), pointer :: imex
+
+    call c_f_pointer(F%sweeper%ctx, imex)
 
     call start_timer(pf, TLEVEL+F%level-1)
 
     ! compute integrals and add fas correction
     do m = 1, F%nnodes-1
-       call create(S(m), F%level, .false., F%nvars, F%shape, F%ctx)
-       call setval(S(m), 0.0d0)
+       call F%encap%create(S(m), F%level, .false., F%nvars, F%shape, F%ctx)
+       call F%encap%setval(S(m), 0.0d0)
        do n = 1, F%nnodes
-          call axpy(S(m), dt*F%smat(m,n,1), F%fSDC(n,1))
-          call axpy(S(m), dt*F%smat(m,n,2), F%fSDC(n,2))
+          call F%encap%axpy(S(m), dt*F%smat(m,n,1), F%fSDC(n,1))
+          call F%encap%axpy(S(m), dt*F%smat(m,n,2), F%fSDC(n,2))
        end do
        if (associated(F%tau)) then
-          call axpy(S(m), 1.0d0, F%tau(m))
+          call F%encap%axpy(S(m), 1.0d0, F%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call unpack(F%qSDC(1), F%q0)
+    call F%encap%unpack(F%qSDC(1), F%q0)
 
-    call eval_f1(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,1))
-    call eval_f2(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,2))
+    call imex%f1eval(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,1))
+    call imex%f2eval(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,2))
 
-    call create(rhs, F%level, .false., F%nvars, F%shape, F%ctx)
+    call F%encap%create(rhs, F%level, .false., F%nvars, F%shape, F%ctx)
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
     do m = 1, F%nnodes-1
        t = t + dtsdc(m)
 
-       if (associated(F%gen_imex_rhs)) then
-          call F%gen_imex_rhs(rhs, F%qSDC(m), dtsdc(m), F%fSDC(m,1), S(m), F%level, F%ctx)
+       if (associated(imex%gen_rhs)) then
+          call imex%gen_rhs(rhs, F%qSDC(m), dtsdc(m), F%fSDC(m,1), S(m), F%level, F%ctx)
        else
-          call copy(rhs, F%qSDC(m))
-          call axpy(rhs, dtsdc(m), F%fSDC(m,1))
-          call axpy(rhs, 1.0d0, S(m))
+          call F%encap%copy(rhs, F%qSDC(m))
+          call F%encap%axpy(rhs, dtsdc(m), F%fSDC(m,1))
+          call F%encap%axpy(rhs, 1.0d0, S(m))
        end if
 
-       call comp_f2(F%qSDC(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%fSDC(m+1,2))
-       call eval_f1(F%qSDC(m+1), t, F%level, F%ctx, F%fSDC(m+1,1))
+       call imex%f2comp(F%qSDC(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%fSDC(m+1,2))
+       call imex%f1eval(F%qSDC(m+1), t, F%level, F%ctx, F%fSDC(m+1,1))
     end do
 
-    call copy(F%qend, F%qSDC(F%nnodes))
+    call F%encap%copy(F%qend, F%qSDC(F%nnodes))
 
     ! done
-    call destroy(rhs)
+    call F%encap%destroy(rhs)
     do m = 1, F%nnodes-1
-       call destroy(S(m))
+       call F%encap%destroy(S(m))
     end do
 
     call end_timer(pf, TLEVEL+F%level-1)
-  end subroutine sweep
+  end subroutine imex_sweep
 
   ! Evaluate function values
-  subroutine sdceval(t, m, F)
-    use feval, only: eval_f1, eval_f2
-
+  subroutine imex_evaluate(F, t, m)
     real(pfdp),       intent(in)    :: t
     integer,          intent(in)    :: m
     type(pf_level_t), intent(inout) :: F
 
-    call eval_f1(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,1))
-    call eval_f2(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,2))
-  end subroutine sdceval
+    type(pf_imex_t), pointer :: imex
+    call c_f_pointer(F%sweeper%ctx, imex)
+
+    call imex%f1eval(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,1))
+    call imex%f2eval(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,2))
+  end subroutine imex_evaluate
 
   ! Initialize smats
-  subroutine sdcinit(F)
+  subroutine imex_initialize(F)
     use pf_mod_dtype
     type(pf_level_t), intent(inout) :: F
     real(pfdp) :: dsdc(F%nnodes-1)
@@ -118,27 +166,48 @@ contains
        F%smat(m,m,1)   = F%smat(m,m,1)   - dsdc(m)
        F%smat(m,m+1,2) = F%smat(m,m+1,2) - dsdc(m)
     end do
-  end subroutine sdcinit
+  end subroutine imex_initialize
 
   ! Compute SDC integral
-  subroutine sdc_integrate(qSDC, fSDC, dt, F, fintSDC)
-    type(pf_level_t),  intent(in)    :: F
-    type(pf_encap_t),  intent(in)    :: qSDC(F%nnodes,npieces) ! Solution
-    type(pf_encap_t),  intent(in)    :: fSDC(F%nnodes,npieces) ! Function values
-    type(pf_encap_t),  intent(inout) :: fintSDC(F%nnodes-1)    ! Integrals of f
-    real(pfdp),        intent(in)    :: dt
+  subroutine imex_integrate(F, fSDC, dt, fintSDC)
+    type(pf_level_t),  intent(in) :: F
+    type(c_ptr),       intent(in) :: fSDC(:, :), fintSDC(:)
+    real(pfdp),        intent(in) :: dt
 
     integer :: n, m, p
 
     do n = 1, F%nnodes-1
-       call setval(fintSDC(n), 0.0d0)
+       call F%encap%setval(fintSDC(n), 0.0d0)
        do m = 1, F%nnodes
           do p = 1, npieces
-             call axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
+             call F%encap%axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do
-  end subroutine sdc_integrate
+  end subroutine imex_integrate
 
-end module pf_mod_sweep
+  ! Create IMEX sweeper
+  subroutine imex_create(sweeper, f1eval, f2eval, f2comp)
+    type(pf_sweeper_t), intent(inout) :: sweeper
+    procedure(pf_f1eval_p) :: f1eval
+    procedure(pf_f2eval_p) :: f2eval
+    procedure(pf_f2comp_p) :: f2comp
+
+    type(pf_imex_t), pointer :: imex
+
+    allocate(imex)
+    imex%f1eval => f1eval
+    imex%f2eval => f2eval
+    imex%f2comp => f2comp
+
+    sweeper%sweep => imex_sweep
+    sweeper%evaluate => imex_evaluate
+    sweeper%initialize => imex_initialize
+    sweeper%integrate => imex_integrate
+
+    sweeper%ctx = c_loc(imex)
+  end subroutine imex_create
+
+
+end module pf_mod_imex
 

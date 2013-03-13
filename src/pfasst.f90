@@ -19,10 +19,11 @@
 
 module pfasst
   use pf_mod_dtype
-  use pf_mod_comm
   use pf_mod_hooks
   use pf_mod_parallel
   use pf_mod_pfasst
   use pf_mod_version
-  use pf_mod_fake
+  use pf_mod_implicit
+  use pf_mod_explicit
+  use pf_mod_imex
 end module pfasst

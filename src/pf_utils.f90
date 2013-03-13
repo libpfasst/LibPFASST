@@ -93,9 +93,9 @@ contains
   end subroutine save
 
   ! Compute residual (generic but probably inefficient)
-  subroutine pf_residual(F, t0, dt, residual)
+  subroutine pf_residual(F, dt, residual)
     type(pf_level_t), intent(inout) :: F
-    real(pfdp),       intent(in)    :: t0, dt
+    real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(in)    :: residual
 
     type(c_ptr) :: fintSDC(F%nnodes-1)
@@ -106,7 +106,7 @@ contains
     end do
 
     ! integrate and compute residual
-    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, fintSDC)
+    call F%sweeper%integrate(F, F%fSDC, dt, fintSDC)
 
     call F%encap%copy(residual, F%qSDC(1))
     do n = 1, F%nnodes-1

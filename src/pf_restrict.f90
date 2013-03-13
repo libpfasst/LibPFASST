@@ -30,7 +30,6 @@ contains
     use pf_mod_dtype
     use pf_mod_utils
     use pf_mod_timer
-    use transfer, only: restrict
 
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
@@ -38,7 +37,7 @@ contains
 
     integer    :: m, mc, trat
     real(pfdp) :: tm(G%nnodes)
-    type(pf_encap_t) :: &
+    type(c_ptr) :: &
          CofG(G%nnodes-1), &    ! coarse integral of coarse function values
          FofF(F%nnodes-1), &    ! fine integral of fine function values
          CofF(G%nnodes-1), &    ! coarse integral of restricted fine function values
@@ -68,7 +67,7 @@ contains
     tm = t0 + dt*G%nodes
     do m = 1, G%nnodes
        ! XXX: use rmat here...
-       call restrict(F%qSDC(trat*(m-1)+1), G%qSDC(m), F%level, F%ctx, G%level, G%ctx)
+       call F%restrict(F%qSDC(trat*(m-1)+1), G%qSDC(m), F%level, F%ctx, G%level, G%ctx)
        call G%sweeper%evaluate(G, tm(m), m)
     end do
 
@@ -82,14 +81,14 @@ contains
        call G%encap%setval(tmp, 0.0_pfdp) ! needed for amr
        do m = 1, F%nnodes-1
           mc = int(ceiling(1.0_pfdp*m/trat))
-          call restrict(F%tau(m), tmp, F%level, F%ctx, G%level, G%ctx)
+          call F%restrict(F%tau(m), tmp, F%level, F%ctx, G%level, G%ctx)
           call G%encap%axpy(G%tau(mc), 1.0_pfdp, tmp)
        end do
     end if
 
     !!!! fas correction
-    call G%sweeper%integrate(G%qSDC, G%fSDC, dt, G, CofG)
-    call F%sweeper%integrate(F%qSDC, F%fSDC, dt, F, FofF)
+    call G%sweeper%integrate(G, G%fSDC, dt, CofG)
+    call F%sweeper%integrate(F, F%fSDC, dt, FofF)
 
     do m = 1, G%nnodes-1
        call G%encap%setval(CofF(m), 0.0_pfdp)
@@ -99,7 +98,7 @@ contains
     call setval(tmp, 0.0_pfdp)
     do m = 1, F%nnodes-1
        mc = int(ceiling(1.0_pfdp*m/trat))
-       call restrict(FofF(m), tmp, F%level, F%ctx, G%level, G%ctx)
+       call F%restrict(FofF(m), tmp, F%level, F%ctx, G%level, G%ctx)
        call G%encap%axpy(CofF(mc), 1.0_pfdp, tmp)
     end do
 

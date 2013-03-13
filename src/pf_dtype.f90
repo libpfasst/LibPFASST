@@ -85,6 +85,7 @@ module pf_mod_dtype
 
      type(pf_encap_t) :: encap
      type(pf_sweeper_t) :: sweeper
+     procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
           q0(:), &                      ! initial condition (packed)
@@ -110,6 +111,8 @@ module pf_mod_dtype
 
      type(c_ptr) :: ctx  = c_null_ptr   ! user context
      integer, pointer :: shape(:)       ! user shape
+
+     logical :: allocated = .false.
   end type pf_level_t
 
 
@@ -164,18 +167,6 @@ module pf_mod_dtype
      end subroutine pf_hook_p
   end interface
 
-  ! ! gen rhs interfaces
-  ! interface
-  !    subroutine imex_rhs_proc(rhs, q0, dt, f1, S, level, ctx)
-  !      use iso_c_binding
-  !      use encap
-  !      type(pf_encap_t), intent(inout) :: rhs
-  !      type(pf_encap_t), intent(in)    :: q0, f1, S
-  !      real(pfdp),       intent(in)    :: dt
-  !      integer,          intent(in)    :: level
-  !      type(c_ptr),      intent(in)    :: ctx
-  !    end subroutine imex_rhs_proc
-  ! end interface
 
   ! sweeper interfaces
   interface
@@ -204,14 +195,22 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
+     subroutine pf_integrate_p(F, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
        type(pf_level_t),  intent(in) :: F
-       type(c_ptr),       intent(in) :: qSDC(:,:)
-       type(c_ptr),       intent(in) :: fSDC(:,:)
-       type(c_ptr),       intent(in) :: fintSDC(:)
+       type(c_ptr),       intent(in) :: fSDC(:, :), fintSDC(:)
        real(pfdp),        intent(in) :: dt
      end subroutine pf_integrate_p
+  end interface
+
+
+  ! transfer interfaces
+  interface
+     subroutine pf_transfer_p(qF, qG, levelF, ctxF, levelG, ctxG)
+       import c_ptr
+       type(c_ptr), intent(in), value :: qF, qG, ctxF, ctxG
+       integer,     intent(in)        :: levelF, levelG
+     end subroutine pf_transfer_p
   end interface
 
 
@@ -219,7 +218,8 @@ module pf_mod_dtype
   interface
      subroutine pf_encap_create_p(sol, level, feval, nvars, shape, ctx)
        import c_ptr
-       type(c_ptr),  intent(in), value :: sol, ctx
+       type(c_ptr),  intent(out)       :: sol
+       type(c_ptr),  intent(in), value :: ctx
        integer,      intent(in)        :: level, nvars, shape(:)
        logical,      intent(in)        :: feval
      end subroutine pf_encap_create_p
