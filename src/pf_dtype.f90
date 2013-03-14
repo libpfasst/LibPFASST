@@ -80,12 +80,11 @@ module pf_mod_dtype
      integer     :: nvars = -1          ! number of variables (dofs)
      integer     :: nnodes = -1         ! number of sdc nodes
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     integer     :: level = -1          ! level number (1=finest)
-     logical     :: Finterp = .false.   ! Interpolate functions instead of solution
+     integer     :: level = -1          ! level number (1 is the coarsest)
+     logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
-     type(pf_encap_t), pointer   :: encap
-     type(pf_sweeper_t), pointer :: sweeper
-
+     type(pf_encap_t),         pointer :: encap
+     type(pf_sweeper_t),       pointer :: sweeper
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -115,7 +114,6 @@ module pf_mod_dtype
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
-
   end type pf_level_t
 
 
@@ -133,10 +131,10 @@ module pf_mod_dtype
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
      type(c_ptr), pointer :: pfpth(:,:) ! mutexes and conditions (indexed by rank, level)
 
-     procedure(pf_post_p), pointer, nopass :: post
-     procedure(pf_recv_p), pointer, nopass :: recv
-     procedure(pf_send_p), pointer, nopass :: send
-     procedure(pf_wait_p), pointer, nopass :: wait
+     procedure(pf_post_p),      pointer, nopass :: post
+     procedure(pf_recv_p),      pointer, nopass :: recv
+     procedure(pf_send_p),      pointer, nopass :: send
+     procedure(pf_wait_p),      pointer, nopass :: wait
      procedure(pf_broadcast_p), pointer, nopass :: broadcast
   end type pf_comm_t
 
@@ -151,11 +149,11 @@ module pf_mod_dtype
      ! pf objects
      type(pf_state_t)          :: state
      type(pf_level_t), pointer :: levels(:)
-     type(pf_comm_t), pointer  :: comm
+     type(pf_comm_t),  pointer :: comm
 
      ! hooks
      type(pf_hook_t), pointer :: hooks(:,:)
-     integer, pointer         :: nhooks(:)
+     integer,         pointer :: nhooks(:)
 
      ! timing
      logical    :: echo_timings  = .false.
