@@ -37,7 +37,7 @@ contains
     real(pfdp), pointer :: r(:)
     type(c_ptr) :: residual
 
-    call create(residual, level%level, .true., level%nvars, level%shape, level%ctx)
+    call encap_create(residual, level%level, .true., level%nvars, level%shape, level%ctx)
     call pf_residual(level, state%dt, residual)
 
     r => array(residual)
@@ -45,7 +45,7 @@ contains
     print '("resid: step: ",i3.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
          state%step+1, state%iter, level%level, maxval(abs(r))
 
-    call destroy(residual)
+    call encap_destroy(residual)
   end subroutine echo_residual
 
 

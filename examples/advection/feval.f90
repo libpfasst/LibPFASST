@@ -19,72 +19,72 @@ module feval
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
-  type :: ad_level_t
+  type :: ad_work_t
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:)              ! work space
      complex(pfdp), pointer :: ddx(:), lap(:)     ! operators
-  end type ad_level_t
-
-  type(ad_level_t), pointer :: levels(:)
+  end type ad_work_t
 
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine feval_init(nlevels, nvars)
+  subroutine feval_create_workspace(ctx, nvars)
+    type(c_ptr), intent(out) :: ctx
+    integer,     intent(in)  :: nvars
 
-    integer, intent(in) :: nlevels, nvars(nlevels)
+    type(ad_work_t), pointer :: work
 
     integer :: i, l
     type(c_ptr) :: wk
     real(pfdp) :: kx
 
-    allocate(levels(nlevels))
-    do l = 1, nlevels
+    allocate(work)
 
-       ! create in-place, complex fft plans
-       wk = fftw_alloc_complex(int(nvars(l), c_size_t))
-       call c_f_pointer(wk, levels(l)%wk, [nvars(l)])
+    ! create in-place, complex fft plans
+    wk = fftw_alloc_complex(int(nvars, c_size_t))
+    call c_f_pointer(wk, work%wk, [nvars])
 
-       levels(l)%ffft = fftw_plan_dft_1d(nvars(l), &
-            levels(l)%wk, levels(l)%wk, FFTW_FORWARD, FFTW_ESTIMATE)
-       levels(l)%ifft = fftw_plan_dft_1d(nvars(l), &
-            levels(l)%wk, levels(l)%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
+    work%ffft = fftw_plan_dft_1d(nvars, &
+         work%wk, work%wk, FFTW_FORWARD, FFTW_ESTIMATE)
+    work%ifft = fftw_plan_dft_1d(nvars, &
+         work%wk, work%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
 
-       ! create operators
-       allocate(levels(l)%ddx(nvars(l)))
-       allocate(levels(l)%lap(nvars(l)))
-       do i = 1, nvars(l)
-          if (i <= nvars(l)/2+1) then
-             kx = two_pi / Lx * dble(i-1)
-          else
-             kx = two_pi / Lx * dble(-nvars(l) + i - 1)
-          end if
+    ! create operators
+    allocate(work%ddx(nvars))
+    allocate(work%lap(nvars))
+    do i = 1, nvars
+       if (i <= nvars/2+1) then
+          kx = two_pi / Lx * dble(i-1)
+       else
+          kx = two_pi / Lx * dble(-nvars + i - 1)
+       end if
 
-          levels(l)%ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
+       work%ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
 
-          if (kx**2 < 1e-13) then
-             levels(l)%lap(i) = 0.0_pfdp
-          else
-             levels(l)%lap(i) = -kx**2
-          end if
-       end do
-    end do
-  end subroutine feval_init
-
-  subroutine feval_finalize()
-
-    integer :: l
-
-    do l = 1, size(levels)
-       deallocate(levels(l)%wk)
-       deallocate(levels(l)%ddx)
-       deallocate(levels(l)%lap)
+       if (kx**2 < 1e-13) then
+          work%lap(i) = 0.0_pfdp
+       else
+          work%lap(i) = -kx**2
+       end if
     end do
 
-    deallocate(levels)
+    ctx = c_loc(work)
+  end subroutine feval_create_workspace
 
-  end subroutine feval_finalize
+  ! subroutine feval_finalize()
+
+  !   integer :: l
+
+  !   do l = 1, size(levels)
+  !      deallocate(levels(l)%wk)
+  !      deallocate(levels(l)%ddx)
+  !      deallocate(levels(l)%lap)
+  !   end do
+
+  !   deallocate(levels)
+
+  ! end subroutine feval_finalize
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -143,17 +143,20 @@ contains
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
-    real(pfdp), pointer :: y(:), f1(:)
-    complex(pfdp), pointer :: wk(:)
+    type(ad_work_t), pointer :: work
+    real(pfdp),      pointer :: y(:), f1(:)
+    complex(pfdp),   pointer :: wk(:)
+
+    call c_f_pointer(ctx, work)
 
     y  => array(yptr)
     f1 => array(f1ptr)
-    wk => levels(level)%wk
+    wk => work%wk
 
     wk = y
-    call fftw_execute_dft(levels(level)%ffft, wk, wk)
-    wk = -v * levels(level)%ddx * wk / size(wk)
-    call fftw_execute_dft(levels(level)%ifft, wk, wk)
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = -v * work%ddx * wk / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
 
     f1 = real(wk)
 
@@ -167,17 +170,20 @@ contains
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
-    real(pfdp), pointer :: y(:), f2(:)
-    complex(pfdp), pointer :: wk(:)
+    type(ad_work_t), pointer :: work
+    real(pfdp),      pointer :: y(:), f2(:)
+    complex(pfdp),   pointer :: wk(:)
+
+    call c_f_pointer(ctx, work)
 
     y  => array(yptr)
     f2 => array(f2ptr)
-    wk => levels(level)%wk
+    wk => work%wk
 
     wk = y
-    call fftw_execute_dft(levels(level)%ffft, wk, wk)
-    wk = nu * levels(level)%lap * wk / size(wk)
-    call fftw_execute_dft(levels(level)%ifft, wk, wk)
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = nu * work%lap * wk / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
 
     f2 = real(wk)
   end subroutine eval_f2
@@ -190,18 +196,21 @@ contains
     real(pfdp),  intent(in)        :: t, dt
     integer,     intent(in)        :: level
 
-    real(pfdp), pointer :: y(:), rhs(:), f2(:)
-    complex(pfdp), pointer :: wk(:)
+    type(ad_work_t), pointer :: work
+    real(pfdp),      pointer :: y(:), rhs(:), f2(:)
+    complex(pfdp),   pointer :: wk(:)
+
+    call c_f_pointer(ctx, work)
 
     y  => array(yptr)
     rhs => array(rhsptr)
     f2 => array(f2ptr)
-    wk => levels(level)%wk
+    wk => work%wk
 
     wk = rhs
-    call fftw_execute_dft(levels(level)%ffft, wk, wk)
-    wk = wk / (1.0_pfdp - nu*dt*levels(level)%lap) / size(wk)
-    call fftw_execute_dft(levels(level)%ifft, wk, wk)
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
 
     y  = real(wk)
     f2 = (y - rhs) / dt

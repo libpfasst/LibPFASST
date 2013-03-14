@@ -6,8 +6,8 @@ program fpfasst
   use pfasst
   use feval
   use hooks
-  use encap_array1d
   use transfer
+  use encap_array1d
   use pf_mod_mpi, only: MPI_COMM_WORLD
 
   implicit none
@@ -19,8 +19,7 @@ program fpfasst
   integer            :: ierror, nlevs, nvars(3), nnodes(3), l
   double precision   :: dt
 
-  type(array1d), pointer :: q0
-  type(c_ptr) :: q0p
+  type(array1d), target :: q0
 
   !!!! initialize mpi
   call mpi_init(ierror)
@@ -34,8 +33,7 @@ program fpfasst
   dt     = 0.01_pfdp
   nlevs  = 3
 
-  call array1d_create(encap)
-
+  call array1d_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, encap, sweeper, nlevs, nvars(1:nlevs), nnodes(1:nlevs))
@@ -51,10 +49,11 @@ program fpfasst
   do l = 1, pf%nlevels
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
+     call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
   end do
 
   call pf_mpi_setup(comm, pf)
-  call setup(pf)
+  call pf_pfasst_setup(pf)
 
   call add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
 
@@ -64,21 +63,18 @@ program fpfasst
 
 
   !!!! initialize advection/diffusion
-  call feval_init(size(nvars), nvars)
-  call create(q0p, nlevs, .false., nvars(nlevs), [0], c_null_ptr)
-
-  call c_f_pointer(q0p, q0)
+  allocate(q0%array(nvars(nlevs)))
   call initial(q0)
 
   !!!! run
-  call pfasst_run(pf, q0p, dt, 0.0_pfdp, 2*comm%nproc)
+  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
 
 
   !!!! done
-  call destroy(q0p)
-  call destroy(pf)
+  deallocate(q0%array)
+
+  call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
-  call feval_finalize()
   call mpi_finalize(ierror)
 
 end program fpfasst

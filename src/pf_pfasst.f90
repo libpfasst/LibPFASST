@@ -19,24 +19,7 @@
 
 module pf_mod_pfasst
   use pf_mod_dtype
-
   implicit none
-
-  interface create
-     module procedure pf_pfasst_create
-     module procedure pf_level_create
-  end interface create
-
-  interface setup
-     module procedure pf_pfasst_setup
-     module procedure pf_level_setup
-  end interface setup
-
-  interface destroy
-     module procedure pf_pfasst_destroy
-     module procedure pf_level_destroy
-  end interface destroy
-
 contains
 
   ! Create a PFASST object
@@ -69,7 +52,7 @@ contains
     pf%nhooks = 0
 
     do l = 1, nlevels
-       call create(pf%levels(l), l)
+       call pf_level_create(pf%levels(l), l)
        pf%levels(l)%sweeper = sweeper
        pf%levels(l)%encap = encap
     end do
@@ -233,7 +216,7 @@ contains
     integer :: l
 
     do l = 1, pf%nlevels
-       call destroy(pf%levels(l))
+       call pf_level_destroy(pf%levels(l))
     end do
 
     deallocate(pf%levels)

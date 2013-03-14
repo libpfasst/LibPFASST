@@ -24,7 +24,7 @@ module pf_mod_parallel
 contains
 
   ! Run in parallel using PFASST (old way for now).
-  subroutine pfasst_run(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
     use pf_mod_dtype
     use pf_mod_interpolate
     use pf_mod_restrict
@@ -227,6 +227,6 @@ contains
        F => pf%levels(pf%nlevels)
        call F%encap%copy(qend, F%qend)
     end if
-  end subroutine pfasst_run
+  end subroutine pf_pfasst_run
 
 end module pf_mod_parallel

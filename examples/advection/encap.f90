@@ -8,34 +8,6 @@ module encap_array1d
      real(pfdp), pointer :: array(:)
   end type array1d
 
-  interface create
-     module procedure encap_create
-  end interface create
-
-  interface destroy
-     module procedure encap_destroy
-  end interface destroy
-
-  interface setval
-     module procedure encap_setval
-  end interface setval
-
-  interface copy
-     module procedure encap_copy
-  end interface copy
-
-  interface axpy
-     module procedure encap_axpy
-  end interface axpy
-
-  interface pack
-     module procedure encap_pack
-  end interface pack
-
-  interface unpack
-     module procedure encap_unpack
-  end interface unpack
-
 contains
 
   function array(ptr) result(r)
@@ -48,17 +20,17 @@ contains
     r => q%array
   end function array
 
-  subroutine array1d_create(encap)
+  subroutine array1d_encap_create(encap)
     type(pf_encap_t), intent(out) :: encap
 
-    encap%create => encap_create
+    encap%create  => encap_create
     encap%destroy => encap_destroy
-    encap%setval => encap_setval
-    encap%copy => encap_copy
-    encap%pack => encap_pack
-    encap%unpack => encap_unpack
-    encap%axpy => encap_axpy
-  end subroutine array1d_create
+    encap%setval  => encap_setval
+    encap%copy    => encap_copy
+    encap%pack    => encap_pack
+    encap%unpack  => encap_unpack
+    encap%axpy    => encap_axpy
+  end subroutine array1d_encap_create
 
   ! Allocate/create solution (spatial data set) for the given level.
   !
