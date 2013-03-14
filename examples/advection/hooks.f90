@@ -4,6 +4,7 @@
 
 module hooks
   use pfasst
+  use encap_array1d
   implicit none
 contains
 
@@ -16,10 +17,13 @@ contains
     type(c_ptr),       intent(in)    :: ctx
 
     real(c_double) :: yexact(level%nvars)
+    real(pfdp), pointer :: qend(:)
+
+    qend => array(level%qend)
 
     call exact(state%t0+state%dt, level%nvars, yexact)
     print '("error: step: ",i3.3," iter: ",i4.3," error: ",es14.7)', &
-         state%step+1, state%iter, maxval(abs(level%qend%array-yexact))
+         state%step+1, state%iter, maxval(abs(qend-yexact))
   end subroutine echo_error
 
   subroutine echo_residual(pf, level, state, ctx)
@@ -30,12 +34,17 @@ contains
     type(pf_state_t),  intent(in)    :: state
     type(c_ptr),       intent(in)    :: ctx
 
-    type(pf_encap_t) :: residual
+    real(pfdp), pointer :: r(:)
+    type(c_ptr) :: residual
 
     call create(residual, level%level, .true., level%nvars, level%shape, level%ctx)
-    call pf_residual(level, state%t0, state%dt, residual)
+    call pf_residual(level, state%dt, residual)
+
+    r => array(residual)
+
     print '("resid: step: ",i3.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
-         state%step+1, state%iter, level%level, maxval(abs(residual%array))
+         state%step+1, state%iter, level%level, maxval(abs(r))
+
     call destroy(residual)
   end subroutine echo_residual
 

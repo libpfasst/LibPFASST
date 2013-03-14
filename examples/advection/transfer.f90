@@ -6,33 +6,35 @@
 
 module transfer
   use iso_c_binding
-  use encap
+  use encap_array1d
   implicit none
 contains
 
-  subroutine interpolate(qF, qG, levelF, ctxF, levelG, ctxG)
+  subroutine interpolate(qFp, qGp, levelF, ctxF, levelG, ctxG)
     use feval
-    type(pf_encap_t), intent(inout) :: qF
-    type(pf_encap_t), intent(in)    :: qG
-    integer,          intent(in)    :: levelF, levelG
-    type(c_ptr),      intent(in)    :: ctxF, ctxG
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+    integer,     intent(in)        :: levelF, levelG
 
+    real(pfdp), pointer :: qF(:), qG(:)
     complex(kind=8), pointer :: wkF(:), wkG(:)
     integer :: nvarF, nvarG, xrat
-    
-    nvarF = size(qF%array) 
-    nvarG = size(qG%array)
+
+    qF => array(qFp)
+    qG => array(qGp)
+
+    nvarF = size(qF)
+    nvarG = size(qG)
     xrat  = nvarF / nvarG
 
     if (xrat == 1) then
-       qF%array = qG%array
+       qF = qG
        return
     endif
 
     wkF => levels(levelF)%wk
     wkG => levels(levelG)%wk
 
-    wkG = qG%array
+    wkG = qG
     call fftw_execute_dft(levels(levelG)%ffft, wkG, wkG)
     wkG = wkG / nvarG
 
@@ -42,21 +44,24 @@ contains
 
     call fftw_execute_dft(levels(levelF)%ifft, wkF, wkF)
 
-    qF%array = real(wkF)
+    qF = real(wkF)
   end subroutine interpolate
 
-  subroutine restrict(qF, qG, levelF, ctxF, levelG, ctxG)
-    integer,          intent(in)    :: levelF, levelG
-    type(pf_encap_t), intent(in)    :: qF
-    type(pf_encap_t), intent(inout) :: qG
-    type(c_ptr),      intent(in)    :: ctxF, ctxG
+  subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+    integer,     intent(in)        :: levelF, levelG
+
+    real(pfdp), pointer :: qF(:), qG(:)
 
     integer :: nvarF, nvarG, xrat
-    
-    nvarF = size(qF%array) 
-    nvarG = size(qG%array)
+
+    qF => array(qFp)
+    qG => array(qGp)
+
+    nvarF = size(qF)
+    nvarG = size(qG)
     xrat  = nvarF / nvarG
 
-    qG%array = qF%array(::xrat)
+    qG = qF(::xrat)
   end subroutine restrict
 end module transfer

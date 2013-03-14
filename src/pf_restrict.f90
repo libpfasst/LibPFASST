@@ -95,7 +95,7 @@ contains
     end do
 
     ! restrict fine function values and sum between coarse nodes
-    call setval(tmp, 0.0_pfdp)
+    call G%encap%setval(tmp, 0.0_pfdp)
     do m = 1, F%nnodes-1
        mc = int(ceiling(1.0_pfdp*m/trat))
        call F%restrict(FofF(m), tmp, F%level, F%ctx, G%level, G%ctx)

@@ -137,10 +137,10 @@ contains
     integer :: n, m, p
 
     do n = 1, F%nnodes-1
-       call setval(fintSDC(n), 0.0d0)
+       call F%encap%setval(fintSDC(n), 0.0d0)
        do m = 1, F%nnodes
           do p = 1, npieces
-             call axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
+             call F%encap%axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do

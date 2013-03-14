@@ -106,8 +106,9 @@ module pf_mod_dtype
           pSDC(:), &                    ! unknowns at sdc nodes, previous sweep
           fSDC(:,:), &                  ! functions values at sdc nodes
           pfSDC(:,:), &                 ! functions at sdc nodes, previous sweep
-          tau(:), &                     ! fas correction
-          qend                          ! solution at last node
+          tau(:)                        ! fas correction
+
+     type(c_ptr) :: qend                ! solution at last node
 
      type(c_ptr) :: ctx  = c_null_ptr   ! user context
      integer, pointer :: shape(:)       ! user shape
@@ -224,7 +225,7 @@ module pf_mod_dtype
   interface
      subroutine pf_encap_create_p(sol, level, feval, nvars, shape, ctx)
        import c_ptr
-       type(c_ptr),  intent(out)       :: sol
+       type(c_ptr),  intent(inout)     :: sol
        type(c_ptr),  intent(in), value :: ctx
        integer,      intent(in)        :: level, nvars, shape(:)
        logical,      intent(in)        :: feval

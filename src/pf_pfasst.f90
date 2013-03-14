@@ -43,11 +43,13 @@ contains
   !
   ! Passing the 'nvars' and 'nnodes' arrays is optional, but these
   ! should be set appropriately before calling setup.
-  subroutine pf_pfasst_create(pf, pf_comm, nlevels, nvars, nnodes, maxlevels)
-    type(pf_pfasst_t), intent(inout)         :: pf
-    type(pf_comm_t),   intent(inout), target :: pf_comm
-    integer,           intent(in)            :: nlevels
-    integer,           intent(in), optional  :: nvars(nlevels), nnodes(nlevels), maxlevels
+  subroutine pf_pfasst_create(pf, comm, encap, sweeper, nlevels, nvars, nnodes, maxlevels)
+    type(pf_pfasst_t),   intent(inout)         :: pf
+    type(pf_comm_t),     intent(inout), target :: comm
+    type(pf_encap_t),    intent(in)            :: encap
+    type(pf_sweeper_t),  intent(in)            :: sweeper
+    integer,             intent(in)            :: nlevels
+    integer,             intent(in), optional  :: nvars(nlevels), nnodes(nlevels), maxlevels
 
     integer :: l, nlevs
 
@@ -57,7 +59,7 @@ contains
        nlevs = nlevels
     end if
 
-    pf%comm => pf_comm
+    pf%comm => comm
 
     pf%nlevels = nlevels
     allocate(pf%levels(nlevs))
@@ -68,6 +70,8 @@ contains
 
     do l = 1, nlevels
        call create(pf%levels(l), l)
+       pf%levels(l)%sweeper = sweeper
+       pf%levels(l)%encap = encap
     end do
 
     if (present(nvars)) then
@@ -90,6 +94,13 @@ contains
     integer,          intent(in)    :: nlevel
 
     level%level = nlevel
+    level%tau => null()
+    level%shape => null()
+    level%smat => null()
+    level%pfSDC => null()
+    level%pSDC => null()
+    level%tmat => null()
+    level%rmat => null()
   end subroutine pf_level_create
 
 
@@ -176,6 +187,7 @@ contains
 
        ! create space to store previous iteration info
        if (F%level < pf%nlevels) then
+
           if (F%Finterp) then  !  Doing store of f and qSDC(1) only
              do m = 1, nnodes
                 do p = 1, npieces
@@ -188,8 +200,8 @@ contains
                 call F%encap%create(F%pSDC(m), F%level, .false., nvars, F%shape, F%ctx)
              end do
           end if
-       end if
 
+       end if
 
        call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
             F%nodes, F%nflags, F%s0mat, F%qmat)

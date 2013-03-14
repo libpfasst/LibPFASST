@@ -213,7 +213,7 @@ contains
           F => pf%levels(pf%nlevels)
 
           call pf%comm%wait(pf, pf%nlevels)
-          call pack(F%send, F%qend)
+          call F%encap%pack(F%send, F%qend)
           call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if

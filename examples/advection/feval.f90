@@ -6,7 +6,7 @@
 
 module feval
   use iso_c_binding
-  use encap
+  use encap_array1d
   implicit none
   include 'fftw3.f03'
 
@@ -90,7 +90,7 @@ contains
 
   ! Set initial condition.
   subroutine initial(q0)
-    type(pf_encap_t), intent(inout) :: q0
+    type(array1d), intent(inout) :: q0
 
     call exact(0.0_pfdp, size(q0%array), q0%array)
   end subroutine initial
@@ -99,7 +99,7 @@ contains
 
   subroutine exact(t, nvars, yex)
     real(pfdp), intent(in)  :: t
-    integer,      intent(in)  :: nvars
+    integer,    intent(in)  :: nvars
     real(pfdp), intent(out) :: yex(nvars)
 
     integer :: i, ii, nbox
@@ -109,8 +109,8 @@ contains
 
     ! decide how many images so that contribution is neglible
     tol = 1e-16
-    if (nu .gt. ZERO) then
-       nbox = 1+ceiling( sqrt( -(4.0_pfdp*nu*(t+t00))*log((4.0*pi*nu*(t+t00))**(HALF)*tol) ))
+    if (nu .gt. 0) then
+       nbox = 1+ceiling( sqrt( -(4.0_pfdp*nu*(t+t00))*log((4.0*pi*nu*(t+t00))**(0.5)*tol) ))
 
 !       do ii = -nbox, nbox
           ii = 0
@@ -119,7 +119,7 @@ contains
 !             yex(i) = yex(i) + ONE/(4.0_pfdp*pi*nu*(t+t00))**(0.5)*dexp(-x**2/(4.0_pfdp*nu*(t+t00)))
              yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
           end do
-          
+
  !      end do
     else
        nbox = 1+ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
@@ -128,7 +128,7 @@ contains
              x = Lx*dble(i-nvars/2-1)/dble(nvars) + ii*Lx - t*v
              yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
           end do
-          
+
        end do
     end if
 
@@ -138,76 +138,73 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine eval_f1(y, t, level, ctx, f1)
+  subroutine eval_f1(yptr, t, level, ctx, f1ptr)
+    type(c_ptr), intent(in), value :: yptr, f1ptr, ctx
+    real(pfdp),  intent(in)        :: t
+    integer,     intent(in)        :: level
 
-    type(pf_encap_t), intent(in)    :: y
-    real(pfdp),     intent(in)    :: t
-    integer,          intent(in)    :: level
-    type(pf_encap_t), intent(inout) :: f1
-    type(c_ptr),      intent(in)    :: ctx
-
+    real(pfdp), pointer :: y(:), f1(:)
     complex(pfdp), pointer :: wk(:)
 
+    y  => array(yptr)
+    f1 => array(f1ptr)
     wk => levels(level)%wk
 
-    wk = y%array
+    wk = y
     call fftw_execute_dft(levels(level)%ffft, wk, wk)
     wk = -v * levels(level)%ddx * wk / size(wk)
     call fftw_execute_dft(levels(level)%ifft, wk, wk)
 
-    f1%array = real(wk)
+    f1 = real(wk)
 
   end subroutine eval_f1
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine eval_f2(y, t, level, ctx, f2)
+  subroutine eval_f2(yptr, t, level, ctx, f2ptr)
+    type(c_ptr), intent(in), value :: yptr, f2ptr, ctx
+    real(pfdp),  intent(in)        :: t
+    integer,     intent(in)        :: level
 
-    type(pf_encap_t), intent(in)    :: y
-    real(pfdp),     intent(in)    :: t
-    integer,          intent(in)    :: level
-    type(pf_encap_t), intent(inout) :: f2
-    type(c_ptr),      intent(in)    :: ctx
-
-
+    real(pfdp), pointer :: y(:), f2(:)
     complex(pfdp), pointer :: wk(:)
 
+    y  => array(yptr)
+    f2 => array(f2ptr)
     wk => levels(level)%wk
 
-    wk = y%array
+    wk = y
     call fftw_execute_dft(levels(level)%ffft, wk, wk)
     wk = nu * levels(level)%lap * wk / size(wk)
     call fftw_execute_dft(levels(level)%ifft, wk, wk)
 
-    f2%array = real(wk)
-
+    f2 = real(wk)
   end subroutine eval_f2
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine comp_f2(y, t, dt, rhs, level, ctx, f2)
+  subroutine comp_f2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
+    type(c_ptr), intent(in), value :: yptr, rhsptr, f2ptr, ctx
+    real(pfdp),  intent(in)        :: t, dt
+    integer,     intent(in)        :: level
 
-    type(pf_encap_t), intent(inout) :: y
-    type(pf_encap_t), intent(in)    :: rhs
-    real(pfdp),     intent(in)    :: t, dt
-    integer,          intent(in)    :: level
-    type(pf_encap_t), intent(inout) :: f2
-    type(c_ptr),      intent(in)    :: ctx
-
+    real(pfdp), pointer :: y(:), rhs(:), f2(:)
     complex(pfdp), pointer :: wk(:)
 
+    y  => array(yptr)
+    rhs => array(rhsptr)
+    f2 => array(f2ptr)
     wk => levels(level)%wk
 
-    wk = rhs%array
+    wk = rhs
     call fftw_execute_dft(levels(level)%ffft, wk, wk)
     wk = wk / (1.0_pfdp - nu*dt*levels(level)%lap) / size(wk)
     call fftw_execute_dft(levels(level)%ifft, wk, wk)
 
-    y%array  = real(wk)
-    f2%array = (y%array - rhs%array) / dt
-
+    y  = real(wk)
+    f2 = (y - rhs) / dt
   end subroutine comp_f2
 
 end module feval

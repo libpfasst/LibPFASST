@@ -134,12 +134,12 @@ contains
     if (pf%rank < pf%comm%nproc-1) then
 
        if (blocking) then
-          call pack(level%send, level%qend)
+          call level%encap%pack(level%send, level%qend)
           call mpi_send(level%send, level%nvars, MPI_REAL8, &
                pf%rank+1, tag, pf%comm%comm, stat, ierror)
        else
           call mpi_wait(pf%comm%sendreq(level%level), stat, ierror)
-          call pack(level%send, level%qend)
+          call level%encap%pack(level%send, level%qend)
           call mpi_isend(level%send, level%nvars, MPI_REAL8, &
                pf%rank+1, tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
        end if
