@@ -14,8 +14,8 @@ program fpfasst
 
   type(pf_pfasst_t)  :: pf
   type(pf_comm_t)    :: comm
-  type(pf_sweeper_t) :: sweeper
-  type(pf_encap_t)   :: encap
+  type(pf_sweeper_t), target :: sweeper
+  type(pf_encap_t),   target :: encap
   integer            :: ierror, nlevs, nvars(3), nnodes(3), l
   double precision   :: dt
 
@@ -36,7 +36,7 @@ program fpfasst
   call array1d_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
-  call pf_pfasst_create(pf, comm, encap, sweeper, nlevs, nvars(1:nlevs), nnodes(1:nlevs))
+  call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters  = 12
   pf%qtype   = 1
@@ -46,10 +46,16 @@ program fpfasst
      pf%levels(1)%nsweeps = 2
   end if
 
-  do l = 1, pf%nlevels
+  do l = 1, nlevs
+     pf%levels(l)%nvars  = nvars(l)
+     pf%levels(l)%nnodes = nnodes(l)
+
+     call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
+
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
-     call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
+     pf%levels(l)%encap       => encap
+     pf%levels(l)%sweeper     => sweeper
   end do
 
   call pf_mpi_setup(comm, pf)
@@ -73,8 +79,14 @@ program fpfasst
   !!!! done
   deallocate(q0%array)
 
+  do l = 1, nlevs
+     call feval_destroy_workspace(pf%levels(l)%ctx)
+  end do
+
+  call pf_imex_destroy(sweeper)
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
   call mpi_finalize(ierror)
+  call fftw_cleanup()
 
 end program fpfasst

@@ -72,19 +72,19 @@ contains
     ctx = c_loc(work)
   end subroutine feval_create_workspace
 
-  ! subroutine feval_finalize()
+  subroutine feval_destroy_workspace(ctx)
+    type(c_ptr), intent(in) :: ctx
+    type(ad_work_t), pointer :: work
 
-  !   integer :: l
+    call c_f_pointer(ctx, work)
 
-  !   do l = 1, size(levels)
-  !      deallocate(levels(l)%wk)
-  !      deallocate(levels(l)%ddx)
-  !      deallocate(levels(l)%lap)
-  !   end do
-
-  !   deallocate(levels)
-
-  ! end subroutine feval_finalize
+    deallocate(work%wk)
+    deallocate(work%ddx)
+    deallocate(work%lap)
+    call fftw_destroy_plan(work%ffft)
+    call fftw_destroy_plan(work%ifft)
+    deallocate(work)
+  end subroutine feval_destroy_workspace
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

@@ -186,7 +186,7 @@ contains
     end do
   end subroutine imex_integrate
 
-  ! Create IMEX sweeper
+  ! Create/destroy IMEX sweeper
   subroutine pf_imex_create(sweeper, f1eval, f2eval, f2comp)
     type(pf_sweeper_t), intent(inout) :: sweeper
     procedure(pf_f1eval_p) :: f1eval
@@ -199,15 +199,25 @@ contains
     imex%f1eval => f1eval
     imex%f2eval => f2eval
     imex%f2comp => f2comp
+    imex%gen_rhs => null()
 
     sweeper%npieces = npieces
-    sweeper%sweep => imex_sweep
-    sweeper%evaluate => imex_evaluate
+    sweeper%sweep      => imex_sweep
+    sweeper%evaluate   => imex_evaluate
     sweeper%initialize => imex_initialize
-    sweeper%integrate => imex_integrate
+    sweeper%integrate  => imex_integrate
 
     sweeper%ctx = c_loc(imex)
   end subroutine pf_imex_create
+
+  subroutine pf_imex_destroy(sweeper)
+    type(pf_sweeper_t), intent(inout) :: sweeper
+
+    type(pf_imex_t), pointer :: imex
+    call c_f_pointer(sweeper%ctx, imex)
+
+    deallocate(imex)
+  end subroutine pf_imex_destroy
 
 end module pf_mod_imex
 

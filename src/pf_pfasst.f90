@@ -26,48 +26,27 @@ contains
   !
   ! Passing the 'nvars' and 'nnodes' arrays is optional, but these
   ! should be set appropriately before calling setup.
-  subroutine pf_pfasst_create(pf, comm, encap, sweeper, nlevels, nvars, nnodes, maxlevels)
+  subroutine pf_pfasst_create(pf, comm, maxlevels)
     type(pf_pfasst_t),   intent(inout)         :: pf
     type(pf_comm_t),     intent(inout), target :: comm
-    type(pf_encap_t),    intent(in)            :: encap
-    type(pf_sweeper_t),  intent(in)            :: sweeper
-    integer,             intent(in)            :: nlevels
-    integer,             intent(in), optional  :: nvars(nlevels), nnodes(nlevels), maxlevels
+    integer,             intent(in)            :: maxlevels
 
-    integer :: l, nlevs
-
-    if (present(maxlevels)) then
-       nlevs = maxlevels
-    else
-       nlevs = nlevels
-    end if
+    integer :: l
 
     pf%comm => comm
+    pf%nlevels = 0
 
-    pf%nlevels = nlevels
-    allocate(pf%levels(nlevs))
-    allocate(pf%hooks(nlevs,PF_MAX_HOOKS))
-    allocate(pf%nhooks(nlevs))
+    allocate(pf%levels(maxlevels))
+    allocate(pf%hooks(maxlevels, PF_MAX_HOOKS))
+    allocate(pf%nhooks(maxlevels))
 
     pf%nhooks = 0
 
-    do l = 1, nlevels
+    do l = 1, maxlevels
        call pf_level_create(pf%levels(l), l)
-       pf%levels(l)%sweeper = sweeper
-       pf%levels(l)%encap = encap
     end do
 
-    if (present(nvars)) then
-       do l = 1, nlevels
-          pf%levels(l)%nvars = nvars(l)
-       end do
-    end if
-
-    if (present(nnodes)) then
-       do l = 1, nlevels
-          pf%levels(l)%nnodes = nnodes(l)
-       end do
-    end if
+    pf%nlevels = maxlevels
   end subroutine pf_pfasst_create
 
 
@@ -77,13 +56,13 @@ contains
     integer,          intent(in)    :: nlevel
 
     level%level = nlevel
-    level%tau => null()
     level%shape => null()
-    level%smat => null()
+    level%tau   => null()
     level%pfSDC => null()
-    level%pSDC => null()
-    level%tmat => null()
-    level%rmat => null()
+    level%pSDC  => null()
+    level%smat  => null()
+    level%rmat  => null()
+    level%tmat  => null()
   end subroutine pf_level_create
 
 
@@ -102,7 +81,7 @@ contains
     end if
 
     do l = 1, pf%nlevels
-       call setup(pf, pf%levels(l))
+       call pf_level_setup(pf, pf%levels(l))
     end do
 
     do l = pf%nlevels, 2, -1

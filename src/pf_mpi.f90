@@ -150,7 +150,7 @@ contains
 
   ! Send
   subroutine pf_mpi_wait(pf, level)
-    use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
+    use pf_mod_mpi, only: MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(in) :: pf
     integer,           intent(in) :: level

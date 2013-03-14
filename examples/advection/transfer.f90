@@ -7,7 +7,7 @@
 module transfer
   use iso_c_binding
   use encap_array1d
-  use feval, only: ad_work_t
+  use feval
   implicit none
 contains
 

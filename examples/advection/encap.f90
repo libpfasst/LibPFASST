@@ -57,6 +57,7 @@ contains
     call c_f_pointer(ptr, q)
 
     deallocate(q%array)
+    deallocate(q)
   end subroutine encap_destroy
 
   ! Set solution value.

@@ -83,8 +83,9 @@ module pf_mod_dtype
      integer     :: level = -1          ! level number (1=finest)
      logical     :: Finterp = .false.   ! Interpolate functions instead of solution
 
-     type(pf_encap_t) :: encap
-     type(pf_sweeper_t) :: sweeper
+     type(pf_encap_t), pointer   :: encap
+     type(pf_sweeper_t), pointer :: sweeper
+
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -94,9 +95,9 @@ module pf_mod_dtype
           nodes(:), &                   ! sdc nodes
           qmat(:,:), &                  ! integration matrix (0 to node)
           s0mat(:,:), &                 ! integration matrix (node to node)
-          smat(:,:,:) => null(), &      ! sdc matrices (allocated by the sweeper)
-          rmat(:,:) => null(), &        ! time restriction matrix
-          tmat(:,:) => null()           ! time interpolation matrix
+          smat(:,:,:), &                ! sdc matrices (allocated by the sweeper)
+          rmat(:,:), &                  ! time restriction matrix
+          tmat(:,:)                     ! time interpolation matrix
 
      integer(c_int), pointer :: &
           nflags(:)                     ! sdc node flags
@@ -114,6 +115,7 @@ module pf_mod_dtype
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
+
   end type pf_level_t
 
 
@@ -196,7 +198,7 @@ module pf_mod_dtype
 
   interface
      subroutine pf_initialize_p(F)
-       import pf_level_t, c_ptr
+       import pf_level_t
        type(pf_level_t), intent(inout) :: F
      end subroutine pf_initialize_p
   end interface
