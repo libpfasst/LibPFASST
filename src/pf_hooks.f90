@@ -22,16 +22,12 @@ module pf_mod_hooks
   implicit none
 
   integer, parameter :: &
-       PF_POST_SWEEP = 1, &     ! call hooks after each sdc sweep
-       PF_POST_ITERATION = 2, & ! call hooks after each pfasst iteration
-       PF_POST_STEP = 3, &      ! call hooks after each time step
-       PF_PRE_ITERATION = 4, &  ! call hooks before each pfasst iteration
+       PF_POST_SWEEP     = 1, & ! after each sdc sweep
+       PF_POST_ITERATION = 2, & ! after each pfasst iteration
+       PF_POST_STEP      = 3, & ! after each time step
+       PF_PRE_ITERATION  = 4, & ! before each pfasst iteration
        PF_POST_PREDICTOR = 5, &
-       PF_PRE_BLOCK = 6
-
-  interface add_hook
-     module procedure pf_add_hook
-  end interface add_hook
+       PF_PRE_BLOCK      = 6
 
 contains
 

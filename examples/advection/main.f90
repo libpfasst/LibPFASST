@@ -21,14 +21,19 @@ program fpfasst
 
   type(array1d), target :: q0
 
-  !!!! initialize mpi
+  !
+  ! initialize mpi
+  !
   call mpi_init(ierror)
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
 
-  !!!! initialize pfasst
-  nvars  = [ 32,64,128 ]
+  !
+  ! initialize pfasst
+  !
+
+  nvars  = [ 32, 64, 128 ]
   nnodes = [ 3, 5, 9 ]
   dt     = 0.01_pfdp
   nlevs  = 3
@@ -38,8 +43,8 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  pf%niters  = 12
-  pf%qtype   = 1
+  pf%niters  = 4
+  pf%qtype   = SDC_GAUSS_LOBATTO
 
   pf%echo_timings = .false.
   if (nlevs > 1) then
@@ -61,22 +66,20 @@ program fpfasst
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
-  call add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
 
-  ! do l = 1, nlevs
-  !    call add_hook(pf, l, PF_POST_PREDICTOR, echo_error)
-  ! end do
-
-
-  !!!! initialize advection/diffusion
+  !
+  ! run
+  !
   allocate(q0%array(nvars(nlevs)))
   call initial(q0)
 
-  !!!! run
+  call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
 
 
-  !!!! done
+  !
+  ! cleanup
+  !
   deallocate(q0%array)
 
   do l = 1, nlevs
