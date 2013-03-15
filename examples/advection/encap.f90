@@ -61,9 +61,10 @@ contains
   end subroutine encap_destroy
 
   ! Set solution value.
-  subroutine encap_setval(ptr, val)
-    type(c_ptr), intent(in), value :: ptr
-    real(pfdp),  intent(in)        :: val
+  subroutine encap_setval(ptr, val, flags)
+    type(c_ptr), intent(in), value    :: ptr
+    real(pfdp),  intent(in)           :: val
+    integer,     intent(in), optional :: flags
 
     real(pfdp), pointer :: q(:)
 
@@ -72,8 +73,9 @@ contains
   end subroutine encap_setval
 
   ! Copy solution value.
-  subroutine encap_copy(dstptr, srcptr)
-    type(c_ptr), intent(in), value :: dstptr, srcptr
+  subroutine encap_copy(dstptr, srcptr, flags)
+    type(c_ptr), intent(in), value    :: dstptr, srcptr
+    integer,     intent(in), optional :: flags
 
     real(pfdp), pointer :: dst(:), src(:)
 
@@ -106,9 +108,10 @@ contains
   end subroutine encap_unpack
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
-  subroutine encap_axpy(yptr, a, xptr)
-    type(c_ptr), intent(in), value :: xptr, yptr
-    real(pfdp),  intent(in)        :: a
+  subroutine encap_axpy(yptr, a, xptr, flags)
+    type(c_ptr), intent(in), value    :: xptr, yptr
+    real(pfdp),  intent(in)           :: a
+    integer,     intent(in), optional :: flags
 
     real(pfdp), pointer :: x(:), y(:)
     x => array(xptr)

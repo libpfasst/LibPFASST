@@ -87,8 +87,8 @@ contains
     end if
 
     !!!! fas correction
-    call G%sweeper%integrate(G, G%fSDC, dt, CofG)
-    call F%sweeper%integrate(F, F%fSDC, dt, FofF)
+    call G%sweeper%integrate(G, G%qSDC, G%fSDC, dt, CofG)
+    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, FofF)
 
     do m = 1, G%nnodes-1
        call G%encap%setval(CofF(m), 0.0_pfdp)

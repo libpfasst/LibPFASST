@@ -20,7 +20,7 @@
 module pf_mod_implicit
   use pf_mod_dtype
   implicit none
-  integer, parameter :: npieces = 1
+  integer, parameter, private :: npieces = 1
 
   interface
      subroutine pf_f2eval_p(y, t, level, ctx, f2)
@@ -136,6 +136,7 @@ contains
   subroutine implicit_initialize(F)
     use pf_mod_dtype
     type(pf_level_t), intent(inout) :: F
+
     real(pfdp) :: dsdc(F%nnodes-1)
 
     integer :: m
@@ -152,9 +153,9 @@ contains
 
 
   ! Compute SDC integral
-  subroutine implicit_integrate(F, fSDC, dt, fintSDC)
+  subroutine implicit_integrate(F, qSDC, fSDC, dt, fintSDC)
     type(pf_level_t), intent(in) :: F
-    type(c_ptr),      intent(in) :: fSDC(:, :), fintSDC(:)
+    type(c_ptr),      intent(in) :: qSDC(:, :), fSDC(:, :), fintSDC(:)
     real(pfdp),       intent(in) :: dt
 
     integer :: n, m, p

@@ -106,7 +106,7 @@ contains
     end do
 
     ! integrate and compute residual
-    call F%sweeper%integrate(F, F%fSDC, dt, fintSDC)
+    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, fintSDC)
 
     call F%encap%copy(residual, F%qSDC(1))
     do n = 1, F%nnodes-1

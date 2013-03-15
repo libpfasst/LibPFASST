@@ -202,10 +202,10 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_integrate_p(F, fSDC, dt, fintSDC)
+     subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
        type(pf_level_t),  intent(in) :: F
-       type(c_ptr),       intent(in) :: fSDC(:, :), fintSDC(:)
+       type(c_ptr),       intent(in) :: qSDC(:, :), fSDC(:, :), fintSDC(:)
        real(pfdp),        intent(in) :: dt
      end subroutine pf_integrate_p
   end interface
@@ -240,17 +240,19 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_encap_setval_p(sol, val)
+     subroutine pf_encap_setval_p(sol, val, flags)
        import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: sol
-       real(pfdp),  intent(in)        :: val
+       type(c_ptr), intent(in), value    :: sol
+       real(pfdp),  intent(in)           :: val
+       integer,     intent(in), optional :: flags
      end subroutine pf_encap_setval_p
   end interface
 
   interface
-     subroutine pf_encap_copy_p(dst, src)
+     subroutine pf_encap_copy_p(dst, src, flags)
        import c_ptr
-       type(c_ptr), intent(in), value :: dst, src
+       type(c_ptr), intent(in), value    :: dst, src
+       integer,     intent(in), optional :: flags
      end subroutine pf_encap_copy_p
   end interface
 
@@ -271,10 +273,11 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_encap_axpy_p(y, a, x)
+     subroutine pf_encap_axpy_p(y, a, x, flags)
        import c_ptr, pfdp
-       real(pfdp),  intent(in)        :: a
-       type(c_ptr), intent(in), value :: x, y
+       real(pfdp),  intent(in)           :: a
+       type(c_ptr), intent(in), value    :: x, y
+       integer,     intent(in), optional :: flags
      end subroutine pf_encap_axpy_p
   end interface
 

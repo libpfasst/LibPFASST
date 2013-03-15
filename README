@@ -10,6 +10,15 @@ with C and C++ fairly easily.
 Please see the documentation in 'docs' and examples in 'examples' for
 usage information.
 
+
+COMPILERS
+=========
+
+LIBPFASST has been successfully compiled with
+
+  * GNU gfortran 4.5 and 4.8.
+
+
 LICENSE
 =======
 
