@@ -48,7 +48,6 @@ contains
     integer    :: m, n
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:F%nnodes-1)
-    type(c_ptr) :: S(F%nnodes-1)
     type(pf_explicit_t), pointer :: exp
 
     call c_f_pointer(F%sweeper%ctx, exp)
@@ -57,40 +56,35 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, F%nnodes-1
-       call F%encap%create(S(m), F%level, .false., F%nvars, F%shape, F%ctx)
-       call F%encap%setval(S(m), 0.0d0)
+       call F%encap%setval(F%S(m), 0.0d0)
        do n = 1, F%nnodes
-          call F%encap%axpy(S(m), dt*F%smat(m,n,1), F%fSDC(n,1))
+          call F%encap%axpy(F%S(m), dt*F%smat(m,n,1), F%F(n,1))
        end do
        if (associated(F%tau)) then
-          call F%encap%axpy(S(m), 1.0d0, F%tau(m))
+          call F%encap%axpy(F%S(m), 1.0d0, F%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call F%encap%unpack(F%qSDC(1), F%q0)
+    call F%encap%unpack(F%Q(1), F%q0)
 
-    call exp%f1eval(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,1))
+    call exp%f1eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
     do m = 1, F%nnodes-1
        t = t + dtsdc(m)
 
-       call F%encap%copy(F%qSDC(m+1), F%qSDC(m))
-       call F%encap%axpy(F%qSDC(m+1), dtsdc(m), F%fSDC(m,1))
-       call F%encap%axpy(F%qSDC(m+1), 1.0d0, S(m))
+       call F%encap%copy(F%Q(m+1), F%Q(m))
+       call F%encap%axpy(F%Q(m+1), dtsdc(m), F%F(m,1))
+       call F%encap%axpy(F%Q(m+1), 1.0d0, F%S(m))
 
-       call exp%f1eval(F%qSDC(m+1), t, F%level, F%ctx, F%fSDC(m+1,1))
+       call exp%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
     end do
 
-    call F%encap%copy(F%qend, F%qSDC(F%nnodes))
+    call F%encap%copy(F%qend, F%Q(F%nnodes))
 
     ! done
-    do m = 1, F%nnodes-1
-       call F%encap%destroy(S(m))
-    end do
-
     call end_timer(pf, TLEVEL+F%level-1)
   end subroutine explicit_sweep
 
@@ -106,7 +100,7 @@ contains
 
     call c_f_pointer(F%sweeper%ctx, exp)
 
-    call exp%f1eval(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,1))
+    call exp%f1eval(F%Q(m), t, F%level, F%ctx, F%F(m,1))
   end subroutine explicit_evaluate
 
   ! Initialize smats

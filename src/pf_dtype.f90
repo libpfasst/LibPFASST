@@ -102,10 +102,11 @@ module pf_mod_dtype
           nflags(:)                     ! sdc node flags
 
      type(c_ptr), pointer :: &
-          qSDC(:), &                    ! unknowns at sdc nodes
-          pSDC(:), &                    ! unknowns at sdc nodes, previous sweep
-          fSDC(:,:), &                  ! functions values at sdc nodes
-          pfSDC(:,:), &                 ! functions at sdc nodes, previous sweep
+          Q(:), &                       ! unknowns at sdc nodes
+          pQ(:), &                      ! unknowns at sdc nodes, previous sweep
+          F(:,:), &                     ! functions values at sdc nodes
+          pF(:,:), &                    ! functions at sdc nodes, previous sweep
+          S(:), &                       ! node to node integrals
           tau(:)                        ! fas correction
 
      type(c_ptr) :: qend                ! solution at last node
@@ -223,10 +224,10 @@ module pf_mod_dtype
 
   ! encapsulation interfaces
   interface
-     subroutine pf_encap_create_p(sol, level, feval, nvars, shape, ctx)
+     subroutine pf_encap_create_p(sol, level, feval, nvars, shape, lctx, ectx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
-       type(c_ptr),  intent(in), value :: ctx
+       type(c_ptr),  intent(in), value :: lctx, ectx
        integer,      intent(in)        :: level, nvars, shape(:)
        logical,      intent(in)        :: feval
      end subroutine pf_encap_create_p

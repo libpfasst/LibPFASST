@@ -53,21 +53,21 @@ contains
 
     !!!! create workspaces
     do m = 1, G%nnodes-1
-       call G%encap%create(CofG(m), G%level, .false., G%nvars, G%shape, G%ctx)
-       call G%encap%create(CofF(m), G%level, .false., G%nvars, G%shape, G%ctx)
+       call G%encap%create(CofG(m), G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call G%encap%create(CofF(m), G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
     end do
 
-    call G%encap%create(tmp, G%level, .false., G%nvars, G%shape, G%ctx)
+    call G%encap%create(tmp, G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
 
     do m = 1, F%nnodes-1
-       call F%encap%create(FofF(m), F%level, .false., F%nvars, F%shape, F%ctx)
+       call F%encap%create(FofF(m), F%level, .false., F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     !!!! restrict qs and recompute fs
     tm = t0 + dt*G%nodes
     do m = 1, G%nnodes
        ! XXX: use rmat here...
-       call F%restrict(F%qSDC(trat*(m-1)+1), G%qSDC(m), F%level, F%ctx, G%level, G%ctx)
+       call F%restrict(F%Q(trat*(m-1)+1), G%Q(m), F%level, F%ctx, G%level, G%ctx)
        call G%sweeper%evaluate(G, tm(m), m)
     end do
 
@@ -87,8 +87,8 @@ contains
     end if
 
     !!!! fas correction
-    call G%sweeper%integrate(G, G%qSDC, G%fSDC, dt, CofG)
-    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, FofF)
+    call G%sweeper%integrate(G, G%Q, G%F, dt, CofG)
+    call F%sweeper%integrate(F, F%Q, F%F, dt, FofF)
 
     do m = 1, G%nnodes-1
        call G%encap%setval(CofF(m), 0.0_pfdp)

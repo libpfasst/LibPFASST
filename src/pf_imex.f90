@@ -78,7 +78,7 @@ contains
     integer    :: m, n
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:F%nnodes-1)
-    type(c_ptr) :: S(F%nnodes-1), rhs
+    type(c_ptr) :: rhs
 
     type(pf_imex_t), pointer :: imex
 
@@ -88,24 +88,23 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, F%nnodes-1
-       call F%encap%create(S(m), F%level, .false., F%nvars, F%shape, F%ctx)
-       call F%encap%setval(S(m), 0.0d0)
+       call F%encap%setval(F%S(m), 0.0d0)
        do n = 1, F%nnodes
-          call F%encap%axpy(S(m), dt*F%smat(m,n,1), F%fSDC(n,1))
-          call F%encap%axpy(S(m), dt*F%smat(m,n,2), F%fSDC(n,2))
+          call F%encap%axpy(F%S(m), dt*F%smat(m,n,1), F%F(n,1))
+          call F%encap%axpy(F%S(m), dt*F%smat(m,n,2), F%F(n,2))
        end do
        if (associated(F%tau)) then
-          call F%encap%axpy(S(m), 1.0d0, F%tau(m))
+          call F%encap%axpy(F%S(m), 1.0d0, F%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call F%encap%unpack(F%qSDC(1), F%q0)
+    call F%encap%unpack(F%Q(1), F%q0)
 
-    call imex%f1eval(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,1))
-    call imex%f2eval(F%qSDC(1), t0, F%level, F%ctx, F%fSDC(1,2))
+    call imex%f1eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
+    call imex%f2eval(F%Q(1), t0, F%level, F%ctx, F%F(1,2))
 
-    call F%encap%create(rhs, F%level, .false., F%nvars, F%shape, F%ctx)
+    call F%encap%create(rhs, F%level, .false., F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
@@ -113,24 +112,21 @@ contains
        t = t + dtsdc(m)
 
        if (associated(imex%gen_rhs)) then
-          call imex%gen_rhs(rhs, F%qSDC(m), dtsdc(m), F%fSDC(m,1), S(m), F%level, F%ctx)
+          call imex%gen_rhs(rhs, F%Q(m), dtsdc(m), F%F(m,1), F%S(m), F%level, F%ctx)
        else
-          call F%encap%copy(rhs, F%qSDC(m))
-          call F%encap%axpy(rhs, dtsdc(m), F%fSDC(m,1))
-          call F%encap%axpy(rhs, 1.0d0, S(m))
+          call F%encap%copy(rhs, F%Q(m))
+          call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
+          call F%encap%axpy(rhs, 1.0d0, F%S(m))
        end if
 
-       call imex%f2comp(F%qSDC(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%fSDC(m+1,2))
-       call imex%f1eval(F%qSDC(m+1), t, F%level, F%ctx, F%fSDC(m+1,1))
+       call imex%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,2))
+       call imex%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
     end do
 
-    call F%encap%copy(F%qend, F%qSDC(F%nnodes))
+    call F%encap%copy(F%qend, F%Q(F%nnodes))
 
     ! done
     call F%encap%destroy(rhs)
-    do m = 1, F%nnodes-1
-       call F%encap%destroy(S(m))
-    end do
 
     call end_timer(pf, TLEVEL+F%level-1)
   end subroutine imex_sweep
@@ -144,8 +140,8 @@ contains
     type(pf_imex_t), pointer :: imex
     call c_f_pointer(F%sweeper%ctx, imex)
 
-    call imex%f1eval(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,1))
-    call imex%f2eval(F%qSDC(m), t, F%level, F%ctx, F%fSDC(m,2))
+    call imex%f1eval(F%Q(m), t, F%level, F%ctx, F%F(m,1))
+    call imex%f2eval(F%Q(m), t, F%level, F%ctx, F%F(m,2))
   end subroutine imex_evaluate
 
   ! Initialize smats

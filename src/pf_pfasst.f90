@@ -58,8 +58,8 @@ contains
     level%level = nlevel
     level%shape => null()
     level%tau   => null()
-    level%pfSDC => null()
-    level%pSDC  => null()
+    level%pF    => null()
+    level%pQ    => null()
     level%smat  => null()
     level%rmat  => null()
     level%tmat  => null()
@@ -119,8 +119,9 @@ contains
        allocate(F%q0(nvars))
        allocate(F%send(nvars))
        allocate(F%recv(nvars))
-       allocate(F%qSDC(nnodes))
-       allocate(F%fSDC(nnodes,npieces))
+       allocate(F%Q(nnodes))
+       allocate(F%F(nnodes,npieces))
+       allocate(F%S(nnodes-1))
        allocate(F%nodes(nnodes))
        allocate(F%nflags(nnodes))
        allocate(F%s0mat(nnodes-1,nnodes))
@@ -128,24 +129,29 @@ contains
 
        if (F%Finterp) then
           if (F%level < pf%nlevels) then
-             allocate(F%pfSDC(nnodes,npieces))
-             allocate(F%pSDC(1))
+             allocate(F%pF(nnodes,npieces))
+             allocate(F%pQ(1))
           end if
        else
           if (F%level < pf%nlevels) then
-             allocate(F%pSDC(nnodes))
+             allocate(F%pQ(nnodes))
           end if
        end if
 
-       call F%encap%create(F%qend, F%level, .false., nvars, F%shape, F%ctx)
-       ! call F%encap%create(F%qex, F%level, .false., nvars, F%shape, F%ctx)
+       call F%encap%create(F%qend, F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+       ! call F%encap%create(F%qex, F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
 
        do m = 1, nnodes
-          call F%encap%create(F%qSDC(m), F%level, .false., nvars, F%shape, F%ctx)
+          call F%encap%create(F%Q(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
           do p = 1, npieces
-             call F%encap%create(F%fSDC(m,p), F%level, .true., nvars, F%shape, F%ctx)
+             call F%encap%create(F%F(m,p), F%level, .true., nvars, F%shape, F%ctx, F%encap%ctx)
           end do
        end do
+
+       do m = 1, nnodes-1
+          call F%encap%create(F%S(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+       end do
+
 
        ! create space to store previous iteration info
        if (F%level < pf%nlevels) then
@@ -153,13 +159,13 @@ contains
           if (F%Finterp) then  !  Doing store of f and qSDC(1) only
              do m = 1, nnodes
                 do p = 1, npieces
-                   call F%encap%create(F%pfSDC(m,p), F%level, .true., nvars, F%shape, F%ctx)
+                   call F%encap%create(F%pF(m,p), F%level, .true., nvars, F%shape, F%ctx, F%encap%ctx)
                 end do
              end do
-             call F%encap%create(F%pSDC(1), F%level, .false., nvars, F%shape, F%ctx)
+             call F%encap%create(F%pQ(1), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
           else   !  Storing all qSDC
              do m = 1, nnodes
-                call F%encap%create(F%pSDC(m), F%level, .false., nvars, F%shape, F%ctx)
+                call F%encap%create(F%pQ(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
              end do
           end if
 
@@ -175,7 +181,7 @@ contains
     if ((F%level < pf%nlevels) .and. (.not. associated(F%tau))) then
        allocate(F%tau(nnodes-1))
        do m = 1, nnodes-1
-          call F%encap%create(F%tau(m), F%level, .false., nvars, F%shape, F%ctx)
+          call F%encap%create(F%tau(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
        end do
     else if ((F%level >= pf%nlevels) .and. (associated(F%tau))) then
        do m = 1, nnodes-1
@@ -234,38 +240,42 @@ contains
        ! call F%encap%destroy(F%qex)
 
        do m = 1, F%nnodes
-          call F%encap%destroy(F%qSDC(m))
-          do p = 1, size(F%fSDC(m,:))
-             call F%encap%destroy(F%fSDC(m,p))
+          call F%encap%destroy(F%Q(m))
+          do p = 1, size(F%F(m,:))
+             call F%encap%destroy(F%F(m,p))
           end do
+       end do
+
+       do m = 1, F%nnodes-1
+          call F%encap%destroy(F%S(m))
        end do
 
        if (F%Finterp) then
           do m = 1, F%nnodes
-             do p = 1, size(F%fSDC(m,:))
-                if (associated(F%pfSDC)) then
-                   call F%encap%destroy(F%pfSDC(m,p))
+             do p = 1, size(F%F(m,:))
+                if (associated(F%pF)) then
+                   call F%encap%destroy(F%pF(m,p))
                 end if
              end do
           end do
-          if (associated(F%pSDC)) then
-             call F%encap%destroy(F%pSDC(1))
+          if (associated(F%pQ)) then
+             call F%encap%destroy(F%pQ(1))
           end if
        else
           do m = 1, F%nnodes
-             if (associated(F%pSDC)) then
-                call F%encap%destroy(F%pSDC(m))
+             if (associated(F%pQ)) then
+                call F%encap%destroy(F%pQ(m))
              end if
           end do
        end if
 
 
-       deallocate(F%qSDC)
-       deallocate(F%fSDC)
+       deallocate(F%Q)
+       deallocate(F%F)
        if (F%Finterp) then
-          if (associated(F%pfSDC)) deallocate(F%pfSDC)
+          if (associated(F%pF)) deallocate(F%pF)
        else
-          if (associated(F%pSDC)) deallocate(F%pSDC)
+          if (associated(F%pQ)) deallocate(F%pQ)
        end if
 
        if (associated(F%tau)) then

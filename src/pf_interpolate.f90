@@ -46,13 +46,13 @@ contains
 
     ! create workspaces
     do m = 1, G%nnodes
-       call G%encap%create(delG(m),   G%level, .true., G%nvars, G%shape, G%ctx)
-       call F%encap%create(delGF(m),  F%level, .true., F%nvars, F%shape, F%ctx)
+       call G%encap%create(delG(m),   G%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call F%encap%create(delGF(m),  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
        !!  Interpolating F
-       do p = 1,size(G%fSDC(1,:))
+       do p = 1,size(G%F(1,:))
           ! needed for amr
           do m = 1, G%nnodes
              call G%encap%setval(delG(m),   0.0_pfdp)
@@ -60,8 +60,8 @@ contains
           end do
 
           do m = 1, G%nnodes
-             call G%encap%copy(delG(m), G%fSDC(m,p))
-             call G%encap%axpy(delG(m), -1.0_pfdp, G%pfSDC(m,p))
+             call G%encap%copy(delG(m), G%F(m,p))
+             call G%encap%axpy(delG(m), -1.0_pfdp, G%pF(m,p))
 
              call G%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
           end do
@@ -70,7 +70,7 @@ contains
           trat = (F%nnodes-1) / (G%nnodes-1)
           do n = 1, F%nnodes
              do m = 1, G%nnodes
-                call G%encap%axpy(F%fSDC(n,p), F%tmat(n,m), delGF(m))
+                call G%encap%axpy(F%F(n,p), F%tmat(n,m), delGF(m))
              end do
           end do
        end do !  Loop on npieces
@@ -78,8 +78,8 @@ contains
        !  Do interpolation of qSDC(1) to update initial condition
        call G%encap%setval(delG(1),   0.0_pfdp)
        call G%encap%setval(delGF(1),  0.0_pfdp)
-       call G%encap%copy(delG(1), G%qSDC(1))
-       call G%encap%axpy(delG(1), -1.0_pfdp, G%pSDC(1))
+       call G%encap%copy(delG(1), G%Q(1))
+       call G%encap%axpy(delG(1), -1.0_pfdp, G%pQ(1))
 
        call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
 
@@ -87,7 +87,7 @@ contains
        trat = (F%nnodes-1) / (G%nnodes-1)
 
        do n = 1, F%nnodes
-          call F%encap%axpy(F%qSDC(n), F%tmat(n,1), delGF(1))
+          call F%encap%axpy(F%Q(n), F%tmat(n,1), delGF(1))
        end do
 
        ! ! recompute fs
@@ -103,8 +103,8 @@ contains
        end do
 
        do m = 1, G%nnodes
-          call G%encap%copy(delG(m), G%qSDC(m))
-          call G%encap%axpy(delG(m), -1.0_pfdp, G%pSDC(m))
+          call G%encap%copy(delG(m), G%Q(m))
+          call G%encap%axpy(delG(m), -1.0_pfdp, G%pQ(m))
 
           call F%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
        end do
@@ -114,7 +114,7 @@ contains
 
        do n = 1, F%nnodes
           do m = 1, G%nnodes
-             call G%encap%axpy(F%qSDC(n), F%tmat(n,m), delGF(m))
+             call G%encap%axpy(F%Q(n), F%tmat(n,m), delGF(m))
           end do
        end do
 
@@ -149,10 +149,10 @@ contains
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
-    call G%encap%create(q0G,  F%level, .true., G%nvars, G%shape, G%ctx)
-    call F%encap%create(q0F,  F%level, .true., F%nvars, F%shape, F%ctx)
-    call G%encap%create(delG,   G%level, .true., G%nvars, G%shape, G%ctx)
-    call F%encap%create(delF,  F%level, .true., F%nvars, F%shape, F%ctx)
+    call G%encap%create(q0G,  F%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(q0F,  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(delG,   G%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(delF,  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)

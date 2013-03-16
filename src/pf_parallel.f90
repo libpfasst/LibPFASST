@@ -83,7 +83,7 @@ contains
           F => pf%levels(l); G => pf%levels(l-1)
           call restrict_time_space_fas(pf, t0, dt, F, G)
           call save(G)
-          call G%encap%pack(G%q0, G%qSDC(1))
+          call G%encap%pack(G%q0, G%Q(1))
        end do
 
        if (pf%comm%nproc > 1) then
@@ -107,7 +107,7 @@ contains
              F => pf%levels(l+1)
              G => pf%levels(l)
              call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
-             call G%encap%pack(F%q0, F%qSDC(1))
+             call G%encap%pack(F%q0, F%Q(1))
           end do
 
        end if
@@ -194,7 +194,7 @@ contains
 
           ! XXX
           ! if (F%residual_tol > 0.0_pfdp) then
-          !    call pf_compute_residual(F%q0, dt, F%fSDC, &
+          !    call pf_compute_residual(F%q0, dt, F%F, &
           !         F%nvars, F%nnodes, F%smat, F%qend, res)
           !    if (res < F%residual_tol) then
           !       print '("serial residual condition met after: ",i3," iterations",i3)', k

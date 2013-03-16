@@ -57,13 +57,13 @@ contains
 
     integer :: m, p
 
-    call F%encap%unpack(F%qSDC(1), F%q0)
+    call F%encap%unpack(F%Q(1), F%q0)
     call F%sweeper%evaluate(F, t0, 1)
 
     do m = 2, F%nnodes
-       call F%encap%copy(F%qSDC(m), F%qSDC(1))
+       call F%encap%copy(F%Q(m), F%Q(1))
        do p = 1, F%sweeper%npieces
-          call F%encap%copy(F%fSDC(m,p), F%fSDC(1,p))
+          call F%encap%copy(F%F(m,p), F%F(1,p))
        end do
     end do
   end subroutine spreadq0
@@ -75,18 +75,18 @@ contains
     integer :: m,p
 
     if (F%Finterp) then
-       if (associated(F%pfSDC)) then
+       if (associated(F%pF)) then
           do m = 1, F%nnodes
-             do p = 1,size(F%fSDC(1,:))
-                call F%encap%copy(F%pfSDC(m,p), F%fSDC(m,p))
+             do p = 1,size(F%F(1,:))
+                call F%encap%copy(F%pF(m,p), F%F(m,p))
              end do
           end do
-          call F%encap%copy(F%pSDC(1), F%qSDC(1))
+          call F%encap%copy(F%pQ(1), F%Q(1))
        end if
     else
-       if (associated(F%pSDC)) then
+       if (associated(F%pQ)) then
           do m = 1, F%nnodes
-             call F%encap%copy(F%pSDC(m), F%qSDC(m))
+             call F%encap%copy(F%pQ(m), F%Q(m))
           end do
        end if
     end if
@@ -102,17 +102,17 @@ contains
     integer :: n
 
     do n = 1, F%nnodes-1
-       call F%encap%create(fintSDC(n), F%level, .true., F%nvars, F%shape, F%ctx)
+       call F%encap%create(fintSDC(n), F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     ! integrate and compute residual
-    call F%sweeper%integrate(F, F%qSDC, F%fSDC, dt, fintSDC)
+    call F%sweeper%integrate(F, F%Q, F%F, dt, fintSDC)
 
-    call F%encap%copy(residual, F%qSDC(1))
+    call F%encap%copy(residual, F%Q(1))
     do n = 1, F%nnodes-1
        call F%encap%axpy(residual, 1.0_pfdp, fintSDC(n))
     end do
-    call F%encap%axpy(residual, -1.0_pfdp, F%qSDC(F%nnodes))
+    call F%encap%axpy(residual, -1.0_pfdp, F%Q(F%nnodes))
 
     do n = 1, F%nnodes-1
        call F%encap%destroy(fintSDC(n))
