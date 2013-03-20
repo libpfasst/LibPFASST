@@ -272,6 +272,8 @@ contains
 
        deallocate(F%Q)
        deallocate(F%F)
+       deallocate(F%S)
+
        if (F%Finterp) then
           if (associated(F%pF)) deallocate(F%pF)
        else
