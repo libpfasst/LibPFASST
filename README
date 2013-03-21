@@ -10,6 +10,10 @@ with C and C++ fairly easily.
 Please see the documentation in 'docs' and examples in 'examples' for
 usage information.
 
+An online version of the documentation is available at
+
+  https://libpfasst.readthedocs.org/en/latest/
+
 
 COMPILERS
 =========
