@@ -104,7 +104,7 @@ contains
     call imex%f1eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
     call imex%f2eval(F%Q(1), t0, F%level, F%ctx, F%F(1,2))
 
-    call F%encap%create(rhs, F%level, .false., F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call F%encap%create(rhs, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))

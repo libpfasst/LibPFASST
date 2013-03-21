@@ -138,18 +138,18 @@ contains
           end if
        end if
 
-       call F%encap%create(F%qend, F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
-       ! call F%encap%create(F%qex, F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(F%qend, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
+       ! call F%encap%create(F%qex, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
 
        do m = 1, nnodes
-          call F%encap%create(F%Q(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+          call F%encap%create(F%Q(m), F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
           do p = 1, npieces
-             call F%encap%create(F%F(m,p), F%level, .true., nvars, F%shape, F%ctx, F%encap%ctx)
+             call F%encap%create(F%F(m,p), F%level, SDC_KIND_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
           end do
        end do
 
        do m = 1, nnodes-1
-          call F%encap%create(F%S(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+          call F%encap%create(F%S(m), F%level, SDC_KIND_INTEGRAL, nvars, F%shape, F%ctx, F%encap%ctx)
        end do
 
 
@@ -159,13 +159,13 @@ contains
           if (F%Finterp) then  !  Doing store of f and qSDC(1) only
              do m = 1, nnodes
                 do p = 1, npieces
-                   call F%encap%create(F%pF(m,p), F%level, .true., nvars, F%shape, F%ctx, F%encap%ctx)
+                   call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
                 end do
              end do
-             call F%encap%create(F%pQ(1), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+             call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
           else   !  Storing all qSDC
              do m = 1, nnodes
-                call F%encap%create(F%pQ(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+                call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape, F%ctx, F%encap%ctx)
              end do
           end if
 
@@ -181,7 +181,7 @@ contains
     if ((F%level < pf%nlevels) .and. (.not. associated(F%tau))) then
        allocate(F%tau(nnodes-1))
        do m = 1, nnodes-1
-          call F%encap%create(F%tau(m), F%level, .false., nvars, F%shape, F%ctx, F%encap%ctx)
+          call F%encap%create(F%tau(m), F%level, SDC_KIND_INTEGRAL, nvars, F%shape, F%ctx, F%encap%ctx)
        end do
     else if ((F%level >= pf%nlevels) .and. (associated(F%tau))) then
        do m = 1, nnodes-1

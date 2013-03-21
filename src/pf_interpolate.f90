@@ -46,8 +46,8 @@ contains
 
     ! create workspaces
     do m = 1, G%nnodes
-       call G%encap%create(delG(m),   G%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
-       call F%encap%create(delGF(m),  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
@@ -149,10 +149,10 @@ contains
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
-    call G%encap%create(q0G,  F%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(q0F,  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
-    call G%encap%create(delG,   G%level, .true., G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(delF,  F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)

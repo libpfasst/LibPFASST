@@ -53,14 +53,14 @@ contains
 
     !!!! create workspaces
     do m = 1, G%nnodes-1
-       call G%encap%create(CofG(m), G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
-       call G%encap%create(CofF(m), G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call G%encap%create(CofG(m), G%level, SDC_KIND_INTEGRAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call G%encap%create(CofF(m), G%level, SDC_KIND_INTEGRAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
     end do
 
-    call G%encap%create(tmp, G%level, .false., G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call G%encap%create(tmp, G%level, SDC_KIND_INTEGRAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
 
     do m = 1, F%nnodes-1
-       call F%encap%create(FofF(m), F%level, .false., F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(FofF(m), F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     !!!! restrict qs and recompute fs

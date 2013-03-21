@@ -36,6 +36,11 @@ module pf_mod_dtype
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
 
+  integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
+  integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
+  integer, parameter :: SDC_KIND_FEVAL        = 3
+  integer, parameter :: SDC_KIND_INTEGRAL     = 4
+  integer, parameter :: SDC_KIND_CORRECTION   = 5
 
   ! state type
   type :: pf_state_t
@@ -224,12 +229,12 @@ module pf_mod_dtype
 
   ! encapsulation interfaces
   interface
-     subroutine pf_encap_create_p(sol, level, feval, nvars, shape, lctx, ectx)
+     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, lctx, ectx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
        type(c_ptr),  intent(in), value :: lctx, ectx
        integer,      intent(in)        :: level, nvars, shape(:)
-       logical,      intent(in)        :: feval
+       integer,      intent(in)        :: kind
      end subroutine pf_encap_create_p
   end interface
 

@@ -102,7 +102,7 @@ contains
     integer :: n
 
     do n = 1, F%nnodes-1
-       call F%encap%create(fintSDC(n), F%level, .true., F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(fintSDC(n), F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     ! integrate and compute residual
