@@ -6,8 +6,9 @@
 # config
 #
 
-FC     = mpif90
+FC     = mpif90 
 FFLAGS = -fPIC -Wall -g -pg -Ibuild -Jbuild
+FFLAGS += -f90=/home/memmett/gcc-4.8/bin/gfortran -Wno-unused-dummy-argument
 
 STATIC = ar rcs
 SHARED = gfortran -shared -Wl,-soname,pfasst
@@ -21,13 +22,13 @@ MKVERBOSE =
 # rules
 #
 
-all: libpfasst.so libpfasst.a
+all: build/libpfasst.a # build/libpfasst.so 
 
-libpfasst.so: $(OBJ)
-	$(SHARED) -o libpfasst.so $(OBJ)
+build/libpfasst.so: $(OBJ)
+	$(SHARED) -o build/libpfasst.so $(OBJ)
 
-libpfasst.a: $(OBJ)
-	$(STATIC) libpfasst.a $(OBJ)
+build/libpfasst.a: $(OBJ)
+	$(STATIC) build/libpfasst.a $(OBJ)
 
 build/%.o: src/%.f90
 	@mkdir -p build
