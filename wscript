@@ -31,9 +31,15 @@ def configure(cnf):
   # cnf.env.FCFLAGS   = [ '-O3' ]
   # cnf.env.CFLAGS    = [ '-O3' ]
 
-  cnf.env.FCFLAGS   += [ '-Wall', '-g', '-pg' ]
+  # f90 = '-f90=/home/memmett/gcc-4.5/bin/gfortran'
+  f90 = '-f90=/home/memmett/gcc-4.8/bin/gfortran'
+
+  cnf.env.FCFLAGS   += [ '-Wall', '-Wextra', '-g', '-pg', '-fno-strict-aliasing', '-fwrapv' ]
   cnf.env.CFLAGS    += [ '-Wall' ]
-  cnf.env.LINKFLAGS += [ '-g' ]
+  cnf.env.LINKFLAGS += [ '-g', f90 ]
+
+  cnf.env.FCFLAGS   += [ f90 ]
+  
 
 
 def build(bld):

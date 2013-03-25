@@ -69,7 +69,6 @@ contains
   ! Setup (allocate) PFASST object
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
-    use pf_mod_version
 
     type(pf_pfasst_t), intent(inout) :: pf
 
