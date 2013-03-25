@@ -3,7 +3,7 @@
 #
 
 # generate src/pf_version.f90
-$(shell python tools/version.py src/pf_version.f90)
+$(shell python mk/version.py src/pf_version.f90)
 
 # configure
 include Makefile.defs
