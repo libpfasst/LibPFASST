@@ -1,0 +1,6 @@
+#
+# Makefile definitions for orga
+#
+
+FC     = mpif90 -f90=/home/memmett/gcc-4.8/bin/gfortran
+FFLAGS = -Wall -g -pg -Wno-unused-dummy-argument
