@@ -25,7 +25,8 @@ contains
 
   subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat)
     integer,    intent(in)  :: qtype, nnodes, nnodes0
-    real(pfdp), intent(out) :: nodes(nnodes), smat(nnodes-1,nnodes), qmat(nnodes-1,nnodes)
+    real(pfdp), intent(out) :: nodes(nnodes)
+    real(pfdp), intent(out) :: smat(nnodes-1,nnodes), qmat(nnodes-1,nnodes)
     integer,    intent(out) :: nflags(nnodes)
 
     real(c_long_double) :: qnodes0(nnodes0), qnodes(nnodes)
@@ -33,13 +34,25 @@ contains
 
     integer :: refine
 
-    refine = (nnodes0 - 1) / (nnodes - 1)
+    if (qtype > SDC_PROPER_NODES) then
 
-    call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)
+       ! nodes are given by proper quadrature rules
 
-    qnodes = qnodes0(::refine)
-    nodes  = real(qnodes, pfdp)
-    nflags = flags0(::refine)
+       call sdc_qnodes(qnodes, nflags, qtype-SDC_PROPER_NODES, nnodes)
+
+    else
+
+       ! nodes are given by refining the finest set of nodes
+
+       refine = (nnodes0 - 1) / (nnodes - 1)
+
+       call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)
+
+       qnodes = qnodes0(::refine)
+       nodes  = real(qnodes, pfdp)
+       nflags = flags0(::refine)
+
+    end if
 
     call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
 

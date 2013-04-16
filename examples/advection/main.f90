@@ -44,7 +44,7 @@ program fpfasst
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters  = 4
-  pf%qtype   = SDC_GAUSS_LOBATTO
+  pf%qtype   = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
 
   pf%echo_timings = .false.
   if (nlevs > 1) then
