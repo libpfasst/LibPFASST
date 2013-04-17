@@ -20,12 +20,22 @@
 ! Parallel PFASST routines.
 
 module pf_mod_parallel
+  use pf_mod_dtype
   implicit none
 contains
 
-  ! Run in parallel using PFASST (old way for now).
+  !
+  ! Build cycle (list of PFASST operations).
+  !
+  subroutine pf_cycle_build(pf)
+
+  end subroutine pf_cycle_build
+
+
+  !
+  ! Run in parallel using PFASST.
+  !
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
-    use pf_mod_dtype
     use pf_mod_interpolate
     use pf_mod_restrict
     use pf_mod_utils

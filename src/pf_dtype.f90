@@ -37,6 +37,10 @@ module pf_mod_dtype
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
   integer, parameter :: SDC_PROPER_NODES    = 100
 
+  integer, parameter :: SDC_CYCLE_V    = 1
+  integer, parameter :: SDC_CYCLE_FULL = 2
+  integer, parameter :: SDC_CYCLE_OLD  = 10
+
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
   integer, parameter :: SDC_KIND_FEVAL        = 3
@@ -150,8 +154,9 @@ module pf_mod_dtype
   type :: pf_pfasst_t
      integer :: nlevels = -1            ! number of pfasst levels
      integer :: niters  = 5             ! number of iterations
-     integer :: qtype   = 1             ! type of quadrature nodes
      integer :: rank    = -1            ! rank of current processor
+     integer :: qtype   = SDC_GAUSS_LOBATTO
+     integer :: ctype   = SDC_CYCLE_OLD
 
      ! pf objects
      type(pf_state_t)          :: state
