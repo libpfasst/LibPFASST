@@ -22,9 +22,11 @@ module pf_mod_utils
   implicit none
 contains
 
-  ! Build the time interpolation matrix
+
+  !
+  ! Build time interpolation matrix.
+  !
   subroutine pf_time_interpolation_matrix(nodesF, nnodesF, nodesG, nnodesG, tmat)
-    implicit none
     integer,    intent(in)  :: nnodesF, nnodesG
     real(pfdp), intent(in)  :: nodesF(0:nnodesF-1), nodesG(0:nnodesG-1)
     real(pfdp), intent(out) :: tmat(0:nnodesF-1,0:nnodesG-1)
@@ -50,7 +52,10 @@ contains
     end do
   end subroutine pf_time_interpolation_matrix
 
-  ! Spread initial condition
+
+  !
+  ! Spread initial condition.
+  !
   subroutine spreadq0(F, t0)
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: t0
@@ -68,11 +73,14 @@ contains
     end do
   end subroutine spreadq0
 
-  ! Save current qSDC and fSDC
+
+  !
+  ! Save current Q and F.
+  !
   subroutine save(F)
     type(pf_level_t), intent(inout) :: F
 
-    integer :: m,p
+    integer :: m, p
 
     if (F%Finterp) then
        if (associated(F%pF)) then
@@ -92,17 +100,21 @@ contains
     end if
   end subroutine save
 
-  ! Compute residual (generic but probably inefficient)
+
+  !
+  ! Compute final residual (generic but inefficient).
+  !
   subroutine pf_residual(F, dt, residual)
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(in)    :: residual
 
     type(c_ptr) :: fintSDC(F%nnodes-1)
-    integer :: n
+    integer     :: n
 
     do n = 1, F%nnodes-1
-       call F%encap%create(fintSDC(n), F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(fintSDC(n), F%level, SDC_KIND_INTEGRAL, &
+            F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     ! integrate and compute residual
@@ -119,6 +131,10 @@ contains
     end do
   end subroutine pf_residual
 
+
+  !
+  ! Apply an interpolation matrix (tmat or rmat) to src.
+  !
   subroutine pf_apply_mat(dst, a, mat, src, encap, zero)
     type(c_ptr),       intent(inout) :: dst(:)
     real(pfdp),        intent(in)    :: a, mat(:, :)
@@ -139,12 +155,15 @@ contains
     do i = 1, n
        if (lzero) call encap%setval(dst(i), 0.0d0)
        do j = 1, m
-          ! print *, i, j, a*mat(i,j)
           call encap%axpy(dst(i), a * mat(i, j), src(j))
        end do
     end do
   end subroutine pf_apply_mat
 
+
+  !
+  ! Integrate F and store in I.  XXX: redundant?
+  !
   subroutine pf_integrate(F, dt, mat, I)
     type(pf_level_t), intent(in)    :: F
     real(pfdp),       intent(in)    :: dt, mat(:, :)
