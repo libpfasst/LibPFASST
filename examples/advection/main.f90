@@ -35,7 +35,7 @@ program fpfasst
 
   nvars  = [ 32, 64, 128 ]
   nnodes = [ 3, 5, 9 ]
-  dt     = 0.01_pfdp
+  dt     = 0.1_pfdp
   nlevs  = 3
 
   call array1d_encap_create(encap)
@@ -43,8 +43,8 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  pf%niters  = 4
-  pf%qtype   = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
+  pf%niters = 8
+  pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
 
   pf%echo_timings = .false.
   if (nlevs > 1) then

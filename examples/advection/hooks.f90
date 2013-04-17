@@ -37,7 +37,8 @@ contains
     real(pfdp), pointer :: r(:)
     type(c_ptr) :: residual
 
-    call encap_create(residual, level%level, .true., level%nvars, level%shape, level%ctx, level%encap%ctx)
+    call encap_create(residual, level%level, SDC_KIND_SOL_NO_FEVAL, &
+         level%nvars, level%shape, level%ctx, level%encap%ctx)
     call pf_residual(level, state%dt, residual)
 
     r => array(residual)
