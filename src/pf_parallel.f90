@@ -99,6 +99,7 @@ contains
              do j = 1, G%nsweeps
                 call G%sweeper%sweep(pf, G, t0, dt)
              end do
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
              call pf%comm%send(pf, G, k, .true.)
           end do
 
@@ -144,9 +145,9 @@ contains
              do j = 1, F%nsweeps
                 call F%sweeper%sweep(pf, F, t0, dt)
              end do
+             call call_hooks(pf, F%level, PF_POST_SWEEP)
              call pf%comm%send(pf, F, F%level*100+k, .false.)
 
-             call call_hooks(pf, F%level, PF_POST_SWEEP)
              call restrict_time_space_fas(pf, t0, dt, F, G)
              call save(G)
           end do
@@ -159,9 +160,8 @@ contains
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, t0, dt)
           end do
-          call pf%comm%send(pf, F, F%level*100+k, .true.)
-
           call call_hooks(pf, F%level, PF_POST_SWEEP)
+          call pf%comm%send(pf, F, F%level*100+k, .true.)
 
           !! go up the v-cycle
           do l = 2, pf%nlevels
