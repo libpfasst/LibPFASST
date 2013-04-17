@@ -1,5 +1,8 @@
 *~
 
+.lock*
+.waf*
+
 build/
 src/pf_version.f90
 

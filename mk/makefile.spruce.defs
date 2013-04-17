@@ -6,4 +6,3 @@ FC     = mpif90
 FFLAGS = -Wall -g -pg -Wno-unused-dummy-argument
 
 AR = ar rcs
-
