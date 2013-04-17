@@ -39,6 +39,7 @@ contains
        ! nodes are given by proper quadrature rules
 
        call sdc_qnodes(qnodes, nflags, qtype-SDC_PROPER_NODES, nnodes)
+       nodes = real(qnodes, pfdp)
 
     else
 

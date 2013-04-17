@@ -119,4 +119,47 @@ contains
     end do
   end subroutine pf_residual
 
+  subroutine pf_apply_mat(dst, a, mat, src, encap, zero)
+    type(c_ptr),       intent(inout) :: dst(:)
+    real(pfdp),        intent(in)    :: a, mat(:, :)
+    type(c_ptr),       intent(in)    :: src(:)
+    type(pf_encap_t),  intent(in)    :: encap
+    logical,           intent(in), optional :: zero
+
+    logical :: lzero
+    integer :: n, m, i, j
+
+    lzero = .true.; if (present(zero)) lzero = zero
+
+    n = size(mat, dim=1)
+    m = size(mat, dim=2)
+
+    ! XXX: test for nan's in matrices...
+
+    do i = 1, n
+       if (lzero) call encap%setval(dst(i), 0.0d0)
+       do j = 1, m
+          ! print *, i, j, a*mat(i,j)
+          call encap%axpy(dst(i), a * mat(i, j), src(j))
+       end do
+    end do
+  end subroutine pf_apply_mat
+
+  subroutine pf_integrate(F, dt, mat, I)
+    type(pf_level_t), intent(in)    :: F
+    real(pfdp),       intent(in)    :: dt, mat(:, :)
+    type(c_ptr),      intent(inout) :: I(:)
+
+    integer :: n, m, p
+
+    do n = 1, F%nnodes-1
+       call F%encap%setval(I(n), 0.0d0)
+       do m = 1, F%nnodes
+          do p = 1, F%sweeper%npieces
+             call F%encap%axpy(I(n), dt*mat(n, m), F%F(m, p))
+          end do
+       end do
+    end do
+  end subroutine pf_integrate
+
 end module pf_mod_utils
