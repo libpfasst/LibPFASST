@@ -44,6 +44,8 @@ module pf_mod_dtype
   integer, parameter :: SDC_CYCLE_UP     = 100
   integer, parameter :: SDC_CYCLE_DOWN   = 101
   integer, parameter :: SDC_CYCLE_BOTTOM = 102
+  integer, parameter :: SDC_CYCLE_SWEEP  = 103
+  integer, parameter :: SDC_CYCLE_INTERP = 104
 
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
@@ -59,8 +61,12 @@ module pf_mod_dtype
   end type pf_state_t
 
   ! cycle stage type
-  type :: pf_cycle_t
+  type :: pf_stage_t
      integer :: type, F, G
+  end type pf_stage_t
+
+  type :: pf_cycle_t
+     type(pf_stage_t), pointer :: start(:), pfasst(:), end(:)
   end type pf_cycle_t
 
   ! hook type
@@ -167,6 +173,7 @@ module pf_mod_dtype
      integer :: ctype   = SDC_CYCLE_OLD
 
      ! pf objects
+     type(pf_cycle_t)          :: cycles
      type(pf_state_t)          :: state
      type(pf_level_t), pointer :: levels(:)
      type(pf_comm_t),  pointer :: comm

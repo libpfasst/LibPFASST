@@ -13,7 +13,8 @@ FFLAGS += -Ibuild -Jbuild
 $(shell python mk/version.py src/pf_version.f90)
 
 FSRC = $(shell ls src/*.f90)
-OBJ  = $(subst src,build,$(FSRC:.f90=.o))
+CSRC = $(shell ls src/*.c)
+OBJ  = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 
 all: build/libpfasst.a
 
