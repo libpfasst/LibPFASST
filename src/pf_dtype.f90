@@ -170,7 +170,7 @@ module pf_mod_dtype
      integer :: niters  = 5             ! number of iterations
      integer :: rank    = -1            ! rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO
-     integer :: ctype   = SDC_CYCLE_OLD
+     integer :: ctype   = SDC_CYCLE_V
 
      ! pf objects
      type(pf_cycle_t)          :: cycles

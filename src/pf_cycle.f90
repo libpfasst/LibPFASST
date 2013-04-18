@@ -35,27 +35,34 @@ contains
     type(pf_stage_t), pointer :: stages(:)
 
     select case(pf%ctype)
-    case (SDC_CYCLE_V)
-
-       stop 'SDC_CYCLE_V NOT IMPLEMENTED YET'
-
     case (SDC_CYCLE_FULL)
 
        stop 'SDC_CYCLE_FULL NOT IMPLEMENTED YET'
 
-    case (SDC_CYCLE_OLD)
+    case (SDC_CYCLE_V)
 
-       allocate(pf%cycles%start(pf%nlevels))
+       allocate(pf%cycles%start(2*(pf%nlevels-1)-1))
        allocate(pf%cycles%pfasst(2*pf%nlevels-1))
        allocate(pf%cycles%end(1))
 
-       ! start: transfer from coarsest to finest
+       ! start: transfer from coarsest to finest, sweeping on the way up
        stages => pf%cycles%start
-       do l = 2, pf%nlevels
-          stages(l)%type = SDC_CYCLE_INTERP
-          stages(l)%F    = l
-          stages(l)%G    = l-1
+       c = 1
+       do l = 2, pf%nlevels-1
+          stages(c)%type = SDC_CYCLE_INTERP
+          stages(c)%F    = l
+          stages(c)%G    = l-1
+          c = c + 1
+
+          stages(c)%type = SDC_CYCLE_SWEEP
+          stages(c)%F    = l
+          stages(c)%G    = -1
+          c = c + 1
        end do
+
+       stages(c)%type = SDC_CYCLE_INTERP
+       stages(c)%F    = pf%nlevels
+       stages(c)%G    = pf%nlevels-1
 
        ! pfasst: v-cycle from finest, but end in middle
        stages => pf%cycles%pfasst
