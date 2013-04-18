@@ -21,6 +21,7 @@
 
 module pf_mod_parallel
   use pf_mod_dtype
+  use pf_mod_cycle
   use pf_mod_interpolate
   use pf_mod_restrict
   use pf_mod_utils
@@ -28,69 +29,6 @@ module pf_mod_parallel
   use pf_mod_hooks
   implicit none
 contains
-
-  !
-  ! Build cycle (list of PFASST operations).
-  !
-  subroutine pf_cycle_build(pf)
-    type(pf_pfasst_t), intent(inout) :: pf
-
-    integer :: l, c
-
-    type(pf_stage_t), pointer :: stages(:)
-
-    select case(pf%ctype)
-    case (SDC_CYCLE_V)
-
-    case (SDC_CYCLE_FULL)
-
-    case (SDC_CYCLE_OLD)
-
-       allocate(pf%cycles%start(pf%nlevels))
-       allocate(pf%cycles%pfasst(2*pf%nlevels-1))
-       allocate(pf%cycles%end(1))
-
-       ! start: transfer from coarsest to finest
-       stages => pf%cycles%start
-       do l = 2, pf%nlevels
-          stages(l)%type = SDC_CYCLE_INTERP
-          stages(l)%F    = l
-          stages(l)%G    = l-1
-       end do
-
-       ! pfasst: v-cycle from finest, but end in middle
-       stages => pf%cycles%pfasst
-
-       c = 1
-       do l = pf%nlevels, 2, -1
-          stages(c)%type = SDC_CYCLE_DOWN
-          stages(c)%F    = l
-          stages(c)%G    = l-1
-          c = c + 1
-       end do
-
-       stages(c)%type = SDC_CYCLE_BOTTOM
-       stages(c)%F    = 1
-       stages(c)%G    = -1
-       c = c + 1
-
-       do l = 2, pf%nlevels
-          stages(c)%type = SDC_CYCLE_UP
-          stages(c)%F    = l
-          stages(c)%G    = l-1
-          c = c + 1
-       end do
-
-       ! end: sweep on finest
-       stages => pf%cycles%end
-
-       stages(1)%type = SDC_CYCLE_SWEEP
-       stages(1)%F    = pf%nlevels
-       stages(1)%G    = -1
-    end select
-
-  end subroutine pf_cycle_build
-
 
   !
   ! Predictor.
@@ -239,8 +177,8 @@ contains
     integer,           intent(in), optional :: nsteps
 
     real(pfdp) :: t0
-    integer    :: nblock, b, c, k, j, l
-    type(pf_level_t), pointer :: F, G
+    integer    :: nblock, b, c, k, l
+    type(pf_level_t), pointer :: F
 
     call start_timer(pf, TTOTAL)
 
@@ -284,10 +222,12 @@ contains
        call pf_predictor(pf, t0, dt)
 
        ! do start cycle stages
-       do c = 1, size(pf%cycles%start)
-          pf%state%cycle = c
-          call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-       end do
+       if (associated(pf%cycles%start)) then
+          do c = 1, size(pf%cycles%start)
+             pf%state%cycle = c
+             call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
+          end do
+       end if
 
 
        ! pfasst iterations
@@ -338,10 +278,12 @@ contains
     !
 
     ! do end cycle stages
-    do c = 1, size(pf%cycles%end)
-       pf%state%cycle = c
-       call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-    end do
+    if (associated(pf%cycles%end)) then
+       do c = 1, size(pf%cycles%end)
+          pf%state%cycle = c
+          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+       end do
+    end if
 
     pf%state%iter = -1
     call end_timer(pf, TTOTAL)

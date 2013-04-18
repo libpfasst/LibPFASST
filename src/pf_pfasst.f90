@@ -47,6 +47,10 @@ contains
        call pf_level_create(pf%levels(l), l)
     end do
 
+    nullify(pf%cycles%start)
+    nullify(pf%cycles%pfasst)
+    nullify(pf%cycles%end)
+
     pf%nlevels = maxlevels
   end subroutine pf_pfasst_create
 
@@ -214,6 +218,10 @@ contains
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
+
+    if (associated(pf%cycles%start)) deallocate(pf%cycles%start)
+    if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
+    if (associated(pf%cycles%end)) deallocate(pf%cycles%end)
 
     ! if (pf%log > 0) then
     !    close(pf%log)
