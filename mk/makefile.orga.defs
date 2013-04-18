@@ -3,6 +3,9 @@
 #
 
 FC     = mpif90 -f90=/home/memmett/gcc-4.8/bin/gfortran
+CC     = /home/memmett/gcc-4.8/bin/gcc
+
 FFLAGS = -Wall -g -pg -Wno-unused-dummy-argument
+CFLAGS = -Wall -g -pg
 
 AR = ar rcs
