@@ -22,12 +22,35 @@ module pf_mod_hooks
   implicit none
 
   integer, parameter :: &
-       PF_POST_SWEEP     = 1, & ! after each sdc sweep
-       PF_POST_ITERATION = 2, & ! after each pfasst iteration
-       PF_POST_STEP      = 3, & ! after each time step
-       PF_PRE_ITERATION  = 4, & ! before each pfasst iteration
-       PF_POST_PREDICTOR = 5, &
-       PF_PRE_BLOCK      = 6
+       PF_PRE_BLOCK      = 1, &
+       PF_POST_BLOCK     = 2, &
+       PF_PRE_PREDICTOR  = 3, &
+       PF_POST_PREDICTOR = 4, &
+       PF_PRE_ITERATION  = 5, &
+       PF_POST_ITERATION = 6, &
+       PF_PRE_SWEEP      = 7, &
+       PF_POST_SWEEP     = 8, &
+       PF_PRE_STEP       = 9, &
+       PF_POST_STEP      = 10, &
+       PF_MAX_HOOK       = 10
+
+
+  integer, parameter :: &
+       PF_HOOK_LOG_ONE  = 1, &
+       PF_HOOK_LOG_ALL  = 7, &
+       PF_HOOK_LOG_LAST = 10
+
+  character(len=20), parameter :: hook_names(PF_HOOK_LOG_LAST) = (/ &
+       'pre-block          ',  &
+       'post-block         ',  &
+       'pre-predictor      ',  &
+       'post-predictor     ',  &
+       'pre-iteration      ',  &
+       'post-iteration     ',  &
+       'pre-sweep          ',  &
+       'post-sweep         ',  &
+       'pre-step           ',  &
+       'post-step          ' /)
 
 contains
 
@@ -38,9 +61,8 @@ contains
     integer,           intent(in)    :: hook
     procedure(pf_hook_p)             :: proc
 
-    pf%nhooks(level) = pf%nhooks(level) + 1
-    pf%hooks(level,pf%nhooks(level))%proc => proc
-    pf%hooks(level,pf%nhooks(level))%hook = hook
+    pf%nhooks(level,hook) = pf%nhooks(level,hook) + 1
+    pf%hooks(level,hook,pf%nhooks(level,hook))%proc => proc
   end subroutine pf_add_hook
 
   ! Call hooks associated with the hook and level
@@ -53,20 +75,18 @@ contains
 
     call start_timer(pf, THOOKS)
 
+    pf%state%hook = hook
+
     if (level == -1) then
        do l = 1, pf%nlevels
-          do i = 1, pf%nhooks(l)
-             if (pf%hooks(l,i)%hook == hook) then
-                call pf%hooks(l,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
-             end if
+          do i = 1, pf%nhooks(l,hook)
+             call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
           end do
        end do
     else
        l = level
-       do i = 1, pf%nhooks(l)
-          if (pf%hooks(l,i)%hook == hook) then
-             call pf%hooks(l,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
-          end if
+       do i = 1, pf%nhooks(l,hook)
+          call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
        end do
     end if
 

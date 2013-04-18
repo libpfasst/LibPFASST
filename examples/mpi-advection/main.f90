@@ -73,6 +73,7 @@ program fpfasst
   allocate(q0%array(nvars(nlevs)))
   call initial(q0)
 
+  call pf_logger_attach(pf)
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
 
