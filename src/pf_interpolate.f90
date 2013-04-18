@@ -18,6 +18,7 @@
 !
 
 module pf_mod_interpolate
+  use pf_mod_dtype
   implicit none
 contains
 
@@ -26,7 +27,7 @@ contains
   ! Interpolation is done by interpolating increments.  The fine
   ! function values are re-evaluated after interpolation.
   subroutine interpolate_time_space(pf, t0, dt, F, G, Finterp)
-    use pf_mod_dtype
+    use pf_mod_utils
     use pf_mod_restrict
     use pf_mod_timer
 
@@ -112,11 +113,7 @@ contains
        ! interpolate corrections
        trat = (F%nnodes-1) / (G%nnodes-1)
 
-       do n = 1, F%nnodes
-          do m = 1, G%nnodes
-             call G%encap%axpy(F%Q(n), F%tmat(n,m), delGF(m))
-          end do
-       end do
+       call pf_apply_mat(F%Q, 1.0_pfdp, F%tmat, delGF, F%encap, .false.)
 
        ! recompute fs
        tm = t0 + dt*F%nodes
