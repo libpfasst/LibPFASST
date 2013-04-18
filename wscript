@@ -53,6 +53,10 @@ def build(bld):
 
   # test programs
   bld(features='fc c fcprogram', use='pfasst FFTW',
-      source=bld.path.ant_glob('examples/advection/*.c|*.f90'),
-      target='advection')
+      source=bld.path.ant_glob('examples/mpi-advection/*.c|*.f90'),
+      target='mpi-advection')
+
+  bld(features='fc c fcprogram', use='pfasst FFTW',
+      source=bld.path.ant_glob('examples/pth-advection/*.c|*.f90'),
+      target='pth-advection')
 

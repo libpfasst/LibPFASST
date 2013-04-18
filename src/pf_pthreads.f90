@@ -19,7 +19,7 @@
 
 ! This module implements PTHREADS communications.
 
-module pf_mod_comm
+module pf_mod_comm_pthreads
   use pf_mod_dtype
   use pf_mod_pfasst
   use pf_mod_timer
@@ -186,7 +186,7 @@ contains
 
     do t = 0, pf_comm%nproc-1
        call c_f_pointer(pf_comm%pfs(t), pf)
-       call destroy(pf)
+       call pf_pfasst_destroy(pf)
        deallocate(pf)
     end do
 
@@ -247,7 +247,7 @@ contains
        call pf_pth_wait_recv(pth, 0)
 
        call pf_pth_lock(pth)
-       call pack(level%send, level%qend)
+       call level%encap%pack(level%send, level%qend)
        call pf_pth_unlock(pth)
 
        call pf_pth_set_recv(pth, tag)
@@ -274,4 +274,4 @@ contains
     stop "PTHREADS BROADCAST NOT IMPLEMENTED YET"
   end subroutine pf_pthreads_broadcast
 
-end module pf_mod_comm
+end module pf_mod_comm_pthreads
