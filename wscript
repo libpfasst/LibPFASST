@@ -36,9 +36,9 @@ def configure(cnf):
 
   cnf.env.FCFLAGS   += [ '-Wall', '-Wextra', '-g', '-pg', '-fno-strict-aliasing', '-fwrapv' ]
   cnf.env.CFLAGS    += [ '-Wall' ]
-  cnf.env.LINKFLAGS += [ '-g', f90 ]
+#  cnf.env.LINKFLAGS += [ '-g', f90 ]
 
-  cnf.env.FCFLAGS   += [ f90 ]
+#  cnf.env.FCFLAGS   += [ f90 ]
   
 
 

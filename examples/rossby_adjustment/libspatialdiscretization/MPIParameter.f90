@@ -62,22 +62,22 @@ CONTAINS
 		param%echo_on = echo_on	
 		param%Nthreads = Nthreads
 		
-		IF (nr_fields > 1) THEN
-			IF (mpi_init_thread==0) THEN
-				ALLOCATE(cartesian_comm(0:0))
-			! If corner ghost-cells are communicated, there are 2x8 = 16 sends and receives
-			ELSE IF (mpi_init_thread==1) THEN
-				ALLOCATE(mpi_request(16,0:0))
-				ALLOCATE(mpi_status(MPI_STATUS_SIZE, 16, 0:0))
-				ALLOCATE(cartesian_comm(0:0))
-			ELSE IF ((mpi_init_thread==2) .or. (mpi_init_thread==3)) THEN
-				ALLOCATE(mpi_request(16,0:Nthreads-1))
-				ALLOCATE(mpi_status(MPI_STATUS_SIZE, 16, 0:Nthreads-1))	
-				! to make sure that each thread communicates with its corresponding counterpart in other MPI processes, for the THREAD_SERIALIZED
-				! paradigm there are as much communicators as there are threads, each communicator providing the context for threads of the same thread number
-				ALLOCATE(cartesian_comm(0:Nthreads-1))		
-			END IF
-		ELSE
+!		IF (nr_fields > 1) THEN
+!			IF (mpi_init_thread==0) THEN
+!				ALLOCATE(cartesian_comm(0:0))
+!			! If corner ghost-cells are communicated, there are 2x8 = 16 sends and receives
+!			ELSE IF (mpi_init_thread==1) THEN
+!				ALLOCATE(mpi_request(16,0:0))
+!				ALLOCATE(mpi_status(MPI_STATUS_SIZE, 16, 0:0))
+!				ALLOCATE(cartesian_comm(0:0))
+!			ELSE IF ((mpi_init_thread==2) .or. (mpi_init_thread==3)) THEN
+!				ALLOCATE(mpi_request(16,0:Nthreads-1))
+!				ALLOCATE(mpi_status(MPI_STATUS_SIZE, 16, 0:Nthreads-1))	
+!				! to make sure that each thread communicates with its corresponding counterpart in other MPI processes, for the THREAD_SERIALIZED
+!				! paradigm there are as much communicators as there are threads, each communicator providing the context for threads of the same thread number
+!				ALLOCATE(cartesian_comm(0:Nthreads-1))		
+!			END IF
+!		ELSE
 			! Without corners, there are 2x4 = 8 sends and receives
 			IF (mpi_init_thread==0) THEN
 				ALLOCATE(cartesian_comm(0:0))
@@ -96,7 +96,7 @@ CONTAINS
 			
 			END IF
 		
-		END IF
+!		END IF
 				
 		! Halo size depends on order and thus support of stencil		
 		SELECT CASE (nr_fields)
@@ -176,9 +176,9 @@ CONTAINS
 		CALL MPI_CART_SHIFT(cartesian_comm(0), 0, 1, ProcNeighbors(2), ProcNeighbors(7),  ierr)
 		CALL MPI_CART_SHIFT(cartesian_comm(0), 1, 1, ProcNeighbors(4), ProcNeighbors(5), ierr)
 			
-		IF (nr_fields > 1) THEN
-			CALL DetermineCornerProcessRanks()
-		END IF
+!		IF (nr_fields > 1) THEN
+!			CALL DetermineCornerProcessRanks()
+!		END IF
 		
 		! Determine coordinates of current process in cartesian topology
 		CALL MPI_CART_COORDS(cartesian_comm(0), myrank, 2, cart_coords, ierr)
@@ -192,7 +192,7 @@ CONTAINS
 		
 		! Generate MPI datatypes with values provided by the FiniteVolume module to be able to select the exact values out of a solution buffer
 		! that represent ghost-cell values for a neighboring sub-domain
-		CALL GenerateMpiDatatypes()
+		! CALL GenerateMpiDatatypes()
 		
 		IF (param%echo_on) THEN
 			CALL MPI_BARRIER(MPI_COMM_WORLD, ierr)

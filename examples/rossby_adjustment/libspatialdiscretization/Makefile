@@ -20,8 +20,8 @@ MPIParameter.o: FVMParameters.o FiniteVolumes.o MPIParameter.f90
 #FiniteVolumes.o: FiniteVolumes.f90
 #	$(FC) $(FFLAGS) -c FiniteVolumes.f90 
 
-#FiniteVolumes.o: WENO5_1D.f90
-#	$(FC) $(FFLAGS) -c WENO5_1D.f90 -o FiniteVolumes.o
+FiniteVolumes.o: WENO5_1D.f90
+	$(FC) $(FFLAGS) -c WENO5_1D.f90 -o FiniteVolumes.o
 
 #FiniteVolumes.o: FD_Burgers.f90
 #	$(FC) $(FFLAGS) -c FD_Burgers.f90 -o FiniteVolumes.o 
@@ -29,8 +29,8 @@ MPIParameter.o: FVMParameters.o FiniteVolumes.o MPIParameter.f90
 #FiniteVolumes.o: WENO5_Burgers_CCOverlap.f90
 #	$(FC) $(FFLAGS) -c WENO5_Burgers_CCOverlap.f90 -o FiniteVolumes.o 
 
-FiniteVolumes.o: WENO5_Burgers.f90
-	$(FC) $(FFLAGS) -c WENO5_Burgers.f90 -o FiniteVolumes.o
+#FiniteVolumes.o: WENO5_Burgers.f90
+#	$(FC) $(FFLAGS) -c WENO5_Burgers.f90 -o FiniteVolumes.o
 
 DistributedIO.o: FVMParameters.o MPIParameter.o DistributedIO.f90
 	$(FC) $(FFLAGS) -c DistributedIO.f90

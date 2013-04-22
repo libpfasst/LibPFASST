@@ -287,8 +287,12 @@ MODULE DistributedIO
 					file_space_id = dataspace_global_solution, &
 					mem_space_id  = memspace_local_solution,   &
 					xfer_prp      = proplist_transfer)
+
+                                IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "Q"'
+
 			END IF
 			
+
 			! Write array over iterations	
 			scalar_iterate_offset = (/ myrank, 0, time_index-1 /)
 			scalar_iterate_count  = (/ 1, iterations, 1 /)
@@ -298,6 +302,8 @@ MODULE DistributedIO
 				file_space_id = dataspace_global_iterate_scalar, &
 				mem_space_id  = memspace_local_iterate_scalar,   &
 				xfer_prp      = proplist_transfer)
+
+                        IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "residuals"'
 
 			! Write scalar values	
 			scalar_offset = (/ myrank, time_index-1 /)
@@ -309,21 +315,26 @@ MODULE DistributedIO
 				mem_space_id  = memspace_local_scalar,   &
 				xfer_prp      = proplist_transfer)
 				
+                        IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "runtime_coarse"'
+
 			CALL H5DWRITE_F(dataset_ids_data(4), H5T_NATIVE_DOUBLE, runtime_fine, dims_local_scalar, hdf5_error, &
 				file_space_id = dataspace_global_scalar, &
 				mem_space_id  = memspace_local_scalar,   &
 				xfer_prp      = proplist_transfer)
+
+                        IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "runtime_fine"'
 				
 			CALL H5DWRITE_F(dataset_ids_data(5), H5T_NATIVE_DOUBLE, runtime_qr, dims_local_scalar, hdf5_error, &
 				file_space_id = dataspace_global_scalar, &
 				mem_space_id  = memspace_local_scalar,   &
-				xfer_prp      = proplist_transfer)												
-																	
+				xfer_prp      = proplist_transfer)			
+
+                        IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "runtime_qr"'																										
 			CALL H5DWRITE_F(dataset_ids_data(6), H5T_NATIVE_INTEGER, iterations, dims_local_scalar, hdf5_error, &
 				file_space_id = dataspace_global_scalar, &
 				mem_space_id  = memspace_local_scalar,   &
 				xfer_prp      = proplist_transfer)																			
-																																				
+                        IF (hdf5_error .ne. 0) WRITE(*,*) 'Error in writing "iterations"'																																				
 		END SUBROUTINE WriteData
 		
 		SUBROUTINE WriteTimerData(Timer_B1, Timer_B2, NrCalls_B1, NrCalls_B2)

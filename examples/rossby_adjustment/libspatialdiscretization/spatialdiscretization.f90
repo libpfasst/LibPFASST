@@ -22,7 +22,7 @@ PRIVATE
 !PUBLIC :: dim, Nx, Ny, nr_fields  ! from FVMParameters and FiniteVolumes
 !PUBLIC :: FinalizeSpatialMPI, myrank, nprocs, MPI_DOUBLE_PRECISION, MPI_WTIME, cartesian_comm ! from MPIParameter
 PUBLIC :: RHS, RHS_coarse !, InitializeLinearAdvectionVelocity, Timer_BOne, Timer_BTwo, NrCalls_BOne, NrCalls_BTwo ! from RHSFunctipns
-PUBLIC :: ReadInitialValue !,CloseDistributedIO, WriteData, WriteFinalData, WriteTimerData, ReadLinearAdvectionVelocity ! from DistributedIO
+PUBLIC :: ReadInitialValue, WriteData !,CloseDistributedIO, WriteFinalData, WriteTimerData, ReadLinearAdvectionVelocity ! from DistributedIO
 PUBLIC :: InitializeSpatialDiscretization, CloseSpatialDiscretization ! From this module
 
 CONTAINS

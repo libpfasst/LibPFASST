@@ -193,9 +193,8 @@ MODULE RHSFunctions
 			CALL WaitForCommunication(Nx, Ny, Nghost, 1)							
 #endif
 
-			! Now that the ghost cell value are up-to-date, evaluate RHS function
-			
-			CALL GetRHS(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
+			! Now that the ghost cell value are up-to-date, evaluate RHS function			
+			CALL GetRHS(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, dt, nu)
 		
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny, Nx)		
 	
@@ -293,7 +292,7 @@ MODULE RHSFunctions
 #endif							
 			
 			! For nonlinear advection, simply put the index of the velocity field into the buffer otherwise containing the constant velocity field.
-			CALL GetRHS( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, nu_coarse)
+			CALL GetRHS( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, dt, nu_coarse)
 										
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny_coarse, Nx_coarse )
 			

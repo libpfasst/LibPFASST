@@ -1,4 +1,4 @@
-!
+!!
 ! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
 !
 
@@ -8,7 +8,7 @@ program fpfasst
   use hooks
   use transfer
   use encap_array1d
-  use spatialdiscretization, only : InitializeSpatialDiscretization, CloseSpatialDiscretization
+  use spatialdiscretization, only : InitializeSpatialDiscretization, CloseSpatialDiscretization, WriteData
   use pf_mod_mpi, only: MPI_COMM_WORLD
 
   implicit none
@@ -19,6 +19,7 @@ program fpfasst
   type(pf_encap_t),   target :: encap
   integer            :: ierror, nlevs, nvars(1), nnodes(1), l
   double precision   :: dt
+  double precision, allocatable, dimension(:) :: residuals
 
   type(array1d), target :: q0
 
@@ -33,7 +34,7 @@ program fpfasst
   ! initialize pfasst
   !
 
-  nvars  = [ 40*40 ]
+  nvars  = [ 40*3 ]
   nnodes = [ 9 ]
   dt     = 0.1_pfdp
   nlevs  = 1
@@ -43,11 +44,14 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  call InitializeSpatialDiscretization(maxit = pf%niters, Nparareal_restarts = 1, mpi_init_thread_flag = 0, &
-       mpi_communicator = MPI_COMM_WORLD, Nthreads = 1, echo_on = .true., dim = nvars(1))
-
   pf%niters = 8
   pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
+
+  call InitializeSpatialDiscretization(maxit = pf%niters, Nparareal_restarts = 1, mpi_init_thread_flag = 0, &
+       mpi_communicator = MPI_COMM_WORLD, Nthreads = 1, echo_on = .false., dim = nvars(1))
+
+  allocate(residuals(pf%niters)) ! must match maxit
+  residuals = 0.0
 
   pf%echo_timings = .false.
   if (nlevs > 1) then
@@ -69,7 +73,7 @@ program fpfasst
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
-  !
+  !1
   ! run
   !
   allocate(q0%array(nvars(nlevs)))
@@ -78,13 +82,14 @@ program fpfasst
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
 
+  Call WriteData( residuals, DBLE(0.0), DBLE(0.0), DBLE(0.0), pf%niters, 1, RESHAPE(q0%array, (/1, 40, 3 /)) )
+
   ! xx
   ! cleanup
   !
   deallocate(q0%array)
-  
+   
   call CloseSpatialDiscretization()
-
   do l = 1, nlevs
      call feval_destroy_workspace(pf%levels(l)%ctx)
   end do

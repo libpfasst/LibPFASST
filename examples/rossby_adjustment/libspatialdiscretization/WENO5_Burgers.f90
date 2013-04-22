@@ -39,11 +39,11 @@ INTEGER,          PARAMETER               :: weno_n   = 2
 
 CONTAINS
 
-	SUBROUTINE GetRHS(Q, order_advection, order_diffusion, RQ, dy, dx, nu)
+	SUBROUTINE GetRHS(Q, order_advection, order_diffusion, RQ, dy, dx, dt, nu)
 	
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(OUT) :: RQ
-		DOUBLE PRECISION,                   INTENT(IN)  :: dy, dx, nu
+		DOUBLE PRECISION,                   INTENT(IN)  :: dy, dx, dt, nu
 		INTEGER,                            INTENT(IN)  :: order_advection, order_diffusion
 
 		INTEGER :: thread_nr, Nx, Ny, i, j

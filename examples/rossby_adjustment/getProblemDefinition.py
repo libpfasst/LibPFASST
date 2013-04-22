@@ -4,40 +4,56 @@ import numpy
 from collections import defaultdict
 def get():
     Nx     = 40
-    Ny     = 40
+    Ny     = 1
     xleft  = 0.0
     xright = 1.0
     ydown  = 0.0
     yup    = 1.0
     domain_height = abs(yup - ydown)
     domain_width  = abs(xright - xleft)
-    XX, YY, dx, dy = getMesh.getMesh(Nx,Ny,xleft,xright,yup,ydown)
+    if Ny>1:
+        XX, YY, dx, dy = getMesh.getMesh(Nx,Ny,xleft,xright,yup,ydown)
     # define function that provides initial value
-    def q0(x,y):
-        return math.sin(2.0*math.pi*x)*math.sin(2.0*math.pi*y)
-
+        def q0(x,y):
+            return math.sin(2.0*math.pi*x)*math.sin(2.0*math.pi*y)
+        
     # evaluate q0 on generate mesh --> adapt for IV with multiple components
-    Q = 0.0*XX
-    for ii in range(0,Nx):
-        for jj in range(0,Ny):
-            Q[jj,ii] = q0(XX[jj,ii],YY[jj,ii])
+        Q = 0.0*XX
+        for ii in range(0,Nx):
+            for jj in range(0,Ny):
+                Q[jj,ii] = q0(XX[jj,ii],YY[jj,ii])
+    else:
+        xnodes  = numpy.linspace(xleft, xright, Nx+1)
+        xcenter = [0 for x in range(Nx)]
+        for ii in range(0,Nx):
+            xcenter[ii] = 0.5*( xnodes[ii] + xnodes[ii+1])
+        
+        def q0(x):
+            return math.sin(2.0*math.pi*x)
+
+        Q = numpy.empty([3, Ny, Nx])
+        for kk in range(0,3):
+            for ii in range(0,Nx):
+                Q[kk,0,ii] = q0(xcenter[ii])
     
-    
+    dx = (xcenter[1] - xcenter[0])
+    dy = 0.0
+
     # Initialize 
     problem = {}
     problem['input'] = {}
     problem['input']['problemdefinition'] = defaultdict(list)
-    problem['input']['problemdefinition']['nr_fields']     = ['i', 1, (1,1)]
+    problem['input']['problemdefinition']['nr_fields']     = ['i', 3, (1,1)]
     problem['input']['problemdefinition']['sound_speed']   = ['d', 0.0, (1,1)]
     problem['input']['problemdefinition']['stabFreq']      = ['d', 0.0, (1,)]
     problem['input']['problemdefinition']['domain_height'] = ['d', domain_height, (1,1)]
     problem['input']['problemdefinition']['domain_width']  = ['d', domain_width, (1,1)] 
-    problem['input']['problemdefinition']['BC']            = ['i', 0, (1,1)]
+    problem['input']['problemdefinition']['BC']            = ['i', 2, (1,1)]
     problem['input']['problemdefinition']['x_left']        = ['d', xleft, (1,1)]
     problem['input']['problemdefinition']['x_right']       = ['d', xright, (1,1)]
     problem['input']['problemdefinition']['y_up']          = ['d', yup, (1,1)]
     problem['input']['problemdefinition']['y_down']        = ['d', ydown, (1,1)]
-    problem['input']['problemdefinition']['q_initial']     = ['d', Q, (Ny,Nx)]
+    problem['input']['problemdefinition']['q_initial']     = ['d', Q, (3, Ny,Nx)]
     problem['input']['problemdefinition']['Uadv']          = ['d', 0.0, (1, 1)]
     problem['input']['problemdefinition']['Vadv']          = ['d', 0.0, (1, 1)]
 

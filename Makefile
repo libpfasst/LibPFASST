@@ -25,9 +25,10 @@ build/%.o: src/%.f90
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
 
 advection: examples/advection/*.f90
-	$(FC) $(FFLAGS) -o $@ $^ -Lbuild -lpfasst -lfftw3
+		$(FC) $(FFLAGS) -o $@ $^ -Lbuild -lpfasst $(LDFLAGS)
 
-
+rossby_adjustment: examples/rossby_adjustment/lib/libspatialdiscretization.a examples/rossby_adjustment/*.f90
+		$(FC) $(FFLAGS) -I$(CURDIR)/examples/rossby_adjustment/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/rossby_adjustment/lib -lspatialdiscretization -L$(CURDIR)/examples/rossby_adjustment/lib -lserialio $(LDFLAGS)
 .PHONY: clean
 
 clean:

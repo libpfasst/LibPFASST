@@ -1,4 +1,4 @@
-MODULE WENO5_1D
+MODULE FiniteVolumes
 ! This module provides the implementation of a one-dimensional, finite difference WENO-5 scheme.
 ! Note that in order to ensure compatibility, all data structures do posses the same layout as
 ! the two-dimesional version, but the y-coordinate is always assumed to have only length one.
@@ -11,7 +11,14 @@ USE omp_lib,       only : omp_get_thread_num
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nr_fields = 1, buffer_layout = 1, stabFreq = 0.01, coriolisPar = 0.0, grav = 1.0
+INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.01, coriolisPar = 0.0, grav = 1.0
+
+TYPE fdm_parameter
+        INTEGER :: Nthreads, mpi_init_thread_flag
+        LOGICAL :: echo_on
+END TYPE
+
+TYPE(fdm_parameter) :: param
 
 ! Define buffers storing ghost-cell values. NOTE: In the 1-D module, GhostUp and GhostDown are only listed
 ! to ensure compatibility, they are neither used nor allocated.
@@ -48,12 +55,12 @@ CONTAINS
 	! f2(h,q,r) = q^2/h + 0.5*g*h^2
 	! f3(h,q,r) = q*r/h
 	!
-	SUBROUTINE GetRHS(Q, RQ, dt, dx, order)
+	SUBROUTINE GetRHS(Q, order, dummy, RQ, dy, dx, dt, nu)
 	
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(OUT) :: RQ
-		DOUBLE PRECISION,                   INTENT(IN)  :: dt, dx
-		INTEGER,                            INTENT(IN)  :: order
+		DOUBLE PRECISION,                   INTENT(IN)  :: dy, dx, dt, nu
+		INTEGER,                            INTENT(IN)  :: order, dummy
 		
 		INTEGER :: thread_nr
 		
@@ -118,30 +125,39 @@ CONTAINS
 		
 	END SUBROUTINE GetRHS
 	
-	SUBROUTINE InitializeWENO5(nr_threads, Nx_max)
+	SUBROUTINE InitializeFiniteVolumes(Nx_max, Ny_max, Nthreads, mpi_init_thread, echo_on)
 	
-		INTEGER, INTENT(IN) :: nr_threads, Nx_max
+		INTEGER, INTENT(IN) :: Nthreads, Nx_max, Ny_max, mpi_init_thread
+                LOGICAL, INTENT(IN) :: echo_on
 		
 		INTEGER :: i, thread_nr
 		
+                IF (Ny_max > 1) THEN
+                   WRITE(*,*) 'Compiled WENO5_1D but found Ny > 1. Now exiting.'
+                   STOP
+                END IF
+
+                param%Nthreads = Nthreads
+                param%echo_on = echo_on
+
 		! In the 1-D module, Ny is always assumed to be one.
 		! The index in the "thread-dimension" starts with zero, so that
 		! it directly coincides with thread numbers
-		ALLOCATE(GhostLeft(     1:nr_fields, 1, 3, 0:nr_threads-1))
-		ALLOCATE(GhostRight(    1:nr_fields, 1, 3, 0:nr_threads-1))
-		ALLOCATE(GhostFluxLeft( 1:nr_fields, 1, 3, 0:nr_threads-1))
-		ALLOCATE(GhostFluxRight(1:nr_fields, 1, 3, 0:nr_threads-1))
+		ALLOCATE(GhostLeft(     1:nr_fields, 1, 3, 0:Nthreads-1))
+		ALLOCATE(GhostRight(    1:nr_fields, 1, 3, 0:Nthreads-1))
+		ALLOCATE(GhostFluxLeft( 1:nr_fields, 1, 3, 0:Nthreads-1))
+		ALLOCATE(GhostFluxRight(1:nr_fields, 1, 3, 0:Nthreads-1))
 		! NOTE: In the 1-D module, GhostUp and GhostDown are NOT ALLOCATED
 		
 		! If there are Nx cells, there are Nx+1 interfaces
-		ALLOCATE(FluxInt_hor( 1:nr_fields, 1, 1:Nx_max+1, 0:nr_threads-1))
-		ALLOCATE(FluxCell_hor(1:nr_fields, 1, 1:Nx_max,   0:nr_threads-1))
+		ALLOCATE(FluxInt_hor( 1:nr_fields, 1, 1:Nx_max+1, 0:Nthreads-1))
+		ALLOCATE(FluxCell_hor(1:nr_fields, 1, 1:Nx_max,   0:Nthreads-1))
 		
 		! Now perform first-touch initialization, i.e. every thread initializes its
 		! part of the buffers
 		
 		!$OMP PARALLEL DO SCHEDULE(static) private(thread_nr)
-		DO i=0,nr_threads-1
+		DO i=0,Nthreads-1
 			thread_nr = omp_get_thread_num()
 			GhostLeft(     :,:,:,thread_nr) = 0.0
 			GhostRight(    :,:,:,thread_nr) = 0.0
@@ -152,7 +168,7 @@ CONTAINS
 		END DO
 		!$OMP END PARALLEL DO
 		
-	END SUBROUTINE InitializeWENO5
+	END SUBROUTINE InitializeFiniteVolumes
 	
 	! -------------------------------------------
 	
@@ -399,12 +415,19 @@ CONTAINS
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
 		INTEGER,						    INTENT(IN)  :: Nghost, thread_nr, BC
 		
-		INTEGER :: i,Nx
+		INTEGER :: i,Nx,Ny
 		
+                Ny = SIZE(Q, 2)
 		Nx = SIZE(Q, 3)
+		
+                IF (Ny > 1) THEN
+                   WRITE (*,*) 'Used module WENO_1D for compilation, but encounterd Ny > 1. Now exiting.'
+                   STOP
+                END IF
 		
 		SELECT CASE (BC)
 		
+                        ! Periodic 
 			CASE (1)			
 			
 				! Fill horizontal ghost cells
@@ -412,7 +435,8 @@ CONTAINS
 					GhostLeft( :,1,i,thread_nr) = Q(:,1,Nx-i+1)
 					GhostRight(:,1,i,thread_nr) = Q(:,1,i)
 				END DO
-									
+				
+                        ! Outflow
 			CASE (2)
 			
 				! Fill horizontal ghost cells
@@ -429,13 +453,18 @@ CONTAINS
 		
 	END SUBROUTINE FillGhostCells
 
-	PURE SUBROUTINE UnpackSolution(Q, Y, nr_fields, Ny, Nx)
+	SUBROUTINE UnpackSolution(Q, Y, nr_fields, Ny, Nx)
 	
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(OUT) :: Q
 		DOUBLE PRECISION, DIMENSION(:),     INTENT(IN)  :: Y
 		INTEGER,                            INTENT(IN)  :: nr_fields, Ny, Nx
 		
 		INTEGER :: i,j, k, counter
+		
+               IF (Ny > 1) THEN
+                  WRITE (*,*) 'Used module WENO_1D for compilation, but encounterd Ny > 1. Now exiting.'
+                  STOP
+               END IF
 		
 		counter=1
 		DO i=1,Nx
@@ -450,7 +479,7 @@ CONTAINS
 	END SUBROUTINE UnpackSolution
 
 
-	PURE SUBROUTINE PackSolution(Y, Q, nr_fields, Ny, Nx)
+	SUBROUTINE PackSolution(Y, Q, nr_fields, Ny, Nx)
 		
 		DOUBLE PRECISION, DIMENSION(:),     INTENT(OUT) :: Y
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
@@ -460,6 +489,11 @@ CONTAINS
 		
 		counter=1
 		
+               IF (Ny > 1) THEN
+                  WRITE (*,*) 'Used module WENO_1D for compilation, but encounterd Ny > 1. Now exiting.'
+                  STOP
+               END IF
+  
 		DO i=1,Nx
 			DO j=1,Ny
 				DO k=1,nr_fields
@@ -477,6 +511,89 @@ CONTAINS
 		DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: Qleft, Qright, Qup, Qdown, Qupleft, Qupright, Qdownleft, Qdownright
 		INTEGER, INTENT(IN) :: Nx, Ny, Nghost
 
+                WRITE(*,*) 'FillinGhostcells not yet implemented. Now exiting.'
+                STOP
+
         END SUBROUTINE FillinGhostcells
         
-END MODULE WENO5_1D
+	SUBROUTINE GetMpiDatatypePar(Nx, Ny, Nghost, blocklengths, indices, length, length_singleThread)
+		
+		INTEGER,                 INTENT(IN)  :: Nx, Ny, Nghost
+		INTEGER, DIMENSION(:,:), INTENT(OUT) :: blocklengths, indices
+		INTEGER, DIMENSION(:),   INTENT(OUT) :: length, length_singleThread
+		
+		INTEGER :: i
+			
+		! --- Upper and lower ghost-cells ---
+		length(2)              = Nx*param%Nthreads
+		length_singleThread(2) = Nx
+		length(7)              = Nx*param%Nthreads
+		length_singleThread(7) = Nx
+
+		! Upper row datatype: For every column  one block of Nghost*nr_fields values has to be defined								
+		blocklengths(1:length(2),2) = Nghost*nr_fields
+		DO i=1,length(2)
+			indices(i,2) = (i-1)*Ny*nr_fields
+		END DO		
+
+		! Lower row datatype
+		blocklengths(1:length(7),7) = Nghost*nr_fields	
+		DO i=1,length(7)
+			indices(i,7) = i*Ny*nr_fields-Nghost*nr_fields
+		END DO
+		
+		! --- Left and right ghost-cells ---
+		length(4)              = param%Nthreads
+		length_singleThread(4) = 1
+		length(5)              = param%Nthreads
+		length_singleThread(5) = 1
+		
+		! Left column datatype
+		blocklengths(1:length(4),4) = Nghost*Ny*nr_fields
+		DO i=1,length(4)
+			indices(i,4) = (i-1)*Nx*Ny*nr_fields
+		END DO
+
+		! Right column datatype
+		blocklengths(1:length(5),5) = Nghost*Ny*nr_fields
+		DO i=1,length(5)
+			indices(i,5) = (Nx-Nghost)*Ny*nr_fields + (i-1)*Nx*Ny*nr_fields
+		END DO
+			
+		! --- Corner ghost-cells ---
+		length(1)              = nr_fields*param%Nthreads
+		length_singleThread(1) = nr_fields
+		length(3)              = nr_fields*param%Nthreads
+		length_singleThread(3) = nr_fields
+		length(6)              = nr_fields*param%Nthreads
+		length_singleThread(6) = nr_fields
+		length(8)              = nr_fields*param%Nthreads
+		length_singleThread(8) = nr_fields
+																		
+		! Upper left
+		blocklengths(1:length(1),1) = 1
+		DO i=1,length(1)
+			indices(i,1) = (i-1)*Nx*Ny
+		END DO				
+
+		! Upper right
+		blocklengths(1:length(3),3) = 1
+		DO i=1,length(3)
+			indices(i,3) = (Nx-1)*Ny + (i-1)*Nx*Ny
+		END DO
+				
+		! Lower left
+		blocklengths(1:length(6),6) = 1
+		DO i=1,length(6)
+			indices(i,6) = (Ny-1) + (i-1)*Nx*Ny
+		END DO
+		
+		! Lower right
+		blocklengths(1:length(8),8) = 1
+		DO i=1,length(8)
+			indices(i,8) = i*Nx*Ny-1
+		END DO
+
+	END SUBROUTINE GetMpiDatatypePar
+
+END MODULE FiniteVolumes
