@@ -1,0 +1,19 @@
+#
+# Makefile rules for compiling examples.
+#
+
+$(EXE): $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS) -lpfasst
+
+build/%.o: src/%.f90
+	@mkdir -p build
+	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+
+build/%.o: src/%.c
+	@mkdir -p build
+	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+
+.PHONY: clean
+
+clean:
+	rm -rf build $(EXE)

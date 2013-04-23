@@ -22,6 +22,10 @@ LIBPFASST has been successfully compiled with
 
   * GNU gfortran 4.5 and 4.8.
 
+To compile: create (or symlink, see mk/*.defs) a Makefile.defs file
+appropriate for you machine.  You should proabably be able to use
+'mpif90' as your F90 compiler.
+
 
 LICENSE
 =======

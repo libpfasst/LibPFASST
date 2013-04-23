@@ -29,10 +29,6 @@ build/%.o: src/%.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 
-advection: examples/advection/*.f90
-	$(FC) $(FFLAGS) -I/home/memmett/opt/include -o $@ $^ -Lbuild -lpfasst -L/home/memmett/opt/lib -lfftw3
-
-
 .PHONY: clean
 
 clean:
