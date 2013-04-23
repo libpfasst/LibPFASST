@@ -3,18 +3,17 @@
 #
 
 LIBPFASST ?= ../..
-FFTW3     ?= $(HOME)/opt
+FFTW3     ?= $(LIBPFASST)/fftw3
 
 EXE = mpi-advection
 
+include $(LIBPFASST)/Makefile.defaults
 
-include $(LIBPFASST)/Makefile.defs
-
-FSRC = $(shell ls src/*.f90)
+FSRC = $(wildcard src/*.f90)
 OBJ  = $(subst src,build,$(FSRC:.f90=.o))
 
-FFLAGS  += -Ibuild -Jbuild -I$(FFTW3)/include -I$(LIBPFASST)/build 
-LDFLAGS += -L$(LIBPFASST)/build -L$(FFTW3)/lib -lfftw3
+FFLAGS  += -I$(LIBPFASST)/build -I$(FFTW3)/include 
+LDFLAGS += -L$(LIBPFASST)/build -lpfasst -L$(FFTW3)/lib -lfftw3
 
 all: $(EXE)
 

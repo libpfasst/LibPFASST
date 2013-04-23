@@ -2,37 +2,40 @@
 # Makefile for libpfasst.
 #
 
-include Makefile.defs
+LIBPFASST ?= .
 
-FFLAGS += -Ibuild -Jbuild
+include $(LIBPFASST)/Makefile.defaults
 
 #
-# rules
+# libpfasst
 #
 
 $(shell python mk/version.py src/pf_version.f90)
 
-FSRC = $(shell ls src/*.f90)
-CSRC = $(shell ls src/*.c)
+FSRC = $(wildcard src/*.f90)
+CSRC = $(wildcard ls src/*.c)
 OBJ  = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-
-all: build/libpfasst.a
 
 build/libpfasst.a: $(OBJ)
 	$(AR) build/libpfasst.a $(OBJ)
 
-build/%.o: src/%.f90
-	@mkdir -p build
-	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+include $(LIBPFASST)/Makefile.rules
 
-build/%.o: src/%.c
-	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+#
+# fftw3 (for the examples)
+# 
 
-.PHONY: clean
+FFTW3 = fftw-3.3.3
+FFTW3_CONFIG = --enable-openmp --enable-sse2 --enable-threads # --enable-shared 
 
-clean:
-	rm -rf build libpfasst.*
+fftw3: $(FFTW3).tar.gz
+	rm -rf $(FFTW3)
+	tar xzf $(FFTW3).tar.gz
+	cd $(FFTW3) && ./configure --prefix=$(PWD)/fftw3 $(FFTW3_CONFIG)
+	cd $(FFTW3) && make install
+
+$(FFTW3).tar.gz:
+	wget http://www.fftw.org/$(FFTW3).tar.gz
 
 #
 # dependencies

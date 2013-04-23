@@ -1,0 +1,13 @@
+#
+# Default build settings for libpfasst.
+#
+
+FC = mpif90
+CC = gcc
+AR = ar rcs
+
+FFLAGS = -Ibuild -Jbuild
+
+# include any .defs files
+DEFS = $(wildcard $(LIBPFASST)/*.defs)
+include $(DEFS)

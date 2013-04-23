@@ -3,7 +3,7 @@
 #
 
 $(EXE): $(OBJ)
-	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS) -lpfasst
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 
 build/%.o: src/%.f90
 	@mkdir -p build
