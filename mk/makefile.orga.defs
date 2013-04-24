@@ -2,7 +2,8 @@
 # Makefile definitions for orga
 #
 
-FC     = mpif90 -f90=/home/memmett/gcc-4.8/bin/gfortran
-FFLAGS = -Wall -g -pg -Wno-unused-dummy-argument
+FC = mpif90 -f90=/home/memmett/gcc-4.8/bin/gfortran
+CC = /home/memmett/gcc-4.8/bin/gcc
 
-AR = ar rcs
+FFLAGS += -Wall -g -pg -Wno-unused-dummy-argument
+CFLAGS += -Wall -g -pg

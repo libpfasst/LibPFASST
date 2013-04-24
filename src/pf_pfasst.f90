@@ -27,6 +27,7 @@ contains
   ! Passing the 'nvars' and 'nnodes' arrays is optional, but these
   ! should be set appropriately before calling setup.
   subroutine pf_pfasst_create(pf, comm, maxlevels)
+    use pf_mod_hooks, only: PF_MAX_HOOK
     type(pf_pfasst_t),   intent(inout)         :: pf
     type(pf_comm_t),     intent(inout), target :: comm
     integer,             intent(in)            :: maxlevels
@@ -37,14 +38,18 @@ contains
     pf%nlevels = 0
 
     allocate(pf%levels(maxlevels))
-    allocate(pf%hooks(maxlevels, PF_MAX_HOOKS))
-    allocate(pf%nhooks(maxlevels))
+    allocate(pf%hooks(maxlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
+    allocate(pf%nhooks(maxlevels, PF_MAX_HOOK))
 
     pf%nhooks = 0
 
     do l = 1, maxlevels
        call pf_level_create(pf%levels(l), l)
     end do
+
+    nullify(pf%cycles%start)
+    nullify(pf%cycles%pfasst)
+    nullify(pf%cycles%end)
 
     pf%nlevels = maxlevels
   end subroutine pf_pfasst_create
@@ -213,6 +218,10 @@ contains
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
+
+    if (associated(pf%cycles%start)) deallocate(pf%cycles%start)
+    if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
+    if (associated(pf%cycles%end)) deallocate(pf%cycles%end)
 
     ! if (pf%log > 0) then
     !    close(pf%log)

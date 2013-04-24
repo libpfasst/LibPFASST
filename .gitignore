@@ -2,6 +2,7 @@
 
 .lock*
 .waf*
+fftw*/
 
 build/
 src/pf_version.f90

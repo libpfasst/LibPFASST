@@ -22,6 +22,53 @@ LIBPFASST has been successfully compiled with
 
   * GNU gfortran 4.5 and 4.8.
 
+Before compiling, you will need an MPI library installed.  On Debian
+or Ubuntu machines, we recommend MPICH2:
+
+  $ sudo apt-get install mpich2 libmpich2-dev
+
+
+COMPILING
+=========
+
+The Makefile included in the LIBPFASST distribution uses the following
+defaults:
+
+  * Fortran: 'mpif90'
+  * C:       'gcc' 
+
+You can change these defaults by creating (or symlinking, see
+mk/*.defs) a .defs file (eg, Makefile.defs) in the LIBPFASST
+directory.
+
+Once you have configured your compilers, you can build LIBPFASST by
+running 'make' in the LIBPFASST directory.  The resulting (static)
+library should be in the 'build' directory.
+
+
+EXAMPLES
+========
+
+Once LIBPFASST is compiled, you can build the examples individually.
+The 'mpi-advection' and 'pth-advection' example require FFTW3.  If you
+already have FFTW3 installed on your machine, please set the FFTW3
+environment variable appropriately.  For example:
+
+  $ export FFTW3=$HOME/opt
+
+If you do not have FFTW3 installed, simply run the 'fftw3' make rule
+from the LIBPFASST directory:
+
+  $ make fftw3
+
+This will download and compile a local (static) copy of FFTW3.
+
+Once you have FFTW installed, you can build the mpi-advection and
+pth-advection examples by:
+
+  $ cd examples/mpi-advection
+  $ make
+
 
 LICENSE
 =======

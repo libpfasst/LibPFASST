@@ -28,7 +28,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: TWO   = 2.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
-  integer, parameter :: PF_MAX_HOOKS = 8
+  integer, parameter :: PF_MAX_HOOKS = 32
 
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
   integer, parameter :: SDC_GAUSS_RADAU     = 2
@@ -36,6 +36,16 @@ module pf_mod_dtype
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
   integer, parameter :: SDC_PROPER_NODES    = 100
+
+  integer, parameter :: SDC_CYCLE_V    = 1
+  integer, parameter :: SDC_CYCLE_FULL = 2
+  integer, parameter :: SDC_CYCLE_OLD  = 10
+
+  integer, parameter :: SDC_CYCLE_UP     = 100
+  integer, parameter :: SDC_CYCLE_DOWN   = 101
+  integer, parameter :: SDC_CYCLE_BOTTOM = 102
+  integer, parameter :: SDC_CYCLE_SWEEP  = 103
+  integer, parameter :: SDC_CYCLE_INTERP = 104
 
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
@@ -46,13 +56,21 @@ module pf_mod_dtype
   ! state type
   type :: pf_state_t
      real(pfdp) :: t0, dt
-     integer    :: block, cycle, step, iter, nsteps
+     integer    :: nsteps
+     integer    :: block, cycle, step, iter, level, hook
   end type pf_state_t
 
+  ! cycle stage type
+  type :: pf_stage_t
+     integer :: type, F, G
+  end type pf_stage_t
+
+  type :: pf_cycle_t
+     type(pf_stage_t), pointer :: start(:), pfasst(:), end(:)
+  end type pf_cycle_t
 
   ! hook type
   type :: pf_hook_t
-     integer :: hook = -1               ! hook type (see pf_mod_hooks)
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
@@ -150,17 +168,19 @@ module pf_mod_dtype
   type :: pf_pfasst_t
      integer :: nlevels = -1            ! number of pfasst levels
      integer :: niters  = 5             ! number of iterations
-     integer :: qtype   = 1             ! type of quadrature nodes
      integer :: rank    = -1            ! rank of current processor
+     integer :: qtype   = SDC_GAUSS_LOBATTO
+     integer :: ctype   = SDC_CYCLE_V
 
      ! pf objects
+     type(pf_cycle_t)          :: cycles
      type(pf_state_t)          :: state
      type(pf_level_t), pointer :: levels(:)
      type(pf_comm_t),  pointer :: comm
 
      ! hooks
-     type(pf_hook_t), pointer :: hooks(:,:)
-     integer,         pointer :: nhooks(:)
+     type(pf_hook_t), pointer :: hooks(:,:,:)
+     integer,         pointer :: nhooks(:,:)
 
      ! timing
      logical    :: echo_timings  = .false.
@@ -211,9 +231,10 @@ module pf_mod_dtype
   interface
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
-       type(pf_level_t),  intent(in) :: F
-       type(c_ptr),       intent(in) :: qSDC(:, :), fSDC(:, :), fintSDC(:)
-       real(pfdp),        intent(in) :: dt
+       type(pf_level_t),  intent(in)    :: F
+       type(c_ptr),       intent(in)    :: qSDC(:, :), fSDC(:, :)
+       real(pfdp),        intent(in)    :: dt
+       type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
   end interface
 
