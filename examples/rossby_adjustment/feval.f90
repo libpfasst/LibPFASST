@@ -11,9 +11,6 @@ module feval
 
   implicit none
 
-  type :: weno
-     double precision, allocatable :: Y(:)
-  end type weno
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -21,13 +18,6 @@ contains
   subroutine feval_create_workspace(ctx, nvars)
     type(c_ptr), intent(out) :: ctx
     integer,     intent(in)  :: nvars
-
-    type(weno), pointer :: work
-
-    allocate(work)
-    allocate(work%Y(nvars))
-    work%Y = DBLE(1.0)
-    ctx = c_loc(work)
 
   end subroutine feval_create_workspace
 
@@ -53,7 +43,7 @@ contains
     integer,    intent(in)  :: nvars
     real(pfdp), intent(out) :: yex(nvars)
 
-    yex = DBLE(2.0)
+    yex = DBLE(0.0)
 
   end subroutine exact
 
@@ -65,15 +55,10 @@ contains
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
-    type(weno), pointer :: y, fy, c
     real(pfdp), pointer :: u(:), fu(:)
     
 ! yptr points  to y, y points to weno datatype
 ! f1ptr points to fy, fy points to weno datatype
-
-    call c_f_pointer(yptr, y)
-    call c_f_pointer(f1ptr, fy)
-    call c_f_pointer(ctx, c)
     
     u => array(yptr)
     fu => array(f1ptr)
@@ -89,7 +74,12 @@ contains
     type(c_ptr), intent(in), value :: yptr, f2ptr, ctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
-
+    
+    real(pfdp), pointer :: u(:), fu(:)
+    
+    fu => array(f2ptr)
+    fu = 0.0
+    
   end subroutine eval_f2
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -99,6 +89,15 @@ contains
     type(c_ptr), intent(in), value :: yptr, rhsptr, f2ptr, ctx
     real(pfdp),  intent(in)        :: t, dt
     integer,     intent(in)        :: level
+
+    real(pfdp), pointer :: u(:), fu(:), rhs(:)
+
+    fu => array(f2ptr)
+    fu = 0.0    
+
+    u => array(yptr)
+    rhs => array(rhsptr)
+    u = rhs
 
   end subroutine comp_f2
 

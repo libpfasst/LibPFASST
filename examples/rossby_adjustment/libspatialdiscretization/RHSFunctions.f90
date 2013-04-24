@@ -151,9 +151,8 @@ MODULE RHSFunctions
 			IF (param%echo_on) WRITE(*,'(A)') ' Starting RHS evaluation ... '
 			
 			thread_nr  = omp_get_thread_num()
-			
+
 			CALL UnpackSolution( Q(:,:,:,thread_nr), Y, nr_fields, Ny, Nx)
-			
 #if(mpi_mode==0)
 			! No MPI, simply fill ghost cell values from own solution buffer according to BC
 			CALL FillGhostCells(Q(:,:,:,thread_nr), Nghost, BC, thread_nr)
@@ -193,11 +192,12 @@ MODULE RHSFunctions
 			CALL WaitForCommunication(Nx, Ny, Nghost, 1)							
 #endif
 
+
 			! Now that the ghost cell value are up-to-date, evaluate RHS function			
 			CALL GetRHS(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, dt, nu)
-		
+
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny, Nx)		
-	
+
 			IF (param%echo_on) WRITE(*,*) ' Finished RHS evaluation. '
 			
 			CONTAINS								
@@ -230,8 +230,7 @@ MODULE RHSFunctions
 					NrCalls_BTwo(thread_nr) = NrCalls_BTwo(thread_nr) + 1
 					
 				END SUBROUTINE BARRIER_TWO_FINE_PROFILING
-							
-																								
+																							
 		END SUBROUTINE RHS
 		
 		!
@@ -295,7 +294,7 @@ MODULE RHSFunctions
 			CALL GetRHS( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, dt, nu_coarse)
 										
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny_coarse, Nx_coarse )
-			
+
 			IF (param%echo_on) WRITE(*,*) ' Finished RHS_coarse evaluation. '
 			
 			CONTAINS

@@ -11,7 +11,7 @@ USE omp_lib,       only : omp_get_thread_num
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.01, coriolisPar = 0.0, grav = 1.0
+INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.0, coriolisPar = 1.0, grav = 1.0
 
 TYPE fdm_parameter
         INTEGER :: Nthreads, mpi_init_thread_flag
@@ -55,7 +55,7 @@ CONTAINS
 	! f2(h,q,r) = q^2/h + 0.5*g*h^2
 	! f3(h,q,r) = q*r/h
 	!
-	SUBROUTINE GetRHS(Q, order, dummy, RQ, dy, dx, dt, nu)
+	SUBROUTINE GetRHS(Q, order, dummy, RQ, dx, dy, dt, nu)
 	
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(OUT) :: RQ
@@ -67,7 +67,7 @@ CONTAINS
 		thread_nr = omp_get_thread_num()
 		
 		IF (order==5) THEN
-				
+
 			! Flux function f1
 			FluxCell_hor(  1,:,:,thread_nr) = Q(2,:,:)
 			GhostFluxLeft( 1,:,:,thread_nr) = GhostLeft( 2,:,:,thread_nr)
@@ -117,12 +117,12 @@ CONTAINS
 			CALL UpdateLaxFriedrichFlux(Q, dt, dx)
 					
 		END IF
-		
+
 		CALL GetFluxDivergence(RQ, dx)
-		
+
 		RQ(2,:,:) = RQ(2,:,:) + coriolisPar*Q(3,:,:)
 		RQ(3,:,:) = RQ(3,:,:) - coriolisPar*Q(2,:,:)
-		
+
 	END SUBROUTINE GetRHS
 	
 	SUBROUTINE InitializeFiniteVolumes(Nx_max, Ny_max, Nthreads, mpi_init_thread, echo_on)
@@ -167,7 +167,7 @@ CONTAINS
 			FluxCell_hor(  :,:,:,thread_nr) = 0.0
 		END DO
 		!$OMP END PARALLEL DO
-		
+
 	END SUBROUTINE InitializeFiniteVolumes
 	
 	! -------------------------------------------

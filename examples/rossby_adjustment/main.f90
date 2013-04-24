@@ -9,7 +9,7 @@ program fpfasst
   use transfer
   use encap_array1d
   use spatialdiscretization, only : InitializeSpatialDiscretization, CloseSpatialDiscretization, WriteData
-  use pf_mod_mpi, only: MPI_COMM_WORLD
+  use pf_mod_mpi, only: MPI_COMM_WORLD, MPI_COMM_SELF
 
   implicit none
 
@@ -17,10 +17,9 @@ program fpfasst
   type(pf_comm_t)    :: comm
   type(pf_sweeper_t), target :: sweeper
   type(pf_encap_t),   target :: encap
-  integer            :: ierror, nlevs, nvars(1), nnodes(1), l
+  integer            :: ierror, nlevs, nvars(2), nnodes(2), l
   double precision   :: dt
-  double precision, allocatable, dimension(:) :: residuals
-
+  integer :: nsteps_pfasst
   type(array1d), target :: q0
 
   !
@@ -34,24 +33,23 @@ program fpfasst
   ! initialize pfasst
   !
 
-  nvars  = [ 40*3 ]
-  nnodes = [ 9 ]
-  dt     = 0.1_pfdp
-  nlevs  = 1
+  nvars  =  600*3 
+  nnodes = [ 5, 3 ] 
+!  dt     = 0.1_pfdp
+  nsteps_pfasst = 2800;
+  dt = (10.0/2800.0)
+  nlevs  = 2
 
   call array1d_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  pf%niters = 8
+  pf%niters = 4
   pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
 
-  call InitializeSpatialDiscretization(maxit = pf%niters, Nparareal_restarts = 1, mpi_init_thread_flag = 0, &
-       mpi_communicator = MPI_COMM_WORLD, Nthreads = 1, echo_on = .false., dim = nvars(1))
-
-  allocate(residuals(pf%niters)) ! must match maxit
-  residuals = 0.0
+  call InitializeSpatialDiscretization(maxit = pf%niters, Nparareal_restarts = nsteps_pfasst, mpi_init_thread_flag = 0, &
+       mpi_communicator = MPI_COMM_SELF, Nthreads = 1, echo_on = .false., dim = nvars(1))
 
   pf%echo_timings = .false.
   if (nlevs > 1) then
@@ -80,9 +78,8 @@ program fpfasst
   call initial(q0)
 
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
-  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
-
-  Call WriteData( residuals, DBLE(0.0), DBLE(0.0), DBLE(0.0), pf%niters, 1, RESHAPE(q0%array, (/1, 40, 3 /)) )
+  call pf_add_hook(pf, nlevs, PF_POST_STEP, output)
+  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps_pfasst)
 
   ! xx
   ! cleanup

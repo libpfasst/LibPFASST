@@ -32,7 +32,7 @@ FiniteVolumes.o: WENO5_1D.f90
 #FiniteVolumes.o: WENO5_Burgers.f90
 #	$(FC) $(FFLAGS) -c WENO5_Burgers.f90 -o FiniteVolumes.o
 
-DistributedIO.o: FVMParameters.o MPIParameter.o DistributedIO.f90
+DistributedIO.o: FVMParameters.o MPIParameter.o FiniteVolumes.o DistributedIO.f90
 	$(FC) $(FFLAGS) -c DistributedIO.f90
 
 mpi_space_communication.o: FVMParameters.o MPIParameter.o FiniteVolumes.o mpi_space_communication.f90

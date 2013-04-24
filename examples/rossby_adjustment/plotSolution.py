@@ -32,7 +32,7 @@ if sol==None:
     print "Could not find dataset 'solution' in selected HDF5 file. Now exiting."
     sys.exit()
 sol = sol[...]
-sol = sol.reshape(3, Nx)
+sol = sol.reshape(2800, Nx, 3)
 
-pylab.plot(xcenter, sol[1,:])
+pylab.plot(xcenter, sol[-1,:,0])
 pylab.show()

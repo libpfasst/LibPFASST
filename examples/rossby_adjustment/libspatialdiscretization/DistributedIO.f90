@@ -3,6 +3,7 @@ MODULE DistributedIO
 	USE HDF5
 	USE FVMParameters,         only : Nx, Ny, nr_fields
 	USE MPIParameter,          only : cartesian_comm, MPI_INFO_NULL, nprocs, nprocs_x, nprocs_y, cart_coords, myrank
+        USE FiniteVolumes,         only : PackSolution
 
 	IMPLICIT NONE
 		
@@ -163,7 +164,7 @@ MODULE DistributedIO
 		
 		SUBROUTINE ReadLinearAdvectionVelocity(Uadv, Vadv)
 
-            DOUBLE PRECISION, DIMENSION(:,:),   INTENT(OUT) :: Uadv, Vadv
+                        DOUBLE PRECISION, DIMENSION(:,:),   INTENT(OUT) :: Uadv, Vadv
 
 			INTEGER(HSIZE_T)  :: dims_local(3), array_adv_count(2), dims_adv(2), dims_adv_local(2)
 			INTEGER(HSSIZE_T) :: array_adv_offset(2)
@@ -232,23 +233,28 @@ MODULE DistributedIO
 			INTEGER(HSSIZE_T) :: array_offset(3)
 			INTEGER(HID_T)    :: group_input_id, group_problem_id, dataset, dataspace, dataspace_local
 			
-			ALLOCATE(Q_initial(Ny, Nx, nr_fields))
-			
+			!ALLOCATE(Q_initial(Ny, Nx, nr_fields))
+			ALLOCATE(Q_initial(nr_fields, Ny, Nx))
+
 			CALL H5GOPEN_F(file_id,        'input',             group_input_id,   hdf5_error)
 			CALL H5GOPEN_F(group_input_id, 'problemdefinition', group_problem_id, hdf5_error)
 												
 			! ---- Load initial value ----			
-			array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
-			array_count  = (/ Ny , Nx, nr_fields /) 
+			!array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
+			!array_count  = (/ Ny , Nx, nr_fields /) 
+                        array_offset = (/ 0, cart_coords(1)*Ny, cart_coords(2)*Nx /)
+                        array_count  = (/ nr_fields, Ny, Nx /)  
 
 			CALL H5DOPEN_F(group_problem_id, 'q_initial', dataset, hdf5_error)
 		
-			dims = (/ nprocs_y*Ny , nprocs_x*Nx, nr_fields /)
-			CALL H5SCREATE_SIMPLE_F( INT(3), dims, dataspace, hdf5_error)			
+			!dims = (/ nprocs_y*Ny , nprocs_x*Nx, nr_fields /)
+			dims = (/ nr_fields, nprocs_y*Ny, nprocs_x*Nx /)
+                        CALL H5SCREATE_SIMPLE_F( INT(3), dims, dataspace, hdf5_error)			
 			CALL H5SSELECT_HYPERSLAB_F(dataspace, H5S_SELECT_SET_F, array_offset, array_count, hdf5_error)
 			
-			dims_local = (/ Ny, Nx, nr_fields /)
-			CALL H5DREAD_F(dataset, H5T_NATIVE_DOUBLE, Q_initial, dims_local, hdf5_error, &
+			!dims_local = (/ Ny, Nx, nr_fields /)
+			dims_local = (/ nr_fields, Ny, Nx /)
+                        CALL H5DREAD_F(dataset, H5T_NATIVE_DOUBLE, Q_initial, dims_local, hdf5_error, &
 				mem_space_id  = memspace_local_solution,  &
 				file_space_id = dataspace,                &
 				xfer_prp      = proplist_transfer)
@@ -260,8 +266,8 @@ MODULE DistributedIO
 			CALL H5GCLOSE_F(group_problem_id, hdf5_error)
 			CALL H5GCLOSE_F(group_input_id,   hdf5_error)
 			
-			Y0 = PACK(Q_initial, .true.)
-			
+			CALL PackSolution(Y0, Q_initial, nr_fields, Ny, Nx)
+
 			DEALLOCATE(Q_initial)
 			
 		END SUBROUTINE ReadInitialValue
