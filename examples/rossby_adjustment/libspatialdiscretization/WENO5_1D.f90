@@ -11,7 +11,7 @@ USE omp_lib,       only : omp_get_thread_num
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.0, coriolisPar = 1.0, grav = 1.0
+INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.0, coriolisPar = 0.0, grav = 1.0
 
 TYPE fdm_parameter
         INTEGER :: Nthreads, mpi_init_thread_flag

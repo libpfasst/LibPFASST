@@ -3,7 +3,7 @@ import sys
 import getMesh
 import numpy
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
+from matplotlib import cm, animation, rcParams
 import matplotlib.pyplot as plt
 import pylab
 
@@ -31,8 +31,25 @@ sol = group1.get('solution')
 if sol==None:
     print "Could not find dataset 'solution' in selected HDF5 file. Now exiting."
     sys.exit()
-sol = sol[...]
-sol = sol.reshape(2800, Nx, 3)
+Ndumps =  sol.shape[0]
+sol    = sol[...]
+sol    = sol.reshape(Ndumps, Nx, 3)
+
+def animate(i):
+    # adjust multiplier in front of i according to frames in call to FuncAnimation
+    line.set_data(xcenter,sol[10*i,:,0])
+    return line,
 
 pylab.plot(xcenter, sol[-1,:,0])
-pylab.show()
+plt.savefig('test.png')
+
+fig   = plt.figure()
+ax    = plt.axes(xlim=(-15,15), ylim=(0,1.2))
+line, = ax.plot([], [], lw=2)
+
+writer = animation.FFMpegFileWriter()
+writer.setup(fig,'movie.mp4', 200, frame_prefix='tmp') # 200 = dpi
+writer.fps = 30
+anim = animation.FuncAnimation(fig, animate, frames=280, blit=True)                            
+# Total runtime of movie is frames/writer.fps in seconds
+anim.save('movie.mp4',writer=writer)
