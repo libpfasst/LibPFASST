@@ -6,16 +6,16 @@ MODULE FiniteVolumes
 ! Daniel Ruprecht, 19.1.2012
 ! ICS Lugano
 
-!USE FVMParameters, only : nr_fields, BC, c_s, stabFreq, coriolisPar, grav
 USE omp_lib,       only : omp_get_thread_num
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1, stabFreq = 0.0, coriolisPar = 0.0, grav = 1.0
+INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1
 
 TYPE fdm_parameter
         INTEGER :: Nthreads, mpi_init_thread_flag
         LOGICAL :: echo_on
+        DOUBLE PRECISION :: grav, coriolisPar
 END TYPE
 
 TYPE(fdm_parameter) :: param
@@ -74,13 +74,13 @@ CONTAINS
 			GhostFluxRight(1,:,:,thread_nr) = GhostRight(2,:,:,thread_nr)
 			
 			! Flux function f2
-			FluxCell_hor( 2,:,:,thread_nr)  = ( Q(2,:,:)*Q(2,:,:)/Q(1,:,:) ) + 0.5*grav*Q(1,:,:)*Q(1,:,:)
+			FluxCell_hor( 2,:,:,thread_nr)  = ( Q(2,:,:)*Q(2,:,:)/Q(1,:,:) ) + 0.5*param%grav*Q(1,:,:)*Q(1,:,:)
 			
 			GhostFluxLeft(2,:,:,thread_nr)  = ( GhostLeft(2,:,:,thread_nr)*GhostLeft(2,:,:,thread_nr)/GhostLeft(1,:,:,thread_nr) ) &
-				+ 0.5*grav*GhostLeft(1,:,:,thread_nr)*GhostLeft(1,:,:,thread_nr)
+				+ 0.5*param%grav*GhostLeft(1,:,:,thread_nr)*GhostLeft(1,:,:,thread_nr)
 				
 			GhostFluxRight(2,:,:,thread_nr) = ( GhostRight(2,:,:,thread_nr)*GhostRight(2,:,:,thread_nr)/GhostRight(1,:,:,thread_nr) ) &
-				+ 0.5*grav*GhostRight(1,:,:,thread_nr)*GhostRight(1,:,:,thread_nr)
+				+ 0.5*param%grav*GhostRight(1,:,:,thread_nr)*GhostRight(1,:,:,thread_nr)
 				
 			! FLux function f3	
 			FluxCell_hor(3,:,:,thread_nr)   = Q(2,:,:)*Q(3,:,:)/Q(1,:,:)
@@ -99,13 +99,13 @@ CONTAINS
 			GhostFluxRight(1,:,:,thread_nr) = GhostRight(2,:,:,thread_nr)
 			
 			! Flux function f2
-			FluxCell_hor( 2,:,:,thread_nr)  = ( Q(2,:,:)*Q(2,:,:)/Q(1,:,:) ) + 0.5*grav*Q(1,:,:)*Q(1,:,:)
+			FluxCell_hor( 2,:,:,thread_nr)  = ( Q(2,:,:)*Q(2,:,:)/Q(1,:,:) ) + 0.5*param%grav*Q(1,:,:)*Q(1,:,:)
 			
 			GhostFluxLeft(2,:,:,thread_nr)  = ( GhostLeft(2,:,:,thread_nr)*GhostLeft(2,:,:,thread_nr)/GhostLeft(1,:,:,thread_nr) ) &
-				+ 0.5*grav*GhostLeft(1,:,:,thread_nr)*GhostLeft(1,:,:,thread_nr)
+				+ 0.5*param%grav*GhostLeft(1,:,:,thread_nr)*GhostLeft(1,:,:,thread_nr)
 				
 			GhostFluxRight(2,:,:,thread_nr) = ( GhostRight(2,:,:,thread_nr)*GhostRight(2,:,:,thread_nr)/GhostRight(1,:,:,thread_nr) ) &
-				+ 0.5*grav*GhostRight(1,:,:,thread_nr)*GhostRight(1,:,:,thread_nr)
+				+ 0.5*param%grav*GhostRight(1,:,:,thread_nr)*GhostRight(1,:,:,thread_nr)
 				
 			! FLux function f3	
 			FluxCell_hor(3,:,:,thread_nr)   = Q(2,:,:)*Q(3,:,:)/Q(1,:,:)
@@ -120,15 +120,16 @@ CONTAINS
 
 		CALL GetFluxDivergence(RQ, dx)
 
-		RQ(2,:,:) = RQ(2,:,:) + coriolisPar*Q(3,:,:)
-		RQ(3,:,:) = RQ(3,:,:) - coriolisPar*Q(2,:,:)
+		RQ(2,:,:) = RQ(2,:,:) + param%coriolisPar*Q(3,:,:)
+		RQ(3,:,:) = RQ(3,:,:) - param%coriolisPar*Q(2,:,:)
 
 	END SUBROUTINE GetRHS
 	
-	SUBROUTINE InitializeFiniteVolumes(Nx_max, Ny_max, Nthreads, mpi_init_thread, echo_on)
+	SUBROUTINE InitializeFiniteVolumes(Nx_max, Ny_max, Nthreads, mpi_init_thread, echo_on, grav, coriolisPar)
 	
 		INTEGER, INTENT(IN) :: Nthreads, Nx_max, Ny_max, mpi_init_thread
                 LOGICAL, INTENT(IN) :: echo_on
+                DOUBLE PRECISION, OPTIONAL, INTENT(IN) :: grav, coriolisPar
 		
 		INTEGER :: i, thread_nr
 		
@@ -137,8 +138,10 @@ CONTAINS
                    STOP
                 END IF
 
-                param%Nthreads = Nthreads
-                param%echo_on = echo_on
+                param%Nthreads    = Nthreads
+                param%echo_on     = echo_on
+                param%coriolisPar = coriolisPar
+                param%grav        = grav
 
 		! In the 1-D module, Ny is always assumed to be one.
 		! The index in the "thread-dimension" starts with zero, so that
@@ -493,7 +496,7 @@ CONTAINS
                   WRITE (*,*) 'Used module WENO_1D for compilation, but encounterd Ny > 1. Now exiting.'
                   STOP
                END IF
-  
+
 		DO i=1,Nx
 			DO j=1,Ny
 				DO k=1,nr_fields

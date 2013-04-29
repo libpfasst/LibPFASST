@@ -17,7 +17,7 @@ MODULE RHSFunctions
 
 	USE FVMParameters,           only : dim, dim_coarse, Nx, Ny, Nx_coarse, Ny_coarse, order_coarse_advection, order_coarse_sound, &
 							            order_fine_advection, order_fine_sound, dx, dy, dx_coarse, dy_coarse, BC, nu, nu_coarse
-	USE FiniteVolumes,           only : GetRHS_inner, GetRHS_boundary, GhostLeft, GhostRight, GhostUp, GhostDown, PackSolution, UnpackSolution, buffer_layout, nr_fields, FillGhostCells
+	USE FiniteVolumes,           only : GetRHS, PackSolution, UnpackSolution, buffer_layout, nr_fields, FillGhostCells
 	USE omp_lib,                 only : omp_get_thread_num
 	USE MPIParameter,            only : Nghost, Nghost_coarse, MPI_WTIME
 	USE mpi_space_communication, only : PostReceives, WaitForCommunication, PostSends
@@ -151,17 +151,12 @@ MODULE RHSFunctions
 			IF (param%echo_on) WRITE(*,'(A)') ' Starting RHS evaluation ... '
 			
 			thread_nr  = omp_get_thread_num()
-			
+
 			CALL UnpackSolution( Q(:,:,:,thread_nr), Y, nr_fields, Ny, Nx)
-			
 #if(mpi_mode==0)
 			! No MPI, simply fill ghost cell values from own solution buffer according to BC
 			CALL FillGhostCells(Q(:,:,:,thread_nr), Nghost, BC, thread_nr)
-
-			! Now that the ghost cell value are up-to-date, evaluate RHS function
-			CALL GetRHS_inner(   Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-			CALL GetRHS_boundary(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-							
+				
 #elif(mpi_mode==1)	
 			! All MPI communication is funneled through the master thread
 			CALL BARRIER_ONE_FINE_PROFILING()
@@ -176,10 +171,6 @@ MODULE RHSFunctions
 			!$OMP END MASTER
 
 			CALL BARRIER_TWO_FINE_PROFILING()
-			
-			! Now that the ghost cell value are up-to-date, evaluate RHS function
-			CALL GetRHS_inner(   Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-			CALL GetRHS_boundary(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)			
 				
 #elif(mpi_mode==2)
 			
@@ -193,27 +184,20 @@ MODULE RHSFunctions
 			!$OMP END CRITICAL
 							
 #elif(mpi_mode==3)			
-
 			total_length_x = Ny*Nghost*nr_fields
 			total_length_y = Nghost*Nx*nr_fields
 			
-			CALL PostReceives(total_length_x,  total_length_y, 1)								
 			CALL PostSends(Q(:,:,:,thread_nr), Nghost)
-			
-			! Now that the ghost cell value are up-to-date, evaluate RHS function
-			CALL GetRHS_inner(   Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-
-			CALL WaitForCommunication(Nx, Ny, Nghost, 1)
-			CALL GetRHS_boundary(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-																				
-#else
-			WRITE(*,*) ' Encountered unknown preprocessor flag for mpi_mode. Now exiting.'
-			STOP
+			CALL PostReceives(total_length_x,  total_length_y, 1)								
+			CALL WaitForCommunication(Nx, Ny, Nghost, 1)							
 #endif
 
-			
+
+			! Now that the ghost cell value are up-to-date, evaluate RHS function			
+			CALL GetRHS(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, dt, nu)
+
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny, Nx)		
-	
+
 			IF (param%echo_on) WRITE(*,*) ' Finished RHS evaluation. '
 			
 			CONTAINS								
@@ -246,8 +230,7 @@ MODULE RHSFunctions
 					NrCalls_BTwo(thread_nr) = NrCalls_BTwo(thread_nr) + 1
 					
 				END SUBROUTINE BARRIER_TWO_FINE_PROFILING
-							
-																								
+																							
 		END SUBROUTINE RHS
 		
 		!
@@ -273,11 +256,7 @@ MODULE RHSFunctions
 #if(mpi_mode==0)
 			! No MPI, simply fill ghost cell values from own solution buffer according to BC
 			CALL FillGhostCells(Q(:,:,:,thread_nr), Nghost, BC, thread_nr)
-				
-			! Now that the ghost cell value are up-to-date, evaluate RHS function
-			CALL GetRHS_inner(   Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)
-			CALL GetRHS_boundary(Q(:,:,:,thread_nr), order_fine_advection, order_fine_sound, RQ(:,:,:,thread_nr), dx, dy, nu)								
-																
+								
 #elif(mpi_mode==1)
 
 			! In non-pipelined Parareal, the coarse propagator is run only
@@ -286,10 +265,8 @@ MODULE RHSFunctions
 			total_length_y = Nx*Nghost*nr_fields*1					
 			CALL PostReceives(total_length_x,  total_length_y, 1)
 			CALL PostSends(Q(:,:,:,0), Nghost)
-			CALL GetRHS_inner(    Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, nu_coarse)		
-			
 			CALL WaitForCommunication(Nx_coarse, Ny_coarse, Nghost, 1)
-			CALL GetRHS_boundary( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, nu_coarse)				
+					
 					
 #elif (mpi_mode==2)	
 
@@ -308,17 +285,16 @@ MODULE RHSFunctions
 			total_length_x = Ny*Nghost*nr_fields
 			total_length_y = Nghost*Nx*nr_fields
 
-			CALL PostReceives(total_length_x,  total_length_y, 1)
 			CALL PostSends(Q(:,:,:,thread_nr), Nghost)
-			
-			CALL GetRHS_inner(    Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, nu_coarse)
-											
+			CALL PostReceives(total_length_x,  total_length_y, 1)								
 			CALL WaitForCommunication(Nx, Ny, Nghost, 1)
-			CALL GetRHS_boundary( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, nu_coarse)
 #endif							
+			
+			! For nonlinear advection, simply put the index of the velocity field into the buffer otherwise containing the constant velocity field.
+			CALL GetRHS( Q(:,:,:,thread_nr), order_coarse_advection, order_coarse_sound, RQ(:,:,:,thread_nr), dx_coarse, dy_coarse, dt, nu_coarse)
 										
 			CALL PackSolution( YDOT, RQ(:,:,:,thread_nr), nr_fields, Ny_coarse, Nx_coarse )
-			
+
 			IF (param%echo_on) WRITE(*,*) ' Finished RHS_coarse evaluation. '
 			
 			CONTAINS
