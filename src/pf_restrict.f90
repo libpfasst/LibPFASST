@@ -24,7 +24,7 @@
 !
 !   2013-04-17 - Matthew Emmett
 !
-!     Time restriction was switched from point injection polynomial
+!     Time restriction was switched from point injection to polynomial
 !     interpolation (ie, using the 'rmat's in each level) so that we
 !     can use proper nodes for each level.
 !
@@ -113,7 +113,7 @@ contains
     type(c_ptr) :: &
          tmpG(G%nnodes), &    ! coarse integral of coarse function values
          tmpF(F%nnodes), &    ! fine integral of fine function values
-         tmpFr(G%nnodes)       ! coarse integral of restricted fine function values
+         tmpFr(G%nnodes)      ! coarse integral of restricted fine function values
 
     call call_hooks(pf, F%level, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + F%level - 1)
@@ -156,19 +156,19 @@ contains
 
     if (associated(F%tau)) then
        ! convert from 'node to node' to '0 to node'
-       call F%encap%setval(tmpF(1), 0.0_pfdp)
-       do m = 2, F%nnodes
+       call F%encap%copy(tmpF(1), F%tau(1))
+       do m = 2, F%nnodes-1
           call F%encap%copy(tmpF(m), tmpF(m-1))
-          call F%encap%axpy(tmpF(m), 1.0_pfdp, F%tau(m-1))
+          call F%encap%axpy(tmpF(m), 1.0_pfdp, F%tau(m))
        end do
 
-       call restrict_sdc(F, G, tmpF, tmpG)
+       call restrict_sdc(F, G, tmpF, tmpG, integral=.true.)
 
        ! convert from '0 to node' to 'node to node'
-       call G%encap%copy(G%tau(1), tmpG(2))
+       call G%encap%copy(G%tau(1), tmpG(1))
        do m = 2, G%nnodes-1
-          call G%encap%copy(G%tau(m), tmpG(m+1))
-          call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m))
+          call G%encap%copy(G%tau(m), tmpG(m))
+          call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m-1))
        end do
     end if
 
