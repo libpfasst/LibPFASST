@@ -21,6 +21,9 @@ build/libpfasst.a: $(OBJ)
 
 include $(LIBPFASST)/Makefile.rules
 
+rossby_adjustment: examples/rossby_adjustment/lib/libspatialdiscretization.a examples/rossby_adjustment/*.f90
+		$(FC) $(FFLAGS) -I$(CURDIR)/examples/rossby_adjustment/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/rossby_adjustment/lib -lspatialdiscretization -L$(CURDIR)/examples/rossby_adjustment/lib -lserialio $(LDFLAGS)
+.PHONY: clean
 #
 # fftw3 (for the examples)
 # 
