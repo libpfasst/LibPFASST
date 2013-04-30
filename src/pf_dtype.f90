@@ -82,7 +82,6 @@ module pf_mod_dtype
      procedure(pf_sweep_p),      pointer, nopass :: sweep
      procedure(pf_initialize_p), pointer, nopass :: initialize
      procedure(pf_evaluate_p),   pointer, nopass :: evaluate
-     procedure(pf_integrate_p),  pointer, nopass :: integrate
   end type pf_sweeper_t
 
 

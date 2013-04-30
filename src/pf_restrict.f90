@@ -117,7 +117,7 @@ contains
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
 
-    integer    :: m
+    integer    :: n, m, p
     real(pfdp) :: tm(G%nnodes)
     type(c_ptr) :: &
          tmpG(G%nnodes), &    ! coarse integral of coarse function values
@@ -188,7 +188,15 @@ contains
 
     ! compute '0 to node' integral on the coarse level
 
-    call pf_integrate(G, dt, G%Qmat, tmpG)
+    ! XXX: could use apply_mat here if it supported multiple pieces...
+    do n = 1, G%nnodes-1
+       call F%encap%setval(tmpG(n), 0.0d0)
+       do m = 1, G%nnodes
+          do p = 1, G%sweeper%npieces
+             call F%encap%axpy(tmpG(n), dt*G%Qmat(n, m), G%F(m, p))
+          end do
+       end do
+    end do
 
     ! restrict '0 to node' integral on the fine level (which was
     ! computed during the last call to pf_residual)

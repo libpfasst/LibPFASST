@@ -162,25 +162,4 @@ contains
     end do
   end subroutine pf_apply_mat
 
-
-  !
-  ! Integrate F and store in I.  XXX: redundant?
-  !
-  subroutine pf_integrate(F, dt, mat, I)
-    type(pf_level_t), intent(in)    :: F
-    real(pfdp),       intent(in)    :: dt, mat(:, :)
-    type(c_ptr),      intent(inout) :: I(:)
-
-    integer :: n, m, p
-
-    do n = 1, F%nnodes-1
-       call F%encap%setval(I(n), 0.0d0)
-       do m = 1, F%nnodes
-          do p = 1, F%sweeper%npieces
-             call F%encap%axpy(I(n), dt*mat(n, m), F%F(m, p))
-          end do
-       end do
-    end do
-  end subroutine pf_integrate
-
 end module pf_mod_utils
