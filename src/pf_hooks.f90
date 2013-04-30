@@ -32,13 +32,19 @@ module pf_mod_hooks
        PF_POST_SWEEP     = 8, &
        PF_PRE_STEP       = 9, &
        PF_POST_STEP      = 10, &
-       PF_MAX_HOOK       = 10
+       PF_PRE_INTERP_ALL = 11, &
+       PF_POST_INTERP_ALL = 12, &
+       PF_PRE_INTERP_Q0   = 13, &
+       PF_POST_INTERP_Q0  = 14, &
+       PF_PRE_RESTRICT_ALL  = 15, &
+       PF_POST_RESTRICT_ALL = 16, &
+       PF_MAX_HOOK          = 16
 
 
   integer, parameter :: &
        PF_HOOK_LOG_ONE  = 1, &
        PF_HOOK_LOG_ALL  = 7, &
-       PF_HOOK_LOG_LAST = 10
+       PF_HOOK_LOG_LAST = PF_MAX_HOOK
 
   character(len=20), parameter :: hook_names(PF_HOOK_LOG_LAST) = (/ &
        'pre-block          ',  &
@@ -50,7 +56,13 @@ module pf_mod_hooks
        'pre-sweep          ',  &
        'post-sweep         ',  &
        'pre-step           ',  &
-       'post-step          ' /)
+       'post-step          ',  &
+       'pre-interp-all     ',  &
+       'post-interp-all    ',  &
+       'pre-interp-q0      ',  &
+       'post-interp-q0     ',  &
+       'pre-restrict-all   ',  &
+       'post-restrict-all  ' /)
 
 contains
 

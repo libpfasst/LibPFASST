@@ -40,6 +40,7 @@ contains
     type(pf_level_t), pointer :: F, G
     integer :: j, k, l
 
+    call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
     F => pf%levels(pf%nlevels)

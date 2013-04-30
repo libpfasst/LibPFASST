@@ -19,6 +19,7 @@
 
 module pf_mod_imex
   use pf_mod_dtype
+  use pf_mod_hooks
   implicit none
   integer, parameter, private :: npieces = 2
 
@@ -84,6 +85,7 @@ contains
 
     call c_f_pointer(F%sweeper%ctx, imex)
 
+    call call_hooks(pf, F%level, PF_PRE_SWEEP)
     call start_timer(pf, TLEVEL+F%level-1)
 
     ! compute integrals and add fas correction
@@ -129,6 +131,8 @@ contains
     call F%encap%destroy(rhs)
 
     call end_timer(pf, TLEVEL+F%level-1)
+    call call_hooks(pf, F%level, PF_POST_SWEEP)
+
   end subroutine imex_sweep
 
   ! Evaluate function values
@@ -171,8 +175,9 @@ contains
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(inout) :: fintSDC(:)
 
-
     integer :: n, m, p
+
+    stop
 
     do n = 1, F%nnodes-1
        call F%encap%setval(fintSDC(n), 0.0d0)

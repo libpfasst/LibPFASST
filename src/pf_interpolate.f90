@@ -19,6 +19,10 @@
 
 module pf_mod_interpolate
   use pf_mod_dtype
+  use pf_mod_restrict
+  use pf_mod_timer
+  use pf_mod_hooks
+  use pf_mod_utils
   implicit none
 contains
 
@@ -27,10 +31,6 @@ contains
   ! Interpolation is done by interpolating increments.  The fine
   ! function values are re-evaluated after interpolation.
   subroutine interpolate_time_space(pf, t0, dt, F, G, Finterp)
-    use pf_mod_utils
-    use pf_mod_restrict
-    use pf_mod_timer
-
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
@@ -43,6 +43,7 @@ contains
          delG(G%nnodes), &
          delGF(G%nnodes)
 
+    call call_hooks(pf, F%level, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
@@ -129,13 +130,11 @@ contains
     end do
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
+    call call_hooks(pf, F%level, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
   subroutine interpolate_q0(pf, F, G)
     !  Use to update the fine initial condition from increment
-    use pf_mod_dtype
-    use pf_mod_restrict
-    use pf_mod_timer
 
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: F, G
@@ -143,6 +142,7 @@ contains
     type(c_ptr) ::    delG, delF
     type(c_ptr) ::    q0F,q0G
 
+    call call_hooks(pf, F%level, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
@@ -175,6 +175,7 @@ contains
     call G%encap%destroy(q0G)
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
+    call call_hooks(pf, F%level, PF_POST_INTERP_Q0)
   end subroutine interpolate_q0
 
 end module pf_mod_interpolate
