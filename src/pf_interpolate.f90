@@ -36,7 +36,7 @@ contains
     type(pf_level_t),  intent(inout) :: F, G
     logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
 
-    integer    :: m, n, p, trat
+    integer    :: m, n, p
     real(pfdp) :: tm(F%nnodes)
 
     type(c_ptr) :: &
@@ -48,8 +48,10 @@ contains
 
     ! create workspaces
     do m = 1, G%nnodes
-       call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
-       call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, &
+            G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, &
+            F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
@@ -69,7 +71,6 @@ contains
           end do
 
           ! interpolate corrections
-          trat = (F%nnodes-1) / (G%nnodes-1)
           do n = 1, F%nnodes
              do m = 1, G%nnodes
                 call G%encap%axpy(F%F(n,p), F%tmat(n,m), delGF(m))
@@ -86,8 +87,6 @@ contains
        call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
 
        ! interpolate corrections
-       trat = (F%nnodes-1) / (G%nnodes-1)
-
        do n = 1, F%nnodes
           call F%encap%axpy(F%Q(n), F%tmat(n,1), delGF(1))
        end do
@@ -112,8 +111,6 @@ contains
        end do
 
        ! interpolate corrections
-       trat = (F%nnodes-1) / (G%nnodes-1)
-
        call pf_apply_mat(F%Q, 1.0_pfdp, F%tmat, delGF, F%encap, .false.)
 
        ! recompute fs
@@ -146,26 +143,28 @@ contains
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
-    call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
-    call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, &
+         G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, &
+         F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, &
+         G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, &
+         F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)
     call G%encap%setval(q0G,  0.0_pfdp)
-    call G%encap%setval(delG,   0.0_pfdp)
-    call F%encap%setval(delF,  0.0_pfdp)
+    call G%encap%setval(delG, 0.0_pfdp)
+    call F%encap%setval(delF, 0.0_pfdp)
 
-    call G%encap%unpack(q0G,G%q0)
-    call F%encap%unpack(q0F,F%q0)
+    call G%encap%unpack(q0G, G%q0)
+    call F%encap%unpack(q0F, F%q0)
 
     call F%restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
-
     call G%encap%axpy(delG, -1.0_pfdp, q0G)
 
     call F%interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
-
     call F%encap%axpy(q0F, -1.0_pfdp, delF)
 
     call F%encap%pack(F%q0, q0F)

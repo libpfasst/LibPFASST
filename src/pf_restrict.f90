@@ -38,7 +38,6 @@
 
 module pf_mod_restrict
   use pf_mod_dtype
-  use pf_mod_utils
   use pf_mod_timer
   use pf_mod_hooks
   implicit none
@@ -49,14 +48,14 @@ contains
   ! Restrict (in time and space) qF to qG.
   !
   subroutine restrict_sdc(F, G, qF, qG, integral)
-    use pf_mod_utils, only: pf_apply_mat
+    use pf_mod_utils, only: apply_mat => pf_apply_mat
 
     type(pf_level_t), intent(inout) :: F, G
     type(c_ptr),      intent(inout) :: qF(:), qG(:)
     logical,          intent(in), optional :: integral
 
     type(c_ptr), pointer :: qFr(:)
-    integer     :: n, m
+    integer :: m
 
     if (present(integral) .and. integral) then
 
@@ -70,12 +69,7 @@ contains
 
        ! when restricting '0 to node' integral terms, skip the first
        ! entry since it is zero
-       do n = 1, G%nnodes-1
-          call G%encap%setval(qG(n), 0.d0)
-          do m = 1, F%nnodes-1
-             call G%encap%axpy(qG(n), F%rmat(n+1, m+1), qFr(m))
-          end do
-       end do
+       call apply_mat(qG, 1.d0, F%rmat(2:,2:), qFr, G%encap)
 
     else
 
@@ -87,12 +81,7 @@ contains
           call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
        end do
 
-       do n = 1, G%nnodes
-          call G%encap%setval(qG(n), 0.d0)
-          do m = 1, F%nnodes
-             call G%encap%axpy(qG(n), F%rmat(n, m), qFr(m))
-          end do
-       end do
+       call apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
 
     end if
 
@@ -113,11 +102,13 @@ contains
   ! evaluations may be different.
   !
   subroutine restrict_time_space_fas(pf, t0, dt, F, G)
+    use pf_mod_utils, only: apply_mat => pf_apply_mat_p2
+
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
 
-    integer    :: n, m, p
+    integer    :: m
     real(pfdp) :: tm(G%nnodes)
     type(c_ptr) :: &
          tmpG(G%nnodes), &    ! coarse integral of coarse function values
@@ -188,15 +179,7 @@ contains
 
     ! compute '0 to node' integral on the coarse level
 
-    ! XXX: could use apply_mat here if it supported multiple pieces...
-    do n = 1, G%nnodes-1
-       call F%encap%setval(tmpG(n), 0.0d0)
-       do m = 1, G%nnodes
-          do p = 1, G%sweeper%npieces
-             call F%encap%axpy(tmpG(n), dt*G%Qmat(n, m), G%F(m, p))
-          end do
-       end do
-    end do
+    call apply_mat(tmpG, dt, G%Qmat, G%F, G%encap)
 
     ! restrict '0 to node' integral on the fine level (which was
     ! computed during the last call to pf_residual)

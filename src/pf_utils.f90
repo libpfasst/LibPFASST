@@ -22,7 +22,6 @@ module pf_mod_utils
   implicit none
 contains
 
-
   !
   ! Build time interpolation matrix.
   !
@@ -161,5 +160,33 @@ contains
        end do
     end do
   end subroutine pf_apply_mat
+
+  subroutine pf_apply_mat_p2(dst, a, mat, src, encap, zero)
+    type(c_ptr),       intent(inout) :: dst(:)
+    real(pfdp),        intent(in)    :: a, mat(:, :)
+    type(c_ptr),       intent(in)    :: src(:, :)
+    type(pf_encap_t),  intent(in)    :: encap
+    logical,           intent(in), optional :: zero
+
+    logical :: lzero
+    integer :: n, m, p, np, i, j
+
+    lzero = .true.; if (present(zero)) lzero = zero
+
+    n  = size(mat, dim=1)
+    m  = size(mat, dim=2)
+    np = size(src, dim=2)
+    
+    ! XXX: test for nan's in matrices...
+
+    do i = 1, n
+       if (lzero) call encap%setval(dst(i), 0.0d0)
+       do j = 1, m
+          do p = 1, np
+             call encap%axpy(dst(i), a * mat(i, j), src(j, p))
+          end do
+       end do
+    end do
+  end subroutine pf_apply_mat_p2
 
 end module pf_mod_utils
