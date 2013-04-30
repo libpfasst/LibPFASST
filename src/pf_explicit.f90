@@ -121,6 +121,26 @@ contains
     end do
   end subroutine explicit_initialize
 
+
+  ! Compute SDC integral
+  subroutine explicit_integrate(F, qSDC, fSDC, dt, fintSDC)
+    type(pf_level_t), intent(in)    :: F
+    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
+    real(pfdp),       intent(in)    :: dt
+    type(c_ptr),      intent(inout) :: fintSDC(:)
+
+    integer :: n, m, p
+
+    do n = 1, F%nnodes-1
+       call F%encap%setval(fintSDC(n), 0.0d0)
+       do m = 1, F%nnodes
+          do p = 1, npieces
+             call F%encap%axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
+          end do
+       end do
+    end do
+  end subroutine explicit_integrate
+
   ! Create implicit sweeper
   subroutine explicit_create(sweeper, f1eval)
     type(pf_sweeper_t), intent(inout) :: sweeper
@@ -134,6 +154,7 @@ contains
     sweeper%sweep => explicit_sweep
     sweeper%evaluate => explicit_evaluate
     sweeper%initialize => explicit_initialize
+    sweeper%integrate => explicit_integrate
 
     sweeper%ctx = c_loc(exp)
   end subroutine explicit_create

@@ -111,24 +111,21 @@ contains
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: dt
 
-    integer :: n, m, p
+    integer :: m
 
-    ! integrate (Q mat), store in I (used in restriction later)
-    do n = 1, F%nnodes-1
-       ! call F%encap%copy(F%I(n), F%Q(1))
-       call F%encap%setval(F%I(n), 0.d0)
-       do m = 1, F%nnodes
-          do p = 1, F%sweeper%npieces
-             call F%encap%axpy(F%I(n), dt*F%Qmat(n, m), F%F(m, p))
-          end do
-       end do
+    call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
+    do m = 2, F%nnodes-1
+       call F%encap%axpy(F%I(m), 1.0_pfdp, F%I(m-1))
     end do
 
-    ! subtract out Q
+    ! subtract out Q, add tau
     do m = 1, F%nnodes-1
        call F%encap%copy(F%R(m), F%Q(1))
        call F%encap%axpy(F%R(m),  1.0_pfdp, F%I(m))
        call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
+       if (associated(F%tau)) then
+          call F%encap%axpy(F%R(m), 1.0_pfdp, F%tau(m))
+       end if
     end do
   end subroutine pf_residual
 
@@ -160,33 +157,5 @@ contains
        end do
     end do
   end subroutine pf_apply_mat
-
-  subroutine pf_apply_mat_p2(dst, a, mat, src, encap, zero)
-    type(c_ptr),       intent(inout) :: dst(:)
-    real(pfdp),        intent(in)    :: a, mat(:, :)
-    type(c_ptr),       intent(in)    :: src(:, :)
-    type(pf_encap_t),  intent(in)    :: encap
-    logical,           intent(in), optional :: zero
-
-    logical :: lzero
-    integer :: n, m, p, np, i, j
-
-    lzero = .true.; if (present(zero)) lzero = zero
-
-    n  = size(mat, dim=1)
-    m  = size(mat, dim=2)
-    np = size(src, dim=2)
-    
-    ! XXX: test for nan's in matrices...
-
-    do i = 1, n
-       if (lzero) call encap%setval(dst(i), 0.0d0)
-       do j = 1, m
-          do p = 1, np
-             call encap%axpy(dst(i), a * mat(i, j), src(j, p))
-          end do
-       end do
-    end do
-  end subroutine pf_apply_mat_p2
 
 end module pf_mod_utils

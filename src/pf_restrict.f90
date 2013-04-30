@@ -48,7 +48,7 @@ contains
   ! Restrict (in time and space) qF to qG.
   !
   subroutine restrict_sdc(F, G, qF, qG, integral)
-    use pf_mod_utils, only: apply_mat => pf_apply_mat
+    use pf_mod_utils, only: pf_apply_mat
 
     type(pf_level_t), intent(inout) :: F, G
     type(c_ptr),      intent(inout) :: qF(:), qG(:)
@@ -69,7 +69,7 @@ contains
 
        ! when restricting '0 to node' integral terms, skip the first
        ! entry since it is zero
-       call apply_mat(qG, 1.d0, F%rmat(2:,2:), qFr, G%encap)
+       call pf_apply_mat(qG, 1.d0, F%rmat(2:,2:), qFr, G%encap)
 
     else
 
@@ -81,7 +81,7 @@ contains
           call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
        end do
 
-       call apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
+       call pf_apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
 
     end if
 
@@ -102,8 +102,6 @@ contains
   ! evaluations may be different.
   !
   subroutine restrict_time_space_fas(pf, t0, dt, F, G)
-    use pf_mod_utils, only: apply_mat => pf_apply_mat_p2
-
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
@@ -179,7 +177,10 @@ contains
 
     ! compute '0 to node' integral on the coarse level
 
-    call apply_mat(tmpG, dt, G%Qmat, G%F, G%encap)
+    call G%sweeper%integrate(G, G%Q, G%F, dt, tmpG)
+    do m = 2, G%nnodes-1
+       call G%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
+    end do
 
     ! restrict '0 to node' integral on the fine level (which was
     ! computed during the last call to pf_residual)

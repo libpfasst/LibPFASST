@@ -82,6 +82,7 @@ module pf_mod_dtype
      procedure(pf_sweep_p),      pointer, nopass :: sweep
      procedure(pf_initialize_p), pointer, nopass :: initialize
      procedure(pf_evaluate_p),   pointer, nopass :: evaluate
+     procedure(pf_integrate_p),  pointer, nopass :: integrate
   end type pf_sweeper_t
 
 
@@ -233,7 +234,7 @@ module pf_mod_dtype
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
        type(pf_level_t),  intent(in)    :: F
-       type(c_ptr),       intent(in)    :: qSDC(:, :), fSDC(:, :)
+       type(c_ptr),       intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),        intent(in)    :: dt
        type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
