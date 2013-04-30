@@ -35,9 +35,9 @@ contains
 
     type(ad_work_t), pointer :: work
 
-    integer :: i, l
+    integer     :: i
     type(c_ptr) :: wk
-    real(pfdp) :: kx
+    real(pfdp)  :: kx
 
     allocate(work)
 

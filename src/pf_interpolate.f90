@@ -19,6 +19,10 @@
 
 module pf_mod_interpolate
   use pf_mod_dtype
+  use pf_mod_restrict
+  use pf_mod_timer
+  use pf_mod_hooks
+  use pf_mod_utils
   implicit none
 contains
 
@@ -27,28 +31,27 @@ contains
   ! Interpolation is done by interpolating increments.  The fine
   ! function values are re-evaluated after interpolation.
   subroutine interpolate_time_space(pf, t0, dt, F, G, Finterp)
-    use pf_mod_utils
-    use pf_mod_restrict
-    use pf_mod_timer
-
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
     logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
 
-    integer    :: m, n, p, trat
+    integer    :: m, n, p
     real(pfdp) :: tm(F%nnodes)
 
     type(c_ptr) :: &
          delG(G%nnodes), &
          delGF(G%nnodes)
 
+    call call_hooks(pf, F%level, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
     do m = 1, G%nnodes
-       call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
-       call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
+       call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, &
+            G%nvars, G%shape, G%ctx, G%encap%ctx)
+       call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, &
+            F%nvars, F%shape, F%ctx, F%encap%ctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
@@ -68,7 +71,6 @@ contains
           end do
 
           ! interpolate corrections
-          trat = (F%nnodes-1) / (G%nnodes-1)
           do n = 1, F%nnodes
              do m = 1, G%nnodes
                 call G%encap%axpy(F%F(n,p), F%tmat(n,m), delGF(m))
@@ -85,8 +87,6 @@ contains
        call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
 
        ! interpolate corrections
-       trat = (F%nnodes-1) / (G%nnodes-1)
-
        do n = 1, F%nnodes
           call F%encap%axpy(F%Q(n), F%tmat(n,1), delGF(1))
        end do
@@ -111,8 +111,6 @@ contains
        end do
 
        ! interpolate corrections
-       trat = (F%nnodes-1) / (G%nnodes-1)
-
        call pf_apply_mat(F%Q, 1.0_pfdp, F%tmat, delGF, F%encap, .false.)
 
        ! recompute fs
@@ -129,13 +127,11 @@ contains
     end do
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
+    call call_hooks(pf, F%level, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
   subroutine interpolate_q0(pf, F, G)
     !  Use to update the fine initial condition from increment
-    use pf_mod_dtype
-    use pf_mod_restrict
-    use pf_mod_timer
 
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: F, G
@@ -143,29 +139,32 @@ contains
     type(c_ptr) ::    delG, delF
     type(c_ptr) ::    q0F,q0G
 
+    call call_hooks(pf, F%level, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + F%level - 1)
 
     ! create workspaces
-    call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
-    call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, G%nvars, G%shape, G%ctx, G%encap%ctx)
-    call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, &
+         G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, &
+         F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, &
+         G%nvars, G%shape, G%ctx, G%encap%ctx)
+    call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, &
+         F%nvars, F%shape, F%ctx, F%encap%ctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)
     call G%encap%setval(q0G,  0.0_pfdp)
-    call G%encap%setval(delG,   0.0_pfdp)
-    call F%encap%setval(delF,  0.0_pfdp)
+    call G%encap%setval(delG, 0.0_pfdp)
+    call F%encap%setval(delF, 0.0_pfdp)
 
-    call G%encap%unpack(q0G,G%q0)
-    call F%encap%unpack(q0F,F%q0)
+    call G%encap%unpack(q0G, G%q0)
+    call F%encap%unpack(q0F, F%q0)
 
     call F%restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
-
     call G%encap%axpy(delG, -1.0_pfdp, q0G)
 
     call F%interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
-
     call F%encap%axpy(q0F, -1.0_pfdp, delF)
 
     call F%encap%pack(F%q0, q0F)
@@ -175,6 +174,7 @@ contains
     call G%encap%destroy(q0G)
 
     call end_timer(pf, TINTERPOLATE + F%level - 1)
+    call call_hooks(pf, F%level, PF_POST_INTERP_Q0)
   end subroutine interpolate_q0
 
 end module pf_mod_interpolate

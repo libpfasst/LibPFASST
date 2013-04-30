@@ -10,7 +10,7 @@ contains
     type(pf_state_t),  intent(in)    :: state
     type(c_ptr),       intent(in)    :: ctx
 
-    print *, hook_names(state%hook), state%level
+    print *, pf%rank, hook_names(state%hook), state%level
   end subroutine pf_logger_hook
 
   subroutine pf_logger_attach(pf)
@@ -24,7 +24,7 @@ contains
 
     do l = 1, pf%nlevels
        do h = PF_HOOK_LOG_ALL, PF_HOOK_LOG_LAST
-          call pf_add_hook(pf, 1, h, pf_logger_hook)
+          call pf_add_hook(pf, l, h, pf_logger_hook)
        end do
     end do
   end subroutine pf_logger_attach

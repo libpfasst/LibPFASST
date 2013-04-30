@@ -130,6 +130,8 @@ module pf_mod_dtype
           pQ(:), &                      ! unknowns at sdc nodes, previous sweep
           F(:,:), &                     ! functions values at sdc nodes
           pF(:,:), &                    ! functions at sdc nodes, previous sweep
+          R(:), &                       ! full residuals
+          I(:), &                       ! 0 to node integrals
           S(:), &                       ! node to node integrals
           tau(:)                        ! fas correction
 
@@ -232,7 +234,7 @@ module pf_mod_dtype
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
        type(pf_level_t),  intent(in)    :: F
-       type(c_ptr),       intent(in)    :: qSDC(:, :), fSDC(:, :)
+       type(c_ptr),       intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),        intent(in)    :: dt
        type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p

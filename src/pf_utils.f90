@@ -22,7 +22,6 @@ module pf_mod_utils
   implicit none
 contains
 
-
   !
   ! Build time interpolation matrix.
   !
@@ -102,32 +101,31 @@ contains
 
 
   !
-  ! Compute final residual (generic but inefficient).
+  ! Compute full residual
   !
-  subroutine pf_residual(F, dt, residual)
+  ! During the process of computing the residual we compute the '0 to
+  ! node' integral and store it in I.  This is used later when doing
+  ! restriction (see restrict_time_space_fas).
+  !
+  subroutine pf_residual(F, dt)
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: dt
-    type(c_ptr),      intent(in)    :: residual
 
-    type(c_ptr) :: fintSDC(F%nnodes-1)
-    integer     :: n
+    integer :: m
 
-    do n = 1, F%nnodes-1
-       call F%encap%create(fintSDC(n), F%level, SDC_KIND_INTEGRAL, &
-            F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
+    do m = 2, F%nnodes-1
+       call F%encap%axpy(F%I(m), 1.0_pfdp, F%I(m-1))
     end do
 
-    ! integrate and compute residual
-    call F%sweeper%integrate(F, F%Q, F%F, dt, fintSDC)
-
-    call F%encap%copy(residual, F%Q(1))
-    do n = 1, F%nnodes-1
-       call F%encap%axpy(residual, 1.0_pfdp, fintSDC(n))
-    end do
-    call F%encap%axpy(residual, -1.0_pfdp, F%Q(F%nnodes))
-
-    do n = 1, F%nnodes-1
-       call F%encap%destroy(fintSDC(n))
+    ! subtract out Q, add tau
+    do m = 1, F%nnodes-1
+       call F%encap%copy(F%R(m), F%Q(1))
+       call F%encap%axpy(F%R(m),  1.0_pfdp, F%I(m))
+       call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
+       if (associated(F%tau)) then
+          call F%encap%axpy(F%R(m), 1.0_pfdp, F%tau(m))
+       end if
     end do
   end subroutine pf_residual
 
@@ -159,26 +157,5 @@ contains
        end do
     end do
   end subroutine pf_apply_mat
-
-
-  !
-  ! Integrate F and store in I.  XXX: redundant?
-  !
-  subroutine pf_integrate(F, dt, mat, I)
-    type(pf_level_t), intent(in)    :: F
-    real(pfdp),       intent(in)    :: dt, mat(:, :)
-    type(c_ptr),      intent(inout) :: I(:)
-
-    integer :: n, m, p
-
-    do n = 1, F%nnodes-1
-       call F%encap%setval(I(n), 0.0d0)
-       do m = 1, F%nnodes
-          do p = 1, F%sweeper%npieces
-             call F%encap%axpy(I(n), dt*mat(n, m), F%F(m, p))
-          end do
-       end do
-    end do
-  end subroutine pf_integrate
 
 end module pf_mod_utils

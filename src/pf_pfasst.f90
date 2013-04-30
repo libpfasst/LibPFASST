@@ -22,10 +22,9 @@ module pf_mod_pfasst
   implicit none
 contains
 
+  !
   ! Create a PFASST object
   !
-  ! Passing the 'nvars' and 'nnodes' arrays is optional, but these
-  ! should be set appropriately before calling setup.
   subroutine pf_pfasst_create(pf, comm, maxlevels)
     use pf_mod_hooks, only: PF_MAX_HOOK
     type(pf_pfasst_t),   intent(inout)         :: pf
@@ -55,23 +54,27 @@ contains
   end subroutine pf_pfasst_create
 
 
+  !
   ! Create a PFASST level object
+  !
   subroutine pf_level_create(level, nlevel)
     type(pf_level_t), intent(inout) :: level
     integer,          intent(in)    :: nlevel
 
     level%level = nlevel
-    level%shape => null()
-    level%tau   => null()
-    level%pF    => null()
-    level%pQ    => null()
-    level%smat  => null()
-    level%rmat  => null()
-    level%tmat  => null()
+    nullify(level%shape)
+    nullify(level%tau)
+    nullify(level%pF)
+    nullify(level%pQ)
+    nullify(level%smat)
+    nullify(level%rmat)
+    nullify(level%tmat)
   end subroutine pf_level_create
 
 
-  ! Setup (allocate) PFASST object
+  !
+  ! Setup PFASST object
+  !
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
 
@@ -101,11 +104,12 @@ contains
 
   end subroutine pf_pfasst_setup
 
-
-  ! Setup (allocate) PFASST object
+  !
+  ! Setup (allocate) PFASST level
   !
   ! If the level is already setup, calling this again will allocate
   ! (or deallocate) tau appropriately.
+  !
   subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
 
@@ -118,76 +122,11 @@ contains
     nnodes  = F%nnodes
     npieces = F%sweeper%npieces
 
-    if (.not. F%allocated) then
 
-       allocate(F%q0(nvars))
-       allocate(F%send(nvars))
-       allocate(F%recv(nvars))
-       allocate(F%Q(nnodes))
-       allocate(F%F(nnodes,npieces))
-       allocate(F%S(nnodes-1))
-       allocate(F%nodes(nnodes))
-       allocate(F%nflags(nnodes))
-       allocate(F%s0mat(nnodes-1,nnodes))
-       allocate(F%qmat(nnodes-1,nnodes))
-
-       if (F%Finterp) then
-          if (F%level < pf%nlevels) then
-             allocate(F%pF(nnodes,npieces))
-             allocate(F%pQ(1))
-          end if
-       else
-          if (F%level < pf%nlevels) then
-             allocate(F%pQ(nnodes))
-          end if
-       end if
-
-       call F%encap%create(F%qend, F%level, SDC_KIND_SOL_NO_FEVAL, &
-            nvars, F%shape, F%ctx, F%encap%ctx)
-
-       do m = 1, nnodes
-          call F%encap%create(F%Q(m), F%level, SDC_KIND_SOL_FEVAL, &
-               nvars, F%shape, F%ctx, F%encap%ctx)
-          do p = 1, npieces
-             call F%encap%create(F%F(m,p), F%level, SDC_KIND_FEVAL, &
-                  nvars, F%shape, F%ctx, F%encap%ctx)
-          end do
-       end do
-
-       do m = 1, nnodes-1
-          call F%encap%create(F%S(m), F%level, SDC_KIND_INTEGRAL, &
-               nvars, F%shape, F%ctx, F%encap%ctx)
-       end do
-
-
-       ! create space to store previous iteration info
-       if (F%level < pf%nlevels) then
-
-          if (F%Finterp) then  !  Doing store of f and qSDC(1) only
-             do m = 1, nnodes
-                do p = 1, npieces
-                   call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, &
-                        nvars, F%shape, F%ctx, F%encap%ctx)
-                end do
-             end do
-             call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                  nvars, F%shape, F%ctx, F%encap%ctx)
-          else   !  Storing all qSDC
-             do m = 1, nnodes
-                call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                     nvars, F%shape, F%ctx, F%encap%ctx)
-             end do
-          end if
-
-       end if
-
-       call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            F%nodes, F%nflags, F%s0mat, F%qmat)
-
-       call F%sweeper%initialize(F)
-
-    end if
-
+    !
+    ! (re)allocate tau (may to need create/destroy tau dynamically
+    !                   when doing AMR)
+    !
     if ((F%level < pf%nlevels) .and. (.not. associated(F%tau))) then
        allocate(F%tau(nnodes-1))
        do m = 1, nnodes-1
@@ -202,10 +141,105 @@ contains
        nullify(F%tau)
     end if
 
+    !
+    ! skip the rest if we're already allocated
+    !
+
+    if (F%allocated) return
+
     F%allocated = .true.
+
+    !
+    ! allocate flat buffers (q0, send, and recv)
+    !
+    allocate(F%q0(nvars))
+    allocate(F%send(nvars))
+    allocate(F%recv(nvars))
+
+    !
+    ! nodes, flags, and integration matrices
+    !
+    allocate(F%nodes(nnodes))
+    allocate(F%nflags(nnodes))
+    allocate(F%s0mat(nnodes-1,nnodes))
+    allocate(F%qmat(nnodes-1,nnodes))
+
+    call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
+         F%nodes, F%nflags, F%s0mat, F%qmat)
+
+    call F%sweeper%initialize(F)
+
+    !
+    ! allocate Q and F
+    !
+    allocate(F%Q(nnodes))
+    allocate(F%F(nnodes,npieces))
+
+    do m = 1, nnodes
+       call F%encap%create(F%Q(m), F%level, SDC_KIND_SOL_FEVAL, &
+            nvars, F%shape, F%ctx, F%encap%ctx)
+       do p = 1, npieces
+          call F%encap%create(F%F(m,p), F%level, SDC_KIND_FEVAL, &
+               nvars, F%shape, F%ctx, F%encap%ctx)
+       end do
+    end do
+
+    !
+    ! allocate S, I, and R
+    !
+    allocate(F%S(nnodes-1))
+    allocate(F%I(nnodes-1))
+    allocate(F%R(nnodes-1))
+
+    do m = 1, nnodes-1
+       call F%encap%create(F%S(m), F%level, SDC_KIND_INTEGRAL, &
+            nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(F%I(m), F%level, SDC_KIND_INTEGRAL, &
+            nvars, F%shape, F%ctx, F%encap%ctx)
+       call F%encap%create(F%R(m), F%level, SDC_KIND_INTEGRAL, &
+            nvars, F%shape, F%ctx, F%encap%ctx)
+    end do
+
+    !
+    ! allocate pQ and pF
+    !
+    if (F%level < pf%nlevels) then
+
+       if (F%Finterp) then  
+          ! store F and Q(1) only
+          allocate(F%pF(nnodes,npieces))
+          allocate(F%pQ(1))
+          do m = 1, nnodes
+             do p = 1, npieces
+                call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, &
+                     nvars, F%shape, F%ctx, F%encap%ctx)
+             end do
+          end do
+          call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, &
+               nvars, F%shape, F%ctx, F%encap%ctx)
+       else 
+          ! store Q
+          allocate(F%pQ(nnodes))
+          do m = 1, nnodes
+             call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
+                  nvars, F%shape, F%ctx, F%encap%ctx)
+          end do
+       end if
+
+    end if
+
+    !
+    ! allocate Qend
+    !
+    call F%encap%create(F%qend, F%level, SDC_KIND_SOL_NO_FEVAL, &
+         nvars, F%shape, F%ctx, F%encap%ctx)
+
   end subroutine pf_level_setup
 
+
+  !
   ! Deallocate PFASST object
+  !
   subroutine pf_pfasst_destroy(pf)
     type(pf_pfasst_t), intent(inout) :: pf
 
@@ -219,100 +253,102 @@ contains
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
 
-    if (associated(pf%cycles%start)) deallocate(pf%cycles%start)
+    if (associated(pf%cycles%start))  deallocate(pf%cycles%start)
     if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
-    if (associated(pf%cycles%end)) deallocate(pf%cycles%end)
-
-    ! if (pf%log > 0) then
-    !    close(pf%log)
-    ! end if
+    if (associated(pf%cycles%end))    deallocate(pf%cycles%end)
   end subroutine pf_pfasst_destroy
 
-  ! Deallocate PFASST level object
+
+  !
+  ! Deallocate PFASST level
+  !
   subroutine pf_level_destroy(F)
     type(pf_level_t), intent(inout) :: F
 
     integer :: m, p
 
-    if (F%allocated) then
-       deallocate(F%q0)
-       deallocate(F%send)
-       deallocate(F%recv)
-       deallocate(F%nodes)
-       deallocate(F%nflags)
-       deallocate(F%qmat)
-       deallocate(F%s0mat)
+    if (.not. F%allocated) return
 
-       if (associated(F%shape)) then
-          deallocate(F%shape)
-       end if
+    ! flat buffers
+    deallocate(F%q0)
+    deallocate(F%send)
+    deallocate(F%recv)
 
-       if (associated(F%smat)) then
-          deallocate(F%smat)
-       end if
+    ! nodes, flags, and integration matrices
+    deallocate(F%nodes)
+    deallocate(F%nflags)
+    deallocate(F%qmat)
+    deallocate(F%s0mat)
 
-       call F%encap%destroy(F%qend)
-       ! call F%encap%destroy(F%qex)
+    if (associated(F%smat)) then
+       deallocate(F%smat)
+    end if
 
-       do m = 1, F%nnodes
-          call F%encap%destroy(F%Q(m))
-          do p = 1, size(F%F(m,:))
-             call F%encap%destroy(F%F(m,p))
-          end do
+    ! Q and F
+    do m = 1, F%nnodes
+       call F%encap%destroy(F%Q(m))
+       do p = 1, size(F%F(m,:))
+          call F%encap%destroy(F%F(m,p))
        end do
+    end do
+    deallocate(F%Q)
+    deallocate(F%F)
 
-       do m = 1, F%nnodes-1
-          call F%encap%destroy(F%S(m))
-       end do
+    ! S, I, and R
+    do m = 1, F%nnodes-1
+       call F%encap%destroy(F%S(m))
+       call F%encap%destroy(F%I(m))
+       call F%encap%destroy(F%R(m))
+    end do
+    deallocate(F%S)
+    deallocate(F%I)
+    deallocate(F%R)
 
+    ! pQ and pF
+    if (associated(F%pQ)) then
        if (F%Finterp) then
           do m = 1, F%nnodes
              do p = 1, size(F%F(m,:))
-                if (associated(F%pF)) then
-                   call F%encap%destroy(F%pF(m,p))
-                end if
+                call F%encap%destroy(F%pF(m,p))
              end do
           end do
-          if (associated(F%pQ)) then
-             call F%encap%destroy(F%pQ(1))
-          end if
-       else
+          call F%encap%destroy(F%pQ(1))
+          deallocate(F%pF)
+          deallocate(F%pQ)
+       else 
           do m = 1, F%nnodes
-             if (associated(F%pQ)) then
-                call F%encap%destroy(F%pQ(m))
-             end if
+             call F%encap%destroy(F%pQ(m))
           end do
+          deallocate(F%pQ)
        end if
+       nullify(F%pQ)
+    end if
 
+    ! qend
+    call F%encap%destroy(F%qend)
 
-       deallocate(F%Q)
-       deallocate(F%F)
-       deallocate(F%S)
+    ! tau
+    if (associated(F%tau)) then
+       do m = 1, F%nnodes-1
+          call F%encap%destroy(F%tau(m))
+       end do
+       deallocate(F%tau)
+       nullify(F%tau)
+    end if
 
-       if (F%Finterp) then
-          if (associated(F%pF)) deallocate(F%pF)
-       else
-          if (associated(F%pQ)) deallocate(F%pQ)
-       end if
+    ! other
+    if (associated(F%shape)) then
+       deallocate(F%shape)
+    end if
 
-       if (associated(F%tau)) then
-          do m = 1, F%nnodes-1
-             call F%encap%destroy(F%tau(m))
-          end do
-          deallocate(F%tau)
-          nullify(F%tau)
-       end if
+    if (associated(F%tmat)) then
+       deallocate(F%tmat)
+       nullify(F%tmat)
+    end if
 
-       if (associated(F%tmat)) then
-          deallocate(F%tmat)
-          nullify(F%tmat)
-       end if
-
-       if (associated(F%rmat)) then
-          deallocate(F%rmat)
-          nullify(F%rmat)
-       end if
-
+    if (associated(F%rmat)) then
+       deallocate(F%rmat)
+       nullify(F%rmat)
     end if
 
   end subroutine pf_level_destroy

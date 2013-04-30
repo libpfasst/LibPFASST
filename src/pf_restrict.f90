@@ -24,7 +24,7 @@
 !
 !   2013-04-17 - Matthew Emmett
 !
-!     Time restriction was switched from point injection polynomial
+!     Time restriction was switched from point injection to polynomial
 !     interpolation (ie, using the 'rmat's in each level) so that we
 !     can use proper nodes for each level.
 !
@@ -38,6 +38,8 @@
 
 module pf_mod_restrict
   use pf_mod_dtype
+  use pf_mod_timer
+  use pf_mod_hooks
   implicit none
 contains
 
@@ -45,29 +47,48 @@ contains
   !
   ! Restrict (in time and space) qF to qG.
   !
-  subroutine restrict_sdc(F, G, qF, qG)
+  subroutine restrict_sdc(F, G, qF, qG, integral)
     use pf_mod_utils, only: pf_apply_mat
 
     type(pf_level_t), intent(inout) :: F, G
-    type(c_ptr),      intent(inout) :: qF(F%nnodes), qG(G%nnodes)
+    type(c_ptr),      intent(inout) :: qF(:), qG(:)
+    logical,          intent(in), optional :: integral
 
-    type(c_ptr) :: qFr(F%nnodes)
-    integer     :: m
+    type(c_ptr), pointer :: qFr(:)
+    integer :: m
 
-    do m = 1, F%nnodes
-       call G%encap%create(qFr(m), G%level, SDC_KIND_SOL_NO_FEVAL, &
-            G%nvars, G%shape, G%ctx, G%encap%ctx)
-    end do
+    if (present(integral) .and. integral) then
 
-    do m = 1, F%nnodes
-       call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
-    end do
+       allocate(qFr(F%nnodes-1))
 
-    call pf_apply_mat(qG, 1.0_pfdp, F%rmat, qFr, F%encap)
+       do m = 1, F%nnodes-1
+          call G%encap%create(qFr(m), G%level, SDC_KIND_INTEGRAL, &
+               G%nvars, G%shape, G%ctx, G%encap%ctx)
+          call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
+       end do
 
-    do m = 1, F%nnodes
+       ! when restricting '0 to node' integral terms, skip the first
+       ! entry since it is zero
+       call pf_apply_mat(qG, 1.d0, F%rmat(2:,2:), qFr, G%encap)
+
+    else
+
+       allocate(qFr(F%nnodes))
+
+       do m = 1, F%nnodes
+          call G%encap%create(qFr(m), G%level, SDC_KIND_SOL_NO_FEVAL, &
+               G%nvars, G%shape, G%ctx, G%encap%ctx)
+          call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
+       end do
+
+       call pf_apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
+
+    end if
+
+    do m = 1, size(qFr)
        call G%encap%destroy(qFr(m))
     end do
+    deallocate(qFr)
 
   end subroutine restrict_sdc
 
@@ -81,10 +102,6 @@ contains
   ! evaluations may be different.
   !
   subroutine restrict_time_space_fas(pf, t0, dt, F, G)
-    use pf_mod_dtype
-    use pf_mod_utils
-    use pf_mod_timer
-
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: F, G
@@ -94,8 +111,9 @@ contains
     type(c_ptr) :: &
          tmpG(G%nnodes), &    ! coarse integral of coarse function values
          tmpF(F%nnodes), &    ! fine integral of fine function values
-         tmpFr(G%nnodes)       ! coarse integral of restricted fine function values
+         tmpFr(G%nnodes)      ! coarse integral of restricted fine function values
 
+    call call_hooks(pf, F%level, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + F%level - 1)
 
     !
@@ -136,19 +154,19 @@ contains
 
     if (associated(F%tau)) then
        ! convert from 'node to node' to '0 to node'
-       call F%encap%setval(tmpF(1), 0.0_pfdp)
-       do m = 2, F%nnodes
+       call F%encap%copy(tmpF(1), F%tau(1))
+       do m = 2, F%nnodes-1
           call F%encap%copy(tmpF(m), tmpF(m-1))
-          call F%encap%axpy(tmpF(m), 1.0_pfdp, F%tau(m-1))
+          call F%encap%axpy(tmpF(m), 1.0_pfdp, F%tau(m))
        end do
 
-       call restrict_sdc(F, G, tmpF, tmpG)
+       call restrict_sdc(F, G, tmpF, tmpG, integral=.true.)
 
        ! convert from '0 to node' to 'node to node'
-       call G%encap%copy(G%tau(1), tmpG(2))
+       call G%encap%copy(G%tau(1), tmpG(1))
        do m = 2, G%nnodes-1
-          call G%encap%copy(G%tau(m), tmpG(m+1))
-          call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m))
+          call G%encap%copy(G%tau(m), tmpG(m))
+          call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m-1))
        end do
     end if
 
@@ -157,26 +175,29 @@ contains
     ! fas correction
     !
 
-    ! compute '0 to node' integrals (Q mat), and set the value at the
-    ! first node to 0.0 (which is the integral from 0 to 0)
+    ! compute '0 to node' integral on the coarse level
 
-    call G%encap%setval(tmpG(1), 0.0_pfdp)
-    call F%encap%setval(tmpF(1), 0.0_pfdp)
+    call G%sweeper%integrate(G, G%Q, G%F, dt, tmpG)
+    do m = 2, G%nnodes-1
+       call G%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
+    end do
 
-    call pf_integrate(G, dt, G%Qmat, tmpG(2:))
-    call pf_integrate(F, dt, F%Qmat, tmpF(2:))
+    ! restrict '0 to node' integral on the fine level (which was
+    ! computed during the last call to pf_residual)
 
-    ! now restrict the fine integral (using rmat) and compute the
-    ! 'node to node' tau correction
+    call restrict_sdc(F, G, F%I, tmpFr, integral=.true.)
 
-    call restrict_sdc(F, G, tmpF, tmpFr)
+    ! compute 'node to node' tau correction
 
-    do m = 1, G%nnodes-1
-       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpFr(m+1))
-       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpFr(m))
+    call G%encap%axpy(G%tau(1),  1.0_pfdp, tmpFr(1))
+    call G%encap%axpy(G%tau(1), -1.0_pfdp, tmpG(1))
 
-       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m+1))
-       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpG(m))
+    do m = 2, G%nnodes-1
+       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpFr(m))
+       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpFr(m-1))
+
+       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m))
+       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpG(m-1))
     end do
 
 
@@ -194,6 +215,7 @@ contains
     end do
 
     call end_timer(pf, TRESTRICT + F%level - 1)
+    call call_hooks(pf, F%level, PF_POST_RESTRICT_ALL)
 
   end subroutine restrict_time_space_fas
 

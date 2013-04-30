@@ -125,7 +125,7 @@ contains
   ! Compute SDC integral
   subroutine explicit_integrate(F, qSDC, fSDC, dt, fintSDC)
     type(pf_level_t), intent(in)    :: F
-    type(c_ptr),      intent(in)    :: qSDC(:, :), fSDC(:, :)
+    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(inout) :: fintSDC(:)
 

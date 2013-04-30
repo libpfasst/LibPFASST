@@ -19,6 +19,7 @@
 
 module pf_mod_imex
   use pf_mod_dtype
+  use pf_mod_hooks
   implicit none
   integer, parameter, private :: npieces = 2
 
@@ -49,20 +50,10 @@ module pf_mod_imex
      end subroutine pf_f2comp_p
   end interface
 
-  interface
-     subroutine pf_imex_rhs_p(rhs, q0, dt, f1, S, level, ctx)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: rhs, q0, f1, S, ctx
-       real(pfdp),  intent(in)        :: dt
-       integer,     intent(in)        :: level
-     end subroutine pf_imex_rhs_p
-  end interface
-
   type :: pf_imex_t
      procedure(pf_f1eval_p),   pointer, nopass :: f1eval
      procedure(pf_f2eval_p),   pointer, nopass :: f2eval
      procedure(pf_f2comp_p),   pointer, nopass :: f2comp
-     procedure(pf_imex_rhs_p), pointer, nopass :: gen_rhs
   end type pf_imex_t
 
 contains
@@ -84,6 +75,7 @@ contains
 
     call c_f_pointer(F%sweeper%ctx, imex)
 
+    call call_hooks(pf, F%level, PF_PRE_SWEEP)
     call start_timer(pf, TLEVEL+F%level-1)
 
     ! compute integrals and add fas correction
@@ -111,13 +103,9 @@ contains
     do m = 1, F%nnodes-1
        t = t + dtsdc(m)
 
-       if (associated(imex%gen_rhs)) then
-          call imex%gen_rhs(rhs, F%Q(m), dtsdc(m), F%F(m,1), F%S(m), F%level, F%ctx)
-       else
-          call F%encap%copy(rhs, F%Q(m))
-          call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
-          call F%encap%axpy(rhs, 1.0d0, F%S(m))
-       end if
+       call F%encap%copy(rhs, F%Q(m))
+       call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
+       call F%encap%axpy(rhs, 1.0d0, F%S(m))
 
        call imex%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,2))
        call imex%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
@@ -129,6 +117,8 @@ contains
     call F%encap%destroy(rhs)
 
     call end_timer(pf, TLEVEL+F%level-1)
+    call call_hooks(pf, F%level, PF_POST_SWEEP)
+
   end subroutine imex_sweep
 
   ! Evaluate function values
@@ -167,10 +157,9 @@ contains
   ! Compute SDC integral
   subroutine imex_integrate(F, qSDC, fSDC, dt, fintSDC)
     type(pf_level_t), intent(in)    :: F
-    type(c_ptr),      intent(in)    :: qSDC(:, :), fSDC(:, :)
+    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(inout) :: fintSDC(:)
-
 
     integer :: n, m, p
 
@@ -197,7 +186,6 @@ contains
     imex%f1eval => f1eval
     imex%f2eval => f2eval
     imex%f2comp => f2comp
-    imex%gen_rhs => null()
 
     sweeper%npieces = npieces
     sweeper%sweep      => imex_sweep

@@ -40,18 +40,9 @@ module pf_mod_implicit
      end subroutine pf_f2comp_p
   end interface
 
-  interface
-     subroutine pf_imp_rhs_p(rhs, q0, S, level, ctx)
-       import c_ptr
-       type(c_ptr), intent(in), value :: rhs, q0, S, ctx
-       integer,     intent(in)        :: level
-     end subroutine pf_imp_rhs_p
-  end interface
-
   type :: pf_implicit_t
      procedure(pf_f2eval_p),  pointer, nopass :: f2eval
      procedure(pf_f2comp_p),  pointer, nopass :: f2comp
-     procedure(pf_imp_rhs_p), pointer, nopass :: gen_rhs
   end type pf_implicit_t
 
 contains
@@ -98,12 +89,8 @@ contains
     do m = 1, F%nnodes-1
        t = t + dtsdc(m)
 
-       if (associated(imp%gen_rhs)) then
-          call imp%gen_rhs(rhs, F%Q(m), F%S(m), F%level, F%ctx)
-       else
-          call F%encap%copy(rhs, F%Q(m))
-          call F%encap%axpy(rhs, 1.0d0, F%S(m))
-       end if
+       call F%encap%copy(rhs, F%Q(m))
+       call F%encap%axpy(rhs, 1.0d0, F%S(m))
 
        call imp%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,1))
     end do
@@ -151,7 +138,7 @@ contains
   ! Compute SDC integral
   subroutine implicit_integrate(F, qSDC, fSDC, dt, fintSDC)
     type(pf_level_t), intent(in)    :: F
-    type(c_ptr),      intent(in)    :: qSDC(:, :), fSDC(:, :)
+    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(inout) :: fintSDC(:)
 
