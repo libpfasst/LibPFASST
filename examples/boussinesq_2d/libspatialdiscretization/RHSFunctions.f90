@@ -3,7 +3,7 @@ MODULE RHSFunctions
 #include <preprocessor.f90>
 
 !
-! This module provides the routines 'RHS' and 'RHS_coarse' which implement the interface 'RHS'
+! This module provides the routines 'RHS' and 'RHS_coarse' which implement the interface 'RHS1'
 ! for the right hand side functions defined in the module 'TimeIntegrators'.
 ! 
 ! It completely hides the details of the underlying spatial discretization, provided by the module

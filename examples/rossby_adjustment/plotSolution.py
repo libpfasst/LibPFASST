@@ -53,5 +53,5 @@ writer.fps = 30
 anim = animation.FuncAnimation(fig, animate, frames=280, blit=False)      
 anim.repeat   = False 
 # Total runtime of movie is frames/writer.fps in seconds
-#anim.save('movie.mp4',writer=writer)
-plt.show()
+anim.save('rossby_adjustment_nonrotating.mp4',writer=writer)
+#plt.show()

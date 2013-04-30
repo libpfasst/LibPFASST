@@ -20,29 +20,14 @@ FVMParameters.o: $(CURDIR)/../lib/libserialio.a FiniteVolumes.o FVMParameters.f9
 MPIParameter.o: FVMParameters.o FiniteVolumes.o MPIParameter.f90
 	$(FC) $(FFLAGS) -c MPIParameter.f90 
 
-#FiniteVolumes.o: FiniteVolumes.f90
-#	$(FC) $(FFLAGS) -c FiniteVolumes.f90 
-
-FiniteVolumes.o: WENO5_1D.f90
-	$(FC) $(FFLAGS) -c WENO5_1D.f90 -o FiniteVolumes.o
-
-#FiniteVolumes.o: FD_Burgers.f90
-#	$(FC) $(FFLAGS) -c FD_Burgers.f90 -o FiniteVolumes.o 
-
-#FiniteVolumes.o: WENO5_Burgers_CCOverlap.f90
-#	$(FC) $(FFLAGS) -c WENO5_Burgers_CCOverlap.f90 -o FiniteVolumes.o 
-
-#FiniteVolumes.o: WENO5_Burgers.f90
-#	$(FC) $(FFLAGS) -c WENO5_Burgers.f90 -o FiniteVolumes.o
+FiniteVolumes.o: WENO5_Boussinesq.f90
+	$(FC) $(FFLAGS) -c WENO5_Boussinesq.f90 -o FiniteVolumes.o
 
 DistributedIO.o: FVMParameters.o MPIParameter.o FiniteVolumes.o DistributedIO.f90
 	$(FC) $(FFLAGS) -c DistributedIO.f90
 
 mpi_space_communication.o: FVMParameters.o MPIParameter.o FiniteVolumes.o mpi_space_communication.f90
 	$(FC) $(FFLAGS) -c mpi_space_communication.f90
-
-#RHSFunctions.o: FVMParameters.o FiniteVolumes.o MPIParameter.o DistributedIO.o mpi_space_communication.o RHSFunctions_CCoverlap.f90
-#	$(FC) $(FFLAGS) -c RHSFunctions_CCoverlap.f90 -o RHSFunctions.o
 
 RHSFunctions.o: FVMParameters.o FiniteVolumes.o MPIParameter.o DistributedIO.o mpi_space_communication.o RHSFunctions.f90
 	$(FC) $(FFLAGS) -c RHSFunctions.f90 -o RHSFunctions.o

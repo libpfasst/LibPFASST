@@ -3,7 +3,7 @@ MODULE DistributedIO
 	USE HDF5
 	USE FVMParameters,         only : Nx, Ny, nr_fields
 	USE MPIParameter,          only : cartesian_comm, MPI_INFO_NULL, nprocs, nprocs_x, nprocs_y, cart_coords, myrank
-        USE FiniteVolumes,         only : PackSolution
+        USE FiniteVolumes,         only : PackSolution, buffer_layout
 
 	IMPLICIT NONE
 		
@@ -239,11 +239,14 @@ MODULE DistributedIO
 			CALL H5GOPEN_F(file_id,        'input',             group_input_id,   hdf5_error)
 			CALL H5GOPEN_F(group_input_id, 'problemdefinition', group_problem_id, hdf5_error)
 												
-			! ---- Load initial value ----			
-			!array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
-			!array_count  = (/ Ny , Nx, nr_fields /) 
-                        array_offset = (/ 0, cart_coords(1)*Ny, cart_coords(2)*Nx /)
-                        array_count  = (/ nr_fields, Ny, Nx /)  
+			! ---- Load initial value ----	
+                        IF (buffer_layout==0) THEN
+                           array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
+                           array_count  = (/ Ny , Nx, nr_fields /) 
+                        ELSE IF (buffer_layout==1) THEN
+                           array_offset = (/ 0, cart_coords(1)*Ny, cart_coords(2)*Nx /)
+                           array_count  = (/ nr_fields, Ny, Nx /)  
+                        END IF
 
 			CALL H5DOPEN_F(group_problem_id, 'q_initial', dataset, hdf5_error)
 		
