@@ -118,6 +118,16 @@ contains
        call F%encap%axpy(F%I(m), 1.0_pfdp, F%I(m-1))
     end do
 
+    ! add tau (which is 'node to node')
+    if (associated(F%tau)) then
+       do m = 1, F%nnodes-1
+          do n = 1, m
+             call F%encap%axpy(F%I(m), 1.0_pfdp, F%tau(n))
+          end do
+       end do
+    end if
+
+
     ! subtract out Q
     do m = 1, F%nnodes-1
        call F%encap%copy(F%R(m), F%Q(1))
@@ -125,14 +135,6 @@ contains
        call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
     end do
 
-    ! add tau (which is 'node to node')
-    if (associated(F%tau)) then
-       do m = 1, F%nnodes-1
-          do n = 1, F%nnodes-1
-             call F%encap%axpy(F%R(m), 1.0_pfdp, F%tau(n))
-          end do
-       end do
-    end if
   end subroutine pf_residual
 
 

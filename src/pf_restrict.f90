@@ -22,6 +22,19 @@
 !
 ! Notes:
 !
+!   2013-04-30 - Matthew Emmett
+!
+!     The pf_residual subroutine is now called after each SDC sweep,
+!     and it computes the '0 to node' integrals and stores them in
+!     'F%I' while it is computing the full SDC residual.  Furthermore,
+!     these 'F%I' integrals also contain the appropriate tau corrections.
+!
+!     This means that when computing FAS corrections: the fine
+!     integral term is already done for us, and it is already FAS
+!     corrected, so we dont't have to "bring down fas corrections"
+!     from finer levels.
+!
+!
 !   2013-04-17 - Matthew Emmett
 !
 !     Time restriction was switched from point injection to polynomial
@@ -145,35 +158,12 @@ contains
 
 
     !
-    ! bring down fas correction from level above
+    ! fas correction
     !
 
     do m = 1, G%nnodes-1
        call G%encap%setval(G%tau(m), 0.0_pfdp)
     end do
-
-    if (associated(F%tau)) then
-       ! convert from 'node to node' to '0 to node'
-       call F%encap%copy(tmpF(1), F%tau(1))
-       do m = 2, F%nnodes-1
-          call F%encap%copy(tmpF(m), tmpF(m-1))
-          call F%encap%axpy(tmpF(m), 1.0_pfdp, F%tau(m))
-       end do
-
-       call restrict_sdc(F, G, tmpF, tmpG, integral=.true.)
-
-       ! convert from '0 to node' to 'node to node'
-       call G%encap%copy(G%tau(1), tmpG(1))
-       do m = 2, G%nnodes-1
-          call G%encap%copy(G%tau(m), tmpG(m))
-          call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m-1))
-       end do
-    end if
-
-
-    !
-    ! fas correction
-    !
 
     ! compute '0 to node' integral on the coarse level
 
