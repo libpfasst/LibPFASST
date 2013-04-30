@@ -50,20 +50,10 @@ module pf_mod_imex
      end subroutine pf_f2comp_p
   end interface
 
-  interface
-     subroutine pf_imex_rhs_p(rhs, q0, dt, f1, S, level, ctx)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: rhs, q0, f1, S, ctx
-       real(pfdp),  intent(in)        :: dt
-       integer,     intent(in)        :: level
-     end subroutine pf_imex_rhs_p
-  end interface
-
   type :: pf_imex_t
      procedure(pf_f1eval_p),   pointer, nopass :: f1eval
      procedure(pf_f2eval_p),   pointer, nopass :: f2eval
      procedure(pf_f2comp_p),   pointer, nopass :: f2comp
-     procedure(pf_imex_rhs_p), pointer, nopass :: gen_rhs
   end type pf_imex_t
 
 contains
@@ -113,13 +103,9 @@ contains
     do m = 1, F%nnodes-1
        t = t + dtsdc(m)
 
-       if (associated(imex%gen_rhs)) then
-          call imex%gen_rhs(rhs, F%Q(m), dtsdc(m), F%F(m,1), F%S(m), F%level, F%ctx)
-       else
-          call F%encap%copy(rhs, F%Q(m))
-          call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
-          call F%encap%axpy(rhs, 1.0d0, F%S(m))
-       end if
+       call F%encap%copy(rhs, F%Q(m))
+       call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
+       call F%encap%axpy(rhs, 1.0d0, F%S(m))
 
        call imex%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,2))
        call imex%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
@@ -200,7 +186,6 @@ contains
     imex%f1eval => f1eval
     imex%f2eval => f2eval
     imex%f2comp => f2comp
-    imex%gen_rhs => null()
 
     sweeper%npieces = npieces
     sweeper%sweep      => imex_sweep
