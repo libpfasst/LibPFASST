@@ -64,9 +64,11 @@ contains
           if (k > 1) &
                call G%encap%pack(G%q0, G%Q(G%nnodes))
 
+          call call_hooks(pf, G%level, PF_PRE_SWEEP)
           do j = 1, G%nsweeps
              call G%sweeper%sweep(pf, G, t0, dt)
           end do
+          call call_hooks(pf, G%level, PF_POST_SWEEP)
           call pf_residual(G, dt)
        end do
 
@@ -112,9 +114,12 @@ contains
        if (F%level < pf%nlevels) then
           ! don't sweep on the finest level on the way up -- if you
           ! need to do this, use a PF_CYCLE_SWEEP
+
+          call call_hooks(pf, F%level, PF_PRE_SWEEP)
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, t0, dt)
           end do
+          call call_hooks(pf, F%level, PF_POST_SWEEP)
           call pf_residual(F, dt)
        end if
 
@@ -124,9 +129,11 @@ contains
        F => pf%levels(stage%F)
        G => pf%levels(stage%G)
 
+       call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(F, dt)
        call pf%comm%send(pf, F, F%level*100+iteration, .false.)
 
@@ -139,9 +146,11 @@ contains
        F => pf%levels(stage%F)
 
        call pf%comm%recv(pf, F, F%level*100+iteration, .true.)
+       call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(F, dt)
        call pf%comm%send(pf, F, F%level*100+iteration, .true.)
 
@@ -150,9 +159,11 @@ contains
 
        F => pf%levels(stage%F)
 
+       call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(F, dt)
 
     case (SDC_CYCLE_INTERP)

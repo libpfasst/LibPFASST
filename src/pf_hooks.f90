@@ -73,8 +73,18 @@ contains
     integer,           intent(in)    :: hook
     procedure(pf_hook_p)             :: proc
 
-    pf%nhooks(level,hook) = pf%nhooks(level,hook) + 1
-    pf%hooks(level,hook,pf%nhooks(level,hook))%proc => proc
+    integer :: l
+
+    if (level == -1) then
+       do l = 1, pf%nlevels
+          pf%nhooks(l,hook) = pf%nhooks(l,hook) + 1
+          pf%hooks(l,hook,pf%nhooks(l,hook))%proc => proc
+       end do
+    else
+       pf%nhooks(level,hook) = pf%nhooks(level,hook) + 1
+       pf%hooks(level,hook,pf%nhooks(level,hook))%proc => proc
+    end if
+
   end subroutine pf_add_hook
 
   ! Call hooks associated with the hook and level

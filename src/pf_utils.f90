@@ -111,22 +111,28 @@ contains
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: dt
 
-    integer :: m
+    integer :: m, n
 
     call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
     do m = 2, F%nnodes-1
        call F%encap%axpy(F%I(m), 1.0_pfdp, F%I(m-1))
     end do
 
-    ! subtract out Q, add tau
+    ! subtract out Q
     do m = 1, F%nnodes-1
        call F%encap%copy(F%R(m), F%Q(1))
        call F%encap%axpy(F%R(m),  1.0_pfdp, F%I(m))
        call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
-       if (associated(F%tau)) then
-          call F%encap%axpy(F%R(m), 1.0_pfdp, F%tau(m))
-       end if
     end do
+
+    ! add tau (which is 'node to node')
+    if (associated(F%tau)) then
+       do m = 1, F%nnodes-1
+          do n = 1, F%nnodes-1
+             call F%encap%axpy(F%R(m), 1.0_pfdp, F%tau(n))
+          end do
+       end do
+    end if
   end subroutine pf_residual
 
 
