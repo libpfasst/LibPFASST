@@ -51,8 +51,8 @@ build/pf_implicit.o:    build/pf_timer.o
 build/pf_mpi.o:         build/pf_timer.o
 build/pf_pthreads.o:    build/pf_timer.o
 build/pf_logger.o:      build/pf_hooks.o
-build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o
-build/pf_interpolate.o: build/pf_restrict.o
+build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o build/pf_hooks.o
+build/pf_interpolate.o: build/pf_restrict.o build/pf_hooks.o
 build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o build/pf_cycle.o
 build/sdc_quadrature.o: build/pf_dtype.o build/sdc_poly.o
 build/pf_quadrature.o:  build/sdc_quadrature.o

@@ -130,6 +130,8 @@ module pf_mod_dtype
           pQ(:), &                      ! unknowns at sdc nodes, previous sweep
           F(:,:), &                     ! functions values at sdc nodes
           pF(:,:), &                    ! functions at sdc nodes, previous sweep
+          R(:), &                       ! full residuals
+          I(:), &                       ! 0 to node integrals
           S(:), &                       ! node to node integrals
           tau(:)                        ! fas correction
 
