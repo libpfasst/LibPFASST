@@ -15,7 +15,7 @@ def get():
     Tend          = 10.0
     Niter         = 5
     grav          = 1.0
-    coriolisPar   = 1.0
+    coriolisPar   = 0.0
 
    # define function that provides initial value
     def q0(x,y):

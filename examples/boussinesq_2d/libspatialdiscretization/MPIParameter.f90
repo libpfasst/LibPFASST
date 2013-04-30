@@ -121,13 +121,17 @@ CONTAINS
 				
 				! For acoustic-advection and Boussinesq, at least a two cell halo has to be communicated in order for the 
 				! divergence damping to be applicable.
-				Nghost_coarse = MAX( CEILING(DBLE( MAX(order_coarse_advection, order_coarse_sound) )/2.0) , 2 )
-				Nghost        = MAX( CEILING(DBLE( MAX(order_fine_advection, order_fine_sound) )/2.0) , 2 )
+				!Nghost_coarse = MAX( CEILING(DBLE( MAX(order_coarse_advection, order_coarse_sound) )/2.0) , 2 )
+				!Nghost        = MAX( CEILING(DBLE( MAX(order_fine_advection, order_fine_sound) )/2.0) , 2 )
+                                Nghost_coarse = 3
+                                Nghost        = 3
 
 			CASE (4)
 		
-				Nghost_coarse = MAX( CEILING(DBLE( MAX(order_coarse_advection, order_coarse_sound) )/2.0) , 2 )
-				Nghost        = MAX( CEILING(DBLE( MAX(order_fine_advection, order_fine_sound) )/2.0) , 2 )		
+				!Nghost_coarse = MAX( CEILING(DBLE( MAX(order_coarse_advection, order_coarse_sound) )/2.0) , 2 )
+				!Nghost        = MAX( CEILING(DBLE( MAX(order_fine_advection, order_fine_sound) )/2.0) , 2 )		
+                                Nghost_coarse = 3
+                                Nghost        = 3
 				
 			CASE DEFAULT	
 		

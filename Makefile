@@ -22,7 +22,11 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 
 rossby_adjustment: examples/rossby_adjustment/lib/libspatialdiscretization.a examples/rossby_adjustment/*.f90
-		$(FC) $(FFLAGS) -I$(CURDIR)/examples/rossby_adjustment/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/rossby_adjustment/lib -lspatialdiscretization -L$(CURDIR)/examples/rossby_adjustment/lib -lserialio $(LDFLAGS)
+		$(FC) $(FFLAGS) -I$(CURDIR)/examples/rossby_adjustment/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/rossby_adjustment/lib -lspatialdiscretization -lserialio $(LDFLAGS)
+
+boussinesq_2d: examples/boussinesq_2d/lib/libspatialdiscretization.a examples/boussinesq_2d/*.f90
+		$(FC) $(FFLAGS) -I$(CURDIR)/examples/boussinesq_2d/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/boussinesq_2d/lib -lspatialdiscretization -lserialio $(LDFLAGS)
+
 .PHONY: clean
 #
 # fftw3 (for the examples)
