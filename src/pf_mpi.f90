@@ -44,6 +44,8 @@ contains
     pf_comm%send => pf_mpi_send
     pf_comm%wait => pf_mpi_wait
     pf_comm%broadcast => pf_mpi_broadcast
+    pf_comm%recv_status => pf_mpi_recv_status
+    pf_comm%send_status => pf_mpi_send_status
   end subroutine pf_mpi_create
 
   ! Setup
@@ -118,6 +120,30 @@ contains
     call end_timer(pf, TRECEIVE + level%level - 1)
   end subroutine pf_mpi_recv
 
+  ! Receive status
+  subroutine pf_mpi_recv_status(pf, tag, status)
+    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
+
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag
+    integer,           intent(out)   :: status
+
+    integer :: ierror, stat(MPI_STATUS_SIZE)
+
+    ! call start_timer(pf, TRECEIVE + level%level - 1)
+
+    if (pf%rank > 0) then
+       call mpi_recv(status, 1, MPI_INTEGER, &
+            pf%rank-1, tag, pf%comm%comm, stat, ierror)
+
+       if (ierror .ne. 0) then
+          print *, 'WARNING: MPI ERROR DURING RECEIVE STATUS', ierror
+       end if
+    end if
+
+    ! call end_timer(pf, TRECEIVE + level%level - 1)
+  end subroutine pf_mpi_recv_status
+
   ! Send
   subroutine pf_mpi_send(pf, level, tag, blocking)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
@@ -147,6 +173,27 @@ contains
 
     call end_timer(pf, TSEND + level%level - 1)
   end subroutine pf_mpi_send
+
+  ! Send status
+  subroutine pf_mpi_send_status(pf, tag, status)
+    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
+
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag, status
+
+    integer :: ierror, stat(MPI_STATUS_SIZE)
+
+    ! call start_timer(pf, TSEND + level%level - 1)
+
+    if (pf%rank < pf%comm%nproc-1) then
+
+       call mpi_isend(status, 1, MPI_INTEGER, &
+            pf%rank+1, tag, pf%comm%comm, stat, ierror)
+
+    end if
+
+    ! call end_timer(pf, TSEND + level%level - 1)
+  end subroutine pf_mpi_send_status
 
   ! Send
   subroutine pf_mpi_wait(pf, level)

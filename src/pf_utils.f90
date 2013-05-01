@@ -139,6 +139,24 @@ contains
 
 
   !
+  ! Compute maximum value of residual norms
+  !
+  subroutine pf_residual_norm(F, res_norm)
+    type(pf_level_t), intent(inout) :: F
+    real(pfdp),       intent(out)   :: res_norm
+
+    real(pfdp) :: norms(F%nnodes-1)
+    integer :: m
+
+    do m = 2, F%nnodes-1
+       norms(m-1) = F%encap%norm(F%R(m))
+    end do
+
+    res_norm = maxval(norms)
+  end subroutine pf_residual_norm
+
+
+  !
   ! Apply an interpolation matrix (tmat or rmat) to src.
   !
   subroutine pf_apply_mat(dst, a, mat, src, encap, zero)

@@ -189,9 +189,10 @@ contains
     type(c_ptr),       intent(in), optional :: qend
     integer,           intent(in), optional :: nsteps
 
-    real(pfdp) :: t0
-    integer    :: nblock, b, c, k, l
     type(pf_level_t), pointer :: F
+    real(pfdp) :: t0, res1, res0
+    integer    :: nblock, b, c, k, l
+    integer    :: prev_status
 
     call start_timer(pf, TTOTAL)
 
@@ -215,7 +216,7 @@ contains
     end if
 
     nblock = pf%state%nsteps/pf%comm%nproc
-
+    res0   = 1.d0
 
     !
     ! time "block" loop
@@ -254,6 +255,25 @@ contains
              F => pf%levels(l)
              call call_hooks(pf, F%level, PF_PRE_ITERATION)
           end do
+
+          ! send status forward
+          F => pf%levels(pf%nlevels)
+          call pf_residual_norm(F, res1)
+
+          if ((k > 1) .and. ( &
+               (1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol))) then
+             pf%state%status = PF_STATUS_CONVERGED
+          else
+             pf%state%status = PF_STATUS_ITERATING
+          end if
+
+          res0 = res1
+
+          call pf%comm%send_status(pf, 200+k, pf%state%status)
+
+          ! receive status
+          call pf%comm%recv_status(pf, 200+k, prev_status)
+          
 
           ! post receive requests
           do l = 2, pf%nlevels

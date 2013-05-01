@@ -53,11 +53,14 @@ module pf_mod_dtype
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
+  integer, parameter :: PF_STATUS_ITERATING   = 1
+  integer, parameter :: PF_STATUS_CONVERGED   = 2
+
   ! state type
   type :: pf_state_t
      real(pfdp) :: t0, dt
      integer    :: nsteps
-     integer    :: block, cycle, step, iter, level, hook
+     integer    :: block, cycle, step, iter, level, hook, status
   end type pf_state_t
 
   ! cycle stage type
@@ -93,6 +96,7 @@ module pf_mod_dtype
      procedure(pf_encap_destroy_p), pointer, nopass :: destroy
      procedure(pf_encap_setval_p),  pointer, nopass :: setval
      procedure(pf_encap_copy_p),    pointer, nopass :: copy
+     procedure(pf_encap_norm_p),    pointer, nopass :: norm
      procedure(pf_encap_pack_p),    pointer, nopass :: pack
      procedure(pf_encap_unpack_p),  pointer, nopass :: unpack
      procedure(pf_encap_axpy_p),    pointer, nopass :: axpy
@@ -158,11 +162,13 @@ module pf_mod_dtype
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
      type(c_ptr), pointer :: pfpth(:,:) ! mutexes and conditions (indexed by rank, level)
 
-     procedure(pf_post_p),      pointer, nopass :: post
-     procedure(pf_recv_p),      pointer, nopass :: recv
-     procedure(pf_send_p),      pointer, nopass :: send
-     procedure(pf_wait_p),      pointer, nopass :: wait
-     procedure(pf_broadcast_p), pointer, nopass :: broadcast
+     procedure(pf_post_p),        pointer, nopass :: post
+     procedure(pf_recv_p),        pointer, nopass :: recv
+     procedure(pf_recv_status_p), pointer, nopass :: recv_status
+     procedure(pf_send_p),        pointer, nopass :: send
+     procedure(pf_send_status_p), pointer, nopass :: send_status
+     procedure(pf_wait_p),        pointer, nopass :: wait
+     procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
 
@@ -173,6 +179,9 @@ module pf_mod_dtype
      integer :: rank    = -1            ! rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO
      integer :: ctype   = SDC_CYCLE_V
+
+     real(pfdp) :: abs_res_tol = 0.d0
+     real(pfdp) :: rel_res_tol = 0.d0
 
      ! pf objects
      type(pf_cycle_t)          :: cycles
@@ -287,6 +296,14 @@ module pf_mod_dtype
   end interface
 
   interface
+     function pf_encap_norm_p(sol) result (norm)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value    :: sol
+       real(pfdp) :: norm
+     end function pf_encap_norm_p
+  end interface
+
+  interface
      subroutine pf_encap_pack_p(z, q)
        import c_ptr, pfdp
        type(c_ptr), intent(in), value :: q
@@ -333,6 +350,15 @@ module pf_mod_dtype
   end interface
 
   interface
+     subroutine pf_recv_status_p(pf, tag, status)
+       import pf_pfasst_t, pf_level_t
+       type(pf_pfasst_t), intent(inout) :: pf
+       integer,           intent(in)    :: tag
+       integer,           intent(out)   :: status
+     end subroutine pf_recv_status_p
+  end interface
+
+  interface
      subroutine pf_send_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
@@ -340,6 +366,15 @@ module pf_mod_dtype
        integer,           intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_send_p
+  end interface
+
+  interface
+     subroutine pf_send_status_p(pf, tag, status)
+       import pf_pfasst_t, pf_level_t
+       type(pf_pfasst_t), intent(inout) :: pf
+       integer,           intent(in)    :: tag
+       integer,           intent(in)    :: status
+     end subroutine pf_send_status_p
   end interface
 
   interface
