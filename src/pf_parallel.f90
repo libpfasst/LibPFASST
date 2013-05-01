@@ -192,7 +192,6 @@ contains
     type(pf_level_t), pointer :: F
     real(pfdp) :: t0, res1, res0
     integer    :: nblock, b, c, k, l
-    integer    :: prev_status
 
     call start_timer(pf, TTOTAL)
 
@@ -203,6 +202,9 @@ contains
     pf%state%t0   = 0.0d0
     pf%state%dt   = dt
     pf%state%iter = -1
+
+    pf%state%first = 0
+    pf%state%last  = pf%comm%nproc - 1
 
     call pf_cycle_build(pf)
 
@@ -223,11 +225,12 @@ contains
     !
 
     do b = 1, nblock
-       pf%state%block = b
-       pf%state%step  = pf%rank + (b-1)*pf%comm%nproc
-       pf%state%t0    = pf%state%step * dt
-       pf%state%iter  = -1
-       pf%state%cycle = -1
+       pf%state%block  = b
+       pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
+       pf%state%t0     = pf%state%step * dt
+       pf%state%iter   = -1
+       pf%state%cycle  = -1
+       pf%state%status = 0
 
        t0 = pf%state%t0
 
@@ -242,7 +245,6 @@ contains
              call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
           end do
        end if
-
 
        ! pfasst iterations
        do k = 1, pf%niters
@@ -269,11 +271,20 @@ contains
 
           res0 = res1
 
+          ! print *, pf%rank, b, k, res0, res1
+
           call pf%comm%send_status(pf, 200+k, pf%state%status)
 
           ! receive status
-          call pf%comm%recv_status(pf, 200+k, prev_status)
-          
+          call pf%comm%recv_status(pf, 200+k, pf%state%pstatus)
+
+          ! at this point we're going to keep iterating even if we've
+          ! converged, but we won't do any communication (except for
+          ! status info)
+
+          if (pf%state%status == PF_STATUS_CONVERGED) then
+             print *, "i am done", pf%rank
+          end if
 
           ! post receive requests
           do l = 2, pf%nlevels

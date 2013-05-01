@@ -46,6 +46,9 @@ contains
        call pf_level_create(pf%levels(l), l)
     end do
 
+    pf%state%pstatus = 0
+    pf%state%status  = 0
+
     nullify(pf%cycles%start)
     nullify(pf%cycles%pfasst)
     nullify(pf%cycles%end)

@@ -43,7 +43,7 @@ contains
     pf_comm%recv => pf_mpi_recv
     pf_comm%send => pf_mpi_send
     pf_comm%wait => pf_mpi_wait
-    pf_comm%broadcast => pf_mpi_broadcast
+    pf_comm%broadcast   => pf_mpi_broadcast
     pf_comm%recv_status => pf_mpi_recv_status
     pf_comm%send_status => pf_mpi_send_status
   end subroutine pf_mpi_create
@@ -58,6 +58,12 @@ contains
     integer :: ierror
 
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
+
+    pf_comm%forward = pf%rank + 1
+    if (pf_comm%forward >= pf_comm%nproc) pf_comm%forward = 0
+
+    pf_comm%backward = pf%rank - 1
+    if (pf_comm%backward < 0) pf_comm%backward = pf_comm%nproc - 1
 
     allocate(pf_comm%recvreq(pf%nlevels))
     allocate(pf_comm%sendreq(pf%nlevels))
@@ -83,9 +89,13 @@ contains
 
     integer :: ierror
 
-    if (pf%comm%nproc > 1 .and. pf%rank > 0) then
+    if (pf%comm%nproc > 1 &
+         .and. pf%rank          /= pf%state%first &
+         .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+
        call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
-            pf%rank-1, tag, pf%comm%comm, pf%comm%recvreq(level%level), ierror)
+            pf%comm%backward, tag, pf%comm%comm, pf%comm%recvreq(level%level), ierror)
+
     end if
   end subroutine pf_mpi_post
 
@@ -102,10 +112,12 @@ contains
 
     call start_timer(pf, TRECEIVE + level%level - 1)
 
-    if (pf%rank > 0) then
+    if (pf%rank /= pf%state%first &
+         .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+
        if (blocking) then
           call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
-               pf%rank-1, tag, pf%comm%comm, stat, ierror)
+               pf%comm%backward, tag, pf%comm%comm, stat, ierror)
        else
           call mpi_wait(pf%comm%recvreq(level%level), stat, ierror)
        end if
@@ -132,13 +144,15 @@ contains
 
     ! call start_timer(pf, TRECEIVE + level%level - 1)
 
-    if (pf%rank > 0) then
+    if (pf%rank /= pf%state%first) then
+
        call mpi_recv(status, 1, MPI_INTEGER, &
-            pf%rank-1, tag, pf%comm%comm, stat, ierror)
+            pf%comm%backward, tag, pf%comm%comm, stat, ierror)
 
        if (ierror .ne. 0) then
           print *, 'WARNING: MPI ERROR DURING RECEIVE STATUS', ierror
        end if
+
     end if
 
     ! call end_timer(pf, TRECEIVE + level%level - 1)
@@ -157,17 +171,18 @@ contains
 
     call start_timer(pf, TSEND + level%level - 1)
 
-    if (pf%rank < pf%comm%nproc-1) then
+    if (pf%rank /= pf%comm%nproc-1 &
+         .and. pf%state%status /= PF_STATUS_CONVERGED) then
 
        if (blocking) then
           call level%encap%pack(level%send, level%qend)
           call mpi_send(level%send, level%nvars, MPI_REAL8, &
-               pf%rank+1, tag, pf%comm%comm, stat, ierror)
+               pf%comm%forward, tag, pf%comm%comm, stat, ierror)
        else
           call mpi_wait(pf%comm%sendreq(level%level), stat, ierror)
           call level%encap%pack(level%send, level%qend)
           call mpi_isend(level%send, level%nvars, MPI_REAL8, &
-               pf%rank+1, tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
+               pf%comm%forward, tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
        end if
     end if
 
@@ -185,10 +200,10 @@ contains
 
     ! call start_timer(pf, TSEND + level%level - 1)
 
-    if (pf%rank < pf%comm%nproc-1) then
+    if (pf%rank /= pf%state%last) then
 
        call mpi_isend(status, 1, MPI_INTEGER, &
-            pf%rank+1, tag, pf%comm%comm, stat, ierror)
+            pf%comm%forward, tag, pf%comm%comm, stat, ierror)
 
     end if
 

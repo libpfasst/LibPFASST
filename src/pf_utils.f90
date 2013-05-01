@@ -148,11 +148,11 @@ contains
     real(pfdp) :: norms(F%nnodes-1)
     integer :: m
 
-    do m = 2, F%nnodes-1
-       norms(m-1) = F%encap%norm(F%R(m))
+    do m = 1, F%nnodes-1
+       norms(m) = F%encap%norm(F%R(m))
     end do
 
-    res_norm = maxval(norms)
+    res_norm = maxval(abs(norms))
   end subroutine pf_residual_norm
 
 

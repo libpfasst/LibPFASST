@@ -60,7 +60,11 @@ module pf_mod_dtype
   type :: pf_state_t
      real(pfdp) :: t0, dt
      integer    :: nsteps
-     integer    :: block, cycle, step, iter, level, hook, status
+     integer    :: block, cycle, step, iter, level, hook
+     integer    :: status       ! status (iterating, converged etc)
+     integer    :: pstatus      ! previous rank's status
+     integer    :: first        ! rank of first processor in time block
+     integer    :: last         ! rank of last processor in time block
   end type pf_state_t
 
   ! cycle stage type
@@ -151,6 +155,8 @@ module pf_mod_dtype
   ! pfasst communicator
   type :: pf_comm_t
      integer :: nproc = -1              ! total number of processors
+     integer :: forward = -1            ! next processors rank
+     integer :: backward = -1           ! previous processors rank
 
      ! mpi
      integer :: comm = -1               ! communicator
