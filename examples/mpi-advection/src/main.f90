@@ -45,9 +45,12 @@ program fpfasst
 
   pf%niters = 12
   pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
-  pf%abs_res_tol = 1.d-10
 
   pf%echo_timings = .false.
+
+  pf%window      = PF_WINDOW_RING
+  pf%abs_res_tol = 1.d-10
+
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if

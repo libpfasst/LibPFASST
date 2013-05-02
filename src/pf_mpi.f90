@@ -141,8 +141,6 @@ contains
 
     integer :: ierror, stat(MPI_STATUS_SIZE), message(2)
 
-    ! call start_timer(pf, TRECEIVE + level%level - 1)
-
     if (pf%rank /= pf%state%first) then
 
        call mpi_recv(message, 2, MPI_INTEGER, &
@@ -156,8 +154,6 @@ contains
        end if
 
     end if
-
-    ! call end_timer(pf, TRECEIVE + level%level - 1)
   end subroutine pf_mpi_recv_status
 
   ! Send
@@ -209,8 +205,6 @@ contains
             pf%comm%forward, tag, pf%comm%comm, stat, ierror)
 
     end if
-
-    ! call end_timer(pf, TSEND + level%level - 1)
   end subroutine pf_mpi_send_status
 
   ! Send
