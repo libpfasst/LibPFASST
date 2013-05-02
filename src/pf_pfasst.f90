@@ -125,6 +125,7 @@ contains
     nnodes  = F%nnodes
     npieces = F%sweeper%npieces
 
+    F%residual = -1.0_pfdp
 
     !
     ! (re)allocate tau (may to need create/destroy tau dynamically

@@ -53,6 +53,9 @@ module pf_mod_dtype
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
+  integer, parameter :: PF_WINDOW_BLOCK = 1
+  integer, parameter :: PF_WINDOW_RING  = 2
+  
   integer, parameter :: PF_STATUS_ITERATING   = 1
   integer, parameter :: PF_STATUS_CONVERGED   = 2
 
@@ -63,6 +66,7 @@ module pf_mod_dtype
      integer    :: block, cycle, step, iter, level, hook
      integer    :: status       ! status (iterating, converged etc)
      integer    :: pstatus      ! previous rank's status
+     integer    :: pstep        ! previous rank's time step number
      integer    :: first        ! rank of first processor in time block
      integer    :: last         ! rank of last processor in time block
   end type pf_state_t
@@ -114,6 +118,8 @@ module pf_mod_dtype
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
      integer     :: level = -1          ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
+
+     real(pfdp)  :: residual
 
      type(pf_encap_t),         pointer :: encap
      type(pf_sweeper_t),       pointer :: sweeper
@@ -188,6 +194,8 @@ module pf_mod_dtype
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
+
+     integer :: window = PF_WINDOW_BLOCK
 
      ! pf objects
      type(pf_cycle_t)          :: cycles
@@ -356,11 +364,10 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_recv_status_p(pf, tag, status)
+     subroutine pf_recv_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,           intent(in)    :: tag
-       integer,           intent(out)   :: status
      end subroutine pf_recv_status_p
   end interface
 
@@ -375,11 +382,10 @@ module pf_mod_dtype
   end interface
 
   interface
-     subroutine pf_send_status_p(pf, tag, status)
+     subroutine pf_send_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,           intent(in)    :: tag
-       integer,           intent(in)    :: status
      end subroutine pf_send_status_p
   end interface
 

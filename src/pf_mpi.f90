@@ -133,21 +133,23 @@ contains
   end subroutine pf_mpi_recv
 
   ! Receive status
-  subroutine pf_mpi_recv_status(pf, tag, status)
+  subroutine pf_mpi_recv_status(pf, tag)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    integer,           intent(out)   :: status
 
-    integer :: ierror, stat(MPI_STATUS_SIZE)
+    integer :: ierror, stat(MPI_STATUS_SIZE), message(2)
 
     ! call start_timer(pf, TRECEIVE + level%level - 1)
 
     if (pf%rank /= pf%state%first) then
 
-       call mpi_recv(status, 1, MPI_INTEGER, &
+       call mpi_recv(message, 2, MPI_INTEGER, &
             pf%comm%backward, tag, pf%comm%comm, stat, ierror)
+
+       pf%state%pstatus = message(1)
+       pf%state%pstep   = message(2)
 
        if (ierror .ne. 0) then
           print *, 'WARNING: MPI ERROR DURING RECEIVE STATUS', ierror
@@ -190,19 +192,20 @@ contains
   end subroutine pf_mpi_send
 
   ! Send status
-  subroutine pf_mpi_send_status(pf, tag, status)
+  subroutine pf_mpi_send_status(pf, tag)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag, status
+    integer,           intent(in)    :: tag
 
-    integer :: ierror, stat(MPI_STATUS_SIZE)
-
-    ! call start_timer(pf, TSEND + level%level - 1)
+    integer :: ierror, stat(MPI_STATUS_SIZE), message(2)
 
     if (pf%rank /= pf%state%last) then
 
-       call mpi_isend(status, 1, MPI_INTEGER, &
+       message(1) = pf%state%status
+       message(2) = pf%state%step
+
+       call mpi_isend(message, 2, MPI_INTEGER, &
             pf%comm%forward, tag, pf%comm%comm, stat, ierror)
 
     end if

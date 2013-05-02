@@ -258,32 +258,31 @@ contains
              call call_hooks(pf, F%level, PF_PRE_ITERATION)
           end do
 
-          ! send status forward
-          F => pf%levels(pf%nlevels)
-          call pf_residual_norm(F, res1)
+          ! send/receive status
+          if (pf%window == PF_WINDOW_RING) then
+             F => pf%levels(pf%nlevels)
 
-          if ((k > 1) .and. ( &
-               (1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol))) then
-             pf%state%status = PF_STATUS_CONVERGED
-          else
-             pf%state%status = PF_STATUS_ITERATING
-          end if
+             res1 = F%residual
 
-          res0 = res1
+             if ((k > 1) .and. ( &
+                  (1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol))) then
+                pf%state%status = PF_STATUS_CONVERGED
+             else
+                pf%state%status = PF_STATUS_ITERATING
+             end if
 
-          ! print *, pf%rank, b, k, res0, res1
+             res0 = res1
 
-          call pf%comm%send_status(pf, 200+k, pf%state%status)
+             call pf%comm%send_status(pf, 200+k)
+             call pf%comm%recv_status(pf, 200+k)
 
-          ! receive status
-          call pf%comm%recv_status(pf, 200+k, pf%state%pstatus)
+             ! at this point we're going to keep iterating even if we've
+             ! converged, but we won't do any communication (except for
+             ! status info)
 
-          ! at this point we're going to keep iterating even if we've
-          ! converged, but we won't do any communication (except for
-          ! status info)
-
-          if (pf%state%status == PF_STATUS_CONVERGED) then
-             print *, "i am done", pf%rank
+             if (pf%state%status == PF_STATUS_CONVERGED) then
+                print *, "i am done", pf%rank
+             end if
           end if
 
           ! post receive requests
