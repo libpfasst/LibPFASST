@@ -2,7 +2,7 @@
 # Makefile for libpfasst.
 #
 
-LIBPFASST ?= .
+LIBPFASST ?= $(PWD)
 
 include $(LIBPFASST)/Makefile.defaults
 
@@ -28,6 +28,7 @@ boussinesq_2d: examples/boussinesq_2d/lib/libspatialdiscretization.a examples/bo
 		$(FC) $(FFLAGS) -I$(CURDIR)/examples/boussinesq_2d/inc -o $@ $^ -Lbuild -lpfasst -L$(CURDIR)/examples/boussinesq_2d/lib -lspatialdiscretization -lserialio $(LDFLAGS)
 
 .PHONY: clean
+
 #
 # fftw3 (for the examples)
 # 
@@ -43,6 +44,33 @@ fftw3: $(FFTW3).tar.gz
 
 $(FFTW3).tar.gz:
 	wget http://www.fftw.org/$(FFTW3).tar.gz
+
+#
+# gcc-4.7
+#
+
+GCC    = gcc-4.7
+GCCDL  = $(GCC).tar.xz xz.tar.gz gcc-infrastructure.tar.xz
+GCCTMP = $(LIBPFASST)/gcc
+
+gcc47: $(GCCDL)
+	mkdir $(GCCTMP)
+	cd $(GCCTMP) && tar zxf $(LIBPFASST)/xz.tar.gz
+	cd $(GCCTMP) && $(GCCTMP)/usr/bin/xzcat $(LIBPFASST)/$(GCC).tar.xz | tar x
+	cd $(GCCTMP)/$(GCC) && $(GCCTMP)/usr/bin/xzcat $(LIBPFASST)/gcc-infrastructure.tar.xz | tar x
+	mv $(GCCTMP)/$(GCC) $(LIBPFASST)
+	cp $(LIBPFASST)/mk/makefile.gcc47.defs $(LIBPFASST)
+	rm -rf $(GCCTMP)
+
+$(GCC).tar.xz:
+	wget http://gfortran.com/download/x86_64/snapshots/$(GCC).tar.xz
+
+xz.tar.gz:
+	wget http://gfortran.com/download/x86_64/xz.tar.gz
+
+gcc-infrastructure.tar.xz:
+	wget http://gfortran.com/download/x86_64/gcc-infrastructure.tar.xz
+
 
 #
 # dependencies
