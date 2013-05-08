@@ -280,9 +280,9 @@ contains
              ! converged, but we won't do any communication (except for
              ! status info)
 
-             if (pf%state%status == PF_STATUS_CONVERGED) then
-                print *, "i am done", pf%rank
-             end if
+             ! if (pf%state%status == PF_STATUS_CONVERGED) then
+             !    print *, "i am done", pf%rank
+             ! end if
           end if
 
           ! post receive requests
