@@ -51,16 +51,31 @@ $(FFTW3).tar.gz:
 
 GCC    = gcc-4.7
 GCCDL  = $(GCC).tar.xz xz.tar.gz gcc-infrastructure.tar.xz
-GCCTMP = $(LIBPFASST)/gcc
+GCCTMP = $(LIBPFASST)/gcc.tmp
+XZCAT  = $(GCCTMP)/usr/bin/xzcat
 
 gcc47: $(GCCDL)
+	rm -rf $(GCCTMP) $(GCC) makefile.gcc47.defs
 	mkdir $(GCCTMP)
 	cd $(GCCTMP) && tar zxf $(LIBPFASST)/xz.tar.gz
-	cd $(GCCTMP) && $(GCCTMP)/usr/bin/xzcat $(LIBPFASST)/$(GCC).tar.xz | tar x
-	cd $(GCCTMP)/$(GCC) && $(GCCTMP)/usr/bin/xzcat $(LIBPFASST)/gcc-infrastructure.tar.xz | tar x
+	cd $(GCCTMP) && $(XZCAT) $(LIBPFASST)/$(GCC).tar.xz | tar x
+	cd $(GCCTMP)/$(GCC) && $(XZCAT) $(LIBPFASST)/gcc-infrastructure.tar.xz | tar x
 	mv $(GCCTMP)/$(GCC) $(LIBPFASST)
-	cp $(LIBPFASST)/mk/makefile.gcc47.defs $(LIBPFASST)
 	rm -rf $(GCCTMP)
+	ln -s $(LIBPFASST)/mk/makefile.gcc47.defs
+	@echo
+	@echo GCC 4.7 has been installed in 
+	@echo 
+	@echo   $(LIBPFASST)/$(GCC)
+	@echo
+	@echo and a symlink to makefile.gcc47.defs has been created.  These makefile
+	@echo definitions should work either of the of OpenMPI or MPICH2 mpif90 
+	@echo compiler wrappers.
+	@echo
+	@echo You may need to set your LD_LIBRARAY_PATH to include
+	@echo
+	@echo   $(LIBPFASST)/$(GCC)/lib:$(LIBPFASST)/$(GCC)/lib64
+	@echo
 
 $(GCC).tar.xz:
 	wget http://gfortran.com/download/x86_64/snapshots/$(GCC).tar.xz
