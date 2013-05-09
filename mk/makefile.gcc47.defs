@@ -9,5 +9,5 @@ FC = mpif90
 CC = $(LIBPFASST)/gcc-4.7/bin/gcc
 AR = ar rcs
 
-FFLAGS  = -Ibuild -Jbuild
-LDFLAGS = -static
+FFLAGS  = -Ibuild -Jbuild -Wall -g -Wno-unused-dummy-argument
+LDFLAGS = -g -static

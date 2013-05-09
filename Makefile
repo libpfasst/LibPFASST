@@ -10,7 +10,9 @@ include $(LIBPFASST)/Makefile.defaults
 # libpfasst
 #
 
-$(shell python mk/version.py src/pf_version.f90)
+$(shell $(PY) mk/version.py src/pf_version.f90)
+
+VPATHS = $(LIBPFASST)/src
 
 FSRC = $(wildcard src/*.f90)
 CSRC = $(wildcard ls src/*.c)
