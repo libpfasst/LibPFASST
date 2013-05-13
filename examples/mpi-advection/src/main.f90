@@ -56,10 +56,10 @@ program fpfasst
   end if
 
   do l = 1, nlevs
-     pf%levels(l)%nvars  = nvars(l)
-     pf%levels(l)%nnodes = nnodes(l)
+     pf%levels(l)%nvars  = nvars(3-nlevs+l)
+     pf%levels(l)%nnodes = nnodes(3-nlevs+l)
 
-     call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
+     call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
@@ -70,17 +70,22 @@ program fpfasst
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
+  if (pf%rank == 0) then
+     print *, 'nvars: ', pf%levels(:)%nvars
+     print *, 'nnodes:', pf%levels(:)%nnodes
+  end if
+
 
   !
   ! run
   !
-  allocate(q0%array(nvars(nlevs)))
+  allocate(q0%array(pf%levels(nlevs)%nvars))
   call initial(q0)
 
   ! call pf_logger_attach(pf)
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, 2*comm%nproc)
+  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps=4*comm%nproc)
 
 
   !
