@@ -5,6 +5,7 @@
 FC = mpif90
 CC = gcc
 AR = ar rcs
+PY = python
 
 FFLAGS = -Ibuild -Jbuild
 

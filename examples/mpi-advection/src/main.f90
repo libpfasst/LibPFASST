@@ -34,7 +34,7 @@ program fpfasst
   !
 
   nvars  = [ 32, 64, 128 ]
-  nnodes = [ 3, 5, 9 ]
+  nnodes = [ 2, 3, 5 ]
   dt     = 0.1_pfdp
   nlevs  = 3
 
@@ -43,10 +43,14 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  pf%niters = 8
+  pf%niters = 12
   pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
 
   pf%echo_timings = .false.
+
+  pf%window      = PF_WINDOW_RING
+  pf%abs_res_tol = 1.d-10
+
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if

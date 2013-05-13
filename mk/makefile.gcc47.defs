@@ -1,0 +1,13 @@
+#
+# Build settings for auto-installed gcc47.
+#
+
+export OMPI_FC   = $(LIBPFASST)/gcc-4.7/bin/gfortran
+export MPICH_F90 = $(LIBPFASST)/gcc-4.7/bin/gfortran
+
+FC = mpif90
+CC = $(LIBPFASST)/gcc-4.7/bin/gcc
+AR = ar rcs
+
+FFLAGS  = -Ibuild -Jbuild -Wall -g -Wno-unused-dummy-argument
+LDFLAGS = -g -static

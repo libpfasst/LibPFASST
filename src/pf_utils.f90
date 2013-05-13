@@ -111,6 +111,7 @@ contains
     type(pf_level_t), intent(inout) :: F
     real(pfdp),       intent(in)    :: dt
 
+    real(pfdp) :: norms(F%nnodes-1)
     integer :: m, n
 
     call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
@@ -134,6 +135,14 @@ contains
        call F%encap%axpy(F%R(m),  1.0_pfdp, F%I(m))
        call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
     end do
+
+    
+    ! compute max residual norm
+    do m = 1, F%nnodes-1
+       norms(m) = F%encap%norm(F%R(m))
+    end do
+
+    F%residual = maxval(abs(norms))
 
   end subroutine pf_residual
 

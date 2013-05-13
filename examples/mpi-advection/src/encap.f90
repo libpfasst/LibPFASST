@@ -27,6 +27,7 @@ contains
     encap%destroy => encap_destroy
     encap%setval  => encap_setval
     encap%copy    => encap_copy
+    encap%norm    => encap_norm
     encap%pack    => encap_pack
     encap%unpack  => encap_unpack
     encap%axpy    => encap_axpy
@@ -84,6 +85,15 @@ contains
 
     dst = src
   end subroutine encap_copy
+
+  ! Compute norm of solution
+  function encap_norm(ptr) result (norm)
+    type(c_ptr), intent(in), value :: ptr
+    real(pfdp) :: norm
+    real(pfdp), pointer :: q(:)
+    q => array(ptr)
+    norm = maxval(abs(q))
+  end function encap_norm
 
   ! Pack solution q into a flat array.
   subroutine encap_pack(z, ptr)

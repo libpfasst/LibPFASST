@@ -189,9 +189,9 @@ contains
     type(c_ptr),       intent(in), optional :: qend
     integer,           intent(in), optional :: nsteps
 
-    real(pfdp) :: t0
-    integer    :: nblock, b, c, k, l
     type(pf_level_t), pointer :: F
+    real(pfdp) :: t0, res1, res0
+    integer    :: nblock, b, c, k, l
 
     call start_timer(pf, TTOTAL)
 
@@ -202,6 +202,9 @@ contains
     pf%state%t0   = 0.0d0
     pf%state%dt   = dt
     pf%state%iter = -1
+
+    pf%state%first = 0
+    pf%state%last  = pf%comm%nproc - 1
 
     call pf_cycle_build(pf)
 
@@ -215,18 +218,19 @@ contains
     end if
 
     nblock = pf%state%nsteps/pf%comm%nproc
-
+    res0   = 1.d0
 
     !
     ! time "block" loop
     !
 
     do b = 1, nblock
-       pf%state%block = b
-       pf%state%step  = pf%rank + (b-1)*pf%comm%nproc
-       pf%state%t0    = pf%state%step * dt
-       pf%state%iter  = -1
-       pf%state%cycle = -1
+       pf%state%block  = b
+       pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
+       pf%state%t0     = pf%state%step * dt
+       pf%state%iter   = -1
+       pf%state%cycle  = -1
+       pf%state%status = 0
 
        t0 = pf%state%t0
 
@@ -242,7 +246,6 @@ contains
           end do
        end if
 
-
        ! pfasst iterations
        do k = 1, pf%niters
           pf%state%iter  = k
@@ -254,6 +257,33 @@ contains
              F => pf%levels(l)
              call call_hooks(pf, F%level, PF_PRE_ITERATION)
           end do
+
+          ! send/receive status
+          if (pf%window == PF_WINDOW_RING) then
+             F => pf%levels(pf%nlevels)
+
+             res1 = F%residual
+
+             if ((k > 1) .and. ( &
+                  (1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol))) then
+                pf%state%status = PF_STATUS_CONVERGED
+             else
+                pf%state%status = PF_STATUS_ITERATING
+             end if
+
+             res0 = res1
+
+             call pf%comm%send_status(pf, 200+k)
+             call pf%comm%recv_status(pf, 200+k)
+
+             ! at this point we're going to keep iterating even if we've
+             ! converged, but we won't do any communication (except for
+             ! status info)
+
+             ! if (pf%state%status == PF_STATUS_CONVERGED) then
+             !    print *, "i am done", pf%rank
+             ! end if
+          end if
 
           ! post receive requests
           do l = 2, pf%nlevels
