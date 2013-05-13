@@ -15,6 +15,8 @@ OBJ  = $(subst src,build,$(FSRC:.f90=.o))
 FFLAGS  += -I$(LIBPFASST)/build -I$(FFTW3)/include 
 LDFLAGS += -L$(LIBPFASST)/build -lpfasst -L$(FFTW3)/lib -lfftw3
 
+VPATHS += src
+
 all: $(EXE)
 
 include $(LIBPFASST)/Makefile.rules
