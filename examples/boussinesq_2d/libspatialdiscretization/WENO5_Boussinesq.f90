@@ -8,7 +8,7 @@ USE omp_lib,       only : omp_get_thread_num
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nr_fields = 3, buffer_layout = 1
+INTEGER, PARAMETER :: nr_fields = 4, buffer_layout = 1
 
 TYPE fdm_parameter
 	INTEGER :: Nthreads, mpi_init_thread_flag
@@ -40,7 +40,7 @@ INTEGER,          PARAMETER               :: weno_n   = 2
 
 CONTAINS
 
-	SUBROUTINE GetRHS(Q, order_advection, order_diffusion, RQ, dy, dx, dt, nu)
+	SUBROUTINE GetRHS(Q, order_advection, order_diffusion, RQ, dx, dy, dt, nu)
 	
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(IN)  :: Q
 		DOUBLE PRECISION, DIMENSION(:,:,:), INTENT(OUT) :: RQ
@@ -66,32 +66,41 @@ CONTAINS
                 ! Q(3,:,:) = theta
                 ! Q(4,:,:) = pi
 
-                ! Horizontal and vertical flux for u
-		FluxCell_hor(  1,:,:,thread_nr) = Q(1,:,:)                    + param%c_s*Q(3,:,:)
-		GhostFluxLeft( 1,:,:,thread_nr) = GhostLeft(1,:,:,thread_nr)  + param%c_s*GhostLeft(3,:,:,thread_nr)
-		GhostFluxRight(1,:,:,thread_nr) = GhostRight(1,:,:,thread_nr) + param%c_s*GhostRight(3,:,:,thread_nr)
+                !! Horizontal and vertical flux for u : u_t + (U*u + pi)_x = 0
+		FluxCell_hor(  1,:,:,thread_nr) = Q(1,:,:)                    + Q(4,:,:)
+		GhostFluxLeft( 1,:,:,thread_nr) = GhostLeft(1,:,:,thread_nr)  + GhostLeft(4,:,:,thread_nr)
+		GhostFluxRight(1,:,:,thread_nr) = GhostRight(1,:,:,thread_nr) + GhostRight(4,:,:,thread_nr)
 				
-		FluxCell_ver( 1,:,:,thread_nr)  = Q(1,:,:)
-		GhostFluxUp(  1,:,:,thread_nr)  = GhostUp(1,:,:,thread_nr)
-		GhostFluxDown(1,:,:,thread_nr)  = GhostDown(1,:,:,thread_nr)
+		FluxCell_ver( 1,:,:,thread_nr)  = DBLE(0.0)
+		GhostFluxUp(  1,:,:,thread_nr)  = DBLE(0.0)
+		GhostFluxDown(1,:,:,thread_nr)  = DBLE(0.0)
                 
-                ! Fluxes for w
+                ! Fluxes for w : w_t + ( U*w )_x + ( pi )_z = grav*theta
                 FluxCell_hor(2,:,:,thread_nr)   = Q(2,:,:)
                 GhostFluxLeft(2,:,:,thread_nr)  = GhostLeft(2,:,:,thread_nr)
                 GhostFluxRight(2,:,:,thread_nr) = GhostRight(2,:,:,thread_nr)
   
-                FluxCell_ver(2,:,:,thread_nr)  = Q(2,:,:)                   + param%c_s*Q(3,:,:)
-                GhostFluxUp(2,:,:,thread_nr)   = GhostUp(2,:,:,thread_nr)   + param%c_s*GhostUp(3,:,:,thread_nr)
-                GhostFluxDown(2,:,:,thread_nr) = GhostDown(2,:,:,thread_nr) + param%c_s*GhostDown(3,:,:,thread_nr)
+                FluxCell_ver(2,:,:,thread_nr)  = Q(4,:,:)
+                GhostFluxUp(2,:,:,thread_nr)   = GhostUp(4,:,:,thread_nr)
+                GhostFluxDown(2,:,:,thread_nr) = GhostDown(4,:,:,thread_nr)
 
-                ! Fluxes for pi
-                FluxCell_hor(3,:,:,thread_nr)   = Q(3,:,:)                    + param%c_s*Q(1,:,:)
-                GhostFluxLeft(3,:,:,thread_nr)  = GhostLeft(3,:,:,thread_nr)  + param%c_s*GhostLeft(1,:,:,thread_nr)
-                GhostFluxRight(3,:,:,thread_nr) = GhostRight(3,:,:,thread_nr) + param%c_s*GhostRight(1,:,:,thread_nr)
+                ! Fluxes for theta : theta_t + ( U*theta )_x = -stabFreq**2 * w
+                FluxCell_hor(3,:,:,thread_nr)   = Q(3,:,:)                    
+                GhostFluxLeft(3,:,:,thread_nr)  = GhostLeft(3,:,:,thread_nr)  
+                GhostFluxRight(3,:,:,thread_nr) = GhostRight(3,:,:,thread_nr)
 
-                FluxCell_ver(3,:,:,thread_nr)   = Q(3,:,:)                   + param%c_s*Q(2,:,:)
-		GhostFluxUp(3,:,:,thread_nr)    = GhostUp(3,:,:,thread_nr)   + param%c_s*GhostUp(2,:,:,thread_nr)
-                GhostFluxDown(3,:,:,thread_nr)  = GhostDown(3,:,:,thread_nr) + param%c_s*GhostDown(2,:,:,thread_nr)
+                FluxCell_ver(3,:,:,thread_nr)   = DBLE(0.0)
+		GhostFluxUp(3,:,:,thread_nr)    = DBLE(0.0)
+                GhostFluxDown(3,:,:,thread_nr)  = DBLE(0.0)
+
+                ! Fluxes for pi : pi_t + ( U*pi + c_s^2*u )_x + ( c_s^2*w )_z  = 0
+                FluxCell_hor(4,:,:,thread_nr)   = Q(4,:,:)                    + param%c_s*param%c_s*Q(1,:,:)
+                GhostFluxLeft(4,:,:,thread_nr)  = GhostLeft(4,:,:,thread_nr)  + param%c_s*param%c_s*GhostLeft(1,:,:,thread_nr)
+                GhostFluxRight(4,:,:,thread_nr) = GhostRight(4,:,:,thread_nr) + param%c_s*param%c_s*GhostRight(1,:,:,thread_nr)
+
+                FluxCell_ver(4,:,:,thread_nr)   = param%c_s*param%c_s*Q(2,:,:)
+                GhostFluxUp(4,:,:,thread_nr)    = param%c_s*param%c_s*GhostUp(2,:,:,thread_nr)
+                GhostFluxDown(4,:,:,thread_nr)  = param%c_s*param%c_s*GhostDown(2,:,:,thread_nr)
 
 		! Now update interface values of horizontal flux
 		CALL UpdateHorizontalFlux(Q, dble(1.0) )
@@ -99,14 +108,18 @@ CONTAINS
 		
 		!CALL UpdateHorizontalFlux_Upwind(Q)
 		!CALL UpdateVerticalFlux_Upwind(Q)
-		!FluxInt_ver(:,:,:,thread_nr) = 0.0
+		!FluxInt_ver(:,:,:,thread_nr) = 0.0 
 		
 		! Compute flux divergence
 		CALL GetFluxDivergence(RQ, dy, dx)
-		
+
+                ! Now add tendencies from buoancy terms
+                RQ(2,:,:) = RQ(2,:,:) + param%grav*Q(3,:,:)
+                RQ(3,:,:) = RQ(3,:,:) - param%stabFreq*param%stabFreq*Q(2,:,:)
+
 		! Add contribution from diffusion
 		!CALL AddDiffusion(Q, RQ, dx, dy, nu, order_diffusion)
-
+  
 		CONTAINS 
 		
 			SUBROUTINE UpdateHorizontalFlux_Upwind(Q)
@@ -974,8 +987,8 @@ CONTAINS
 					! Fill horizontal ghost cells
 					DO i=1,Nghost
 						DO j=1,Ny
-							GhostLeft( j,i,k,thread_nr) = Q(j, Nx-i+1, k)
-							GhostRight(j,i,k,thread_nr) = Q(j, i, k)
+							GhostLeft( k,j,i,thread_nr) = Q(k,j, Nx-i+1)
+							GhostRight(k,j,i,thread_nr) = Q(k,j, i)
 						END DO
 					END DO
 					
@@ -987,8 +1000,8 @@ CONTAINS
 						
 						DO i=1,Nx
 							DO j=1,Nghost
-								GhostUp(  j, i, k, thread_nr) = -Q(j, i, k)
-								GhostDown(j, i, k, thread_nr) = -Q(Ny-j+1, i, k)
+								GhostUp(  k, j, i, thread_nr) = -Q(k, j, i)
+								GhostDown(k, j, i, thread_nr) = -Q(k, Ny-j+1, i)
 							END DO
 						END DO
 				
@@ -996,8 +1009,8 @@ CONTAINS
 					
 						DO i=1,Nx
 							DO j=1,Nghost
-								GhostUp(  j, i, k, thread_nr) = Q(j, i, k)
-								GhostDown(j, i, k, thread_nr) = Q(Ny-j+1,i,k)
+								GhostUp(  k, j, i, thread_nr) = Q(k, j, i)
+								GhostDown(k, j, i, thread_nr) = Q(k, Ny-j+1,i)
 							END DO
 						END DO
 						

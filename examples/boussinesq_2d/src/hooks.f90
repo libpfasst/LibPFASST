@@ -38,16 +38,11 @@ contains
     real(pfdp), pointer :: r(:)
     type(c_ptr) :: residual
 
-    call encap_create(residual, level%level, SDC_KIND_SOL_NO_FEVAL, &
-         level%nvars, level%shape, level%ctx, level%encap%ctx)
-    call pf_residual(level, state%dt, residual)
+   r => array(level%R(level%nnodes-1))
 
-    r => array(residual)
-
-    print '("resid: step: ",i4.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
+    print '("resid: step: ",i3.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
          state%step+1, state%iter, level%level, maxval(abs(r))
 
-    call encap_destroy(residual)
   end subroutine echo_residual
 
   subroutine output(pf, level, state, ctx)
@@ -66,7 +61,7 @@ contains
     allocate(residuals(pf%niters)) ! must match maxit
     residuals = 0.0
 
-    Call WriteData( residuals, DBLE(0.0), DBLE(0.0), DBLE(0.0), pf%niters, state%step+1, RESHAPE(y, (/ nr_fields, Nx, Ny /)) )
+    Call WriteData( residuals, DBLE(0.0), DBLE(0.0), DBLE(0.0), pf%niters, state%step+1, RESHAPE(y, (/ nr_fields, Ny, Nx /)) )
 
   end subroutine output
 end module hooks

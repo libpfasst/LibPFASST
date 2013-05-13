@@ -2,41 +2,61 @@ import math
 import getMesh
 import numpy
 from collections import defaultdict
+# Formulas for compution nondimensional parameter:
+#
+# Given : reference length L and time T such that U = L/T = 20 m/s
+# stabFreq^2 = L*N^2/g with N = 0.01 1/s and g = 10 m/s^2
+# grav       = T^2*g/L
+# c_s        = T*c_s_dim/L with c_s_dim = 300m/s
+# xright     = 300km/L
+# yup        = 10km/L
+# Tend       = 3000s/T
+# dt         = 1s/T or 2s/T
+# Nsteps     = Tend/dt
+# dx=dz      = 1km/L , compute Nx, Ny accordingly
+# a          = 5km/L
+
+# Use: L = 10km and T = 500s ==> U = 10,000m/500s = 20 m/s
+# ...and stabFreq = sqrt(0.1), grav = 250, c_s = 15
 def get():
-    nr_fields = 3
-    Nx        = 25
-    Ny        = 25
+    nr_fields = 4
+    Nx        = 300
+    Ny        = 60
     xleft     = 0.0
-    xright    = 1.0
+    xright    = 30.0
     ydown     = 0.0
     yup       = 1.0
-    Nsteps        = 50
-    Tend          = 0.5
-    Niter         = 5
-    grav          = 1.0
-    stabFreq      = 0.0
-    c_s           = 1.0
+    Nsteps    = 6000
+    Tend      = 6.0
+    Niter     = 6
+    grav      = 250.0
+    stabFreq  = math.sqrt(0.1)
+    c_s       = 15.0
 
    # define function that provides initial value
+    x_c = 10
+    a   = 0.5
     def q0(x,y):
             #return math.sin(2.0*math.pi*x)*math.sin(2.0*math.pi*y)
-        return math.exp(-(x-0.5)**2/0.1**2 - (y-0.5)**2/0.1**2)
-        
+        #return math.exp(-(x-x_c)**2/3.0**2 - (y-0.5)**2/0.1**2)
+        return 0.01*math.sin(math.pi*y/yup)/( 1 + (x - x_c )**2/a**2 )
+
     # if this is an actual 2D problem, get a 2D mesh and evaluate q0 accordingly
     XX, YY, dx, dy = getMesh.getMesh(Nx,Ny,xleft,xright,yup,ydown)
     
     # evaluate q0 on generate mesh --> adapt for IV with multiple components
-    Q = numpy.empty([Ny,Nx,nr_fields])
+    Q = numpy.empty([Nx,Ny,nr_fields])
     for jj in range(0,Ny):
         for ii in range(0,Nx):
             for kk in range(0,nr_fields):
-                if kk==0:
-                    Q[jj,ii,kk] = q0(XX[jj,ii],YY[jj,ii])
+                if kk==2:
+                    Q[ii,jj,kk] = q0(XX[jj,ii],YY[jj,ii])
                 else:
-                    Q[jj,ii,kk] = 0.0
+                    Q[ii,jj,kk] = 0.0
 
     domain_height = abs(yup - ydown)
     domain_width  = abs(xright - xleft)
+
 
     # Initialize 
     problem = {}
@@ -49,12 +69,12 @@ def get():
     problem['input']['problemdefinition']['coriolisPar']   = ['d', 0.0, (1,1)]
     problem['input']['problemdefinition']['domain_height'] = ['d', domain_height, (1,1)]
     problem['input']['problemdefinition']['domain_width']  = ['d', domain_width, (1,1)] 
-    problem['input']['problemdefinition']['BC']            = ['i', 1, (1,1)]
+    problem['input']['problemdefinition']['BC']            = ['i', 3, (1,1)]
     problem['input']['problemdefinition']['x_left']        = ['d', xleft, (1,1)]
     problem['input']['problemdefinition']['x_right']       = ['d', xright, (1,1)]
     problem['input']['problemdefinition']['y_up']          = ['d', yup, (1,1)]
     problem['input']['problemdefinition']['y_down']        = ['d', ydown, (1,1)]
-    problem['input']['problemdefinition']['q_initial']     = ['d', Q, (Ny, Nx, nr_fields)]
+    problem['input']['problemdefinition']['q_initial']     = ['d', Q, (Nx, Ny, nr_fields)]
     problem['input']['problemdefinition']['Uadv']          = ['d', 0.0, (1, 1)]
     problem['input']['problemdefinition']['Vadv']          = ['d', 0.0, (1, 1)]
 

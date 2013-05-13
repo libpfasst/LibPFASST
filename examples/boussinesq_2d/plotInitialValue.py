@@ -27,9 +27,17 @@ if sol==None:
     print "Could not find dataset 'solution' in selected HDF5 file. Now exiting."
     sys.exit()
 sol = sol[...]
-sol = sol.reshape(Ny,Nx,nr_fields)
+sol = sol.reshape(Nx,Ny,nr_fields)
 
-fig = plt.figure()
-ax  = fig.gca(projection='3d')
-surf = ax.plot_surface(XX, YY, sol[:,:,0], cstride=1, rstride=1, cmap=cm.coolwarm, linewidth=0.0)
+
+#print XX.shape
+#print YY.shape
+#fig = plt.figure()
+#ax  = fig.gca(projection='3d')
+#surf = ax.plot_surface(XX, YY, sol[:,:,0], cstride=1, rstride=1, cmap=cm.coolwarm, linewidth=0.0)
+#ax.view_init(89,-89)
+N = (1e-2-5e-4)/5e-4
+contour_lines = numpy.linspace(5e-4,1e-2,N)
+CS = plt.contour(XX,YY, sol[:,:,2].T,contour_lines)
+plt.clabel(CS, inline=1, fontsize=10)
 plt.show()
