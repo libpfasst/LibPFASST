@@ -73,6 +73,8 @@ program fpfasst
   if (pf%rank == 0) then
      print *, 'nvars: ', pf%levels(:)%nvars
      print *, 'nnodes:', pf%levels(:)%nnodes
+
+     call pf_cycle_print(pf)
   end if
 
 

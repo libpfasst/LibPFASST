@@ -28,4 +28,5 @@ module pfasst
   use pf_mod_implicit
   use pf_mod_explicit
   use pf_mod_imex
+  use pf_mod_cycle
 end module pfasst

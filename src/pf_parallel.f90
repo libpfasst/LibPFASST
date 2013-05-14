@@ -206,8 +206,6 @@ contains
     pf%state%first = 0
     pf%state%last  = pf%comm%nproc - 1
 
-    call pf_cycle_build(pf)
-
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
 

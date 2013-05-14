@@ -40,31 +40,36 @@ contains
        stop 'SDC_CYCLE_FULL NOT IMPLEMENTED YET'
 
     case (SDC_CYCLE_V)
-
-       allocate(pf%cycles%start(2*(pf%nlevels-1)-1))
-       allocate(pf%cycles%pfasst(2*pf%nlevels-1))
-       allocate(pf%cycles%end(1))
-
+       
        ! start: transfer from coarsest to finest, sweeping on the way up
-       stages => pf%cycles%start
-       c = 1
-       do l = 2, pf%nlevels-1
+       if (pf%nlevels > 1) then
+          allocate(pf%cycles%start(2*(pf%nlevels-1)-1))
+
+          stages => pf%cycles%start
+          c = 1
+          do l = 2, pf%nlevels-1
+             stages(c)%type = SDC_CYCLE_INTERP
+             stages(c)%F    = l
+             stages(c)%G    = l-1
+             c = c + 1
+
+             stages(c)%type = SDC_CYCLE_SWEEP
+             stages(c)%F    = l
+             stages(c)%G    = -1
+             c = c + 1
+          end do
+
           stages(c)%type = SDC_CYCLE_INTERP
-          stages(c)%F    = l
-          stages(c)%G    = l-1
-          c = c + 1
+          stages(c)%F    = pf%nlevels
+          stages(c)%G    = pf%nlevels-1
+       else
 
-          stages(c)%type = SDC_CYCLE_SWEEP
-          stages(c)%F    = l
-          stages(c)%G    = -1
-          c = c + 1
-       end do
+          allocate(pf%cycles%start(0))
 
-       stages(c)%type = SDC_CYCLE_INTERP
-       stages(c)%F    = pf%nlevels
-       stages(c)%G    = pf%nlevels-1
+       end if
 
        ! pfasst: v-cycle from finest, but end in middle
+       allocate(pf%cycles%pfasst(2*pf%nlevels-1))
        stages => pf%cycles%pfasst
 
        c = 1
@@ -88,13 +93,58 @@ contains
        end do
 
        ! end: sweep on finest
+       allocate(pf%cycles%end(1))
        stages => pf%cycles%end
 
        stages(1)%type = SDC_CYCLE_SWEEP
        stages(1)%F    = pf%nlevels
        stages(1)%G    = -1
+
     end select
 
   end subroutine pf_cycle_build
+
+  subroutine pf_cycle_print_stage(stage)
+    type(pf_stage_t), intent(in) :: stage
+
+    select case(stage%type)
+    case (SDC_CYCLE_UP)
+       print *, "==> cycle up:     F/G: ", stage%F, stage%G
+    case (SDC_CYCLE_DOWN)
+       print *, "==> cycle down:   F/G: ", stage%F, stage%G
+    case (SDC_CYCLE_BOTTOM)
+       print *, "==> cycle bottom: F:   ", stage%F
+    case (SDC_CYCLE_SWEEP)
+       print *, "==> cycle sweep:  F:   ", stage%F
+    case (SDC_CYCLE_INTERP)
+       print *, "==> cycle interp: F/G: ", stage%F, stage%G
+    end select
+  end subroutine pf_cycle_print_stage
+
+  subroutine pf_cycle_print(pf)
+    type(pf_pfasst_t), intent(in) :: pf
+    
+    integer :: c
+
+    print *, 'STARTING (POST PREDICTOR) STAGES'
+    if (pf%nlevels > 1) then
+       do c = 1, size(pf%cycles%start)
+          call pf_cycle_print_stage(pf%cycles%start(c))
+       end do
+    end if
+
+    print *, 'PFASST (ITERATION) STAGES'
+    do c = 1, size(pf%cycles%pfasst)
+       call pf_cycle_print_stage(pf%cycles%pfasst(c))
+    end do
+
+    print *, 'END STAGES'
+    do c = 1, size(pf%cycles%end)
+       call pf_cycle_print_stage(pf%cycles%end(c))
+    end do
+
+
+  end subroutine pf_cycle_print
+
 
 end module pf_mod_cycle
