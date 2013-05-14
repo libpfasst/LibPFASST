@@ -3,7 +3,9 @@
 .lock*
 .waf*
 fftw*
+hdf5*
 gcc*
+xz*
 
 build/
 src/pf_version.f90

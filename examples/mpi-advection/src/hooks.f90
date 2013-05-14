@@ -39,7 +39,7 @@ contains
 
     r => array(level%R(level%nnodes-1))
 
-    print '("resid: step: ",i3.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
+    print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          state%step+1, state%iter, level%level, maxval(abs(r))
   end subroutine echo_residual
 

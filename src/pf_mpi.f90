@@ -69,6 +69,7 @@ contains
     allocate(pf_comm%sendreq(pf%nlevels))
 
     pf_comm%sendreq = MPI_REQUEST_NULL
+    pf_comm%statreq = -66
   end subroutine pf_mpi_setup
 
   ! Destroy
@@ -134,26 +135,27 @@ contains
 
   ! Receive status
   subroutine pf_mpi_recv_status(pf, tag)
-    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
+    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
 
-    integer :: ierror, stat(MPI_STATUS_SIZE), message(2)
+    integer    :: ierror, stat(MPI_STATUS_SIZE)
+    integer(4) :: message(8)
 
     if (pf%rank /= pf%state%first) then
 
-       call mpi_recv(message, 2, MPI_INTEGER, &
+       call mpi_recv(message, 8, MPI_INTEGER4, &
             pf%comm%backward, tag, pf%comm%comm, stat, ierror)
 
-       pf%state%pstatus = message(1)
-       pf%state%pstep   = message(2)
+       pf%state%pstatus = message(7)
+       pf%state%pstep   = message(8)
 
        if (ierror .ne. 0) then
           print *, 'WARNING: MPI ERROR DURING RECEIVE STATUS', ierror
        end if
-
     end if
+
   end subroutine pf_mpi_recv_status
 
   ! Send
@@ -169,7 +171,7 @@ contains
 
     call start_timer(pf, TSEND + level%level - 1)
 
-    if (pf%rank /= pf%comm%nproc-1 &
+    if (pf%rank /= pf%state%last &
          .and. pf%state%status /= PF_STATUS_CONVERGED) then
 
        if (blocking) then
@@ -189,22 +191,32 @@ contains
 
   ! Send status
   subroutine pf_mpi_send_status(pf, tag)
-    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
+    use pf_mod_mpi!, only: MPI_INTEGER, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
 
-    integer :: ierror, stat(MPI_STATUS_SIZE), message(2)
+    integer    :: ierror, stat(MPI_STATUS_SIZE)
+    integer(4) :: message(8)
 
     if (pf%rank /= pf%state%last) then
 
-       message(1) = pf%state%status
-       message(2) = pf%state%step
+       ! on orga there is some weird issue with send/recv status: the
+       ! first two integer4's always get set to zero on the receiving
+       ! end.  hence we use 8 integer4's and put the message in the
+       ! last two slots.
 
-       call mpi_isend(message, 2, MPI_INTEGER, &
-            pf%comm%forward, tag, pf%comm%comm, stat, ierror)
+       message = 666
+       message(7) = pf%state%status
+       message(8) = pf%state%step + 99
 
+       if (pf%comm%statreq /= -66) then
+          call mpi_wait(pf%comm%statreq, stat, ierror)
+       end if
+       call mpi_issend(message, 8, MPI_INTEGER4, &
+            pf%comm%forward, tag, pf%comm%comm, pf%comm%statreq, ierror)
     end if
+
   end subroutine pf_mpi_send_status
 
   ! Send

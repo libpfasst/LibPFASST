@@ -39,7 +39,6 @@ module pf_mod_dtype
 
   integer, parameter :: SDC_CYCLE_V    = 1
   integer, parameter :: SDC_CYCLE_FULL = 2
-  integer, parameter :: SDC_CYCLE_OLD  = 10
 
   integer, parameter :: SDC_CYCLE_UP     = 100
   integer, parameter :: SDC_CYCLE_DOWN   = 101
@@ -169,6 +168,7 @@ module pf_mod_dtype
      integer, pointer :: &
           recvreq(:), &                 ! receive requests (indexed by level)
           sendreq(:)                    ! send requests (indexed by level)
+     integer :: statreq                 ! status send request
 
      ! pthreads
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)

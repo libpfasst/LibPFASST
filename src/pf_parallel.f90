@@ -224,13 +224,17 @@ contains
     ! time "block" loop
     !
 
+    pf%comm%statreq = -66
+
     do b = 1, nblock
        pf%state%block  = b
        pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
        pf%state%t0     = pf%state%step * dt
        pf%state%iter   = -1
        pf%state%cycle  = -1
-       pf%state%status = 0
+
+       pf%state%status  = PF_STATUS_ITERATING
+       pf%state%pstatus = PF_STATUS_ITERATING
 
        t0 = pf%state%t0
 
@@ -273,16 +277,20 @@ contains
 
              res0 = res1
 
-             call pf%comm%send_status(pf, 200+k)
-             call pf%comm%recv_status(pf, 200+k)
+             call pf%comm%recv_status(pf, 8000+k)
 
-             ! at this point we're going to keep iterating even if we've
-             ! converged, but we won't do any communication (except for
-             ! status info)
+             ! if the previous processor hasn't converged yet, keep
+             ! iterating
+             if (pf%rank /= pf%state%first) then
+                if (pf%state%pstatus /= PF_STATUS_CONVERGED) &
+                   pf%state%status = PF_STATUS_ITERATING
+             end if
 
-             ! if (pf%state%status == PF_STATUS_CONVERGED) then
-             !    print *, "i am done", pf%rank
-             ! end if
+             call pf%comm%send_status(pf, 8000+k)
+          end if
+
+          if (pf%state%status == PF_STATUS_CONVERGED) then
+             cycle
           end if
 
           ! post receive requests
@@ -313,6 +321,8 @@ contains
           call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
+
+       pf%comm%statreq = -66
 
     end do ! end block loop
 
