@@ -1,5 +1,5 @@
 #
-# fftw3 (for the examples)
+# fftw3
 # 
 
 FFTW3 = fftw-3.3.3
@@ -13,6 +13,24 @@ fftw3: $(FFTW3).tar.gz
 
 $(FFTW3).tar.gz:
 	wget http://www.fftw.org/$(FFTW3).tar.gz
+
+
+#
+# hdf5
+# 
+
+HDF5 = hdf5-1.8.11
+HDF5_CONFIG = --enable-fortran --enable-parallel
+
+hdf5: $(HDF5).tar.gz
+	rm -rf $(HDF5)
+	tar xzf $(HDF5).tar.gz
+	cd $(HDF5) && ./configure --prefix=$(PWD)/hdf5 $(HDF5_CONFIG)
+	cd $(HDF5) && make install
+
+$(HDF5).tar.gz:
+	wget http://www.hdfgroup.org/ftp/HDF5/current/src/$(HDF5).tar.gz
+
 
 #
 # gcc-4.7

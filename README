@@ -61,13 +61,20 @@ from the LIBPFASST directory:
 
   $ make fftw3
 
-This will download and compile a local (static) copy of FFTW3.
-
-Once you have FFTW installed, you can build the mpi-advection and
+This will download and compile a local (static) copy of FFTW3.  Once
+you have FFTW installed, you can build the mpi-advection and
 pth-advection examples by:
 
   $ cd examples/mpi-advection
   $ make
+
+Similarly, some other examples may require HDF5.  If you do not
+already have HDF5 installed, simply run the 'hdf5' make rule from the
+LIBPFASST directory:
+
+  $ make hdf5
+
+This will download and compile a local (static) copy of HDF5.
 
 
 LICENSE
