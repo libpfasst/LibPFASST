@@ -4,7 +4,7 @@
 
 LIBPFASST ?= $(PWD)
 
-include $(LIBPFASST)/Makefile.defs
+include $(LIBPFASST)/Makefile.defaults
 
 #
 # libpfasst

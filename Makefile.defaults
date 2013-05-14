@@ -9,6 +9,4 @@ PY = python
 
 FFLAGS = -Ibuild -Jbuild
 
-# include any .defs files
-DEFS = $(wildcard $(LIBPFASST)/*.defs)
-include $(DEFS)
+include $(LIBPFASST)/*.defs

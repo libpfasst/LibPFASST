@@ -1,14 +1,11 @@
 *~
 
-.lock*
-.waf*
 fftw*
 hdf5*
 gcc*
 xz*
 
+*.defs
+
 build/
 src/pf_version.f90
-
-
-
