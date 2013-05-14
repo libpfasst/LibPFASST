@@ -1,6 +1,6 @@
 include $(CURDIR)/../../../Makefile.defs
 
-FFLAGS += -I$(CURDIR)/../inc -I/home/daniel/Programs/hdf5/include -I$(CURDIR)/../
+FFLAGS += -I$(CURDIR)/../inc -I/home/daniel/Programs/hdf5/include -I$(CURDIR)
 #LDFLAGS += -L$(CURDIR)/../lib -l lserial_io
 
 all: libspatialdiscretization.a

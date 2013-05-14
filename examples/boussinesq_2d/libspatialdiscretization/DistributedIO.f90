@@ -118,7 +118,8 @@ MODULE DistributedIO
 			! STEP 2 : Define all data space (that is, dimensionalities) that will be used during I/O
 			
 			! a) Define global data spaces, containing data from all processors. These are used as targets for output
-			dims_global_solution        = (/ Ny*nprocs_y, Nx*nprocs_x, nr_fields, Nsteps_parallel /)
+			!dims_global_solution        = (/ Ny*nprocs_y, Nx*nprocs_x, nr_fields, Nsteps_parallel /)
+                        dims_global_solution        = (/ nr_fields, Ny*nprocs_y, Nx*nprocs_x, Nsteps_parallel /)
 			dims_global_iterate_scalar  = (/ nprocs, maxit, Nsteps_parallel /)
 			dims_global_scalar          = (/ nprocs, Nsteps_parallel /)
 			dims_global_constant_scalar = (/ nprocs /)
@@ -131,8 +132,9 @@ MODULE DistributedIO
 			CALL H5SCREATE_SIMPLE_F( INT(2), dims_global_threads,         dataspace_global_threads,         hdf5_error)
 			
 			! b) Define local data spaces, containing data from one processor. These are used as sources for output
-			dims_local_solution       = (/ Ny, Nx, nr_fields /)
-			dims_local_iterate_scalar = (/ maxit /)
+			!dims_local_solution       = (/ Ny, Nx, nr_fields /)
+			dims_local_solution       = (/ nr_fields, Ny, Nx /)
+                        dims_local_iterate_scalar = (/ maxit /)
 			dims_local_scalar         = (/ 1 /)
 			dims_local_threads        = (/ Nthreads /)
 			
@@ -240,13 +242,10 @@ MODULE DistributedIO
 			CALL H5GOPEN_F(group_input_id, 'problemdefinition', group_problem_id, hdf5_error)
 												
 			! ---- Load initial value ----	
-                        IF (buffer_layout==0) THEN
-                           array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
-                           array_count  = (/ Ny , Nx, nr_fields /) 
-                        ELSE IF (buffer_layout==1) THEN
-                           array_offset = (/ 0, cart_coords(1)*Ny, cart_coords(2)*Nx /)
-                           array_count  = (/ nr_fields, Ny, Nx /)  
-                        END IF
+                        ! array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0 /)
+                        ! array_count  = (/ Ny , Nx, nr_fields /) 
+                        array_offset = (/ 0, cart_coords(1)*Ny, cart_coords(2)*Nx /)
+                        array_count  = (/ nr_fields, Ny, Nx /)  
 
 			CALL H5DOPEN_F(group_problem_id, 'q_initial', dataset, hdf5_error)
 		
@@ -288,9 +287,13 @@ MODULE DistributedIO
 			! Write array solution
 
 			IF (PRESENT(Q)) THEN
-				array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0, time_index-1 /)
-				array_count  = (/ Ny, Nx, nr_fields, 1 /)
-				CALL H5SSELECT_HYPERSLAB_F(dataspace_global_solution, H5S_SELECT_SET_F, array_offset, array_count, hdf5_error)
+				!array_offset = (/ cart_coords(1)*Ny , cart_coords(2)*Nx, 0, time_index-1 /)
+				!array_count  = (/ Ny, Nx, nr_fields, 1 /)
+				
+				array_offset = (/ 0, cart_coords(1)*Ny , cart_coords(2)*Nx, time_index-1 /)
+				array_count  = (/ nr_fields, Ny, Nx, 1 /)
+
+                                CALL H5SSELECT_HYPERSLAB_F(dataspace_global_solution, H5S_SELECT_SET_F, array_offset, array_count, hdf5_error)
 
 				CALL H5DWRITE_F(dataset_ids_data(1), H5T_NATIVE_DOUBLE, Q, dims_local_solution, hdf5_error, &
 					file_space_id = dataspace_global_solution, &

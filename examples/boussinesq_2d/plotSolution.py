@@ -31,17 +31,31 @@ if sol==None:
     sys.exit()
 Ndumps = sol.shape[0]
 sol    = sol[...]
-sol    = sol.reshape(Ndumps, Ny, Nx, nr_fields)
 
-fig = [None for x in range(0,nr_fields)]
-ax  = [None for x in range(0,nr_fields)]
-for ii in range(0,nr_fields):
-    fig[ii] = plt.figure()
-    ax[ii] = fig[ii].gca(projection='3d')
-    ax[ii].plot_surface(XX,YY,sol[-1,:,:,ii],rstride=1,cstride=1,cmap=cm.coolwarm,linewidth=0)
-    ax[ii].set_title(ii+1)
+print sol[-1,:,:,2].min()
+print sol[-1,:,:,2].max()
+#fig = [None for x in range(0,nr_fields)]
+#ax  = [None for x in range(0,nr_fields)]
+#for ii in range(0,nr_fields):
+#    fig[ii] = plt.figure()
+#    ax[ii] = fig[ii].gca(projection='3d')
+#    ax[ii].plot_surface(XX,YY,sol[-1,:,:,0].T,rstride=1,cstride=1,cmap=cm.coolwarm,linewidth=0)
+#    ax[ii].set_title(ii+1)
     #ax[ii].view_init(30,60)
 
+fig = plt.figure()
+N = int((1e-1-5e-4)/5e-4)
+contour_lines = numpy.linspace(5e-4,1e-1,N+1)
+#contours = numpy.empty(2*N)
+#for ii in range(0,N):
+#    contours[ii]   = -contour_lines[N-ii-1]
+#    contours[N+ii] = contour_lines[ii]
+
+contours = [-3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5]
+CS = plt.contour(XX,YY,1e3*sol[-1,:,:,2].T, contours, colors='k')
+#plt.clabel(CS, inline=1, fontsize=10)
 
 plt.show()
+
+
 

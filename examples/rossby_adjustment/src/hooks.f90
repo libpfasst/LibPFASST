@@ -38,16 +38,20 @@ contains
     real(pfdp), pointer :: r(:)
     type(c_ptr) :: residual
 
-    call encap_create(residual, level%level, SDC_KIND_SOL_NO_FEVAL, &
-         level%nvars, level%shape, level%ctx, level%encap%ctx)
-    call pf_residual(level, state%dt, residual)
+    r => array(level%R(level%nnodes-1))
 
-    r => array(residual)
-
-    print '("resid: step: ",i4.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
+    print '("resid: step: ",i3.3," iter: ",i3.3," level: ",i2.2," resid: ",es14.7)', &
          state%step+1, state%iter, level%level, maxval(abs(r))
 
-    call encap_destroy(residual)
+
+!    call encap_create(residual, level%level, SDC_KIND_SOL_NO_FEVAL, &
+!         level%nvars, level%shape, level%ctx, level%encap%ctx)
+!    call pf_residual(level, state%dt, residual)
+!    r => array(residual)
+!    print '("resid: step: ",i4.3," iter: ",i3.3," level: ",i2.2," resid: ",es14!.7)', &
+!         state%step+1, state%iter, level%level, maxval(abs(r))
+!    call encap_destroy(residual)
+
   end subroutine echo_residual
 
   subroutine output(pf, level, state, ctx)

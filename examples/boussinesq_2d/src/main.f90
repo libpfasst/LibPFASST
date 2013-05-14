@@ -22,9 +22,10 @@ program fpfasst
   double precision   :: dt
   integer :: nsteps_pfasst, dim
   type(array1d), target :: q0
-
-  CALL ReadFVMParameter(echo_on = .false., dim = dim)
-  CALL ReadIntegrationParameter(time_serial = .true., echo_on = .false.)
+  logical :: echo_on = .false.
+  
+  CALL ReadFVMParameter(echo_on = echo_on, dim = dim)
+  CALL ReadIntegrationParameter(time_serial = .true., echo_on = echo_on)
 
   WRITE(*,'(A, I6)') 'Total number of steps: ', Nsteps_fine_total
   WRITE(*,'(A, F6.3)') 'End time:              ', global_tend
@@ -55,7 +56,7 @@ program fpfasst
   pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
 
   call InitializeSpatialDiscretization(maxit = pf%niters, Nparareal_restarts = Nsteps_fine_total, mpi_init_thread_flag = 0, &
-       mpi_communicator = MPI_COMM_SELF, Nthreads = 1, echo_on = .false., dim = nvars(1))
+       mpi_communicator = MPI_COMM_SELF, Nthreads = 1, echo_on = echo_on, dim = nvars(1))
 
   pf%echo_timings = .false.
   if (nlevs > 1) then
