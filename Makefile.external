@@ -3,7 +3,7 @@
 # 
 
 FFTW3 = fftw-3.3.3
-FFTW3_CONFIG = --enable-openmp --enable-sse2 --enable-threads # --enable-shared 
+FFTW3_CONFIG = --enable-openmp --enable-threads # --enable-sse2 --enable-shared 
 
 fftw3: $(FFTW3).tar.gz
 	rm -rf $(FFTW3)

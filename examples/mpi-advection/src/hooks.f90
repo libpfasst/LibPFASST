@@ -3,7 +3,8 @@
 !
 
 module hooks
-  use pfasst
+  use pf_mod_dtype
+  use pf_mod_imex
   use encap_array1d
   implicit none
 contains
