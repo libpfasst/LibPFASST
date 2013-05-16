@@ -96,7 +96,7 @@ program fpfasst
   allocate(q0%array(pf%levels(nlevs)%nvars))
   call initial(q0)
 
-  call pf_fake_run(pf, c_loc(q0), dt, nsteps=nprocs)
+  call pf_fake_run(pf, c_loc(q0), dt, nsteps=2*nprocs)
 
 
   !

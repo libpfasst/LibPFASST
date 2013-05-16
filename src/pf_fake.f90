@@ -86,12 +86,6 @@ contains
              call pf_residual(G, dt)
           end do
 
-          ! do p = k, nproc
-          !    call c_f_pointer(pfs(p), pf)
-          !    G => pf%levels(1)
-          !    call send(pf, G, k, .true.)
-          ! end do ! proc loop
-
        end do
 
     end if
@@ -119,7 +113,7 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
 
-    type(pf_level_t), pointer :: F
+    type(pf_level_t), pointer :: F, Fb
     real(pfdp) :: t0
     integer    :: nblock, b, c, k, l, p, nproc
 
@@ -226,17 +220,18 @@ contains
           call call_hooks(pf, -1, PF_POST_STEP)
        end do
 
-       ! XXX: need to do broadcasting...
+       ! broadcast fine qend (non-pipelined time loop)
+       if (nblock > 1) then
+          call c_f_pointer(pfs(nproc), pf)
+          F => pf%levels(pf%nlevels)
 
-       ! ! broadcast fine qend (non-pipelined time loop)
-       ! if (nblock > 1) then
-       !    F => pf%levels(pf%nlevels)
-
-       !    call pf%comm%wait(pf, pf%nlevels)
-       !    call F%encap%pack(F%send, F%qend)
-       !    call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
-       !    F%q0 = F%send
-       ! end if
+          do p = 1, nproc
+             call c_f_pointer(pfs(p), pf)
+             Fb => pf%levels(pf%nlevels)
+             call Fb%encap%copy(Fb%qend, F%qend)
+             call Fb%encap%pack(Fb%q0, Fb%qend)
+          end do
+       end if
 
     end do ! end block loop
 
