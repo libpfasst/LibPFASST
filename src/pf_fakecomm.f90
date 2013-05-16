@@ -22,6 +22,7 @@
 module pf_mod_comm_fake
   use pf_mod_dtype
   use pf_mod_timer
+  use pf_mod_pfasst
   use iso_c_binding
 
   implicit none

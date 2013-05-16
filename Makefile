@@ -45,7 +45,7 @@ build/pf_hooks.o:       build/pf_timer.o
 build/pf_implicit.o:    build/pf_timer.o
 build/pf_mpi.o:         build/pf_timer.o
 build/pf_pthreads.o:    build/pf_timer.o
-build/pf_fakecomm.o:    build/pf_timer.o
+build/pf_fakecomm.o:    build/pf_timer.o build/pf_pfasst.o
 build/pf_logger.o:      build/pf_hooks.o
 build/pf_imex.o:        build/pf_timer.o build/pf_explicit.o build/pf_implicit.o
 build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o build/pf_hooks.o
