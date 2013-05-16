@@ -25,8 +25,10 @@ module pfasst
   use pf_mod_pfasst
   use pf_mod_comm_mpi
   use pf_mod_comm_pthreads
+  use pf_mod_comm_fake
   use pf_mod_implicit
   use pf_mod_explicit
   use pf_mod_imex
   use pf_mod_cycle
+  use pf_mod_fake
 end module pfasst
