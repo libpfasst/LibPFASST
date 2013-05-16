@@ -3,12 +3,16 @@
 !
 
 program fpfasst
-  use pfasst
+  use pf_mod_dtype
+  use pf_mod_parallel
+  use pf_mod_pfasst
+  use pf_mod_mpi
+  use pf_mod_comm_mpi
+
   use feval
   use hooks
   use transfer
   use encap_array1d
-  use pf_mod_mpi, only: MPI_COMM_WORLD
 
   implicit none
 

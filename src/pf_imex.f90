@@ -19,40 +19,15 @@
 
 module pf_mod_imex
   use pf_mod_dtype
+  use pf_mod_explicit, only: pf_f1eval_p
+  use pf_mod_implicit, only: pf_f2eval_p, pf_f2comp_p
   implicit none
   integer, parameter, private :: npieces = 2
 
-  interface
-     subroutine pf_f1eval_p(y, t, level, ctx, f1)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f1, ctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f1eval_p
-  end interface
-
-  interface
-     subroutine pf_f2eval_p(y, t, level, ctx, f2)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f2, ctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f2eval_p
-  end interface
-
-  interface
-     subroutine pf_f2comp_p(y, t, dt, rhs, level, ctx, f2)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, rhs, f2, ctx
-       real(pfdp),     intent(in)        :: t, dt
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f2comp_p
-  end interface
-
   type :: pf_imex_t
-     procedure(pf_f1eval_p),   pointer, nopass :: f1eval
-     procedure(pf_f2eval_p),   pointer, nopass :: f2eval
-     procedure(pf_f2comp_p),   pointer, nopass :: f2comp
+     procedure(pf_f1eval_p), pointer, nopass :: f1eval
+     procedure(pf_f2eval_p), pointer, nopass :: f2eval
+     procedure(pf_f2comp_p), pointer, nopass :: f2comp
   end type pf_imex_t
 
 contains

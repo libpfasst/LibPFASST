@@ -1,6 +1,7 @@
 module encap_array1d
   use iso_c_binding
-  use pfasst
+  use pf_mod_dtype
+  ! use pfasst
   implicit none
 
   type :: array1d
@@ -19,19 +20,6 @@ contains
 
     r => q%array
   end function array
-
-  subroutine array1d_encap_create(encap)
-    type(pf_encap_t), intent(out) :: encap
-
-    encap%create  => encap_create
-    encap%destroy => encap_destroy
-    encap%setval  => encap_setval
-    encap%copy    => encap_copy
-    encap%norm    => encap_norm
-    encap%pack    => encap_pack
-    encap%unpack  => encap_unpack
-    encap%axpy    => encap_axpy
-  end subroutine array1d_encap_create
 
   ! Allocate/create solution (spatial data set) for the given level.
   !
@@ -69,8 +57,8 @@ contains
 
     real(pfdp), pointer :: q(:)
 
-    q => array(ptr)
-    q = val
+    ! q => array(ptr)
+    ! q = val
   end subroutine encap_setval
 
   ! Copy solution value.
@@ -80,10 +68,10 @@ contains
 
     real(pfdp), pointer :: dst(:), src(:)
 
-    dst => array(dstptr)
-    src => array(srcptr)
+    ! dst => array(dstptr)
+    ! src => array(srcptr)
 
-    dst = src
+    ! dst = src
   end subroutine encap_copy
 
   ! Compute norm of solution
@@ -91,8 +79,8 @@ contains
     type(c_ptr), intent(in), value :: ptr
     real(pfdp) :: norm
     real(pfdp), pointer :: q(:)
-    q => array(ptr)
-    norm = maxval(abs(q))
+    ! q => array(ptr)
+    ! norm = maxval(abs(q))
   end function encap_norm
 
   ! Pack solution q into a flat array.
@@ -101,9 +89,9 @@ contains
     real(pfdp),  intent(out)        :: z(:)
 
     real(pfdp), pointer :: q(:)
-    q => array(ptr)
+    ! q => array(ptr)
 
-    z = q
+    ! z = q
   end subroutine encap_pack
 
   ! Unpack solution from a flat array.
@@ -112,9 +100,9 @@ contains
     real(pfdp),  intent(in)        :: z(:)
 
     real(pfdp), pointer :: q(:)
-    q => array(ptr)
+    ! q => array(ptr)
 
-    q = z
+    ! q = z
   end subroutine encap_unpack
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
@@ -124,10 +112,24 @@ contains
     integer,     intent(in), optional :: flags
 
     real(pfdp), pointer :: x(:), y(:)
-    x => array(xptr)
-    y => array(yptr)
+    ! x => array(xptr)
+    ! y => array(yptr)
 
-    y = a * x + y
+    ! y = a * x + y
   end subroutine encap_axpy
+
+
+  subroutine array1d_encap_create(encap)
+    type(pf_encap_t), intent(out) :: encap
+
+    encap%create  => encap_create
+    encap%destroy => encap_destroy
+    encap%setval  => encap_setval
+    encap%copy    => encap_copy
+    encap%norm    => encap_norm
+    encap%pack    => encap_pack
+    encap%unpack  => encap_unpack
+    encap%axpy    => encap_axpy
+  end subroutine array1d_encap_create
 
 end module encap_array1d

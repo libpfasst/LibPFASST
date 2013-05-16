@@ -1,0 +1,12 @@
+# @ job_name = PFASST
+# @ error = $(job_name).$(jobid).out
+# @ output = $(job_name).$(jobid).out
+# @ environment = COPY_ALL
+# @ wall_clock_limit = 00:10:00
+# @ notification = always
+# @ notify_user = memmett@gmail.com
+# @ job_type = bluegene
+# @ bg_size = 32
+# @ queue
+
+runjob --ranks-per-node 1 : mpi-advection

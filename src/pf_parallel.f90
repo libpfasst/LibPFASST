@@ -190,9 +190,12 @@ contains
     integer,           intent(in), optional :: nsteps
 
     type(pf_level_t), pointer :: F
+    type(pf_encap_t), pointer :: encap
     real(pfdp) :: t0, res1, res0
     integer    :: nblock, b, c, k, l
 
+
+    
     call start_timer(pf, TTOTAL)
 
     !
@@ -340,8 +343,9 @@ contains
     call end_timer(pf, TTOTAL)
 
     if (present(qend)) then
-       F => pf%levels(pf%nlevels)
-       call F%encap%copy(qend, F%qend)
+       F     => pf%levels(pf%nlevels)
+       encap => F%encap         ! needed for xlf
+       call encap%copy(qend, F%qend)
     end if
   end subroutine pf_pfasst_run
 
