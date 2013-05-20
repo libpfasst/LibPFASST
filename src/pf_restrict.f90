@@ -65,12 +65,12 @@ contains
 
     type(pf_level_t), intent(inout) :: F, G
     type(c_ptr),      intent(inout) :: qF(:), qG(:)
-    logical,          intent(in), optional :: integral
+    logical,          intent(in)    :: integral
 
     type(c_ptr), pointer :: qFr(:)
     integer :: m
 
-    if (present(integral) .and. integral) then
+    if (integral) then
 
        allocate(qFr(F%nnodes-1))
 
@@ -150,7 +150,7 @@ contains
     !
     tm = t0 + dt*G%nodes
 
-    call restrict_sdc(F, G, F%Q, G%Q)
+    call restrict_sdc(F, G, F%Q, G%Q, .false.)
 
     do m = 1, G%nnodes
        call G%sweeper%evaluate(G, tm(m), m)
@@ -175,7 +175,7 @@ contains
     ! restrict '0 to node' integral on the fine level (which was
     ! computed during the last call to pf_residual)
 
-    call restrict_sdc(F, G, F%I, tmpFr, integral=.true.)
+    call restrict_sdc(F, G, F%I, tmpFr, .true.)
 
     ! compute 'node to node' tau correction
 

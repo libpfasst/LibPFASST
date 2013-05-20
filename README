@@ -20,7 +20,10 @@ COMPILERS
 
 LIBPFASST has been successfully compiled with
 
-  * GNU gfortran 4.5 and 4.8.
+  * GNU 4.5 and 4.8,
+  * Intel 13.0.1, and
+  * PGI 12.9 (almost, minor issues, but overall OK).
+   
 
 Before compiling, you will need an MPI library installed.  On Debian
 or Ubuntu machines, we recommend MPICH2:

@@ -401,8 +401,8 @@ module pf_mod_dtype
      subroutine pf_broadcast_p(pf, y, nvar, root)
        import pf_pfasst_t, pfdp
        type(pf_pfasst_t), intent(inout) :: pf
-       real(pfdp)  ,      intent(in)    :: y(nvar)
        integer,           intent(in)    :: nvar, root
+       real(pfdp)  ,      intent(in)    :: y(nvar)
      end subroutine pf_broadcast_p
   end interface
 
