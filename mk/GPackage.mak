@@ -15,6 +15,8 @@ f90sources += pf_timer.f90
 f90sources += pf_utils.f90
 f90sources += pf_logger.f90
 f90sources += pf_pthreads.f90
+f90sources += pf_fake.f90
+f90sources += pf_fakecomm.f90
 f90sources += sdc_poly.f90
 f90sources += sdc_quadrature.f90
 
