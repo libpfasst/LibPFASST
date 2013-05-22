@@ -1,4 +1,6 @@
-include $(CURDIR)/../../../Makefile.defs
+FC = /Users/ruprechd/Programs/MPICH_GCC46/bin/mpif90
+FFLAGS = -cpp -fopenmp -Wtabs -ffree-line-length-none 
+#FFLAGS += -fbounds-check -frange-check -fbacktrace -fvar-tracking -C -Wconversion -fimplicit-none -Warray-temporaries -Wcharacter-truncation -Wline-truncation -fcheck=all -g
 
 all: libserialio.a
 
@@ -10,13 +12,7 @@ serialio.o: serialio.f90
 
 serialio.mod: serialio.o
 
-install: libserialio.a serialio.mod
-	cp libserialio.a $(CURDIR)/../lib
-	cp *.mod $(CURDIR)/../inc
-
 clean:
 	rm -rf *.o
 	rm -rf *.mod
 	rm -rf *.a
-	rm -rf $(CURDIR)/../lib/libserialio.a
-	rm -rf $(CURDIR)/../inc/serialio.mod

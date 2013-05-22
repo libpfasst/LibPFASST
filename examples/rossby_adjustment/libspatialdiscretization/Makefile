@@ -1,7 +1,8 @@
-include $(CURDIR)/../../../Makefile.defs
+FC = /Users/ruprechd/Programs/MPICH_GCC46/bin/mpif90
+FFLAGS = -fopenmp -Wtabs -ffree-line-length-none -cpp -I/Users/ruprechd/Programs/MPICH_GCC46/include -I$(CURDIR)/../libserialio -I$(CURDIR)
+LDFLAGS = -L/Users/ruprechd/Programs/MPICH_GCC46/lib -lhdf5_fortran -lhdf5 -L$(CURDIR)/../libserialio -lserialio 
 
-FFLAGS += -I$(CURDIR)/../inc -I/home/daniel/Programs/hdf5/include -I$(CURDIR)
-#LDFLAGS += -L$(CURDIR)/../lib -l lserial_io
+#FFLAGS += -frange-check -fbacktrace -fvar-tracking -C -Wconversion -fimplicit-none -Warray-temporaries -Wcharacter-truncation -Wline-truncation -fcheck=all -g -fbounds-check
 
 all: libspatialdiscretization.a
 
@@ -11,10 +12,10 @@ libspatialdiscretization.a: timediscretization_parameter.o FVMParameters.o MPIPa
 
 # Rules for object files
 
-timediscretization_parameter.o: $(CURDIR)/../lib/libserialio.a timediscretization_parameter.f90
+timediscretization_parameter.o: $(CURDIR)/../libserialio/libserialio.a timediscretization_parameter.f90
 	$(FC) $(FFLAGS) -c timediscretization_parameter.f90
 
-FVMParameters.o: $(CURDIR)/../lib/libserialio.a FiniteVolumes.o FVMParameters.f90
+FVMParameters.o: $(CURDIR)/../libserialio/libserialio.a FiniteVolumes.o FVMParameters.f90
 	$(FC) $(FFLAGS) -c FVMParameters.f90 
 
 MPIParameter.o: FVMParameters.o FiniteVolumes.o MPIParameter.f90
@@ -53,17 +54,10 @@ spatialdiscretization.o: FVMParameters.o MPIParameter.o FiniteVolumes.o Distribu
 spatialdiscretization.mod: spatialdiscretization.o
 
 # Rule to update serial io library if need
-$(CURDIR)/../lib/libserialio.a:
+$(CURDIR)/../libserialio/libserialio.a:
 	cd $(CURDIR)/../libserialio; make
-	cd $(CURDIR)/../libserialio; make install
-
-install: libspatialdiscretization.a spatialdiscretization.mod
-	cp libspatialdiscretization.a $(CURDIR)/../lib
-	cp *.mod $(CURDIR)/../inc
 
 clean:
 	rm -rf *.o
 	rm -rf *.mod
-	rm -rf *.a
-	rm -rf $(CURDIR)/../lib/libspatialdiscretization.a
-	rm -rf $(CURDIR)/../inc/spatialdiscretization.mod
+	rm -rf *.a

@@ -68,7 +68,7 @@ contains
     y => array(level%qend)
 
     allocate(residuals(pf%niters)) ! must match maxit
-    residuals = 0.0
+    residuals = 0.0 ! TODO: put actual residuals in here...
 
     Call WriteData( residuals, DBLE(0.0), DBLE(0.0), DBLE(0.0), pf%niters, state%step+1, RESHAPE(y, (/ nr_fields, Nx, Ny /)) )
 

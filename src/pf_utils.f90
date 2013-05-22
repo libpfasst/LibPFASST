@@ -128,7 +128,6 @@ contains
        end do
     end if
 
-
     ! subtract out Q
     do m = 1, F%nnodes-1
        call F%encap%copy(F%R(m), F%Q(1))
@@ -136,12 +135,10 @@ contains
        call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
     end do
 
-    
     ! compute max residual norm
     do m = 1, F%nnodes-1
        norms(m) = F%encap%norm(F%R(m))
     end do
-
     F%residual = maxval(abs(norms))
 
   end subroutine pf_residual

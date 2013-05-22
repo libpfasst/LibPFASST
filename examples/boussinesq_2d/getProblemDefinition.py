@@ -21,7 +21,7 @@ from collections import defaultdict
 def get():
     nr_fields = 4
     Nx        = 300
-    Ny        = 60
+    Ny        = 10
     xleft     = 0.0
     xright    = 30.0
     ydown     = 0.0

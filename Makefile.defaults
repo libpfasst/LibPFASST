@@ -2,11 +2,12 @@
 # Default build settings for libpfasst.
 #
 
-FC = mpif90
-CC = gcc
+FC = /Users/ruprechd/Programs/MPICH_GCC46/bin/mpif90
+CC = /Users/ruprechd/Programs/MPICH_GCC46/bin/mpicc
 AR = ar rcs
 PY = python
 
-FFLAGS = -Ibuild -Jbuild
+FFLAGS = -Ibuild -Jbuild -cpp -fopenmp 
+#FFLAGS += -fbounds-check -g -frange-check -fbacktrace -fvar-tracking -C -Wconversion -fimplicit-none -Warray-temporaries -Wcharacter-truncation -Wline-truncation -fcheck=all
 
 include $(wildcard $(LIBPFASST)/*.defs)

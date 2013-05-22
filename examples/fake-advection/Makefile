@@ -3,7 +3,7 @@
 #
 
 LIBPFASST ?= ../..
-FFTW3     ?= $(LIBPFASST)/fftw3
+FFTW3     ?= /Users/ruprechd/Programs/MPICH_GCC46
 
 EXE = fake-advection
 

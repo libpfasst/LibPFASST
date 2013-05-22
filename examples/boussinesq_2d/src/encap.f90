@@ -30,6 +30,8 @@ contains
     encap%pack    => encap_pack
     encap%unpack  => encap_unpack
     encap%axpy    => encap_axpy
+	encap%norm    => encap_norm
+	
   end subroutine array1d_encap_create
 
   ! Allocate/create solution (spatial data set) for the given level.
@@ -120,4 +122,13 @@ contains
     y = a * x + y
   end subroutine encap_axpy
 
+  ! Compute norm of solution
+  function encap_norm(ptr) result (norm)
+    type(c_ptr), intent(in), value :: ptr
+    real(pfdp) :: norm
+    real(pfdp), pointer :: q(:)
+    q => array(ptr)
+    norm = maxval(abs(q))
+  end function encap_norm
+    
 end module encap_array1d

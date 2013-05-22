@@ -85,6 +85,7 @@ program fpfasst
 
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_add_hook(pf, nlevs, PF_POST_STEP, output)
+  !call pf_logger_attach(pf)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, Nsteps_fine_total)
 
   ! xx
