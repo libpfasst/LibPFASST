@@ -24,6 +24,7 @@ LIBPFASST is a Fortran implementation of the PFASST algorithm.
 * :doc:`Download <download>` - download and installation instructions.
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
 * :doc:`Overview <overview>` - design and interface overview.
+* :doc:`Reference <reference>` - information about the internals of LIBPFASST.
 
 
 Contributing
