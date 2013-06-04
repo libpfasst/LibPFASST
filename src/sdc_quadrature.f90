@@ -24,14 +24,10 @@
 !
 
 module sdc_mod_quadrature
-
   use iso_c_binding
   use sdc_mod_poly
-
   use pf_mod_dtype
-
   implicit none
-
 contains
 
   logical function not_proper(flags, node)
@@ -45,7 +41,7 @@ contains
   !
   ! Compute high precision quadrature nodes.
   !
-  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) bind(c, name='sdc_qnodes')
+  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) bind(c)
     integer(c_int),       intent(in), value  :: nnodes
     integer(c_int),       intent(in), value  :: qtype
     real(c_long_double),  intent(out)        :: qnodes(nnodes)
@@ -158,7 +154,7 @@ contains
   !
   ! Compute SDC Q and S matrices given source and destination nodes.
   !
-  subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc) bind(c, name='sdc_qmats')
+  subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc) bind(c)
     integer(c_int),      intent(in), value  :: ndst, nsrc
     real(c_long_double), intent(in)  :: dst(ndst), src(nsrc)
     real(c_double),      intent(out) :: qmat(ndst-1, nsrc), smat(ndst-1, nsrc)

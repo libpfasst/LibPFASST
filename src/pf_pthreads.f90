@@ -35,26 +35,20 @@ module pf_mod_comm_pthreads
           bind(c, name='pthread_self')
        use iso_c_binding
      end function pthread_self
-  end interface
 
-  interface
      integer(c_int) function pthread_join(thread, valueptr) &
           bind(c, name='pthread_join')
        use iso_c_binding
        integer(c_long), intent(in), value :: thread
        type(c_ptr),     intent(in), value :: valueptr
      end function pthread_join
-  end interface
 
-  interface
      integer(c_long) function pthread_create(thread, attr, start, arg) &
           bind(c, name='pthread_create')
        use iso_c_binding
        type(c_ptr), intent(in), value :: thread, attr, start, arg
      end function pthread_create
-  end interface
 
-  interface
      subroutine pthread_exit(retval) bind(c, name='pthread_exit')
        use iso_c_binding
        type(c_ptr), intent(in), value :: retval
@@ -68,55 +62,41 @@ module pf_mod_comm_pthreads
      type(c_ptr) function pf_pth_create() bind(c, name='pf_pth_create')
        use iso_c_binding
      end function pf_pth_create
-  end interface
 
-  interface
      subroutine pf_pth_destroy(pth) bind(c, name='pf_pth_destroy')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
      end subroutine pf_pth_destroy
-  end interface
 
-  interface
      subroutine pf_pth_wait_send(pth, tag) bind(c, name='pf_pth_wait_send')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
        integer(c_int), intent(in), value :: tag
      end subroutine pf_pth_wait_send
-  end interface
 
-  interface
      subroutine pf_pth_set_send(pth, tag) bind(c, name='pf_pth_set_send')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
        integer(c_int), intent(in), value :: tag
      end subroutine pf_pth_set_send
-  end interface
 
-  interface
      subroutine pf_pth_wait_recv(pth, tag) bind(c, name='pf_pth_wait_recv')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
        integer(c_int), intent(in), value :: tag
      end subroutine pf_pth_wait_recv
-  end interface
 
-  interface
      subroutine pf_pth_set_recv(pth, tag) bind(c, name='pf_pth_set_recv')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
        integer(c_int), intent(in), value :: tag
      end subroutine pf_pth_set_recv
-  end interface
 
-  interface
      subroutine pf_pth_lock(pth) bind(c, name='pf_pth_lock')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth
      end subroutine pf_pth_lock
-  end interface
 
-  interface
      subroutine pf_pth_unlock(pth) bind(c, name='pf_pth_unlock')
        use iso_c_binding
        type(c_ptr), intent(in), value :: pth

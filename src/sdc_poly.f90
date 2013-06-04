@@ -30,9 +30,7 @@
 !
 
 module sdc_mod_poly
-
   use iso_c_binding
-
   implicit none
 
   integer,  parameter :: qp = c_long_double
@@ -51,7 +49,7 @@ contains
   !
   ! Evaluate polynomial.
   !
-  real(qp) function poly_eval(p, n, x) result(v) bind(c, name='poly_eval')
+  real(qp) function poly_eval(p, n, x) result(v) bind(c)
     integer(c_int), intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n), x
 
@@ -80,7 +78,7 @@ contains
   !
   ! Differentiate polynomial (in place)
   !
-  subroutine poly_diff(p, n) bind(c, name='poly_diff')
+  subroutine poly_diff(p, n) bind(c)
     integer(c_int), intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
 
@@ -100,7 +98,7 @@ contains
   !
   ! Integrate polynomial (in place)
   !
-  subroutine poly_int(p, n) bind(c, name='poly_int')
+  subroutine poly_int(p, n) bind(c)
     integer(c_int), intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
 
@@ -121,7 +119,7 @@ contains
   ! Compute Legendre polynomial coefficients using Bonnet's recursion
   ! formula.
   !
-  subroutine poly_legendre(p, n) bind(c, name='poly_legendre')
+  subroutine poly_legendre(p, n) bind(c)
     integer(c_int), intent(in), value :: n
     real(qp),       intent(out)       :: p(0:n)
 
@@ -163,7 +161,7 @@ contains
   !
   ! The roots are assumed to be real.
   !
-  subroutine poly_roots(roots, p0, n) bind(c, name='poly_roots')
+  subroutine poly_roots(roots, p0, n) bind(c)
     integer(c_int),  intent(in), value   :: n
     real(qp),        intent(out)  :: roots(n)
     real(qp),        intent(in)   :: p0(0:n)
