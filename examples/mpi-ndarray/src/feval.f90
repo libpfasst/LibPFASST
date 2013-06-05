@@ -23,7 +23,7 @@ contains
   ! Evaluation routines
   !
 
-  subroutine f1eval(yabs, t, level, ctx, f1abs)
+  subroutine f1eval1(yabs, t, level, ctx, f1abs)
     class(pf_encap_t),   intent(inout), target :: yabs, f1abs
     class(pf_context_t), intent(inout), target :: ctx
     real(pfdp),          intent(in)            :: t
@@ -53,11 +53,11 @@ contains
     end select
 
     call fftw_execute_dft(work%ifft, wk, wk)
-
     f1 = real(wk)
-  end subroutine f1eval
 
-  subroutine f2eval(yabs, t, level, ctx, f2abs)
+  end subroutine f1eval1
+
+  subroutine f2eval1(yabs, t, level, ctx, f2abs)
     class(pf_encap_t),   intent(inout), target :: yabs, f2abs
     class(pf_context_t), intent(inout), target :: ctx
     real(pfdp),          intent(in)            :: t
@@ -76,6 +76,8 @@ contains
     call fftw_execute_dft(work%ffft, wk, wk)
     
     select case(problem)
+    case (PROB_HEAT)
+       wk = nu * work%lap * wk / size(wk)
     case (PROB_AD)
        wk = nu * work%lap * wk / size(wk)
     case (PROB_VB)
@@ -87,9 +89,9 @@ contains
     call fftw_execute_dft(work%ifft, wk, wk)
 
     f2 = real(wk)
-  end subroutine f2eval
+  end subroutine f2eval1
 
-  subroutine f2comp(yabs, t, dt, rhsabs, level, ctx, f2abs)
+  subroutine f2comp1(yabs, t, dt, rhsabs, level, ctx, f2abs)
     class(pf_encap_t),   intent(inout), target :: yabs, rhsabs, f2abs
     class(pf_context_t), intent(inout), target :: ctx
     real(pfdp),          intent(in)            :: t, dt
@@ -109,6 +111,8 @@ contains
     call fftw_execute_dft(work%ffft, wk, wk)
 
     select case(problem)
+    case (PROB_HEAT)
+       wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     case (PROB_AD)
        wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     case (PROB_VB)
@@ -121,7 +125,7 @@ contains
 
     y  = real(wk)
     f2 = (y - rhs) / dt
-  end subroutine f2comp
+  end subroutine f2comp1
 
 
   !
@@ -168,9 +172,9 @@ contains
     allocate(work%lap(nvars))
     do i = 1, nvars
        if (i <= nvars/2+1) then
-          kx = two_pi / Lx * dble(i-1)
+          kx = two_pi * dble(i-1) / Lx
        else
-          kx = two_pi / Lx * dble(-nvars + i - 1)
+          kx = two_pi * dble(-nvars + i - 1) / Lx
        end if
 
        work%ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx

@@ -1,8 +1,21 @@
 &prbin
 
+  problem_type = 'heat'
+
   nsteps = 4
 
-  outdir = 'out'
-  output = T
+  nu     = 0.005
+
+  ! output = 'ref'
+  ! nlevs  = 1
+  ! nnodes = 9
+  ! nvars  = 256
+  ! niters = 16
+
+  output = 'out'
+  nlevs  = 2
+  nnodes = 3 5
+  nvars  = 128 256
+  niters = 8
 
 /

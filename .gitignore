@@ -5,8 +5,13 @@ hdf5*
 gcc*
 xz*
 
-*.defs
 *.exe
+*.defs
+
+*.pyc
+*.npy
+fort.*
+gmon.out
 
 build/
 staging/

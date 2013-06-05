@@ -16,11 +16,11 @@ module probin
 
   character(len=64), save :: problem_type
 
+  double precision, save :: v      ! advection velocity (PROB_AD only)
   double precision, save :: Lx     ! domain size
-  double precision, save :: v      ! advection velocity (use non-linear advection if negative)
   double precision, save :: nu     ! viscosity
-  double precision, save :: t00    ! initial time for exact solution
-  double precision, save :: sigma  ! initial condition parameter (use exact if negative)
+  double precision, save :: t0     ! initial time for exact solution (PROB_AD only)
+  double precision, save :: sigma  ! initial condition parameter
   double precision, save :: dt     ! time step
 
   integer, save :: nlevs           ! number of pfasst levels
@@ -41,7 +41,7 @@ contains
 
     namelist /prbin/ &
          problem_type, output, &
-         Lx, v, nu, t00, &
+         v, Lx, nu, t0, &
          nlevs, nnodes, nvars, nsteps, niters
 
 
@@ -58,11 +58,11 @@ contains
     niters  = 8
     nsteps  = -1
 
-    Lx      = 1.d0
     v       = 1.d0
+    Lx      = 1.d0
     nu      = 0.02d0
-    sigma   = -1.d0
-    t00     = 0.25d0
+    sigma   = 0.004d0
+    t0      = 0.25d0
     dt      = 0.01d0
 
 

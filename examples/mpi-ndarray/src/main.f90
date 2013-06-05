@@ -6,6 +6,8 @@ program fpfasst
   use pf_mod_dtype
   use pf_mod_pfasst
   use pf_mod_parallel
+  use pf_mod_imex
+  use pf_mod_implicit
   use pf_mod_mpi
   use pf_mod_comm_mpi
 
@@ -18,12 +20,14 @@ program fpfasst
 
   implicit none
 
-  type(pf_pfasst_t)       :: pf
-  type(pf_comm_t)         :: comm
-  type(pf_imex_t), target :: sweeper
-  type(array1d)           :: q0
-  integer                 :: ierror, l
+  type(pf_pfasst_t) :: pf
+  type(pf_comm_t)   :: comm
+  type(array1d)     :: q1
 
+  type(pf_imex_t),     target :: imex1
+  type(pf_implicit_t), target :: implicit1
+
+  integer        :: ierror, l
   character(256) :: probin_fname
 
 
@@ -53,7 +57,8 @@ program fpfasst
   !
 
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  call pf_imex_create(sweeper, f1eval, f2eval, f2comp)
+  call pf_imex_create(imex1, f1eval1, f2eval1, f2comp1)
+  call pf_implicit_create(implicit1, f2eval1, f2comp1)
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = niters
@@ -74,7 +79,11 @@ program fpfasst
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
      pf%levels(l)%new         => encap_new
-     pf%levels(l)%sweeper     => sweeper
+     if (problem == PROB_HEAT) then
+        pf%levels(l)%sweeper  => implicit1
+     else
+        pf%levels(l)%sweeper  => imex1
+     end if
   end do
 
   call pf_mpi_setup(comm, pf)
@@ -89,8 +98,8 @@ program fpfasst
   !
   ! run
   !
-  allocate(q0%array(pf%levels(nlevs)%nvars))
-  call initial(q0)
+  allocate(q1%array(pf%levels(nlevs)%nvars))
+  call initial(q1)
 
   if (problem == PROB_AD) then
      call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error_hook)
@@ -105,13 +114,13 @@ program fpfasst
      nsteps = comm%nproc
   end if
 
-  call pf_pfasst_run(pf, q0, dt, 0.0_pfdp, nsteps=nsteps)
+  call pf_pfasst_run(pf, q1, dt, 0.0_pfdp, nsteps=nsteps)
 
 
   !
   ! cleanup
   !
-  deallocate(q0%array)
+  deallocate(q1%array)
 
   do l = 1, nlevs
      call feval_destroy_workspace(pf%levels(l)%ctx)
