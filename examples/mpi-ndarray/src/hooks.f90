@@ -6,8 +6,24 @@ module hooks
   use pf_mod_dtype
   use pf_mod_imex
   use encap
-  use output
   implicit none
+
+  interface
+     subroutine dump_mkdir(dname, dlen) bind(c)
+       use iso_c_binding
+       character(c_char), intent(in) :: dname
+       integer(c_int),    intent(in), value :: dlen
+     end subroutine dump_mkdir
+
+     subroutine dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
+       use iso_c_binding
+       character(c_char), intent(in) :: dname, fname, endian(4)
+       integer(c_int),    intent(in), value :: dim, nvars
+       integer(c_int),    intent(in) :: shape(dim)
+       real(c_double),    intent(in) :: array(nvars)
+     end subroutine dump_numpy
+  end interface
+
 contains
 
   subroutine echo_error_hook(pf, level, state, ctx)
@@ -29,17 +45,23 @@ contains
   end subroutine echo_error_hook
 
 
-  subroutine echo_error_hook(pf, level, state, ctx)
+  subroutine dump_hook(pf, level, state, ctx)
+    use probin, only: outdir
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
     class(pf_context_t), intent(inout) :: ctx
 
+    character(len=256)  :: fname
     real(pfdp), pointer :: qend(:)
     qend => get_array(level%qend%q)
 
-    call dump_numpy()
+    write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
+         state%step, state%iter, level%level
 
-  end subroutine echo_error_hook
+    call dump_numpy(trim(outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
+         1, [ size(qend) ], size(qend), qend)
+
+  end subroutine dump_hook
 
 end module hooks

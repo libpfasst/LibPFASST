@@ -15,23 +15,22 @@ void dump_mkdir(char *dname, int dlen)
 }
 
 
-void dump_numpy(char *fname, int flen, char endian[4], int dim, int *shape, double *array)
+void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, int nvars, double *array)
 {
-  unsigned long   nvars;
   unsigned short  i, len, pad;
   FILE*           fp;
   char            errmsg[BUFLEN];
   char            header[256*256];
-  char            shp[BUFLEN];
+  char            buf[BUFLEN], shp[BUFLEN];
 
   /*
    * open output file
    */
 
-  fname[flen] = 0;
-  fp = fopen(fname, "wb");
+  snprintf(buf, BUFLEN, "%s/%s", dname, fname);
+  fp = fopen(buf, "wb");
   if (fp == NULL) {
-    snprintf(errmsg, BUFLEN, "WARNING: Unable to create npy file (%s)", fname);
+    snprintf(errmsg, BUFLEN, "WARNING: Unable to create npy file (%s)", buf);
     perror(errmsg);
     return;
   }
@@ -77,10 +76,6 @@ void dump_numpy(char *fname, int flen, char endian[4], int dim, int *shape, doub
   /*
    * write data and close 
    */
-  nvars = 1;
-  for (i=0; i<dim; i++) 
-    nvars *= shape[i];
-
   fwrite(array, sizeof(double), nvars, fp);
   fclose(fp);
 }

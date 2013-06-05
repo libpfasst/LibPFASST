@@ -26,8 +26,7 @@ include $(LIBPFASST)/Makefile.rules
 # dependencies
 #
 
-build/output.o:    build/encap.o build/numpy.o
 build/solutions.o: build/encap.o build/probin.o
 build/feval.o:     build/encap.o build/probin.o
-build/hooks.o:     build/output.o build/solutions.o
+build/hooks.o:     build/numpy.o build/solutions.o
 build/main.o:      build/feval.o build/hooks.o build/transfer.o

@@ -29,6 +29,10 @@ module probin
   integer, save :: nsteps          ! number of time steps
   integer, save :: niters          ! number of iterations
 
+  logical, save :: output          ! dump solutions
+  character(len=64), save :: outdir ! directory name for output
+  
+
 contains
 
   subroutine probin_init(filename)
@@ -37,7 +41,7 @@ contains
     integer :: un
 
     namelist /prbin/ &
-         problem_type, &
+         problem_type, output, outdir, &
          Lx, v, nu, t00, &
          nlevs, nnodes, nvars, nsteps, niters
 
@@ -46,7 +50,10 @@ contains
     ! defaults
     !
 
-    problem_type = 'ad'
+    problem_type = "ad"
+
+    outdir  = "out"
+    output  = .false.
 
     nlevs   = 2
     nnodes  = [ 2, 3, 5 ]

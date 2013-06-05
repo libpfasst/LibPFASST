@@ -2,4 +2,7 @@
 
   nsteps = 4
 
+  outdir = 'out'
+  output = T
+
 /
