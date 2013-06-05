@@ -66,8 +66,8 @@ program fpfasst
   end if
 
   do l = 1, nlevs
-     pf%levels(l)%nvars  = nvars(3-nlevs+l)
-     pf%levels(l)%nnodes = nnodes(3-nlevs+l)
+     pf%levels(l)%nvars  = nvars(l)
+     pf%levels(l)%nnodes = nnodes(l)
 
      call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
@@ -96,8 +96,8 @@ program fpfasst
      call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error_hook)
   end if
 
-  if (output) then
-     call dump_mkdir(outdir, len_trim(outdir))
+  if (len_trim(output) > 0) then
+     call dump_mkdir(output, len_trim(output))
      call pf_add_hook(pf, nlevs, PF_POST_SWEEP, dump_hook)
   end if
 

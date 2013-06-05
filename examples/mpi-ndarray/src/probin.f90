@@ -29,8 +29,7 @@ module probin
   integer, save :: nsteps          ! number of time steps
   integer, save :: niters          ! number of iterations
 
-  logical, save :: output          ! dump solutions
-  character(len=64), save :: outdir ! directory name for output
+  character(len=64), save :: output ! directory name for output
   
 
 contains
@@ -41,7 +40,7 @@ contains
     integer :: un
 
     namelist /prbin/ &
-         problem_type, output, outdir, &
+         problem_type, output, &
          Lx, v, nu, t00, &
          nlevs, nnodes, nvars, nsteps, niters
 
@@ -51,9 +50,7 @@ contains
     !
 
     problem_type = "ad"
-
-    outdir  = "out"
-    output  = .false.
+    output       = ""
 
     nlevs   = 2
     nnodes  = [ 2, 3, 5 ]

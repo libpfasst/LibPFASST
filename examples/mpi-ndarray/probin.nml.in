@@ -1,0 +1,18 @@
+&prbin
+
+  problem_type = "{problem}"
+
+  output = "{output}"
+  
+  nsteps = {nsteps}
+  dt     = {dt}
+
+  nlevs  = {nlevs}
+  niters = {niters}
+  nnodes = {nnodes}
+  nvars  = {nvars}
+  
+  nu    = {nu}
+  sigma = {sigma}
+
+/

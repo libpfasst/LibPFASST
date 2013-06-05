@@ -9,6 +9,7 @@ xz*
 *.exe
 
 build/
+staging/
 src/pf_version.f90
 
 fort.*

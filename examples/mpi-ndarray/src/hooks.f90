@@ -46,7 +46,7 @@ contains
 
 
   subroutine dump_hook(pf, level, state, ctx)
-    use probin, only: outdir
+    use probin, only: output
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
@@ -59,7 +59,7 @@ contains
     write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
          state%step, state%iter, level%level
 
-    call dump_numpy(trim(outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
+    call dump_numpy(trim(output)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
          1, [ size(qend) ], size(qend), qend)
 
   end subroutine dump_hook
