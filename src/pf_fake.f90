@@ -208,12 +208,26 @@ contains
                 pf%state%cycle = pf%state%cycle + 1
                 call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
              end do
+          end do
 
+          do p = 1, nproc
              call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
              call end_timer(pf, TITERATION)
           end do
 
        end do ! end pfasst iteration loop
+
+       ! do end cycle stages
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
+
+          if (associated(pf%cycles%end)) then
+             do c = 1, size(pf%cycles%end)
+                pf%state%cycle = c
+                call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+             end do
+          end if
+       end do
 
        do p = 1, nproc
           call c_f_pointer(pfs(p), pf)
@@ -238,18 +252,8 @@ contains
     !
     ! finish up
     !
-
-    ! do end cycle stages
     do p = 1, nproc
        call c_f_pointer(pfs(p), pf)
-       
-       if (associated(pf%cycles%end)) then
-          do c = 1, size(pf%cycles%end)
-             pf%state%cycle = c
-             call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-          end do
-       end if
-       
        pf%state%iter = -1
        call end_timer(pf, TTOTAL)
     end do
