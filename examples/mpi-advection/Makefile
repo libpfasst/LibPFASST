@@ -5,7 +5,7 @@
 LIBPFASST ?= ../..
 FFTW3     ?= /Users/ruprechd/Programs/MPICH_GCC46
 
-EXE = mpi-advection
+EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 

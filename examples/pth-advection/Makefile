@@ -5,7 +5,7 @@
 LIBPFASST ?= ../..
 FFTW3     ?= $(LIBPFASST)/fftw3
 
-EXE = pth-advection
+EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 

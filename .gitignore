@@ -6,6 +6,11 @@ gcc*
 xz*
 
 *.defs
+*.exe
 
 build/
 src/pf_version.f90
+
+fort.*
+*.npy
+gmon.out
