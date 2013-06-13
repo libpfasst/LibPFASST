@@ -160,8 +160,6 @@ module pf_mod_dtype
   ! pfasst communicator
   type :: pf_comm_t
      integer :: nproc = -1              ! total number of processors
-     integer :: forward = -1            ! next processors rank
-     integer :: backward = -1           ! previous processors rank
 
      ! mpi
      integer :: comm = -1               ! communicator

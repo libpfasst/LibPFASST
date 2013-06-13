@@ -59,12 +59,6 @@ contains
 
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
 
-    pf_comm%forward = pf%rank + 1
-    if (pf_comm%forward >= pf_comm%nproc) pf_comm%forward = 0
-
-    pf_comm%backward = pf%rank - 1
-    if (pf_comm%backward < 0) pf_comm%backward = pf_comm%nproc - 1
-
     allocate(pf_comm%recvreq(pf%nlevels))
     allocate(pf_comm%sendreq(pf%nlevels))
 
@@ -95,7 +89,8 @@ contains
          .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
 
        call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
-            pf%comm%backward, tag, pf%comm%comm, pf%comm%recvreq(level%level), ierror)
+            modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, &
+            pf%comm%recvreq(level%level), ierror)
 
     end if
   end subroutine pf_mpi_post
@@ -118,7 +113,7 @@ contains
 
        if (blocking) then
           call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
-               pf%comm%backward, tag, pf%comm%comm, stat, ierror)
+               modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
        else
           call mpi_wait(pf%comm%recvreq(level%level), stat, ierror)
        end if
@@ -146,7 +141,7 @@ contains
     if (pf%rank /= pf%state%first) then
 
        call mpi_recv(message, 8, MPI_INTEGER4, &
-            pf%comm%backward, tag, pf%comm%comm, stat, ierror)
+            modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
 
        pf%state%pstatus = message(7)
        pf%state%pstep   = message(8)
@@ -177,12 +172,14 @@ contains
        if (blocking) then
           call level%encap%pack(level%send, level%qend)
           call mpi_send(level%send, level%nvars, MPI_REAL8, &
-               pf%comm%forward, tag, pf%comm%comm, stat, ierror)
+               modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, &
+               stat, ierror)
        else
           call mpi_wait(pf%comm%sendreq(level%level), stat, ierror)
           call level%encap%pack(level%send, level%qend)
           call mpi_isend(level%send, level%nvars, MPI_REAL8, &
-               pf%comm%forward, tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
+               modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, &
+               pf%comm%sendreq(level%level), ierror)
        end if
     end if
 
@@ -214,7 +211,7 @@ contains
           call mpi_wait(pf%comm%statreq, stat, ierror)
        end if
        call mpi_issend(message, 8, MPI_INTEGER4, &
-            pf%comm%forward, tag, pf%comm%comm, pf%comm%statreq, ierror)
+            modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%statreq, ierror)
     end if
 
   end subroutine pf_mpi_send_status
