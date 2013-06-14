@@ -23,6 +23,8 @@ module pf_mod_dtype
 
   integer, parameter :: pfdp = c_double
 
+  logical, parameter :: do_ring = .false.
+
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
   real(pfdp), parameter :: TWO   = 2.0_pfdp
@@ -54,9 +56,12 @@ module pf_mod_dtype
 
   integer, parameter :: PF_WINDOW_BLOCK = 1
   integer, parameter :: PF_WINDOW_RING  = 2 ! XXX: THIS IS EXPERIMENTAL
+  integer, parameter :: PF_TAG_NMOVED   = 666
   
-  integer, parameter :: PF_STATUS_ITERATING   = 1
-  integer, parameter :: PF_STATUS_CONVERGED   = 2
+  integer, parameter :: PF_STATUS_ITERATING = 1
+  integer, parameter :: PF_STATUS_CONVERGED = 2
+  integer, parameter :: PF_STATUS_MOVING    = 3
+  integer, parameter :: PF_STATUS_PREDICTOR = 4
 
   ! state type
   type :: pf_state_t
@@ -65,7 +70,7 @@ module pf_mod_dtype
      integer    :: block, cycle, step, iter, level, hook
      integer    :: status       ! status (iterating, converged etc)
      integer    :: pstatus      ! previous rank's status
-     integer    :: pstep        ! previous rank's time step number
+     integer    :: nmoved       ! how many processors behind me have moved
      integer    :: first        ! rank of first processor in time block
      integer    :: last         ! rank of last processor in time block
   end type pf_state_t
@@ -175,8 +180,10 @@ module pf_mod_dtype
      procedure(pf_post_p),        pointer, nopass :: post
      procedure(pf_recv_p),        pointer, nopass :: recv
      procedure(pf_recv_status_p), pointer, nopass :: recv_status
+     procedure(pf_recv_status_p), pointer, nopass :: recv_nmoved
      procedure(pf_send_p),        pointer, nopass :: send
      procedure(pf_send_status_p), pointer, nopass :: send_status
+     procedure(pf_send_status_p), pointer, nopass :: send_nmoved
      procedure(pf_wait_p),        pointer, nopass :: wait
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
