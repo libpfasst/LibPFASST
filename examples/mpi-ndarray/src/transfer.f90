@@ -11,21 +11,21 @@ module transfer
 contains
 
   subroutine interpolate(qFp, qGp, levelF, ctxF, levelG, ctxG)
-    class(pf_encap_t),   intent(inout), target :: qFp, qGp
-    class(pf_context_t), intent(inout), target :: ctxF, ctxG
-    integer,             intent(in)            :: levelF, levelG
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+    integer,     intent(in)        :: levelF, levelG
 
-    class(ad_work_t), pointer :: workF, workG
-    real(pfdp),       pointer :: qF(:), qG(:)
-    complex(kind=8),  pointer :: wkF(:), wkG(:)
+    type(ad_work_t), pointer :: workF, workG
+    real(pfdp),      pointer :: qF(:), qG(:)
+    complex(kind=8), pointer :: wkF(:), wkG(:)
 
     integer :: nvarF, nvarG, xrat
 
-    workF => get_work(ctxF)
-    workG => get_work(ctxG)
-    qF    => get_array(qFp)
-    qG    => get_array(qGp)
-    
+    call c_f_pointer(ctxF, workF)
+    call c_f_pointer(ctxG, workG)
+
+    qF => array1(qFp)
+    qG => array1(qGp)
+
     nvarF = size(qF)
     nvarG = size(qG)
     xrat  = nvarF / nvarG
@@ -51,17 +51,16 @@ contains
     qF = real(wkF)
   end subroutine interpolate
 
-  subroutine restrict(qFp, qGp, levelF, workF, levelG, workG)
-    class(pf_encap_t),   intent(inout), target :: qFp, qGp
-    class(pf_context_t), intent(inout), target :: workF, workG
-    integer,             intent(in)            :: levelF, levelG
+  subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+    integer,     intent(in)        :: levelF, levelG
 
     real(pfdp), pointer :: qF(:), qG(:)
 
     integer :: nvarF, nvarG, xrat
 
-    qF => get_array(qFp)
-    qG => get_array(qGp)
+    qF => array1(qFp)
+    qG => array1(qGp)
 
     nvarF = size(qF)
     nvarG = size(qG)

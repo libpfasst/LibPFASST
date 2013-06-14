@@ -11,7 +11,7 @@ module feval
   implicit none
   include 'fftw3.f03'
 
-  type, extends(pf_context_t) :: ad_work_t
+  type :: ad_work_t
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:)              ! work space
      complex(pfdp), pointer :: ddx(:), lap(:)     ! operators
@@ -23,20 +23,20 @@ contains
   ! Evaluation routines
   !
 
-  subroutine f1eval1(yabs, t, level, ctx, f1abs)
-    class(pf_encap_t),   intent(inout), target :: yabs, f1abs
-    class(pf_context_t), intent(inout), target :: ctx
-    real(pfdp),          intent(in)            :: t
-    integer,             intent(in)            :: level
+  subroutine f1eval(yptr, t, level, ctx, f1ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f1ptr, ctx
+    real(pfdp),     intent(in)         :: t
+    integer(c_int), intent(in)         :: level
 
-    real(pfdp),       pointer :: y(:), f1(:)
-    class(ad_work_t), pointer :: work
-    complex(pfdp),    pointer :: wk(:)
+    real(pfdp),      pointer :: y(:), f1(:)
+    type(ad_work_t), pointer :: work
+    complex(pfdp),   pointer :: wk(:)
 
-    work => get_work(ctx)
-    y    => get_array(yabs)
-    f1   => get_array(f1abs)
-    wk   => work%wk
+    call c_f_pointer(ctx, work)
+
+    y  => array1(yptr)
+    f1 => array1(f1ptr)
+    wk => work%wk
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
@@ -55,22 +55,22 @@ contains
     call fftw_execute_dft(work%ifft, wk, wk)
     f1 = real(wk)
 
-  end subroutine f1eval1
+  end subroutine f1eval
 
-  subroutine f2eval1(yabs, t, level, ctx, f2abs)
-    class(pf_encap_t),   intent(inout), target :: yabs, f2abs
-    class(pf_context_t), intent(inout), target :: ctx
-    real(pfdp),          intent(in)            :: t
-    integer,             intent(in)            :: level
+  subroutine f2eval(yptr, t, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
+    real(pfdp),     intent(in)         :: t
+    integer(c_int), intent(in)         :: level
 
-    real(pfdp),       pointer :: y(:), f2(:)
-    class(ad_work_t), pointer :: work
-    complex(pfdp),    pointer :: wk(:)
+    real(pfdp),      pointer :: y(:), f2(:)
+    type(ad_work_t), pointer :: work
+    complex(pfdp),   pointer :: wk(:)
 
-    work => get_work(ctx)
-    y    => get_array(yabs)
-    f2   => get_array(f2abs)
-    wk   => work%wk
+    call c_f_pointer(ctx, work)
+
+    y  => array1(yptr)
+    f2 => array1(f2ptr)
+    wk => work%wk
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
@@ -89,23 +89,23 @@ contains
     call fftw_execute_dft(work%ifft, wk, wk)
 
     f2 = real(wk)
-  end subroutine f2eval1
+  end subroutine f2eval
 
-  subroutine f2comp1(yabs, t, dt, rhsabs, level, ctx, f2abs)
-    class(pf_encap_t),   intent(inout), target :: yabs, rhsabs, f2abs
-    class(pf_context_t), intent(inout), target :: ctx
-    real(pfdp),          intent(in)            :: t, dt
-    integer,             intent(in)            :: level
+  subroutine f2comp(yptr, t, dt, rhsptr, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
+    real(pfdp),     intent(in)         :: t, dt
+    integer(c_int), intent(in)         :: level
 
-    real(pfdp),       pointer :: y(:), rhs(:), f2(:)
-    class(ad_work_t), pointer :: work
-    complex(pfdp),    pointer :: wk(:)
+    real(pfdp),      pointer :: y(:), rhs(:), f2(:)
+    type(ad_work_t), pointer :: work
+    complex(pfdp),   pointer :: wk(:)
 
-    work => get_work(ctx)
-    y    => get_array(yabs)
-    rhs  => get_array(rhsabs)
-    f2   => get_array(f2abs)
-    wk   => work%wk
+    call c_f_pointer(ctx, work)
+
+    y   => array1(yptr)
+    rhs => array1(rhsptr)
+    f2  => array1(f2ptr)
+    wk  => work%wk
 
     wk = rhs
     call fftw_execute_dft(work%ffft, wk, wk)
@@ -125,21 +125,7 @@ contains
 
     y  = real(wk)
     f2 = (y - rhs) / dt
-  end subroutine f2comp1
-
-
-  !
-  ! Helpers
-  !
-
-  function get_work(ctx) result(r)
-    class(pf_context_t), intent(in), target :: ctx
-    class(ad_work_t), pointer :: r
-    select type(ctx)
-    class is (ad_work_t)
-       r => ctx
-    end select
-  end function get_work
+  end subroutine f2comp
 
 
   !
@@ -147,16 +133,16 @@ contains
   !
 
   subroutine feval_create_workspace(ctx, nvars)
-    class(pf_context_t), intent(out), pointer :: ctx
-    integer,             intent(in)           :: nvars
+    type(c_ptr), intent(out) :: ctx
+    integer,     intent(in)  :: nvars
 
-    class(ad_work_t), pointer :: work
+    type(ad_work_t), pointer :: work
     integer     :: i
     type(c_ptr) :: wk
     real(pfdp)  :: kx
 
-    allocate(ad_work_t::ctx)
-    work => get_work(ctx)
+    allocate(work)
+    ctx = c_loc(work)
 
     ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nvars, c_size_t))
@@ -189,10 +175,11 @@ contains
   end subroutine feval_create_workspace
 
   subroutine feval_destroy_workspace(ctx)
-    class(pf_context_t), intent(inout) :: ctx
+    type(c_ptr), intent(in) :: ctx
 
-    class(ad_work_t), pointer :: work
-    work => get_work(ctx)
+    type(ad_work_t), pointer :: work
+
+    call c_f_pointer(ctx, work)
 
     deallocate(work%wk)
     deallocate(work%ddx)

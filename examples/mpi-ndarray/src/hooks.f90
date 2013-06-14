@@ -31,12 +31,12 @@ contains
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    class(pf_context_t), intent(inout) :: ctx
+    type(c_ptr),         intent(in)    :: ctx
 
     real(c_double) :: yexact(level%nvars)
     real(pfdp), pointer :: qend(:)
 
-    qend => get_array(level%qend%q)
+    qend => array1(level%qend)
 
     call exact(state%t0+state%dt, level%nvars, yexact)
     print '("error: step: ",i3.3," iter: ",i4.3," error: ",es14.7)', &
@@ -50,11 +50,12 @@ contains
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    class(pf_context_t), intent(inout) :: ctx
+    type(c_ptr),         intent(in)    :: ctx
 
     character(len=256)  :: fname
     real(pfdp), pointer :: qend(:)
-    qend => get_array(level%qend%q)
+
+    qend => array1(level%qend)
 
     write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
          state%step, state%iter, level%level

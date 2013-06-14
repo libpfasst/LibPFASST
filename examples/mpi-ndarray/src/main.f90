@@ -2,14 +2,9 @@
 ! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
 !
 
-program fpfasst
-  use pf_mod_dtype
-  use pf_mod_pfasst
-  use pf_mod_parallel
-  use pf_mod_imex
-  use pf_mod_implicit
+program main
+  use pfasst
   use pf_mod_mpi
-  use pf_mod_comm_mpi
 
   use encap
   use feval
@@ -22,10 +17,10 @@ program fpfasst
 
   type(pf_pfasst_t) :: pf
   type(pf_comm_t)   :: comm
-  type(array1d)     :: q1
 
-  type(pf_imex_t),     target :: imex1
-  type(pf_implicit_t), target :: implicit1
+  type(ndarray),      target :: q1
+  type(pf_sweeper_t), target :: sweeper
+  type(pf_encap_t),   target :: encapsulation
 
   integer        :: ierror, l
   character(256) :: probin_fname
@@ -56,9 +51,9 @@ program fpfasst
   ! initialize pfasst
   !
 
+  call ndarray_encap_create(encapsulation)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  call pf_imex_create(imex1, f1eval1, f2eval1, f2comp1)
-  call pf_implicit_create(implicit1, f2eval1, f2comp1)
+  call pf_imex_create(sweeper, f1eval, f2eval, f2comp)
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = niters
@@ -76,14 +71,12 @@ program fpfasst
 
      call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
+     allocate(pf%levels(l)%shape(1))
+     pf%levels(l)%shape       = [ nvars(l) ]
+     pf%levels(l)%encap       => encapsulation
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
-     pf%levels(l)%new         => encap_new
-     if (problem == PROB_HEAT) then
-        pf%levels(l)%sweeper  => implicit1
-     else
-        pf%levels(l)%sweeper  => imex1
-     end if
+     pf%levels(l)%sweeper     => sweeper
   end do
 
   call pf_mpi_setup(comm, pf)
@@ -98,7 +91,7 @@ program fpfasst
   !
   ! run
   !
-  allocate(q1%array(pf%levels(nlevs)%nvars))
+  call ndarray_create_simple(q1, [ nvars(nlevs) ])
   call initial(q1)
 
   if (problem == PROB_AD) then
@@ -114,7 +107,7 @@ program fpfasst
      nsteps = comm%nproc
   end if
 
-  call pf_pfasst_run(pf, q1, dt, 0.0_pfdp, nsteps=nsteps)
+  call pf_pfasst_run(pf, c_loc(q1), dt, 0.0_pfdp, nsteps=nsteps)
 
 
   !
@@ -131,4 +124,4 @@ program fpfasst
   call mpi_finalize(ierror)
   call fftw_cleanup()
 
-end program fpfasst
+end program main

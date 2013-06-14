@@ -1,104 +1,191 @@
+!
+! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
+!
+
 module encap
-  use pf_mod_dtype, only: pf_encap_t, pf_context_t, pfdp
+  use iso_c_binding
+  use pf_mod_dtype
   implicit none
 
-  type, extends(pf_encap_t) :: array1d
-     integer :: nvars
+  type :: ndarray
+     integer             :: dim
+     integer,    pointer :: shape(:)
      real(pfdp), pointer :: array(:)
-   contains
-     procedure :: create  => encap_create
-     procedure :: destroy => encap_destroy
-     procedure :: setval  => encap_setval
-     procedure :: norm    => encap_norm
-     procedure :: pack    => encap_pack
-     procedure :: unpack  => encap_unpack
-     procedure :: copy    => encap_copy
-     procedure :: axpy    => encap_axpy
-  end type array1d
+  end type ndarray
 
 contains
 
-  function get_array(q) result(r)
-    class(pf_encap_t), intent(in), target :: q
-    real(pfdp),        pointer    :: r(:)
-    select type(q)
-    class is (array1d)
-       r => q%array
-    end select
-  end function get_array
+  subroutine ndarray_create_simple(q, shape)
+    type(ndarray), intent(inout) :: q
+    integer,       intent(in)    :: shape(:)
+    allocate(q%shape(size(shape)))
+    allocate(q%array(product(shape)))
+    q%dim   = size(shape)
+    q%shape = shape
+  end subroutine ndarray_create_simple
 
-  ! Instantiate a new encapsulation class.
-  subroutine encap_new(r)
-    class(pf_encap_t), intent(out), allocatable :: r
-    allocate(array1d::r)
-  end subroutine encap_new
+  ! Allocate/create solution (spatial data set).
+  subroutine ndarray_create(solptr, level, kind, nvars, shape, levelctx, encapctx)
+    type(c_ptr),       intent(inout)     :: solptr
+    integer,           intent(in)        :: level, nvars, shape(:)
+    integer,           intent(in)        :: kind
+    type(c_ptr),       intent(in), value :: levelctx, encapctx
 
-  ! Allocate/create solution (spatial data set) for the given level.
-  !
-  ! This is called for each SDC node.
-  subroutine encap_create(sol, level, kind, nvars, shape, ctx)
-    class(array1d),      intent(inout) :: sol
-    integer,             intent(in)    :: kind, level, nvars, shape(:)
-    class(pf_context_t), intent(in)    :: ctx
+    type(ndarray),     pointer :: sol
 
-    allocate(sol%array(nvars))
-    sol%nvars = nvars
-  end subroutine encap_create
+    allocate(sol)
+    allocate(sol%shape(size(shape)))
+    allocate(sol%array(product(shape)))
+
+    sol%dim   = size(shape)
+    sol%shape = shape
+    solptr    = c_loc(sol)
+  end subroutine ndarray_create
 
   ! Deallocate/destroy solution.
-  subroutine encap_destroy(sol)
-    class(array1d), intent(inout) :: sol
+  subroutine ndarray_destroy(solptr)
+    type(c_ptr), intent(in), value :: solptr
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
     deallocate(sol%array)
-  end subroutine encap_destroy
+    deallocate(sol%shape)
+    deallocate(sol)
+  end subroutine ndarray_destroy
 
   ! Set solution value.
-  subroutine encap_setval(sol, val, flags)
-    class(array1d), intent(inout) :: sol
-    real(pfdp),     intent(in)    :: val
-    integer,        intent(in), optional :: flags
+  subroutine ndarray_setval(solptr, val, flags)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp),  intent(in)        :: val
+    integer,     intent(in), optional :: flags
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
     sol%array = val
-  end subroutine encap_setval
+  end subroutine ndarray_setval
 
   ! Copy solution value.
-  subroutine encap_copy(dst, src, flags)
-    class(array1d),    intent(inout) :: dst
-    class(pf_encap_t), intent(in)    :: src
-    integer,           intent(in), optional :: flags
-    real(pfdp), pointer :: src_array(:)
-    src_array => get_array(src)
-    dst%array = src_array
-  end subroutine encap_copy
+  subroutine ndarray_copy(dstptr, srcptr, flags)
+    type(c_ptr), intent(in), value    :: dstptr, srcptr
+    integer,     intent(in), optional :: flags
 
-  ! Compute norm of solution
-  function encap_norm(sol) result (norm)
-    class(array1d), intent(in) :: sol
-    real(pfdp) :: norm
-    norm = maxval(abs(sol%array))
-  end function encap_norm
+    type(ndarray), pointer :: dst, src
+    call c_f_pointer(dstptr, dst)
+    call c_f_pointer(srcptr, src)
+
+    dst%array = src%array
+  end subroutine ndarray_copy
 
   ! Pack solution q into a flat array.
-  subroutine encap_pack(sol, z)
-    class(array1d), intent(in)  :: sol
-    real(pfdp),     intent(out) :: z(:)
-    z = sol%array
-  end subroutine encap_pack
+  subroutine ndarray_pack(z, ptr)
+    type(c_ptr), intent(in), value  :: ptr
+    real(pfdp),  intent(out)        :: z(:)
+    real(pfdp), pointer :: q(:)
+    q => array1(ptr)
+    z = q
+  end subroutine ndarray_pack
 
   ! Unpack solution from a flat array.
-  subroutine encap_unpack(sol, z)
-    class(array1d), intent(inout) :: sol
-    real(pfdp),     intent(in)    :: z(:)
-    sol%array = z
-  end subroutine encap_unpack
+  subroutine ndarray_unpack(ptr, z)
+    type(c_ptr), intent(in), value :: ptr
+    real(pfdp),  intent(in)        :: z(:)
+    real(pfdp), pointer :: q(:)
+    q => array1(ptr)
+    q = z
+  end subroutine ndarray_unpack
+
+  ! Compute norm of solution
+  function ndarray_norm(ptr) result (norm)
+    type(c_ptr), intent(in), value :: ptr
+    real(pfdp) :: norm
+    real(pfdp), pointer :: q(:)
+    q => array1(ptr)
+    norm = maxval(abs(q))
+  end function ndarray_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
-  subroutine encap_axpy(y, a, x, flags)
-    class(array1d),    intent(inout) :: y
-    real(pfdp),        intent(in)    :: a
-    class(pf_encap_t), intent(in)    :: x
-    integer,           intent(in), optional :: flags
-    real(pfdp), pointer :: x_array(:)
-    x_array => get_array(x)
-    y%array = a * x_array + y%array
-  end subroutine encap_axpy
+  subroutine ndarray_saxpy(yptr, a, xptr, flags)
+    type(c_ptr), intent(in), value    :: yptr, xptr
+    real(pfdp),  intent(in)           :: a
+    integer,     intent(in), optional :: flags
+
+    type(ndarray), pointer :: y, x
+    call c_f_pointer(yptr, y)
+    call c_f_pointer(xptr, x)
+
+    y%array = a * x%array + y%array
+  end subroutine ndarray_saxpy
+
+  ! Helpers
+  function array1(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp), pointer :: r(:)
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    if (sol%dim == 1) then
+       call c_f_pointer(c_loc(sol%array(1)), r, sol%shape)
+    else
+       stop
+    end if
+  end function array1
+
+  function array2(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp), pointer :: r(:,:)
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    if (sol%dim == 2) then
+       call c_f_pointer(c_loc(sol%array(1)), r, sol%shape)
+    else
+       stop
+    end if
+  end function array2
+
+  function array3(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp), pointer :: r(:,:,:)
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    if (sol%dim == 3) then
+       call c_f_pointer(c_loc(sol%array(1)), r, sol%shape)
+    else
+       stop
+    end if
+  end function array3
+
+  function array4(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp), pointer :: r(:,:,:,:)
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    if (sol%dim == 4) then
+       call c_f_pointer(c_loc(sol%array(1)), r, sol%shape)
+    else
+       stop
+    end if
+  end function array4
+
+  subroutine ndarray_encap_create(encap)
+    type(pf_encap_t), intent(out) :: encap
+
+    encap%create  => ndarray_create
+    encap%destroy => ndarray_destroy
+    encap%setval  => ndarray_setval
+    encap%copy    => ndarray_copy
+    encap%norm    => ndarray_norm
+    encap%pack    => ndarray_pack
+    encap%unpack  => ndarray_unpack
+    encap%axpy    => ndarray_saxpy
+  end subroutine ndarray_encap_create
 
 end module encap

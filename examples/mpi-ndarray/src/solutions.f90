@@ -8,7 +8,7 @@ contains
 
   ! Set initial condition.
   subroutine initial(q0)
-    class(array1d), intent(inout) :: q0
+    type(ndarray), intent(inout) :: q0
 
     select case(problem)
     case (PROB_AD)
