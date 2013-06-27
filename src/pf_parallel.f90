@@ -269,8 +269,9 @@ contains
 
              res1 = F%residual
 
-             if ((k > 1) .and. ( &
-                  (1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol))) then
+             if ((k > 1) .and. ( (abs(1.0_pfdp - res1/res0) < pf%rel_res_tol) &
+                            .or. (res1 < pf%abs_res_tol) &
+                            .or. (abs(res0-res1) < pf%abs_res_tol) )) then
                 pf%state%status = PF_STATUS_CONVERGED
              else
                 pf%state%status = PF_STATUS_ITERATING
