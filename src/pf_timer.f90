@@ -25,7 +25,8 @@ module pf_mod_timer
        TTOTAL       = 1,  &
        TPREDICTOR   = 2,  &
        TITERATION   = 3,  &
-       THOOKS       = 4, &
+       THOOKS       = 4,  &
+       TSTEP        = 5,  &
        TINTERPOLATE = 10,  &
        TRESTRICT    = 20,  &
        TRECEIVE     = 30,  &
@@ -39,7 +40,7 @@ module pf_mod_timer
        'predictor  ',  &        ! 2
        'iteration  ',  &        ! 3
        'hooks      ',  &        ! 4
-       '5          ',  &
+       'step       ',  &        ! 5
        '6          ',  &
        '7          ',  &
        '8          ',  &

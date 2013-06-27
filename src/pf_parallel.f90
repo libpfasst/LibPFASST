@@ -240,6 +240,7 @@ contains
        t0 = pf%state%t0
 
        call call_hooks(pf, -1, PF_PRE_BLOCK)
+       call start_timer(pf, TSTEP)
 
        call pf_predictor(pf, t0, dt)
 
@@ -324,6 +325,7 @@ contains
        end if
 
        call call_hooks(pf, -1, PF_POST_STEP)
+       call end_timer(pf, TSTEP)
 
        ! broadcast fine qend (non-pipelined time loop)
        if (nblock > 1) then
