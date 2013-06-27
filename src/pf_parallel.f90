@@ -253,7 +253,10 @@ contains
 
        ! pfasst iterations
        do k = 1, pf%niters
-          pf%state%iter  = k
+          if (.not. (pf%state%status == PF_STATUS_CONVERGED)) then
+             pf%state%iter  = k
+          end if
+          !pf%state%iter  = k
           pf%state%cycle = 1
 
           call start_timer(pf, TITERATION)
