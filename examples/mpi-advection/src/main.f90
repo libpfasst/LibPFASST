@@ -55,7 +55,7 @@ program main
 
   pf%window      = PF_WINDOW_RING
   ! pf%rel_res_tol = 1.d-4
-  pf%abs_res_tol = 1.d-12
+  pf%abs_res_tol = 1.d-10
 
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
@@ -90,7 +90,7 @@ program main
 
   ! call pf_logger_attach(pf)
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
-  ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps=4*comm%nproc)
 
 

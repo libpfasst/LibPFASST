@@ -55,13 +55,12 @@ module pf_mod_dtype
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
   integer, parameter :: PF_WINDOW_BLOCK = 1
-  integer, parameter :: PF_WINDOW_RING  = 2 ! XXX: THIS IS EXPERIMENTAL
+  integer, parameter :: PF_WINDOW_RING  = 2
   integer, parameter :: PF_TAG_NMOVED   = 666
   
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
-  integer, parameter :: PF_STATUS_MOVING    = 3
-  integer, parameter :: PF_STATUS_PREDICTOR = 4
+  integer, parameter :: PF_STATUS_PREDICTOR = 3
 
   ! state type
   type :: pf_state_t

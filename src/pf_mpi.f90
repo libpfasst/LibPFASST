@@ -76,25 +76,6 @@ contains
     deallocate(pf_comm%sendreq)
   end subroutine pf_mpi_destroy
 
-  function pf_mpi_recvq(pf, level, tag) result(r)
-    type(pf_pfasst_t), intent(in)    :: pf
-    type(pf_level_t),  intent(inout) :: level
-    integer,           intent(in)    :: tag
-    logical                          :: r
-
-    r = .true.
-
-    if (pf%state%status == PF_STATUS_MOVING &
-         .and. pf%rank /= modulo(pf%state%first+1, pf%comm%nproc)) then 
-
-       r = .false.
-
-    end if
-
-    if (pf%rank == pf%state%first) r = .false.
-    if (pf%comm%nproc == 1)        r = .false.
-  end function pf_mpi_recvq
-
   ! Post
   subroutine pf_mpi_post(pf, level, tag)
     use pf_mod_mpi, only: MPI_REAL8
@@ -105,7 +86,7 @@ contains
 
     integer :: ierror
 
-    if (pf_mpi_recvq(pf, level, tag)) then
+    if (pf%rank /= pf%state%first) then
        call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
             modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, &
             pf%comm%recvreq(level%level), ierror)
@@ -125,12 +106,7 @@ contains
 
     call start_timer(pf, TRECEIVE + level%level - 1)
 
-    ! if (pf%rank /= pf%state%first &
-    !      .and. pf%state%pstatus == PF_STATUS_ITERATING) then
-
-    if (pf_mpi_recvq(pf, level, tag)) then
-
-       print *, pf%rank, 'recv', modulo(pf%rank-1, pf%comm%nproc), tag, blocking
+    if (pf%rank /= pf%state%first) then
 
        if (blocking) then
           call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
@@ -142,8 +118,6 @@ contains
        if (ierror .ne. 0) then
           print *, pf%rank, 'warning: mpi error during receive', ierror
        end if
-
-       print *, pf%rank, 'recv done'
 
        level%q0 = level%recv
     end if
@@ -163,8 +137,6 @@ contains
 
     if (pf%rank /= pf%state%first) then
 
-       print *, pf%rank, 'recv status', modulo(pf%rank-1, pf%comm%nproc)
-
        call mpi_recv(message, 8, MPI_INTEGER4, &
             modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
 
@@ -175,35 +147,25 @@ contains
           print *, pf%rank, 'warning: mpi error during receive status', ierror
        end if
 
-       print *, pf%rank, 'recv status done pstatus', message(7), 'nmoveing', message(8)
-
     end if
 
   end subroutine pf_mpi_recv_status
 
   ! Receive status
   subroutine pf_mpi_recv_nmoved(pf, tag)
-    use pf_mod_mpi!, only: MPI_SOURCE, MPI_STATUS_SIZE, MPI_ANY_SOURCE
-
+    use pf_mod_mpi
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
 
     integer    :: ierror, stat(MPI_STATUS_SIZE)
     integer(4) :: src, message(8)
 
-    print *, pf%rank, 'probe'
-
     call mpi_probe(MPI_ANY_SOURCE, tag, pf%comm%comm, stat, ierror)
-
     src = stat(MPI_SOURCE)
-    print *, pf%rank, 'recv nmoved', src
 
     call mpi_recv(message, 8, MPI_INTEGER4, &
          src, tag, pf%comm%comm, stat, ierror)
-
     pf%state%nmoved = message(8)
-
-    print *, pf%rank, 'recv nmoved done nmoved', message(8)
 
   end subroutine pf_mpi_recv_nmoved
 
@@ -223,8 +185,6 @@ contains
     if (pf%rank /= pf%state%last &
          .and. pf%state%status == PF_STATUS_ITERATING) then
 
-       print *, pf%rank, 'send', modulo(pf%rank+1, pf%comm%nproc), tag, blocking
-
        if (blocking) then
           call level%encap%pack(level%send, level%qend)
           call mpi_send(level%send, level%nvars, MPI_REAL8, &
@@ -237,11 +197,10 @@ contains
                modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, &
                pf%comm%sendreq(level%level), ierror)
        end if
-
-       print *, pf%rank, 'send done'
     end if
 
     call end_timer(pf, TSEND + level%level - 1)
+
   end subroutine pf_mpi_send
 
   ! Send status
@@ -269,15 +228,11 @@ contains
           message(8) = message(8) + 1
        end if
 
-       print *, pf%rank, 'send status', message(7), 'nmoving', message(8), 'last', pf%state%last
-
        if (pf%comm%statreq /= -66) then
           call mpi_wait(pf%comm%statreq, stat, ierror)
        end if
        call mpi_issend(message, 8, MPI_INTEGER4, &
             modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%statreq, ierror)
-
-       print *, pf%rank, 'send status done'
     end if
 
   end subroutine pf_mpi_send_status
@@ -294,8 +249,6 @@ contains
     message = 666
     message(8) = pf%state%nmoved
 
-    print *, pf%rank, 'send nmoved'
-
     do r = 1, pf%state%nmoved
        call mpi_isend(message, 8, MPI_INTEGER4, &
             modulo(pf%rank-r, pf%comm%nproc), tag, pf%comm%comm, sendreq(r), ierror)
@@ -305,37 +258,26 @@ contains
        call mpi_wait(sendreq(r), stat, ierror)
     end do
 
-    print *, pf%rank, 'send nmoved done'
-
   end subroutine pf_mpi_send_nmoved
 
   ! Send
   subroutine pf_mpi_wait(pf, level)
     use pf_mod_mpi, only: MPI_STATUS_SIZE
-
     type(pf_pfasst_t), intent(in) :: pf
     integer,           intent(in) :: level
-
     integer :: ierror, stat(MPI_STATUS_SIZE)
-
     call mpi_wait(pf%comm%sendreq(level), stat, ierror)
   end subroutine pf_mpi_wait
-
 
   ! Broadcast
   subroutine pf_mpi_broadcast(pf, y, nvar, root)
     use pf_mod_mpi, only: MPI_REAL8
-
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
-
     integer :: ierror
-
     call start_timer(pf, TSEND)
-
     call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)
-
     call end_timer(pf, TSEND)
   end subroutine pf_mpi_broadcast
 
