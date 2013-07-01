@@ -314,8 +314,8 @@ contains
 
     ! pfasst iterations
     do k = 1, 9999
-       pf%state%iter  = k
-       pf%state%cycle = 1
+       pf%state%iter   = k
+       pf%state%cycle  = 1
 
        call start_timer(pf, TITERATION)
 
@@ -326,14 +326,17 @@ contains
 
        ! check convergence
        res1 = pf%levels(pf%nlevels)%residual
-       if (pf%state%status == PF_STATUS_ITERATING) &
-         if ((1.0_pfdp - res1/res0 < pf%rel_res_tol) .or. (res1 < pf%abs_res_tol)) &
-           pf%state%status = PF_STATUS_CONVERGED
+       if (pf%state%status == PF_STATUS_ITERATING) then
+          print *, abs(1.0_pfdp - abs(res1/res0)), abs(res1)
+          if ((abs(1.0_pfdp - abs(res1/res0)) < pf%rel_res_tol) .or. (abs(res1) < pf%abs_res_tol)) &
+               pf%state%status = PF_STATUS_CONVERGED
+       end if
        res0 = res1
 
        if (pf%state%status /= PF_STATUS_CONVERGED) &
          pf%state%status = PF_STATUS_ITERATING
 
+       pf%state%nmoved = 0
        call pf%comm%recv_status(pf, 8000+k)
 
        ! if the previous processor hasn't converged yet, keep
@@ -347,6 +350,9 @@ contains
 
        if (pf%state%status == PF_STATUS_CONVERGED) then
 
+          print *, 'I AM DONE', pf%rank
+          if (pf%state%step + pf%comm%nproc >= pf%state%nsteps) exit
+
           if (pf%rank == pf%state%last) then
              call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
 
@@ -356,7 +362,7 @@ contains
              call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
 
              pf%state%status = PF_STATUS_MOVING
-             pf%state%step   = pf%state%step + pf%comm%nproc
+             pf%state%step = pf%state%step + pf%comm%nproc
           end if
 
        else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
@@ -365,8 +371,13 @@ contains
 
        end if
 
+       pf%state%t0     = pf%state%step * dt
        pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
        pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
+
+       print *, 'MY STATUS IS', pf%rank, k, pf%state%status, pf%state%first, pf%state%last
+
+       if (pf%state%step > pf%state%nsteps) exit
 
        ! post receive requests
        do l = 2, pf%nlevels
