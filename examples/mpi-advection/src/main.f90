@@ -1,8 +1,8 @@
 !
-! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
+! Simple example of using LIBPFASST.
 !
 
-program fpfasst
+program main
   use pf_mod_dtype
   use pf_mod_parallel
   use pf_mod_pfasst
@@ -25,6 +25,7 @@ program fpfasst
 
   type(array1d), target :: q0
 
+
   !
   ! initialize mpi
   !
@@ -34,11 +35,11 @@ program fpfasst
 
 
   !
-  ! initialize pfasst
+  ! initialize pfasst using three levels
   !
 
-  nvars  = [ 32, 64, 128 ]
-  nnodes = [ 2, 3, 5 ]
+  nvars  = [ 32, 64, 128 ]      ! number of dofs on the time/space levels
+  nnodes = [ 2, 3, 5 ]          ! number of sdc nodes on time/space levels
   dt     = 0.1_pfdp
   nlevs  = 3
 
@@ -52,8 +53,9 @@ program fpfasst
 
   pf%echo_timings = .false.
 
-  ! pf%window      = PF_WINDOW_RING
-  ! pf%abs_res_tol = 1.d-8
+  pf%window      = PF_WINDOW_RING
+  ! pf%rel_res_tol = 1.d-4
+  pf%abs_res_tol = 1.d-10
 
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
@@ -77,8 +79,6 @@ program fpfasst
   if (pf%rank == 0) then
      print *, 'nvars: ', pf%levels(:)%nvars
      print *, 'nnodes:', pf%levels(:)%nnodes
-
-     call pf_cycle_print(pf)
   end if
 
 
@@ -90,13 +90,15 @@ program fpfasst
 
   ! call pf_logger_attach(pf)
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
-  ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps=2*comm%nproc)
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
+  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps=4*comm%nproc)
 
 
   !
   ! cleanup
   !
+  print *, 'done', pf%rank
+
   deallocate(q0%array)
 
   do l = 1, nlevs
@@ -109,4 +111,4 @@ program fpfasst
   call mpi_finalize(ierror)
   call fftw_cleanup()
 
-end program fpfasst
+end program main

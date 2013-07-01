@@ -29,59 +29,75 @@ processor may be idle for a time while it waits for the last processor
 to finish (due to the burn in time associated with the predictor step)
 after each block of |P| time steps are computed.
 
-Alternatively, in |RING| mode, |P| time steps are computed at once.
-When a processor is finished its PFASST iterations on the time step
-that it is operating on, it moves itself to one time step beyond the
-last processor.
+Alternatively, in |RING| mode, when a processor is finished iterating
+on the time step that it is operating on, it moves itself to one time
+step beyond the last processor.
 
 At the beginning of each PFASST iteration (before receive requests are
-posted) each processor receives a status message (this is blocking so
+posted) each processor: (i) determines if it has converged by checking
+residuals, and (ii) receives a status message (this is blocking so
 that the status send/recv stage is done in serial).  This status
 message contains two pieces of information: whether the previous
 processor is finished iterating (in which case the previous processor
 will move itself to the end of the line), and how many of of the
 previous processors are going to move to the end of the line.
 
-Subsequent to receiving this message, the current processor will
-determine if it is done iterating.  If all residual conditions are met
-AND the previous processor is done iterating, the current processor
-will decide that it is done iterating too.  It will then send this
-information to the next processor (and bump up the number of
-processors that are going to move by one).
+If all residual conditions are met AND the previous processor is done
+iterating, the current processor will decide that it is done iterating
+too.  It will then send this information to the next processor (and
+bump up the number of processors that are going to move by one).
 
 If a processor is done iterating, then it will move to the end of the
 line.  To do this, it does a blocking probe for a message with the
-special "nmoved" tag and with source MPI_SOURCE_ANY.  This special
-message is sent by the first processor that is still iterating AND
-whose previous processor moved, OR by the last processor in the event
-that all processors finished at the same iteration.  In this case,
-even though the last processor is done iterating, it will do one final
-iteration so that normal communication can proceed.
+special "nmoved" tag and with source ``MPI_ANY_SOURCE``.  This special
+message is sent by the first processor that is still iterating *and*
+whose previous processor moved, **or** by the last processor in the
+event that all processors finished at the same iteration.  In this
+case, even though the last processor is done iterating, it will do one
+final iteration before moving so that normal communication can
+proceed.
 
 In any case, all processors rotate their first/last markers by the
 number of processors that moved.
 
+Finally, if a processor steps beyond the number of requested time
+steps it stop iterating.  In this case, other processors move their
+last marker accordingly so that they do not include stopped processors
+in their communications.
 
 
 MPI
 ---
 
-The PFASST (time) MPI communicator can be used in conjunction with
-spatial MPI communications.  The user is responsible for splitting
-MPI_COMM_WORLD appropriatly (this can be done, eg, using a simple
-coloring algorithm).
+The PFASST MPI communicator can be used in conjunction with spatial
+MPI communications.  The user is responsible for splitting
+``MPI_COMM_WORLD`` appropriately (this can be done, eg, using a simple
+colouring algorithm).
 
-To support the PF_WINDOW_RING mode, the MPI communicator maintains the
-:code:`first` and :code:`last` integers to keep track of the MPI ranks
-corresponding to the first and last processors in the current 
+To support the |RING| mode, the MPI communicator maintains the
+``first`` and ``last`` integers to keep track of the MPI ranks
+corresponding to the first and last processors in the current block.
 
 At the beginning of each PFASST iteration the MPI communicator posts
 receive requests on all PFASST levels.
 
 
+pthreads
+--------
+
+The PFASST pthreads communicator works in |BLOCK| mode but currently
+only supports one time block.  Users are responsible for spawing
+pthreads and setting up multiple PFASST objects appropriately.
+
+
+fake
+----
+
+The PFASST fake communicator allows us to study the convergence
+behaviour of PFASST in |BLOCK| mode using only a single core.
+
 
 .. |N| replace:: :math:`N`
 .. |P| replace:: :math:`P`
-.. |BLOCK| replace:: :code:`PF_WINDOW_BLOCK`
-.. |RING| replace:: :code:`PF_WINDOW_RING`
-
+.. |BLOCK| replace:: ``PF_WINDOW_BLOCK``
+.. |RING| replace:: ``PF_WINDOW_RING``

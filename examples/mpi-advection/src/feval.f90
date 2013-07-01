@@ -14,7 +14,7 @@ module feval
        Lx     = 1.0_pfdp, &        ! domain size
        v      = 1.0_pfdp, &        ! velocity
        nu     = 0.02_pfdp, &       ! viscosity
-       t00    = 0.25_pfdp           ! initial time for exact solution
+       t00    = 0.15_pfdp           ! initial time for exact solution
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp

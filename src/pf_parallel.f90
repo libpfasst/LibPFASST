@@ -179,14 +179,9 @@ contains
   end subroutine pf_do_stage
 
 
-  !
-  ! Run in parallel using PFASST.
-  !
-  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_do_window_block(pf, dt, tend, nsteps)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(c_ptr),       intent(in)    :: q0
     real(pfdp),        intent(in)    :: dt, tend
-    type(c_ptr),       intent(in), optional :: qend
     integer,           intent(in), optional :: nsteps
 
     type(pf_level_t), pointer :: F
@@ -194,29 +189,6 @@ contains
     real(pfdp) :: t0, res1, res0
     integer    :: nblock, b, c, k, l
 
-
-    
-    call start_timer(pf, TTOTAL)
-
-    !
-    ! initialize
-    !
-
-    pf%state%t0   = 0.0d0
-    pf%state%dt   = dt
-    pf%state%iter = -1
-
-    pf%state%first = 0
-    pf%state%last  = pf%comm%nproc - 1
-
-    F => pf%levels(pf%nlevels)
-    call F%encap%pack(F%q0, q0)
-
-    if(present(nsteps)) then
-       pf%state%nsteps = nsteps
-    else
-       pf%state%nsteps = ceiling(1.0*tend/dt)
-    end if
 
     nblock = pf%state%nsteps/pf%comm%nproc
     res0   = 1.d0
@@ -233,9 +205,6 @@ contains
        pf%state%t0     = pf%state%step * dt
        pf%state%iter   = -1
        pf%state%cycle  = -1
-
-       pf%state%status  = PF_STATUS_ITERATING
-       pf%state%pstatus = PF_STATUS_ITERATING
 
        t0 = pf%state%t0
 
@@ -257,7 +226,6 @@ contains
           if (.not. (pf%state%status == PF_STATUS_CONVERGED)) then
              pf%state%iter  = k
           end if
-          !pf%state%iter  = k
           pf%state%cycle = 1
 
           call start_timer(pf, TITERATION)
@@ -268,7 +236,7 @@ contains
           end do
 
           ! send/receive status
-          if (pf%window == PF_WINDOW_RING) then
+          if (pf%abs_res_tol > 0.d0 .or. pf%rel_res_tol > 0.d0) then
              F => pf%levels(pf%nlevels)
 
              res1 = F%residual
@@ -340,6 +308,204 @@ contains
        pf%comm%statreq = -66
 
     end do ! end block loop
+  end subroutine pf_do_window_block
+
+  subroutine pf_do_window_ring(pf, dt, tend, nsteps)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(in)    :: dt, tend
+    integer,           intent(in), optional :: nsteps
+
+    type(pf_level_t), pointer :: F
+    type(pf_encap_t), pointer :: encap
+    real(pfdp) :: t0, res1, res0
+    integer    :: nblock, b, c, k, l
+    integer    :: steps_to_last
+
+
+    pf%comm%statreq = -66
+    pf%state%block  = -66
+
+    pf%state%step   = pf%rank
+    pf%state%t0     = pf%state%step * dt
+    pf%state%iter   = -1
+    pf%state%cycle  = -1
+
+    pf%state%status  = PF_STATUS_ITERATING
+    pf%state%pstatus = PF_STATUS_ITERATING
+
+    t0 = pf%state%t0
+
+    call pf_predictor(pf, t0, dt)
+
+    ! do start cycle stages
+    if (associated(pf%cycles%start)) then
+       do c = 1, size(pf%cycles%start)
+          pf%state%cycle = c
+          call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
+       end do
+    end if
+
+    pf%state%nmoved = 0
+    pf%state%status = PF_STATUS_PREDICTOR
+
+    ! pfasst iterations
+    do k = 1, 9999
+       pf%state%iter   = k
+       pf%state%cycle  = 1
+
+       call start_timer(pf, TITERATION)
+
+       do l = 1, pf%nlevels
+          F => pf%levels(l)
+          call call_hooks(pf, F%level, PF_PRE_ITERATION)
+       end do
+
+       ! check convergence
+       res1 = pf%levels(pf%nlevels)%residual
+       if (pf%state%status == PF_STATUS_ITERATING .and. res0 > 0.0d0) then
+          if ( (abs(1.0_pfdp - abs(res1/res0)) < pf%rel_res_tol) .or. &
+               (abs(res1)                      < pf%abs_res_tol) ) then
+
+             pf%state%status = PF_STATUS_CONVERGED
+
+          end if
+       end if
+       res0 = res1
+
+       if (pf%state%status /= PF_STATUS_CONVERGED) &
+         pf%state%status = PF_STATUS_ITERATING
+
+       pf%state%nmoved = 0
+       call pf%comm%recv_status(pf, 8000+k)
+
+       ! keep iterating if the previous processor hasn't converged yet
+       if (pf%rank /= pf%state%first) then
+          if (pf%state%pstatus == PF_STATUS_ITERATING) &
+               pf%state%status = PF_STATUS_ITERATING
+       end if
+
+       call pf%comm%send_status(pf, 8000+k)
+
+       if (pf%state%status == PF_STATUS_CONVERGED) then
+
+          if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
+             exit
+          end if
+
+          if (pf%rank == pf%state%last) then
+             call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+
+             pf%state%status = PF_STATUS_ITERATING
+          else
+             call call_hooks(pf, -1, PF_POST_STEP)
+             call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
+
+             pf%state%status = PF_STATUS_ITERATING
+             pf%state%step   = pf%state%step + pf%comm%nproc
+             res0 = -1
+          end if
+
+       else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
+
+          call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+
+       end if
+
+       pf%state%t0     = pf%state%step * dt
+       pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
+       pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
+
+       if (pf%state%step >= pf%state%nsteps) exit
+
+       ! roll back "last" processor
+       steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
+       do while (pf%state%step + steps_to_last >= pf%state%nsteps)
+          pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
+          steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
+       end do
+
+       ! post receive requests
+       do l = 2, pf%nlevels
+          F => pf%levels(l)
+          call pf%comm%post(pf, F, F%level*100+k)
+       end do
+
+       ! do pfasst cycle stages
+       do c = 1, size(pf%cycles%pfasst)
+          pf%state%cycle = pf%state%cycle + 1
+          call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+       end do
+
+       call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
+       call end_timer(pf, TITERATION)
+
+    end do ! end pfasst iteration loop
+
+    ! do end cycle stages
+    if (associated(pf%cycles%end)) then
+       do c = 1, size(pf%cycles%end)
+          pf%state%cycle = c
+          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+       end do
+    end if
+
+  end subroutine pf_do_window_ring
+
+
+  !
+  ! Run in parallel using PFASST.
+  !
+  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(c_ptr),       intent(in)    :: q0
+    real(pfdp),        intent(in)    :: dt, tend
+    type(c_ptr),       intent(in), optional :: qend
+    integer,           intent(in), optional :: nsteps
+
+    type(pf_level_t), pointer :: F
+    type(pf_encap_t), pointer :: encap
+    real(pfdp) :: t0, res1, res0
+    integer    :: nblock, b, c, k, l
+
+
+    
+    call start_timer(pf, TTOTAL)
+
+    !
+    ! initialize
+    !
+
+    pf%state%t0   = 0.0d0
+    pf%state%dt   = dt
+    pf%state%iter = -1
+
+    pf%state%first = 0
+    pf%state%last  = pf%comm%nproc - 1
+
+    F => pf%levels(pf%nlevels)
+    call F%encap%pack(F%q0, q0)
+
+    if(present(nsteps)) then
+       pf%state%nsteps = nsteps
+    else
+       pf%state%nsteps = ceiling(1.0*tend/dt)
+    end if
+
+    nblock = pf%state%nsteps/pf%comm%nproc
+    res0   = 1.d0
+
+    !
+    ! time "block" loop
+    !
+
+    select case (pf%window)
+    case (PF_WINDOW_BLOCK)
+       call pf_do_window_block(pf, dt, tend, nsteps)
+    case (PF_WINDOW_RING)
+       call pf_do_window_ring(pf, dt, tend, nsteps)
+    case default
+       stop "ERROR: Invalid window type."
+    end select
 
     !
     ! finish up
