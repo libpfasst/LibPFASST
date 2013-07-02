@@ -24,7 +24,16 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-.PHONY: clean
+
+# XXX: all of the examples should be buildable and runnable too
+tests:
+	@echo
+	@echo '===> building tests'
+	cd tests && make
+
+	@echo
+	@echo '===> running nosetests'
+	@$(NOSE)
 
 
-
+.PHONY: clean tests

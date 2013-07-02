@@ -19,7 +19,8 @@ build/%.o: %.c
 .PHONY: clean
 
 clean:
-	rm -rf build $(EXE)
+	find . -name build | xargs rm -rf
+	find . -name '*.exe' | xargs rm -f 
 
 
 

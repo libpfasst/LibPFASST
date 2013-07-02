@@ -4,8 +4,7 @@
 
 module hooks
   use pf_mod_dtype
-  use pf_mod_imex
-  use encap
+  use pf_mod_ndarray
   implicit none
 
   interface

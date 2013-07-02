@@ -6,6 +6,7 @@ FC = mpif90
 CC = mpicc
 AR = ar rcs
 PY = python
+NOSE = nosetests
 
 FFLAGS = -Ibuild -Jbuild
 

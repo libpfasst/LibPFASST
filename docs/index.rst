@@ -34,7 +34,7 @@ Contributing
 LIBPFASST is released under the GNU GPL, please see the LICENSE file
 in the source code repository for more information.
 
-If you would like to contribute to the development of PyPFASST,
+If you would like to contribute to the development of LIBPFASST,
 please, dive right in by visiting the `LIBPFASST project page`_.
 
 
