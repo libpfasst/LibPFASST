@@ -34,4 +34,4 @@ html_sidebars = {
 project   = 'LIBPFASST'
 copyright = '2011, 2012, 2013 Matthew Emmett'
 
-release = 0.5.0
+release = '0.5.0'
