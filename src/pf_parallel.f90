@@ -197,6 +197,7 @@ contains
     !
 
     pf%comm%statreq = -66
+    pf%state%status = PF_STATUS_ITERATING
 
     do b = 1, nblock
        pf%state%block  = b
