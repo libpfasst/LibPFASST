@@ -3,34 +3,31 @@
 !
 
 program main
-  use pf_mod_dtype
-  use pf_mod_parallel
-  use pf_mod_pfasst
-  use pf_mod_mpi
-  use pf_mod_comm_mpi
-
+  use pfasst
+  use pf_mod_mpi, only: MPI_COMM_WORLD
   use feval
   use hooks
   use transfer
-  use encap_array1d
 
   implicit none
 
-  type(pf_pfasst_t)  :: pf
-  type(pf_comm_t)    :: comm
-  type(pf_sweeper_t), target :: sweeper
-  type(pf_encap_t),   target :: encap
-  integer            :: ierror, nlevs, nvars(3), nnodes(3), l
-  double precision   :: dt
+  integer, parameter :: nlevs = 3
 
-  type(array1d), target :: q0
+  type(pf_pfasst_t)           :: pf
+  type(pf_comm_t)             :: comm
+  type(pf_sweeper_t), target  :: sweeper
+  type(pf_encap_t),   target  :: encap
+  type(ndarray),      pointer :: q0
+  integer                     :: err, nvars(nlevs), nnodes(nlevs), l
+  double precision            :: dt
 
 
   !
   ! initialize mpi
   !
-  call mpi_init(ierror)
-  if (ierror .ne. 0) &
+
+  call mpi_init(err)
+  if (err .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
 
@@ -38,32 +35,25 @@ program main
   ! initialize pfasst using three levels
   !
 
-  nvars  = [ 32, 64, 128 ]      ! number of dofs on the time/space levels
-  nnodes = [ 2, 3, 5 ]          ! number of sdc nodes on time/space levels
+  nvars  = [ 32, 64, 128 ]   ! number of dofs on the time/space levels
+  nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
   dt     = 0.1_pfdp
-  nlevs  = 3
 
-  call array1d_encap_create(encap)
+  call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = 12
-  pf%qtype  = SDC_GAUSS_LOBATTO + SDC_PROPER_NODES
-
-  pf%echo_timings = .false.
-
-  pf%window      = PF_WINDOW_RING
-  ! pf%rel_res_tol = 1.d-4
-  pf%abs_res_tol = 1.d-10
+  pf%qtype  = SDC_GAUSS_LOBATTO
 
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if
 
   do l = 1, nlevs
-     pf%levels(l)%nvars  = nvars(3-nlevs+l)
-     pf%levels(l)%nnodes = nnodes(3-nlevs+l)
+     pf%levels(l)%nvars  = nvars(l)
+     pf%levels(l)%nnodes = nnodes(l)
 
      call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
@@ -71,6 +61,9 @@ program main
      pf%levels(l)%restrict    => restrict
      pf%levels(l)%encap       => encap
      pf%levels(l)%sweeper     => sweeper
+
+     allocate(pf%levels(l)%shape(1))
+     pf%levels(l)%shape(1)    = nvars(l)
   end do
 
   call pf_mpi_setup(comm, pf)
@@ -83,23 +76,23 @@ program main
 
 
   !
-  ! run
+  ! compute initial condition, add hooks, run
   !
-  allocate(q0%array(pf%levels(nlevs)%nvars))
+
+  allocate(q0)
+  call ndarray_create_simple(q0, [ nvars(3) ])
   call initial(q0)
 
-  ! call pf_logger_attach(pf)
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-  call pf_pfasst_run(pf, c_loc(q0), dt, 0.0_pfdp, nsteps=4*comm%nproc)
+  call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=4*comm%nproc)
 
 
   !
   ! cleanup
   !
-  print *, 'done', pf%rank
 
-  deallocate(q0%array)
+  call ndarray_destroy(c_loc(q0))
 
   do l = 1, nlevs
      call feval_destroy_workspace(pf%levels(l)%ctx)
@@ -108,7 +101,7 @@ program main
   call pf_imex_destroy(sweeper)
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
-  call mpi_finalize(ierror)
+  call mpi_finalize(err)
   call fftw_cleanup()
 
 end program main

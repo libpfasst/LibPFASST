@@ -5,8 +5,6 @@
 ! Transfer (interpolate, restrict) routines.
 
 module transfer
-  use iso_c_binding
-  use encap_array1d
   use feval
   implicit none
 contains
@@ -24,8 +22,8 @@ contains
     call c_f_pointer(ctxF, workF)
     call c_f_pointer(ctxG, workG)
 
-    qF => array(qFp)
-    qG => array(qGp)
+    qF => array1(qFp)
+    qG => array1(qGp)
 
     nvarF = size(qF)
     nvarG = size(qG)
@@ -60,8 +58,8 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    qF => array(qFp)
-    qG => array(qGp)
+    qF => array1(qFp)
+    qG => array1(qGp)
 
     nvarF = size(qF)
     nvarG = size(qG)

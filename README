@@ -53,8 +53,8 @@ EXAMPLES
 ========
 
 Once LIBPFASST is compiled, you can build the examples individually.
-The 'mpi-advection' and 'pth-advection' example require FFTW3.  If you
-already have FFTW3 installed on your machine, please set the FFTW3
+The 'mpi-advection' and 'pth-advection' examples require FFTW3.  If
+you already have FFTW3 installed on your machine, please set the FFTW3
 environment variable appropriately.  For example:
 
   $ export FFTW3=$HOME/opt

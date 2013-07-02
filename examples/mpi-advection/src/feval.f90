@@ -5,8 +5,8 @@
 ! RHS routines for advection/diffusion example.
 
 module feval
-  use iso_c_binding
-  use encap_array1d
+  use pf_mod_dtype
+  use pf_mod_ndarray
   implicit none
   include 'fftw3.f03'
 
@@ -90,45 +90,38 @@ contains
 
   ! Set initial condition.
   subroutine initial(q0)
-    type(array1d), intent(inout) :: q0
-
-    call exact(0.0_pfdp, size(q0%array), q0%array)
+    type(ndarray), intent(inout) :: q0
+    call exact(0.0_pfdp, q0%flatarray)
   end subroutine initial
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine exact(t, nvars, yex)
+  subroutine exact(t, yex)
     real(pfdp), intent(in)  :: t
-    integer,    intent(in)  :: nvars
-    real(pfdp), intent(out) :: yex(nvars)
+    real(pfdp), intent(out) :: yex(:)
 
-    integer :: i, ii, nbox
-    real(pfdp) :: x,tol
+    integer    :: nvars, i, ii, nbox
+    real(pfdp) :: tol, x
 
-    yex = 0.0_pfdp
+    nvars = size(yex)
+    yex   = 0
 
-    ! decide how many images so that contribution is neglible
-    tol = 1e-16
     if (nu .gt. 0) then
-       nbox = 1+ceiling( sqrt( -(4.0_pfdp*nu*(t+t00))*log((4.0*pi*nu*(t+t00))**(0.5)*tol) ))
-
-!       do ii = -nbox, nbox
-          ii = 0
-          do i = 1, nvars
-             x = Lx*dble(i-nvars/2-1)/dble(nvars) + dble(ii)*Lx - t*v
-!             yex(i) = yex(i) + ONE/(4.0_pfdp*pi*nu*(t+t00))**(0.5)*dexp(-x**2/(4.0_pfdp*nu*(t+t00)))
-             yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
-          end do
-
- !      end do
+       do i = 1, nvars
+          x = Lx*dble(i-nvars/2-1)/dble(nvars) - t*v
+          yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
+       end do
     else
-       nbox = 1+ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
+
+       ! decide how many images so that contribution is neglible
+       tol  = 1e-16
+       nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
+
        do ii = -nbox, nbox
           do i = 1, nvars
              x = Lx*dble(i-nvars/2-1)/dble(nvars) + ii*Lx - t*v
              yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
           end do
-
        end do
     end if
 
@@ -149,8 +142,8 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    f1 => array(f1ptr)
+    y  => array1(yptr)
+    f1 => array1(f1ptr)
     wk => work%wk
 
     wk = y
@@ -176,8 +169,8 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    f2 => array(f2ptr)
+    y  => array1(yptr)
+    f2 => array1(f2ptr)
     wk => work%wk
 
     wk = y
@@ -202,9 +195,9 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    rhs => array(rhsptr)
-    f2 => array(f2ptr)
+    y  => array1(yptr)
+    rhs => array1(rhsptr)
+    f2 => array1(f2ptr)
     wk => work%wk
 
     wk = rhs

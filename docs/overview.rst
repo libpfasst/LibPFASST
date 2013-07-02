@@ -2,7 +2,7 @@
 Overview
 ========
 
-The LIBPFASST library evolves systems of ODEs in time::
+The LIBPFASST library evolves systems of ODEs in time:
 
 .. math::
 
@@ -31,24 +31,24 @@ The user provides:
 
 
 User interactions with LIBPFASST are typically marshaled through the
-:f:class:`type(pf_pfasst_t)` class.  This class acts as the overall
+``type(pf_pfasst_t)`` class.  This class acts as the overall
 controller of the algorithm.  Implementing a ODE/PDE solver in
 LIBPFASST generally consists of the following steps:
 
-#. Create an :f:class:`type(pf_pfasst_t)` controller.
+#. Create an ``type(pf_pfasst_t)`` controller.
 
-#. Create an :f:class:`type(pf_encap_t)` encapsulation object.  This
+#. Create an ``type(pf_encap_t)`` encapsulation object.  This
    may be level dependent.
 
-#. Create an :f:class:`type(pf_comm_t)` communicator object.  This
+#. Create an ``type(pf_comm_t)`` communicator object.  This
    allows LIBPFASST to use MPI or pthreads parallelization
    (independent of any spatial parallelization).
 
-#. Create an :f:class:`type(pf_sweeper_t)` SDC sweeper.  Builtin
+#. Create an ``type(pf_sweeper_t)`` SDC sweeper.  Builtin
    sweepers include: explicit, implicit, or imex.  Custom sweepers can
    also be built.  This can also be level dependent.
 
-#. Add levels to the :f:class:`type(pf_pfasst_t)` controller.  This
+#. Add levels to the ``type(pf_pfasst_t)`` controller.  This
    includes telling LIBPFASST how many degrees-of-freedom are on each
    level, how many SDC nodes should be used on each level and their
    type, which interpolation and restriction routines to use, which
