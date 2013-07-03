@@ -1,10 +1,13 @@
 &prbin
 
-  problem_type = 'heat'
+  problem_type = 'ad'
 
-  nsteps = 4
+  nsteps = 10
 
-  nu     = 0.005
+  window_type = "ring"
+  abs_tol     = 1.d-10
+
+  ! nu     = 0.005
 
   ! output = 'ref'
   ! nlevs  = 1
@@ -12,10 +15,11 @@
   ! nvars  = 256
   ! niters = 16
 
-  output = 'out'
-  nlevs  = 2
-  nnodes = 3 5
-  nvars  = 128 256
-  niters = 8
+  ! output = 'ks'
+  ! nlevs  = 2
+  ! nnodes = 3 5
+  ! nvars  = 128 256
+  ! niters = 8
+  ! dt     = 1.0
 
 /

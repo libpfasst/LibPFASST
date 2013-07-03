@@ -39,9 +39,9 @@ def speed():
 
   jobs = JobQueue(rwd=env.scratch + 'speed', queue='regular')
 
-  for prob, nprocs, nlevs in product( [ 'heat', 'burgers', 'ks' ],
-                                     [ 1, 4, 8, 16, 32, 64 ],
-                                     [ 2, 3 ]):
+  for prob, nprocs, nlevs in product( [ 'heat', 'burgers' ], #, 'ks' ],
+                                      [ 1, 4, 8, 16, 32, 64 ],
+                                      [ 2, 3 ] ):
 
     name = '%sp%02dl%d' % (prob, nprocs, nlevs)
     job = Job(name=name, 
@@ -51,8 +51,8 @@ def speed():
               walltime="00:10:00")
 
     job.update_params(
-      problem=prob, output="", nsteps=64, dt=dt[prob], nlevs=nlevs,
-      nnodes=nnodes[prob][:nlevs][::-1], nvars=nvars[prob][:nlevs][::-1],
+      problem=prob, rwd=name, output="output", nsteps=64, dt=dt[prob], nlevs=nlevs,
+      nnodes=','.join(map(str, nnodes[prob][:nlevs][::-1])), nvars=','.join(map(str, nvars[prob][:nlevs][::-1])),
       niters=niters[prob][nprocs], nu=0.005, sigma=0.004,
       )
 
@@ -110,7 +110,7 @@ def setenv():
     env.scheduler   = 'edison'
     env.host_string = 'edison.nersc.gov'
     env.host_rsync  = 'edison-s'
-    env.exe         = 'mpi-ndarray'
+    env.exe         = 'main.exe'
 
     env.depth   = 6
     env.pernode = 4
@@ -123,10 +123,20 @@ def setenv():
     env.scheduler   = 'serial'
     env.host_string = 'gigan.lbl.gov'
     env.host_rsync  = 'gigan-s'
-    env.exe         = 'mpi-ndarray'
+    env.exe         = 'main.exe'
 
     env.width = 1
     env.depth = 16
+
+  else:
+    env.scratch     = '/home/memmett/scratch/'
+    env.scheduler   = 'serial'
+    env.host_string = 'localhost'
+    env.host_rsync  = 'localhost'
+    env.exe         = '/home/memmett/projects/libpfasst/examples/mpi-ndarray/main.exe'
+
+    env.width = 1
+    env.depth = 2
     
   env.rsync = [ (projects + 'libpfasst', env.scratch + 'libpfasst'), ]
 

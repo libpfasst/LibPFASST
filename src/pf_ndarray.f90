@@ -149,6 +149,16 @@ contains
   end subroutine ndarray_saxpy
 
   ! Helpers
+  function dims(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    integer :: r
+
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    r = sol%dim
+  end function dims
+
   function array1(solptr) result(r)
     type(c_ptr), intent(in), value :: solptr
     real(pfdp), pointer :: r(:)
