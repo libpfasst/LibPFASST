@@ -166,6 +166,7 @@ contains
     imp%f2eval => f2eval
     imp%f2comp => f2comp
 
+    sweeper%npieces = npieces
     sweeper%sweep      => implicit_sweep
     sweeper%evaluate   => implicit_evaluate
     sweeper%initialize => implicit_initialize

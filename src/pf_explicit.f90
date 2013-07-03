@@ -151,10 +151,11 @@ contains
     allocate(exp)
     exp%f1eval => f1eval
 
-    sweeper%sweep => explicit_sweep
-    sweeper%evaluate => explicit_evaluate
+    sweeper%npieces = npieces
+    sweeper%sweep      => explicit_sweep
+    sweeper%evaluate   => explicit_evaluate
     sweeper%initialize => explicit_initialize
-    sweeper%integrate => explicit_integrate
+    sweeper%integrate  => explicit_integrate
 
     sweeper%ctx = c_loc(exp)
   end subroutine pf_explicit_create
