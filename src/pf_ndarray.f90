@@ -112,27 +112,27 @@ contains
   subroutine ndarray_pack(z, ptr)
     type(c_ptr), intent(in), value  :: ptr
     real(pfdp),  intent(out)        :: z(:)
-    real(pfdp), pointer :: q(:)
-    q => array1(ptr)
-    z = q
+    type(ndarray), pointer :: y
+    call c_f_pointer(ptr, y)
+    z = y%flatarray
   end subroutine ndarray_pack
 
   ! Unpack solution from a flat array.
   subroutine ndarray_unpack(ptr, z)
     type(c_ptr), intent(in), value :: ptr
     real(pfdp),  intent(in)        :: z(:)
-    real(pfdp), pointer :: q(:)
-    q => array1(ptr)
-    q = z
+    type(ndarray), pointer :: y
+    call c_f_pointer(ptr, y)
+    y%flatarray = z
   end subroutine ndarray_unpack
 
   ! Compute norm of solution
   function ndarray_norm(ptr) result (norm)
     type(c_ptr), intent(in), value :: ptr
     real(pfdp) :: norm
-    real(pfdp), pointer :: q(:)
-    q => array1(ptr)
-    norm = maxval(abs(q))
+    type(ndarray), pointer :: y
+    call c_f_pointer(ptr, y)
+    norm = maxval(abs(y%flatarray))
   end function ndarray_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
@@ -153,11 +153,13 @@ contains
     type(c_ptr), intent(in), value :: solptr
     real(pfdp), pointer :: r(:)
 
+    integer                :: shp(1)
     type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
 
+    call c_f_pointer(solptr, sol)
     if (sol%dim == 1) then
-       call c_f_pointer(sol%aptr, r, sol%shape)
+       shp = sol%shape
+       call c_f_pointer(sol%aptr, r, shp)
     else
        stop
     end if
@@ -167,11 +169,13 @@ contains
     type(c_ptr), intent(in), value :: solptr
     real(pfdp), pointer :: r(:,:)
 
+    integer                :: shp(2)
     type(ndarray), pointer :: sol
     call c_f_pointer(solptr, sol)
 
     if (sol%dim == 2) then
-       call c_f_pointer(sol%aptr, r, sol%shape)
+       shp = sol%shape
+       call c_f_pointer(sol%aptr, r, shp)
     else
        stop
     end if
@@ -181,11 +185,13 @@ contains
     type(c_ptr), intent(in), value :: solptr
     real(pfdp), pointer :: r(:,:,:)
 
+    integer                :: shp(3)
     type(ndarray), pointer :: sol
     call c_f_pointer(solptr, sol)
 
     if (sol%dim == 3) then
-       call c_f_pointer(sol%aptr, r, sol%shape)
+       shp = sol%shape
+       call c_f_pointer(sol%aptr, r, shp)
     else
        stop
     end if
@@ -195,11 +201,13 @@ contains
     type(c_ptr), intent(in), value :: solptr
     real(pfdp), pointer :: r(:,:,:,:)
 
+    integer                :: shp(4)
     type(ndarray), pointer :: sol
     call c_f_pointer(solptr, sol)
 
     if (sol%dim == 4) then
-       call c_f_pointer(sol%aptr, r, sol%shape)
+       shp = sol%shape
+       call c_f_pointer(sol%aptr, r, shp)
     else
        stop
     end if
