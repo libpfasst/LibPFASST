@@ -169,7 +169,7 @@ contains
     if (sol%dim == 1) then
        call c_f_pointer(sol%aptr, r, sol%shape)
     else
-       stop
+       stop "DIM MISMATCH"
     end if
   end function array1
 
@@ -183,7 +183,7 @@ contains
     if (sol%dim == 2) then
        call c_f_pointer(sol%aptr, r, sol%shape)
     else
-       stop
+       stop "DIM MISMATCH"
     end if
   end function array2
 
@@ -197,7 +197,7 @@ contains
     if (sol%dim == 3) then
        call c_f_pointer(sol%aptr, r, sol%shape)
     else
-       stop
+       stop "DIM MISMATCH"
     end if
   end function array3
 
@@ -211,7 +211,7 @@ contains
     if (sol%dim == 4) then
        call c_f_pointer(sol%aptr, r, sol%shape)
     else
-       stop
+       stop "DIM MISMATCH"
     end if
   end function array4
 
