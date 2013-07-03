@@ -25,7 +25,7 @@ contains
        shp2 = q0%shape
        call c_f_pointer(q0%aptr, y2, shp2)
        y2 = 0
-       call gaussian(y2(1, :))
+       call gaussian(y2(:, 1))
     case default
        stop "ERROR: Unknown problem type."
     end select

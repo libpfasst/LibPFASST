@@ -82,12 +82,10 @@ program main
         pf%levels(l)%shape  = nvars(l)
      end if
 
-     print *, dim, pf%levels(l)%shape
-
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
      pf%levels(l)%nnodes = nnodes(maxlevs-nlevs+l)
 
-     call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
+     call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%shape(1))
 
      pf%levels(l)%encap       => encap
      pf%levels(l)%interpolate => interpolate
@@ -97,8 +95,6 @@ program main
 
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
-
-  print *, pf%rank
 
   if (pf%rank == 0) then
      print *, 'nlevs:  ', nlevs

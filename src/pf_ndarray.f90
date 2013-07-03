@@ -53,7 +53,6 @@ contains
     integer,       intent(in)    :: shape(:)
     allocate(q%shape(size(shape)))
     allocate(q%flatarray(product(shape)))
-    ! print *, 'CREATE', shape
     q%dim   = size(shape)
     q%shape = shape
     q%aptr  = c_loc(q%flatarray(1))
