@@ -223,6 +223,22 @@ contains
     end if
   end function array4
 
+  function array5(solptr) result(r)
+    type(c_ptr), intent(in), value :: solptr
+    real(pfdp), pointer :: r(:,:,:,:,:)
+
+    integer                :: shp(5)
+    type(ndarray), pointer :: sol
+    call c_f_pointer(solptr, sol)
+
+    if (sol%dim == 5) then
+       shp = sol%shape
+       call c_f_pointer(sol%aptr, r, shp)
+    else
+       stop "ERROR: array5 dimension mismatch."
+    end if
+  end function array5
+
   subroutine ndarray_encap_create(encap)
     type(pf_encap_t), intent(out) :: encap
 
