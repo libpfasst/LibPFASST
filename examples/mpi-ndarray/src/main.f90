@@ -1,12 +1,8 @@
-!
-! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
-!
-
 program main
   use pfasst
-  use pf_mod_mpi
+  use pf_mod_mpi, only: MPI_COMM_WORLD
+  use pf_mod_ndarray
 
-  use encap
   use feval
   use hooks
   use probin
@@ -20,7 +16,7 @@ program main
 
   type(ndarray),      target :: q1
   type(pf_sweeper_t), target :: sweeper
-  type(pf_encap_t),   target :: encapsulation
+  type(pf_encap_t),   target :: encap
 
   integer        :: ierror, l
   character(256) :: probin_fname
@@ -51,13 +47,22 @@ program main
   ! initialize pfasst
   !
 
-  call ndarray_encap_create(encapsulation)
+  call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  call pf_imex_create(sweeper, f1eval, f2eval, f2comp)
+  if (.not. (problem == PROB_SHEAR .or. problem == PROB_WAVE)) then
+     call pf_imex_create(sweeper, f1eval1, f2eval1, f2comp1)
+  else
+     call pf_imex_create(sweeper, f1eval2, f2eval2, f2comp2)
+  end if
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = niters
   pf%qtype  = SDC_GAUSS_LOBATTO ! + SDC_PROPER_NODES
+  pf%window = wtype
+
+  pf%abs_res_tol = abs_tol
+  pf%rel_res_tol = rel_tol
+  
 
   pf%echo_timings = .true.
 
@@ -66,14 +71,20 @@ program main
   end if
 
   do l = 1, nlevs
-     pf%levels(l)%nvars  = nvars(l)
-     pf%levels(l)%nnodes = nnodes(l)
+     allocate(pf%levels(l)%shape(dim))
+
+     if (problem == PROB_WAVE) then
+        pf%levels(l)%shape  = [ 2, nvars(l) ]
+     else
+        pf%levels(l)%shape  = nvars(l)
+     end if
+
+     pf%levels(l)%nvars  = product(pf%levels(l)%shape)
+     pf%levels(l)%nnodes = nnodes(maxlevs-nlevs+l)
 
      call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
-     allocate(pf%levels(l)%shape(1))
-     pf%levels(l)%shape       = [ nvars(l) ]
-     pf%levels(l)%encap       => encapsulation
+     pf%levels(l)%encap       => encap
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
      pf%levels(l)%sweeper     => sweeper
@@ -91,7 +102,8 @@ program main
   !
   ! run
   !
-  call ndarray_create_simple(q1, [ nvars(nlevs) ])
+
+  call ndarray_create_simple(q1, pf%levels(nlevs)%shape)
   call initial(q1)
 
   if (problem == PROB_AD) then
@@ -113,7 +125,8 @@ program main
   !
   ! cleanup
   !
-  deallocate(q1%array)
+
+  deallocate(q1%flatarray)
 
   do l = 1, nlevs
      call feval_destroy_workspace(pf%levels(l)%ctx)

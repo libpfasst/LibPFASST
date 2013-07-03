@@ -1,7 +1,7 @@
 module solutions
   use pf_mod_dtype
+  use pf_mod_ndarray
   use probin
-  use encap
   implicit none
 
 contains
@@ -12,13 +12,13 @@ contains
 
     select case(problem)
     case (PROB_AD)
-       call exact(0.0_pfdp, size(q0%array), q0%array)
+       call exact(0.0_pfdp, size(q0%flatarray), q0%flatarray)
     case (PROB_HEAT)
-       call gaussian(q0%array)
+       call gaussian(q0%flatarray)
     case (PROB_VB)
-       call gaussian(q0%array)
+       call gaussian(q0%flatarray)
     case (PROB_KS)
-       call sinusoidal(q0%array)
+       call sinusoidal(q0%flatarray)
     case default
        stop "ERROR: Unknown problem type."
     end select

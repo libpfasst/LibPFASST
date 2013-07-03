@@ -1,0 +1,9 @@
+This example actually encompases several examples:
+
+#. 1d advection/diffusion
+#. 1d heat equation
+#. 1d viscous burgers
+#. 1d wave equation (2nd order)
+#. 1d KS
+#. 2d shear
+

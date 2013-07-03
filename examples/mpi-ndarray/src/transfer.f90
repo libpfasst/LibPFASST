@@ -5,8 +5,8 @@
 ! Transfer (interpolate, restrict) routines.
 
 module transfer
-  use encap
   use feval
+  use probin
   implicit none
 contains
 
@@ -35,8 +35,8 @@ contains
        return
     endif
 
-    wkF => workF%wk
-    wkG => workG%wk
+    wkF => workF%wk1
+    wkG => workG%wk1
 
     wkG = qG
     call fftw_execute_dft(workG%ffft, wkG, wkG)
@@ -55,17 +55,31 @@ contains
     type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
 
-    real(pfdp), pointer :: qF(:), qG(:)
+    real(pfdp), pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
 
     integer :: nvarF, nvarG, xrat
 
-    qF => array1(qFp)
-    qG => array1(qGp)
-
-    nvarF = size(qF)
-    nvarG = size(qG)
-    xrat  = nvarF / nvarG
-
-    qG = qF(::xrat)
+    if (problem == PROB_WAVE) then
+       qF2 => array2(qFp)
+       qG2 => array2(qGp)
+       nvarF = size(qF2, 2)
+       nvarG = size(qG2, 2)
+       xrat  = nvarF / nvarG
+       qG2 = qF2(:,::xrat)
+    else if (problem == PROB_SHEAR) then
+       qF2 => array2(qFp)
+       qG2 => array2(qGp)
+       nvarF = size(qF2, 2)
+       nvarG = size(qG2, 2)
+       xrat  = nvarF / nvarG
+       qG2 = qF2(::xrat,::xrat)
+    else
+       qF => array1(qFp)
+       qG => array1(qGp)
+       nvarF = size(qF)
+       nvarG = size(qG)
+       xrat  = nvarF / nvarG
+       qG = qF(::xrat)
+    end if
   end subroutine restrict
 end module transfer
