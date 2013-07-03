@@ -9,6 +9,8 @@ contains
   ! Set initial condition.
   subroutine initial(q0)
     type(ndarray), intent(inout) :: q0
+    integer             :: shp2(2)
+    real(pfdp), pointer :: y2(:,:)
 
     select case(problem)
     case (PROB_AD)
@@ -19,6 +21,11 @@ contains
        call gaussian(q0%flatarray)
     case (PROB_KS)
        call sinusoidal(q0%flatarray)
+    case (PROB_WAVE)
+       shp2 = q0%shape
+       call c_f_pointer(q0%aptr, y2, shp2)
+       y2 = 0
+       call gaussian(y2(1, :))
     case default
        stop "ERROR: Unknown problem type."
     end select

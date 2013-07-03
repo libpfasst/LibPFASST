@@ -1,11 +1,12 @@
 &prbin
 
-  problem_type = 'ad'
-
+  nlevs = 1
+  problem_type = 'wave'
   nsteps = 10
+  output = 'test'
 
-  window_type = "ring"
-  abs_tol     = 1.d-10
+  ! window_type = "ring"
+  ! abs_tol     = 1.d-10
 
   ! nu     = 0.005
 

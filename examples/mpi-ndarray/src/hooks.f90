@@ -51,16 +51,16 @@ contains
     type(pf_state_t),    intent(in)    :: state
     type(c_ptr),         intent(in)    :: ctx
 
-    character(len=256)  :: fname
-    real(pfdp), pointer :: qend(:)
+    character(len=256)     :: fname
+    type(ndarray), pointer :: qend
 
-    qend => array1(level%qend)
+    call c_f_pointer(level%qend, qend)
 
     write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
          state%step, state%iter, level%level
 
     call dump_numpy(trim(output)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
-         1, [ size(qend) ], size(qend), qend)
+         qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
 
   end subroutine dump_hook
 

@@ -49,11 +49,14 @@ program main
 
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  if (.not. (problem == PROB_SHEAR .or. problem == PROB_WAVE)) then
-     call pf_imex_create(sweeper, f1eval1, f2eval1, f2comp1)
-  else
+  select case(problem)
+  case (PROB_WAVE)
+     call pf_explicit_create(sweeper, f1eval2)
+  case (PROB_SHEAR)
      call pf_imex_create(sweeper, f1eval2, f2eval2, f2comp2)
-  end if
+  case default
+     call pf_imex_create(sweeper, f1eval1, f2eval1, f2comp1)
+  end select
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = niters
@@ -74,10 +77,12 @@ program main
      allocate(pf%levels(l)%shape(dim))
 
      if (problem == PROB_WAVE) then
-        pf%levels(l)%shape  = [ 2, nvars(l) ]
+        pf%levels(l)%shape  = [ nvars(l), 2 ]
      else
         pf%levels(l)%shape  = nvars(l)
      end if
+
+     print *, dim, pf%levels(l)%shape
 
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
      pf%levels(l)%nnodes = nnodes(maxlevs-nlevs+l)
@@ -93,9 +98,13 @@ program main
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
+  print *, pf%rank
+
   if (pf%rank == 0) then
-     print *, 'nvars: ', pf%levels(:)%nvars
-     print *, 'nnodes:', pf%levels(:)%nnodes
+     print *, 'nlevs:  ', nlevs
+     print *, 'nvars:  ', pf%levels(:)%nvars
+     print *, 'nnodes: ', pf%levels(:)%nnodes
+     print *, 'output: ', output
   end if
 
 

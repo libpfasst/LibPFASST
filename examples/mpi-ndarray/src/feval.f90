@@ -40,7 +40,7 @@ contains
     case (PROB_KS)
        f1 = -y * real(wk)
     case default
-       stop "ERROR: Unknown problem type in f1eval."
+       stop "ERROR: Unknown problem type."
     end select
   end subroutine f1eval1
 
@@ -72,7 +72,7 @@ contains
     case (PROB_KS)
        wk = work%ks1 * wk / size(wk)
     case default
-       stop "ERROR: Unknown problem type in f2eval."
+       stop "ERROR: Unknown problem type."
     end select
 
     call fftw_execute_dft(work%ifft, wk, wk)
@@ -109,7 +109,7 @@ contains
     case (PROB_KS)
        wk = wk / (1.0_pfdp - dt*work%ks1) / size(wk)
     case default
-       stop "ERROR: Unknown problem type in f2comp."
+       stop "ERROR: Unknown problem type."
     end select
 
     call fftw_execute_dft(work%ifft, wk, wk)
@@ -125,13 +125,32 @@ contains
 
     real(pfdp),      pointer :: y(:,:), f1(:,:)
     type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:,:)
+    complex(pfdp),   pointer :: wk1(:), wk2(:,:)
 
     call c_f_pointer(ctx, work)
 
     y  => array2(yptr)
     f1 => array2(f1ptr)
 
+    select case(problem)
+    case (PROB_WAVE)
+       wk1 => work%wk1
+       
+       wk1 = y(:, 1)
+       call fftw_execute_dft(work%ffft, wk1, wk1)
+       wk1 = work%ddx1 * wk1 / size(wk1)
+       call fftw_execute_dft(work%ifft, wk1, wk1)
+       f1(:, 2) = real(wk1)
+
+       wk1 = y(:, 2)
+       call fftw_execute_dft(work%ffft, wk1, wk1)
+       wk1 = work%ddx1 * wk1 / size(wk1)
+       call fftw_execute_dft(work%ifft, wk1, wk1)
+       f1(:, 1) = real(wk1)
+
+    case default
+       stop "ERROR: Unknown problem type."
+    end select
   end subroutine f1eval2
 
   subroutine f2eval2(yptr, t, level, ctx, f2ptr)
@@ -148,6 +167,10 @@ contains
     y  => array1(yptr)
     f2 => array1(f2ptr)
 
+    select case(problem)
+    case default
+       stop "ERROR: Unknown problem type."
+    end select
   end subroutine f2eval2
 
   subroutine f2comp2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
@@ -165,6 +188,10 @@ contains
     rhs => array1(rhsptr)
     f2  => array1(f2ptr)
 
+    select case(problem)
+    case default
+       stop "ERROR: Unknown problem type."
+    end select
   end subroutine f2comp2
 
   subroutine feval_create_workspace(ctx, nvars)

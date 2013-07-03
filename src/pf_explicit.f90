@@ -141,8 +141,8 @@ contains
     end do
   end subroutine explicit_integrate
 
-  ! Create implicit sweeper
-  subroutine explicit_create(sweeper, f1eval)
+  ! Create explicit sweeper
+  subroutine pf_explicit_create(sweeper, f1eval)
     type(pf_sweeper_t), intent(inout) :: sweeper
     procedure(pf_f1eval_p) :: f1eval
 
@@ -157,7 +157,7 @@ contains
     sweeper%integrate => explicit_integrate
 
     sweeper%ctx = c_loc(exp)
-  end subroutine explicit_create
+  end subroutine pf_explicit_create
 
 
 end module pf_mod_explicit

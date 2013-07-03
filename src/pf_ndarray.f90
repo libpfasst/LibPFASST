@@ -53,6 +53,7 @@ contains
     integer,       intent(in)    :: shape(:)
     allocate(q%shape(size(shape)))
     allocate(q%flatarray(product(shape)))
+    ! print *, 'CREATE', shape
     q%dim   = size(shape)
     q%shape = shape
     q%aptr  = c_loc(q%flatarray(1))
@@ -171,7 +172,7 @@ contains
        shp = sol%shape
        call c_f_pointer(sol%aptr, r, shp)
     else
-       stop "DIM MISMATCH"
+       stop "ERROR: array1 dimension mismatch."
     end if
   end function array1
 
@@ -187,7 +188,7 @@ contains
        shp = sol%shape
        call c_f_pointer(sol%aptr, r, shp)
     else
-       stop "DIM MISMATCH"
+       stop "ERROR: array2 dimension mismatch."
     end if
   end function array2
 
@@ -203,7 +204,7 @@ contains
        shp = sol%shape
        call c_f_pointer(sol%aptr, r, shp)
     else
-       stop "DIM MISMATCH"
+       stop "ERROR: array3 dimension mismatch."
     end if
   end function array3
 
@@ -219,7 +220,7 @@ contains
        shp = sol%shape
        call c_f_pointer(sol%aptr, r, shp)
     else
-       stop "DIM MISMATCH"
+       stop "ERROR: array4 dimension mismatch."
     end if
   end function array4
 
