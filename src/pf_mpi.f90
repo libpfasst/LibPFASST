@@ -106,7 +106,8 @@ contains
 
     call start_timer(pf, TRECEIVE + level%level - 1)
 
-    if (pf%rank /= pf%state%first) then
+    if (pf%rank /= pf%state%first .and. &
+         pf%state%pstatus == PF_STATUS_ITERATING) then
 
        if (blocking) then
           call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
