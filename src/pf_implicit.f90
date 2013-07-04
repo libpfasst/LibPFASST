@@ -155,7 +155,7 @@ contains
   end subroutine implicit_integrate
 
   ! Create implicit sweeper
-  subroutine implicit_create(sweeper, f2eval, f2comp)
+  subroutine pf_implicit_create(sweeper, f2eval, f2comp)
     type(pf_sweeper_t), intent(inout) :: sweeper
     procedure(pf_f2eval_p) :: f2eval
     procedure(pf_f2comp_p) :: f2comp
@@ -173,7 +173,7 @@ contains
     sweeper%integrate  => implicit_integrate
 
     sweeper%ctx = c_loc(imp)
-  end subroutine implicit_create
+  end subroutine pf_implicit_create
 
 end module pf_mod_implicit
 
