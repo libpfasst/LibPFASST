@@ -16,6 +16,7 @@ nvars  = defaultdict(lambda: [ 512, 256, 128 ], {
 })
 
 niters = {
+  'ad':      defaultdict(lambda: 8, { 1: 12 }),
   'heat':    defaultdict(lambda: 8, { 1: 12 }),
   'burgers': defaultdict(lambda: 8, { 1: 12 }),
   'ks':      defaultdict(lambda: 8, { 1: 12 }),
@@ -39,8 +40,9 @@ def speed():
 
   jobs = JobQueue(rwd=env.scratch + 'speed', queue='regular')
 
-  for prob, nprocs, nlevs in product( [ 'heat', 'burgers' ], #, 'ks' ],
-                                      [ 1, 4, 8, 16, 32, 64 ],
+  for prob, nprocs, nlevs in product( [ 'ad' ], #, 'burgers' ], #, 'ks' ],
+                                      [ 4, 8, 16, 32 ],
+#                                      [ 1, 4, 8, 16, 32, 64 ],
                                       [ 2, 3 ] ):
 
     name = '%sp%02dl%d' % (prob, nprocs, nlevs)
@@ -51,7 +53,7 @@ def speed():
               walltime="00:10:00")
 
     job.update_params(
-      problem=prob, rwd=name, output="output", nsteps=64, dt=dt[prob], nlevs=nlevs,
+      problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=nlevs,
       nnodes=','.join(map(str, nnodes[prob][:nlevs][::-1])), nvars=','.join(map(str, nvars[prob][:nlevs][::-1])),
       niters=niters[prob][nprocs], nu=0.005, sigma=0.004,
       )
@@ -62,41 +64,12 @@ def speed():
 
 
 @task
-def flamebox_speed_comp():
-  """Compute convergence errors (run speed-comp.py) on the remote host."""
-  setenv()
-  rsync()
-
-  if env.host[:6] == 'hopper':
-    with prefix('module load numpy'):
-      with cd(env.scratch + '/Combustion/SMC/analysis'):
-        run('python speed-comp.py')
-  elif env.host[:5] == 'gigan':
-    with cd(env.scratch + '/Combustion/SMC/analysis'):
-      run('/home/memmett/venv/base/bin/python speed-comp.py')
-
-
-@task
-def rsync():
-  """Push (rsync) directories in env.rsync to env.host."""
+def build(target=''):
+  """Build mpi-ndarray on the remote host."""
 
   setenv()
-  if env.host == 'localhost':
-    return
-
-  for src, dst in env.rsync:
-      command = "rsync -avz -F {src}/ {host}:{dst}".format(
-          host=env.host_rsync, src=src, dst=dst)
-      local(command)
-
-
-@task
-def make(target=''):
-  """Run make in the env.rwd directory on the remote host."""
-
-  setenv()
-  rsync()
-  with cd(env.rwd):
+  with cd(env.libpfasst):
+    run('git pull')
     run('make %s' % target)
 
 
@@ -127,6 +100,18 @@ def setenv():
 
     env.width = 1
     env.depth = 16
+
+  elif env.host[:7] == 'juqueen':
+    env.use_ssh_config = True
+    env.scratch     = '/homea/hwu12/hwu125/scratch/'
+    env.scheduler   = 'juqueen'
+    env.host_string = 'juqueen'
+    env.host_rsync  = 'juqueen'
+    env.exe         = 'main.exe'
+    env.libpfasst   = '/homea/hwu12/hwu125/projects/libpfasst/examples/mpi-ndarray'
+
+    env.width = 1
+    env.depth = 1
 
   else:
     env.scratch     = '/home/memmett/scratch/'
