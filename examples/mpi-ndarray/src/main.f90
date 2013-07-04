@@ -18,7 +18,7 @@ program main
   type(pf_sweeper_t), target :: sweeper
   type(pf_encap_t),   target :: encap
 
-  integer        :: ierror, l
+  integer        :: err, l
   character(256) :: probin_fname
 
 
@@ -38,8 +38,8 @@ program main
   ! initialize mpi
   !
 
-  call mpi_init(ierror)
-  if (ierror .ne. 0) &
+  call mpi_init(err)
+  if (err .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
 
@@ -50,6 +50,8 @@ program main
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   select case(problem)
+  case (PROB_HEAT)
+     call pf_implicit_create(sweeper, f2eval1, f2comp1)
   case (PROB_WAVE)
      call pf_explicit_create(sweeper, f1eval2)
   case (PROB_SHEAR)
@@ -124,6 +126,8 @@ program main
      nsteps = comm%nproc
   end if
 
+  call mpi_barrier(MPI_COMM_WORLD, err)
+
   call pf_pfasst_run(pf, c_loc(q1), dt, 0.0_pfdp, nsteps=nsteps)
 
 
@@ -139,7 +143,7 @@ program main
 
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
-  call mpi_finalize(ierror)
+  call mpi_finalize(err)
   call fftw_cleanup()
 
 end program main
