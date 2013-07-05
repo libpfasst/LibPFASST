@@ -85,7 +85,7 @@ program main
      end if
 
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
-     pf%levels(l)%nnodes = nnodes(maxlevs-nlevs+l)
+     pf%levels(l)%nnodes = nnodes(l)
 
      call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%shape(1))
 

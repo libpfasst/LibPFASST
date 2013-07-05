@@ -2,17 +2,16 @@
 
   problem_type = "{problem}"
 
-  output = "{output}"
-  
-  nsteps = {nsteps}
-  dt     = {dt}
+  nsteps  = {nsteps}
+  dt      = {dt}
 
-  nlevs  = {nlevs}
-  niters = {niters}
-  nnodes = {nnodes}
-  nvars  = {nvars}
+  nlevs   = {nlevs}
+  niters  = {niters}
+  abs_tol = {abs_tol}
+  nnodes  = {nnodes}
+  nvars   = {nvars}
   
-  nu    = {nu}
-  sigma = {sigma}
+  nu      = {nu}
+  sigma   = {sigma}
 
 /
