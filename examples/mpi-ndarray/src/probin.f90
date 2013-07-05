@@ -48,7 +48,7 @@ contains
 
     namelist /prbin/ &
          problem_type, window_type, output, abs_tol, rel_tol, &
-         v, Lx, nu, t0, dt, sigma, &
+         v, nu, t0, dt, sigma, &
          nlevs, nnodes, nvars, nsteps, niters
 
 
@@ -107,6 +107,7 @@ contains
     case ("ks")
        problem = PROB_KS
        nu      = -1.d0
+       Lx      = 100.d0
        dim     = 1
     case ("shear")
        problem = PROB_SHEAR

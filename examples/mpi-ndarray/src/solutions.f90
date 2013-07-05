@@ -51,19 +51,16 @@ contains
 
   subroutine sinusoidal(q)
     real(pfdp), intent(inout) :: q(:)
-    integer :: nvars, ii, i
+    integer :: nvars, i
     double precision :: x
 
     nvars = size(q)
 
-    q = 0.0d0
-    do ii = -3, 3
-       do i = 1, nvars
-          x = Lx * (dble(i-nvars/2-1)/dble(nvars) + ii)
-          q(i) = q(i) + 0.1*sin(3*two_pi*x/Lx) &
-                      + 0.2*sin(4*two_pi*x/Lx) &
-                      + 0.3*sin(7*two_pi*x/Lx)
-       end do
+    do i = 1, nvars
+       x = dble(i-1)/dble(nvars)
+       q(i) = 0.1*dsin(3*two_pi*x) &
+            + 0.2*dsin(4*two_pi*x) &
+            + 0.3*dsin(7*two_pi*x)
     end do
   end subroutine sinusoidal
 
