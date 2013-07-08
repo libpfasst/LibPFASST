@@ -34,6 +34,7 @@ contains
   ! Predictor.
   !
   subroutine pf_predictor(pf, t0, dt)
+    ! PREDICTOR
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
@@ -197,7 +198,6 @@ contains
     !
 
     pf%comm%statreq = -66
-    pf%state%status = PF_STATUS_ITERATING
 
     do b = 1, nblock
        pf%state%block  = b
@@ -205,6 +205,7 @@ contains
        pf%state%t0     = pf%state%step * dt
        pf%state%iter   = -1
        pf%state%cycle  = -1
+       pf%state%status = PF_STATUS_ITERATING
 
        t0 = pf%state%t0
 

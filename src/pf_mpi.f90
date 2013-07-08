@@ -29,8 +29,11 @@ module pf_mod_comm_mpi
   implicit none
 contains
 
-  ! Create an MPI based PFASST communicator
   subroutine pf_mpi_create(pf_comm, mpi_comm)
+    !
+    ! Create an MPI based PFASST communicator using the MPI
+    ! communicator *mpi_comm*.
+    !
     type(pf_comm_t), intent(out) :: pf_comm
     integer,         intent(in)  :: mpi_comm
 
@@ -50,8 +53,13 @@ contains
     pf_comm%send_nmoved => pf_mpi_send_nmoved
   end subroutine pf_mpi_create
 
-  ! Setup
   subroutine pf_mpi_setup(pf_comm, pf)
+    !
+    ! Setup the PFASST communicator.
+    !
+    ! This should be called soon after adding levels to the PFASST
+    ! controller **pf**.
+    !
     use pf_mod_mpi, only: MPI_REQUEST_NULL
 
     type(pf_comm_t),   intent(inout) :: pf_comm
@@ -68,16 +76,20 @@ contains
     pf_comm%statreq = -66
   end subroutine pf_mpi_setup
 
-  ! Destroy
   subroutine pf_mpi_destroy(pf_comm)
+    !
+    ! Destroy the PFASST communicator.
+    !
     type(pf_comm_t), intent(inout) :: pf_comm
 
     deallocate(pf_comm%recvreq)
     deallocate(pf_comm%sendreq)
   end subroutine pf_mpi_destroy
 
-  ! Post
   subroutine pf_mpi_post(pf, level, tag)
+    !
+    ! Post receive requests.
+    !
     use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(in)    :: pf
@@ -86,15 +98,18 @@ contains
 
     integer :: ierror
 
-    if (pf%rank /= pf%state%first) then
+    if (pf%rank /= pf%state%first  .and. &
+         pf%state%pstatus == PF_STATUS_ITERATING) then
        call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
             modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, &
             pf%comm%recvreq(level%level), ierror)
     end if
   end subroutine pf_mpi_post
 
-  ! Receive
   subroutine pf_mpi_recv(pf, level, tag, blocking)
+    !
+    ! Receive new initial condition.
+    !
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
