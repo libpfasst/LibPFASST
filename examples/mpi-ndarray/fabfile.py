@@ -47,14 +47,41 @@ def speed():
   """Speedup/timing tests."""
 
   setenv()
+  jobs     = JobQueue(rwd=env.scratch + 'speed', queue='regular')
+  problems = [ 'heat', 'burgers', 'wave', 'ks' ]
 
-  jobs = JobQueue(rwd=env.scratch + 'speed', queue='regular')
+  #
+  # serial reference runs
+  #
 
-  for prob, nprocs, nlevs in product( [ 'heat', 'burgers', 'wave', 'ks' ],
-                                      [ 1 ],
-#                                      [ 1, 4, 8, 16, 32, 64 ],
-                                      [ 1 ] ):                                      
-#                                      [ 2, 3 ] ):
+  for prob in problems:
+    nprocs = 1
+    nlevs  = 1
+    
+    name = '%s_p%02dl%d' % (prob, nprocs, nlevs)
+    job = Job(name=name, 
+              param_file='probin.nml.in', 
+              rwd=name, 
+              width=nprocs, 
+              walltime="00:10:00")
+
+    job.update_params(
+      problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=nlevs,
+      nnodes=','.join(map(str, nnodes[prob][-nlevs:])), nvars=','.join(map(str, nvars[prob][-nlevs:])),
+      abs_tol=0,
+      niters=niters[prob][nprocs], nu=0.005, sigma=0.004,
+      )
+
+    jobs.add(job)
+
+
+  #
+  # parallel runs
+  #
+
+  for prob, nprocs, nlevs in product( problems,
+                                      [ 4, 8, 16, 32, 64 ],
+                                      [ 2, 3 ] ):
 
     name = '%s_p%02dl%d' % (prob, nprocs, nlevs)
     job = Job(name=name, 
@@ -73,6 +100,18 @@ def speed():
     jobs.add(job)
 
   jobs.submit_all()
+
+
+@task
+def pull(rwd=''):
+  setenv()
+
+  if rwd is None:
+    print 'need to specify a directory'
+    return
+
+  local("rsync -aFvz {host}:{scratch}{rwd} .".format(
+    host=env.host_rsync, scratch=env.scratch, rwd=rwd))
 
 
 @task
