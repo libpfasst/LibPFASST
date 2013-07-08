@@ -19,6 +19,7 @@
 
 module pf_mod_utils
   use pf_mod_dtype
+  use pf_mod_timer
   implicit none
 contains
 
@@ -107,12 +108,15 @@ contains
   ! node' integral and store it in I.  This is used later when doing
   ! restriction (see restrict_time_space_fas).
   !
-  subroutine pf_residual(F, dt)
-    type(pf_level_t), intent(inout) :: F
-    real(pfdp),       intent(in)    :: dt
+  subroutine pf_residual(pf, F, dt)
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_level_t),  intent(inout) :: F
+    real(pfdp),        intent(in)    :: dt
 
     real(pfdp) :: norms(F%nnodes-1)
     integer :: m, n
+
+    call start_timer(pf, TRESIDUAL)
 
     call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
     do m = 2, F%nnodes-1
@@ -140,6 +144,8 @@ contains
        norms(m) = F%encap%norm(F%R(m))
     end do
     F%residual = maxval(abs(norms))
+
+    call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
 

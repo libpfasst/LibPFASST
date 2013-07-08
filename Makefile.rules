@@ -29,9 +29,9 @@ clean:
 # LIBPFASST dependencies
 #
 
-build/pf_utils.o:       build/pf_dtype.o
 build/pf_timer.o:       build/pf_dtype.o
 build/pf_cycle.o:       build/pf_dtype.o
+build/pf_utils.o:       build/pf_timer.o
 build/pf_explicit.o:    build/pf_timer.o
 build/pf_hooks.o:       build/pf_timer.o
 build/pf_implicit.o:    build/pf_timer.o

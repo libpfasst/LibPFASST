@@ -49,7 +49,7 @@ contains
 
     do l = pf%nlevels, 2, -1
        F => pf%levels(l); G => pf%levels(l-1)
-       call pf_residual(F, dt)
+       call pf_residual(pf, F, dt)
        call restrict_time_space_fas(pf, t0, dt, F, G)
        call save(G)
        call G%encap%pack(G%q0, G%Q(1))
@@ -70,7 +70,7 @@ contains
              call G%sweeper%sweep(pf, G, t0, dt)
           end do
           call call_hooks(pf, G%level, PF_POST_SWEEP)
-          call pf_residual(G, dt)
+          call pf_residual(pf, G, dt)
        end do
 
     end if
@@ -121,7 +121,7 @@ contains
              call F%sweeper%sweep(pf, F, t0, dt)
           end do
           call call_hooks(pf, F%level, PF_POST_SWEEP)
-          call pf_residual(F, dt)
+          call pf_residual(pf, F, dt)
        end if
 
 
@@ -135,7 +135,7 @@ contains
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(F, dt)
+       call pf_residual(pf, F, dt)
        call pf%comm%send(pf, F, F%level*100+iteration, .false.)
 
        call restrict_time_space_fas(pf, t0, dt, F, G)
@@ -152,7 +152,7 @@ contains
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(F, dt)
+       call pf_residual(pf, F, dt)
        call pf%comm%send(pf, F, F%level*100+iteration, .true.)
 
 
@@ -165,7 +165,7 @@ contains
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(F, dt)
+       call pf_residual(pf, F, dt)
 
     case (SDC_CYCLE_INTERP)
 

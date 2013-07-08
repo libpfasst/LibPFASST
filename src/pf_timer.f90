@@ -27,6 +27,7 @@ module pf_mod_timer
        TITERATION   = 3,  &
        THOOKS       = 4,  &
        TSTEP        = 5,  &
+       TRESIDUAL    = 6,  &
        TINTERPOLATE = 10,  &
        TRESTRICT    = 20,  &
        TRECEIVE     = 30,  &
@@ -37,11 +38,11 @@ module pf_mod_timer
 
   character(len=14), parameter :: timer_names(59) = (/ &
        'total      ',  &        ! 1
-       'predictor  ',  &        ! 2
-       'iteration  ',  &        ! 3
-       'hooks      ',  &        ! 4
+       'predictor  ',  &
+       'iteration  ',  &
+       'hooks      ',  &
        'step       ',  &        ! 5
-       '6          ',  &
+       'residual   ',  &
        '7          ',  &
        '8          ',  &
        '9          ',  &
