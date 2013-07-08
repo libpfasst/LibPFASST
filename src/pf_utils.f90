@@ -116,6 +116,8 @@ contains
     real(pfdp) :: norms(F%nnodes-1)
     integer :: m, n
 
+    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
+
     call start_timer(pf, TRESIDUAL)
 
     call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
