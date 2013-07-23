@@ -265,6 +265,7 @@ contains
           end if
 
           if (pf%state%status == PF_STATUS_CONVERGED) then
+             ! XXX: this needs to be fixed: spinning here is not good.
              cycle
           end if
 
@@ -476,6 +477,9 @@ contains
 
     pf%state%first = 0
     pf%state%last  = pf%comm%nproc - 1
+
+    pf%state%status  = PF_STATUS_ITERATING
+    pf%state%pstatus = PF_STATUS_ITERATING
 
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
