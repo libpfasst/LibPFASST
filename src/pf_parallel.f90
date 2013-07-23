@@ -103,7 +103,7 @@ contains
 
        call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
 
-       call pf%comm%recv(pf, F, F%level*100+iteration, .false.)
+       call pf%comm%recv(pf, F, F%level*10000+iteration, .false.)
 
        if (pf%rank > 0) then
           ! interpolate increment to q0 -- the fine initial condition
@@ -136,7 +136,7 @@ contains
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
-       call pf%comm%send(pf, F, F%level*100+iteration, .false.)
+       call pf%comm%send(pf, F, F%level*10000+iteration, .false.)
 
        call restrict_time_space_fas(pf, t0, dt, F, G)
        call save(G)
@@ -146,14 +146,14 @@ contains
 
        F => pf%levels(stage%F)
 
-       call pf%comm%recv(pf, F, F%level*100+iteration, .true.)
+       call pf%comm%recv(pf, F, F%level*10000+iteration, .true.)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
-       call pf%comm%send(pf, F, F%level*100+iteration, .true.)
+       call pf%comm%send(pf, F, F%level*10000+iteration, .true.)
 
 
     case (SDC_CYCLE_SWEEP)
@@ -271,7 +271,7 @@ contains
           ! post receive requests
           do l = 2, pf%nlevels
              F => pf%levels(l)
-             call pf%comm%post(pf, F, F%level*100+k)
+             call pf%comm%post(pf, F, F%level*10000+k)
           end do
 
           ! do pfasst cycle stages
@@ -427,7 +427,7 @@ contains
        ! post receive requests
        do l = 2, pf%nlevels
           F => pf%levels(l)
-          call pf%comm%post(pf, F, F%level*100+k)
+          call pf%comm%post(pf, F, F%level*10000+k)
        end do
 
        ! do pfasst cycle stages
@@ -490,14 +490,22 @@ contains
     ! dispatch
     !
 
-    select case (pf%window)
-    case (PF_WINDOW_BLOCK)
+    if (pf%comm%nproc == 1) then
+
        call pf_do_window_block(pf, dt, tend, nsteps)
-    case (PF_WINDOW_RING)
-       call pf_do_window_ring(pf, dt, tend, nsteps)
-    case default
-       stop "ERROR: Invalid window type."
-    end select
+
+    else
+       
+       select case (pf%window)
+       case (PF_WINDOW_BLOCK)
+          call pf_do_window_block(pf, dt, tend, nsteps)
+       case (PF_WINDOW_RING)
+          call pf_do_window_ring(pf, dt, tend, nsteps)
+       case default
+          stop "ERROR: Invalid window type."
+       end select
+
+    end if
 
     !
     ! finish up
