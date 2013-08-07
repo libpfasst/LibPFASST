@@ -23,7 +23,9 @@ module pfasst
   use pf_mod_logger
   use pf_mod_parallel
   use pf_mod_pfasst
+#ifndef NOMPI
   use pf_mod_comm_mpi
+#endif
   use pf_mod_comm_pthreads
   use pf_mod_comm_fake
   use pf_mod_implicit

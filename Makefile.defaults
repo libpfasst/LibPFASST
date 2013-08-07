@@ -8,6 +8,65 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jbuild
+FFLAGS = -Ibuild -Jbuild -cpp
 
 include $(wildcard $(LIBPFASST)/*.defs)
+
+VPATHS = $(LIBPFASST)/src
+
+ifdef NOMPI
+  FSRC = src/pfasst.f90 \
+         src/pf_cycle.f90 \
+         src/pf_dtype.f90 \
+         src/pf_explicit.f90 \
+         src/pf_fakecomm.f90 \
+         src/pf_fake.f90 \
+         src/pf_hooks.f90 \
+         src/pf_imex.f90 \
+         src/pf_implicit.f90 \
+         src/pf_interpolate.f90 \
+         src/pf_logger.f90 \
+         src/pf_ndarray.f90 \
+         src/pf_parallel.f90 \
+         src/pf_pfasst.f90 \
+         src/pf_pthreads.f90 \
+         src/pf_quadrature.f90 \
+         src/pf_restrict.f90 \
+         src/pf_timer.f90 \
+         src/pf_utils.f90 \
+         src/pf_version.f90 \
+         src/sdc_poly.f90 \
+         src/sdc_quadrature.f90
+  CSRC = src/pf_cpthreads.c
+else
+  FSRC = src/pfasst.f90 \
+         src/pf_cycle.f90 \
+         src/pf_dtype.f90 \
+         src/pf_explicit.f90 \
+         src/pf_fakecomm.f90 \
+         src/pf_fake.f90 \
+         src/pf_hooks.f90 \
+         src/pf_imex.f90 \
+         src/pf_implicit.f90 \
+         src/pf_interpolate.f90 \
+         src/pf_logger.f90 \
+         src/pf_mpi.f90 \
+         src/pf_ndarray.f90 \
+         src/pf_parallel.f90 \
+         src/pf_pfasst.f90 \
+         src/pf_pthreads.f90 \
+         src/pf_quadrature.f90 \
+         src/pf_restrict.f90 \
+         src/pf_timer.f90 \
+         src/pf_utils.f90 \
+         src/pf_version.f90 \
+         src/sdc_poly.f90 \
+         src/sdc_quadrature.f90
+  CSRC = src/pf_cpthreads.c
+endif
+
+OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+
+ifdef NOMPI
+  FFLAGS += -DNOMPI
+endif

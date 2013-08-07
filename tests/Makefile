@@ -7,24 +7,23 @@
 LIBPFASST ?= ..
 FFTW3     ?= ../fftw3
 
-all: t1.exe
-
 include $(LIBPFASST)/Makefile.defaults
-
-FSRC = $(wildcard $(LIBPFASST)/src/*.f90)
-CSRC = $(wildcard $(LIBPFASST)/src/*.c)
-OBJ  = $(addprefix build/, $(notdir $(FSRC:.f90=.o) $(CSRC:.c=.o)))
 
 FFLAGS  += -I$(FFTW3)/include 
 LDFLAGS += -L$(FFTW3)/lib -lfftw3
 
 VPATHS = $(LIBPFASST)/src src
 
+all: t1.exe t2.exe t3.exe
+
 t1.exe: src/spec_ad.f90 src/t1.f90 $(OBJ)
 	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 
+t2.exe: src/spec_ad.f90 src/t2.f90 $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 
-
+t3.exe: src/spec_ad.f90 src/t3.f90 $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 
 
 include $(LIBPFASST)/Makefile.rules

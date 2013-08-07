@@ -11,14 +11,11 @@ EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 
-FSRC = $(wildcard src/*.f90 $(LIBPFASST)/src/*.f90)
-CSRC = $(wildcard src/*.c $(LIBPFASST)/src/*.c)
-OBJ  = $(addprefix build/, $(notdir $(FSRC:.f90=.o) $(CSRC:.c=.o)))
+VPATHS += src
+FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90
 
 FFLAGS  += -I$(FFTW3)/include 
 LDFLAGS += -L$(FFTW3)/lib -lfftw3
-
-VPATHS = $(LIBPFASST)/src src
 
 all: $(EXE)
 
