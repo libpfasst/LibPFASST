@@ -13,9 +13,10 @@ for prob, nlevs in product([ 'heat', 'burgers', 'wave', 'ks' ],
     speedups[prob, nlevs] = []
 
     for nprocs in [ 4, 8, 16, 32, 64 ]:
-        serial   = 'speed/%s_p01l1' % prob
-        parallel = 'speed/%s_p%02dl%d' % (prob, nprocs, nlevs)
-        speedups[prob, nlevs].append(speedup(serial, parallel))
+        serial   = 'speed.out/%s_p01l1' % prob
+        parallel = 'speed.out/%s_p%02dl%d' % (prob, nprocs, nlevs)
+        print serial, parallel
+        speedups[prob, nlevs].append(speedup(serial, parallel, True))
 
 with open('speedups.pkl', 'w') as f:
     dump(speedups, f)

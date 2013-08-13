@@ -47,7 +47,7 @@ def speed():
   """Speedup/timing tests."""
 
   setenv()
-  jobs     = JobQueue(rwd=env.scratch + 'speed', queue='regular')
+  jobs     = JobQueue(rwd=env.scratch + 'speed.out', queue='regular')
   problems = [ 'heat', 'burgers', 'wave', 'ks' ]
 
   #
@@ -97,7 +97,7 @@ def speed():
       niters=niters[prob][nprocs], nu=0.005, sigma=0.004,
       )
 
-    jobs.add(job)
+    # jobs.add(job)
 
   jobs.submit_all()
 

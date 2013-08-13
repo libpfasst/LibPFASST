@@ -8,16 +8,13 @@ xz*
 *.exe
 *.defs
 fort.*
+gmon.out
+*.out
 
 *.pyc
 *.npy
-fort.*
-gmon.out
 
 build/
 staging/
 src/pf_version.f90
 
-fort.*
-*.npy
-gmon.out
