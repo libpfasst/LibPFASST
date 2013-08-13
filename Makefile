@@ -25,15 +25,15 @@ include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
 
-# XXX: all of the examples should be buildable and runnable too
-tests:
-	@echo
-	@echo '===> building tests'
-	cd tests && make
+EXTESTS = examples/mpi-advection examples/mpi-ndarray
 
+tests: $(EXTESTS)
 	@echo
 	@echo '===> running nosetests'
 	@$(NOSE)
 
+$(EXTESTS):
+	@echo "===>" $@
+	$(MAKE) -C $@
 
-.PHONY: clean tests
+.PHONY: clean tests $(EXTESTS)
