@@ -4,20 +4,27 @@
 # well as the application specific code in the src directory.
 #
 
-LIBPFASST ?= ../..
-FFTW3     ?= ../../fftw3
-
-EXE = main.exe
+LIBPFASST ?= ..
+FFTW3     ?= ../fftw3
 
 include $(LIBPFASST)/Makefile.defaults
-
-VPATHS += src
-FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90
 
 FFLAGS  += -I$(FFTW3)/include 
 LDFLAGS += -L$(FFTW3)/lib -lfftw3
 
-all: $(EXE)
+VPATHS = $(LIBPFASST)/src src
+
+all: t1.exe t2.exe t3.exe
+
+t1.exe: src/spec_ad.f90 src/t1.f90 $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+
+t2.exe: src/spec_ad.f90 src/t2.f90 $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+
+t3.exe: src/spec_ad.f90 src/t3.f90 $(OBJ)
+	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+
 
 include $(LIBPFASST)/Makefile.rules
 
@@ -28,3 +35,4 @@ include $(LIBPFASST)/Makefile.rules
 build/feval.o: build/pfasst.o
 build/hooks.o: build/pfasst.o
 build/main.o: build/feval.o build/hooks.o build/transfer.o
+
