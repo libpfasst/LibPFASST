@@ -39,12 +39,15 @@ contains
   !
   ! No time communication is performed during the predictor.
   !
+  ! The iteration count is reset to 0, and the status is reset to
+  ! ITERATING.
+  !
   subroutine pf_predictor(pf, t0, dt)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
     type(pf_level_t), pointer :: F, G
-    integer :: j, k, l
+    integer :: c, j, k, l
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
@@ -59,6 +62,7 @@ contains
        call save(G)
        call G%encap%pack(G%q0, G%Q(1))
     end do
+
 
     if (pf%comm%nproc > 1) then
 
@@ -80,7 +84,6 @@ contains
        end do
 
        ! do start cycle stages
-       pf%state%iter  = -1
        if (associated(pf%cycles%start)) then
           do c = 1, size(pf%cycles%start)
              pf%state%cycle = c
@@ -92,6 +95,9 @@ contains
 
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, 1, PF_POST_PREDICTOR)
+
+    pf%state%iter   = 0
+    pf%state%status = PF_STATUS_ITERATING
 
   end subroutine pf_predictor
 
@@ -193,280 +199,280 @@ contains
   end subroutine pf_do_stage
 
 
-  subroutine pf_do_window_block(pf, dt, tend, nsteps)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, tend
-    integer,           intent(in), optional :: nsteps
-
-    type(pf_level_t), pointer :: F
-    real(pfdp) :: t0, res1, res0
-    integer    :: nblock, b, c, k, l
-
-
-    nblock = pf%state%nsteps/pf%comm%nproc
-    res0   = 1.d0
-
-    !
-    ! time "block" loop
-    !
-
-    pf%comm%statreq = -66
-
-    do b = 1, nblock
-       pf%state%block  = b
-       pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
-       pf%state%t0     = pf%state%step * dt
-       pf%state%iter   = -1
-       pf%state%cycle  = -1
-       pf%state%status  = PF_STATUS_ITERATING
-       pf%state%pstatus = PF_STATUS_ITERATING
-
-       t0 = pf%state%t0
-
-       call call_hooks(pf, -1, PF_PRE_BLOCK)
-       call start_timer(pf, TSTEP)
-
-       call pf_predictor(pf, t0, dt)
-
-       ! do start cycle stages
-       if (associated(pf%cycles%start)) then
-          do c = 1, size(pf%cycles%start)
-             pf%state%cycle = c
-             call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-          end do
-       end if
-
-       ! pfasst iterations
-       do k = 1, pf%niters
-          if (.not. (pf%state%status == PF_STATUS_CONVERGED)) then
-             pf%state%iter  = k
-          end if
-          pf%state%cycle = 1
-
-          call start_timer(pf, TITERATION)
-
-          do l = 1, pf%nlevels
-             F => pf%levels(l)
-             call call_hooks(pf, F%level, PF_PRE_ITERATION)
-          end do
-
-          ! send/receive status
-          if (pf%abs_res_tol > 0.d0 .or. pf%rel_res_tol > 0.d0) then
-             F => pf%levels(pf%nlevels)
-
-             res1 = F%residual
-
-             if ((k > 1) .and. ( (abs(1.0_pfdp - res1/res0) < pf%rel_res_tol) &
-                            .or. (res1 < pf%abs_res_tol) &
-                            .or. (abs(res0-res1) < pf%abs_res_tol) )) then
-                pf%state%status = PF_STATUS_CONVERGED
-             else
-                pf%state%status = PF_STATUS_ITERATING
-             end if
-
-             res0 = res1
-
-             call pf%comm%recv_status(pf, 8000+k)
-
-             ! if the previous processor hasn't converged yet, keep
-             ! iterating
-             if (pf%rank /= pf%state%first) then
-                if (pf%state%pstatus /= PF_STATUS_CONVERGED) &
-                   pf%state%status = PF_STATUS_ITERATING
-             end if
-
-             call pf%comm%send_status(pf, 8000+k)
-          end if
-
-          ! if (pf%state%status  == PF_STATUS_CONVERGED .and. &
-          !     pf%state%pstatus == PF_STATUS_CONVERGED) then
-          !    exit
-          ! else if (pf%state%status == PF_STATUS_CONVERGED) then
-          if (pf%state%status == PF_STATUS_CONVERGED) then
-             cycle
-          end if
-
-          ! post receive requests
-          do l = 2, pf%nlevels
-             F => pf%levels(l)
-             call pf%comm%post(pf, F, F%level*10000+k)
-          end do
-
-          ! do pfasst cycle stages
-          do c = 1, size(pf%cycles%pfasst)
-             pf%state%cycle = pf%state%cycle + 1
-             call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
-          end do
+  ! subroutine pf_do_window_block(pf, dt, tend, nsteps)
+  !   type(pf_pfasst_t), intent(inout) :: pf
+  !   real(pfdp),        intent(in)    :: dt, tend
+  !   integer,           intent(in), optional :: nsteps
+
+  !   type(pf_level_t), pointer :: F
+  !   real(pfdp) :: t0, res1, res0
+  !   integer    :: nblock, b, c, k, l
+
+
+  !   nblock = pf%state%nsteps/pf%comm%nproc
+  !   res0   = 1.d0
+
+  !   !
+  !   ! time "block" loop
+  !   !
+
+  !   pf%comm%statreq = -66
+
+  !   do b = 1, nblock
+  !      pf%state%block  = b
+  !      pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
+  !      pf%state%t0     = pf%state%step * dt
+  !      pf%state%iter   = -1
+  !      pf%state%cycle  = -1
+  !      pf%state%status  = PF_STATUS_ITERATING
+  !      pf%state%pstatus = PF_STATUS_ITERATING
+
+  !      t0 = pf%state%t0
+
+  !      call call_hooks(pf, -1, PF_PRE_BLOCK)
+  !      call start_timer(pf, TSTEP)
+
+  !      call pf_predictor(pf, t0, dt)
+
+  !      ! do start cycle stages
+  !      if (associated(pf%cycles%start)) then
+  !         do c = 1, size(pf%cycles%start)
+  !            pf%state%cycle = c
+  !            call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
+  !         end do
+  !      end if
+
+  !      ! pfasst iterations
+  !      do k = 1, pf%niters
+  !         if (.not. (pf%state%status == PF_STATUS_CONVERGED)) then
+  !            pf%state%iter  = k
+  !         end if
+  !         pf%state%cycle = 1
+
+  !         call start_timer(pf, TITERATION)
+
+  !         do l = 1, pf%nlevels
+  !            F => pf%levels(l)
+  !            call call_hooks(pf, F%level, PF_PRE_ITERATION)
+  !         end do
+
+  !         ! send/receive status
+  !         if (pf%abs_res_tol > 0.d0 .or. pf%rel_res_tol > 0.d0) then
+  !            F => pf%levels(pf%nlevels)
+
+  !            res1 = F%residual
+
+  !            if ((k > 1) .and. ( (abs(1.0_pfdp - res1/res0) < pf%rel_res_tol) &
+  !                           .or. (res1 < pf%abs_res_tol) &
+  !                           .or. (abs(res0-res1) < pf%abs_res_tol) )) then
+  !               pf%state%status = PF_STATUS_CONVERGED
+  !            else
+  !               pf%state%status = PF_STATUS_ITERATING
+  !            end if
+
+  !            res0 = res1
+
+  !            call pf%comm%recv_status(pf, 8000+k)
+
+  !            ! if the previous processor hasn't converged yet, keep
+  !            ! iterating
+  !            if (pf%rank /= pf%state%first) then
+  !               if (pf%state%pstatus /= PF_STATUS_CONVERGED) &
+  !                  pf%state%status = PF_STATUS_ITERATING
+  !            end if
+
+  !            call pf%comm%send_status(pf, 8000+k)
+  !         end if
+
+  !         ! if (pf%state%status  == PF_STATUS_CONVERGED .and. &
+  !         !     pf%state%pstatus == PF_STATUS_CONVERGED) then
+  !         !    exit
+  !         ! else if (pf%state%status == PF_STATUS_CONVERGED) then
+  !         if (pf%state%status == PF_STATUS_CONVERGED) then
+  !            cycle
+  !         end if
+
+  !         ! post receive requests
+  !         do l = 2, pf%nlevels
+  !            F => pf%levels(l)
+  !            call pf%comm%post(pf, F, F%level*10000+k)
+  !         end do
+
+  !         ! do pfasst cycle stages
+  !         do c = 1, size(pf%cycles%pfasst)
+  !            pf%state%cycle = pf%state%cycle + 1
+  !            call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+  !         end do
 
-          call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
-          call end_timer(pf, TITERATION)
+  !         call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
+  !         call end_timer(pf, TITERATION)
 
-       end do ! end pfasst iteration loop
+  !      end do ! end pfasst iteration loop
 
-       ! do end cycle stages
-       if (associated(pf%cycles%end)) then
-          do c = 1, size(pf%cycles%end)
-             pf%state%cycle = c
-             call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-          end do
-       end if
+  !      ! do end cycle stages
+  !      if (associated(pf%cycles%end)) then
+  !         do c = 1, size(pf%cycles%end)
+  !            pf%state%cycle = c
+  !            call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+  !         end do
+  !      end if
 
-       call call_hooks(pf, -1, PF_POST_STEP)
-       call end_timer(pf, TSTEP)
+  !      call call_hooks(pf, -1, PF_POST_STEP)
+  !      call end_timer(pf, TSTEP)
 
-       ! broadcast fine qend (non-pipelined time loop)
-       if (nblock > 1) then
-          F => pf%levels(pf%nlevels)
+  !      ! broadcast fine qend (non-pipelined time loop)
+  !      if (nblock > 1) then
+  !         F => pf%levels(pf%nlevels)
 
-          call pf%comm%wait(pf, pf%nlevels)
-          call F%encap%pack(F%send, F%qend)
-          call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
-          F%q0 = F%send
-       end if
+  !         call pf%comm%wait(pf, pf%nlevels)
+  !         call F%encap%pack(F%send, F%qend)
+  !         call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
+  !         F%q0 = F%send
+  !      end if
 
-       pf%comm%statreq = -66
+  !      pf%comm%statreq = -66
 
-    end do ! end block loop
-  end subroutine pf_do_window_block
+  !   end do ! end block loop
+  ! end subroutine pf_do_window_block
 
-  subroutine pf_do_window_ring(pf, dt, tend, nsteps)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, tend
-    integer,           intent(in), optional :: nsteps
+  ! subroutine pf_do_window_ring(pf, dt, tend, nsteps)
+  !   type(pf_pfasst_t), intent(inout) :: pf
+  !   real(pfdp),        intent(in)    :: dt, tend
+  !   integer,           intent(in), optional :: nsteps
 
-    type(pf_level_t), pointer :: F
-    real(pfdp) :: t0, res1, res0
-    integer    :: c, k, l
-    integer    :: steps_to_last
+  !   type(pf_level_t), pointer :: F
+  !   real(pfdp) :: t0, res1, res0
+  !   integer    :: c, k, l
+  !   integer    :: steps_to_last
 
 
-    pf%comm%statreq = -66
-    pf%state%block  = -66
+  !   pf%comm%statreq = -66
+  !   pf%state%block  = -66
 
-    pf%state%step   = pf%rank
-    pf%state%t0     = pf%state%step * dt
-    pf%state%iter   = -1
-    pf%state%cycle  = -1
+  !   pf%state%step   = pf%rank
+  !   pf%state%t0     = pf%state%step * dt
+  !   pf%state%iter   = -1
+  !   pf%state%cycle  = -1
 
-    pf%state%status  = PF_STATUS_ITERATING
-    pf%state%pstatus = PF_STATUS_ITERATING
+  !   pf%state%status  = PF_STATUS_ITERATING
+  !   pf%state%pstatus = PF_STATUS_ITERATING
 
-    t0 = pf%state%t0
+  !   t0 = pf%state%t0
 
 
-    ! do start cycle stages
-    if (associated(pf%cycles%start)) then
-       do c = 1, size(pf%cycles%start)
-          pf%state%cycle = c
-          call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-       end do
-    end if
+  !   ! do start cycle stages
+  !   if (associated(pf%cycles%start)) then
+  !      do c = 1, size(pf%cycles%start)
+  !         pf%state%cycle = c
+  !         call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
+  !      end do
+  !   end if
 
-    pf%state%nmoved = 0
-    pf%state%status = PF_STATUS_PREDICTOR
+  !   pf%state%nmoved = 0
+  !   pf%state%status = PF_STATUS_PREDICTOR
 
-    ! pfasst iterations
-    do k = 1, 9999
-       pf%state%iter   = k
-       pf%state%cycle  = 1
+  !   ! pfasst iterations
+  !   do k = 1, 9999
+  !      pf%state%iter   = k
+  !      pf%state%cycle  = 1
 
-       call start_timer(pf, TITERATION)
+  !      call start_timer(pf, TITERATION)
 
-       do l = 1, pf%nlevels
-          F => pf%levels(l)
-          call call_hooks(pf, F%level, PF_PRE_ITERATION)
-       end do
+  !      do l = 1, pf%nlevels
+  !         F => pf%levels(l)
+  !         call call_hooks(pf, F%level, PF_PRE_ITERATION)
+  !      end do
 
-       ! check convergence
-       res1 = pf%levels(pf%nlevels)%residual
-       if (pf%state%status == PF_STATUS_ITERATING .and. res0 > 0.0d0) then
-          if ( (abs(1.0_pfdp - abs(res1/res0)) < pf%rel_res_tol) .or. &
-               (abs(res1)                      < pf%abs_res_tol) ) then
+  !      ! check convergence
+  !      res1 = pf%levels(pf%nlevels)%residual
+  !      if (pf%state%status == PF_STATUS_ITERATING .and. res0 > 0.0d0) then
+  !         if ( (abs(1.0_pfdp - abs(res1/res0)) < pf%rel_res_tol) .or. &
+  !              (abs(res1)                      < pf%abs_res_tol) ) then
 
-             pf%state%status = PF_STATUS_CONVERGED
+  !            pf%state%status = PF_STATUS_CONVERGED
 
-          end if
-       end if
-       res0 = res1
+  !         end if
+  !      end if
+  !      res0 = res1
 
-       if (pf%state%status /= PF_STATUS_CONVERGED) &
-         pf%state%status = PF_STATUS_ITERATING
+  !      if (pf%state%status /= PF_STATUS_CONVERGED) &
+  !        pf%state%status = PF_STATUS_ITERATING
 
-       pf%state%nmoved = 0
-       call pf%comm%recv_status(pf, 8000+k)
+  !      pf%state%nmoved = 0
+  !      call pf%comm%recv_status(pf, 8000+k)
 
-       ! keep iterating if the previous processor hasn't converged yet
-       if (pf%rank /= pf%state%first) then
-          if (pf%state%pstatus == PF_STATUS_ITERATING) &
-               pf%state%status = PF_STATUS_ITERATING
-       end if
+  !      ! keep iterating if the previous processor hasn't converged yet
+  !      if (pf%rank /= pf%state%first) then
+  !         if (pf%state%pstatus == PF_STATUS_ITERATING) &
+  !              pf%state%status = PF_STATUS_ITERATING
+  !      end if
 
-       call pf%comm%send_status(pf, 8000+k)
+  !      call pf%comm%send_status(pf, 8000+k)
 
-       if (pf%state%status == PF_STATUS_CONVERGED) then
+  !      if (pf%state%status == PF_STATUS_CONVERGED) then
 
-          if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
-             exit
-          end if
+  !         if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
+  !            exit
+  !         end if
 
-          if (pf%rank == pf%state%last) then
-             call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+  !         if (pf%rank == pf%state%last) then
+  !            call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
 
-             pf%state%status = PF_STATUS_ITERATING
-          else
-             call call_hooks(pf, -1, PF_POST_STEP)
-             call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
+  !            pf%state%status = PF_STATUS_ITERATING
+  !         else
+  !            call call_hooks(pf, -1, PF_POST_STEP)
+  !            call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
 
-             pf%state%status = PF_STATUS_ITERATING
-             pf%state%step   = pf%state%step + pf%comm%nproc
-             res0 = -1
-          end if
+  !            pf%state%status = PF_STATUS_ITERATING
+  !            pf%state%step   = pf%state%step + pf%comm%nproc
+  !            res0 = -1
+  !         end if
 
-       else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
+  !      else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
 
-          call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+  !         call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
 
-       end if
+  !      end if
 
-       pf%state%t0     = pf%state%step * dt
-       pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
-       pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
+  !      pf%state%t0     = pf%state%step * dt
+  !      pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
+  !      pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
 
-       if (pf%state%step >= pf%state%nsteps) exit
+  !      if (pf%state%step >= pf%state%nsteps) exit
 
-       ! roll back "last" processor
-       steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-       do while (pf%state%step + steps_to_last >= pf%state%nsteps)
-          pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
-          steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-       end do
+  !      ! roll back "last" processor
+  !      steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
+  !      do while (pf%state%step + steps_to_last >= pf%state%nsteps)
+  !         pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
+  !         steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
+  !      end do
 
-       ! post receive requests
-       do l = 2, pf%nlevels
-          F => pf%levels(l)
-          call pf%comm%post(pf, F, F%level*10000+k)
-       end do
+  !      ! post receive requests
+  !      do l = 2, pf%nlevels
+  !         F => pf%levels(l)
+  !         call pf%comm%post(pf, F, F%level*10000+k)
+  !      end do
 
-       ! do pfasst cycle stages
-       do c = 1, size(pf%cycles%pfasst)
-          pf%state%cycle = pf%state%cycle + 1
-          call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
-       end do
+  !      ! do pfasst cycle stages
+  !      do c = 1, size(pf%cycles%pfasst)
+  !         pf%state%cycle = pf%state%cycle + 1
+  !         call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+  !      end do
 
-       call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
-       call end_timer(pf, TITERATION)
+  !      call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
+  !      call end_timer(pf, TITERATION)
 
-    end do ! end pfasst iteration loop
+  !   end do ! end pfasst iteration loop
 
-    ! do end cycle stages
-    if (associated(pf%cycles%end)) then
-       do c = 1, size(pf%cycles%end)
-          pf%state%cycle = c
-          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-       end do
-    end if
+  !   ! do end cycle stages
+  !   if (associated(pf%cycles%end)) then
+  !      do c = 1, size(pf%cycles%end)
+  !         pf%state%cycle = c
+  !         call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+  !      end do
+  !   end if
 
-  end subroutine pf_do_window_ring
+  ! end subroutine pf_do_window_ring
 
 
   !
@@ -479,13 +485,11 @@ contains
     type(c_ptr),       intent(in), optional :: qend
     integer,           intent(in), optional :: nsteps
 
-    type(pf_level_t), pointer :: F
+    type(pf_level_t), pointer :: F, G
+    integer                   :: j, k, l, c, steps_to_last
+    real(pfdp)                :: t0, res0, res1
     
     call start_timer(pf, TTOTAL)
-
-    !
-    ! initialize
-    !
 
     pf%state%dt      = dt
     pf%state%step    = pf%rank
@@ -507,45 +511,161 @@ contains
        pf%state%nsteps = ceiling(1.0*tend/dt)
     end if
 
-    !
-    ! iterate
-    !
+    do k = 1, 666666666
 
-    do k = 1, 2**31
+       !
+       ! in block mode, jump to next block if appropriate
+       !
 
-       if (pf%state%status == PF_STATUS_PREDICTOR) then
-          call pf_predictor(pf, t0, dt)
-          pf%state%status = PF_STATUS_ITERATING
+       if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
+
+          F => pf%levels(pf%nlevels)
+          call pf%comm%wait(pf, pf%nlevels)
+          call F%encap%pack(F%send, F%qend)
+          call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
+          F%q0 = F%send
+
+          pf%state%step   = pf%state%step + pf%comm%nproc
+          pf%state%status = PF_STATUS_PREDICTOR
+
        end if
+
+       !
+       ! do predictor if requested
+       !
+
+       if (pf%state%status == PF_STATUS_PREDICTOR) &
+            call pf_predictor(pf, t0, dt)
        
+       !
+       ! perform fine sweeps
+       !
+
+       pf%state%iter   = pf%state%iter + 1
+       pf%state%cycle  = 1
+
        call start_timer(pf, TITERATION)
-       do l = 1, pf%nlevels
-          F => pf%levels(l)
-          call call_hooks(pf, F%level, PF_PRE_ITERATION)
+       call call_hooks(pf, -1, PF_PRE_ITERATION)
+
+       if (pf%state%status /= PF_STATUS_CONVERGED) then
+
+          F => pf%levels(pf%nlevels)
+          call call_hooks(pf, F%level, PF_PRE_SWEEP)
+          do j = 1, F%nsweeps
+             call F%sweeper%sweep(pf, F, t0, dt)
+          end do
+          call call_hooks(pf, F%level, PF_POST_SWEEP)
+          call pf_residual(pf, F, dt)
+
+          call pf%comm%send(pf, F, F%level*10000+k, .false.)
+
+          if (pf%nlevels > 1) then
+             G => pf%levels(pf%nlevels-1)
+             call restrict_time_space_fas(pf, t0, dt, F, G)
+             call save(G)
+          end if
+
+       end if
+
+       !
+       ! check convergence
+       !
+
+       res1 = pf%levels(pf%nlevels)%residual
+       if (pf%state%status == PF_STATUS_ITERATING .and. res0 > 0.0d0) then
+          if ( (abs(1.0_pfdp - abs(res1/res0)) < pf%rel_res_tol) .or. &
+               (abs(res1)                      < pf%abs_res_tol) ) then
+
+             pf%state%status = PF_STATUS_CONVERGED
+
+          end if
+       end if
+       res0 = res1
+
+       call pf%comm%recv_status(pf, 8000+k)
+       if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
+            pf%state%status = PF_STATUS_ITERATING
+       call pf%comm%send_status(pf, 8000+k)
+
+       if (pf%window == PF_WINDOW_BLOCK) then
+
+          ! XXX: this ain't so pretty, perhaps we should use the
+          ! 'nmoved' thinger to break this cycle if everyone is
+          ! done...
+
+          if (pf%state%status == PF_STATUS_CONVERGED) cycle
+
+       else
+
+          if (pf%state%status == PF_STATUS_CONVERGED) then
+
+             if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
+                exit
+             end if
+
+             if (pf%rank == pf%state%last) then
+                call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+
+                pf%state%status = PF_STATUS_ITERATING
+             else
+                call call_hooks(pf, -1, PF_POST_STEP)
+                call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
+
+                pf%state%status = PF_STATUS_ITERATING
+                pf%state%step   = pf%state%step + pf%comm%nproc
+                res0 = -1
+             end if
+
+          else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
+
+             call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+
+          end if
+
+       end if
+
+       pf%state%t0     = pf%state%step * dt
+       pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
+       pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
+
+       if (pf%state%step >= pf%state%nsteps) exit
+
+       ! roll back "last" processor
+       steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
+       do while (pf%state%step + steps_to_last >= pf%state%nsteps)
+          pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
+          steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
        end do
 
+       !
+       ! continuing with iteration, post receive requests
+       !
 
+       do l = 2, pf%nlevels
+          F => pf%levels(l)
+          call pf%comm%post(pf, F, F%level*10000+k)
+       end do
 
+       !
+       ! do pfasst cycle stages
+       !
+
+       do c = 1, size(pf%cycles%pfasst)
+          pf%state%cycle = pf%state%cycle + 1
+          call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+       end do
        
+       call call_hooks(pf, -1, PF_POST_ITERATION)
+       call end_timer(pf, TITERATION)
 
     end do
 
-
-    if (pf%comm%nproc == 1) then
-
-       call pf_do_window_block(pf, dt, tend, nsteps)
-
-    else
-       
-       select case (pf%window)
-       case (PF_WINDOW_BLOCK)
-          call pf_do_window_block(pf, dt, tend, nsteps)
-       case (PF_WINDOW_RING)
-          call pf_do_window_ring(pf, dt, tend, nsteps)
-       case default
-          stop "ERROR: Invalid window type."
-       end select
-
+    ! do end cycle stages
+    if (associated(pf%cycles%end)) then
+       do c = 1, size(pf%cycles%end)
+          pf%state%cycle = c
+          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+       end do
     end if
 
     !

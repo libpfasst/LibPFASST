@@ -151,6 +151,8 @@ contains
     integer    :: ierror, stat(MPI_STATUS_SIZE)
     integer(4) :: message(8)
 
+    pf%state%nmoved = 0
+
     if (pf%rank /= pf%state%first) then
 
        call mpi_recv(message, 8, MPI_INTEGER4, &
@@ -240,7 +242,7 @@ contains
        message(7) = pf%state%status
        message(8) = pf%state%nmoved
 
-       if (pf%state%status == PF_STATUS_CONVERGED) then
+       if (pf%window == PF_WINDOW_RING .and. pf%state%status == PF_STATUS_CONVERGED) then
           message(8) = message(8) + 1
        end if
 

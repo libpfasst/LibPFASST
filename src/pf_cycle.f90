@@ -68,12 +68,12 @@ contains
 
        end if
 
-       ! pfasst: v-cycle from finest, but end in middle
+       ! pfasst: v-cycle from middle
        allocate(pf%cycles%pfasst(2*pf%nlevels-1))
        stages => pf%cycles%pfasst
 
        c = 1
-       do l = pf%nlevels, 2, -1
+       do l = pf%nlevels-1, 2, -1
           stages(c)%type = SDC_CYCLE_DOWN
           stages(c)%F    = l
           stages(c)%G    = l-1
@@ -93,6 +93,7 @@ contains
        end do
 
        ! end: sweep on finest
+       ! XXX: get rid of this crap...
        allocate(pf%cycles%end(1))
        stages => pf%cycles%end
 
