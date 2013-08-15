@@ -267,12 +267,12 @@ contains
     message = 666
     message(8) = pf%state%nmoved
 
-    do r = 1, pf%state%nmoved
+    do r = 1, min(pf%state%nmoved, pf%comm%nproc-1)
        call mpi_isend(message, 8, MPI_INTEGER4, &
             modulo(pf%rank-r, pf%comm%nproc), tag, pf%comm%comm, sendreq(r), ierror)
     end do
 
-    do r = 1, pf%state%nmoved
+    do r = 1, min(pf%state%nmoved, pf%comm%nproc-1)
        call mpi_wait(sendreq(r), stat, ierror)
     end do
 

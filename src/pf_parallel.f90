@@ -519,14 +519,26 @@ contains
 
        if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
 
+          pf%state%step   = pf%state%step + pf%comm%nproc
+          pf%state%status = PF_STATUS_PREDICTOR
+
+          if (pf%state%step >= pf%state%nsteps) exit
+
           F => pf%levels(pf%nlevels)
           call pf%comm%wait(pf, pf%nlevels)
           call F%encap%pack(F%send, F%qend)
           call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
 
-          pf%state%step   = pf%state%step + pf%comm%nproc
-          pf%state%status = PF_STATUS_PREDICTOR
+       end if
+
+       if (pf%window == PF_WINDOW_RING .and. k > 1 .and. pf%state%status == PF_STATUS_PREDICTOR) then
+
+          F => pf%levels(pf%nlevels)
+          call pf%comm%wait(pf, pf%nlevels)
+          call F%encap%pack(F%send, F%qend)
+          call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
+          F%q0 = F%send
 
        end if
 
@@ -604,23 +616,24 @@ contains
              end if
 
              if (pf%rank == pf%state%last) then
+                pf%state%nmoved = pf%comm%nproc
                 call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
-
-                pf%state%status = PF_STATUS_ITERATING
              else
                 call call_hooks(pf, -1, PF_POST_STEP)
                 call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
-
-                pf%state%status = PF_STATUS_ITERATING
-                pf%state%step   = pf%state%step + pf%comm%nproc
-                res0 = -1
              end if
+
+             pf%state%status = PF_STATUS_ITERATING
+             pf%state%step   = pf%state%step + pf%comm%nproc
+             res0 = -1
 
           else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
 
              call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
 
           end if
+
+          ! print *, k, pf%rank, 'NMOVED', pf%state%nmoved
 
        end if
 
@@ -637,6 +650,11 @@ contains
           steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
        end do
 
+       if (pf%state%nmoved == pf%comm%nproc) then
+          pf%state%status = PF_STATUS_PREDICTOR
+          cycle
+       end if
+          
        !
        ! continuing with iteration, post receive requests
        !
@@ -660,13 +678,13 @@ contains
 
     end do
 
-    ! do end cycle stages
-    if (associated(pf%cycles%end)) then
-       do c = 1, size(pf%cycles%end)
-          pf%state%cycle = c
-          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-       end do
-    end if
+    ! ! do end cycle stages
+    ! if (associated(pf%cycles%end)) then
+    !    do c = 1, size(pf%cycles%end)
+    !       pf%state%cycle = c
+    !       call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+    !    end do
+    ! end if
 
     !
     ! finish up

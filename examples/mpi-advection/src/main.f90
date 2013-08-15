@@ -53,7 +53,7 @@ program main
      select case(arg)
      case ("--ring")
         pf%window      = PF_WINDOW_RING
-        pf%abs_res_tol = 1.d-10
+        pf%abs_res_tol = 5.d-10
      case default
         stop "Usage: main.exe [--ring]"
      end select
@@ -95,7 +95,7 @@ program main
   call ndarray_create_simple(q0, [ nvars(3) ])
   call initial(q0)
 
-  pf%abs_res_tol = 1.d-10
+  ! pf%abs_res_tol = 5.d-10
 
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
