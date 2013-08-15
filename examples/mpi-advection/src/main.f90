@@ -38,7 +38,7 @@ program main
 
   nvars  = [ 32, 64, 128 ]   ! number of dofs on the time/space levels
   nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
-  dt     = 0.1_pfdp
+  dt     = 0.05_pfdp
 
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
@@ -53,7 +53,6 @@ program main
      select case(arg)
      case ("--ring")
         pf%window      = PF_WINDOW_RING
-        pf%abs_res_tol = 5.d-10
      case default
         stop "Usage: main.exe [--ring]"
      end select
@@ -95,11 +94,12 @@ program main
   call ndarray_create_simple(q0, [ nvars(3) ])
   call initial(q0)
 
-  ! pf%abs_res_tol = 5.d-10
+  pf%abs_res_tol = 5.d-12
 
-  call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
-  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-  call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=4*comm%nproc)
+  ! call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+  ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
+  call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=16*comm%nproc)
 
 
   !

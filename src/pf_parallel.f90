@@ -594,6 +594,10 @@ contains
        end if
        res0 = res1
 
+       ! if (pf%state%iter > pf%niters) then
+       !    pf%state%status = PF_STATUS_CONVERGED
+       ! end if
+
        call pf%comm%recv_status(pf, 8000+k)
        if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
             pf%state%status = PF_STATUS_ITERATING
@@ -625,6 +629,7 @@ contains
 
              pf%state%status = PF_STATUS_ITERATING
              pf%state%step   = pf%state%step + pf%comm%nproc
+             pf%state%iter   = 1
              res0 = -1
 
           else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
@@ -632,8 +637,6 @@ contains
              call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
 
           end if
-
-          ! print *, k, pf%rank, 'NMOVED', pf%state%nmoved
 
        end if
 
