@@ -1,26 +1,16 @@
 &prbin
 
-  nlevs = 1
-  problem_type = 'wave'
-  nsteps = 10
-  output = 'test'
+  problem_type = 'ks'
+  nlevs        = 2
+  niters       = 20
+  nsteps       = 20
+  dt           = 1.d0
 
-  ! window_type = "ring"
-  ! abs_tol     = 1.d-10
+  nvars  = 512 1024
+  nnodes = 5 9
 
-  ! nu     = 0.005
+  abs_tol     = 5.d-5
 
-  ! output = 'ref'
-  ! nlevs  = 1
-  ! nnodes = 9
-  ! nvars  = 256
-  ! niters = 16
 
-  ! output = 'ks'
-  ! nlevs  = 2
-  ! nnodes = 3 5
-  ! nvars  = 128 256
-  ! niters = 8
-  ! dt     = 1.0
 
 /

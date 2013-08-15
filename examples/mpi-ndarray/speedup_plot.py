@@ -38,7 +38,8 @@ for prob in problems:
         ax[0].plot(x, y, label='%d levels, theory' % nlevs, **pens[nlevs, 'theory'])
 
     # pl.plot([0, 70], [0, 70], '--k', label='ideal')
-    ax[0].legend(loc='best', fontsize=8)
+    #ax[0].legend(loc='best', fontsize=8)
+    ax[0].legend(loc='best')
     ax[0].set_ylabel('speedup')
     ax[0].set_ylim(0, 24)
 
