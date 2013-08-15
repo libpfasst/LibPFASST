@@ -6,3 +6,5 @@ export MPICH_F90 = /home/memmett/gcc-4.7/bin/gfortran
 
 FFLAGS += -Wall -g -Wno-unused-dummy-argument
 CFLAGS += -Wall -g 
+
+NOSE = /home/memmett/anaconda/bin/nosetests

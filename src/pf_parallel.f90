@@ -205,7 +205,8 @@ contains
        pf%state%t0     = pf%state%step * dt
        pf%state%iter   = -1
        pf%state%cycle  = -1
-       pf%state%status = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
+       pf%state%pstatus = PF_STATUS_ITERATING
 
        t0 = pf%state%t0
 
@@ -264,8 +265,11 @@ contains
              call pf%comm%send_status(pf, 8000+k)
           end if
 
+          ! if (pf%state%status  == PF_STATUS_CONVERGED .and. &
+          !     pf%state%pstatus == PF_STATUS_CONVERGED) then
+          !    exit
+          ! else if (pf%state%status == PF_STATUS_CONVERGED) then
           if (pf%state%status == PF_STATUS_CONVERGED) then
-             ! XXX: this needs to be fixed: spinning here is not good.
              cycle
           end if
 

@@ -18,8 +18,9 @@ program main
   type(pf_sweeper_t), target  :: sweeper
   type(pf_encap_t),   target  :: encap
   type(ndarray),      pointer :: q0
-  integer                     :: err, nvars(nlevs), nnodes(nlevs), l
+  integer                     :: argc, err, nvars(nlevs), nnodes(nlevs), l
   double precision            :: dt
+  character(len=128)          :: arg
 
 
   !
@@ -44,9 +45,20 @@ program main
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
-  pf%niters = 12
   pf%qtype  = SDC_GAUSS_LOBATTO
+  pf%niters = 12
 
+  do argc = 1, command_argument_count()
+     call get_command_argument(argc, arg)
+     select case(arg)
+     case ("--ring")
+        pf%window      = PF_WINDOW_RING
+        pf%abs_res_tol = 1.d-12
+     case default
+        stop "Usage: main.exe [--ring]"
+     end select
+  end do
+  
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if

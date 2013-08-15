@@ -18,19 +18,15 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-echo:
-	@echo $(OBJ)
+EXTESTS = examples/mpi-advection examples/mpi-ndarray
 
-# XXX: all of the examples should be buildable and runnable too
-tests:
-	@echo
-	@echo '===> building tests'
-	cd tests && make
-
+tests: $(EXTESTS)
 	@echo
 	@echo '===> running nosetests'
 	@$(NOSE)
 
+$(EXTESTS):
+	@echo "===>" $@
+	$(MAKE) -C $@
 
-.PHONY: clean tests echo
-
+.PHONY: clean tests $(EXTESTS)
