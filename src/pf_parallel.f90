@@ -33,8 +33,13 @@ contains
   !
   ! Predictor.
   !
+  ! Spreads the fine initial condition (F%q0) to all levels and all
+  ! nodes.  If we're running with more than one processor, performs
+  ! sweeps on the coarse accordingly and execute "start cycles".
+  !
+  ! No time communication is performed during the predictor.
+  !
   subroutine pf_predictor(pf, t0, dt)
-    ! PREDICTOR
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
@@ -57,6 +62,7 @@ contains
 
     if (pf%comm%nproc > 1) then
 
+       ! predictor burn in
        G => pf%levels(1)
        do k = 1, pf%rank + 1
           pf%state%iter = -k
@@ -73,10 +79,17 @@ contains
           call pf_residual(pf, G, dt)
        end do
 
+       ! do start cycle stages
+       pf%state%iter  = -1
+       if (associated(pf%cycles%start)) then
+          do c = 1, size(pf%cycles%start)
+             pf%state%cycle = c
+             call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
+          end do
+       end if
+
     end if
 
-    pf%state%iter  = -1
-    pf%state%cycle = -1
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, 1, PF_POST_PREDICTOR)
 
@@ -340,7 +353,6 @@ contains
 
     t0 = pf%state%t0
 
-    call pf_predictor(pf, t0, dt)
 
     ! do start cycle stages
     if (associated(pf%cycles%start)) then
@@ -475,28 +487,49 @@ contains
     ! initialize
     !
 
-    pf%state%t0   = 0.0d0
-    pf%state%dt   = dt
-    pf%state%iter = -1
-
-    pf%state%first = 0
-    pf%state%last  = pf%comm%nproc - 1
-
-    pf%state%status  = PF_STATUS_ITERATING
-    pf%state%pstatus = PF_STATUS_ITERATING
+    pf%state%dt      = dt
+    pf%state%step    = pf%rank
+    pf%state%t0      = pf%state%step * dt
+    pf%state%iter    = -1
+    pf%state%cycle   = -1
+    pf%state%first   = 0
+    pf%state%last    = pf%comm%nproc - 1
+    pf%state%status  = PF_STATUS_PREDICTOR
+    pf%state%pstatus = PF_STATUS_PREDICTOR
+    pf%comm%statreq  = -66
 
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
 
-    if(present(nsteps)) then
+    if (present(nsteps)) then
        pf%state%nsteps = nsteps
     else
        pf%state%nsteps = ceiling(1.0*tend/dt)
     end if
 
     !
-    ! dispatch
+    ! iterate
     !
+
+    do k = 1, 2**31
+
+       if (pf%state%status == PF_STATUS_PREDICTOR) then
+          call pf_predictor(pf, t0, dt)
+          pf%state%status = PF_STATUS_ITERATING
+       end if
+       
+       call start_timer(pf, TITERATION)
+       do l = 1, pf%nlevels
+          F => pf%levels(l)
+          call call_hooks(pf, F%level, PF_PRE_ITERATION)
+       end do
+
+
+
+       
+
+    end do
+
 
     if (pf%comm%nproc == 1) then
 
