@@ -23,8 +23,6 @@ module pf_mod_dtype
 
   integer, parameter :: pfdp = c_double
 
-  logical, parameter :: do_ring = .false.
-
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
   real(pfdp), parameter :: TWO   = 2.0_pfdp
@@ -62,19 +60,17 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
-  ! state type
-  type :: pf_state_t
-     real(pfdp) :: t0, dt
-     integer    :: nsteps
-     integer    :: block, cycle, step, iter, level, hook
-     integer    :: status       ! status (iterating, converged etc)
-     integer    :: pstatus      ! previous rank's status
-     integer    :: nmoved       ! how many processors behind me have moved
-     integer    :: first        ! rank of first processor in time block
-     integer    :: last         ! rank of last processor in time block
+  type, bind(c) :: pf_state_t
+     real(c_double) :: t0, dt
+     integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
+     integer(c_int) :: status       ! status (iterating, converged etc)
+     integer(c_int) :: pstatus      ! previous rank's status
+     integer(c_int) :: nmoved       ! how many processors behind me have moved
+     integer(c_int) :: first        ! rank of first processor in time block
+     integer(c_int) :: last         ! rank of last processor in time block
+     real(c_double) :: res
   end type pf_state_t
 
-  ! cycle stage type
   type :: pf_stage_t
      integer :: type, F, G
   end type pf_stage_t
@@ -83,13 +79,10 @@ module pf_mod_dtype
      type(pf_stage_t), pointer :: start(:), pfasst(:), end(:)
   end type pf_cycle_t
 
-  ! hook type
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-
-  ! sweeper type
   type :: pf_sweeper_t
      type(c_ptr) :: ctx
      integer     :: npieces
@@ -99,8 +92,6 @@ module pf_mod_dtype
      procedure(pf_integrate_p),  pointer, nopass :: integrate
   end type pf_sweeper_t
 
-
-  ! encap type
   type :: pf_encap_t
      type(c_ptr) :: ctx
      procedure(pf_encap_create_p),  pointer, nopass :: create
@@ -113,8 +104,6 @@ module pf_mod_dtype
      procedure(pf_encap_axpy_p),    pointer, nopass :: axpy
   end type pf_encap_t
 
-
-  ! level type
   type :: pf_level_t
      integer     :: nvars = -1          ! number of variables (dofs)
      integer     :: nnodes = -1         ! number of sdc nodes
@@ -160,8 +149,6 @@ module pf_mod_dtype
      logical :: allocated = .false.
   end type pf_level_t
 
-
-  ! pfasst communicator
   type :: pf_comm_t
      integer :: nproc = -1              ! total number of processors
 
@@ -187,8 +174,6 @@ module pf_mod_dtype
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
-
-  ! pfasst type
   type :: pf_pfasst_t
      integer :: nlevels = -1            ! number of pfasst levels
      integer :: niters  = 5             ! number of iterations
@@ -203,7 +188,7 @@ module pf_mod_dtype
 
      ! pf objects
      type(pf_cycle_t)          :: cycles
-     type(pf_state_t)          :: state
+     type(pf_state_t), pointer :: state
      type(pf_level_t), pointer :: levels(:)
      type(pf_comm_t),  pointer :: comm
 
@@ -215,11 +200,13 @@ module pf_mod_dtype
      logical    :: echo_timings  = .false.
      integer(8) :: timers(100)   = 0
      integer(8) :: runtimes(100) = 0
+
+     ! debug
+     type(c_ptr) :: zmq
   end type pf_pfasst_t
 
-
-  ! hook interface
   interface
+     ! hook interface
      subroutine pf_hook_p(pf, level, state, ctx)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
@@ -228,36 +215,27 @@ module pf_mod_dtype
        type(pf_state_t),  intent(in)    :: state
        type(c_ptr),       intent(in)    :: ctx
      end subroutine pf_hook_p
-  end interface
 
-
-  ! sweeper interfaces
-  interface
+     ! sweeper interfaces
      subroutine pf_sweep_p(pf, F, t0, dt)
        import pf_pfasst_t, pf_level_t, pfdp, c_ptr
        type(pf_pfasst_t), intent(inout) :: pf
        real(pfdp),        intent(in)    :: dt, t0
        type(pf_level_t),  intent(inout) :: F
      end subroutine pf_sweep_p
-  end interface
 
-  interface
      subroutine pf_evaluate_p(F, t, m)
        import pf_level_t, pfdp, c_ptr
        type(pf_level_t), intent(inout) :: F
        real(pfdp),       intent(in)    :: t
        integer,          intent(in)    :: m
      end subroutine pf_evaluate_p
-  end interface
 
-  interface
      subroutine pf_initialize_p(F)
        import pf_level_t
        type(pf_level_t), intent(inout) :: F
      end subroutine pf_initialize_p
-  end interface
 
-  interface
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
        type(pf_level_t),  intent(in)    :: F
@@ -265,21 +243,15 @@ module pf_mod_dtype
        real(pfdp),        intent(in)    :: dt
        type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
-  end interface
 
-
-  ! transfer interfaces
-  interface
+     ! transfer interfaces
      subroutine pf_transfer_p(qF, qG, levelF, ctxF, levelG, ctxG)
        import c_ptr
        type(c_ptr), intent(in), value :: qF, qG, ctxF, ctxG
        integer,     intent(in)        :: levelF, levelG
      end subroutine pf_transfer_p
-  end interface
 
-
-  ! encapsulation interfaces
-  interface
+     ! encapsulation interfaces
      subroutine pf_encap_create_p(sol, level, kind, nvars, shape, lctx, ectx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
@@ -287,77 +259,58 @@ module pf_mod_dtype
        integer,      intent(in)        :: level, nvars, shape(:)
        integer,      intent(in)        :: kind
      end subroutine pf_encap_create_p
-  end interface
 
-  interface
      subroutine pf_encap_destroy_p(sol)
        import c_ptr
        type(c_ptr), intent(in), value :: sol
      end subroutine pf_encap_destroy_p
-  end interface
 
-  interface
      subroutine pf_encap_setval_p(sol, val, flags)
        import c_ptr, pfdp
        type(c_ptr), intent(in), value    :: sol
        real(pfdp),  intent(in)           :: val
        integer,     intent(in), optional :: flags
      end subroutine pf_encap_setval_p
-  end interface
 
-  interface
      subroutine pf_encap_copy_p(dst, src, flags)
        import c_ptr
        type(c_ptr), intent(in), value    :: dst, src
        integer,     intent(in), optional :: flags
      end subroutine pf_encap_copy_p
-  end interface
 
-  interface
      function pf_encap_norm_p(sol) result (norm)
        import c_ptr, pfdp
        type(c_ptr), intent(in), value    :: sol
        real(pfdp) :: norm
      end function pf_encap_norm_p
-  end interface
 
-  interface
      subroutine pf_encap_pack_p(z, q)
        import c_ptr, pfdp
        type(c_ptr), intent(in), value :: q
        real(pfdp),  intent(out)       :: z(:)
      end subroutine pf_encap_pack_p
-  end interface
 
-  interface
      subroutine pf_encap_unpack_p(q, z)
        import c_ptr, pfdp
        type(c_ptr), intent(in), value :: q
        real(pfdp),  intent(in)        :: z(:)
      end subroutine pf_encap_unpack_p
-  end interface
 
-  interface
      subroutine pf_encap_axpy_p(y, a, x, flags)
        import c_ptr, pfdp
        real(pfdp),  intent(in)           :: a
        type(c_ptr), intent(in), value    :: x, y
        integer,     intent(in), optional :: flags
      end subroutine pf_encap_axpy_p
-  end interface
 
-
-  ! communicator interfaces
-  interface
+     ! communicator interfaces
      subroutine pf_post_p(pf, level, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf
        type(pf_level_t),  intent(inout) :: level
        integer,           intent(in)    :: tag
      end subroutine pf_post_p
-  end interface
 
-  interface
      subroutine pf_recv_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
@@ -365,17 +318,13 @@ module pf_mod_dtype
        integer,           intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_recv_p
-  end interface
 
-  interface
      subroutine pf_recv_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,           intent(in)    :: tag
      end subroutine pf_recv_status_p
-  end interface
 
-  interface
      subroutine pf_send_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
@@ -383,31 +332,60 @@ module pf_mod_dtype
        integer,           intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_send_p
-  end interface
 
-  interface
      subroutine pf_send_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,           intent(in)    :: tag
      end subroutine pf_send_status_p
-  end interface
 
-  interface
      subroutine pf_wait_p(pf, level)
        import pf_pfasst_t
        type(pf_pfasst_t), intent(in) :: pf
        integer,           intent(in) :: level
      end subroutine pf_wait_p
-  end interface
 
-  interface
      subroutine pf_broadcast_p(pf, y, nvar, root)
        import pf_pfasst_t, pfdp
        type(pf_pfasst_t), intent(inout) :: pf
        integer,           intent(in)    :: nvar, root
        real(pfdp)  ,      intent(in)    :: y(nvar)
      end subroutine pf_broadcast_p
+
+#ifdef ZMQ
+     type(c_ptr) function dzmq_connect() bind(c)
+       import :: c_ptr
+     end function dzmq_connect
+
+     subroutine dzmq_status(ptr, state, where, wlen) bind(c)
+       import :: c_ptr, c_char, c_int, pf_state_t
+       type(c_ptr), intent(in), value :: ptr
+       type(pf_state_t), intent(in) :: state
+       character(c_char), intent(in) :: where(1)
+       integer(c_int), intent(in), value :: wlen
+     end subroutine dzmq_status
+
+     subroutine dzmq_close(ptr) bind(c)
+       import :: c_ptr
+       type(c_ptr), intent(in), value :: ptr
+     end subroutine dzmq_close
+#endif
+
   end interface
+
+contains
+
+  subroutine pf_dstatus(pf, where)
+    type(pf_pfasst_t), intent(inout) :: pf
+    character(len=*),  intent(in)    :: where
+
+#ifdef ZMQ
+    if (.not. c_associated(pf%zmq)) then
+       pf%zmq = dzmq_connect()
+    end if
+
+    call dzmq_status(pf%zmq, pf%state, where, len_trim(where))
+#endif
+  end subroutine pf_dstatus
 
 end module pf_mod_dtype

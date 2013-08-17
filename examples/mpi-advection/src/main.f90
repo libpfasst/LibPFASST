@@ -94,10 +94,10 @@ program main
   call ndarray_create_simple(q0, [ nvars(3) ])
   call initial(q0)
 
-  pf%abs_res_tol = 5.d-12
+  pf%abs_res_tol = 1.d-9
 
-  ! call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
-  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+  call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
+  ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
   call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=16*comm%nproc)
 

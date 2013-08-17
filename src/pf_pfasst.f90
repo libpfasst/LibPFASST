@@ -46,6 +46,7 @@ contains
        call pf_level_create(pf%levels(l), l)
     end do
 
+    allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
 
@@ -54,6 +55,8 @@ contains
     nullify(pf%cycles%end)
 
     pf%nlevels = maxlevels
+
+    pf%zmq = c_null_ptr
   end subroutine pf_pfasst_create
 
 
@@ -263,6 +266,8 @@ contains
     if (associated(pf%cycles%start))  deallocate(pf%cycles%start)
     if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
     if (associated(pf%cycles%end))    deallocate(pf%cycles%end)
+
+    deallocate(pf%state)
   end subroutine pf_pfasst_destroy
 
 
