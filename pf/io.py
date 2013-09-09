@@ -61,3 +61,23 @@ def read_avail(dname):
                                 os.path.join(dname, m.group(0))))
 
   return solutions
+
+
+def read_final(dname):
+  """Read output directory *dname* and return list of final solutions.
+  
+  Note that this does not read the solutions.
+  """
+
+  avail = read_avail(dname)
+
+  solutions = []
+  for step in set([ x.step for x in avail ]):
+    tmp = [ x for x in avail if x.step == step ]
+    max_iter  = max([ x.iter for x in tmp ])
+    max_level = max([ x.level for x in tmp ])
+
+    solutions.extend([ x for x in tmp if x.iter == max_iter and x.level == max_level ])
+
+  return sorted(solutions)
+
