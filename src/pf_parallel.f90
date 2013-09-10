@@ -122,9 +122,8 @@ contains
 
        call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
 
-       call pf%comm%recv(pf, F, F%level*10000+iteration, .false.)
+       call pf_recv(pf, F, F%level*10000+iteration, .false.)
 
-!       if (pf%rank > 0) then
        if (pf%rank /= pf%state%first) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
@@ -156,7 +155,7 @@ contains
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
-       call pf%comm%send(pf, F, F%level*10000+iteration, .false.)
+       call pf_send(pf, F, F%level*10000+iteration, .false.)
 
        call restrict_time_space_fas(pf, t0, dt, F, G)
        call save(G)
@@ -166,14 +165,14 @@ contains
 
        F => pf%levels(stage%F)
 
-       call pf%comm%recv(pf, F, F%level*10000+iteration, .true.)
+       call pf_recv(pf, F, F%level*10000+iteration, .true.)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
        call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
-       call pf%comm%send(pf, F, F%level*10000+iteration, .true.)
+       call pf_send(pf, F, F%level*10000+iteration, .true.)
 
 
     case (SDC_CYCLE_SWEEP)
@@ -227,12 +226,12 @@ contains
 
     pf%state%res = res
 
-    call pf%comm%recv_status(pf, 8000+k)
+    call pf_recv_status(pf, 8000+k)
 
     if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
-    call pf%comm%send_status(pf, 8000+k)
+    call pf_send_status(pf, 8000+k)
 
     if (pf%window == PF_WINDOW_BLOCK) then
 
@@ -256,9 +255,9 @@ contains
 
           if (pf%rank == pf%state%last) then
              pf%state%nmoved = pf%comm%nproc
-             call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+             call pf_send_nmoved(pf, PF_TAG_NMOVED)
           else
-             call pf%comm%recv_nmoved(pf, PF_TAG_NMOVED)
+             call pf_recv_nmoved(pf, PF_TAG_NMOVED)
           end if
 
           pf%state%pstatus = PF_STATUS_ITERATING
@@ -269,7 +268,7 @@ contains
 
        else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
 
-          call pf%comm%send_nmoved(pf, PF_TAG_NMOVED)
+          call pf_send_nmoved(pf, PF_TAG_NMOVED)
 
        end if
 
@@ -360,7 +359,7 @@ contains
           F => pf%levels(pf%nlevels)
           call pf%comm%wait(pf, pf%nlevels)
           call F%encap%pack(F%send, F%qend)
-          call pf%comm%broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
+          call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
 
@@ -402,12 +401,12 @@ contains
 
        do l = 2, pf%nlevels
           F => pf%levels(l)
-          call pf%comm%post(pf, F, F%level*10000+k)
+          call pf_post(pf, F, F%level*10000+k)
        end do
 
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
-          call pf%comm%send(pf, F, F%level*10000+k, .false.)
+          call pf_send(pf, F, F%level*10000+k, .false.)
 
           if (pf%nlevels > 1) then
              G => pf%levels(pf%nlevels-1)
@@ -439,5 +438,92 @@ contains
        call F%encap%copy(qend, F%qend)
     end if
   end subroutine pf_pfasst_run
+
+
+  !
+  ! Communication helpers
+  !
+  subroutine pf_post(pf, level, tag)
+    type(pf_pfasst_t), intent(in)    :: pf
+    type(pf_level_t),  intent(inout) :: level
+    integer,           intent(in)    :: tag
+    if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) then
+       call pf%comm%post(pf, level, tag)
+    end if
+  end subroutine pf_post
+
+  subroutine pf_send_status(pf, tag)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag
+    call pf_dstatus(pf, "send_status1")
+    if (pf%rank /= pf%state%last) then
+       call pf%comm%send_status(pf, tag)
+    end if
+    call pf_dstatus(pf, "send_status2")
+  end subroutine pf_send_status
+
+  subroutine pf_recv_status(pf, tag)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag
+    call pf_dstatus(pf, "recv_status1")
+    if (pf%rank /= pf%state%first) then
+       call pf%comm%recv_status(pf, tag)
+    end if
+    call pf_dstatus(pf, "recv_status2")
+  end subroutine pf_recv_status
+
+  subroutine pf_send_nmoved(pf, tag)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag
+    call pf_dstatus(pf, "send_nmoved1")
+    call pf%comm%send_nmoved(pf, tag)
+    call pf_dstatus(pf, "send_nmoved2")
+  end subroutine pf_send_nmoved
+
+  subroutine pf_recv_nmoved(pf, tag)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: tag
+    call pf_dstatus(pf, "recv_nmoved1")
+    call pf%comm%recv_nmoved(pf, tag)
+    call pf_dstatus(pf, "recv_nmoved2")
+  end subroutine pf_recv_nmoved
+
+  subroutine pf_send(pf, level, tag, blocking)
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_level_t),  intent(inout) :: level
+    integer,           intent(in)    :: tag
+    logical,           intent(in)    :: blocking
+    call pf_dstatus(pf, "send1")
+    call start_timer(pf, TSEND + level%level - 1)
+    if (pf%rank /= pf%state%last &
+         .and. pf%state%status == PF_STATUS_ITERATING) then
+       call pf%comm%send(pf, level, tag, blocking)
+    end if
+    call end_timer(pf, TSEND + level%level - 1)
+    call pf_dstatus(pf, "send2")
+  end subroutine pf_send
+
+  subroutine pf_recv(pf, level, tag, blocking)
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_level_t),  intent(inout) :: level
+    integer,           intent(in)    :: tag
+    logical,           intent(in)    :: blocking
+    call pf_dstatus(pf, "recv1")
+    call start_timer(pf, TRECEIVE + level%level - 1)
+    if (pf%rank /= pf%state%first .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
+       call pf%comm%recv(pf, level, tag, blocking)
+    end if
+    call end_timer(pf, TRECEIVE + level%level - 1)
+    call pf_dstatus(pf, "recv2")
+  end subroutine pf_recv
+
+  subroutine pf_broadcast(pf, y, nvar, root)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp)  ,      intent(in)    :: y(nvar)
+    integer,           intent(in)    :: nvar, root
+    call start_timer(pf, TSEND)
+    call pf%comm%broadcast(pf, y, nvar, root)
+    call end_timer(pf, TSEND)
+  end subroutine pf_broadcast
 
 end module pf_mod_parallel
