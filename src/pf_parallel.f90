@@ -143,7 +143,6 @@ contains
           call pf_residual(pf, F, dt)
        end if
 
-
     case (SDC_CYCLE_DOWN)
 
        F => pf%levels(stage%F)
@@ -160,7 +159,6 @@ contains
        call restrict_time_space_fas(pf, t0, dt, F, G)
        call save(G)
 
-
     case (SDC_CYCLE_BOTTOM)
 
        F => pf%levels(stage%F)
@@ -173,7 +171,6 @@ contains
        call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
        call pf_send(pf, F, F%level*10000+iteration, .true.)
-
 
     case (SDC_CYCLE_SWEEP)
 
@@ -193,6 +190,11 @@ contains
 
        call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
        call G%encap%pack(F%q0, F%Q(1))
+
+    case (SDC_CYCLE_RECV)
+
+       F => pf%levels(stage%F)
+       call pf_recv(pf, F, F%level*10000+iteration, .true.)
 
     end select
 
@@ -263,6 +265,7 @@ contains
           pf%state%pstatus = PF_STATUS_ITERATING
           pf%state%status  = PF_STATUS_ITERATING
           pf%state%step    = pf%state%step + pf%comm%nproc
+          pf%state%t0      = pf%state%step * dt
           pf%state%iter    = 1
           res = -1
 
@@ -274,7 +277,6 @@ contains
 
     end if
 
-    pf%state%t0     = pf%state%step * dt
     pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
     pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
 
@@ -343,7 +345,9 @@ contains
 
        ! in block mode, jump to next block if we've reached the max iteration count
        if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
-          pf%state%step   = pf%state%step + pf%comm%nproc
+          pf%state%step = pf%state%step + pf%comm%nproc
+          pf%state%t0   = pf%state%step * dt
+
           if (pf%state%step >= pf%state%nsteps) exit
 
           pf%state%status = PF_STATUS_PREDICTOR
@@ -406,6 +410,7 @@ contains
 
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
+          F => pf%levels(pf%nlevels)
           call pf_send(pf, F, F%level*10000+k, .false.)
 
           if (pf%nlevels > 1) then

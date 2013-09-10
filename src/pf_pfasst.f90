@@ -52,7 +52,6 @@ contains
 
     nullify(pf%cycles%start)
     nullify(pf%cycles%pfasst)
-    nullify(pf%cycles%end)
 
     pf%nlevels = maxlevels
 
@@ -265,7 +264,6 @@ contains
 
     if (associated(pf%cycles%start))  deallocate(pf%cycles%start)
     if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
-    if (associated(pf%cycles%end))    deallocate(pf%cycles%end)
 
     deallocate(pf%state)
   end subroutine pf_pfasst_destroy

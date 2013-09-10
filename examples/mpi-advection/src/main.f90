@@ -11,14 +11,15 @@ program main
 
   implicit none
 
-  integer, parameter :: nlevs = 3
+  integer :: nlevs = 3
+  integer :: window = PF_WINDOW_BLOCK
 
   type(pf_pfasst_t)           :: pf
   type(pf_comm_t)             :: comm
   type(pf_sweeper_t), target  :: sweeper
   type(pf_encap_t),   target  :: encap
   type(ndarray),      pointer :: q0
-  integer                     :: argc, err, nvars(nlevs), nnodes(nlevs), l
+  integer                     :: argc, err, nvars(3), nnodes(3), l
   double precision            :: dt
   character(len=128)          :: arg
 
@@ -33,12 +34,26 @@ program main
 
 
   !
-  ! initialize pfasst using three levels
+  ! initialize pfasst
   !
 
   nvars  = [ 32, 64, 128 ]   ! number of dofs on the time/space levels
   nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
   dt     = 0.05_pfdp
+
+  do argc = 1, command_argument_count()
+     call get_command_argument(argc, arg)
+     select case(arg)
+     case ("--ring")
+        window = PF_WINDOW_RING
+     case ("--single")
+        nlevs  = 1
+        nvars  = 128
+        nnodes = 5
+     case default
+        stop "Usage: main.exe [--ring]"
+     end select
+  end do
 
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
@@ -47,16 +62,6 @@ program main
 
   pf%qtype  = SDC_GAUSS_LOBATTO
   pf%niters = 12
-
-  do argc = 1, command_argument_count()
-     call get_command_argument(argc, arg)
-     select case(arg)
-     case ("--ring")
-        pf%window      = PF_WINDOW_RING
-     case default
-        stop "Usage: main.exe [--ring]"
-     end select
-  end do
   
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
@@ -81,8 +86,8 @@ program main
   call pf_pfasst_setup(pf)
 
   if (pf%rank == 0) then
-     print *, 'nvars: ', pf%levels(:)%nvars
-     print *, 'nnodes:', pf%levels(:)%nnodes
+     print *, 'nvars: ', pf%levels(:nlevs)%nvars
+     print *, 'nnodes:', pf%levels(:nlevs)%nnodes
   end if
 
 
@@ -91,16 +96,17 @@ program main
   !
 
   allocate(q0)
-  call ndarray_create_simple(q0, [ nvars(3) ])
+  call ndarray_create_simple(q0, [ nvars(nlevs) ])
   call initial(q0)
 
   pf%abs_res_tol = 1.d-9
+
+  ! call pf_cycle_print(pf)
 
   call pf_add_hook(pf, nlevs, PF_POST_ITERATION, echo_error)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
   call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=16*comm%nproc)
-
 
   !
   ! cleanup

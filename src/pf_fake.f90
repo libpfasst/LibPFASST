@@ -217,17 +217,17 @@ contains
 
        end do ! end pfasst iteration loop
 
-       ! do end cycle stages
-       do p = 1, nproc
-          call c_f_pointer(pfs(p), pf)
+       ! ! do end cycle stages
+       ! do p = 1, nproc
+       !    call c_f_pointer(pfs(p), pf)
 
-          if (associated(pf%cycles%end)) then
-             do c = 1, size(pf%cycles%end)
-                pf%state%cycle = c
-                call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-             end do
-          end if
-       end do
+       !    if (associated(pf%cycles%end)) then
+       !       do c = 1, size(pf%cycles%end)
+       !          pf%state%cycle = c
+       !          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
+       !       end do
+       !    end if
+       ! end do
 
        do p = 1, nproc
           call c_f_pointer(pfs(p), pf)
