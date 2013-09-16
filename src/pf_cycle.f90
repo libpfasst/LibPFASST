@@ -104,6 +104,59 @@ contains
 
        end if
 
+    case (SDC_CYCLE_FAKE)
+       
+       ! start: transfer from coarsest to finest, sweeping on the way up
+       if (pf%nlevels > 1) then
+          allocate(pf%cycles%start(2*(pf%nlevels-1)-1))
+
+          stages => pf%cycles%start
+          c = 1
+          do l = 2, pf%nlevels-1
+             stages(c)%type = SDC_CYCLE_INTERP
+             stages(c)%F    = l
+             stages(c)%G    = l-1
+             c = c + 1
+
+             stages(c)%type = SDC_CYCLE_SWEEP
+             stages(c)%F    = l
+             stages(c)%G    = -1
+             c = c + 1
+          end do
+
+          stages(c)%type = SDC_CYCLE_INTERP
+          stages(c)%F    = pf%nlevels
+          stages(c)%G    = pf%nlevels-1
+       else
+
+          allocate(pf%cycles%start(0))
+
+       end if
+
+       ! pfasst: v-cycle from finest, but end in middle
+       allocate(pf%cycles%pfasst(2*pf%nlevels-1))
+       stages => pf%cycles%pfasst
+
+       c = 1
+       do l = pf%nlevels, 2, -1
+          stages(c)%type = SDC_CYCLE_DOWN
+          stages(c)%F    = l
+          stages(c)%G    = l-1
+          c = c + 1
+       end do
+
+       stages(c)%type = SDC_CYCLE_BOTTOM
+       stages(c)%F    = 1
+       stages(c)%G    = -1
+       c = c + 1
+
+       do l = 2, pf%nlevels
+          stages(c)%type = SDC_CYCLE_UP
+          stages(c)%F    = l
+          stages(c)%G    = l-1
+          c = c + 1
+       end do
+
     end select
 
   end subroutine pf_cycle_build

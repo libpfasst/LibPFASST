@@ -120,6 +120,8 @@ contains
     type(pf_pfasst_t), pointer :: pf
     type(c_ptr),       pointer :: pfs(:)
 
+    type(pf_stage_t) :: end_stage
+
     nproc =  pf0%comm%nproc
     pfs   => pf0%comm%pfs
 
@@ -217,17 +219,14 @@ contains
 
        end do ! end pfasst iteration loop
 
-       ! ! do end cycle stages
-       ! do p = 1, nproc
-       !    call c_f_pointer(pfs(p), pf)
-
-       !    if (associated(pf%cycles%end)) then
-       !       do c = 1, size(pf%cycles%end)
-       !          pf%state%cycle = c
-       !          call pf_do_stage(pf, pf%cycles%end(c), -1, t0, dt)
-       !       end do
-       !    end if
-       ! end do
+       ! do end cycle stages
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
+          end_stage%type = SDC_CYCLE_SWEEP
+          end_stage%F    = pf%nlevels
+          end_stage%G    = -1
+          call pf_do_stage(pf, end_stage, -1, t0, dt)
+       end do
 
        do p = 1, nproc
           call c_f_pointer(pfs(p), pf)

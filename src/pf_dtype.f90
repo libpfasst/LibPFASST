@@ -39,6 +39,7 @@ module pf_mod_dtype
 
   integer, parameter :: SDC_CYCLE_V    = 1
   integer, parameter :: SDC_CYCLE_FULL = 2
+  integer, parameter :: SDC_CYCLE_FAKE = 3
 
   integer, parameter :: SDC_CYCLE_UP     = 100
   integer, parameter :: SDC_CYCLE_DOWN   = 101
