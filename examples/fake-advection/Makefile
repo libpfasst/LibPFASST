@@ -5,6 +5,8 @@
 LIBPFASST ?= ../..
 FFTW3     ?= $(LIBPFASST)/fftw3
 
+NOMPI = t
+
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults

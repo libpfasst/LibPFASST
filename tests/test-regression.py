@@ -45,6 +45,9 @@ def check_last_error(exe, tol):
   assert lasterr < tol
     
 
+def test_fake_advection():
+  check_last_error('examples/fake-advection/main.exe', 5e-9)
+
 def test_mpi_advection_1level():
   check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe --single', 5e-7)
 
