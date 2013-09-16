@@ -45,6 +45,7 @@ module pf_mod_dtype
   integer, parameter :: SDC_CYCLE_BOTTOM = 102
   integer, parameter :: SDC_CYCLE_SWEEP  = 103
   integer, parameter :: SDC_CYCLE_INTERP = 104
+  integer, parameter :: SDC_CYCLE_RECV   = 105
 
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
@@ -76,7 +77,7 @@ module pf_mod_dtype
   end type pf_stage_t
 
   type :: pf_cycle_t
-     type(pf_stage_t), pointer :: start(:), pfasst(:), end(:)
+     type(pf_stage_t), pointer :: start(:), pfasst(:)
   end type pf_cycle_t
 
   type :: pf_hook_t

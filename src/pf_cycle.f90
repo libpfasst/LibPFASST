@@ -69,37 +69,40 @@ contains
        end if
 
        ! pfasst: v-cycle from middle
-       allocate(pf%cycles%pfasst(2*pf%nlevels-1))
-       stages => pf%cycles%pfasst
+       if (pf%nlevels > 1) then
 
-       c = 1
-       do l = pf%nlevels-1, 2, -1
-          stages(c)%type = SDC_CYCLE_DOWN
-          stages(c)%F    = l
-          stages(c)%G    = l-1
+          allocate(pf%cycles%pfasst(2*pf%nlevels-1))
+          stages => pf%cycles%pfasst
+
+          c = 1
+          do l = pf%nlevels-1, 2, -1
+             stages(c)%type = SDC_CYCLE_DOWN
+             stages(c)%F    = l
+             stages(c)%G    = l-1
+             c = c + 1
+          end do
+
+          stages(c)%type = SDC_CYCLE_BOTTOM
+          stages(c)%F    = 1
+          stages(c)%G    = -1
           c = c + 1
-       end do
 
-       stages(c)%type = SDC_CYCLE_BOTTOM
-       stages(c)%F    = 1
-       stages(c)%G    = -1
-       c = c + 1
+          do l = 2, pf%nlevels
+             stages(c)%type = SDC_CYCLE_UP
+             stages(c)%F    = l
+             stages(c)%G    = l-1
+             c = c + 1
+          end do
 
-       do l = 2, pf%nlevels
-          stages(c)%type = SDC_CYCLE_UP
-          stages(c)%F    = l
-          stages(c)%G    = l-1
-          c = c + 1
-       end do
+       else
 
-       ! end: sweep on finest
-       ! XXX: get rid of this crap...
-       allocate(pf%cycles%end(1))
-       stages => pf%cycles%end
+          allocate(pf%cycles%pfasst(1))
+          stages => pf%cycles%pfasst
 
-       stages(1)%type = SDC_CYCLE_SWEEP
-       stages(1)%F    = pf%nlevels
-       stages(1)%G    = -1
+          stages(1)%type = SDC_CYCLE_RECV
+          stages(1)%F    = 1
+
+       end if
 
     end select
 
@@ -138,12 +141,6 @@ contains
     do c = 1, size(pf%cycles%pfasst)
        call pf_cycle_print_stage(pf%cycles%pfasst(c))
     end do
-
-    print *, 'END STAGES'
-    do c = 1, size(pf%cycles%end)
-       call pf_cycle_print_stage(pf%cycles%end(c))
-    end do
-
 
   end subroutine pf_cycle_print
 
