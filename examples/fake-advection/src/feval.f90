@@ -6,7 +6,8 @@
 
 module feval
   use iso_c_binding
-  use encap_array1d
+  use pf_mod_dtype
+  use pf_mod_ndarray
   implicit none
   include 'fftw3.f03'
 
@@ -90,9 +91,8 @@ contains
 
   ! Set initial condition.
   subroutine initial(q0)
-    type(array1d), intent(inout) :: q0
-
-    call exact(0.0_pfdp, size(q0%array), q0%array)
+    type(ndarray), intent(inout) :: q0
+    call exact(0.0_pfdp, size(q0%flatarray), q0%flatarray)
   end subroutine initial
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -149,8 +149,8 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    f1 => array(f1ptr)
+    y  => array1(yptr)
+    f1 => array1(f1ptr)
     wk => work%wk
 
     wk = y
@@ -176,8 +176,8 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    f2 => array(f2ptr)
+    y  => array1(yptr)
+    f2 => array1(f2ptr)
     wk => work%wk
 
     wk = y
@@ -202,9 +202,9 @@ contains
 
     call c_f_pointer(ctx, work)
 
-    y  => array(yptr)
-    rhs => array(rhsptr)
-    f2 => array(f2ptr)
+    y  => array1(yptr)
+    rhs => array1(rhsptr)
+    f2 => array1(f2ptr)
     wk => work%wk
 
     wk = rhs

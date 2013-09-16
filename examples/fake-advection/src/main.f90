@@ -7,7 +7,6 @@ program fpfasst
   use feval
   use hooks
   use transfer
-  use encap_array1d
 
   implicit none
 
@@ -19,7 +18,7 @@ program fpfasst
   integer            :: nprocs, nlevs, nvars(3), nnodes(3), l, p
   double precision   :: dt
 
-  type(array1d), target :: q0
+  type(ndarray), pointer :: q0
 
   !
   ! initialize pfasst
@@ -31,7 +30,7 @@ program fpfasst
   dt     = 0.1_pfdp
   nlevs  = 3
 
-  call array1d_encap_create(encap)
+  call ndarray_encap_create(encap)
   call pf_fake_create(comm, nprocs)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
 
@@ -59,6 +58,9 @@ program fpfasst
         pf%levels(l)%restrict    => restrict
         pf%levels(l)%encap       => encap
         pf%levels(l)%sweeper     => sweeper
+
+        allocate(pf%levels(l)%shape(1))
+        pf%levels(l)%shape(1)    = nvars(l)
      end do
 
      call pf_fake_setup(comm, pf)
@@ -93,7 +95,8 @@ program fpfasst
   !
   ! run
   !
-  allocate(q0%array(pf%levels(nlevs)%nvars))
+  allocate(q0)
+  call ndarray_create_simple(q0, [ pf%levels(nlevs)%nvars ])
   call initial(q0)
 
   call pf_fake_run(pf, c_loc(q0), dt, nsteps=2*nprocs)
@@ -102,7 +105,7 @@ program fpfasst
   !
   ! cleanup
   !
-  deallocate(q0%array)
+  call ndarray_destroy(c_loc(q0))
 
   do l = 1, nlevs
      call feval_destroy_workspace(pf0%levels(l)%ctx)
