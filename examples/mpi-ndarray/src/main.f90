@@ -98,12 +98,12 @@ program main
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
-  if (pf%rank == 0) then
-     print *, 'nlevs:  ', nlevs
-     print *, 'nvars:  ', pf%levels(:)%nvars
-     print *, 'nnodes: ', pf%levels(:)%nnodes
-     print *, 'output: ', output
-  end if
+  ! if (pf%rank == 0) then
+  !    print *, 'nlevs:  ', nlevs
+  !    print *, 'nvars:  ', pf%levels(:)%nvars
+  !    print *, 'nnodes: ', pf%levels(:)%nnodes
+  !    print *, 'output: ', output
+  ! end if
 
 
   !
@@ -127,6 +127,8 @@ program main
   if (nsteps < comm%nproc) then
      nsteps = comm%nproc
   end if
+
+  call pf_print_options(pf)
 
   call mpi_barrier(MPI_COMM_WORLD, err)
 

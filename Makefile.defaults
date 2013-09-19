@@ -26,6 +26,7 @@ FSRC = src/pfasst.f90 \
        src/pf_interpolate.f90 \
        src/pf_logger.f90 \
        src/pf_ndarray.f90 \
+       src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
        src/pf_pthreads.f90 \
@@ -50,4 +51,3 @@ ifdef ZMQ
 endif
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-
