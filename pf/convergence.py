@@ -7,7 +7,7 @@ import pf.io
 
 
 class Cache(object):
-  """Simple cache for solutions."""
+  '''Simple cache for solutions.'''
   def __init__(self):
     self.cache = {}
   def get(self, name):
@@ -50,8 +50,7 @@ def errors(reference, approximate, **kwargs):
 
   steps  = sorted(list(set([ x.step for x in approximate ])))
   iters  = sorted(list(set([ x.iter for x in approximate ])))
-  #levels = sorted(list(set([ x.level for x in approximate ])))
-  levels = [ max(list(set([ x.level for x in approximate ]))) ]
+  levels = sorted(list(set([ x.level for x in approximate ])))
   riter  = max([ x.iter for x in reference ])
   rlev   = max([ x.level for x in reference ])
   rmap   = step_iter_level_map(reference)
@@ -63,12 +62,7 @@ def errors(reference, approximate, **kwargs):
   for step, aiter, alev in product(steps, iters, levels):
     ref = cache.get(rmap[step*trat, riter, rlev])
     app = cache.get(amap[step, aiter, alev])
-
-    # assert abs(ref.time - app.time) < 1e-8
-
-    dif = abs(ref - app)
-    err = dif.max()
-
+    err = abs(ref - app).max()
     errors[step, aiter, alev] = err
 
   return errors, steps, iters, levels
@@ -92,33 +86,21 @@ def plot(errs, steps, iters, levels, **kwargs):
 
   '''
 
-  if len(levels) > 1:
-    fig, ax = pylab.subplots(ncols=len(levels))
-    for l, level in enumerate(levels):
-      for i, iter in enumerate(iters):
+  fig, ax = pylab.subplots(ncols=len(levels))
 
-        x = steps
-        y = [ errs[step,iter,level] for step in steps ]
-
-        ax[l].semilogy(x, y, **kwargs)
-        ax[l].set_title('level %d' % level)
-        ax[l].set_xlabel('step/processor')
-        ax[l].set_ylabel('max abs. error')
-
-  else:
-
-    fig, ax = pylab.subplots(ncols=len(levels))
-    level = levels[0]
+  if not isinstance(ax, list):
+    ax = [ ax ]
+  
+  for l, level in enumerate(levels):
     for i, iter in enumerate(iters):
 
       x = steps
       y = [ errs[step,iter,level] for step in steps ]
 
-      ax.semilogy(x, y, **kwargs)
-      ax.set_title('level %d' % level)
-      ax.set_xlabel('step/processor')
-      ax.set_ylabel('max abs. error')
-    
+      ax[l].semilogy(x, y, **kwargs)
+      ax[l].set_title('level %d' % level)
+      ax[l].set_xlabel('step/processor')
+      ax[l].set_ylabel('max abs. error')
 
   return fig, ax
 
