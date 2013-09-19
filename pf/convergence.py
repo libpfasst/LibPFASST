@@ -20,18 +20,6 @@ def step_iter_level_map(available):
   return { (x.step, x.iter, x.level): x.fname for x in available }
 
 
-def find(available, step, iter, level):
-  singleton = [ x.fname for x in available 
-                if  x.step  == step
-                and x.iter  == iter
-                and x.level == level ]
-
-  if len(singleton) == 1:
-    return singleton[0]
-
-  raise ValueError('more than one solution found')
-
-
 def errors(reference, approximate, **kwargs):
   '''Compute errors of approximate solutions relative to the reference solution.
 
