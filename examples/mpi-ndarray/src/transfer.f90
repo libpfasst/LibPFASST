@@ -10,15 +10,13 @@ module transfer
   implicit none
 contains
 
-  subroutine interp1(qF, qG, workF, workG)
-    type(ad_work_t), intent(inout) :: workF, workG
-    real(pfdp),      intent(inout) :: qF(:), qG(:)
+  subroutine interp1(qF, qG, ctxF, ctxG)
+    type(c_ptr), intent(in), value :: ctxF, ctxG
+    real(pfdp),  intent(inout) :: qF(:), qG(:)
 
+    type(work1),   pointer :: workF, workG
     complex(pfdp), pointer :: wkF(:), wkG(:)
     integer                :: nvarF, nvarG, xrat
-
-    wkF => workF%wk1
-    wkG => workG%wk1
 
     nvarF = size(qF)
     nvarG = size(qG)
@@ -29,8 +27,11 @@ contains
        return
     endif
 
-    wkF => workF%wk1
-    wkG => workG%wk1
+    call c_f_pointer(ctxF, workF)
+    call c_f_pointer(ctxG, workG)
+
+    wkF => workF%wk
+    wkG => workG%wk
 
     wkG = qG
     call fftw_execute_dft(workG%ffft, wkG, wkG)
@@ -49,27 +50,27 @@ contains
     type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
 
-    type(ad_work_t), pointer :: workF, workG
     real(pfdp),      pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
-
-    call c_f_pointer(ctxF, workF)
-    call c_f_pointer(ctxG, workG)
 
     if (dim == 1) then
        qF => array1(qFp)
        qG => array1(qGp)
 
-       call interp1(qF, qG, workF, workG)
+       call interp1(qF, qG, ctxF, ctxG)
 
     else if (problem == PROB_WAVE) then
 
        qF2 => array2(qFp)
        qG2 => array2(qGp)
 
-       call interp1(qF2(:, 1), qG2(:, 1), workF, workG)
-       call interp1(qF2(:, 2), qG2(:, 2), workF, workG)
+       call interp1(qF2(:, 1), qG2(:, 1), ctxF, ctxG)
+       call interp1(qF2(:, 2), qG2(:, 2), ctxF, ctxG)
 
-    end if
+     else if (problem == PROB_SHEAR) then
+
+        print *, 'NOT IMPLEMENTED YET'
+
+     end if
   end subroutine interpolate
 
   subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG)

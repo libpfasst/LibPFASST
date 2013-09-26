@@ -6,12 +6,12 @@ module probin
 
   integer, parameter :: maxlevs = 3
 
-  integer, parameter :: PROB_AD    = 1
-  integer, parameter :: PROB_HEAT  = 2
-  integer, parameter :: PROB_VB    = 3
-  integer, parameter :: PROB_WAVE  = 4
-  integer, parameter :: PROB_KS    = 5
-  integer, parameter :: PROB_SHEAR = 6
+  integer, parameter :: PROB_AD    = 11
+  integer, parameter :: PROB_HEAT  = 12
+  integer, parameter :: PROB_VB    = 13
+  integer, parameter :: PROB_WAVE  = 14
+  integer, parameter :: PROB_KS    = 15
+  integer, parameter :: PROB_SHEAR = 21
 
   integer, save :: problem
   integer, save :: wtype

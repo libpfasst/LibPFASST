@@ -27,7 +27,7 @@ contains
        y2 = 0
        call gaussian(y2(:, 1))
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (initial)."
     end select
   end subroutine initial
 

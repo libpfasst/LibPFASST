@@ -4,11 +4,18 @@ module feval
   implicit none
   include 'fftw3.f03'
 
-  type :: ad_work_t
+  type :: work1
      type(c_ptr) :: ffft, ifft
-     complex(pfdp), pointer :: wk1(:)                   ! work space
-     complex(pfdp), pointer :: ddx1(:), lap1(:), ks1(:) ! operators
-  end type ad_work_t
+     complex(pfdp), pointer :: wk(:)
+     complex(pfdp), pointer :: ddx(:), lap(:), ks(:)
+  end type work1
+
+  type :: work2
+     type(c_ptr) :: ffft, ifft
+     complex(pfdp), pointer :: wk(:,:)
+     complex(pfdp), pointer :: ddx(:,:), ddy(:,:), psidx(:,:), psidy(:,:), k2(:,:)
+  end type work2
+
 
 contains
 
@@ -17,19 +24,19 @@ contains
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:), f1(:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:)
+    real(pfdp),    pointer :: y(:), f1(:)
+    type(work1),   pointer :: work
+    complex(pfdp), pointer :: wk(:)
 
     call c_f_pointer(ctx, work)
 
     y  => array1(yptr)
     f1 => array1(f1ptr)
-    wk => work%wk1
+    wk => work%wk
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
-    wk = work%ddx1 * wk / size(wk)
+    wk = work%ddx * wk / size(wk)
     call fftw_execute_dft(work%ifft, wk, wk)
 
     select case(problem)
@@ -40,7 +47,7 @@ contains
     case (PROB_KS)
        f1 = -y * real(wk)
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (f1eval1)."
     end select
   end subroutine f1eval1
 
@@ -49,30 +56,30 @@ contains
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:), f2(:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:)
+    real(pfdp),    pointer :: y(:), f2(:)
+    type(work1),   pointer :: work
+    complex(pfdp), pointer :: wk(:)
 
     call c_f_pointer(ctx, work)
 
     y  => array1(yptr)
     f2 => array1(f2ptr)
-    wk => work%wk1
+    wk => work%wk
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
     
     select case(problem)
     case (PROB_HEAT)
-       wk = nu * work%lap1 * wk / size(wk)
+       wk = nu * work%lap * wk / size(wk)
     case (PROB_AD)
-       wk = nu * work%lap1 * wk / size(wk)
+       wk = nu * work%lap * wk / size(wk)
     case (PROB_VB)
-       wk = nu * work%lap1 * wk / size(wk)
+       wk = nu * work%lap * wk / size(wk)
     case (PROB_KS)
-       wk = work%ks1 * wk / size(wk)
+       wk = work%ks * wk / size(wk)
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (f2eval1)."
     end select
 
     call fftw_execute_dft(work%ifft, wk, wk)
@@ -85,31 +92,31 @@ contains
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:), rhs(:), f2(:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:)
+    real(pfdp),    pointer :: y(:), rhs(:), f2(:)
+    type(work1),   pointer :: work
+    complex(pfdp), pointer :: wk(:)
 
     call c_f_pointer(ctx, work)
 
     y   => array1(yptr)
     rhs => array1(rhsptr)
     f2  => array1(f2ptr)
-    wk  => work%wk1
+    wk  => work%wk
 
     wk = rhs
     call fftw_execute_dft(work%ffft, wk, wk)
 
     select case(problem)
     case (PROB_HEAT)
-       wk = wk / (1.0_pfdp - nu*dt*work%lap1) / size(wk)
+       wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     case (PROB_AD)
-       wk = wk / (1.0_pfdp - nu*dt*work%lap1) / size(wk)
+       wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     case (PROB_VB)
-       wk = wk / (1.0_pfdp - nu*dt*work%lap1) / size(wk)
+       wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     case (PROB_KS)
-       wk = wk / (1.0_pfdp - dt*work%ks1) / size(wk)
+       wk = wk / (1.0_pfdp - dt*work%ks) / size(wk)
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (f2comp1)."
     end select
 
     call fftw_execute_dft(work%ifft, wk, wk)
@@ -123,34 +130,22 @@ contains
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:,:), f1(:,:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk1(:), wk2(:,:)
+    real(pfdp),    pointer :: y(:,:), f1(:,:)
+    type(work2),   pointer :: work
+    complex(pfdp), pointer :: wk(:,:)
 
     call c_f_pointer(ctx, work)
 
     y  => array2(yptr)
     f1 => array2(f1ptr)
+    wk => work%wk
 
-    select case(problem)
-    case (PROB_WAVE)
-       wk1 => work%wk1
-       
-       wk1 = y(:, 1)
-       call fftw_execute_dft(work%ffft, wk1, wk1)
-       wk1 = work%ddx1 * wk1 / size(wk1)
-       call fftw_execute_dft(work%ifft, wk1, wk1)
-       f1(:, 2) = real(wk1)
+    wk = y
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = -( (work%psidy * wk) * (work%ddx * wk) - (work%psidx * wk) * (work%ddy * wk) ) / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    f1 = real(wk)
 
-       wk1 = y(:, 2)
-       call fftw_execute_dft(work%ffft, wk1, wk1)
-       wk1 = work%ddx1 * wk1 / size(wk1)
-       call fftw_execute_dft(work%ifft, wk1, wk1)
-       f1(:, 1) = real(wk1)
-
-    case default
-       stop "ERROR: Unknown problem type."
-    end select
   end subroutine f1eval2
 
   subroutine f2eval2(yptr, t, level, ctx, f2ptr)
@@ -158,19 +153,21 @@ contains
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:), f2(:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:)
+    real(pfdp),    pointer :: y(:,:), f2(:,:)
+    type(work2),   pointer :: work
+    complex(pfdp), pointer :: wk(:,:)
 
     call c_f_pointer(ctx, work)
 
-    y  => array1(yptr)
-    f2 => array1(f2ptr)
+    y  => array2(yptr)
+    f2 => array2(f2ptr)
+    wk => work%wk
 
-    select case(problem)
-    case default
-       stop "ERROR: Unknown problem type."
-    end select
+    wk = y
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = -nu * work%k2 * wk / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    f2 = real(wk)
   end subroutine f2eval2
 
   subroutine f2comp2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
@@ -178,80 +175,133 @@ contains
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
-    real(pfdp),      pointer :: y(:), rhs(:), f2(:)
-    type(ad_work_t), pointer :: work
-    complex(pfdp),   pointer :: wk(:)
+    real(pfdp),    pointer :: y(:,:), rhs(:,:), f2(:,:)
+    type(work2),   pointer :: work
+    complex(pfdp), pointer :: wk(:,:)
 
     call c_f_pointer(ctx, work)
 
-    y   => array1(yptr)
-    rhs => array1(rhsptr)
-    f2  => array1(f2ptr)
+    y   => array2(yptr)
+    rhs => array2(rhsptr)
+    f2  => array2(f2ptr)
 
     select case(problem)
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (f2comp2)."
     end select
   end subroutine f2comp2
 
-  subroutine feval_create_workspace(ctx, nvars)
+  subroutine create_work1(ctx, nvars)
     type(c_ptr), intent(out) :: ctx
     integer,     intent(in)  :: nvars
 
-    type(ad_work_t), pointer :: work
+    type(work1), pointer :: work
     integer     :: i
     type(c_ptr) :: wk
-    real(pfdp)  :: kx
+    real(pfdp)  :: kx(nvars)
 
     allocate(work)
     ctx = c_loc(work)
 
-    ! create in-place, complex fft plans
-    wk = fftw_alloc_complex(int(nvars, c_size_t))
-    call c_f_pointer(wk, work%wk1, [nvars])
-
-    work%ffft = fftw_plan_dft_1d(nvars, &
-         work%wk1, work%wk1, FFTW_FORWARD, FFTW_ESTIMATE)
-    work%ifft = fftw_plan_dft_1d(nvars, &
-         work%wk1, work%wk1, FFTW_BACKWARD, FFTW_ESTIMATE)
-
-    ! create operators
-    allocate(work%ddx1(nvars))
-    allocate(work%lap1(nvars))
-    allocate(work%ks1(nvars))
     do i = 1, nvars
        if (i <= nvars/2+1) then
-          kx = two_pi * dble(i-1) / Lx
+          kx(i) = two_pi * dble(i-1) / Lx
        else
-          kx = two_pi * dble(-nvars + i - 1) / Lx
-       end if
-
-       work%ddx1(i) = (0.0_pfdp, 1.0_pfdp) * kx
-
-       if (kx**2 < 1e-13) then
-          work%lap1(i) = 0.0_pfdp
-          work%ks1(i)  = 0.0_pfdp
-       else
-          work%lap1(i) = -kx**2
-          work%ks1(i)  = kx**2*(1.0 - kx**2)
+          kx(i) = two_pi * dble(-nvars + i - 1) / Lx
        end if
     end do
-  end subroutine feval_create_workspace
 
-  subroutine feval_destroy_workspace(ctx)
+    ! create in-place, complex fft plans
+    wk = fftw_alloc_complex(int(nvars, c_size_t))
+    call c_f_pointer(wk, work%wk, [nvars])
+
+    work%ffft = fftw_plan_dft_1d(nvars, &
+         work%wk, work%wk, FFTW_FORWARD, FFTW_ESTIMATE)
+    work%ifft = fftw_plan_dft_1d(nvars, &
+         work%wk, work%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
+
+    ! create operators
+    allocate(work%ddx(nvars))
+    allocate(work%lap(nvars))
+    allocate(work%ks(nvars))
+
+    work%ddx = (0.0_pfdp, 1.0_pfdp) * kx
+    work%lap = -kx**2
+    work%ks  = kx**2*(1.0 - kx**2)
+
+    where (kx**2 < 1e-13)
+       work%lap = 0.0_pfdp
+       work%ks  = 0.0_pfdp
+    end where
+
+  end subroutine create_work1
+
+  subroutine create_work2(ctx, nvars)
+    type(c_ptr), intent(out) :: ctx
+    integer,     intent(in)  :: nvars
+
+    type(work2), pointer :: work
+    integer     :: i, j
+    type(c_ptr) :: wk
+    real(pfdp)  :: kx(nvars)
+
+    allocate(work)
+    ctx = c_loc(work)
+
+    do i = 1, nvars
+       if (i <= nvars/2+1) then
+          kx(i) = two_pi * dble(i-1) / Lx
+       else
+          kx(i) = two_pi * dble(-nvars + i - 1) / Lx
+       end if
+    end do
+
+    ! create in-place, complex fft plans
+    wk = fftw_alloc_complex(int(nvars**2, c_size_t))
+    call c_f_pointer(wk, work%wk, [nvars,nvars])
+    
+    work%ffft = fftw_plan_dft_2d(nvars, nvars, &
+         work%wk, work%wk, FFTW_FORWARD, FFTW_ESTIMATE)
+    work%ifft = fftw_plan_dft_2d(nvars, nvars, &
+         work%wk, work%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
+    
+    ! create operators
+    allocate(work%k2(nvars,nvars))
+    allocate(work%ddx(nvars,nvars))
+    allocate(work%ddy(nvars,nvars))
+    allocate(work%psidx(nvars,nvars))
+    allocate(work%psidy(nvars,nvars))
+    
+    work%psidx = 0
+    work%psidy = 0
+    
+    do j = 1, nvars
+       do i = 1, nvars
+          work%k2(i,j) = kx(i)**2 + kx(j)**2
+          work%ddx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i)
+          work%ddy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j)
+    
+          if (work%k2(i,j) /= 0.0_pfdp) then
+             work%psidx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i) / work%k2(i,j)
+             work%psidy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j) / work%k2(i,j)
+          end if
+       end do
+    end do
+
+  end subroutine create_work2
+
+
+  subroutine destroy_work1(ctx)
     type(c_ptr), intent(in) :: ctx
-
-    type(ad_work_t), pointer :: work
-
+    type(work1), pointer :: work
     call c_f_pointer(ctx, work)
-
-    deallocate(work%wk1)
-    deallocate(work%ddx1)
-    deallocate(work%lap1)
-    deallocate(work%ks1)
+    deallocate(work%wk)
+    deallocate(work%ddx)
+    deallocate(work%lap)
+    deallocate(work%ks)
     call fftw_destroy_plan(work%ffft)
     call fftw_destroy_plan(work%ifft)
     deallocate(work)
-  end subroutine feval_destroy_workspace
+  end subroutine destroy_work1
 
 end module feval
