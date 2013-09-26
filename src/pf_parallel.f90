@@ -72,8 +72,10 @@ contains
           pf%state%iter = -k
 
           ! get new initial value (skip on first iteration)
-          if (k > 1) &
+          if (k > 1) then
                call G%encap%pack(G%q0, G%Q(G%nnodes))
+               call spreadq0(G, t0)
+            end if
 
           call call_hooks(pf, G%level, PF_PRE_SWEEP)
           do j = 1, G%nsweeps
@@ -221,7 +223,6 @@ contains
             (abs(res1)                      < pf%abs_res_tol) ) then
 
           pf%state%status = PF_STATUS_CONVERGED
-
        end if
     end if
     res = res1
@@ -317,7 +318,7 @@ contains
     logical :: qexit, qcycle, qbroadcast
     
     call start_timer(pf, TTOTAL)
-
+    t0=pf%state%step * dt
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%step    = pf%rank
