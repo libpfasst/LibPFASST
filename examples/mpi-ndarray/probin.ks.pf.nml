@@ -1,0 +1,14 @@
+&prbin
+
+  problem_type = 'ks'
+  nlevs        = 2
+  niters       = 20
+  nsteps       = 20
+  dt           = 1.d0
+
+  nvars  = 512 1024
+  nnodes = 5 9
+
+  output = 'ks-parallel'
+
+/

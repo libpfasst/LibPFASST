@@ -205,6 +205,8 @@ module pf_mod_dtype
 
      ! debug
      type(c_ptr) :: zmq
+
+     character(512) :: ctx_char
   end type pf_pfasst_t
 
   interface

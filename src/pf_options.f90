@@ -54,7 +54,68 @@ contains
     end do
   end subroutine pf_opts_from_cl
 
+  subroutine pf_opts_from_file(pf, un)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: un
 
+    
+
+  end subroutine pf_opts_from_file
+
+  subroutine pf_set_options(pf, fname, unitno, cmdline)
+    type(pf_pfasst_t), intent(inout) :: pf
+    character(len=*),  intent(in), optional :: fname
+    integer,           intent(in), optional :: unitno
+    logical,           intent(in), optional :: cmdline
+
+    if (present(fname) .and. len_trim(fname) > 0) then
+       open(unit=66, file=fname, status='old', action='read')
+       call pf_opts_from_file(pf, 66)
+       close(unit=66)
+    end if
+    if (present(unitno)) then
+       call pf_opts_from_file(pf, unitno)
+    end if
+    if (.not. present(cmdline) .or. cmdline) then
+       call pf_opts_from_cl(pf)
+    end if
+  end subroutine pf_set_options
+
+  subroutine pf_print_options(pf, unitno)
+    use pf_mod_version
+
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in), optional :: unitno
+
+    integer :: un = 6
+    character(8)   :: date
+    character(10)  :: time
+
+    if (pf%rank /= 0) return
+    if (present(unitno)) un = unitno
+
+    write(un,*) 'PFASST Configuration'
+    write(un,*) '===================='
+
+    call date_and_time(date=date, time=time)
+    write(un,*) 'date:        ', date
+    write(un,*) 'time:        ', time
+    write(un,*) 'version:     ', pf_version
+    write(un,*) 'git version: ', pf_git_version
+
+    write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
+    write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
+    write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
+    write(un,*) 'nnodes:      ', pf%levels(:)%nnodes, '! number of sdc nodes per level'
+    write(un,*) 'nvars:       ', pf%levels(:)%nvars, '! number of degrees of freedom per level'
+    write(un,*) 'nsweeps:     ', pf%levels(:)%nsweeps, '! number of sdc sweeps performed per visit to each level'
+    if (pf%window == PF_WINDOW_RING) then
+       write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
+    else
+       write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+    end if
+
+  end subroutine pf_print_options
 
 end module pf_mod_options
 
