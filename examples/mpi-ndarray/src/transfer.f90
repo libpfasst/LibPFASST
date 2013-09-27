@@ -66,11 +66,11 @@ contains
        call interp1(qF2(:, 1), qG2(:, 1), ctxF, ctxG)
        call interp1(qF2(:, 2), qG2(:, 2), ctxF, ctxG)
 
-     else if (problem == PROB_SHEAR) then
+    else if (problem == PROB_SHEAR) then
 
-        print *, 'NOT IMPLEMENTED YET'
+       print *, 'NOT IMPLEMENTED YET'
 
-     end if
+    end if
   end subroutine interpolate
 
   subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG)

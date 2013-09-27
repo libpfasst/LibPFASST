@@ -13,7 +13,8 @@ module feval
   type :: work2
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:,:)
-     complex(pfdp), pointer :: ddx(:,:), ddy(:,:), psidx(:,:), psidy(:,:), k2(:,:)
+     complex(pfdp), pointer :: ddx(:,:), ddy(:,:), psidx(:,:), psidy(:,:), k2(:,:), w(:,:)
+     real(pfdp), pointer :: psi_x(:,:), psi_y(:,:), w_x(:,:), w_y(:,:)
   end type work2
 
 
@@ -142,10 +143,25 @@ contains
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
-    wk = -( (work%psidy * wk) * (work%ddx * wk) - (work%psidx * wk) * (work%ddy * wk) ) / size(wk)
-    call fftw_execute_dft(work%ifft, wk, wk)
-    f1 = real(wk)
+    work%w = wk / size(wk)
 
+    wk = real(work%psidx * work%w)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    work%psi_x = real(wk)
+
+    wk = real(work%psidy * work%w)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    work%psi_y = real(wk)
+
+    wk = real(work%ddx * work%w)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    work%w_x = real(wk)
+
+    wk = real(work%ddy * work%w)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    work%w_y = real(wk)
+
+    f1 = -(work%psi_y * work%w_x - work%psi_x * work%w_y)
   end subroutine f1eval2
 
   subroutine f2eval2(yptr, t, level, ctx, f2ptr)
@@ -184,11 +200,16 @@ contains
     y   => array2(yptr)
     rhs => array2(rhsptr)
     f2  => array2(f2ptr)
+    wk  => work%wk
 
-    select case(problem)
-    case default
-       stop "ERROR: Unknown problem type (f2comp2)."
-    end select
+    wk = rhs
+    call fftw_execute_dft(work%ffft, wk, wk)
+
+    wk = wk / (1.0_pfdp + nu*dt*work%k2) / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
+
+    y  = real(wk)
+    f2 = (y - rhs) / dt
   end subroutine f2comp2
 
   subroutine create_work1(ctx, nvars)
@@ -271,6 +292,11 @@ contains
     allocate(work%ddy(nvars,nvars))
     allocate(work%psidx(nvars,nvars))
     allocate(work%psidy(nvars,nvars))
+    allocate(work%psi_x(nvars,nvars))
+    allocate(work%psi_y(nvars,nvars))
+    allocate(work%w_x(nvars,nvars))
+    allocate(work%w_y(nvars,nvars))
+    allocate(work%w(nvars,nvars))
     
     work%psidx = 0
     work%psidy = 0

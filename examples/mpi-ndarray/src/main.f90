@@ -128,7 +128,9 @@ program main
      call pf_add_hook(pf, nlevs, PF_POST_SWEEP, dump_hook)
   end if
 
-  call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual_hook)
+  if (dim == 1) then
+     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual_hook)
+  end if
 
   if (nsteps < comm%nproc) then
      nsteps = comm%nproc

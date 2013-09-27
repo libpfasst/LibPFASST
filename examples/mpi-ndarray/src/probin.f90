@@ -23,6 +23,8 @@ module probin
   double precision, save :: nu     ! viscosity
   double precision, save :: t0     ! initial time for exact solution (PROB_AD only)
   double precision, save :: sigma  ! initial condition parameter
+  double precision, save :: delta  ! initial condition parameter
+  double precision, save :: rho    ! initial condition parameter
   double precision, save :: dt     ! time step
 
   double precision, save :: abs_tol ! absolute residual tolerance
@@ -72,6 +74,8 @@ contains
     sigma   = 0.004d0
     t0      = 0.25d0
     dt      = 0.01d0
+    delta   = 1.0d0
+    rho     = 1.0d0
 
     abs_tol = 0.d0
     rel_tol = 0.d0
