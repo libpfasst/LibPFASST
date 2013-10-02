@@ -103,12 +103,14 @@ contains
     write(un,*) 'version:     ', pf_version
     write(un,*) 'git version: ', pf_git_version
 
-    write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
-    write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
-    write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
-    write(un,*) 'nnodes:      ', pf%levels(:)%nnodes, '! number of sdc nodes per level'
-    write(un,*) 'nvars:       ', pf%levels(:)%nvars, '! number of degrees of freedom per level'
-    write(un,*) 'nsweeps:     ', pf%levels(:)%nsweeps, '! number of sdc sweeps performed per visit to each level'
+    write(un,*) 'nlevels=     ', pf%nlevels, '   ! number of pfasst levels'
+    write(un,*) 'nprocs=      ', pf%comm%nproc, '   ! number of pfasst "time" processors'
+    write(un,*) 'niters=      ', pf%niters, '   ! maximum number of sdc/pfasst iterations'
+    write(un,*) '  '
+    write(un,*) 'nnodes=      ', pf%levels(:)%nnodes, '   ! number of sdc nodes per level'
+    write(un,*) 'nvars=       ', pf%levels(:)%nvars, '   ! number of degrees of freedom per level'
+    write(un,*) 'nsweeps=     ', pf%levels(:)%nsweeps, '   ! number of sdc sweeps performed per visit to each level'
+    write(un,*) '  '
     if (pf%window == PF_WINDOW_RING) then
        write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
     else
