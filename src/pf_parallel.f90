@@ -313,7 +313,7 @@ contains
 
     type(pf_level_t), pointer :: F, G
     integer                   :: j, k, l, c
-    real(pfdp)                :: res1
+    real(pfdp)                :: res1,t0
 
     logical :: qexit, qcycle, qbroadcast
     
