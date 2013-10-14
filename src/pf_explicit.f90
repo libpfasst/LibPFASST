@@ -23,9 +23,9 @@ module pf_mod_explicit
   integer, parameter, private :: npieces = 1
 
   interface
-     subroutine pf_f1eval_p(y, t, level, ctx, f1)
+     subroutine pf_f1eval_p(y, t, level, levelctx, f1)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f1, ctx
+       type(c_ptr),    intent(in), value :: y, f1, levelctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f1eval_p
@@ -50,7 +50,7 @@ contains
     real(pfdp) :: dtsdc(1:F%nnodes-1)
     type(pf_explicit_t), pointer :: exp
 
-    call c_f_pointer(F%sweeper%ctx, exp)
+    call c_f_pointer(F%sweeper%sweeperctx, exp)
 
     call start_timer(pf, TLEVEL+F%level-1)
 
@@ -68,7 +68,7 @@ contains
     ! do the time-stepping
     call F%encap%unpack(F%Q(1), F%q0)
 
-    call exp%f1eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
+    call exp%f1eval(F%Q(1), t0, F%level, F%levelctx, F%F(1,1))
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
@@ -79,7 +79,7 @@ contains
        call F%encap%axpy(F%Q(m+1), dtsdc(m), F%F(m,1))
        call F%encap%axpy(F%Q(m+1), 1.0d0, F%S(m))
 
-       call exp%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
+       call exp%f1eval(F%Q(m+1), t, F%level, F%levelctx, F%F(m+1,1))
     end do
 
     call F%encap%copy(F%qend, F%Q(F%nnodes))
@@ -98,9 +98,9 @@ contains
 
     type(pf_explicit_t), pointer :: exp
 
-    call c_f_pointer(F%sweeper%ctx, exp)
+    call c_f_pointer(F%sweeper%sweeperctx, exp)
 
-    call exp%f1eval(F%Q(m), t, F%level, F%ctx, F%F(m,1))
+    call exp%f1eval(F%Q(m), t, F%level, F%levelctx, F%F(m,1))
   end subroutine explicit_evaluate
 
   ! Initialize smats
@@ -157,7 +157,7 @@ contains
     sweeper%initialize => explicit_initialize
     sweeper%integrate  => explicit_integrate
 
-    sweeper%ctx = c_loc(exp)
+    sweeper%sweeperctx = c_loc(exp)
   end subroutine pf_explicit_create
 
 

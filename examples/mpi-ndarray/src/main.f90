@@ -90,9 +90,9 @@ program main
      pf%levels(l)%nnodes = nnodes(l)
 
      if (dim == 1) then
-        call create_work1(pf%levels(l)%ctx, pf%levels(l)%shape(1))
+        call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
      else if (dim == 2) then
-        call create_work2(pf%levels(l)%ctx, pf%levels(l)%shape(1))
+        call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
      end if
 
      pf%levels(l)%encap       => encap
@@ -151,9 +151,9 @@ program main
 
   do l = 1, nlevs
      if (dim == 1) then
-        call destroy_work1(pf%levels(l)%ctx)
+        call destroy_work1(pf%levels(l)%levelctx)
      else
-        ! call destroy_work2(pf%levels(l)%ctx)
+        ! call destroy_work2(pf%levels(l)%levelctx)
      end if
   end do
 

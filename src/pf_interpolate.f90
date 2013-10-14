@@ -49,9 +49,9 @@ contains
     ! create workspaces
     do m = 1, G%nnodes
        call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, &
-            G%nvars, G%shape, G%ctx, G%encap%ctx)
+            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
        call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, &
-            F%nvars, F%shape, F%ctx, F%encap%ctx)
+            F%nvars, F%shape, F%levelctx, F%encap%encapctx)
     end do
 
     if(present(Finterp) .and. (Finterp)) then
@@ -67,7 +67,7 @@ contains
              call G%encap%copy(delG(m), G%F(m,p))
              call G%encap%axpy(delG(m), -1.0_pfdp, G%pF(m,p))
 
-             call G%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+             call G%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx)
           end do
 
           ! interpolate corrections
@@ -84,7 +84,7 @@ contains
        call G%encap%copy(delG(1), G%Q(1))
        call G%encap%axpy(delG(1), -1.0_pfdp, G%pQ(1))
 
-       call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
+       call F%interpolate(delGF(1), delG(1), F%level, F%levelctx, G%level, G%levelctx)
 
        ! interpolate corrections
        do n = 1, F%nnodes
@@ -107,7 +107,7 @@ contains
           call G%encap%copy(delG(m), G%Q(m))
           call G%encap%axpy(delG(m), -1.0_pfdp, G%pQ(m))
 
-          call F%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+          call F%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx)
        end do
 
        ! interpolate corrections
@@ -144,13 +144,13 @@ contains
 
     ! create workspaces
     call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, &
-         G%nvars, G%shape, G%ctx, G%encap%ctx)
+         G%nvars, G%shape, G%levelctx, G%encap%encapctx)
     call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, &
-         F%nvars, F%shape, F%ctx, F%encap%ctx)
+         F%nvars, F%shape, F%levelctx, F%encap%encapctx)
     call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, &
-         G%nvars, G%shape, G%ctx, G%encap%ctx)
+         G%nvars, G%shape, G%levelctx, G%encap%encapctx)
     call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, &
-         F%nvars, F%shape, F%ctx, F%encap%ctx)
+         F%nvars, F%shape, F%levelctx, F%encap%encapctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)
@@ -161,10 +161,10 @@ contains
     call G%encap%unpack(q0G, G%q0)
     call F%encap%unpack(q0F, F%q0)
 
-    call F%restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%restrict(q0F, delG, F%level, F%levelctx, G%level, G%levelctx)
     call G%encap%axpy(delG, -1.0_pfdp, q0G)
 
-    call F%interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%interpolate(delF, delG, F%level, F%levelctx, G%level, G%levelctx)
     call F%encap%axpy(q0F, -1.0_pfdp, delF)
 
     call F%encap%pack(F%q0, q0F)

@@ -8,7 +8,7 @@ with open('speedups.pkl', 'r') as f:
     speedups = load(f)
 
 
-problems = [ 'heat', 'burgers', 'wave', 'ks' ]
+problems = [ 'heat', 'burgers', 'wave' ]#, 'ks' ]
 
 pens = {
     2: { 'linestyle': 'none', 'color': 'black',  'marker': 's', 'markersize': 8, 'markerfacecolor': 'white', 'markeredgewidth': 2 },

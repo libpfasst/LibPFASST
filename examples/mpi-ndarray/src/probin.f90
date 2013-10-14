@@ -50,7 +50,7 @@ contains
 
     namelist /prbin/ &
          problem_type, window_type, output, abs_tol, rel_tol, &
-         v, nu, t0, dt, sigma, &
+         v, nu, t0, dt, sigma, rho, delta, &
          nlevs, nnodes, nvars, nsteps, niters
 
 

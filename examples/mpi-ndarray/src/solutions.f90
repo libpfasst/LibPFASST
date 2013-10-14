@@ -77,7 +77,7 @@ contains
     nvars = size(w, dim=1)
 
     do j = 1, nvars
-       y = dble(j-1)/nvars
+       y = dble(j-1)/dble(nvars)
        do i = 1, nvars
           x = dble(i-1)/dble(nvars)
 
@@ -85,8 +85,8 @@ contains
           u_y = 0
 
           do k = -4, 4
-             u_y = u_y + rho * ( 1 - tanh(rho * ((0.75d0 + k) - y ))**2 )
-             u_y = u_y - rho * ( 1 - tanh(rho * (y - (0.25d0 + k) ))**2 )
+             u_y = u_y + rho * ( 1.d0 - tanh(rho * ((0.75d0 + dble(k)) - y ))**2 )
+             u_y = u_y - rho * ( 1.d0 - tanh(rho * (y - (0.25d0 + dble(k)) ))**2 )
           end do
 
           w(i,j) = v_x - u_y

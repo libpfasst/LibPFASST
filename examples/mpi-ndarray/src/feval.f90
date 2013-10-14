@@ -13,15 +13,15 @@ module feval
   type :: work2
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:,:)
-     complex(pfdp), pointer :: ddx(:,:), ddy(:,:), psidx(:,:), psidy(:,:), k2(:,:), w(:,:)
-     real(pfdp), pointer :: psi_x(:,:), psi_y(:,:), w_x(:,:), w_y(:,:)
+     complex(pfdp), pointer :: ddx(:,:), ddy(:,:), psidx(:,:), psidy(:,:), w(:,:)
+     real(pfdp), pointer :: k2(:,:), psi_x(:,:), psi_y(:,:), w_x(:,:), w_y(:,:)
   end type work2
 
 
 contains
 
-  subroutine f1eval1(yptr, t, level, ctx, f1ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f1ptr, ctx
+  subroutine f1eval1(yptr, t, level, levelctx, f1ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f1ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -29,7 +29,7 @@ contains
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array1(yptr)
     f1 => array1(f1ptr)
@@ -52,8 +52,8 @@ contains
     end select
   end subroutine f1eval1
 
-  subroutine f2eval1(yptr, t, level, ctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
+  subroutine f2eval1(yptr, t, level, levelctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -61,7 +61,7 @@ contains
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array1(yptr)
     f2 => array1(f2ptr)
@@ -88,8 +88,8 @@ contains
     f2 = real(wk)
   end subroutine f2eval1
 
-  subroutine f2comp1(yptr, t, dt, rhsptr, level, ctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
+  subroutine f2comp1(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
@@ -97,7 +97,7 @@ contains
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y   => array1(yptr)
     rhs => array1(rhsptr)
@@ -126,8 +126,8 @@ contains
     f2 = (y - rhs) / dt
   end subroutine f2comp1
 
-  subroutine f1eval2(yptr, t, level, ctx, f1ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f1ptr, ctx
+  subroutine f1eval2(yptr, t, level, levelctx, f1ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f1ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -135,7 +135,7 @@ contains
     type(work2),   pointer :: work
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array2(yptr)
     f1 => array2(f1ptr)
@@ -145,27 +145,27 @@ contains
     call fftw_execute_dft(work%ffft, wk, wk)
     work%w = wk / size(wk)
 
-    wk = real(work%psidx * work%w)
+    wk = work%psidx * work%w
     call fftw_execute_dft(work%ifft, wk, wk)
     work%psi_x = real(wk)
 
-    wk = real(work%psidy * work%w)
+    wk = work%psidy * work%w
     call fftw_execute_dft(work%ifft, wk, wk)
     work%psi_y = real(wk)
 
-    wk = real(work%ddx * work%w)
+    wk = work%ddx * work%w
     call fftw_execute_dft(work%ifft, wk, wk)
     work%w_x = real(wk)
 
-    wk = real(work%ddy * work%w)
+    wk = work%ddy * work%w
     call fftw_execute_dft(work%ifft, wk, wk)
     work%w_y = real(wk)
 
     f1 = -(work%psi_y * work%w_x - work%psi_x * work%w_y)
   end subroutine f1eval2
 
-  subroutine f2eval2(yptr, t, level, ctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
+  subroutine f2eval2(yptr, t, level, levelctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -173,7 +173,7 @@ contains
     type(work2),   pointer :: work
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array2(yptr)
     f2 => array2(f2ptr)
@@ -186,8 +186,8 @@ contains
     f2 = real(wk)
   end subroutine f2eval2
 
-  subroutine f2comp2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
+  subroutine f2comp2(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
@@ -195,7 +195,7 @@ contains
     type(work2),   pointer :: work
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y   => array2(yptr)
     rhs => array2(rhsptr)
@@ -212,8 +212,8 @@ contains
     f2 = (y - rhs) / dt
   end subroutine f2comp2
 
-  subroutine create_work1(ctx, nvars)
-    type(c_ptr), intent(out) :: ctx
+  subroutine create_work1(levelctx, nvars)
+    type(c_ptr), intent(out) :: levelctx
     integer,     intent(in)  :: nvars
 
     type(work1), pointer :: work
@@ -222,7 +222,7 @@ contains
     real(pfdp)  :: kx(nvars)
 
     allocate(work)
-    ctx = c_loc(work)
+    levelctx = c_loc(work)
 
     do i = 1, nvars
        if (i <= nvars/2+1) then
@@ -257,8 +257,8 @@ contains
 
   end subroutine create_work1
 
-  subroutine create_work2(ctx, nvars)
-    type(c_ptr), intent(out) :: ctx
+  subroutine create_work2(levelctx, nvars)
+    type(c_ptr), intent(out) :: levelctx
     integer,     intent(in)  :: nvars
 
     type(work2), pointer :: work
@@ -267,7 +267,7 @@ contains
     real(pfdp)  :: kx(nvars)
 
     allocate(work)
-    ctx = c_loc(work)
+    levelctx = c_loc(work)
 
     do i = 1, nvars
        if (i <= nvars/2+1) then
@@ -307,7 +307,7 @@ contains
           work%ddx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i)
           work%ddy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j)
     
-          if (work%k2(i,j) /= 0.0_pfdp) then
+          if (work%k2(i,j) > 0.0_pfdp) then
              work%psidx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i) / work%k2(i,j)
              work%psidy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j) / work%k2(i,j)
           end if
@@ -317,10 +317,10 @@ contains
   end subroutine create_work2
 
 
-  subroutine destroy_work1(ctx)
-    type(c_ptr), intent(in) :: ctx
+  subroutine destroy_work1(levelctx)
+    type(c_ptr), intent(in) :: levelctx
     type(work1), pointer :: work
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
     deallocate(work%wk)
     deallocate(work%ddx)
     deallocate(work%lap)
