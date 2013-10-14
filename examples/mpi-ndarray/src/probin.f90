@@ -116,6 +116,7 @@ contains
     case ("shear")
        problem = PROB_SHEAR
        dim     = 2
+       nu      = 1.d-4
     end select
 
     select case (window_type)
