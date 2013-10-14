@@ -313,12 +313,13 @@ contains
 
     type(pf_level_t), pointer :: F, G
     integer                   :: j, k, l, c
-    real(pfdp)                :: t0, res1
+    real(pfdp)                :: res1,t0
 
     logical :: qexit, qcycle, qbroadcast
     
     call start_timer(pf, TTOTAL)
-    t0=pf%state%step * dt
+
+
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%step    = pf%rank
@@ -330,6 +331,7 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
+    t0=pf%state%t0
 
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
