@@ -80,6 +80,8 @@ program main
 
      if (problem == PROB_WAVE) then
         pf%levels(l)%shape  = [ nvars(l), 2 ]
+     else if (problem == PROB_SHEAR) then
+        pf%levels(l)%shape  = [ nvars(l), nvars(l) ]
      else
         pf%levels(l)%shape  = nvars(l)
      end if
@@ -87,7 +89,11 @@ program main
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
      pf%levels(l)%nnodes = nnodes(l)
 
-     call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%shape(1))
+     if (dim == 1) then
+        call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+     else if (dim == 2) then
+        call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+     end if
 
      pf%levels(l)%encap       => encap
      pf%levels(l)%interpolate => interpolate
@@ -122,7 +128,9 @@ program main
      call pf_add_hook(pf, nlevs, PF_POST_SWEEP, dump_hook)
   end if
 
-  call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual_hook)
+  if (dim == 1) then
+     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual_hook)
+  end if
 
   if (nsteps < comm%nproc) then
      nsteps = comm%nproc
@@ -142,7 +150,11 @@ program main
   deallocate(q1%flatarray)
 
   do l = 1, nlevs
-     call feval_destroy_workspace(pf%levels(l)%ctx)
+     if (dim == 1) then
+        call destroy_work1(pf%levels(l)%levelctx)
+     else
+        ! call destroy_work2(pf%levels(l)%levelctx)
+     end if
   end do
 
   call pf_pfasst_destroy(pf)

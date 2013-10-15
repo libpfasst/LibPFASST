@@ -47,7 +47,7 @@ contains
 
     type(pf_imex_t), pointer :: imex
 
-    call c_f_pointer(F%sweeper%ctx, imex)
+    call c_f_pointer(F%sweeper%sweeperctx, imex)
 
     call start_timer(pf, TLEVEL+F%level-1)
 
@@ -66,10 +66,10 @@ contains
     ! do the time-stepping
     call F%encap%unpack(F%Q(1), F%q0)
 
-    call imex%f1eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
-    call imex%f2eval(F%Q(1), t0, F%level, F%ctx, F%F(1,2))
+    call imex%f1eval(F%Q(1), t0, F%level, F%levelctx, F%F(1,1))
+    call imex%f2eval(F%Q(1), t0, F%level, F%levelctx, F%F(1,2))
 
-    call F%encap%create(rhs, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call F%encap%create(rhs, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape, F%levelctx, F%encap%encapctx)
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
@@ -80,8 +80,8 @@ contains
        call F%encap%axpy(rhs, dtsdc(m), F%F(m,1))
        call F%encap%axpy(rhs, 1.0d0, F%S(m))
 
-       call imex%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,2))
-       call imex%f1eval(F%Q(m+1), t, F%level, F%ctx, F%F(m+1,1))
+       call imex%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%levelctx, F%F(m+1,2))
+       call imex%f1eval(F%Q(m+1), t, F%level, F%levelctx, F%F(m+1,1))
     end do
 
     call F%encap%copy(F%qend, F%Q(F%nnodes))
@@ -99,10 +99,10 @@ contains
     type(pf_level_t), intent(inout) :: F
 
     type(pf_imex_t), pointer :: imex
-    call c_f_pointer(F%sweeper%ctx, imex)
+    call c_f_pointer(F%sweeper%sweeperctx, imex)
 
-    call imex%f1eval(F%Q(m), t, F%level, F%ctx, F%F(m,1))
-    call imex%f2eval(F%Q(m), t, F%level, F%ctx, F%F(m,2))
+    call imex%f1eval(F%Q(m), t, F%level, F%levelctx, F%F(m,1))
+    call imex%f2eval(F%Q(m), t, F%level, F%levelctx, F%F(m,2))
   end subroutine imex_evaluate
 
   ! Initialize smats
@@ -164,14 +164,14 @@ contains
     sweeper%initialize => imex_initialize
     sweeper%integrate  => imex_integrate
 
-    sweeper%ctx = c_loc(imex)
+    sweeper%sweeperctx = c_loc(imex)
   end subroutine pf_imex_create
 
   subroutine pf_imex_destroy(sweeper)
     type(pf_sweeper_t), intent(inout) :: sweeper
 
     type(pf_imex_t), pointer :: imex
-    call c_f_pointer(sweeper%ctx, imex)
+    call c_f_pointer(sweeper%sweeperctx, imex)
 
     deallocate(imex)
   end subroutine pf_imex_destroy

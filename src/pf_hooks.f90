@@ -102,13 +102,13 @@ contains
     if (level == -1) then
        do l = 1, pf%nlevels
           do i = 1, pf%nhooks(l,hook)
-             call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
+             call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%levelctx)
           end do
        end do
     else
        l = level
        do i = 1, pf%nhooks(l,hook)
-          call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%ctx)
+          call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state, pf%levels(l)%levelctx)
        end do
     end if
 

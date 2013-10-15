@@ -76,8 +76,8 @@ contains
 
        do m = 1, F%nnodes-1
           call G%encap%create(qFr(m), G%level, SDC_KIND_INTEGRAL, &
-               G%nvars, G%shape, G%ctx, G%encap%ctx)
-          call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
+               G%nvars, G%shape, G%levelctx, G%encap%encapctx)
+          call F%restrict(qF(m), qFr(m), F%level, F%levelctx, G%level, G%levelctx)
        end do
 
        ! when restricting '0 to node' integral terms, skip the first
@@ -90,8 +90,8 @@ contains
 
        do m = 1, F%nnodes
           call G%encap%create(qFr(m), G%level, SDC_KIND_SOL_NO_FEVAL, &
-               G%nvars, G%shape, G%ctx, G%encap%ctx)
-          call F%restrict(qF(m), qFr(m), F%level, F%ctx, G%level, G%ctx)
+               G%nvars, G%shape, G%levelctx, G%encap%encapctx)
+          call F%restrict(qF(m), qFr(m), F%level, F%levelctx, G%level, G%levelctx)
        end do
 
        call pf_apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
@@ -134,14 +134,14 @@ contains
     !
     do m = 1, G%nnodes
        call G%encap%create(tmpG(m), G%level, SDC_KIND_INTEGRAL, &
-            G%nvars, G%shape, G%ctx, G%encap%ctx)
+            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
        call G%encap%create(tmpFr(m), G%level, SDC_KIND_INTEGRAL, &
-            G%nvars, G%shape, G%ctx, G%encap%ctx)
+            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
     end do
 
     do m = 1, F%nnodes
        call F%encap%create(tmpF(m), F%level, SDC_KIND_INTEGRAL, &
-            F%nvars, F%shape, F%ctx, F%encap%ctx)
+            F%nvars, F%shape, F%levelctx, F%encap%encapctx)
     end do
 
 

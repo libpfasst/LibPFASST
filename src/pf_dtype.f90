@@ -86,7 +86,7 @@ module pf_mod_dtype
   end type pf_hook_t
 
   type :: pf_sweeper_t
-     type(c_ptr) :: ctx
+     type(c_ptr) :: sweeperctx
      integer     :: npieces
      procedure(pf_sweep_p),      pointer, nopass :: sweep
      procedure(pf_initialize_p), pointer, nopass :: initialize
@@ -95,7 +95,7 @@ module pf_mod_dtype
   end type pf_sweeper_t
 
   type :: pf_encap_t
-     type(c_ptr) :: ctx
+     type(c_ptr) :: encapctx
      procedure(pf_encap_create_p),  pointer, nopass :: create
      procedure(pf_encap_destroy_p), pointer, nopass :: destroy
      procedure(pf_encap_setval_p),  pointer, nopass :: setval
@@ -145,7 +145,7 @@ module pf_mod_dtype
 
      type(c_ptr) :: qend                ! solution at last node
 
-     type(c_ptr) :: ctx  = c_null_ptr   ! user context
+     type(c_ptr) :: levelctx            ! user context
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
@@ -205,19 +205,18 @@ module pf_mod_dtype
 
      ! debug
      type(c_ptr) :: zmq
-
      character(512) :: ctx_char
   end type pf_pfasst_t
 
   interface
      ! hook interface
-     subroutine pf_hook_p(pf, level, state, ctx)
+     subroutine pf_hook_p(pf, level, state, levelctx)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
        type(pf_pfasst_t), intent(inout) :: pf
        type(pf_level_t),  intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
-       type(c_ptr),       intent(in)    :: ctx
+       type(c_ptr),       intent(in)    :: levelctx
      end subroutine pf_hook_p
 
      ! sweeper interfaces
@@ -249,17 +248,17 @@ module pf_mod_dtype
      end subroutine pf_integrate_p
 
      ! transfer interfaces
-     subroutine pf_transfer_p(qF, qG, levelF, ctxF, levelG, ctxG)
+     subroutine pf_transfer_p(qF, qG, levelF, levelctxF, levelG, levelctxG)
        import c_ptr
-       type(c_ptr), intent(in), value :: qF, qG, ctxF, ctxG
+       type(c_ptr), intent(in), value :: qF, qG, levelctxF, levelctxG
        integer,     intent(in)        :: levelF, levelG
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
-     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, lctx, ectx)
+     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, levelctx, encapctx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
-       type(c_ptr),  intent(in), value :: lctx, ectx
+       type(c_ptr),  intent(in), value :: levelctx, encapctx
        integer,      intent(in)        :: level, nvars, shape(:)
        integer,      intent(in)        :: kind
      end subroutine pf_encap_create_p

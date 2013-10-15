@@ -25,12 +25,12 @@ module hooks
 
 contains
 
-  subroutine echo_error_hook(pf, level, state, ctx)
+  subroutine echo_error_hook(pf, level, state, levelctx)
     use solutions, only: exact
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    type(c_ptr),         intent(in)    :: ctx
+    type(c_ptr),         intent(in)    :: levelctx
 
     real(c_double) :: yexact(level%nvars)
     real(pfdp), pointer :: qend(:)
@@ -44,12 +44,12 @@ contains
   end subroutine echo_error_hook
 
 
-  subroutine dump_hook(pf, level, state, ctx)
+  subroutine dump_hook(pf, level, state, levelctx)
     use probin, only: output
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    type(c_ptr),         intent(in)    :: ctx
+    type(c_ptr),         intent(in)    :: levelctx
 
     character(len=256)     :: fname
     type(ndarray), pointer :: qend
@@ -65,13 +65,13 @@ contains
   end subroutine dump_hook
 
 
-  subroutine echo_residual_hook(pf, level, state, ctx)
+  subroutine echo_residual_hook(pf, level, state, levelctx)
     use iso_c_binding
     use pf_mod_utils
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: level
     type(pf_state_t),  intent(in)    :: state
-    type(c_ptr),       intent(in)    :: ctx
+    type(c_ptr),       intent(in)    :: levelctx
 
     real(pfdp), pointer :: r(:)
 

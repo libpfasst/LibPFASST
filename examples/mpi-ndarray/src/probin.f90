@@ -6,12 +6,12 @@ module probin
 
   integer, parameter :: maxlevs = 3
 
-  integer, parameter :: PROB_AD    = 1
-  integer, parameter :: PROB_HEAT  = 2
-  integer, parameter :: PROB_VB    = 3
-  integer, parameter :: PROB_WAVE  = 4
-  integer, parameter :: PROB_KS    = 5
-  integer, parameter :: PROB_SHEAR = 6
+  integer, parameter :: PROB_AD    = 11
+  integer, parameter :: PROB_HEAT  = 12
+  integer, parameter :: PROB_VB    = 13
+  integer, parameter :: PROB_WAVE  = 14
+  integer, parameter :: PROB_KS    = 15
+  integer, parameter :: PROB_SHEAR = 21
 
   integer, save :: problem
   integer, save :: wtype
@@ -23,6 +23,8 @@ module probin
   double precision, save :: nu     ! viscosity
   double precision, save :: t0     ! initial time for exact solution (PROB_AD only)
   double precision, save :: sigma  ! initial condition parameter
+  double precision, save :: delta  ! initial condition parameter
+  double precision, save :: rho    ! initial condition parameter
   double precision, save :: dt     ! time step
 
   double precision, save :: abs_tol ! absolute residual tolerance
@@ -48,7 +50,7 @@ contains
 
     namelist /prbin/ &
          problem_type, window_type, output, abs_tol, rel_tol, &
-         v, nu, t0, dt, sigma, &
+         v, nu, t0, dt, sigma, rho, delta, &
          nlevs, nnodes, nvars, nsteps, niters
 
 
@@ -72,6 +74,8 @@ contains
     sigma   = 0.004d0
     t0      = 0.25d0
     dt      = 0.01d0
+    delta   = 1.0d0
+    rho     = 1.0d0
 
     abs_tol = 0.d0
     rel_tol = 0.d0
@@ -112,6 +116,7 @@ contains
     case ("shear")
        problem = PROB_SHEAR
        dim     = 2
+       nu      = 1.d-4
     end select
 
     select case (window_type)

@@ -29,8 +29,8 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine feval_create_workspace(ctx, nvars)
-    type(c_ptr), intent(out) :: ctx
+  subroutine feval_create_workspace(levelctx, nvars)
+    type(c_ptr), intent(out) :: levelctx
     integer,     intent(in)  :: nvars
 
     type(ad_work_t), pointer :: work
@@ -69,14 +69,14 @@ contains
        end if
     end do
 
-    ctx = c_loc(work)
+    levelctx = c_loc(work)
   end subroutine feval_create_workspace
 
-  subroutine feval_destroy_workspace(ctx)
-    type(c_ptr), intent(in) :: ctx
+  subroutine feval_destroy_workspace(levelctx)
+    type(c_ptr), intent(in) :: levelctx
     type(ad_work_t), pointer :: work
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     deallocate(work%wk)
     deallocate(work%ddx)
@@ -131,8 +131,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine eval_f1(yptr, t, level, ctx, f1ptr)
-    type(c_ptr), intent(in), value :: yptr, f1ptr, ctx
+  subroutine eval_f1(yptr, t, level, levelctx, f1ptr)
+    type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
@@ -140,7 +140,7 @@ contains
     real(pfdp),      pointer :: y(:), f1(:)
     complex(pfdp),   pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array1(yptr)
     f1 => array1(f1ptr)
@@ -158,8 +158,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine eval_f2(yptr, t, level, ctx, f2ptr)
-    type(c_ptr), intent(in), value :: yptr, f2ptr, ctx
+  subroutine eval_f2(yptr, t, level, levelctx, f2ptr)
+    type(c_ptr), intent(in), value :: yptr, f2ptr, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
@@ -167,7 +167,7 @@ contains
     real(pfdp),      pointer :: y(:), f2(:)
     complex(pfdp),   pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array1(yptr)
     f2 => array1(f2ptr)
@@ -184,8 +184,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine comp_f2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
-    type(c_ptr), intent(in), value :: yptr, rhsptr, f2ptr, ctx
+  subroutine comp_f2(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
+    type(c_ptr), intent(in), value :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),  intent(in)        :: t, dt
     integer,     intent(in)        :: level
 
@@ -193,7 +193,7 @@ contains
     real(pfdp),      pointer :: y(:), rhs(:), f2(:)
     complex(pfdp),   pointer :: wk(:)
 
-    call c_f_pointer(ctx, work)
+    call c_f_pointer(levelctx, work)
 
     y  => array1(yptr)
     rhs => array1(rhsptr)
