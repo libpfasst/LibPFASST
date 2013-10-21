@@ -248,10 +248,11 @@ module pf_mod_dtype
      end subroutine pf_integrate_p
 
      ! transfer interfaces
-     subroutine pf_transfer_p(qF, qG, levelF, levelctxF, levelG, levelctxG)
-       import c_ptr
+     subroutine pf_transfer_p(qF, qG, levelF, levelctxF, levelG, levelctxG, t)
+       import c_ptr, pfdp
        type(c_ptr), intent(in), value :: qF, qG, levelctxF, levelctxG
        integer,     intent(in)        :: levelF, levelG
+       real(pfdp),  intent(in)        :: t
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
