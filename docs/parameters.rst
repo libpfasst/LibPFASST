@@ -1,3 +1,25 @@
+
+Parameters and variables
+========================
+
+The libpfasst library has many parameters which control the 
+behavior of the PFASST algorithm and can be changed by the 
+user.  This section lists all the parameters and describes
+their function, location, default values, 
+and how they are set.  Below is also an explanation of how to set 
+certain parameters to acheive particular variants of PFASST.
+
+Types of parameters
+-------------------
+
+*  libpfasst static parameters:  are hard coded and cannot be changed at run time
+*  libfpasst mandatory paramters: must be reassigned at run time by either specification in and input file or the command line.  The use of default values will result in program termination.
+*  libfpasst optional paramters: can  be reassigned at run time by either specification in and input file or the command line.  The use of default values will result in default execution.
+* local mandatory parameters:  must be passed in a call to pf_run_pfasst
+* local optional parameters:   specified by the user application and unrelated to the workings of libpfasst
+
+
+
   type :: pf_pfasst_t
      integer :: nlevels = -1            ! number of pfasst levels
      integer :: niters  = 5             ! number of iterations
@@ -57,3 +79,28 @@
 
   namelist /params/ fbase          !  Base name for output
   namelist /params/ fnml          !  Base name for output
+
+
+
+File input
+----------
+
+The default input file is "probin.nml" wherein the namelist 
+PARAMS (defined  locally in probin.f90) can be specified.  Alternatively,
+a different input file can be specified on the command line by adding
+the file name directly after the executable.  The alternative input
+file must be specified first before any command line parameter specifications 
+(see next section).
+
+Command line input
+------------------
+
+All the variables in the namelist PARAMS (defined  locally in probin.f90) can
+be modified by simply specifying their value on the command line.  There is 
+only one caveat to this in that any parameters must be specified after the
+(optional) input file specification.  For example
+
+mpirun -n 20 main.exe  myinput.nml niters=10
+
+would set the  input file to "myinput.nml" and then over-ride any
+specified value of niters with the value 10. 
