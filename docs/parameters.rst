@@ -26,6 +26,8 @@ Types of parameters
      integer :: rank    = -1            ! rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO
      integer :: ctype   = SDC_CYCLE_V
+     logical :: Pipeline_G   = .FALSE.  !  Pipeline at coarsest level
+     logical :: PFASST_pred   = .TRUE.  !  Do PFASST style predictor
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
@@ -104,3 +106,60 @@ mpirun -n 20 main.exe  myinput.nml niters=10
 
 would set the  input file to "myinput.nml" and then over-ride any
 specified value of niters with the value 10. 
+
+
+
+Variable for the predictor
+--------------------------
+
+The two variables Pipeline_G and PFASST_pred  determine how the
+predictor works.  The different combinations of these variables
+and the parameter Nsweeps on the coarsest level great some subtle
+differences in how the predictor performs.
+
+Some cases:
+1. If PFASST_pred is false and Pipeline_G is false, then 
+the predictor is a serial application of SDC with Nsweeps.
+This can be done without communication wherein every processor
+mimics the behavior of the processors previous to it in time.
+
+2. If PFASST_pred is false and Pipeline_G is true and Nsweeps
+is one, then the predictor is a serial application of SDC with 1
+sweep.  As above, there is no communication necessary.
+
+3. If PFASST_pred is false and Pipeline_G is true and Nsweeps
+is greater than one,  then the predictor is a version of pipelined
+SDC. There is no communication necessary until the second sweep on
+the each processor is done.  After that, each processor must recieve
+a new initial value.
+
+4. If PFASST_pred is true, and Nsweeps equals one, then it doesn't
+matter what Pipeline_G is.  No communication is necessary, and 
+we simply reuse the function values from the previous iteration
+in each SDC sweep.  Some care must be taken here as to how to 
+interpret the variable t0 especially in light of time dependent
+boundary conditions.  Currently t0 does not change in these
+iterations, hence one should use caution using PFASST_pred = true with
+time dependent boundary conditions.
+
+5. If PFASST_pred is true, and Nsweeps is greater than  one and 
+Pipeline_G is true, then the predictor will act like the normal
+PFASST_pred with Nsweeps equals one, but more iterations will be
+taken.  This choice is a bit strange.  No communication is needed
+until each processor is doing the P+1st iteration, then new
+initial data must be used and in all cases, previous f values are
+used in the SDCsweeps.  The caveat about t0 is still valid.    
+
+6. Finally, if PFASST_pred is true, and Nsweeps is greater than  one and 
+Pipeline_G is false, then the predictor will act like the normal
+PFASST_pred with Nsweeps equals one, but additional iterations
+are taken before the initial conditions at each processor are reset.
+This can be done without communication.
+The caveat about t0 is still valid.    
+
+How is this implemented?  There are two pieces to the initialization.
+The first consists of the process of giving every processor an initial
+value which is consistent with t0 at that processor.  This can be
+done without communication in all cases.
+
+

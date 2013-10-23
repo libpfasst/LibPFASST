@@ -62,6 +62,8 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
+
+
   type, bind(c) :: pf_state_t
      real(c_double) :: t0, dt
      integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
@@ -187,6 +189,9 @@ module pf_mod_dtype
      real(pfdp) :: rel_res_tol = 0.d0
 
      integer :: window = PF_WINDOW_BLOCK
+ 
+     logical :: Pipeline_G =  .true.
+     logical :: PFASST_pred = .true.
 
      ! pf objects
      type(pf_cycle_t)          :: cycles

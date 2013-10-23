@@ -65,25 +65,61 @@ contains
 
 
     if (pf%comm%nproc > 1) then
-
-       ! predictor burn in
-       G => pf%levels(1)
-       do k = 1, pf%rank + 1
-          pf%state%iter = -k
-
-          ! get new initial value (skip on first iteration)
-          if (k > 1) then
-               call G%encap%pack(G%q0, G%Q(G%nnodes))
-               call spreadq0(G, t0)
-            end if
-
-          call call_hooks(pf, G%level, PF_PRE_SWEEP)
-          do j = 1, G%nsweeps
+       if (pf%Pipeline_G .and. (G%nsweeps > 1)) then
+          !  This is the weird choice.  We burn in without communication, then do extra sweeps
+          G => pf%levels(1)
+          do k = 1, pf%rank + 1
+             pf%state%iter = -k
+             
+             ! get new initial value (skip on first iteration)
+             if (k > 1) then
+                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                if (.not. pf%PFASST_pred) then 
+                   call spreadq0(G, t0)
+                end if
+             end if
+             
+             call call_hooks(pf, G%level, PF_PRE_SWEEP)
              call G%sweeper%sweep(pf, G, t0, dt)
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
+             call pf_residual(pf, G, dt)  !  why is this here?
           end do
-          call call_hooks(pf, G%level, PF_POST_SWEEP)
-          call pf_residual(pf, G, dt)
-       end do
+          ! Now we have mimicked the burn in and we must do pipe-lined sweeps
+          do k = 1, G%nsweeps-1
+             pf%state%iter =-(pf%rank + 1) -k
+
+             !  Get new initial conditions
+             call pf_recv(pf, G, G%level*20000+pf%rank, .true.)        
+             !  Do a sweep
+             call call_hooks(pf, G%level, PF_PRE_SWEEP)
+             call G%sweeper%sweep(pf, G, t0, dt)
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
+             !  Send forward
+             call pf_send(pf, G,  G%level*20000+pf%rank+1, .true.)
+          end do
+          call pf_residual(pf, G, dt)  !  why is this here?
+       else
+          ! Normal predictor burn in
+          G => pf%levels(1)
+          do k = 1, pf%rank + 1
+             pf%state%iter = -k
+             
+             ! get new initial value (skip on first iteration)
+             if (k > 1) then
+                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                if (.not. pf%PFASST_pred) then 
+                   call spreadq0(G, t0)
+                end if
+             end if
+             
+             call call_hooks(pf, G%level, PF_PRE_SWEEP)
+             do j = 1, G%nsweeps
+                call G%sweeper%sweep(pf, G, t0, dt)
+             end do
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
+             call pf_residual(pf, G, dt)
+          end do
+       endif    ! (Pipeline_G)
 
        ! do start cycle stages
        if (associated(pf%cycles%start)) then
@@ -92,9 +128,9 @@ contains
              call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
           end do
        end if
-
+          
     end if
-
+       
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, 1, PF_POST_PREDICTOR)
 
