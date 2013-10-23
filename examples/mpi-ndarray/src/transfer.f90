@@ -46,9 +46,10 @@ contains
     qF = real(wkF)
   end subroutine interp1
 
-  subroutine interpolate(qFp, qGp, levelF, levelctxF, levelG, levelctxG)
+  subroutine interpolate(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
     type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
     integer,     intent(in)        :: levelF, levelG
+    real(pfdp),  intent(in) :: t
 
     real(pfdp),      pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
 
@@ -73,9 +74,10 @@ contains
     end if
   end subroutine interpolate
 
-  subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG)
+  subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
     type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
     integer,     intent(in)        :: levelF, levelG
+    real(pfdp),  intent(in) :: t
 
     real(pfdp), pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
 
