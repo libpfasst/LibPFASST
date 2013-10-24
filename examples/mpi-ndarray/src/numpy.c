@@ -14,7 +14,6 @@ void dump_mkdir(char *dname, int dlen)
   mkdir(dname, 0755);
 }
 
-
 void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, int nvars, double *array)
 {
   unsigned short  i, len, pad;
@@ -23,10 +22,7 @@ void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, i
   char            header[256*256];
   char            buf[BUFLEN], shp[BUFLEN];
 
-  /*
-   * open output file
-   */
-
+  /* open output file */
   snprintf(buf, BUFLEN, "%s/%s", dname, fname);
   fp = fopen(buf, "wb");
   if (fp == NULL) {
@@ -35,20 +31,14 @@ void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, i
     return;
   }
 
-  /*
-   * build shape string
-   */
+  /* build shape string */
   shp[0] = 0;
-  for (i=0; i<dim; i++) {
-    snprintf(shp + strlen(shp), BUFLEN-strlen(shp)-1,
-             "%d,", shape[i]);
-  }
+  for (i=0; i<dim; i++)
+    snprintf(shp + strlen(shp), BUFLEN-strlen(shp)-1, "%d,", shape[i]);
 
-  /* 
-   * build numpy header 
-   */
-  snprintf(header, 256*256, 
-           "{'descr': '%s', 'fortran_order': True, 'shape': (%s), }", 
+  /* build numpy header */
+  snprintf(header, 256*256,
+           "{'descr': '%s', 'fortran_order': True, 'shape': (%s), }",
            endian, shp);
 
   len = strlen(header);
@@ -64,18 +54,13 @@ void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, i
   header[len+pad+1] = '\n';
   header[len+pad+2] = '\0';
 
-  /* 
-   * write npy header, v1.0 
-   */
+  /* write npy header, v1.0 */
   len = strlen(header);
-  
   fwrite("\x93NUMPY\x01\x00", 1, 8, fp);
   fwrite(&len, 1, 2, fp);
   fwrite(header, 1, len, fp);
 
-  /*
-   * write data and close 
-   */
+  /* write data and close */
   fwrite(array, sizeof(double), nvars, fp);
   fclose(fp);
 }

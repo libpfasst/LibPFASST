@@ -208,7 +208,7 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
     logical,           intent(out)   :: qexit, qcycle
-    
+
     integer    :: steps_to_last
     real(pfdp) :: res1
 
@@ -242,7 +242,7 @@ contains
        ! 'nmoved' thinger to break this cycle if everyone is
        ! done...
 
-       if (pf%state%status == PF_STATUS_CONVERGED) then 
+       if (pf%state%status == PF_STATUS_CONVERGED) then
           qcycle = .true.
           return
        end if
@@ -316,7 +316,7 @@ contains
     real(pfdp)                :: res1
 
     logical :: qexit, qcycle, qbroadcast
-    
+
     call start_timer(pf, TTOTAL)
 
 
@@ -372,7 +372,7 @@ contains
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
             call pf_predictor(pf, pf%state%t0, dt)
-       
+
        !
        ! perform fine sweeps
        !
@@ -428,12 +428,9 @@ contains
           pf%state%cycle = pf%state%cycle + 1
           call pf_do_stage(pf, pf%cycles%pfasst(c), k,pf%state%t0, dt)
        end do
-       
+
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
-
-       ! call pf_dstatus(pf, 'waiting')
-       ! call mpi_barrier(MPI_COMM_WORLD, c)
 
     end do
 
@@ -462,37 +459,29 @@ contains
   subroutine pf_send_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    call pf_dstatus(pf, "send_status1")
     if (pf%rank /= pf%state%last) then
        call pf%comm%send_status(pf, tag)
     end if
-    call pf_dstatus(pf, "send_status2")
   end subroutine pf_send_status
 
   subroutine pf_recv_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    call pf_dstatus(pf, "recv_status1")
     if (pf%rank /= pf%state%first) then
        call pf%comm%recv_status(pf, tag)
     end if
-    call pf_dstatus(pf, "recv_status2")
   end subroutine pf_recv_status
 
   subroutine pf_send_nmoved(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    call pf_dstatus(pf, "send_nmoved1")
     call pf%comm%send_nmoved(pf, tag)
-    call pf_dstatus(pf, "send_nmoved2")
   end subroutine pf_send_nmoved
 
   subroutine pf_recv_nmoved(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    call pf_dstatus(pf, "recv_nmoved1")
     call pf%comm%recv_nmoved(pf, tag)
-    call pf_dstatus(pf, "recv_nmoved2")
   end subroutine pf_recv_nmoved
 
   subroutine pf_send(pf, level, tag, blocking)
@@ -500,14 +489,12 @@ contains
     type(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
-    call pf_dstatus(pf, "send1")
     call start_timer(pf, TSEND + level%level - 1)
     if (pf%rank /= pf%state%last &
          .and. pf%state%status == PF_STATUS_ITERATING) then
        call pf%comm%send(pf, level, tag, blocking)
     end if
     call end_timer(pf, TSEND + level%level - 1)
-    call pf_dstatus(pf, "send2")
   end subroutine pf_send
 
   subroutine pf_recv(pf, level, tag, blocking)
@@ -515,13 +502,11 @@ contains
     type(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
-    call pf_dstatus(pf, "recv1")
     call start_timer(pf, TRECEIVE + level%level - 1)
     if (pf%rank /= pf%state%first .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
        call pf%comm%recv(pf, level, tag, blocking)
     end if
     call end_timer(pf, TRECEIVE + level%level - 1)
-    call pf_dstatus(pf, "recv2")
   end subroutine pf_recv
 
   subroutine pf_broadcast(pf, y, nvar, root)

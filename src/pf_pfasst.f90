@@ -27,9 +27,9 @@ contains
   !
   subroutine pf_pfasst_create(pf, comm, maxlevels)
     use pf_mod_hooks, only: PF_MAX_HOOK
-    type(pf_pfasst_t),   intent(inout)         :: pf
-    type(pf_comm_t),     intent(inout), target :: comm
-    integer,             intent(in)            :: maxlevels
+    type(pf_pfasst_t), intent(inout)         :: pf
+    type(pf_comm_t),   intent(inout), target :: comm
+    integer,           intent(in)            :: maxlevels
 
     integer :: l
 
@@ -54,8 +54,6 @@ contains
     nullify(pf%cycles%pfasst)
 
     pf%nlevels = maxlevels
-
-    pf%zmq = c_null_ptr
   end subroutine pf_pfasst_create
 
 
@@ -88,7 +86,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
 
     type(pf_level_t), pointer :: F, G
-    integer :: l
+    integer                   :: l
 
     if (pf%rank < 0) then
        stop 'invalid PF rank: did you call setup correctly?'
@@ -215,7 +213,7 @@ contains
     !
     if (F%level < pf%nlevels) then
 
-       if (F%Finterp) then  
+       if (F%Finterp) then
           ! store F and Q(1) only
           allocate(F%pF(nnodes,npieces))
           allocate(F%pQ(1))
@@ -227,7 +225,7 @@ contains
           end do
           call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, &
                nvars, F%shape, F%levelctx, F%encap%encapctx)
-       else 
+       else
           ! store Q
           allocate(F%pQ(nnodes))
           do m = 1, nnodes
@@ -326,7 +324,7 @@ contains
           call F%encap%destroy(F%pQ(1))
           deallocate(F%pF)
           deallocate(F%pQ)
-       else 
+       else
           do m = 1, F%nnodes
              call F%encap%destroy(F%pQ(m))
           end do
