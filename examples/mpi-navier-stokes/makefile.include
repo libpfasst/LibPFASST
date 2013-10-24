@@ -1,0 +1,6 @@
+COMM = mpi
+SDC  = imex
+
+LDFLAGS += -fopenmp -L$(SYSLIBDIR) -lfftw3_omp -lstdc++
+FFLAGS += -fopenmp
+CFLAGS += -fopenmp
