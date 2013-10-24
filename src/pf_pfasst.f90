@@ -65,6 +65,10 @@ contains
     integer,          intent(in)    :: nlevel
 
     level%level = nlevel
+    nullify(level%encap)
+    nullify(level%sweeper)
+    nullify(level%interpolate)
+    nullify(level%restrict)
     nullify(level%shape)
     nullify(level%tau)
     nullify(level%pF)
@@ -124,6 +128,18 @@ contains
     type(pf_level_t),  intent(inout) :: F
 
     integer :: m, p, nvars, nnodes, npieces
+
+    !
+    ! do some sanity checks
+    !
+
+    if (F%nvars <= 0) stop "ERROR: Invalid nvars/dofs (pf_pfasst.f90)."
+    if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
+    if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
+    if (.not. associated(F%encap)) stop "ERROR: Missing encapsulation (pf_pfasst.f90)."
+    if (.not. associated(F%sweeper)) stop "ERROR: Missing sweeper (pf_pfasst.f90)."
+    if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
+    if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
 
     nvars   = F%nvars
     nnodes  = F%nnodes
