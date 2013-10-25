@@ -48,6 +48,7 @@ contains
 
     type(pf_level_t), pointer :: F, G
     integer :: c, j, k, l
+    real(pfdp)    :: t0k
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
@@ -103,18 +104,19 @@ contains
           G => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
-             
+             t0k = t0-(pf%rank)*dt + (k-1)*dt
+
              ! get new initial value (skip on first iteration)
              if (k > 1) then
                 call G%encap%pack(G%q0, G%Q(G%nnodes))
                 if (.not. pf%PFASST_pred) then 
-                   call spreadq0(G, t0)
+                   call spreadq0(G, t0k)
                 end if
              end if
              
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              do j = 1, G%nsweeps
-                call G%sweeper%sweep(pf, G, t0, dt)
+                call G%sweeper%sweep(pf, G, t0k, dt)
              end do
              call call_hooks(pf, G%level, PF_POST_SWEEP)
              call pf_residual(pf, G, dt)

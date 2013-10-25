@@ -190,8 +190,8 @@ module pf_mod_dtype
 
      integer :: window = PF_WINDOW_BLOCK
  
-     logical :: Pipeline_G =  .true.
-     logical :: PFASST_pred = .true.
+     logical :: Pipeline_G =  .false.
+     logical :: PFASST_pred = .false.
 
      ! pf objects
      type(pf_cycle_t)          :: cycles

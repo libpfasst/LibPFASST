@@ -54,13 +54,78 @@ contains
     end do
   end subroutine pf_opts_from_cl
 
-  subroutine pf_opts_from_file(pf, un)
+  subroutine pf_read_opts(pf, read_cmd,fname)
     type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: un
-
+    logical,           intent(in)    :: read_cmd
+    character(len=*),  intent(in), optional  :: fname
     
+    !  local versions of pfasst parameters
+    integer   :: niters, nlevels, qtype, ctype, window
+    double precision :: abs_res_tol, rel_res_tol  
+    logical :: Pipeline_G , PFASST_pred, echo_timings    
 
-  end subroutine pf_opts_from_file
+    !  Stuff for reading the command line
+    INTEGER :: i,ios
+    CHARACTER(len=32) :: arg
+    integer,parameter :: un=9
+    CHARACTER(LEN=255) :: istring  ! stores command line argument
+    CHARACTER(LEN=255) :: message           ! use for I/O error messages
+
+    !  Define the namelist for reading
+    namelist /PF_PARAMS/ niters, nlevels, qtype, ctype, abs_res_tol,rel_res_tol, window
+    namelist /PF_PARAMS/ Pipeline_G,PFASST_pred,echo_timings
+
+
+    !  Set local variables to pf_pfasst defaults
+    niters = pf%niters        
+    nlevels  = pf%nlevels         
+    qtype  = pf%qtype        
+    ctype = pf%ctype          
+    window = pf%window     
+    abs_res_tol = pf%abs_res_tol
+    rel_res_tol  = pf%rel_res_tol 
+    Pipeline_G  = pf%Pipeline_G
+    PFASST_pred = pf%PFASST_pred
+    echo_timings = pf%PFASST_pred
+
+
+
+    !  Open the file fname and read the pfasst namelist
+    if (present(fname))  then
+       open(unit=un, file = fname, status = 'old', action = 'read')
+       read(unit=un, nml = PF_PARAMS)
+       close(unit=un)
+    end if
+
+    !  Overwrite with the command line
+    if (read_cmd) then
+       i = 0
+       DO
+          CALL get_command_argument(i, arg)
+          IF (LEN_TRIM(arg) == 0) EXIT
+          
+          !       WRITE (*,*) TRIM(arg)
+          if (i > 0) then
+             istring="&PF_PARAMS "//TRIM(arg)//" /"    
+             !          write(*,*) istring
+             READ(istring,nml=PF_PARAMS,iostat=ios,iomsg=message) ! internal read of NAMELIST
+          end if
+          i = i+1
+       END DO
+    end if
+
+    ! Re-assign the pfasst internals
+    pf%niters = niters        
+    pf%nlevels  = nlevels         
+    pf%qtype  = qtype        
+    pf%ctype = ctype          
+    pf%window = window     
+    pf%abs_res_tol = abs_res_tol
+    pf%rel_res_tol  = rel_res_tol 
+    pf%Pipeline_G  = Pipeline_G
+    pf%PFASST_pred = PFASST_pred
+    pf%echo_timings = echo_timings
+  end subroutine pf_read_opts
 
   subroutine pf_set_options(pf, fname, unitno, cmdline)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -70,11 +135,11 @@ contains
 
     if (present(fname) .and. len_trim(fname) > 0) then
        open(unit=66, file=fname, status='old', action='read')
-       call pf_opts_from_file(pf, 66)
+!       call pf_opts_from_file(pf, 66)
        close(unit=66)
     end if
     if (present(unitno)) then
-       call pf_opts_from_file(pf, unitno)
+ !      call pf_opts_from_file(pf, unitno)
     end if
     if (.not. present(cmdline) .or. cmdline) then
        call pf_opts_from_cl(pf)
@@ -118,6 +183,17 @@ contains
        write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
     else
        write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+    end if
+
+    if (pf%Pipeline_G) then
+       write(un,*) 'Predictor Pipelining is ON    '
+    else
+       write(un,*) 'Predictor Pipelining is OFF    '
+    end if
+    if (pf%PFASST_pred) then
+       write(un,*) 'PFASST Predictor style  '
+    else
+       write(un,*) 'Serial Predictor style  '
     end if
 
   end subroutine pf_print_options
