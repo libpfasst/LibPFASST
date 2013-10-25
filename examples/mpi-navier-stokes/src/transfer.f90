@@ -7,13 +7,15 @@
 module transfer
   use iso_c_binding
   use encap
+  use pf_mod_dtype
   implicit none
 contains
 
-  subroutine interpolate(qFptr, qGptr, levelF, ctxF, levelG, ctxG)
+  subroutine interpolate(qFptr, qGptr, levelF, ctxF, levelG, ctxG, t)
     use feval
-    type(c_ptr), intent(in), value :: qFptr, qGptr, ctxF, ctxG
-    integer,     intent(in)        :: levelF, levelG
+    type(c_ptr), intent(in   ), value :: qFptr, qGptr, ctxF, ctxG
+    integer,     intent(in   )        :: levelF, levelG
+    real(pfdp),  intent(in   )        :: t
 
     type(carray4), pointer :: qF, qG
     integer :: i, j, k, ii, jj, kk, c, nG, nF
@@ -65,9 +67,10 @@ contains
     !$omp end parallel do
   end subroutine interpolate
 
-  subroutine restrict(qFptr, qGptr, levelF, ctxF, levelG, ctxG)
-    type(c_ptr), intent(in), value :: qFptr, qGptr, ctxF, ctxG
-    integer,     intent(in)        :: levelF, levelG
+  subroutine restrict(qFptr, qGptr, levelF, ctxF, levelG, ctxG, t)
+    type(c_ptr), intent(in   ), value :: qFptr, qGptr, ctxF, ctxG
+    integer,     intent(in   )        :: levelF, levelG
+    real(pfdp),  intent(in   )        :: t
 
     integer :: i, j, k, ii, jj, kk, c, nG, nF
     type(carray4), pointer :: qF, qG

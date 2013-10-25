@@ -12,10 +12,10 @@ include $(LIBPFASST)/Makefile.defaults
 VPATHS += src
 FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90 src/encap.f90 src/fftwpp.f90
 CSRC   += src/numpy.c
-CXXSRC += src/cfftw++.cpp src/fftw++.cpp src/convolution.cpp 
+CXXSRC += src/cfftw++.cpp src/fftw++.cpp src/convolution.cpp
 
-FFLAGS  += -I$(FFTW3)/include 
-LDFLAGS += -L$(FFTW3)/lib -lfftw3
+FFLAGS  += -I$(FFTW3)/include -fopenmp
+LDFLAGS += -L$(FFTW3)/lib -lfftw3 -fopenmp -lstdc++
 
 build/%.o: %.cpp
 	@mkdir -p build
@@ -23,13 +23,16 @@ build/%.o: %.cpp
 
 all: $(EXE)
 
+OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o) $(CXXSRC:.cpp=.o))
+vpath %.cpp   $(VPATHS)
+
 include $(LIBPFASST)/Makefile.rules
 
 #
 # dependencies
 #
 
-build/solutions.o: build/pfasst.o 
-build/feval.o:     build/pfasst.o build/encap.o build/fftwpp.o 
+build/solutions.o: build/pfasst.o
+build/feval.o:     build/pfasst.o build/encap.o build/fftwpp.o
 build/hooks.o:     build/numpy.o build/solutions.o
 build/main.o:      build/feval.o build/hooks.o build/transfer.o

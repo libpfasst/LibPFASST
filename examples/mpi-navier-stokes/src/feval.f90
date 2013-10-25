@@ -21,9 +21,9 @@ contains
     use omp_lib
     implicit none
 
-    integer(c_int), intent(in), value :: n, nthreads
-    real(c_double), intent(in), value :: l, nu
-    type(c_ptr),    intent(out)       :: cptr
+    integer(c_int), intent(in   ), value :: n, nthreads
+    real(c_double), intent(in   ), value :: l, nu
+    type(c_ptr),    intent(  out)        :: cptr
 
     type(feval_t), pointer :: ctx
     integer :: k
@@ -69,7 +69,7 @@ contains
 
     type(feval_t), pointer :: ctx
     call c_f_pointer(cptr, ctx)
-    
+
     call delete_cconv3d(ctx%conv)
 
     call fftw_free(ctx%u1)
@@ -127,7 +127,7 @@ contains
              end do
 
              v(k, j, i) = delta * sin(6.28318530718d0*(x + 0.25d0))
-             
+
           end do
        end do
     end do
@@ -182,7 +182,7 @@ contains
              div(i3, i2, i1) = &
                   kk(i1) * (0.0d0,1.0d0) * u(i3, i2, i1, 1) + &
                   kk(i2) * (0.0d0,1.0d0) * u(i3, i2, i1, 2) + &
-                  kk(i3) * (0.0d0,1.0d0) * u(i3, i2, i1, 3) 
+                  kk(i3) * (0.0d0,1.0d0) * u(i3, i2, i1, 3)
 
           end do
        end do
@@ -222,7 +222,7 @@ contains
              phi = &
                   kk(i1) * (0.0d0,1.0d0) * ustar(i3, i2, i1, 1) + &
                   kk(i2) * (0.0d0,1.0d0) * ustar(i3, i2, i1, 2) + &
-                  kk(i3) * (0.0d0,1.0d0) * ustar(i3, i2, i1, 3) 
+                  kk(i3) * (0.0d0,1.0d0) * ustar(i3, i2, i1, 3)
 
              ! phi = inv_lap(phi)
              if (i1 > 1 .or. i2 > 1 .or. i3 > 1) then
@@ -282,9 +282,9 @@ contains
   end subroutine copy_for_convolve
 
   subroutine eval_f1(yptr, t, level, ctxptr, f1ptr)
-    type(c_ptr),  intent(in), value :: yptr, ctxptr, f1ptr
-    real(pfdp),   intent(in)        :: t
-    integer,      intent(in)        :: level
+    type(c_ptr), intent(in   ), value :: yptr, ctxptr, f1ptr
+    real(pfdp),  intent(in   )        :: t
+    integer,     intent(in   )        :: level
 
     complex(c_double), dimension(:,:,:), pointer :: uu, uv, uw, vv, vw, ww
 
@@ -322,12 +322,12 @@ contains
     integer(c_int),            intent(in), value :: n1, n2, n3
     complex(c_double_complex), intent(in)        :: &
          uu(n3, n2, n1), uv(n3, n2, n1), vv(n3, n2, n1), &
-         uw(n3, n2, n1), vw(n3, n2, n1), ww(n3, n2, n1) 
+         uw(n3, n2, n1), vw(n3, n2, n1), ww(n3, n2, n1)
     complex(c_double_complex), intent(out)       :: f1(n3, n2, n1, 3)
 
-    type(feval_t), pointer      :: fptr
-    integer                   :: i1, i2, i3
-    real(c_double)            :: kk(n1)
+    type(feval_t), pointer :: fptr
+    integer                :: i1, i2, i3
+    real(c_double)         :: kk(n1)
 
     call c_f_pointer(cptr, fptr)
     kk = fptr%k
@@ -360,16 +360,17 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine eval_f2(y, t, level, ctxptr, f2)
-    type(carray4), intent(in)    :: y
-    real(pfdp),       intent(in)    :: t
-    integer,          intent(in)    :: level
-    type(carray4), intent(inout) :: f2
-    type(c_ptr),      intent(in)    :: ctxptr
+  subroutine eval_f2(yptr, t, level, ctxptr, f2ptr)
+    type(c_ptr),   intent(in   ), value :: yptr, ctxptr, f2ptr
+    real(pfdp),    intent(in   )        :: t
+    integer,       intent(in   )        :: level
 
     type(feval_t), pointer :: ctx
+    type(carray4), pointer :: y, f2
     call c_f_pointer(ctxptr, ctx)
-    
+    call c_f_pointer(yptr, y)
+    call c_f_pointer(f2ptr, f2)
+
     call f2eval(ctxptr, ctx%n, ctx%n, ctx%n, y%array, t, f2%array)
   end subroutine eval_f2
 
@@ -408,17 +409,18 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine comp_f2(y, t, dt, rhs, level, ctxptr, f2)
-    type(carray4), intent(inout) :: y
-    type(carray4), intent(in)    :: rhs
-    real(pfdp),       intent(in)    :: t, dt
-    integer,          intent(in)    :: level
-    type(carray4), intent(inout) :: f2
-    type(c_ptr),      intent(in)    :: ctxptr
+  subroutine comp_f2(yptr, t, dt, rhsptr, level, ctxptr, f2ptr)
+    type(c_ptr), intent(in   ), value :: yptr, rhsptr, ctxptr, f2ptr
+    real(pfdp),  intent(in   )        :: t, dt
+    integer,     intent(in   )        :: level
 
+    type(carray4), pointer :: y, rhs, f2
     type(feval_t), pointer :: ctx
     call c_f_pointer(ctxptr, ctx)
-    
+    call c_f_pointer(yptr, y)
+    call c_f_pointer(f2ptr, f2)
+    call c_f_pointer(rhsptr, rhs)
+
     call f2solv(ctxptr, ctx%n, ctx%n, ctx%n, rhs%array, y%array, ctx%nu, dt, f2%array)
   end subroutine comp_f2
 
