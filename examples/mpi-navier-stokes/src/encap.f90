@@ -109,7 +109,7 @@ contains
   ! Unpack solution from a flat array.
   subroutine encap_unpack(solptr, q)
     type(c_ptr), intent(in   ), value :: solptr
-    real(pfdp),  intent(  out)        :: q(:)
+    real(pfdp),  intent(in   )        :: q(:)
 
     type(c_ptr)            :: qptr
     type(carray4), pointer :: sol

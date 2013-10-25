@@ -15,7 +15,10 @@ CSRC   += src/numpy.c
 CXXSRC += src/cfftw++.cpp src/fftw++.cpp src/convolution.cpp
 
 FFLAGS  += -I$(FFTW3)/include -fopenmp
-LDFLAGS += -L$(FFTW3)/lib -lfftw3 -fopenmp -lstdc++
+CFLAGS  += -I$(FFTW3)/include -fopenmp
+LDFLAGS += -L$(FFTW3)/lib -lfftw3 -fopenmp -lstdc++ -lfftw3_omp
+
+vpath %.cpp $(VPATHS)
 
 build/%.o: %.cpp
 	@mkdir -p build
@@ -24,7 +27,6 @@ build/%.o: %.cpp
 all: $(EXE)
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o) $(CXXSRC:.cpp=.o))
-vpath %.cpp   $(VPATHS)
 
 include $(LIBPFASST)/Makefile.rules
 
