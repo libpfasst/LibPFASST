@@ -134,7 +134,7 @@ contains
     logical,           intent(in), optional :: cmdline
 
     if (present(fname) .and. len_trim(fname) > 0) then
-       open(unit=66, file=fname, status='old', action='read')
+       open(unit=66, file=fname, status='old',action='read')
 !       call pf_opts_from_file(pf, 66)
        close(unit=66)
     end if
