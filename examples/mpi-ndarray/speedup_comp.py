@@ -10,7 +10,7 @@ speedups = {}
 
 from fabfile import nnodes, nvars
 
-for prob, nlevs in product([ 'heat' , 'burgers', 'wave' ], #, 'ks' ],
+for prob, nlevs in product([ 'heat' , 'burgers', 'wave', 'ks' ],
                            [ 2, 3 ]):       
 
     speedups[prob, nlevs] = []

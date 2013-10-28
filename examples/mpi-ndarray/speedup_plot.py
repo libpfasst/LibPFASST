@@ -8,7 +8,7 @@ with open('speedups.pkl', 'r') as f:
     speedups = load(f)
 
 
-problems = [ 'heat', 'burgers', 'wave' ]#, 'ks' ]
+problems = [ 'heat', 'burgers', 'wave', 'ks' ]
 
 pens = {
     2: { 'linestyle': 'none', 'color': 'black',  'marker': 's', 'markersize': 8, 'markerfacecolor': 'white', 'markeredgewidth': 2 },
@@ -36,6 +36,11 @@ for prob in problems:
         xy = sorted([ (s.nproc, s.theory) for s in speedups[prob, nlevs] ])
         x, y = zip(*xy)
         ax[0].plot(x, y, label='%d levels, theory' % nlevs, **pens[nlevs, 'theory'])
+
+        xy = sorted([ (s.nproc, s.theory/s.nproc) for s in speedups[prob, nlevs] ])
+        x, y = zip(*xy)
+        ax[1].plot(x, y, label='%d levels, theory' % nlevs, **pens[nlevs, 'theory'])
+
 
     # pl.plot([0, 70], [0, 70], '--k', label='ideal')
     #ax[0].legend(loc='best', fontsize=8)

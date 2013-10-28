@@ -29,7 +29,8 @@ def read_timings(fname):
             rank, block, step, iteration, cycle = map(int, match.group(2, 3, 4, 5, 6))
             delta, start, end = map(lambda x: float(x)/rate, match.group(8, 10, 11))
 
-            timings.append(Timing(timer, rank, block, step, iteration, cycle, delta, start, end))
+            timing = Timing(timer, rank, block, step, iteration, cycle, delta, start, end)
+            timings.append(timing)
 
     return timings
 

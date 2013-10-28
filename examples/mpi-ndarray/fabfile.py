@@ -1,5 +1,6 @@
 """Fabric (fabfile.org) tasks for mpi-ndarray."""
 
+import os.path
 import numpy as np
 
 from fabric.api import *
@@ -10,14 +11,14 @@ from collections import defaultdict
 
 nnodes = defaultdict(
   lambda: [ 2, 3, 5 ],
-  { 
+  {
     'ks': [ 3, 5, 9 ]
   })
 
 nvars  = defaultdict(
   lambda: [ 128, 256, 512 ],
-  { 
-    'ks': [ 256, 512, 1024 ] 
+  {
+    'ks': [ 256, 512, 1024 ]
   })
 
 niters = {
@@ -29,14 +30,14 @@ niters = {
 }
 
 sigma = defaultdict(
-  lambda: 0.004, 
-  { 
-    'wave': 0.001 
+  lambda: 0.004,
+  {
+    'wave': 0.001
   })
 
 dt = defaultdict(
-  lambda: 0.01, 
-  { 
+  lambda: 0.01,
+  {
     'wave': 0.5/512,
     'ks':   1.0,
   })
@@ -57,12 +58,12 @@ def speed():
   for prob in problems:
     nprocs = 1
     nlevs  = 1
-    
+
     name = '%s_p%02dl%d' % (prob, nprocs, nlevs)
-    job = Job(name=name, 
-              param_file='probin.nml.in', 
-              rwd=name, 
-              width=nprocs, 
+    job = Job(name=name,
+              param_file='probin.nml.in',
+              rwd=name,
+              width=nprocs,
               walltime="00:10:00")
 
     job.update_params(
@@ -84,10 +85,10 @@ def speed():
                                       [ 2, 3 ] ):
 
     name = '%s_p%02dl%d' % (prob, nprocs, nlevs)
-    job = Job(name=name, 
-              param_file='probin.nml.in', 
-              rwd=name, 
-              width=nprocs, 
+    job = Job(name=name,
+              param_file='probin.nml.in',
+              rwd=name,
+              width=nprocs,
               walltime="00:10:00")
 
     job.update_params(
@@ -115,11 +116,11 @@ def pull(rwd=''):
 
 
 @task
-def build(target=''):
-  """Build mpi-ndarray on the remote host."""
+def build(example='mpi-ndarray', target=''):
+  """Build given example on the remote host."""
 
   setenv()
-  with cd(env.libpfasst):
+  with cd(os.path.join(env.libpfasst, 'examples', example)):
     run('git pull')
     run('make %s' % target)
 
@@ -155,7 +156,7 @@ def setenv():
     env.host_string = 'juqueen'
     env.host_rsync  = 'juqueen'
     env.exe         = 'main.exe'
-    env.libpfasst   = '/homea/hwu12/hwu125/projects/libpfasst/examples/mpi-ndarray'
+    env.libpfasst   = '/homea/hwu12/hwu125/projects/libpfasst'
     env.width       = 1
     env.depth       = 1
 
@@ -167,5 +168,5 @@ def setenv():
     env.exe         = '/home/memmett/projects/libpfasst/examples/mpi-ndarray/main.exe'
     env.width       = 1
     env.depth       = 2
-    
+
   env.rsync = [ (projects + 'libpfasst', env.scratch + 'libpfasst'), ]
