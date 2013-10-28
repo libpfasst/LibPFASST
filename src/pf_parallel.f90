@@ -515,9 +515,9 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
-    call start_timer(pf, TSEND)
+    call start_timer(pf, TBROADCAST)
     call pf%comm%broadcast(pf, y, nvar, root)
-    call end_timer(pf, TSEND)
+    call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
 
 end module pf_mod_parallel
