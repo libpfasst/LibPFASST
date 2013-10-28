@@ -206,7 +206,7 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
     logical,           intent(out)   :: qexit, qcycle
-    
+
     integer    :: steps_to_last
     real(pfdp) :: res1
 
@@ -241,7 +241,7 @@ contains
        ! 'nmoved' thinger to break this cycle if everyone is
        ! done...
 
-       if (pf%state%status == PF_STATUS_CONVERGED) then 
+       if (pf%state%status == PF_STATUS_CONVERGED) then
           qcycle = .true.
           return
        end if
@@ -312,10 +312,10 @@ contains
 
     type(pf_level_t), pointer :: F, G
     integer                   :: j, k, l, c
-    real(pfdp)                :: t0, res1
+    real(pfdp)                :: res1
 
     logical :: qexit, qcycle, qbroadcast
-    
+
     call start_timer(pf, TTOTAL)
 
     pf%state%dt      = dt
@@ -369,8 +369,8 @@ contains
 
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
-            call pf_predictor(pf, t0, dt)
-       
+            call pf_predictor(pf, pf%state%t0, dt)
+
        !
        ! perform fine sweeps
        !
@@ -387,7 +387,7 @@ contains
           F => pf%levels(pf%nlevels)
           call call_hooks(pf, F%level, PF_PRE_SWEEP)
           do j = 1, F%nsweeps
-             call F%sweeper%sweep(pf, F, t0, dt)
+             call F%sweeper%sweep(pf, F, pf%state%t0, dt)
           end do
           call call_hooks(pf, F%level, PF_POST_SWEEP)
           call pf_residual(pf, F, dt)
@@ -415,7 +415,7 @@ contains
 
           if (pf%nlevels > 1) then
              G => pf%levels(pf%nlevels-1)
-             call restrict_time_space_fas(pf, t0, dt, F, G)
+             call restrict_time_space_fas(pf, pf%state%t0, dt, F, G)
              call save(G)
           end if
 
@@ -424,9 +424,9 @@ contains
 
        do c = 1, size(pf%cycles%pfasst)
           pf%state%cycle = pf%state%cycle + 1
-          call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+          call pf_do_stage(pf, pf%cycles%pfasst(c), k, pf%state%t0, dt)
        end do
-       
+
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
 
