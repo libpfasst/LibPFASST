@@ -323,6 +323,7 @@ contains
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%step    = pf%rank
+    pf%state%block   = 1
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
     pf%state%cycle   = -1
@@ -353,6 +354,7 @@ contains
           if (pf%state%step >= pf%state%nsteps) exit
 
           pf%state%status = PF_STATUS_PREDICTOR
+          pf%state%block  = pf%state%block + 1
           qbroadcast = .true.
        end if
 
