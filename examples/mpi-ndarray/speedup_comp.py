@@ -10,7 +10,7 @@ speedups = {}
 
 from fabfile import nnodes, nvars
 
-for prob, nlevs in product([ 'heat', 'burgers', 'wave', 'ks' ],
+for prob, nlevs in product([ 'heat' , 'burgers', 'wave', 'ks' ],
                            [ 2, 3 ]):       
 
     speedups[prob, nlevs] = []
@@ -27,7 +27,7 @@ for prob, nlevs in product([ 'heat', 'burgers', 'wave', 'ks' ],
         sp = speedup(serial, parallel)
         sp = sp._replace(theory=theoretical_speedup_fixed_block(serial, parallel, 
                                                                 nnodes[prob][:nlevs], 
-                                                                nvars[prob][:nlevs], C=0, verbose=True))
+                                                                nvars[prob][:nlevs], C=0.01/64*nprocs, verbose=True))
         speedups[prob, nlevs].append(sp)
 
         print sp.speedup

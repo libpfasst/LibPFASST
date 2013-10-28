@@ -23,18 +23,18 @@ module pf_mod_implicit
   integer, parameter, private :: npieces = 1
 
   interface
-     subroutine pf_f2eval_p(y, t, level, ctx, f2)
+     subroutine pf_f2eval_p(y, t, level, levelctx, f2)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f2, ctx
+       type(c_ptr),    intent(in), value :: y, f2, levelctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2eval_p
   end interface
 
   interface
-     subroutine pf_f2comp_p(y, t, dt, rhs, level, ctx, f2)
+     subroutine pf_f2comp_p(y, t, dt, rhs, level, levelctx, f2)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, rhs, f2, ctx
+       type(c_ptr),    intent(in), value :: y, rhs, f2, levelctx
        real(pfdp),     intent(in)        :: t, dt
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2comp_p
@@ -62,7 +62,7 @@ contains
 
     type(pf_implicit_t), pointer :: imp
 
-    call c_f_pointer(F%sweeper%ctx, imp)
+    call c_f_pointer(F%sweeper%sweeperctx, imp)
 
     call start_timer(pf, TLEVEL+F%level-1)
 
@@ -80,9 +80,9 @@ contains
     ! do the time-stepping
     call F%encap%unpack(F%Q(1), F%q0)
 
-    call imp%f2eval(F%Q(1), t0, F%level, F%ctx, F%F(1,1))
+    call imp%f2eval(F%Q(1), t0, F%level, F%levelctx, F%F(1,1))
 
-    call F%encap%create(rhs, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape, F%ctx, F%encap%ctx)
+    call F%encap%create(rhs, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape, F%levelctx, F%encap%encapctx)
 
     t = t0
     dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
@@ -92,7 +92,7 @@ contains
        call F%encap%copy(rhs, F%Q(m))
        call F%encap%axpy(rhs, 1.0d0, F%S(m))
 
-       call imp%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%ctx, F%F(m+1,1))
+       call imp%f2comp(F%Q(m+1), t, dtsdc(m), rhs, F%level, F%levelctx, F%F(m+1,1))
     end do
 
     call F%encap%copy(F%qend, F%Q(F%nnodes))
@@ -110,9 +110,9 @@ contains
     type(pf_level_t), intent(inout) :: F
 
     type(pf_implicit_t), pointer :: imp
-    call c_f_pointer(F%sweeper%ctx, imp)
+    call c_f_pointer(F%sweeper%sweeperctx, imp)
 
-    call imp%f2eval(F%Q(m), t, F%level, F%ctx, F%F(m,1))
+    call imp%f2eval(F%Q(m), t, F%level, F%levelctx, F%F(m,1))
   end subroutine implicit_evaluate
 
   ! Initialize smats
@@ -172,7 +172,7 @@ contains
     sweeper%initialize => implicit_initialize
     sweeper%integrate  => implicit_integrate
 
-    sweeper%ctx = c_loc(imp)
+    sweeper%sweeperctx = c_loc(imp)
   end subroutine pf_implicit_create
 
 end module pf_mod_implicit

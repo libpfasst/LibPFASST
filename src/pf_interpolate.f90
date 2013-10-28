@@ -37,7 +37,8 @@ contains
     logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
 
     integer    :: m, n, p
-    real(pfdp) :: tm(F%nnodes)
+    real(pfdp) :: tF(F%nnodes)
+    real(pfdp) :: tG(G%nnodes)
 
     type(c_ptr) :: &
          delG(G%nnodes), &
@@ -49,10 +50,14 @@ contains
     ! create workspaces
     do m = 1, G%nnodes
        call G%encap%create(delG(m),   G%level, SDC_KIND_CORRECTION, &
-            G%nvars, G%shape, G%ctx, G%encap%ctx)
+            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
        call F%encap%create(delGF(m),  F%level, SDC_KIND_CORRECTION, &
-            F%nvars, F%shape, F%ctx, F%encap%ctx)
+            F%nvars, F%shape, F%levelctx, F%encap%encapctx)
     end do
+
+    ! set time at coarse and fine nodes
+    tG = t0 + dt*G%nodes
+    tF = t0 + dt*F%nodes
 
     if(present(Finterp) .and. (Finterp)) then
        !!  Interpolating F
@@ -67,7 +72,7 @@ contains
              call G%encap%copy(delG(m), G%F(m,p))
              call G%encap%axpy(delG(m), -1.0_pfdp, G%pF(m,p))
 
-             call G%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+             call G%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx,tG(m))
           end do
 
           ! interpolate corrections
@@ -84,7 +89,7 @@ contains
        call G%encap%copy(delG(1), G%Q(1))
        call G%encap%axpy(delG(1), -1.0_pfdp, G%pQ(1))
 
-       call F%interpolate(delGF(1), delG(1), F%level, F%ctx, G%level, G%ctx)
+       call F%interpolate(delGF(1), delG(1), F%level, F%levelctx, G%level, G%levelctx,tG(1))
 
        ! interpolate corrections
        do n = 1, F%nnodes
@@ -92,8 +97,7 @@ contains
        end do
 
        ! ! recompute fs
-       ! tm = t0 + dt*F%nodes
-       ! call sdceval(tm(1), 1, F)
+       ! call sdceval(tF(1), 1, F)
     else
        !!  Interpolating q
        ! create workspaces
@@ -102,21 +106,21 @@ contains
           call G%encap%setval(delG(m),   0.0_pfdp)
           call G%encap%setval(delGF(m),  0.0_pfdp)
        end do
+       
 
        do m = 1, G%nnodes
           call G%encap%copy(delG(m), G%Q(m))
           call G%encap%axpy(delG(m), -1.0_pfdp, G%pQ(m))
 
-          call F%interpolate(delGF(m), delG(m), F%level, F%ctx, G%level, G%ctx)
+          call F%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx,tG(m))
        end do
 
        ! interpolate corrections
        call pf_apply_mat(F%Q, 1.0_pfdp, F%tmat, delGF, F%encap, .false.)
 
        ! recompute fs
-       tm = t0 + dt*F%nodes
        do m = 1, F%nnodes
-          call F%sweeper%evaluate(F, tm(m), m)
+          call F%sweeper%evaluate(F, tF(m), m)
        end do
     end if  !  Feval
 
@@ -141,16 +145,16 @@ contains
 
     call call_hooks(pf, F%level, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + F%level - 1)
-
+  
     ! create workspaces
     call G%encap%create(q0G,  F%level, SDC_KIND_SOL_NO_FEVAL, &
-         G%nvars, G%shape, G%ctx, G%encap%ctx)
+         G%nvars, G%shape, G%levelctx, G%encap%encapctx)
     call F%encap%create(q0F,  F%level, SDC_KIND_SOL_NO_FEVAL, &
-         F%nvars, F%shape, F%ctx, F%encap%ctx)
+         F%nvars, F%shape, F%levelctx, F%encap%encapctx)
     call G%encap%create(delG, G%level, SDC_KIND_CORRECTION, &
-         G%nvars, G%shape, G%ctx, G%encap%ctx)
+         G%nvars, G%shape, G%levelctx, G%encap%encapctx)
     call F%encap%create(delF, F%level, SDC_KIND_CORRECTION, &
-         F%nvars, F%shape, F%ctx, F%encap%ctx)
+         F%nvars, F%shape, F%levelctx, F%encap%encapctx)
 
     ! needed for amr
     call F%encap%setval(q0F,  0.0_pfdp)
@@ -161,10 +165,10 @@ contains
     call G%encap%unpack(q0G, G%q0)
     call F%encap%unpack(q0F, F%q0)
 
-    call F%restrict(q0F, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%restrict(q0F, delG, F%level, F%levelctx, G%level, G%levelctx,pf%state%t0)
     call G%encap%axpy(delG, -1.0_pfdp, q0G)
 
-    call F%interpolate(delF, delG, F%level, F%ctx, G%level, G%ctx)
+    call F%interpolate(delF, delG, F%level, F%levelctx, G%level, G%levelctx,pf%state%t0)
     call F%encap%axpy(q0F, -1.0_pfdp, delF)
 
     call F%encap%pack(F%q0, q0F)

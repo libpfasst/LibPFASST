@@ -20,7 +20,6 @@ def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbo
     # B   -  number of pfasst blocks
     # Cp  -  parallel cost
 
-
     # serial cost
     N  = max([ x.step for x in serial ]) + 1
     Ks = max([ x.iter for x in serial ])
@@ -32,6 +31,7 @@ def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbo
         print 'Ks: ', Ks
         print 'Y0: ', Y0
         print 'Cs: ', Cs
+        print 'ACT:', max([ x.delta for x in serial if x.timer == 'total' ])
 
     # parallel cost
     L  = len(set([ x.timer for x in parallel if x.timer.startswith('sweep') ]))

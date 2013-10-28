@@ -26,8 +26,12 @@ contains
        call c_f_pointer(q0%aptr, y2, shp2)
        y2 = 0
        call gaussian(y2(:, 1))
+    case (PROB_SHEAR)
+       shp2 = q0%shape
+       call c_f_pointer(q0%aptr, y2, shp2)
+       call vortex_sheets(y2)
     case default
-       stop "ERROR: Unknown problem type."
+       stop "ERROR: Unknown problem type (initial)."
     end select
   end subroutine initial
 
@@ -63,6 +67,32 @@ contains
             + 0.3*dsin(7*two_pi*x)
     end do
   end subroutine sinusoidal
+
+  subroutine vortex_sheets(w)
+    use probin, only: delta, rho
+    real(pfdp), intent(inout) :: w(:,:)
+    integer :: nvars, i, j, k
+    double precision :: x, y, u_y, v_x
+
+    nvars = size(w, dim=1)
+
+    do j = 1, nvars
+       y = dble(j-1)/dble(nvars)
+       do i = 1, nvars
+          x = dble(i-1)/dble(nvars)
+
+          v_x = -two_pi * delta * cos(two_pi * (x + 0.25d0))
+          u_y = 0
+
+          do k = -4, 4
+             u_y = u_y + rho * ( 1.d0 - tanh(rho * ((0.75d0 + dble(k)) - y ))**2 )
+             u_y = u_y - rho * ( 1.d0 - tanh(rho * (y - (0.25d0 + dble(k)) ))**2 )
+          end do
+
+          w(i,j) = v_x - u_y
+       end do
+    end do
+  end subroutine vortex_sheets
 
   subroutine exact(t, nvars, yex)
     real(pfdp), intent(in)  :: t
