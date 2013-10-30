@@ -28,6 +28,7 @@ module pf_mod_timer
        THOOKS       = 4,  &
        TSTEP        = 5,  &
        TRESIDUAL    = 6,  &
+       TBROADCAST   = 7,  &
        TINTERPOLATE = 10,  &
        TRESTRICT    = 20,  &
        TRECEIVE     = 30,  &
@@ -43,7 +44,7 @@ module pf_mod_timer
        'hooks      ',  &
        'step       ',  &        ! 5
        'residual   ',  &
-       '7          ',  &
+       'broadcast  ',  &
        '8          ',  &
        '9          ',  &
        'interp0    ',  &        ! 10

@@ -67,7 +67,7 @@ program main
 
   pf%abs_res_tol = abs_tol
   pf%rel_res_tol = rel_tol
-  
+
 
   pf%echo_timings = .true.
 
@@ -104,6 +104,8 @@ program main
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
+  pf%outdir = output
+
   ! if (pf%rank == 0) then
   !    print *, 'nlevs:  ', nlevs
   !    print *, 'nvars:  ', pf%levels(:)%nvars
@@ -124,8 +126,8 @@ program main
   end if
 
   if (len_trim(output) > 0) then
-     call dump_mkdir(output, len_trim(output))
-     call pf_add_hook(pf, nlevs, PF_POST_SWEEP, dump_hook)
+     call ndarray_mkdir(output, len_trim(output))
+     call pf_add_hook(pf, nlevs, PF_POST_SWEEP, ndarray_dump_hook)
   end if
 
   if (dim == 1) then

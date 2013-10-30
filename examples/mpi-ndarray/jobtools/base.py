@@ -1,10 +1,12 @@
 
-class Container(object):
-    def __init__(self, **kwargs):
-        self.attrs = {}
-        self.attrs.update(kwargs)
-    def __getattr__(self, name):
-        return self.attrs.get(name, None)
+from fabric.utils import _AttributeDict
+
+class Container(_AttributeDict):
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            return None
 
 class NoInputError(Exception):
     pass

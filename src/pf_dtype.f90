@@ -57,7 +57,7 @@ module pf_mod_dtype
   integer, parameter :: PF_WINDOW_BLOCK = 1
   integer, parameter :: PF_WINDOW_RING  = 2
   integer, parameter :: PF_TAG_NMOVED   = 666
-  
+
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
@@ -208,9 +208,8 @@ module pf_mod_dtype
      integer(8) :: timers(100)   = 0
      integer(8) :: runtimes(100) = 0
 
-     ! debug
-     type(c_ptr) :: zmq
-     character(512) :: ctx_char
+     ! misc
+     character(512) :: outdir
   end type pf_pfasst_t
 
   interface
@@ -361,40 +360,6 @@ module pf_mod_dtype
        real(pfdp)  ,      intent(in)    :: y(nvar)
      end subroutine pf_broadcast_p
 
-#ifdef ZMQ
-     type(c_ptr) function dzmq_connect() bind(c)
-       import :: c_ptr
-     end function dzmq_connect
-
-     subroutine dzmq_status(ptr, state, where, wlen) bind(c)
-       import :: c_ptr, c_char, c_int, pf_state_t
-       type(c_ptr), intent(in), value :: ptr
-       type(pf_state_t), intent(in) :: state
-       character(c_char), intent(in) :: where(1)
-       integer(c_int), intent(in), value :: wlen
-     end subroutine dzmq_status
-
-     subroutine dzmq_close(ptr) bind(c)
-       import :: c_ptr
-       type(c_ptr), intent(in), value :: ptr
-     end subroutine dzmq_close
-#endif
-
   end interface
-
-contains
-
-  subroutine pf_dstatus(pf, where)
-    type(pf_pfasst_t), intent(inout) :: pf
-    character(len=*),  intent(in)    :: where
-
-#ifdef ZMQ
-    if (.not. c_associated(pf%zmq)) then
-       pf%zmq = dzmq_connect()
-    end if
-
-    call dzmq_status(pf%zmq, pf%state, where, len_trim(where))
-#endif
-  end subroutine pf_dstatus
 
 end module pf_mod_dtype

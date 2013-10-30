@@ -29,9 +29,9 @@
 !   allocate(pf%levels(1)%shape(2))
 !   pf%levels(1)%shape = [ 3, 10 ]
 !
-! The helper routines array1, array2, array3, and array4 can be used
-! to extract pointers to the encapsulated array from a C pointer
-! without performing any copies.
+! The helper routines array1, array2, array3, etc can be used to
+! extract pointers to the encapsulated array from a C pointer without
+! performing any copies.
 !
 
 module pf_mod_ndarray
@@ -46,11 +46,29 @@ module pf_mod_ndarray
      type(c_ptr)         :: aptr
   end type ndarray
 
+  ! interfaces to routines in pf_numpy.c
+  interface
+     subroutine ndarray_mkdir(dname, dlen) bind(c)
+       use iso_c_binding
+       character(c_char), intent(in   )        :: dname
+       integer(c_int),    intent(in   ), value :: dlen
+     end subroutine ndarray_mkdir
+
+     subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
+       use iso_c_binding
+       character(c_char), intent(in   )        :: dname, fname, endian(4)
+       integer(c_int),    intent(in   ), value :: dim, nvars
+       integer(c_int),    intent(in   )        :: shape(dim)
+       real(c_double),    intent(in   )        :: array(nvars)
+     end subroutine ndarray_dump_numpy
+  end interface
+
 contains
 
   subroutine ndarray_create_simple(q, shape)
     type(ndarray), intent(inout) :: q
-    integer,       intent(in)    :: shape(:)
+    integer,       intent(in   ) :: shape(:)
+
     allocate(q%shape(size(shape)))
     allocate(q%flatarray(product(shape)))
     q%dim   = size(shape)
@@ -60,12 +78,12 @@ contains
 
   ! Allocate/create solution (spatial data set).
   subroutine ndarray_create(solptr, level, kind, nvars, shape, levelctx, encapctx)
-    type(c_ptr),       intent(inout)     :: solptr
-    integer,           intent(in)        :: level, nvars, shape(:)
-    integer,           intent(in)        :: kind
-    type(c_ptr),       intent(in), value :: levelctx, encapctx
+    type(c_ptr), intent(inout)        :: solptr
+    integer,     intent(in   )        :: level, nvars, shape(:)
+    integer,     intent(in   )        :: kind
+    type(c_ptr), intent(in   ), value :: levelctx, encapctx
 
-    type(ndarray),     pointer :: sol
+    type(ndarray), pointer :: sol
 
     allocate(sol)
     call ndarray_create_simple(sol, shape)
@@ -74,7 +92,7 @@ contains
 
   ! Deallocate/destroy solution.
   subroutine ndarray_destroy(solptr)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
 
     type(ndarray), pointer :: sol
     call c_f_pointer(solptr, sol)
@@ -86,20 +104,20 @@ contains
 
   ! Set solution value.
   subroutine ndarray_setval(solptr, val, flags)
-    type(c_ptr), intent(in), value :: solptr
-    real(pfdp),  intent(in)        :: val
-    integer,     intent(in), optional :: flags
+    type(c_ptr), intent(in   ), value    :: solptr
+    real(pfdp),  intent(in   )           :: val
+    integer,     intent(in   ), optional :: flags
 
     type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
 
+    call c_f_pointer(solptr, sol)
     sol%flatarray = val
   end subroutine ndarray_setval
 
   ! Copy solution value.
   subroutine ndarray_copy(dstptr, srcptr, flags)
-    type(c_ptr), intent(in), value    :: dstptr, srcptr
-    integer,     intent(in), optional :: flags
+    type(c_ptr), intent(in   ), value    :: dstptr, srcptr
+    integer,     intent(in   ), optional :: flags
 
     type(ndarray), pointer :: dst, src
     call c_f_pointer(dstptr, dst)
@@ -110,36 +128,42 @@ contains
 
   ! Pack solution q into a flat array.
   subroutine ndarray_pack(z, ptr)
-    type(c_ptr), intent(in), value  :: ptr
-    real(pfdp),  intent(out)        :: z(:)
+    type(c_ptr), intent(in   ), value :: ptr
+    real(pfdp),  intent(  out)        :: z(:)
+
     type(ndarray), pointer :: y
+
     call c_f_pointer(ptr, y)
     z = y%flatarray
   end subroutine ndarray_pack
 
   ! Unpack solution from a flat array.
   subroutine ndarray_unpack(ptr, z)
-    type(c_ptr), intent(in), value :: ptr
-    real(pfdp),  intent(in)        :: z(:)
+    type(c_ptr), intent(in   ), value :: ptr
+    real(pfdp),  intent(in   )        :: z(:)
+
     type(ndarray), pointer :: y
     call c_f_pointer(ptr, y)
+
     y%flatarray = z
   end subroutine ndarray_unpack
 
   ! Compute norm of solution
   function ndarray_norm(ptr) result (norm)
-    type(c_ptr), intent(in), value :: ptr
-    real(pfdp) :: norm
+    type(c_ptr), intent(in   ), value :: ptr
+    real(pfdp)   :: norm
+
     type(ndarray), pointer :: y
     call c_f_pointer(ptr, y)
+
     norm = maxval(abs(y%flatarray))
   end function ndarray_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
   subroutine ndarray_saxpy(yptr, a, xptr, flags)
-    type(c_ptr), intent(in), value    :: yptr, xptr
-    real(pfdp),  intent(in)           :: a
-    integer,     intent(in), optional :: flags
+    type(c_ptr), intent(in   ), value    :: yptr, xptr
+    real(pfdp),  intent(in   )           :: a
+    integer,     intent(in   ), optional :: flags
 
     type(ndarray), pointer :: y, x
     call c_f_pointer(yptr, y)
@@ -150,7 +174,7 @@ contains
 
   ! Helpers
   function dims(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     integer :: r
 
     type(ndarray), pointer :: sol
@@ -160,7 +184,7 @@ contains
   end function dims
 
   function array1(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     real(pfdp), pointer :: r(:)
 
     integer                :: shp(1)
@@ -176,7 +200,7 @@ contains
   end function array1
 
   function array2(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     real(pfdp), pointer :: r(:,:)
 
     integer                :: shp(2)
@@ -192,7 +216,7 @@ contains
   end function array2
 
   function array3(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     real(pfdp), pointer :: r(:,:,:)
 
     integer                :: shp(3)
@@ -208,7 +232,7 @@ contains
   end function array3
 
   function array4(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     real(pfdp), pointer :: r(:,:,:,:)
 
     integer                :: shp(4)
@@ -224,7 +248,7 @@ contains
   end function array4
 
   function array5(solptr) result(r)
-    type(c_ptr), intent(in), value :: solptr
+    type(c_ptr), intent(in   ), value :: solptr
     real(pfdp), pointer :: r(:,:,:,:,:)
 
     integer                :: shp(5)
@@ -251,5 +275,25 @@ contains
     encap%unpack  => ndarray_unpack
     encap%axpy    => ndarray_saxpy
   end subroutine ndarray_encap_create
+
+  subroutine ndarray_dump_hook(pf, level, state, levelctx)
+    type(pf_pfasst_t),   intent(inout) :: pf
+    type(pf_level_t),    intent(inout) :: level
+    type(pf_state_t),    intent(in)    :: state
+    type(c_ptr),         intent(in)    :: levelctx
+
+    character(len=256)     :: fname
+    type(ndarray), pointer :: qend
+
+    call c_f_pointer(level%qend, qend)
+
+    write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
+         state%step, state%iter, level%level
+
+    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
+         qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
+
+  end subroutine ndarray_dump_hook
+
 
 end module pf_mod_ndarray

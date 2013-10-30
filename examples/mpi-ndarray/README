@@ -1,4 +1,7 @@
-This example actually encompases several examples:
+LIBPFASST mpi-ndarray
+=====================
+
+This example encompases several PDEs:
 
 #. 1d advection/diffusion
 #. 1d heat equation
@@ -6,4 +9,47 @@ This example actually encompases several examples:
 #. 1d wave equation (2nd order)
 #. 1d KS
 #. 2d shear
+
+This directory also contains several other files:
+
+* ks-convergence.py: A Python script to plot error-vs-time for the KS
+  equation.
+
+* ks-anim.py: A Python script to create a movie of the KS equation.
+
+
+Timing analysis
+---------------
+
+The examples contained in mpi-ndarray were used to analyse PFASST
+speedup and efficiency in "A parallel full approximation scheme in
+space and time" by Emmett and Minion.
+
+To reproduce the results therein:
+
+$ cd libpfasst/examples/mpi-ndarray
+$ fab -H edison build:mpi-ndarray
+$ fab -H edison build:mpi-navier-stokes
+$ fab -H edison timings
+$ fab -H edison pull:timings
+$ python timings.py
+
+
+
+Notes
+-----
+
+* 2013-10-29
+
+  I ran the heat, burgers, and ks examples on edison without any
+  specialized cpus.  From the generated boxplots it seems as though
+  communication is slowing things down a bit compared to some
+  quick'n'dirty runs using specialized cpus from yesterday.
+
+  The timing info for these runs is in 'timings/edison.r0'.
+
+  I would like to try again with specialized cpus (using 'aprun -r X')
+  but with setting those ugly environment variables to see if I can
+  recover the nice results from yesterday.
+
 

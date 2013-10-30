@@ -37,17 +37,14 @@ FSRC = src/pfasst.f90 \
        src/pf_version.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
-CSRC = src/pf_cpthreads.c
+
+CSRC = src/pf_cpthreads.c \
+       src/pf_numpy.c
 
 ifdef NOMPI
   FFLAGS += -DNOMPI
 else
   FSRC += src/pf_mpi.f90
-endif
-
-ifdef ZMQ
-  CSRC += src/pf_dzmq.c
-  FFLAGS += -DZMQ
 endif
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))

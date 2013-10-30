@@ -5,7 +5,7 @@ import os
 from collections import namedtuple
 
 
-Timing = namedtuple('Timing', ['timer', 'rank', 'block', 'step', 'iter', 'cycle', 
+Timing = namedtuple('Timing', ['timer', 'rank', 'block', 'step', 'iter', 'cycle',
                                'delta', 'start', 'end'])
 
 Solution = namedtuple('Solution', [ 'step', 'iter', 'level', 'fname' ])
@@ -26,10 +26,19 @@ def read_timings(fname):
             timer = str(match.group(1)).strip()
             rate  = float(match.group(7))
 
-            rank, block, step, iteration, cycle = map(int, match.group(2, 3, 4, 5, 6))
+            if True:
+                # something funky is happening with the block tag in
+                # libpfasst, just skip it for now...
+                rank, step, iteration, cycle = map(int, match.group(2, 4, 5, 6))
+                block = 1
+            else:
+                rank, block, step, iteration, cycle = map(int, match.group(2, 3, 4, 5, 6))
+
             delta, start, end = map(lambda x: float(x)/rate, match.group(8, 10, 11))
 
-            timings.append(Timing(timer, rank, block, step, iteration, cycle, delta, start, end))
+            timing = Timing(timer, rank, block, step, iteration, cycle, delta, start, end)
+            timings.append(timing)
+
 
     return timings
 
@@ -57,7 +66,7 @@ def read_avail(dname):
     m = prog.search(fname)
     if m:
       step, iteration, level = map(int, m.groups()[1:])
-      solutions.append(Solution(step, iteration, level, 
+      solutions.append(Solution(step, iteration, level,
                                 os.path.join(dname, m.group(0))))
 
   return solutions
@@ -65,7 +74,7 @@ def read_avail(dname):
 
 def read_final(dname):
   """Read output directory *dname* and return list of final solutions.
-  
+
   Note that this does not read the solutions.
   """
 

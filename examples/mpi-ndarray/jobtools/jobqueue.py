@@ -22,7 +22,6 @@ class JobQueue(base.Container):
         Job resource (specific to the queueing system in use) can be
         specified as keyword arguments.
         """
-
         self.jobs.append(job)
 
 
@@ -33,11 +32,12 @@ class JobQueue(base.Container):
 
 
     def rsync_stage(self):
+        run('mkdir -p {dst}'.format(dst=self.rwd))
         local('rsync -auz {src}/* {host}:{dst}/'.format(src=self.stage, host=env.host, dst=self.rwd))
         shutil.rmtree(self.stage)
 
 
-    def submit_all(self):
+    def submit_all(self, **kwargs):
         self.stage_all()
         self.rsync_stage()
 
@@ -47,20 +47,20 @@ class JobQueue(base.Container):
             scheduler = Scheduler()
 
         for job in self.jobs:
-
             rwd = self.rwd or env.get('rwd', '')
-
             exe = self.exe or job.exe or env.get('exe', None)
             if not exe.startswith('/'):
                 exe = rwd + '/' + exe
 
-            rwd = rwd + '/' + job.rwd
+            if not job.rwd.startswith('/'):
+                rwd = rwd + '/' + job.rwd
+            else:
+                rwd = job.rwd
 
-            kwargs = {}
-            kwargs.update(job.attrs)
-            kwargs.update(self.attrs)
+            kwargs.update(env)
+            kwargs.update(self)
+            kwargs.update(job)
             kwargs.pop('rwd', None)
             kwargs.pop('exe', None)
 
-            # print some message...
-            scheduler.submit(job, rwd=rwd, exe=exe, inputs='probin.nml', **kwargs)
+            scheduler.submit(exe=exe, rwd=rwd, inputs='probin.nml', **kwargs)

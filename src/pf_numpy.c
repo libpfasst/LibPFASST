@@ -8,13 +8,13 @@
 
 #define BUFLEN 256
 
-void dump_mkdir(char *dname, int dlen)
+void ndarray_mkdir(char *dname, int dlen)
 {
   dname[dlen] = 0;
   mkdir(dname, 0755);
 }
 
-void dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, int nvars, double *array)
+void ndarray_dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, int nvars, double *array)
 {
   unsigned short  i, len, pad;
   FILE*           fp;

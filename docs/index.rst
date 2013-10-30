@@ -41,3 +41,15 @@ please, dive right in by visiting the `LIBPFASST project page`_.
 .. _`Michael L. Minion`: http://amath.unc.edu/Minion/Minion
 .. _`Matthew Emmett`: http://emmett.ca/matthew/
 .. _`LIBPFASST project page`: https://bitbucket.org/memmett/libpfasst
+
+.. toctree::
+   :hidden:
+
+   self
+   maths
+   download
+   tutorial
+   overview
+   reference
+   communicators
+   parameters

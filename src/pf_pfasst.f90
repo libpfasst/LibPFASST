@@ -27,6 +27,7 @@ contains
   !
   subroutine pf_pfasst_create(pf, comm, nlevels,fname, nocmd)
     use pf_mod_hooks, only: PF_MAX_HOOK
+
     use pf_mod_options
     type(pf_pfasst_t),   intent(inout)         :: pf
     type(pf_comm_t),     intent(inout), target :: comm
@@ -66,7 +67,9 @@ contains
     nullify(pf%cycles%start)
     nullify(pf%cycles%pfasst)
 
-    pf%zmq = c_null_ptr
+
+!    pf%zmq = c_null_ptr
+
   end subroutine pf_pfasst_create
 
 
@@ -78,6 +81,10 @@ contains
     integer,          intent(in)    :: nlevel
 
     level%level = nlevel
+    nullify(level%encap)
+    nullify(level%sweeper)
+    nullify(level%interpolate)
+    nullify(level%restrict)
     nullify(level%shape)
     nullify(level%tau)
     nullify(level%pF)
@@ -99,7 +106,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
 
     type(pf_level_t), pointer :: F, G
-    integer :: l
+    integer                   :: l
 
     if (pf%rank < 0) then
        stop 'invalid PF rank: did you call setup correctly?'
@@ -137,6 +144,18 @@ contains
     type(pf_level_t),  intent(inout) :: F
 
     integer :: m, p, nvars, nnodes, npieces
+
+    !
+    ! do some sanity checks
+    !
+
+    if (F%nvars <= 0) stop "ERROR: Invalid nvars/dofs (pf_pfasst.f90)."
+    if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
+    if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
+    if (.not. associated(F%encap)) stop "ERROR: Missing encapsulation (pf_pfasst.f90)."
+    if (.not. associated(F%sweeper)) stop "ERROR: Missing sweeper (pf_pfasst.f90)."
+    if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
+    if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
 
     nvars   = F%nvars
     nnodes  = F%nnodes
@@ -226,7 +245,7 @@ contains
     !
     if (F%level < pf%nlevels) then
 
-       if (F%Finterp) then  
+       if (F%Finterp) then
           ! store F and Q(1) only
           allocate(F%pF(nnodes,npieces))
           allocate(F%pQ(1))
@@ -238,7 +257,7 @@ contains
           end do
           call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, &
                nvars, F%shape, F%levelctx, F%encap%encapctx)
-       else 
+       else
           ! store Q
           allocate(F%pQ(nnodes))
           do m = 1, nnodes
@@ -337,7 +356,7 @@ contains
           call F%encap%destroy(F%pQ(1))
           deallocate(F%pF)
           deallocate(F%pQ)
-       else 
+       else
           do m = 1, F%nnodes
              call F%encap%destroy(F%pQ(m))
           end do
