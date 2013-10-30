@@ -77,10 +77,11 @@ def plot(errs, steps, iters, levels, **kwargs):
 
   '''
 
-  fig, ax = pylab.subplots(ncols=len(levels))
+  # fig, ax = pylab.subplots(ncols=len(levels))
+  # if not isinstance(ax, list):
+  #   ax = [ ax ]
 
-  if not isinstance(ax, list):
-    ax = [ ax ]
+  pylab.figure()
 
   for l, level in enumerate(levels):
     for i, iter in enumerate(iters):
@@ -88,9 +89,11 @@ def plot(errs, steps, iters, levels, **kwargs):
       x = steps
       y = [ errs[step,iter,level] for step in steps ]
 
-      ax[l].semilogy(x, y, **kwargs)
-      ax[l].set_title('level %d' % level)
-      ax[l].set_xlabel('step/processor')
-      ax[l].set_ylabel('max abs. error')
+      pylab.subplot(1, len(levels), l+1)
 
-  return fig, ax
+      pylab.semilogy(x, y, **kwargs)
+      pylab.title('level %d' % level)
+      pylab.xlabel('step/processor')
+      pylab.ylabel('max abs. error')
+
+  # return fig, ax
