@@ -17,7 +17,10 @@ class Cache(object):
 
 
 def step_iter_level_map(available):
-  return { (x.step, x.iter, x.level): x.fname for x in available }
+  m = {}
+  for x in available:
+    m[x.step, x.iter, x.level] = x.fname
+  return m
 
 
 def errors(reference, approximate, **kwargs):
@@ -78,7 +81,7 @@ def plot(errs, steps, iters, levels, **kwargs):
 
   if not isinstance(ax, list):
     ax = [ ax ]
-  
+
   for l, level in enumerate(levels):
     for i, iter in enumerate(iters):
 
@@ -91,11 +94,3 @@ def plot(errs, steps, iters, levels, **kwargs):
       ax[l].set_ylabel('max abs. error')
 
   return fig, ax
-
-
-
-  
-
-  
-    
-    
