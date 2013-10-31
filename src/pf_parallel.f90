@@ -333,6 +333,8 @@ contains
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
 
+    res1 = -1
+
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
 

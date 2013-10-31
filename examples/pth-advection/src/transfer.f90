@@ -5,15 +5,14 @@
 ! Transfer (interpolate, restrict) routines.
 
 module transfer
-  use iso_c_binding
-  use encap_array1d
   use feval
   implicit none
 contains
 
-  subroutine interpolate(qFp, qGp, levelF, ctxF, levelG, ctxG)
-    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+  subroutine interpolate(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
     integer,     intent(in)        :: levelF, levelG
+    real(pfdp),  intent(in) :: t
 
     type(ad_work_t), pointer :: workF, workG
     real(pfdp),      pointer :: qF(:), qG(:)
@@ -21,11 +20,11 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    call c_f_pointer(ctxF, workF)
-    call c_f_pointer(ctxG, workG)
+    call c_f_pointer(levelctxF, workF)
+    call c_f_pointer(levelctxG, workG)
 
-    qF => array(qFp)
-    qG => array(qGp)
+    qF => array1(qFp)
+    qG => array1(qGp)
 
     nvarF = size(qF)
     nvarG = size(qG)
@@ -52,16 +51,17 @@ contains
     qF = real(wkF)
   end subroutine interpolate
 
-  subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG)
-    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
+  subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
     integer,     intent(in)        :: levelF, levelG
+    real(pfdp),  intent(in) :: t
 
     real(pfdp), pointer :: qF(:), qG(:)
 
     integer :: nvarF, nvarG, xrat
 
-    qF => array(qFp)
-    qG => array(qGp)
+    qF => array1(qFp)
+    qG => array1(qGp)
 
     nvarF = size(qF)
     nvarG = size(qG)

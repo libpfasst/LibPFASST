@@ -8,7 +8,6 @@ program fpfasst
   use feval
   use hooks
   use transfer
-  use encap_array1d
   implicit none
 
   type(pf_pfasst_t),  pointer :: pf
@@ -28,13 +27,12 @@ program fpfasst
 
   nthreads = 4
 
-
   !
   ! initialize pfasst and launch
   !
   call pf_pthreads_create(tcomm, nthreads, size(nvars))
 
-  call array1d_encap_create(encap)
+  call ndarray_encap_create(encap)
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
 
   allocate(tid(nthreads))
@@ -52,7 +50,10 @@ program fpfasst
         pf%levels(l)%nvars  = nvars(l)
         pf%levels(l)%nnodes = nnodes(l)
 
-        call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
+        allocate(pf%levels(l)%shape(1))
+        pf%levels(l)%shape(1) = nvars(l)
+
+        call feval_create_workspace(pf%levels(l)%levelctx, nvars(l))
 
         pf%levels(l)%interpolate => interpolate
         pf%levels(l)%restrict    => restrict
@@ -63,8 +64,7 @@ program fpfasst
      call pf_pthreads_setup(tcomm, pf)
      call pf_add_hook(pf, 3, PF_POST_ITERATION, echo_error)
 
-     ret = pthread_create(c_loc(tid(t)), c_null_ptr, &
-          c_funloc(pth_main), c_loc(pf))
+     ret = pthread_create(c_loc(tid(t)), c_null_ptr, c_funloc(pth_main), c_loc(pf))
   end do
 
   do t = 1, nthreads
@@ -74,7 +74,7 @@ program fpfasst
   do t = 1, nthreads
      call c_f_pointer(tcomm%pfs(t-1), pf)
      do l = 1, size(nvars)
-        call feval_destroy_workspace(pf%levels(l)%ctx)
+        call feval_destroy_workspace(pf%levels(l)%levelctx)
      end do
   end do
 
