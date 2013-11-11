@@ -1,9 +1,9 @@
 #
 # fftw3
-# 
+#
 
 FFTW3 = fftw-3.3.3
-FFTW3_CONFIG = --enable-openmp --enable-threads # --enable-sse2 --enable-shared 
+FFTW3_CONFIG = --enable-openmp --enable-threads --enable-sse2 # --enable-shared
 
 fftw3: $(FFTW3).tar.gz
 	rm -rf $(FFTW3)
@@ -17,7 +17,7 @@ $(FFTW3).tar.gz:
 
 #
 # hdf5
-# 
+#
 
 HDF5 = hdf5-1.8.11
 HDF5_CONFIG = --enable-fortran --enable-parallel
@@ -51,12 +51,12 @@ gcc47: $(GCCDL)
 	rm -rf $(GCCTMP)
 	ln -s $(LIBPFASST)/mk/makefile.gcc47.defs
 	@echo
-	@echo GCC 4.7 has been installed in 
-	@echo 
+	@echo GCC 4.7 has been installed in
+	@echo
 	@echo   $(LIBPFASST)/$(GCC)
 	@echo
 	@echo and a symlink to makefile.gcc47.defs has been created.  These makefile
-	@echo definitions should work either of the of OpenMPI or MPICH2 mpif90 
+	@echo definitions should work either of the of OpenMPI or MPICH2 mpif90
 	@echo compiler wrappers.
 	@echo
 	@echo You may need to set your LD_LIBRARAY_PATH to include
