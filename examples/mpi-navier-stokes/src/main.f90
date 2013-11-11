@@ -26,7 +26,7 @@ program fpfasst
        stop "ERROR: Can't initialize MPI."
 
   nthreads = -1
-  nsteps   = -1
+  nsteps   = 32
 
   if (nthreads < 0) then
      call getenv("OMP_NUM_THREADS", arg)
@@ -51,7 +51,7 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  pf%niters = 12
+  pf%niters = 5
   pf%qtype  = 1
 
   pf%echo_timings = .true.
@@ -86,10 +86,6 @@ program fpfasst
 
 
   !!!! run
-  if (nsteps < 0) then
-     nsteps = pf%comm%nproc
-  end if
-
   if (pf%rank == 0) then
      print *, 'NX:       ', nx(first:)
      print *, 'NNODES:   ', nnodes(first:)
