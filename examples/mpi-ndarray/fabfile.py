@@ -29,47 +29,61 @@ dt    = defaultdict(lambda: 0.01, { 'wave': 0.5/512, 'ks': 1.0, })
 
 
 @task
-def timings():
+def timings1():
   """Speedup/timing tests."""
 
   setenv()
-
   jobs       = JobQueue(rwd=os.path.join(env.scratch, 'timings', env.host_nick), queue='regular')
   problems   = [ 'heat', 'burgers', 'ks' ]
-  # problems   = [ 'navier-stokes' ]
   processors = [ 4, 8, 16, 32, 64 ]
   trials     = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
   levels     = [ 2, 3 ]
 
-  # serial reference run
+  # serial reference runs
   for prob in problems:
     name = '%s_p%02dl%d' % (prob, 1, 1)
-    job  = Job(name=name, rwd=name, width=1, walltime="00:10:00")
-    if prob == 'navier-stokes':
-      job.exe = os.path.join(env.libpfasst, 'examples/mpi-navier-stokes/main.exe')
-    else:
-      job.param_file = 'probin.nml.in'
-      job.update_params(
-        problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=1,
-        nnodes=','.join(map(str, nnodes[prob][-1:])), nvars=','.join(map(str, nvars[prob][-1:])),
-        niters=niters[prob][1], nu=0.005, sigma=sigma[prob], abs_tol=0)
+    job  = Job(name=name, rwd=name, width=1, param_file='probin.nml.in', walltime="00:05:00")
+    job.update_params(
+      problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=1,
+      nnodes=','.join(map(str, nnodes[prob][-1:])), nvars=','.join(map(str, nvars[prob][-1:])),
+      niters=niters[prob][1], nu=0.005, sigma=sigma[prob], abs_tol=0)
     jobs.add(job)
 
   # parallel runs
   for prob, trial, nprocs, nlevs in product(problems, trials, processors, levels):
     name = '%s_t%02dp%02dl%d' % (prob, trial, nprocs, nlevs)
-    job  = Job(name=name, rwd=name, width=nprocs, walltime="00:10:00")
-    if prob == 'navier-stokes':
-      job.depth       = 10
-      job.specialized = 2
-      job.pernode     = 2
-      job.exe         = os.path.join(env.libpfasst, 'examples/mpi-navier-stokes/main.exe')
-    else:
-      job.param_file = 'probin.nml.in'
-      job.update_params(
-        problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=nlevs,
-        nnodes=','.join(map(str, nnodes[prob][-nlevs:])), nvars=','.join(map(str, nvars[prob][-nlevs:])),
-        niters=niters[prob][nprocs], nu=0.005, sigma=sigma[prob], abs_tol=0)
+    job  = Job(name=name, rwd=name, width=nprocs, param_file='probin.nml.in', walltime="00:05:00")
+    job.update_params(
+      problem=prob, rwd=name, output="", nsteps=64, dt=dt[prob], nlevs=nlevs,
+      nnodes=','.join(map(str, nnodes[prob][-nlevs:])), nvars=','.join(map(str, nvars[prob][-nlevs:])),
+      niters=niters[prob][nprocs], nu=0.005, sigma=sigma[prob], abs_tol=0)
+    jobs.add(job)
+
+  jobs.submit_all()
+
+
+@task
+def timings3():
+  """Speedup/timing tests."""
+
+  setenv()
+  jobs       = JobQueue(rwd=os.path.join(env.scratch, 'timings', env.host_nick), queue='regular',
+                        exe=os.path.join(env.libpfasst, 'examples/mpi-navier-stokes/main.exe'))
+  prob       = 'navier-stokes'
+  processors = [ 4, 8, 16, 32 ]
+  trials     = [ 1, 2, 3, 4, 5 ]
+  levels     = [ 2, 3 ]
+
+  # serial reference run
+  name = '%s_p%02dl%d' % (prob, 1, 1)
+  job  = Job(name=name, rwd=name, width=1, walltime="02:05:00")
+  jobs.add(job)
+
+  # parallel runs
+  for trial, nprocs, nlevs in product(trials, processors, levels):
+    name = '%s_t%02dp%02dl%d' % (prob, trial, nprocs, nlevs)
+    job  = Job(name=name, rwd=name, width=nprocs, walltime="00:30:00",
+               depth=10, specialized=2, pernode=2)
     jobs.add(job)
 
   jobs.submit_all()
@@ -112,17 +126,29 @@ def setenv():
     env.host_rsync  = 'edison-s'
     env.scheduler   = 'edison'
     env.depth       = 1
-    # # XXX: not sure if this is still needed
-    # env.pbs_cmds    = [
-    #   'export MPICH_MAX_THREAD_SAFETY=multiple',
-    #   'export MPICH_NEMESIS_ASYNC_PROGRESS=method2',
-    #   'export MPICH_GNI_USE_UNASSIGNED_CPUS=enabled',
-    #   ]
-
+    env.pbs_cmds    = [
+      'export MPICH_MAX_THREAD_SAFETY=multiple',
+      'export MPICH_NEMESIS_ASYNC_PROGRESS=method2',
+      'export MPICH_GNI_USE_UNASSIGNED_CPUS=enabled',
+      ]
     # fabric
     env.host_string = 'edison.nersc.gov'
 
+  elif env.host[:6] == 'hopper':
+    # local
+    env.host_nick   = 'hopper'
+    env.scratch     = '/global/scratch2/sd/memmett/PFASST'
+    env.libpfasst   = '/global/homes/m/memmett/projects/libpfasst'
+    env.exe         = '/global/homes/m/memmett/projects/libpfasst/examples/mpi-ndarray/main.exe'
+    # jobtools
+    env.host_rsync  = 'hopper-s'
+    env.scheduler   = 'hopper'
+    env.depth       = 1
+    # fabric
+    env.host_string = 'hopper.nersc.gov'
+
   elif env.host[:5] == 'gigan':
+
     env.host_nick   = 'gigan'
     env.scratch     = '/scratch/memmett/'
     env.scheduler   = 'serial'

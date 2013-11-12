@@ -30,7 +30,8 @@ To reproduce the results therein:
 $ cd libpfasst/examples/mpi-ndarray
 $ fab -H edison build:mpi-ndarray
 $ fab -H edison build:mpi-navier-stokes
-$ fab -H edison timings
+$ fab -H edison timings1
+$ fab -H edison timings3
 $ fab -H edison pull:timings
 $ python timings.py
 
@@ -41,7 +42,7 @@ Notes
 
 * 2013-10-29
 
-  I ran the heat, burgers, and ks examples on edison without any
+  I ran the heat, burgers, and KS examples on Edison without any
   specialized cpus.  From the generated boxplots it seems as though
   communication is slowing things down a bit compared to some
   quick'n'dirty runs using specialized cpus from yesterday.
@@ -49,7 +50,25 @@ Notes
   The timing info for these runs is in 'timings/edison.r0'.
 
   I would like to try again with specialized cpus (using 'aprun -r X')
-  but with setting those ugly environment variables to see if I can
+  but without setting those ugly environment variables to see if I can
   recover the nice results from yesterday.
+
+* 2013-10-31
+
+  I have been trying to redo the above using 1 specialized CPU for
+  communication (but without the ugly env variables), but Edison is
+  flaky these days.
+
+* 2013-11-01
+
+  Looks like using 1 specialized CPU slows things down, will try again
+  with the environment variables... turns out they help much (maybe
+  these specialized CPUs would be helpful for the NS problem).
+
+* 2013-11-10
+
+  I'm redoing the Navier-Stokes runs with 2 specialized CPUs after
+  fixing the number of steps and iterations.
+
 
 

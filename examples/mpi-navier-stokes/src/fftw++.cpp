@@ -9,7 +9,7 @@ const double fftw::twopi=2.0*acos(-1.0);
 // User settings:
 unsigned int fftw::effort=FFTW_ESTIMATE;
 const char *WisdomName="wisdom3.txt";
-unsigned int fftw::maxthreads=1;
+unsigned int fftw::maxthreads=12;
 double fftw::testseconds=0.1; // Time limit for threading efficiency tests
 
 void fftw::LoadWisdom() {
@@ -25,5 +25,5 @@ void fftw::SaveWisdom() {
   fftwpp_export_wisdom(PutWisdom,ofWisdom);
   ofWisdom.close();
 }
-  
+
 }
