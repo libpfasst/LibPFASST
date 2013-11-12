@@ -103,11 +103,8 @@ contains
        DO
           CALL get_command_argument(i, arg)
           IF (LEN_TRIM(arg) == 0) EXIT
-          
-          !       WRITE (*,*) TRIM(arg)
           if (i > 0) then
              istring="&PF_PARAMS "//TRIM(arg)//" /"    
-             !          write(*,*) istring
              READ(istring,nml=PF_PARAMS,iostat=ios,iomsg=message) ! internal read of NAMELIST
           end if
           i = i+1
