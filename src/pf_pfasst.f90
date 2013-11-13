@@ -32,13 +32,14 @@ contains
     type(pf_pfasst_t),   intent(inout)         :: pf
     type(pf_comm_t),     intent(inout), target :: comm
     integer,             intent(in), optional  :: nlevels
-    character(len=*),    intent(in), optional  :: fname
+    character(len=*),    intent(in), optional  :: fname   
     logical,             intent(in), optional  :: nocmd
 
     logical :: read_cmd = .true.
     integer :: l
 
     if (present(nlevels))   pf%nlevels = nlevels
+
     !  Gather some input from a file and command line
     if (present(nocmd) .and. nocmd)   read_cmd = .false.
     if (present(fname))  then

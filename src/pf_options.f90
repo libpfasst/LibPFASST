@@ -77,8 +77,8 @@ contains
 
 
     !  Set local variables to pf_pfasst defaults
-    niters = pf%niters        
     nlevels  = pf%nlevels         
+    niters = pf%niters        
     qtype  = pf%qtype        
     ctype = pf%ctype          
     window = pf%window     
@@ -122,6 +122,11 @@ contains
     pf%Pipeline_G  = Pipeline_G
     pf%PFASST_pred = PFASST_pred
     pf%echo_timings = echo_timings
+
+    if (pf%nlevels < 1) then
+       write(*,*) 'Bad specification for nlevels=', pf%nlevels
+       stop
+    endif
   end subroutine pf_read_opts
 
   subroutine pf_set_options(pf, fname, unitno, cmdline)

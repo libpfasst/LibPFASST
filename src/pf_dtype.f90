@@ -21,6 +21,7 @@ module pf_mod_dtype
   use iso_c_binding
   implicit none
 
+  !  static pfasst paramters
   integer, parameter :: pfdp = c_double
 
   real(pfdp), parameter :: ZERO  = 0.0_pfdp

@@ -5,111 +5,157 @@ Parameters and variables
 The libpfasst library has many parameters which control the 
 behavior of the PFASST algorithm and can be changed by the 
 user.  This section lists all the parameters and describes
-their function, location, default values, 
-and how they are set.  Below is also an explanation of how to set 
-certain parameters to acheive particular variants of PFASST.
+their function, location, and default values. Most of the 
+parameters assume a default value that can be changed by
+specifying the value either in an input file or on the 
+command line.  Some of the parameters must be changed from
+their default value or PFASST will not execute.  
+
+Following these lists is an explanation of how to set 
+parameters through input files or the command line, and 
+how to choose certain parameters to acheive particular 
+variants of PFASST.
 
 Types of parameters
 -------------------
 
 *  libpfasst static parameters:  are hard coded and cannot be changed at run time
-*  libfpasst mandatory paramters: must be reassigned at run time by either specification in and input file or the command line.  The use of default values will result in program termination.
-*  libfpasst optional paramters: can  be reassigned at run time by either specification in and input file or the command line.  The use of default values will result in default execution.
-* local mandatory parameters:  must be passed in a call to pf_run_pfasst
-* local optional parameters:   specified by the user application and unrelated to the workings of libpfasst
+*  pfasst_t mandatory parameters: must be reassigned at run time 
+    the use of default values will result in program termination.
+*  pfasst_t optional parameters: can  be reassigned at run time,  
+   the use of default values will result in default execution.
+*  level_t mandatory  parameters: must be reassigned at run time,  
+   the use of default values will result in default execution.
+*  level_t optional parameters: can  be reassigned at run time, 
+   the use of default values will result in default execution.
+*  local mandatory parameters:  must be passed in a call to pf_run_pfasst 
+*  local optional parameters:   specified by the user application and unrelated to the workings of libpfasst
 
 
+libfpasst static parameters:
+---------------------------
 
+The parameters at the top of the file src/pf_dtype.f90 are all set at compile time and can't be changed at runtime.
+The only parameter here of interest to the user is 
+
+  integer, parameter :: pfdp = c_double
+
+which controls the precision of all floating point numbers (or at least all those using pfdp in the declaration)
+
+pfasst_t mandatory parameters:
+---------------------------
+
+The parameters defined in type  pf_pfasst_t the file src/pf_dtype.f90 are all given a default value.  Currently
+on the variable nlevels is given a problematic default.  Hence setting this variable on the command line or in
+an initialization file is mandatory
+
+pfasst_t optional parameters:
+---------------------------
+
+The remaining variables in the specification  of  pf_pfasst_t  are given default values as below
   type :: pf_pfasst_t
-     integer :: nlevels = -1            ! number of pfasst levels
+
      integer :: niters  = 5             ! number of iterations
      integer :: rank    = -1            ! rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO
      integer :: ctype   = SDC_CYCLE_V
-     logical :: Pipeline_G   = .FALSE.  !  Pipeline at coarsest level
-     logical :: PFASST_pred   = .TRUE.  !  Do PFASST style predictor
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
 
      integer :: window = PF_WINDOW_BLOCK
-     
+ 
+     logical :: Pipeline_G =  .false.
+     logical :: PFASST_pred = .false.
+
+     ! timing
+     logical    :: echo_timings  = .false.
+
+These value can be changed as desired.
+
+level_t mandatory parameters:
+---------------------------
+
+In the specification of pf_level_t, the first two variables nvar and nnodes
+are given default values that will cause the program to abort.  These variables
+are typically set per level in the main.f90 routine.
+
   type :: pf_level_t
      integer     :: nvars = -1          ! number of variables (dofs)
      integer     :: nnodes = -1         ! number of sdc nodes
+
+level_t optional parameters:
+---------------------------
+
+In the specification of pf_level_t, the first  variables nsweeps and Finterp
+are  default values.  These can be changed per level as the levels are created
+in main.f90
+
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     integer     :: level = -1          ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
 
 
-  type, bind(c) :: pf_state_t
-     integer(c_int) :: block
-     integer(c_int) :: cycle
-     integer(c_int) :: hook
-     integer(c_int) :: first        ! rank of first processor in time block
-     integer(c_int) :: iter
-     integer(c_int) :: last         ! rank of last processor in time block
-     integer(c_int) :: level
-     integer(c_int) :: nmoved       ! how many processors behind me have moved
-     integer(c_int) :: nsteps
-     integer(c_int) :: proc
-     integer(c_int) :: pstatus      ! previous rank's status
-     integer(c_int) :: step
-     integer(c_int) :: status       ! status (iterating, converged etc)
+local mandatory parameters: 
+---------------------------
 
-     real(c_double) :: dt
-     real(c_double) :: res
-     real(c_double) :: t0
-  end type pf_state_t
+In the call to run pfasst
 
+    pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
 
-  namelist /params/ Finterp       !  Interpolate function values too?
-  namelist /params/ nnodes        !  Number of nodes in each level
-  namelist /params/ nfake         !  number of fake processors
-  namelist /params/ niters        !  number of pfasst iterations
-  namelist /params/ nlevs         !  number of PFASST levels
-  namelist /params/ nprob         !  define which problem to run
-  namelist /params/ nsteps        !  Number of time steps to take
-  namelist /params/ qtype         !  type of quadrature nodes
-  namelist /params/ poutmod       !  controls how often output comes
+The variables q0, dt, and tend  must be included.  The variable
+nsteps is optional, if it is not included, then nsteps is set to  
 
-  namelist /params/ dt            !  time step
-  namelist /params/ Tfin          !  End time of run
-  namelist /params/ Htol          !  Tolerance for stopping
+       pf%state%nsteps = ceiling(1.0*tend/dt)
 
-
-  namelist /params/ fbase          !  Base name for output
-  namelist /params/ fnml          !  Base name for output
+qend is also optional and returns the final solution.
 
 
 
-File input
-----------
+File input for user variables
+-----------------------------
 
-The default input file is "probin.nml" wherein the namelist 
+The usual default input file is "probin.nml" wherein the namelist 
 PARAMS (defined  locally in probin.f90) can be specified.  Alternatively,
 a different input file can be specified on the command line by adding
 the file name directly after the executable.  The alternative input
 file must be specified first before any command line parameter specifications 
 (see next section).
 
+File input for pfasst  variables
+--------------------------------
+
+The pfasst parameters are specified in a namelist PF_PARAMS defined
+in routine pf_read_opts in src/pf_options.f90.  This routine is called
+from pf_pfasst_create in pf_pfasst.f90 (which is typically 
+called from main.f90).  If no file is specified in the call to pf_pfasst_create,
+then no file is read.  Typically the main.f90 routine specifies this
+input file (the default being probin.nml), and this file can be changed 
+by specifying   the value of
+
+  pfasst_nml = 'probin.nml'
+
+either in the local input file or the command line. 
+
 Command line input
 ------------------
 
-All the variables in the namelist PARAMS (defined  locally in probin.f90) can
-be modified by simply specifying their value on the command line.  There is 
+All the variables in the namelist PARAMS (defined  locally in probin.f90) 
+and PF_PARAMS can be modified by simply specifying their value on the command line.  There is 
 only one caveat to this in that any parameters must be specified after the
 (optional) input file specification.  For example
 
 mpirun -n 20 main.exe  myinput.nml niters=10
 
 would set the  input file to "myinput.nml" and then over-ride any
-specified value of niters with the value 10. 
+specified value of niters with the value 10. Command line options
+over-ride input files.
 
 
 
-Variable for the predictor
+
+
+Variables for the predictor
 --------------------------
 
 The two variables Pipeline_G and PFASST_pred  determine how the
