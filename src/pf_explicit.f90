@@ -160,6 +160,14 @@ contains
     sweeper%sweeperctx = c_loc(exp)
   end subroutine pf_explicit_create
 
+  subroutine pf_explicit_destroy(sweeper)
+    type(pf_sweeper_t), intent(inout) :: sweeper
+
+    type(pf_explicit_t), pointer :: explicit
+    call c_f_pointer(sweeper%sweeperctx, explicit)
+
+    deallocate(explicit)
+  end subroutine pf_explicit_destroy
 
 end module pf_mod_explicit
 
