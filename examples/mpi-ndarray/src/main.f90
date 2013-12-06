@@ -15,7 +15,7 @@ program main
   type(pf_comm_t)   :: comm
 
   type(ndarray),      target :: q1
-  type(pf_sweeper_t), target :: sweeper
+
   type(pf_encap_t),   target :: encap
 
   integer        :: err, l
@@ -49,16 +49,6 @@ program main
 
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  select case(problem)
-  case (PROB_HEAT)
-     call pf_implicit_create(sweeper, f2eval1, f2comp1)
-  case (PROB_WAVE)
-     call pf_explicit_create(sweeper, f1eval2)
-  case (PROB_SHEAR)
-     call pf_imex_create(sweeper, f1eval2, f2eval2, f2comp2)
-  case default
-     call pf_imex_create(sweeper, f1eval1, f2eval1, f2comp1)
-  end select
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%niters = niters
@@ -98,7 +88,18 @@ program main
      pf%levels(l)%encap       => encap
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
-     pf%levels(l)%sweeper     => sweeper
+
+     select case(problem)
+     case (PROB_HEAT)
+        call pf_implicit_create(pf%levels(l)%sweeper, f2eval1, f2comp1)
+     case (PROB_WAVE)
+        call pf_explicit_create(pf%levels(l)%sweeper, f1eval2)
+     case (PROB_SHEAR)
+        call pf_imex_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
+     case default
+        call pf_imex_create(pf%levels(l)%sweeper, f1eval1, f2eval1, f2comp1)
+     end select
+
   end do
 
   call pf_mpi_setup(comm, pf)

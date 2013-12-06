@@ -16,7 +16,7 @@ program main
 
   type(pf_pfasst_t)           :: pf
   type(pf_comm_t)             :: comm
-  type(pf_sweeper_t), target  :: sweeper
+!  type(pf_sweeper_t), target  :: sweeper
   type(pf_encap_t),   target  :: encap
   type(ndarray),      pointer :: q0
   integer                     :: argc, err, nvars(3), nnodes(3), l
@@ -57,7 +57,6 @@ program main
 
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
-  call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%qtype  = SDC_GAUSS_LOBATTO
@@ -76,7 +75,7 @@ program main
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
      pf%levels(l)%encap       => encap
-     pf%levels(l)%sweeper     => sweeper
+     call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
 
      allocate(pf%levels(l)%shape(1))
      pf%levels(l)%shape(1)    = nvars(l)
@@ -118,7 +117,7 @@ program main
      call feval_destroy_workspace(pf%levels(l)%levelctx)
   end do
 
-  call pf_imex_destroy(sweeper)
+
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
   call mpi_finalize(err)

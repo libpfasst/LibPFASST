@@ -95,6 +95,7 @@ module pf_mod_dtype
      procedure(pf_initialize_p), pointer, nopass :: initialize
      procedure(pf_evaluate_p),   pointer, nopass :: evaluate
      procedure(pf_integrate_p),  pointer, nopass :: integrate
+     procedure(pf_sweepdestroy_p),  pointer, nopass :: destroy
   end type pf_sweeper_t
 
   type :: pf_encap_t
@@ -119,7 +120,7 @@ module pf_mod_dtype
      real(pfdp)  :: residual
 
      type(pf_encap_t),         pointer :: encap
-     type(pf_sweeper_t),       pointer :: sweeper
+     type(pf_sweeper_t)       :: sweeper
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -129,7 +130,7 @@ module pf_mod_dtype
           nodes(:), &                   ! sdc nodes
           qmat(:,:), &                  ! integration matrix (0 to node)
           s0mat(:,:), &                 ! integration matrix (node to node)
-          smat(:,:,:), &                ! sdc matrices (allocated by the sweeper)
+!          smat(:,:,:), &                ! sdc matrices (allocated by the sweeper)
           rmat(:,:), &                  ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
@@ -243,6 +244,11 @@ module pf_mod_dtype
        import pf_level_t
        type(pf_level_t), intent(inout) :: F
      end subroutine pf_initialize_p
+
+     subroutine pf_sweepdestroy_p(sweeper)
+       import pf_sweeper_t
+       type(pf_sweeper_t), intent(inout)  :: sweeper
+     end subroutine pf_sweepdestroy_p
 
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp

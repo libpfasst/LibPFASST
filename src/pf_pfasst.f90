@@ -83,14 +83,13 @@ contains
 
     level%level = nlevel
     nullify(level%encap)
-    nullify(level%sweeper)
     nullify(level%interpolate)
     nullify(level%restrict)
     nullify(level%shape)
     nullify(level%tau)
     nullify(level%pF)
     nullify(level%pQ)
-    nullify(level%smat)
+!    nullify(level%smat)
     nullify(level%rmat)
     nullify(level%tmat)
     level%levelctx = c_null_ptr
@@ -154,7 +153,6 @@ contains
     if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
     if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
     if (.not. associated(F%encap)) stop "ERROR: Missing encapsulation (pf_pfasst.f90)."
-    if (.not. associated(F%sweeper)) stop "ERROR: Missing sweeper (pf_pfasst.f90)."
     if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
     if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
 
@@ -322,9 +320,9 @@ contains
     deallocate(F%qmat)
     deallocate(F%s0mat)
 
-    if (associated(F%smat)) then
-       deallocate(F%smat)
-    end if
+!    if (associated(F%smat)) then
+!       deallocate(F%smat)
+!    end if
 
     ! Q and F
     do m = 1, F%nnodes
@@ -392,6 +390,9 @@ contains
        deallocate(F%rmat)
        nullify(F%rmat)
     end if
+
+    !  Kill the sweeper
+    call F%sweeper%destroy(F%sweeper)
 
   end subroutine pf_level_destroy
 

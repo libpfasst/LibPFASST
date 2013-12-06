@@ -33,109 +33,113 @@ module pf_mod_explicit
 
   type :: pf_explicit_t
      procedure(pf_f1eval_p),   pointer, nopass :: f1eval
+     real(pfdp), ALLOCATABLE :: SdiffE(:,:)
   end type pf_explicit_t
 
 contains
 
-  ! Perform on SDC sweep on level F and set qend appropriately.
-  subroutine explicit_sweep(pf, F, t0, dt)
+  ! Perform on SDC sweep on level Lev and set qend appropriately.
+  subroutine explicit_sweep(pf, Lev, t0, dt)
     use pf_mod_timer
 
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: dt, t0
-    type(pf_level_t),  intent(inout) :: F
+    type(pf_level_t),  intent(inout) :: Lev
 
     integer    :: m, n
     real(pfdp) :: t
-    real(pfdp) :: dtsdc(1:F%nnodes-1)
+    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
     type(pf_explicit_t), pointer :: exp
 
-    call c_f_pointer(F%sweeper%sweeperctx, exp)
+    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
 
-    call start_timer(pf, TLEVEL+F%level-1)
+    call start_timer(pf, TLEVEL+Lev%level-1)
 
     ! compute integrals and add fas correction
-    do m = 1, F%nnodes-1
-       call F%encap%setval(F%S(m), 0.0d0)
-       do n = 1, F%nnodes
-          call F%encap%axpy(F%S(m), dt*F%smat(m,n,1), F%F(n,1))
+    do m = 1, Lev%nnodes-1
+       call Lev%encap%setval(Lev%S(m), 0.0d0)
+       do n = 1, Lev%nnodes
+          call Lev%encap%axpy(Lev%S(m), dt*exp%SdiffE(m,n), Lev%F(n,1))
        end do
-       if (associated(F%tau)) then
-          call F%encap%axpy(F%S(m), 1.0d0, F%tau(m))
+       if (associated(Lev%tau)) then
+          call Lev%encap%axpy(Lev%S(m), 1.0d0, Lev%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call F%encap%unpack(F%Q(1), F%q0)
+    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call exp%f1eval(F%Q(1), t0, F%level, F%levelctx, F%F(1,1))
+    call exp%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
 
     t = t0
-    dtsdc = dt * (F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1))
-    do m = 1, F%nnodes-1
+    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
+    do m = 1, Lev%nnodes-1
        t = t + dtsdc(m)
 
-       call F%encap%copy(F%Q(m+1), F%Q(m))
-       call F%encap%axpy(F%Q(m+1), dtsdc(m), F%F(m,1))
-       call F%encap%axpy(F%Q(m+1), 1.0d0, F%S(m))
+       call Lev%encap%copy(Lev%Q(m+1), Lev%Q(m))
+       call Lev%encap%axpy(Lev%Q(m+1), dtsdc(m), Lev%F(m,1))
+       call Lev%encap%axpy(Lev%Q(m+1), 1.0d0, Lev%S(m))
 
-       call exp%f1eval(F%Q(m+1), t, F%level, F%levelctx, F%F(m+1,1))
+       call exp%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
     end do
 
-    call F%encap%copy(F%qend, F%Q(F%nnodes))
+    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
 
     ! done
-    call end_timer(pf, TLEVEL+F%level-1)
+    call end_timer(pf, TLEVEL+Lev%level-1)
   end subroutine explicit_sweep
 
   ! Evaluate function values
-  subroutine explicit_evaluate(F, t, m)
+  subroutine explicit_evaluate(Lev, t, m)
     use pf_mod_dtype
 
     real(pfdp),       intent(in)    :: t
     integer,          intent(in)    :: m
-    type(pf_level_t), intent(inout) :: F
+    type(pf_level_t), intent(inout) :: Lev
 
     type(pf_explicit_t), pointer :: exp
 
-    call c_f_pointer(F%sweeper%sweeperctx, exp)
+    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
 
-    call exp%f1eval(F%Q(m), t, F%level, F%levelctx, F%F(m,1))
+    call exp%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
   end subroutine explicit_evaluate
 
-  ! Initialize smats
-  subroutine explicit_initialize(F)
+  ! Initialize matrix
+  subroutine explicit_initialize(Lev)
     use pf_mod_dtype
-    type(pf_level_t), intent(inout) :: F
-    real(pfdp) :: dsdc(F%nnodes-1)
+    type(pf_level_t), intent(inout) :: Lev
+    real(pfdp) :: dsdc(Lev%nnodes-1)
 
-    integer :: m
+    integer :: m,nnodes
+    type(pf_explicit_t), pointer :: exp
+    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
 
-    allocate(F%smat(F%nnodes-1,F%nnodes,npieces))
+    nnodes = Lev%nnodes
+    allocate(exp%SdiffE(nnodes-1,nnodes))  ! S-FE
 
-    F%smat(:,:,1) = F%s0mat
+    exp%SdiffE = Lev%s0mat
 
-    dsdc = F%nodes(2:F%nnodes) - F%nodes(1:F%nnodes-1)
-    do m = 1, F%nnodes-1
-       F%smat(m,m,1) = F%smat(m,m,1)   - dsdc(m)
+    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
+    do m = 1, nnodes-1
+       exp%SdiffE(m,m)   = exp%SdiffE(m,m)   - dsdc(m)
     end do
   end subroutine explicit_initialize
 
 
   ! Compute SDC integral
-  subroutine explicit_integrate(F, qSDC, fSDC, dt, fintSDC)
-    type(pf_level_t), intent(in)    :: F
+  subroutine explicit_integrate(Lev, qSDC, fSDC, dt, fintSDC)
+    type(pf_level_t), intent(in)    :: Lev
     type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
     type(c_ptr),      intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
-    do n = 1, F%nnodes-1
-       call F%encap%setval(fintSDC(n), 0.0d0)
-       do m = 1, F%nnodes
+    do n = 1, Lev%nnodes-1
+       call Lev%encap%setval(fintSDC(n), 0.0d0)
+       do m = 1, Lev%nnodes
           do p = 1, npieces
-             call F%encap%axpy(fintSDC(n), dt*F%s0mat(n,m), fSDC(m,p))
+             call Lev%encap%axpy(fintSDC(n), dt*Lev%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do
@@ -165,7 +169,7 @@ contains
 
     type(pf_explicit_t), pointer :: explicit
     call c_f_pointer(sweeper%sweeperctx, explicit)
-
+    deallocate(explicit%SdiffE)
     deallocate(explicit)
   end subroutine pf_explicit_destroy
 

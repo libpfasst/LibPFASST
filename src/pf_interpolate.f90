@@ -59,45 +59,47 @@ contains
     tG = t0 + dt*G%nodes
     tF = t0 + dt*F%nodes
 
-    if(present(Finterp) .and. (Finterp)) then
-       !!  Interpolating F
-       do p = 1,size(G%F(1,:))
-          ! needed for amr
-          do m = 1, G%nnodes
-             call G%encap%setval(delG(m),   0.0_pfdp)
-             call F%encap%setval(delGF(m),  0.0_pfdp)
-          end do
-
-          do m = 1, G%nnodes
-             call G%encap%copy(delG(m), G%F(m,p))
-             call G%encap%axpy(delG(m), -1.0_pfdp, G%pF(m,p))
-
-             call G%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx,tG(m))
-          end do
-
+    if(present(Finterp)) then
+       if  (Finterp)  then
+          !!  Interpolating F
+          do p = 1,size(G%F(1,:))
+             ! needed for amr
+             do m = 1, G%nnodes
+                call G%encap%setval(delG(m),   0.0_pfdp)
+                call F%encap%setval(delGF(m),  0.0_pfdp)
+             end do
+             
+             do m = 1, G%nnodes
+                call G%encap%copy(delG(m), G%F(m,p))
+                call G%encap%axpy(delG(m), -1.0_pfdp, G%pF(m,p))
+                
+                call G%interpolate(delGF(m), delG(m), F%level, F%levelctx, G%level, G%levelctx,tG(m))
+             end do
+             
+             ! interpolate corrections
+             do n = 1, F%nnodes
+                do m = 1, G%nnodes
+                   call G%encap%axpy(F%F(n,p), F%tmat(n,m), delGF(m))
+                end do
+             end do
+          end do !  Loop on npieces
+          
+          !  Do interpolation of qSDC(1) to update initial condition
+          call G%encap%setval(delG(1),   0.0_pfdp)
+          call G%encap%setval(delGF(1),  0.0_pfdp)
+          call G%encap%copy(delG(1), G%Q(1))
+          call G%encap%axpy(delG(1), -1.0_pfdp, G%pQ(1))
+          
+          call F%interpolate(delGF(1), delG(1), F%level, F%levelctx, G%level, G%levelctx,tG(1))
+          
           ! interpolate corrections
           do n = 1, F%nnodes
-             do m = 1, G%nnodes
-                call G%encap%axpy(F%F(n,p), F%tmat(n,m), delGF(m))
-             end do
+             call F%encap%axpy(F%Q(n), F%tmat(n,1), delGF(1))
           end do
-       end do !  Loop on npieces
-
-       !  Do interpolation of qSDC(1) to update initial condition
-       call G%encap%setval(delG(1),   0.0_pfdp)
-       call G%encap%setval(delGF(1),  0.0_pfdp)
-       call G%encap%copy(delG(1), G%Q(1))
-       call G%encap%axpy(delG(1), -1.0_pfdp, G%pQ(1))
-
-       call F%interpolate(delGF(1), delG(1), F%level, F%levelctx, G%level, G%levelctx,tG(1))
-
-       ! interpolate corrections
-       do n = 1, F%nnodes
-          call F%encap%axpy(F%Q(n), F%tmat(n,1), delGF(1))
-       end do
-
-       ! ! recompute fs
-       ! call sdceval(tF(1), 1, F)
+          
+          ! ! recompute fs
+          ! call sdceval(tF(1), 1, F)
+       endif
     else
        !!  Interpolating q
        ! create workspaces
