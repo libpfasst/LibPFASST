@@ -24,9 +24,10 @@ contains
 
   subroutine pf_opts_from_cl(pf)
     type(pf_pfasst_t), intent(inout) :: pf
+
     character(len=128) :: arg
     integer            :: argc, argi
-    
+
     argc = command_argument_count()
     argi = 1
     do while (argi <= argc)
@@ -58,11 +59,11 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     logical,           intent(in)    :: read_cmd
     character(len=*),  intent(in), optional  :: fname
-    
+
     !  local versions of pfasst parameters
     integer   :: niters, nlevels, qtype, ctype, window
-    double precision :: abs_res_tol, rel_res_tol  
-    logical :: Pipeline_G , PFASST_pred, echo_timings    
+    double precision :: abs_res_tol, rel_res_tol
+    logical :: Pipeline_G , PFASST_pred, echo_timings
 
     !  Stuff for reading the command line
     INTEGER :: i,ios
@@ -77,13 +78,13 @@ contains
 
 
     !  Set local variables to pf_pfasst defaults
-    nlevels  = pf%nlevels         
-    niters = pf%niters        
-    qtype  = pf%qtype        
-    ctype = pf%ctype          
-    window = pf%window     
+    nlevels  = pf%nlevels
+    niters = pf%niters
+    qtype  = pf%qtype
+    ctype = pf%ctype
+    window = pf%window
     abs_res_tol = pf%abs_res_tol
-    rel_res_tol  = pf%rel_res_tol 
+    rel_res_tol  = pf%rel_res_tol
     Pipeline_G  = pf%Pipeline_G
     PFASST_pred = pf%PFASST_pred
     echo_timings = pf%PFASST_pred
@@ -104,7 +105,7 @@ contains
           CALL get_command_argument(i, arg)
           IF (LEN_TRIM(arg) == 0) EXIT
           if (i > 0) then
-             istring="&PF_PARAMS "//TRIM(arg)//" /"    
+             istring="&PF_PARAMS "//TRIM(arg)//" /"
              READ(istring,nml=PF_PARAMS,iostat=ios,iomsg=message) ! internal read of NAMELIST
           end if
           i = i+1
@@ -112,13 +113,13 @@ contains
     end if
 
     ! Re-assign the pfasst internals
-    pf%niters = niters        
-    pf%nlevels  = nlevels         
-    pf%qtype  = qtype        
-    pf%ctype = ctype          
-    pf%window = window     
+    pf%niters = niters
+    pf%nlevels  = nlevels
+    pf%qtype  = qtype
+    pf%ctype = ctype
+    pf%window = window
     pf%abs_res_tol = abs_res_tol
-    pf%rel_res_tol  = rel_res_tol 
+    pf%rel_res_tol  = rel_res_tol
     pf%Pipeline_G  = Pipeline_G
     pf%PFASST_pred = PFASST_pred
     pf%echo_timings = echo_timings
@@ -130,10 +131,10 @@ contains
   end subroutine pf_read_opts
 
   subroutine pf_set_options(pf, fname, unitno, cmdline)
-    type(pf_pfasst_t), intent(inout) :: pf
-    character(len=*),  intent(in), optional :: fname
-    integer,           intent(in), optional :: unitno
-    logical,           intent(in), optional :: cmdline
+    type(pf_pfasst_t), intent(inout)           :: pf
+    character(len=*),  intent(in   ), optional :: fname
+    integer,           intent(in   ), optional :: unitno
+    logical,           intent(in   ), optional :: cmdline
 
     if (present(fname) .and. len_trim(fname) > 0) then
        open(unit=66, file=fname, status='old',action='read')
@@ -149,10 +150,8 @@ contains
   end subroutine pf_set_options
 
   subroutine pf_print_options(pf, unitno)
-    use pf_mod_version
-
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in), optional :: unitno
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer,           intent(in   ), optional :: unitno
 
     integer :: un = 6
     character(8)   :: date
@@ -167,8 +166,6 @@ contains
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date
     write(un,*) 'time:        ', time
-    write(un,*) 'version:     ', pf_version
-    write(un,*) 'git version: ', pf_git_version
 
     write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
     write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
@@ -201,4 +198,3 @@ contains
   end subroutine pf_print_options
 
 end module pf_mod_options
-
