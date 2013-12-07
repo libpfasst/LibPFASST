@@ -14,14 +14,13 @@ program main
   integer :: nlevs = 3
   integer :: window = PF_WINDOW_BLOCK
 
-  type(pf_pfasst_t)           :: pf
-  type(pf_comm_t)             :: comm
-!  type(pf_sweeper_t), target  :: sweeper
-  type(pf_encap_t),   target  :: encap
-  type(ndarray),      pointer :: q0
-  integer                     :: argc, err, nvars(3), nnodes(3), l
-  double precision            :: dt
-  character(len=128)          :: arg
+  type(pf_pfasst_t)        :: pf
+  type(pf_comm_t)          :: comm
+  type(pf_encap_t), target :: encap
+  type(ndarray), pointer   :: q0
+  integer                  :: argc, err, nvars(3), nnodes(3), l
+  double precision         :: dt
+  character(len=128)       :: arg
 
 
   !
@@ -41,27 +40,13 @@ program main
   nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
   dt     = 0.05_pfdp
 
-  do argc = 1, command_argument_count()
-     call get_command_argument(argc, arg)
-     select case(arg)
-     case ("--ring")
-        window = PF_WINDOW_RING
-     case ("--single")
-        nlevs  = 1
-        nvars  = 128
-        nnodes = 5
-     case default
-        stop "Usage: main.exe [--ring]"
-     end select
-  end do
-
   call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, comm, nlevs)
 
   pf%qtype  = SDC_GAUSS_LOBATTO
   pf%niters = 12
-  
+
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if

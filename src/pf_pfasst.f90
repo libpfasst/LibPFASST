@@ -29,11 +29,11 @@ contains
     use pf_mod_hooks, only: PF_MAX_HOOK
 
     use pf_mod_options
-    type(pf_pfasst_t),   intent(inout)         :: pf
-    type(pf_comm_t),     intent(inout), target :: comm
-    integer,             intent(in), optional  :: nlevels
-    character(len=*),    intent(in), optional  :: fname
-    logical,             intent(in), optional  :: nocmd
+    type(pf_pfasst_t), intent(inout)           :: pf
+    type(pf_comm_t),   intent(inout), target   :: comm
+    integer,           intent(in   ), optional :: nlevels
+    character(len=*),  intent(in   ), optional :: fname
+    logical,           intent(in   ), optional :: nocmd
 
     logical :: read_cmd = .true.
     integer :: l
