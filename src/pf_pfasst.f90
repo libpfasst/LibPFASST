@@ -25,36 +25,34 @@ contains
   !
   ! Create a PFASST object
   !
-  subroutine pf_pfasst_create(pf, comm, nlevels,fname, nocmd)
+  subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
     use pf_mod_hooks, only: PF_MAX_HOOK
 
     use pf_mod_options
     type(pf_pfasst_t),   intent(inout)         :: pf
     type(pf_comm_t),     intent(inout), target :: comm
     integer,             intent(in), optional  :: nlevels
-    character(len=*),    intent(in), optional  :: fname   
+    character(len=*),    intent(in), optional  :: fname
     logical,             intent(in), optional  :: nocmd
 
     logical :: read_cmd = .true.
     integer :: l
 
-    if (present(nlevels))   pf%nlevels = nlevels
+    if (present(nlevels)) pf%nlevels = nlevels
 
-    !  Gather some input from a file and command line
+    ! gather some input from a file and command line
     if (present(nocmd) .and. nocmd)   read_cmd = .false.
     if (present(fname))  then
        call pf_read_opts(pf, read_cmd, fname)
     else
        if (read_cmd)   call pf_read_opts(pf, read_cmd)
     end if
-    
+
     pf%comm => comm
-    
 
     allocate(pf%levels(pf%nlevels))
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
     allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK))
-
     pf%nhooks = 0
 
     do l = 1, pf%nlevels
@@ -67,10 +65,6 @@ contains
 
     nullify(pf%cycles%start)
     nullify(pf%cycles%pfasst)
-
-
-!    pf%zmq = c_null_ptr
-
   end subroutine pf_pfasst_create
 
 
@@ -79,7 +73,7 @@ contains
   !
   subroutine pf_level_create(level, nlevel)
     type(pf_level_t), intent(inout) :: level
-    integer,          intent(in)    :: nlevel
+    integer,          intent(in   ) :: nlevel
 
     level%level = nlevel
     nullify(level%encap)
@@ -89,9 +83,9 @@ contains
     nullify(level%tau)
     nullify(level%pF)
     nullify(level%pQ)
-!    nullify(level%smat)
     nullify(level%rmat)
     nullify(level%tmat)
+    allocate(level%sweeper)
     level%levelctx = c_null_ptr
   end subroutine pf_level_create
 
@@ -139,8 +133,7 @@ contains
   !
   subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
-
-    type(pf_pfasst_t), intent(in)    :: pf
+    type(pf_pfasst_t), intent(in   ) :: pf
     type(pf_level_t),  intent(inout) :: F
 
     integer :: m, p, nvars, nnodes, npieces
@@ -183,9 +176,7 @@ contains
     !
     ! skip the rest if we're already allocated
     !
-
     if (F%allocated) return
-
     F%allocated = .true.
 
     !
@@ -320,10 +311,6 @@ contains
     deallocate(F%qmat)
     deallocate(F%s0mat)
 
-!    if (associated(F%smat)) then
-!       deallocate(F%smat)
-!    end if
-
     ! Q and F
     do m = 1, F%nnodes
        call F%encap%destroy(F%Q(m))
@@ -391,8 +378,9 @@ contains
        nullify(F%rmat)
     end if
 
-    !  Kill the sweeper
+    ! kill the sweeper
     call F%sweeper%destroy(F%sweeper)
+    deallocate(F%sweeper)
 
   end subroutine pf_level_destroy
 

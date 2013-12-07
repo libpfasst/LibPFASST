@@ -22,106 +22,70 @@ module pf_mod_options
   implicit none
 contains
 
-  subroutine pf_opts_from_cl(pf)
-    type(pf_pfasst_t), intent(inout) :: pf
+  subroutine pf_read_opts(pf, read_cmd, fname)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    logical,           intent(in   )           :: read_cmd
+    character(len=*),  intent(in   ), optional :: fname
 
-    character(len=128) :: arg
-    integer            :: argc, argi
-
-    argc = command_argument_count()
-    argi = 1
-    do while (argi <= argc)
-       call get_command_argument(argi, arg)
-       select case(arg)
-       case ("--pf-ring")
-          pf%window = PF_WINDOW_RING
-       case ("--pf-niters")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%niters
-       case ("--pf-abs-res-tol")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%abs_res_tol
-       case ("--pf-rel-res-tol")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%rel_res_tol
-       case ('--')
-          exit
-       case default
-       end select
-       argi = argi + 1
-    end do
-  end subroutine pf_opts_from_cl
-
-  subroutine pf_read_opts(pf, read_cmd,fname)
-    type(pf_pfasst_t), intent(inout) :: pf
-    logical,           intent(in)    :: read_cmd
-    character(len=*),  intent(in), optional  :: fname
-
-    !  local versions of pfasst parameters
-    integer   :: niters, nlevels, qtype, ctype, window
+    ! local versions of pfasst parameters
+    integer          :: niters, nlevels, qtype, ctype, window
     double precision :: abs_res_tol, rel_res_tol
-    logical :: Pipeline_G , PFASST_pred, echo_timings
+    logical          :: pipeline_g , pfasst_pred, echo_timings
 
-    !  Stuff for reading the command line
-    INTEGER :: i,ios
-    CHARACTER(len=32) :: arg
-    integer,parameter :: un=9
-    CHARACTER(LEN=255) :: istring  ! stores command line argument
-    CHARACTER(LEN=255) :: message           ! use for I/O error messages
+    ! stuff for reading the command line
+    integer, parameter :: un = 9
+    integer            :: i, ios
+    character(len=32)  :: arg
+    character(len=255) :: istring  ! stores command line argument
+    character(len=255) :: message  ! use for i/o error messages
 
-    !  Define the namelist for reading
-    namelist /PF_PARAMS/ niters, nlevels, qtype, ctype, abs_res_tol,rel_res_tol, window
-    namelist /PF_PARAMS/ Pipeline_G,PFASST_pred,echo_timings
+    ! define the namelist for reading
+    namelist /pf_params/ niters, nlevels, qtype, ctype, abs_res_tol, rel_res_tol, window
+    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings
 
-
-    !  Set local variables to pf_pfasst defaults
-    nlevels  = pf%nlevels
-    niters = pf%niters
-    qtype  = pf%qtype
-    ctype = pf%ctype
-    window = pf%window
-    abs_res_tol = pf%abs_res_tol
+    ! set local variables to pf_pfasst defaults
+    nlevels      = pf%nlevels
+    niters       = pf%niters
+    qtype        = pf%qtype
+    ctype        = pf%ctype
+    window       = pf%window
+    abs_res_tol  = pf%abs_res_tol
     rel_res_tol  = pf%rel_res_tol
-    Pipeline_G  = pf%Pipeline_G
-    PFASST_pred = pf%PFASST_pred
-    echo_timings = pf%PFASST_pred
+    pipeline_g   = pf%pipeline_g
+    pfasst_pred  = pf%pfasst_pred
+    echo_timings = pf%echo_timings
 
-
-
-    !  Open the file fname and read the pfasst namelist
+    ! open the file fname and read the pfasst namelist
     if (present(fname))  then
-       open(unit=un, file = fname, status = 'old', action = 'read')
-       read(unit=un, nml = PF_PARAMS)
+       open(unit=un, file=fname, status='old', action='read')
+       read(unit=un, nml=pf_params)
        close(unit=un)
     end if
 
-    !  Overwrite with the command line
+    ! overwrite with the command line
     if (read_cmd) then
        i = 0
-       DO
-          CALL get_command_argument(i, arg)
-          IF (LEN_TRIM(arg) == 0) EXIT
+       do
+          call get_command_argument(i, arg)
+          if (len_trim(arg) == 0) exit
           if (i > 0) then
-             istring="&PF_PARAMS "//TRIM(arg)//" /"
-             READ(istring,nml=PF_PARAMS,iostat=ios,iomsg=message) ! internal read of NAMELIST
+             istring="&pf_params " // trim(arg) // " /"
+             read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
           end if
           i = i+1
-       END DO
+       end do
     end if
 
-    ! Re-assign the pfasst internals
-    pf%niters = niters
-    pf%nlevels  = nlevels
-    pf%qtype  = qtype
-    pf%ctype = ctype
-    pf%window = window
-    pf%abs_res_tol = abs_res_tol
+    ! re-assign the pfasst internals
+    pf%niters       = niters
+    pf%nlevels      = nlevels
+    pf%qtype        = qtype
+    pf%ctype        = ctype
+    pf%window       = window
+    pf%abs_res_tol  = abs_res_tol
     pf%rel_res_tol  = rel_res_tol
-    pf%Pipeline_G  = Pipeline_G
-    pf%PFASST_pred = PFASST_pred
+    pf%pipeline_g   = pipeline_g
+    pf%pfasst_pred  = pfasst_pred
     pf%echo_timings = echo_timings
 
     if (pf%nlevels < 1) then
@@ -129,25 +93,6 @@ contains
        stop
     endif
   end subroutine pf_read_opts
-
-  subroutine pf_set_options(pf, fname, unitno, cmdline)
-    type(pf_pfasst_t), intent(inout)           :: pf
-    character(len=*),  intent(in   ), optional :: fname
-    integer,           intent(in   ), optional :: unitno
-    logical,           intent(in   ), optional :: cmdline
-
-    if (present(fname) .and. len_trim(fname) > 0) then
-       open(unit=66, file=fname, status='old',action='read')
-!       call pf_opts_from_file(pf, 66)
-       close(unit=66)
-    end if
-    if (present(unitno)) then
- !      call pf_opts_from_file(pf, unitno)
-    end if
-    if (.not. present(cmdline) .or. cmdline) then
-       call pf_opts_from_cl(pf)
-    end if
-  end subroutine pf_set_options
 
   subroutine pf_print_options(pf, unitno)
     type(pf_pfasst_t), intent(inout)           :: pf
@@ -194,7 +139,6 @@ contains
     else
        write(un,*) 'Serial Predictor style  '
     end if
-
   end subroutine pf_print_options
 
 end module pf_mod_options

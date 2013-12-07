@@ -22,6 +22,7 @@ module pf_mod_imex
   use pf_mod_explicit, only: pf_f1eval_p
   use pf_mod_implicit, only: pf_f2eval_p, pf_f2comp_p
   implicit none
+
   integer, parameter, private :: npieces = 2
 
   type :: pf_imex_t
@@ -42,12 +43,12 @@ contains
     use pf_mod_timer
 
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, t0
+    real(pfdp),        intent(in   ) :: dt, t0
     type(pf_level_t),  intent(inout) :: Lev
 
-    integer    :: m, n
-    real(pfdp) :: t
-    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
+    integer     :: m, n
+    real(pfdp)  :: t
+    real(pfdp)  :: dtsdc(1:Lev%nnodes-1)
     type(c_ptr) :: rhs
 
     type(pf_imex_t), pointer :: imex
@@ -99,8 +100,8 @@ contains
 
   ! Evaluate function values
   subroutine imex_evaluate(Lev, t, m)
-    real(pfdp),       intent(in)    :: t
-    integer,          intent(in)    :: m
+    real(pfdp),       intent(in   ) :: t
+    integer,          intent(in   ) :: m
     type(pf_level_t), intent(inout) :: Lev
 
     type(pf_imex_t), pointer :: imex
@@ -110,13 +111,12 @@ contains
     call imex%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,2))
   end subroutine imex_evaluate
 
-  ! Initialize Matrices
+  ! Initialize matrices
   subroutine imex_initialize(Lev)
-    use pf_mod_dtype
     type(pf_level_t), intent(inout) :: Lev
-    real(pfdp) :: dsdc(Lev%nnodes-1)
 
-    integer :: m,nnodes
+    real(pfdp) :: dsdc(Lev%nnodes-1)
+    integer    :: m, nnodes
 
     type(pf_imex_t), pointer :: imex
     call c_f_pointer(Lev%sweeper%sweeperctx, imex)
@@ -173,7 +173,7 @@ contains
     sweeper%evaluate   => imex_evaluate
     sweeper%initialize => imex_initialize
     sweeper%integrate  => imex_integrate
-    sweeper%destroy  => pf_imex_destroy
+    sweeper%destroy    => pf_imex_destroy
 
     sweeper%sweeperctx = c_loc(imex)
   end subroutine pf_imex_create

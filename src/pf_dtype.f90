@@ -119,8 +119,8 @@ module pf_mod_dtype
 
      real(pfdp)  :: residual
 
-     type(pf_encap_t),         pointer :: encap
-     type(pf_sweeper_t)       :: sweeper
+     type(pf_encap_t),         pointer         :: encap
+     type(pf_sweeper_t),       pointer         :: sweeper
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -130,7 +130,6 @@ module pf_mod_dtype
           nodes(:), &                   ! sdc nodes
           qmat(:,:), &                  ! integration matrix (0 to node)
           s0mat(:,:), &                 ! integration matrix (node to node)
-!          smat(:,:,:), &                ! sdc matrices (allocated by the sweeper)
           rmat(:,:), &                  ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
@@ -149,7 +148,7 @@ module pf_mod_dtype
 
      type(c_ptr) :: qend                ! solution at last node
 
-     type(c_ptr) :: levelctx            ! user context
+     type(c_ptr)      :: levelctx       ! user context
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
@@ -191,7 +190,7 @@ module pf_mod_dtype
      real(pfdp) :: rel_res_tol = 0.d0
 
      integer :: window = PF_WINDOW_BLOCK
- 
+
      logical :: Pipeline_G =  .false.
      logical :: PFASST_pred = .false.
 
