@@ -160,6 +160,7 @@ contains
     sweeper%evaluate   => explicit_evaluate
     sweeper%initialize => explicit_initialize
     sweeper%integrate  => explicit_integrate
+    sweeper%destroy    => pf_explicit_destroy
 
     sweeper%sweeperctx = c_loc(exp)
   end subroutine pf_explicit_create
