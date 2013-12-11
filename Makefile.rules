@@ -6,15 +6,30 @@ vpath %.f90 $(VPATHS)
 vpath %.c   $(VPATHS)
 
 $(EXE): $(OBJ)
+ifdef MKVERBOSE
 	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+else
+	@echo "Linking..."
+	@$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+endif
 
 build/%.o: %.f90
 	@mkdir -p build
+ifdef MKVERBOSE
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+else
+	@echo "Building $<..."
+	@$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+endif
 
 build/%.o: %.c
 	@mkdir -p build
+ifdef MKVERBOSE
 	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+else
+	@echo "Building $<..."
+	@$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+endif
 
 .PHONY: clean
 
