@@ -38,17 +38,6 @@ module pf_mod_dtype
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
   integer, parameter :: SDC_PROPER_NODES    = 100
 
-  integer, parameter :: SDC_CYCLE_V    = 1
-  integer, parameter :: SDC_CYCLE_FULL = 2
-  integer, parameter :: SDC_CYCLE_FAKE = 3
-
-  integer, parameter :: SDC_CYCLE_UP     = 100
-  integer, parameter :: SDC_CYCLE_DOWN   = 101
-  integer, parameter :: SDC_CYCLE_BOTTOM = 102
-  integer, parameter :: SDC_CYCLE_SWEEP  = 103
-  integer, parameter :: SDC_CYCLE_INTERP = 104
-  integer, parameter :: SDC_CYCLE_RECV   = 105
-
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
   integer, parameter :: SDC_KIND_FEVAL        = 3
@@ -64,7 +53,6 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
 
-
   type, bind(c) :: pf_state_t
      real(c_double) :: t0, dt
      integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
@@ -75,14 +63,6 @@ module pf_mod_dtype
      integer(c_int) :: last         ! rank of last processor in time block
      real(c_double) :: res
   end type pf_state_t
-
-  type :: pf_stage_t
-     integer :: type, F, G
-  end type pf_stage_t
-
-  type :: pf_cycle_t
-     type(pf_stage_t), pointer :: start(:), pfasst(:)
-  end type pf_cycle_t
 
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
@@ -184,7 +164,6 @@ module pf_mod_dtype
      integer :: niters  = 5             ! number of iterations
      integer :: rank    = -1            ! rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO
-     integer :: ctype   = SDC_CYCLE_V
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
@@ -195,7 +174,6 @@ module pf_mod_dtype
      logical :: PFASST_pred = .false.
 
      ! pf objects
-     type(pf_cycle_t)          :: cycles
      type(pf_state_t), pointer :: state
      type(pf_level_t), pointer :: levels(:)
      type(pf_comm_t),  pointer :: comm

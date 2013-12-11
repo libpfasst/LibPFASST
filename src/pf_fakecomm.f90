@@ -47,13 +47,13 @@ contains
     type(pf_pfasst_t), intent(inout), target  :: pf
 
     pf_comm%pfs(pf%rank+1) = c_loc(pf)
-    pf%ctype = SDC_CYCLE_FAKE
+    ! pf%ctype = SDC_CYCLE_FAKE
   end subroutine pf_fake_setup
 
   ! Retrieve the PFASST object associated with the given rank
   subroutine pf_fake_get(pf_comm, rank, pf)
     type(pf_comm_t),   intent(in)  :: pf_comm
-    integer,           intent(in)  :: rank 
+    integer,           intent(in)  :: rank
     type(pf_pfasst_t), intent(out), pointer :: pf
 
     call c_f_pointer(pf_comm%pfs(rank+1), pf)

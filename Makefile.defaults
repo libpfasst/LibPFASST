@@ -15,7 +15,6 @@ include $(wildcard $(LIBPFASST)/*.defs)
 VPATHS = $(LIBPFASST)/src
 
 FSRC = src/pfasst.f90 \
-       src/pf_cycle.f90 \
        src/pf_dtype.f90 \
        src/pf_explicit.f90 \
        src/pf_fakecomm.f90 \
