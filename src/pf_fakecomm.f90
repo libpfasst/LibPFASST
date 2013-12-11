@@ -47,7 +47,6 @@ contains
     type(pf_pfasst_t), intent(inout), target  :: pf
 
     pf_comm%pfs(pf%rank+1) = c_loc(pf)
-    ! pf%ctype = SDC_CYCLE_FAKE
   end subroutine pf_fake_setup
 
   ! Retrieve the PFASST object associated with the given rank

@@ -26,6 +26,7 @@ module pf_mod_fake
   use pf_mod_utils
   use pf_mod_timer
   use pf_mod_hooks
+  use pf_mod_parallel
   implicit none
 contains
 
@@ -42,63 +43,63 @@ contains
     type(pf_pfasst_t), pointer :: pf
     type(c_ptr),       pointer :: pfs(:)
 
-    ! nproc =  pf0%comm%nproc
-    ! pfs   => pf0%comm%pfs
+    nproc =  pf0%comm%nproc
+    pfs   => pf0%comm%pfs
 
-    ! do p = 1, nproc
-    !    call c_f_pointer(pfs(p), pf)
+    do p = 1, nproc
+       call c_f_pointer(pfs(p), pf)
 
-    !    call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    !    call start_timer(pf, TPREDICTOR)
+       call call_hooks(pf, 1, PF_PRE_PREDICTOR)
+       call start_timer(pf, TPREDICTOR)
 
-    !    F => pf%levels(pf%nlevels)
-    !    call spreadq0(F, t0)
+       F => pf%levels(pf%nlevels)
+       call spreadq0(F, t0)
 
-    !    do l = pf%nlevels, 2, -1
-    !       F => pf%levels(l); G => pf%levels(l-1)
-    !       call pf_residual(pf, F, dt)
-    !       call restrict_time_space_fas(pf, t0, dt, F, G)
-    !       call save(G)
-    !       call G%encap%pack(G%q0, G%Q(1))
-    !    end do
-    ! end do
+       do l = pf%nlevels, 2, -1
+          F => pf%levels(l); G => pf%levels(l-1)
+          call pf_residual(pf, F, dt)
+          call restrict_time_space_fas(pf, t0, dt, F, G)
+          call save(G)
+          call G%encap%pack(G%q0, G%Q(1))
+       end do
+    end do
 
-    ! if (nproc > 1) then
+    if (nproc > 1) then
 
-    !    do k = 1, nproc
-    !       do p = k, nproc
-    !          call c_f_pointer(pfs(p), pf)
+       do k = 1, nproc
+          do p = k, nproc
+             call c_f_pointer(pfs(p), pf)
 
-    !          pf%state%iter = -k
+             pf%state%iter = -k
 
-    !          G => pf%levels(1)
+             G => pf%levels(1)
 
-    !          ! get new initial value (skip on first iteration)
-    !          if (k > 1) then
-    !             call G%encap%pack(G%q0, G%Q(G%nnodes))
-    !             call spreadq0(G, t0)
-    !          end if
+             ! get new initial value (skip on first iteration)
+             if (k > 1) then
+                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                call spreadq0(G, t0)
+             end if
 
-    !          call call_hooks(pf, G%level, PF_PRE_SWEEP)
-    !          do j = 1, G%nsweeps
-    !             call G%sweeper%sweep(pf, G, t0, dt)
-    !          end do
-    !          call call_hooks(pf, G%level, PF_POST_SWEEP)
-    !          call pf_residual(pf, G, dt)
-    !       end do
+             call call_hooks(pf, G%level, PF_PRE_SWEEP)
+             do j = 1, G%nsweeps
+                call G%sweeper%sweep(pf, G, t0, dt)
+             end do
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
+             call pf_residual(pf, G, dt)
+          end do
 
-    !    end do
+       end do
 
-    ! end if
+    end if
 
-    ! do p = 1, nproc
-    !    call c_f_pointer(pfs(p), pf)
+    do p = 1, nproc
+       call c_f_pointer(pfs(p), pf)
 
-    !    pf%state%iter  = -1
-    !    pf%state%cycle = -1
-    !    call end_timer(pf, TPREDICTOR)
-    !    call call_hooks(pf, 1, PF_POST_PREDICTOR)
-    ! end do
+       pf%state%iter  = -1
+       pf%state%cycle = -1
+       call end_timer(pf, TPREDICTOR)
+       call call_hooks(pf, 1, PF_POST_PREDICTOR)
+    end do
 
   end subroutine pf_fake_predictor
 
@@ -114,149 +115,154 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
 
-    ! type(pf_level_t), pointer :: F, Fb
-    ! real(pfdp) :: t0
-    ! integer    :: nblock, b, c, k, l, p, nproc
+    type(pf_level_t), pointer :: F, Fb
+    real(pfdp) :: t0
+    integer    :: nblock, b, j, k, l, p, nproc
 
-    ! type(pf_pfasst_t), pointer :: pf
-    ! type(c_ptr),       pointer :: pfs(:)
+    type(pf_pfasst_t), pointer :: pf
+    type(c_ptr),       pointer :: pfs(:)
 
-    ! type(pf_stage_t) :: end_stage
+    nproc =  pf0%comm%nproc
+    pfs   => pf0%comm%pfs
 
-    ! nproc =  pf0%comm%nproc
-    ! pfs   => pf0%comm%pfs
+    !
+    ! initialize
+    !
 
-    ! !
-    ! ! initialize
-    ! !
+    do p = 1, nproc
+       call c_f_pointer(pfs(p), pf)
 
-    ! do p = 1, nproc
-    !    call c_f_pointer(pfs(p), pf)
+       call start_timer(pf, TTOTAL)
 
-    !    call start_timer(pf, TTOTAL)
+       pf%state%t0   = 0.0d0
+       pf%state%dt   = dt
+       pf%state%iter = -1
 
-    !    pf%state%t0   = 0.0d0
-    !    pf%state%dt   = dt
-    !    pf%state%iter = -1
+       pf%state%first = 0
+       pf%state%last  = pf%comm%nproc - 1
 
-    !    pf%state%first = 0
-    !    pf%state%last  = pf%comm%nproc - 1
+       F => pf%levels(pf%nlevels)
+       call F%encap%pack(F%q0, q0)
 
-    !    F => pf%levels(pf%nlevels)
-    !    call F%encap%pack(F%q0, q0)
-
-    !    pf%state%nsteps = nsteps
-    ! end do
+       pf%state%nsteps = nsteps
+    end do
 
 
-    ! nblock = pf0%state%nsteps/pf0%comm%nproc
+    nblock = pf0%state%nsteps/pf0%comm%nproc
 
-    ! !
-    ! ! time "block" loop
-    ! !
+    !
+    ! time "block" loop
+    !
 
-    ! do b = 1, nblock
+    do b = 1, nblock
 
-    !    do p = 1, nproc
-    !       call c_f_pointer(pfs(p), pf)
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
 
-    !       pf%state%block  = b
-    !       pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
-    !       pf%state%t0     = pf%state%step * dt
-    !       pf%state%iter   = -1
-    !       pf%state%cycle  = -1
+          pf%state%block  = b
+          pf%state%step   = pf%rank + (b-1)*pf%comm%nproc
+          pf%state%t0     = pf%state%step * dt
+          pf%state%iter   = -1
+          pf%state%cycle  = -1
 
-    !       pf%state%status  = PF_STATUS_ITERATING
-    !       pf%state%pstatus = PF_STATUS_ITERATING
+          pf%state%status  = PF_STATUS_ITERATING
+          pf%state%pstatus = PF_STATUS_ITERATING
 
-    !       t0 = pf%state%t0
+          t0 = pf%state%t0
 
-    !       call call_hooks(pf, -1, PF_PRE_BLOCK)
-    !    end do
+          call call_hooks(pf, -1, PF_PRE_BLOCK)
+       end do
 
-    !    call pf_fake_predictor(pf0, t0, dt)
+       call pf_fake_predictor(pf0, t0, dt)
 
-    !    ! do start cycle stages
-    !    do p = 1, nproc
-    !       call c_f_pointer(pfs(p), pf)
+       ! do start cycle stages
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
+          call pf_v_cycle_post_predictor(pf, t0, dt)
+       end do
 
-    !       if (associated(pf%cycles%start)) then
-    !          do c = 1, size(pf%cycles%start)
-    !             pf%state%cycle = c
-    !             ! call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-    !          end do
-    !       end if
-    !    end do
+       ! pfasst iterations
+       do k = 1, pf0%niters
 
-    !    ! pfasst iterations
-    !    do k = 1, pf0%niters
+          do p = 1, nproc
+             call c_f_pointer(pfs(p), pf)
 
-    !       do p = 1, nproc
-    !          call c_f_pointer(pfs(p), pf)
+             pf%state%iter  = k
+             pf%state%cycle = 1
 
-    !          pf%state%iter  = k
-    !          pf%state%cycle = 1
+             call start_timer(pf, TITERATION)
 
-    !          call start_timer(pf, TITERATION)
+             do l = 1, pf%nlevels
+                F => pf%levels(l)
+                call call_hooks(pf, F%level, PF_PRE_ITERATION)
+             end do
 
-    !          do l = 1, pf%nlevels
-    !             F => pf%levels(l)
-    !             call call_hooks(pf, F%level, PF_PRE_ITERATION)
-    !          end do
+             ! XXX: skipping send/receive status
 
-    !          ! XXX: skipping send/receive status
+             F => pf%levels(pf%nlevels)
+             call call_hooks(pf, F%level, PF_PRE_SWEEP)
+             do j = 1, F%nsweeps
+                call F%sweeper%sweep(pf, F, pf%state%t0, dt)
+             end do
+             call call_hooks(pf, F%level, PF_POST_SWEEP)
+             call pf_residual(pf, F, dt)
 
-    !          ! do pfasst cycle stages
-    !          do c = 1, size(pf%cycles%pfasst)
-    !             pf%state%cycle = pf%state%cycle + 1
-    !             ! call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
-    !          end do
-    !       end do
+             call pf_v_cycle(pf, k, pf%state%t0, dt)
 
-    !       do p = 1, nproc
-    !          call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
-    !          call end_timer(pf, TITERATION)
-    !       end do
+          end do
 
-    !    end do ! end pfasst iteration loop
+          do p = 1, nproc
+             call call_hooks(pf, pf%nlevels, PF_POST_ITERATION)
+             call end_timer(pf, TITERATION)
+          end do
 
-    !    ! do end cycle stages
-    !    ! do p = 1, nproc
-    !    !    call c_f_pointer(pfs(p), pf)
-    !    !    end_stage%type = SDC_CYCLE_SWEEP
-    !    !    end_stage%F    = pf%nlevels
-    !    !    end_stage%G    = -1
-    !    !    call pf_do_stage(pf, end_stage, -1, t0, dt)
-    !    ! end do
+       end do ! end pfasst iteration loop
 
-    !    do p = 1, nproc
-    !       call c_f_pointer(pfs(p), pf)
-    !       call call_hooks(pf, -1, PF_POST_STEP)
-    !    end do
+       ! do end cycle stages
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
+          ! ! end_stage%type = SDC_CYCLE_SWEEP
+          ! ! end_stage%F    = pf%nlevels
+          ! ! end_stage%G    = -1
+          ! ! call pf_do_stage(pf, end_stage, -1, t0, dt)
 
-    !    ! broadcast fine qend (non-pipelined time loop)
-    !    if (nblock > 1) then
-    !       call c_f_pointer(pfs(nproc), pf)
-    !       F => pf%levels(pf%nlevels)
+          !    F => pf%levels(pf%nlevels)
+          !    call call_hooks(pf, F%level, PF_PRE_SWEEP)
+          !    do j = 1, F%nsweeps
+          !       call F%sweeper%sweep(pf, F, pf%state%t0, dt)
+          !    end do
+          !    call call_hooks(pf, F%level, PF_POST_SWEEP)
+          !    call pf_residual(pf, F, dt)
+       end do
 
-    !       do p = 1, nproc
-    !          call c_f_pointer(pfs(p), pf)
-    !          Fb => pf%levels(pf%nlevels)
-    !          call Fb%encap%copy(Fb%qend, F%qend)
-    !          call Fb%encap%pack(Fb%q0, Fb%qend)
-    !       end do
-    !    end if
+       do p = 1, nproc
+          call c_f_pointer(pfs(p), pf)
+          call call_hooks(pf, -1, PF_POST_STEP)
+       end do
 
-    ! end do ! end block loop
+       ! broadcast fine qend (non-pipelined time loop)
+       if (nblock > 1) then
+          call c_f_pointer(pfs(nproc), pf)
+          F => pf%levels(pf%nlevels)
 
-    ! !
-    ! ! finish up
-    ! !
-    ! do p = 1, nproc
-    !    call c_f_pointer(pfs(p), pf)
-    !    pf%state%iter = -1
-    !    call end_timer(pf, TTOTAL)
-    ! end do
+          do p = 1, nproc
+             call c_f_pointer(pfs(p), pf)
+             Fb => pf%levels(pf%nlevels)
+             call Fb%encap%copy(Fb%qend, F%qend)
+             call Fb%encap%pack(Fb%q0, Fb%qend)
+          end do
+       end if
+
+    end do ! end block loop
+
+    !
+    ! finish up
+    !
+    do p = 1, nproc
+       call c_f_pointer(pfs(p), pf)
+       pf%state%iter = -1
+       call end_timer(pf, TTOTAL)
+    end do
 
   end subroutine pf_fake_run
 
