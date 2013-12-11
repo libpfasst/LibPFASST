@@ -49,7 +49,7 @@ program fpfasst
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  pf%niters = 1
+  pf%niters = 5
   pf%qtype  = 1
 
   pf%echo_timings = .true.
