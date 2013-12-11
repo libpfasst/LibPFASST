@@ -115,9 +115,9 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
 
-    type(pf_level_t), pointer :: F, Fb
+    type(pf_level_t), pointer :: F, G, Fb
     real(pfdp) :: t0
-    integer    :: nblock, b, j, k, l, p, nproc
+    integer    :: nblock, b, j, k, p, nproc
 
     type(pf_pfasst_t), pointer :: pf
     type(c_ptr),       pointer :: pfs(:)
@@ -191,11 +191,7 @@ contains
              pf%state%cycle = 1
 
              call start_timer(pf, TITERATION)
-
-             do l = 1, pf%nlevels
-                F => pf%levels(l)
-                call call_hooks(pf, F%level, PF_PRE_ITERATION)
-             end do
+             call call_hooks(pf, -1, PF_PRE_ITERATION)
 
              ! XXX: skipping send/receive status
 
@@ -206,6 +202,12 @@ contains
              end do
              call call_hooks(pf, F%level, PF_POST_SWEEP)
              call pf_residual(pf, F, dt)
+             call pf_send(pf, F, F%level*10000+k, .false.)
+             if (pf%nlevels > 1) then
+                G => pf%levels(pf%nlevels-1)
+                call restrict_time_space_fas(pf, pf%state%t0, dt, F, G)
+                call save(G)
+             end if
 
              call pf_v_cycle(pf, k, pf%state%t0, dt)
 
