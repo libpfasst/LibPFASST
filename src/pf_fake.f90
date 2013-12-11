@@ -75,8 +75,10 @@ contains
              G => pf%levels(1)
 
              ! get new initial value (skip on first iteration)
-             if (k > 1) &
-                  call G%encap%pack(G%q0, G%Q(G%nnodes))
+             if (k > 1) then
+                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                call spreadq0(G, t0)
+             end if
 
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              do j = 1, G%nsweeps

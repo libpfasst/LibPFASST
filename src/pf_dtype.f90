@@ -21,6 +21,7 @@ module pf_mod_dtype
   use iso_c_binding
   implicit none
 
+  !  static pfasst paramters
   integer, parameter :: pfdp = c_double
 
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
@@ -62,6 +63,8 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
+
+
   type, bind(c) :: pf_state_t
      real(c_double) :: t0, dt
      integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
@@ -92,6 +95,7 @@ module pf_mod_dtype
      procedure(pf_initialize_p), pointer, nopass :: initialize
      procedure(pf_evaluate_p),   pointer, nopass :: evaluate
      procedure(pf_integrate_p),  pointer, nopass :: integrate
+     procedure(pf_sweepdestroy_p),  pointer, nopass :: destroy
   end type pf_sweeper_t
 
   type :: pf_encap_t
@@ -115,8 +119,8 @@ module pf_mod_dtype
 
      real(pfdp)  :: residual
 
-     type(pf_encap_t),         pointer :: encap
-     type(pf_sweeper_t),       pointer :: sweeper
+     type(pf_encap_t),         pointer         :: encap
+     type(pf_sweeper_t),       pointer         :: sweeper
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -126,7 +130,6 @@ module pf_mod_dtype
           nodes(:), &                   ! sdc nodes
           qmat(:,:), &                  ! integration matrix (0 to node)
           s0mat(:,:), &                 ! integration matrix (node to node)
-          smat(:,:,:), &                ! sdc matrices (allocated by the sweeper)
           rmat(:,:), &                  ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
@@ -145,7 +148,7 @@ module pf_mod_dtype
 
      type(c_ptr) :: qend                ! solution at last node
 
-     type(c_ptr) :: levelctx            ! user context
+     type(c_ptr)      :: levelctx       ! user context
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
@@ -187,6 +190,9 @@ module pf_mod_dtype
      real(pfdp) :: rel_res_tol = 0.d0
 
      integer :: window = PF_WINDOW_BLOCK
+
+     logical :: Pipeline_G =  .false.
+     logical :: PFASST_pred = .false.
 
      ! pf objects
      type(pf_cycle_t)          :: cycles
@@ -237,6 +243,11 @@ module pf_mod_dtype
        import pf_level_t
        type(pf_level_t), intent(inout) :: F
      end subroutine pf_initialize_p
+
+     subroutine pf_sweepdestroy_p(sweeper)
+       import pf_sweeper_t
+       type(pf_sweeper_t), intent(inout)  :: sweeper
+     end subroutine pf_sweepdestroy_p
 
      subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp

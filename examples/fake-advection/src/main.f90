@@ -12,7 +12,7 @@ program fpfasst
 
   type(pf_pfasst_t),  pointer :: pf, pf0
   type(pf_comm_t),    target  :: comm
-  type(pf_sweeper_t), target  :: sweeper
+
   type(pf_encap_t),   target  :: encap
 
   integer            :: nprocs, nlevs, nvars(3), nnodes(3), l, p
@@ -32,7 +32,7 @@ program fpfasst
 
   call ndarray_encap_create(encap)
   call pf_fake_create(comm, nprocs)
-  call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
+
 
   do p = 1, nprocs
      allocate(pf)
@@ -57,8 +57,7 @@ program fpfasst
         pf%levels(l)%interpolate => interpolate
         pf%levels(l)%restrict    => restrict
         pf%levels(l)%encap       => encap
-        pf%levels(l)%sweeper     => sweeper
-
+        call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
         allocate(pf%levels(l)%shape(1))
         pf%levels(l)%shape(1)    = nvars(l)
      end do
@@ -111,7 +110,7 @@ program fpfasst
      call feval_destroy_workspace(pf0%levels(l)%levelctx)
   end do
 
-  call pf_imex_destroy(sweeper)
+
   call pf_fake_destroy(comm)
   call fftw_cleanup()
 

@@ -22,70 +22,81 @@ module pf_mod_options
   implicit none
 contains
 
-  subroutine pf_opts_from_cl(pf)
-    type(pf_pfasst_t), intent(inout) :: pf
-    character(len=128) :: arg
-    integer            :: argc, argi
-    
-    argc = command_argument_count()
-    argi = 1
-    do while (argi <= argc)
-       call get_command_argument(argi, arg)
-       select case(arg)
-       case ("--pf-ring")
-          pf%window = PF_WINDOW_RING
-       case ("--pf-niters")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%niters
-       case ("--pf-abs-res-tol")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%abs_res_tol
-       case ("--pf-rel-res-tol")
-          argi = argi + 1
-          call get_command_argument(argi, arg)
-          read(arg,*) pf%rel_res_tol
-       case ('--')
-          exit
-       case default
-       end select
-       argi = argi + 1
-    end do
-  end subroutine pf_opts_from_cl
+  subroutine pf_read_opts(pf, read_cmd, fname)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    logical,           intent(in   )           :: read_cmd
+    character(len=*),  intent(in   ), optional :: fname
 
-  subroutine pf_opts_from_file(pf, un)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: un
+    ! local versions of pfasst parameters
+    integer          :: niters, nlevels, qtype, ctype, window
+    double precision :: abs_res_tol, rel_res_tol
+    logical          :: pipeline_g , pfasst_pred, echo_timings
 
-    
+    ! stuff for reading the command line
+    integer, parameter :: un = 9
+    integer            :: i, ios
+    character(len=32)  :: arg
+    character(len=255) :: istring  ! stores command line argument
+    character(len=255) :: message  ! use for i/o error messages
 
-  end subroutine pf_opts_from_file
+    ! define the namelist for reading
+    namelist /pf_params/ niters, nlevels, qtype, ctype, abs_res_tol, rel_res_tol, window
+    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings
 
-  subroutine pf_set_options(pf, fname, unitno, cmdline)
-    type(pf_pfasst_t), intent(inout) :: pf
-    character(len=*),  intent(in), optional :: fname
-    integer,           intent(in), optional :: unitno
-    logical,           intent(in), optional :: cmdline
+    ! set local variables to pf_pfasst defaults
+    nlevels      = pf%nlevels
+    niters       = pf%niters
+    qtype        = pf%qtype
+    ctype        = pf%ctype
+    window       = pf%window
+    abs_res_tol  = pf%abs_res_tol
+    rel_res_tol  = pf%rel_res_tol
+    pipeline_g   = pf%pipeline_g
+    pfasst_pred  = pf%pfasst_pred
+    echo_timings = pf%echo_timings
 
-    if (present(fname) .and. len_trim(fname) > 0) then
-       open(unit=66, file=fname, status='old', action='read')
-       call pf_opts_from_file(pf, 66)
-       close(unit=66)
+    ! open the file fname and read the pfasst namelist
+    if (present(fname))  then
+       open(unit=un, file=fname, status='old', action='read')
+       read(unit=un, nml=pf_params)
+       close(unit=un)
     end if
-    if (present(unitno)) then
-       call pf_opts_from_file(pf, unitno)
+
+    ! overwrite with the command line
+    if (read_cmd) then
+       i = 0
+       do
+          call get_command_argument(i, arg)
+          if (len_trim(arg) == 0) exit
+          if (i > 0) then
+             istring="&pf_params " // trim(arg) // " /"
+             read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
+          end if
+          i = i+1
+       end do
     end if
-    if (.not. present(cmdline) .or. cmdline) then
-       call pf_opts_from_cl(pf)
-    end if
-  end subroutine pf_set_options
+
+    ! re-assign the pfasst internals
+    pf%niters       = niters
+    pf%nlevels      = nlevels
+    pf%qtype        = qtype
+    pf%ctype        = ctype
+    pf%window       = window
+    pf%abs_res_tol  = abs_res_tol
+    pf%rel_res_tol  = rel_res_tol
+    pf%pipeline_g   = pipeline_g
+    pf%pfasst_pred  = pfasst_pred
+    pf%echo_timings = echo_timings
+
+    if (pf%nlevels < 1) then
+       write(*,*) 'Bad specification for nlevels=', pf%nlevels
+       stop
+    endif
+  end subroutine pf_read_opts
 
   subroutine pf_print_options(pf, unitno)
-    use pf_mod_version
-
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in), optional :: unitno
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer,           intent(in   ), optional :: unitno
 
     integer :: un = 6
     character(8)   :: date
@@ -100,8 +111,6 @@ contains
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date
     write(un,*) 'time:        ', time
-    write(un,*) 'version:     ', pf_version
-    write(un,*) 'git version: ', pf_git_version
 
     write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
     write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
@@ -111,16 +120,30 @@ contains
        write(un,*) '            ', '             ', ' ! since >1 time procs are being used, this is a parallel pfasst run'
     end if
     write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
-    write(un,*) 'nnodes:      ', pf%levels(:)%nnodes, '! number of sdc nodes per level'
-    write(un,*) 'nvars:       ', pf%levels(:)%nvars, '! number of degrees of freedom per level'
-    write(un,*) 'nsweeps:     ', pf%levels(:)%nsweeps, '! number of sdc sweeps performed per visit to each level'
-    if (pf%window == PF_WINDOW_RING) then
-       write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
-    else
-       write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+    write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
+    write(un,*) 'nvars:       ', pf%levels(1:pf%nlevels)%nvars, '! number of degrees of freedom per level'
+    write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
+
+    if (pf%comm%nproc > 1) then
+       if (pf%window == PF_WINDOW_RING) then
+          write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
+       else
+          write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+       end if
     end if
 
+    if (pf%Pipeline_G) then
+       write(un,*) 'Predictor Pipelining is ON    '
+    else
+       write(un,*) 'Predictor Pipelining is OFF    '
+    end if
+    if (pf%PFASST_pred) then
+       write(un,*) 'PFASST Predictor style  '
+    else
+       write(un,*) 'Serial Predictor style  '
+    end if
+
+    write(un,*) ''
   end subroutine pf_print_options
 
 end module pf_mod_options
-

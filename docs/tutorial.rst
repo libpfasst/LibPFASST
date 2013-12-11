@@ -1,7 +1,7 @@
 Tutorial
 ========
 
-Please see the ``mpi-advection`` example included in LIBPFASST for a
+Please see the `mpi-advection`_ example included in LIBPFASST for a
 simple application of LIBPFASST.
 
 This example solves a 1d linear advection diffusion equation
@@ -29,9 +29,12 @@ reduce the total number of PFASST iterations required.
 
 The solution :math:`u` will be stored in a flat Fortran array, and
 hence this application will use LIBPFASSTs built in ``ndarray``
-encapsulation.  Various hooks are added to echo the error (on the
-finest level) and residual (on all levels) throughout the algorithm.
-These hooks are in ``src/hooks.f90``.
+encapsulation.  Note that LIBPFASST doesn't impose any particular
+storage format on your solver -- instead, you must tell LIBPFASST how
+to perform a few basic operations on your solution (eg, how to create
+solutions, perform ``y <- y + a x``, etc).  Various hooks are added to
+echo the error (on the finest level) and residual (on all levels)
+throughout the algorithm.  These hooks are in ``src/hooks.f90``.
 
 Note that the ``feval_create_workspace`` routine is specific to the
 problem being solved (ie, not part of LIBPFASST, but part of the user
@@ -41,15 +44,17 @@ workspaces during each call to the function evaluation routines), and
 pre-computes various spectral operators.
 
 LIBPFASST allows you, the user, to attach an arbitrary C pointer to
-each PFASST level.  This is called a context (typically called ``ctx``
-in the source) pointer (as in, "for the problem I'm solving I have a
-specific context that I will be working in").  Your context pointer
-gets passed to your function evaluation routines and to your transfer
-routines.  In most of the examples this context pointer is used to
-hold FFTW plans etc as described above.  Note that each level gets its
-own context because each level has a different number of
-degrees-of-freedom (``nvars``).
+each PFASST level.  This is called a context (typically called
+``levelctx`` in the source) pointer (as in, "for the problem I'm
+solving I have a specific context that I will be working in").  Your
+context pointer gets passed to your function evaluation routines and
+to your transfer routines.  In most of the examples this context
+pointer is used to hold FFTW plans etc as described above.  Note that
+each level gets its own context because each level has a different
+number of degrees-of-freedom (``nvars``).
 
 C pointers are used because they provide a lot of flexibility.  The
 drawback to this is that we loose the ability for the compiler to do
 type checking for us.
+
+.. _`mpi_advection`: https://bitbucket.org/memmett/libpfasst/src/master/examples/mpi-advection/src
