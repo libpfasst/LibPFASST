@@ -255,6 +255,11 @@ contains
     qexit  = .false.
     qcycle = .false.
 
+    if (pf%window == PF_WINDOW_BLOCK .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+       if (pf%state%step >= pf%state%nsteps) qexit = .true.
+       return
+    end if
+
     res1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. res > 0.0d0) then
        if ( (abs(1.0_pfdp - abs(res1/res)) < pf%rel_res_tol) .or. &
