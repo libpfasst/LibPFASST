@@ -51,7 +51,7 @@ program fpfasst
   call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  pf%niters = 1
+  pf%niters = 5
   pf%qtype  = 1
 
   pf%echo_timings = .true.
