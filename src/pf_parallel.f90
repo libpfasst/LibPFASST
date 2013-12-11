@@ -71,15 +71,15 @@ contains
           G => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
-             
+
              ! get new initial value (skip on first iteration)
              if (k > 1) then
                 call G%encap%pack(G%q0, G%Q(G%nnodes))
-                if (.not. pf%PFASST_pred) then 
+                if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0)
                 end if
              end if
-             
+
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              call G%sweeper%sweep(pf, G, t0, dt)
              call call_hooks(pf, G%level, PF_POST_SWEEP)
@@ -90,7 +90,7 @@ contains
              pf%state%iter =-(pf%rank + 1) -k
 
              !  Get new initial conditions
-             call pf_recv(pf, G, G%level*20000+pf%rank, .true.)        
+             call pf_recv(pf, G, G%level*20000+pf%rank, .true.)
              !  Do a sweep
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              call G%sweeper%sweep(pf, G, t0, dt)
@@ -109,11 +109,11 @@ contains
              ! get new initial value (skip on first iteration)
              if (k > 1) then
                 call G%encap%pack(G%q0, G%Q(G%nnodes))
-                if (.not. pf%PFASST_pred) then 
+                if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0k)
                 end if
              end if
-             
+
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              do j = 1, G%nsweeps
                 call G%sweeper%sweep(pf, G, t0k, dt)
@@ -130,9 +130,9 @@ contains
              call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
           end do
        end if
-          
+
     end if
-       
+
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, 1, PF_POST_PREDICTOR)
 
@@ -258,8 +258,7 @@ contains
     res1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. res > 0.0d0) then
        if ( (abs(1.0_pfdp - abs(res1/res)) < pf%rel_res_tol) .or. &
-            (abs(res1)                      < pf%abs_res_tol) ) then
-
+            (abs(res1)                     < pf%abs_res_tol) ) then
           pf%state%status = PF_STATUS_CONVERGED
        end if
     end if
@@ -286,6 +285,10 @@ contains
        end if
 
     else
+
+       if (pf%state%status == PF_STATUS_ITERATING .and. pf%state%iter > pf%niters) then
+          stop "failed to converge before max iteration count"
+       end if
 
        if (pf%state%status == PF_STATUS_CONVERGED) then
 
