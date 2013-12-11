@@ -266,12 +266,14 @@ contains
 
     pf%state%res = res
 
+    call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
     call pf_recv_status(pf, 8000+k)
 
     if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
     call pf_send_status(pf, 8000+k)
+    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
     if (pf%window == PF_WINDOW_BLOCK) then
 
