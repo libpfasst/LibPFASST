@@ -256,7 +256,8 @@ contains
     qcycle = .false.
 
     if (pf%window == PF_WINDOW_BLOCK .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
-       if (pf%state%step >= pf%state%nsteps) qexit = .true.
+       pf%state%pstatus = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
        return
     end if
 
