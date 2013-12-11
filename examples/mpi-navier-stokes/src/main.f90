@@ -17,7 +17,6 @@ program fpfasst
   double precision      :: dt
   character(len=32)     :: arg
 
-  type(pf_sweeper_t), target :: sweeper
   type(pf_encap_t),   target :: encaps
 
   ! initialize mpi
@@ -48,7 +47,6 @@ program fpfasst
 
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
-  call pf_imex_create(sweeper, eval_f1, eval_f2, comp_f2)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
   pf%niters = 1
@@ -70,7 +68,7 @@ program fpfasst
      pf%levels(l)%encap       => encaps
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
-     pf%levels(l)%sweeper     => sweeper
+     call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
   end do
 
   call pf_mpi_setup(tcomm, pf)
@@ -95,6 +93,7 @@ program fpfasst
      print *, 'NPROCS:   ', pf%comm%nproc
   end if
 
+  call pf_logger_attach(pf)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0d0, nsteps=nsteps)
 
 

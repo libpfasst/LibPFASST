@@ -122,6 +122,7 @@ contains
             timer_names(timer), pf%rank, &
             pf%state%block, pf%state%step, pf%state%iter, pf%state%cycle, rate, &
             t-pf%timers(timer), t-pf%timers(TTOTAL), pf%timers(timer), t
+       call flush(601+pf%rank)
     end if
 
   end subroutine end_timer
