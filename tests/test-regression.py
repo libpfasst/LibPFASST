@@ -35,7 +35,7 @@ def errors(out):
 def check_last_error(exe, tol):
   out = run(exe)
   err = errors(out)
-  
+
   maxstep = max([ x.step for x in err ])
   maxiter = max([ x.iter for x in err if x.step == maxstep ])
   lasterr = max([ x.error for x in err if x.step == maxstep and x.iter == maxiter ])
@@ -43,13 +43,13 @@ def check_last_error(exe, tol):
   print "check_last_error:", lasterr, tol
 
   assert lasterr < tol
-    
+
 
 def test_fake_advection():
   check_last_error('examples/fake-advection/main.exe', 5e-9)
 
 def test_mpi_advection_1level():
-  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe --single', 5e-7)
+  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe nlevels=1', 5e-7)
 
 def test_mpi_advection_block4():
   check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe', 5e-8)
@@ -58,13 +58,4 @@ def test_mpi_advection_block8():
   check_last_error('mpiexec -n 8 examples/mpi-advection/main.exe', 5e-8)
 
 def test_mpi_advection_ring4():
-  # XXX: something wrong here...
-  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe --ring', 5e-8)
-
-def test_mpi_advection_ring8():
-  check_last_error('mpiexec -n 8 examples/mpi-advection/main.exe --ring', 5e-8)
-
-if __name__ == '__main__':
-  test_mpi_advection_block4()
-
-
+  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe window=2', 5e-8)
