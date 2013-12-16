@@ -38,7 +38,9 @@ module pf_mod_hooks
        PF_POST_INTERP_Q0  = 14, &
        PF_PRE_RESTRICT_ALL  = 15, &
        PF_POST_RESTRICT_ALL = 16, &
-       PF_MAX_HOOK          = 16
+       PF_PRE_CONVERGENCE   = 17, &
+       PF_POST_CONVERGENCE  = 18, &
+       PF_MAX_HOOK          = 18
 
 
   integer, parameter :: &
@@ -62,7 +64,9 @@ module pf_mod_hooks
        'pre-interp-q0      ',  &
        'post-interp-q0     ',  &
        'pre-restrict-all   ',  &
-       'post-restrict-all  ' /)
+       'post-restrict-all  ',  &
+       'pre-convergence    ',  &
+       'post-convergence   ' /)
 
 contains
 

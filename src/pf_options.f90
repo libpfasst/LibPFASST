@@ -120,13 +120,16 @@ contains
        write(un,*) '            ', '             ', ' ! since >1 time procs are being used, this is a parallel pfasst run'
     end if
     write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
-    write(un,*) 'nnodes:      ', pf%levels(:)%nnodes, '! number of sdc nodes per level'
-    write(un,*) 'nvars:       ', pf%levels(:)%nvars, '! number of degrees of freedom per level'
-    write(un,*) 'nsweeps:     ', pf%levels(:)%nsweeps, '! number of sdc sweeps performed per visit to each level'
-    if (pf%window == PF_WINDOW_RING) then
-       write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
-    else
-       write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+    write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
+    write(un,*) 'nvars:       ', pf%levels(1:pf%nlevels)%nvars, '! number of degrees of freedom per level'
+    write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
+
+    if (pf%comm%nproc > 1) then
+       if (pf%window == PF_WINDOW_RING) then
+          write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
+       else
+          write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
+       end if
     end if
 
     if (pf%Pipeline_G) then
@@ -139,6 +142,8 @@ contains
     else
        write(un,*) 'Serial Predictor style  '
     end if
+
+    write(un,*) ''
   end subroutine pf_print_options
 
 end module pf_mod_options

@@ -28,7 +28,7 @@ Types of parameters
   the use of default values will result in default execution.
 * ``pf_level_t`` optional parameters: can  be reassigned at run time,
   the use of default values will result in default execution.
-* local mandatory parameters: must be passed in a call to pf_run_pfasst
+* local mandatory parameters: must be passed in a call to ``pf_run_pfasst``
 * local optional parameters: specified by the user application and
   unrelated to the workings of libpfasst
 
@@ -47,8 +47,8 @@ here of interest to the user is
 which controls the precision of all floating point numbers (or at
 least all those using ``pfdp`` in the declaration).
 
-pfasst_t mandatory parameters
------------------------------
+pfasst mandatory parameters
+---------------------------
 
 The parameters defined in type ``pf_pfasst_t`` in ``src/pf_dtype.f90``
 are all given a default value.  Currently only the variable
@@ -56,8 +56,8 @@ are all given a default value.  Currently only the variable
 variable on the command line or in an initialization file is mandatory
 
 
-pfasst_t optional parameters
-----------------------------
+pfasst optional parameters
+--------------------------
 
 The remaining variables in the specification of ``pf_pfasst_t`` are given
 default values as below:
@@ -84,8 +84,8 @@ default values as below:
 These value can be changed as desired.
 
 
-level_t mandatory parameters
-----------------------------
+level mandatory parameters
+--------------------------
 
 In the specification of ``pf_level_t``, the first two variables
 ``nvars`` and ``nnodes`` are given default values that will cause the
@@ -100,39 +100,39 @@ initializing PFASST.
      integer     :: nnodes = -1         ! number of sdc nodes
 
 
-level_t optional parameters
----------------------------
+level optional parameters
+-------------------------
 
 In the specification of ``pf_level_t``, the first variables
 ``nsweeps`` and ``Finterp`` are default values.  These can be changed
 per level as the levels are when initializing PFASST.
 
- .. code-block:: fortran
+.. code-block:: fortran
 
-   type :: pf_level_t
+  type :: pf_level_t
 
-      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
+     integer     :: nsweeps = 1         ! number of sdc sweeps to perform
+     logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
 
- local mandatory parameters
- --------------------------
+local mandatory parameters
+--------------------------
 
- In the call to run pfasst
+In the call to run pfasst
 
- .. code-block:: fortran
+.. code-block:: fortran
 
-     pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+  pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
 
- The variables ``q0``, ``dt``, and ``tend`` must be included.  The
- variable ``nsteps`` is optional, if it is not included, then
- ``nsteps`` is set to
+The variables ``q0``, ``dt``, and ``tend`` must be included.  The
+variable ``nsteps`` is optional, if it is not included, then
+``nsteps`` is set to
 
- .. code-block:: fortran
+.. code-block:: fortran
 
-	pf%state%nsteps = ceiling(1.0*tend/dt)
+  pf%state%nsteps = ceiling(1.0*tend/dt)
 
- Finally, ``qend`` is also optional and returns the final solution.
+Finally, ``qend`` is also optional and returns the final solution.
 
 
 ..
