@@ -35,13 +35,16 @@ contains
     character(len=*),  intent(in   ), optional :: fname
     logical,           intent(in   ), optional :: nocmd
 
-    logical :: read_cmd = .true.
+    logical :: read_cmd 
     integer :: l
 
     if (present(nlevels)) pf%nlevels = nlevels
 
     ! gather some input from a file and command line
-    if (present(nocmd) .and. nocmd)   read_cmd = .false.
+    read_cmd = .true.
+    if (present(nocmd)) then
+         if (nocmd)  read_cmd = .false.
+    end if
     if (present(fname))  then
        call pf_read_opts(pf, read_cmd, fname)
     else
