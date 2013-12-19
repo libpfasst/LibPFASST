@@ -21,12 +21,12 @@
 
 module pf_mod_fake
   use pf_mod_dtype
-  use pf_mod_cycle
   use pf_mod_interpolate
   use pf_mod_restrict
   use pf_mod_utils
   use pf_mod_timer
   use pf_mod_hooks
+  use pf_mod_parallel
   implicit none
 contains
 
@@ -48,7 +48,7 @@ contains
 
     do p = 1, nproc
        call c_f_pointer(pfs(p), pf)
-       
+
        call call_hooks(pf, 1, PF_PRE_PREDICTOR)
        call start_timer(pf, TPREDICTOR)
 
@@ -108,21 +108,19 @@ contains
   ! Run PFASST using fake communicator.
   !
   subroutine pf_fake_run(pf0, q0, dt, nsteps)
-    use pf_mod_parallel, only: pf_do_stage
+    ! use pf_mod_parallel, only: pf_do_stage
 
     type(pf_pfasst_t), intent(inout) :: pf0
     type(c_ptr),       intent(in)    :: q0
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
 
-    type(pf_level_t), pointer :: F, Fb
+    type(pf_level_t), pointer :: F, G, Fb
     real(pfdp) :: t0
-    integer    :: nblock, b, c, k, l, p, nproc
+    integer    :: nblock, b, j, k, p, nproc
 
     type(pf_pfasst_t), pointer :: pf
     type(c_ptr),       pointer :: pfs(:)
-
-    type(pf_stage_t) :: end_stage
 
     nproc =  pf0%comm%nproc
     pfs   => pf0%comm%pfs
@@ -130,7 +128,7 @@ contains
     !
     ! initialize
     !
-    
+
     do p = 1, nproc
        call c_f_pointer(pfs(p), pf)
 
@@ -180,13 +178,7 @@ contains
        ! do start cycle stages
        do p = 1, nproc
           call c_f_pointer(pfs(p), pf)
-
-          if (associated(pf%cycles%start)) then
-             do c = 1, size(pf%cycles%start)
-                pf%state%cycle = c
-                call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-             end do
-          end if
+          call pf_v_cycle_post_predictor(pf, t0, dt)
        end do
 
        ! pfasst iterations
@@ -199,19 +191,26 @@ contains
              pf%state%cycle = 1
 
              call start_timer(pf, TITERATION)
-
-             do l = 1, pf%nlevels
-                F => pf%levels(l)
-                call call_hooks(pf, F%level, PF_PRE_ITERATION)
-             end do
+             call call_hooks(pf, -1, PF_PRE_ITERATION)
 
              ! XXX: skipping send/receive status
-             
-             ! do pfasst cycle stages
-             do c = 1, size(pf%cycles%pfasst)
-                pf%state%cycle = pf%state%cycle + 1
-                call pf_do_stage(pf, pf%cycles%pfasst(c), k, t0, dt)
+
+             F => pf%levels(pf%nlevels)
+             call call_hooks(pf, F%level, PF_PRE_SWEEP)
+             do j = 1, F%nsweeps
+                call F%sweeper%sweep(pf, F, pf%state%t0, dt)
              end do
+             call call_hooks(pf, F%level, PF_POST_SWEEP)
+             call pf_residual(pf, F, dt)
+             call pf_send(pf, F, F%level*10000+k, .false.)
+             if (pf%nlevels > 1) then
+                G => pf%levels(pf%nlevels-1)
+                call restrict_time_space_fas(pf, pf%state%t0, dt, F, G)
+                call save(G)
+             end if
+
+             call pf_v_cycle(pf, k, pf%state%t0, dt)
+
           end do
 
           do p = 1, nproc
@@ -224,10 +223,18 @@ contains
        ! do end cycle stages
        do p = 1, nproc
           call c_f_pointer(pfs(p), pf)
-          end_stage%type = SDC_CYCLE_SWEEP
-          end_stage%F    = pf%nlevels
-          end_stage%G    = -1
-          call pf_do_stage(pf, end_stage, -1, t0, dt)
+          ! ! end_stage%type = SDC_CYCLE_SWEEP
+          ! ! end_stage%F    = pf%nlevels
+          ! ! end_stage%G    = -1
+          ! ! call pf_do_stage(pf, end_stage, -1, t0, dt)
+
+          !    F => pf%levels(pf%nlevels)
+          !    call call_hooks(pf, F%level, PF_PRE_SWEEP)
+          !    do j = 1, F%nsweeps
+          !       call F%sweeper%sweep(pf, F, pf%state%t0, dt)
+          !    end do
+          !    call call_hooks(pf, F%level, PF_POST_SWEEP)
+          !    call pf_residual(pf, F, dt)
        end do
 
        do p = 1, nproc

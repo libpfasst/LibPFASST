@@ -28,7 +28,7 @@ contains
     character(len=*),  intent(in   ), optional :: fname
 
     ! local versions of pfasst parameters
-    integer          :: niters, nlevels, qtype, ctype, window
+    integer          :: niters, nlevels, qtype, window
     double precision :: abs_res_tol, rel_res_tol
     logical          :: pipeline_g , pfasst_pred, echo_timings
 
@@ -40,14 +40,13 @@ contains
     character(len=255) :: message  ! use for i/o error messages
 
     ! define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, ctype, abs_res_tol, rel_res_tol, window
+    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, window
     namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings
 
     ! set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
     niters       = pf%niters
     qtype        = pf%qtype
-    ctype        = pf%ctype
     window       = pf%window
     abs_res_tol  = pf%abs_res_tol
     rel_res_tol  = pf%rel_res_tol
@@ -80,7 +79,6 @@ contains
     pf%niters       = niters
     pf%nlevels      = nlevels
     pf%qtype        = qtype
-    pf%ctype        = ctype
     pf%window       = window
     pf%abs_res_tol  = abs_res_tol
     pf%rel_res_tol  = rel_res_tol

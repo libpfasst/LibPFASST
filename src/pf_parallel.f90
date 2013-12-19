@@ -21,7 +21,6 @@
 
 module pf_mod_parallel
   use pf_mod_dtype
-  use pf_mod_cycle
   use pf_mod_interpolate
   use pf_mod_restrict
   use pf_mod_utils
@@ -44,11 +43,11 @@ contains
   !
   subroutine pf_predictor(pf, t0, dt)
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: t0, dt
+    real(pfdp),        intent(in   ) :: t0, dt
 
     type(pf_level_t), pointer :: F, G
-    integer :: c, j, k, l
-    real(pfdp)    :: t0k
+    integer                   :: j, k, l
+    real(pfdp)                :: t0k
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
@@ -123,13 +122,8 @@ contains
           end do
        endif    ! (Pipeline_G)
 
-       ! do start cycle stages
-       if (associated(pf%cycles%start)) then
-          do c = 1, size(pf%cycles%start)
-             pf%state%cycle = c
-             call pf_do_stage(pf, pf%cycles%start(c), -1, t0, dt)
-          end do
-       end if
+       ! return to fine level...
+       call pf_v_cycle_post_predictor(pf, t0, dt)
 
     end if
 
@@ -140,105 +134,6 @@ contains
     pf%state%status = PF_STATUS_ITERATING
 
   end subroutine pf_predictor
-
-
-  !
-  ! Execute a cycle "stage".
-  !
-  subroutine pf_do_stage(pf, stage, iteration, t0, dt)
-    type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_stage_t),  intent(in)    :: stage
-    real(pfdp),        intent(in)    :: t0, dt
-    integer,           intent(in)    :: iteration
-
-    type(pf_level_t), pointer :: F, G
-    integer :: j
-
-    select case(stage%type)
-    case (SDC_CYCLE_UP)
-
-       F => pf%levels(stage%F)
-       G => pf%levels(stage%G)
-
-       call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
-
-       call pf_recv(pf, F, F%level*10000+iteration, .false.)
-
-       if (pf%rank /= pf%state%first) then
-          ! interpolate increment to q0 -- the fine initial condition
-          ! needs the same increment that Q(1) got, but applied to the
-          ! new fine initial condition
-          call interpolate_q0(pf,F, G)
-       end if
-
-       if (F%level < pf%nlevels) then
-          ! don't sweep on the finest level on the way up -- if you
-          ! need to do this, use a PF_CYCLE_SWEEP
-
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          do j = 1, F%nsweeps
-             call F%sweeper%sweep(pf, F, t0, dt)
-          end do
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
-          call pf_residual(pf, F, dt)
-       end if
-
-    case (SDC_CYCLE_DOWN)
-
-       F => pf%levels(stage%F)
-       G => pf%levels(stage%G)
-
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
-       end do
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(pf, F, dt)
-       call pf_send(pf, F, F%level*10000+iteration, .false.)
-
-       call restrict_time_space_fas(pf, t0, dt, F, G)
-       call save(G)
-
-    case (SDC_CYCLE_BOTTOM)
-
-       F => pf%levels(stage%F)
-
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
-       end do
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(pf, F, dt)
-       call pf_send(pf, F, F%level*10000+iteration, .true.)
-
-    case (SDC_CYCLE_SWEEP)
-
-       F => pf%levels(stage%F)
-
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
-       end do
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_residual(pf, F, dt)
-
-    case (SDC_CYCLE_INTERP)
-
-       F => pf%levels(stage%F)
-       G => pf%levels(stage%G)
-
-       call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call G%encap%pack(F%q0, F%Q(1))
-
-    case (SDC_CYCLE_RECV)
-
-       F => pf%levels(stage%F)
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
-
-    end select
-
-  end subroutine pf_do_stage
 
   subroutine pf_check_convergence(pf, k, dt, res, qexit, qcycle)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -361,7 +256,7 @@ contains
     integer,           intent(in), optional :: nsteps
 
     type(pf_level_t), pointer :: F, G
-    integer                   :: j, k, l, c
+    integer                   :: j, k, l
     real(pfdp)                :: res1
 
     logical :: qexit, qcycle, qbroadcast
@@ -476,11 +371,7 @@ contains
 
        end if
 
-
-       do c = 1, size(pf%cycles%pfasst)
-          pf%state%cycle = pf%state%cycle + 1
-          call pf_do_stage(pf, pf%cycles%pfasst(c), k, pf%state%t0, dt)
-       end do
+       call pf_v_cycle(pf, k, pf%state%t0, dt)
 
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
@@ -496,6 +387,109 @@ contains
     end if
   end subroutine pf_pfasst_run
 
+  !
+  ! After predictor, return to fine level.
+  !
+  subroutine pf_v_cycle_post_predictor(pf, t0, dt)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(in)    :: t0, dt
+
+    type(pf_level_t), pointer :: F, G
+    integer :: l, j
+
+    if (pf%nlevels <= 1) return
+
+    do l = 2, pf%nlevels-1
+       F => pf%levels(l); G => pf%levels(l-1)
+       call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
+       call G%encap%pack(F%q0, F%Q(1))
+       call call_hooks(pf, F%level, PF_PRE_SWEEP)
+       do j = 1, F%nsweeps
+          call F%sweeper%sweep(pf, F, t0, dt)
+       end do
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
+       call pf_residual(pf, F, dt)
+    end do
+
+    F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
+    call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
+    call G%encap%pack(F%q0, F%Q(1))
+
+  end subroutine pf_v_cycle_post_predictor
+
+  !
+  ! Execute a V-cycle, starting and ending from the middle level.
+  !
+  subroutine pf_v_cycle(pf, iteration, t0, dt)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(in)    :: t0, dt
+    integer,           intent(in)    :: iteration
+
+    type(pf_level_t), pointer :: F, G
+    integer :: l, j
+
+    if (pf%nlevels == 1) then
+       F => pf%levels(1)
+       call pf_recv(pf, F, F%level*10000+iteration, .true.)
+       return
+    end if
+
+    !
+    ! down
+    !
+    do l = pf%nlevels-1, 2, -1
+       F => pf%levels(l); G => pf%levels(l-1)
+       call call_hooks(pf, F%level, PF_PRE_SWEEP)
+       do j = 1, F%nsweeps
+          call F%sweeper%sweep(pf, F, t0, dt)
+       end do
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
+       call pf_residual(pf, F, dt)
+       call pf_send(pf, F, F%level*10000+iteration, .false.)
+       call restrict_time_space_fas(pf, t0, dt, F, G)
+       call save(G)
+    end do
+
+    !
+    ! bottom
+    !
+    F => pf%levels(1)
+    call pf_recv(pf, F, F%level*10000+iteration, .true.)
+    call call_hooks(pf, F%level, PF_PRE_SWEEP)
+    do j = 1, F%nsweeps
+       call F%sweeper%sweep(pf, F, t0, dt)
+    end do
+    call call_hooks(pf, F%level, PF_POST_SWEEP)
+    call pf_residual(pf, F, dt)
+    call pf_send(pf, F, F%level*10000+iteration, .true.)
+
+    !
+    ! up
+    !
+    do l = 2, pf%nlevels
+       F => pf%levels(l); G => pf%levels(l-1)
+
+       call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
+       call pf_recv(pf, F, F%level*10000+iteration, .false.)
+
+       if (pf%rank /= pf%state%first) then
+          ! interpolate increment to q0 -- the fine initial condition
+          ! needs the same increment that Q(1) got, but applied to the
+          ! new fine initial condition
+          call interpolate_q0(pf,F, G)
+       end if
+
+       if (F%level < pf%nlevels) then
+          call call_hooks(pf, F%level, PF_PRE_SWEEP)
+          do j = 1, F%nsweeps
+             call F%sweeper%sweep(pf, F, t0, dt)
+          end do
+          call call_hooks(pf, F%level, PF_POST_SWEEP)
+          call pf_residual(pf, F, dt)
+       end if
+    end do
+
+  end subroutine pf_v_cycle
 
   !
   ! Communication helpers

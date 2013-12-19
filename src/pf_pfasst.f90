@@ -63,8 +63,6 @@ contains
     pf%state%pstatus = 0
     pf%state%status  = 0
 
-    nullify(pf%cycles%start)
-    nullify(pf%cycles%pfasst)
   end subroutine pf_pfasst_create
 
 
@@ -95,7 +93,6 @@ contains
   !
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
-    use pf_mod_cycle
 
     type(pf_pfasst_t), intent(inout) :: pf
 
@@ -120,8 +117,6 @@ contains
        allocate(F%rmat(G%nnodes,F%nnodes))
        call pf_time_interpolation_matrix(G%nodes, G%nnodes, F%nodes, F%nnodes, F%rmat)
     end do
-
-    call pf_cycle_build(pf)
 
   end subroutine pf_pfasst_setup
 
@@ -282,9 +277,6 @@ contains
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
-
-    if (associated(pf%cycles%start))  deallocate(pf%cycles%start)
-    if (associated(pf%cycles%pfasst)) deallocate(pf%cycles%pfasst)
 
     deallocate(pf%state)
   end subroutine pf_pfasst_destroy
