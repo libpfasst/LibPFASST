@@ -13,13 +13,16 @@ from collections import defaultdict
 
 
 nnodes = defaultdict(lambda: [ 2, 3, 5 ], { 'ks': [ 3, 5, 9 ] })
-nvars  = defaultdict(lambda: [ 128, 256, 512 ], { 'ks': [ 256, 512, 1024 ] })
+nvars  = defaultdict(lambda: [ 128, 256, 512 ],
+                     { 'navier-stokes': [2*3*32**3, 2*3*64**3, 2*3*128**3],
+                       'ks': [ 256, 512, 1024 ] })
 niters = {
   'ad':      defaultdict(lambda: 8, { 1: 12 }),
   'wave':    defaultdict(lambda: 8, { 1: 12 }),
   'heat':    defaultdict(lambda: 8, { 1: 12 }),
   'burgers': defaultdict(lambda: 8, { 1: 12 }),
   'ks':      defaultdict(lambda: 8, { 1: 12 }),
+  'navier-stokes': defaultdict(lambda: 5, { 1: 5 }), # XXX
 }
 sigma = defaultdict(lambda: 0.004, { 'wave': 0.001 })
 dt    = defaultdict(lambda: 0.01, { 'wave': 0.5/512, 'ks': 1.0, })
@@ -76,13 +79,13 @@ def timings3():
 
   # serial reference run
   name = '%s_p%02dl%d' % (prob, 1, 1)
-  job  = Job(name=name, rwd=name, width=1, walltime="02:05:00")
+  job  = Job(name=name, rwd=name, width=1, depth=10, walltime="02:05:00")
   jobs.add(job)
 
   # parallel runs
   for trial, nprocs, nlevs in product(trials, processors, levels):
     name = '%s_t%02dp%02dl%d' % (prob, trial, nprocs, nlevs)
-    job  = Job(name=name, rwd=name, width=nprocs, walltime="00:30:00",
+    job  = Job(name=name, rwd=name, width=nprocs, walltime="01:00:00",
                depth=10, specialized=2, pernode=2)
     jobs.add(job)
 
@@ -126,11 +129,11 @@ def setenv():
     env.host_rsync  = 'edison-s'
     env.scheduler   = 'edison'
     env.depth       = 1
-    env.pbs_cmds    = [
-      'export MPICH_MAX_THREAD_SAFETY=multiple',
-      'export MPICH_NEMESIS_ASYNC_PROGRESS=method2',
-      'export MPICH_GNI_USE_UNASSIGNED_CPUS=enabled',
-      ]
+    # env.pbs_cmds    = [
+    #   'export MPICH_MAX_THREAD_SAFETY=multiple',
+    #   'export MPICH_NEMESIS_ASYNC_PROGRESS=method2',
+    #   'export MPICH_GNI_USE_UNASSIGNED_CPUS=enabled',
+    #   ]
     # fabric
     env.host_string = 'edison.nersc.gov'
 

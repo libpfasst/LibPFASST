@@ -8,30 +8,19 @@ Speedup = namedtuple('Speedup', [ 'nproc', 'stime', 'ptime', 'speedup', 'efficie
 
 
 def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbose=False):
-    '''Compute the theoretical speedup...'''
+    '''Compute the theoretical speedup assuming that PFASST was run
+    block mode with a fixed number of iterations per block.
 
-    # N   -  number of time steps
-    # Ks  -  number of serial sdc iterations
-    # Y0  -  cost of fine sweep
-    # Cs  -  serial cost
-    # L   -  number of pfasst levels
-    # Kp  -  number of pfasst iterations
-    # P   -  number of pfasst processors
-    # B   -  number of pfasst blocks
-    # Cp  -  parallel cost
+    Note that the communication overhead is taken to be maximum
+    communication time over all send/recv timings.
+
+    '''
 
     # serial cost
-    N  = max([ x.step for x in serial ]) + 1
+    N  = max([ x.step for x in serial ])
     Ks = max([ x.iter for x in serial ])
     Y0 = np.mean([ x.delta for x in serial if x.timer == 'sweep0' ])
     Cs = N * Ks * Y0
-
-    if verbose:
-        print 'N:  ', N
-        print 'Ks: ', Ks
-        print 'Y0: ', Y0
-        print 'Cs: ', Cs
-        print 'ACT:', max([ x.delta for x in serial if x.timer == 'total' ])
 
     # parallel cost
     L  = len(set([ x.timer for x in parallel if x.timer.startswith('sweep') ]))
@@ -40,31 +29,10 @@ def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbo
     B  = N / P
 
     if C < 0:
-        C = np.mean([ x.delta for x in parallel if x.timer == 'send0' ])
+        C = np.max([ x.delta for x in parallel if x.timer.startswith('send') or x.timer.startswith('recv') ])
 
-    nnodesF, nvarsF = float(nnodes[-1]), float(nvars[-1])
-    alpha = [ nv/nvarsF * nn/nnodesF  for nv, nn in zip(nnodes, nvars) ]
-
-    if verbose:
-        print 'L:     ', L
-        print 'Kp:    ', Kp
-        print 'P:     ', P
-        print 'B:     ', B
-        print 'C:     ', C
-        print 'alpha: ', alpha
-
-    # Y = {}                      # sweep times
-    # O = {}                      # overhead: iterp and restrict costs
-    # C = np.mean([ x.delta for x in parallel if x.timer == 'send0' ]) # communication overhead
-    # for lev in range(nlevs):
-    #     Y[lev] = np.mean([ x.delta for x in parallel if x.timer == 'sweep%d' % lev ])
-    #     if lev > 0:
-    #         O[lev] = np.mean([ x.delta for x in parallel if x.timer == 'interp%d' % lev 
-    #                                                      or x.timer == 'restrict%d' % lev ])
-    #     else:
-    #         O[lev] = 0
-    # Cp = N * 2 * Y[0] +  B * Kp * ( C + sum([ 2*Y[lev] for lev in range(nlevs-1) ]) 
-    #                                   + sum([   O[lev] for lev in range(nlevs) ]) + Y[nlevs-1] )
+    nnodesF, nvarsF = nnodes[-1], nvars[-1]
+    alpha = [ float(nv)/nvarsF * float(nn)/nnodesF for nv, nn in zip(nnodes, nvars) ]
 
     OI = np.mean([ x.delta for x in parallel if x.timer == 'interp%d' % (L-1) ])
     OR = np.mean([ x.delta for x in parallel if x.timer == 'restrict%d' % (L-1) ])
@@ -73,16 +41,41 @@ def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbo
     Y = [ Y0 * alpha[l] for l in range(L) ]
     O = [ O0 * alpha[l] for l in range(L) ]
 
-    Cp =  N * 2 * Y[0] + B * Kp * ( C + sum([ 2*Y[lev] for lev in range(L-1) ]) 
+    Cp =  N * 2 * Y[0] + B * Kp * ( C + sum([ 2*Y[lev] for lev in range(L-1) ])
                                       + sum([   O[lev] for lev in range(L) ]) + Y[L-1] )
 
-    
     if verbose:
-        print 'Y:     ', Y
-        print 'O:     ', O
-        print 'Cp:    ', Cp
-        print 'E:     ', Cs/Cp
+        measCs = max([ x.delta for x in serial if x.timer == 'total' ])
+        measCp = max([ x.delta for x in parallel if x.timer == 'total' ])
+        measY = []
+        for l in range(L):
+            measY.append(np.mean([ x.delta for x in parallel if x.timer == 'sweep%d' % l ]))
+        measO = []
+        for l in range(L):
+            OI = np.mean([ x.delta for x in parallel if x.timer == 'interp%d' % (l) ])
+            OR = np.mean([ x.delta for x in parallel if x.timer == 'restrict%d' % (l) ])
+            measO.append(OI + OR)
 
+        print ''
+        print 'steps:                      ', N
+        print 'serial iterations:          ', Ks
+        print 'mean cost of serial sweeps: ', Y0
+        print 'estimated serial cost:      ', Cs
+        print 'actual serial cost:         ', measCs
+        print 'parallel levels:            ', L
+        print 'parallel iterations:        ', Kp
+        print 'parallel processors:        ', P
+        print 'parallel blocks:            ', B
+        print 'max cost of any/all comm:   ', C
+        print 'alpha ratios:               ', alpha
+        print 'estimated cost of sweeps:   ', Y
+        print 'actual cost of sweeps:      ', measY
+        print 'estimated cost of overhead: ', O
+        print 'actual cost of overhead:    ', measO
+        print 'estimated parallel cost:    ', Cp
+        print 'actual parallel cost:       ', measCp
+        print 'estimated speedup:          ', Cs/Cp
+        print 'actual speedup:             ', measCs/measCp
 
     return Cs / Cp
 
