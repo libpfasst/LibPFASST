@@ -28,7 +28,8 @@ class JobQueue(base.Container):
     def stage_all(self):
         for job in self.jobs:
             os.makedirs(os.path.join(self.stage, job.rwd))
-            job.write_params(os.path.join(self.stage, job.rwd, 'probin.nml'))
+            if job.has_params:
+                job.write_params(os.path.join(self.stage, job.rwd, 'probin.nml'))
 
 
     def rsync_stage(self):
@@ -63,4 +64,7 @@ class JobQueue(base.Container):
             kwargs.pop('rwd', None)
             kwargs.pop('exe', None)
 
-            scheduler.submit(exe=exe, rwd=rwd, inputs='probin.nml', **kwargs)
+            if job.has_params:
+                scheduler.submit(exe=exe, rwd=rwd, inputs='probin.nml', **kwargs)
+            else:
+                scheduler.submit(exe=exe, rwd=rwd, inputs='', **kwargs)

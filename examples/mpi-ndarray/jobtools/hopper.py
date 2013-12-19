@@ -47,7 +47,7 @@ class HopperPBS(object):
 
         if a.pbs_cmds:
             pbs.extend(a.pbs_cmds)
-        pbs.append("aprun {opts} {exe} {inputs}")
+        pbs.append("aprun {opts} {exe} {inputs} {cmd_opts}")
 
         opts = []
         if a.width:
@@ -65,7 +65,7 @@ class HopperPBS(object):
         if a.aprun_opts:
             opts.extend(a.aprun_opts)
 
-        pbs = '\n'.join(pbs).format(opts=' '.join(opts), rwd=a.rwd, exe=a.exe, inputs=a.inputs)
+        pbs = '\n'.join(pbs).format(opts=' '.join(opts), rwd=a.rwd, exe=a.exe, inputs=a.inputs, cmd_opts=a.cmd_opts)
 
         if not a.dry_run:
             run_script = a.rwd + '/pbs.sh'

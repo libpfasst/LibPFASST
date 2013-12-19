@@ -18,3 +18,7 @@ class Job(Container):
         if self._inputs is not None:
             with open(fname, 'w') as f:
                 f.write(self._inputs)
+
+    @property
+    def has_params(self):
+        return self._inputs is not None
