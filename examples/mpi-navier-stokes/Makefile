@@ -22,7 +22,7 @@ vpath %.cpp $(VPATHS)
 
 build/%.o: %.cpp
 	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+	$(CXX) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 
 all: $(EXE)
 

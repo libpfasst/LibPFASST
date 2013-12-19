@@ -101,7 +101,7 @@ program fpfasst
      print *, 'NPROCS:   ', pf%comm%nproc
   end if
 
-  call pf_logger_attach(pf)
+  ! call pf_logger_attach(pf)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0d0, nsteps=nsteps)
 
 
