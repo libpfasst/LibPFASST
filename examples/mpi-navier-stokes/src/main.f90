@@ -28,9 +28,11 @@ program fpfasst
 
   nthreads = -1
   nsteps   = 32
-  nlevs    = 3
-
-  if (nprocs == 1) nlevs = 1
+  if (nprocs == 1) then
+     nlevs = 1
+  else
+     nlevs = 3
+  end if
 
   if (nthreads < 0) then
      call getenv("OMP_NUM_THREADS", arg)
@@ -41,20 +43,21 @@ program fpfasst
      end if
   end if
 
-
   ! initialize pfasst
   nx     = [ 32, 64, 128 ]
   nvars  = 2 * 3 * nx**3
   nnodes = [ 2, 3, 5 ]
   dt     = 0.001d0
-  first  = size(nx) - nlevs + 1
 
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
+  nlevs = pf%nlevels
+  first = size(nx) - nlevs + 1
+
   if (nprocs == 1) then
-     pf%niters = 6
+     pf%niters = 8
   else
      pf%niters = 5
   end if
@@ -65,7 +68,7 @@ program fpfasst
      pf%levels(1)%nsweeps = 2
   end if
 
-  do l = 1, nlevs
+  do l = 1, pf%nlevels
      pf%levels(l)%nvars  = nvars(first-1+l)
      pf%levels(l)%nnodes = nnodes(first-1+l)
 
@@ -82,7 +85,7 @@ program fpfasst
   call pf_mpi_setup(tcomm, pf)
   call pf_pfasst_setup(pf)
 
-  !!!! initialize advection/diffusion
+  ! initialize advection/diffusion
   call carray4_create(q0, pf%levels(nlevs)%shape)
   call vortex_sheets(q0)
 
@@ -91,7 +94,7 @@ program fpfasst
   end do
 
 
-  !!!! run
+  ! run
   if (pf%rank == 0) then
      print *, 'NX:       ', nx(first:)
      print *, 'NLEVS:    ', nlevs
@@ -105,14 +108,13 @@ program fpfasst
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0d0, nsteps=nsteps)
 
 
-  !!!! done
+  ! done
   call mpi_barrier(pf%comm%comm, ierror)
 
   do l = 1, nlevs
      call feval_destroy(pf%levels(l)%levelctx)
   end do
 
-  ! call destroy(q0)
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(tcomm)
   call feval_finalize()
