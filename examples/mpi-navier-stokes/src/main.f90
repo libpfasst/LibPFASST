@@ -11,7 +11,7 @@ program fpfasst
   type(pf_pfasst_t)     :: pf
   type(pf_comm_t)       :: tcomm
   type(carray4), target :: q0
-  integer               :: nlevs, nthreads, nsteps, first
+  integer               :: nprocs, nlevs, nthreads, nsteps, first
   integer               :: nx(3), nvars(3), nnodes(3)
   integer               :: ierror, l
   double precision      :: dt
@@ -24,9 +24,13 @@ program fpfasst
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
+  call mpi_comm_size(mpi_comm_world, nprocs, ierror)
+
   nthreads = -1
   nsteps   = 32
   nlevs    = 3
+
+  if (nprocs == 1) nlevs = 1
 
   if (nthreads < 0) then
      call getenv("OMP_NUM_THREADS", arg)
@@ -49,7 +53,11 @@ program fpfasst
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  pf%niters = 5
+  if (nprocs == 1) then
+     pf%niters = 6
+  else
+     pf%niters = 5
+  end if
   pf%qtype  = 1
 
   pf%echo_timings = .true.
