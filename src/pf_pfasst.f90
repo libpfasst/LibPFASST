@@ -234,17 +234,19 @@ contains
     if (F%level < pf%nlevels) then
 
        if (F%Finterp) then
-          ! store F and Q(1) only
+          ! store F and Q(1) only  
+          ! Changed by MM Dec. 20, 2013 to allocate all pQ as well
+          ! 
           allocate(F%pF(nnodes,npieces))
-          allocate(F%pQ(1))
+          allocate(F%pQ(nnodes))
           do m = 1, nnodes
              do p = 1, npieces
                 call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, &
                      nvars, F%shape, F%levelctx, F%encap%encapctx)
              end do
+             call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
+                  nvars, F%shape, F%levelctx, F%encap%encapctx)
           end do
-          call F%encap%create(F%pQ(1), F%level, SDC_KIND_SOL_NO_FEVAL, &
-               nvars, F%shape, F%levelctx, F%encap%encapctx)
        else
           ! store Q
           allocate(F%pQ(nnodes))
