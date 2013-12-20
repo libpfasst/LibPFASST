@@ -83,13 +83,15 @@ contains
     integer :: m, p
 
     if (F%Finterp) then
+       !  Changed by MM Dec. 21, 2013 to save solutions too
        if (associated(F%pF)) then
           do m = 1, F%nnodes
              do p = 1,size(F%F(1,:))
                 call F%encap%copy(F%pF(m,p), F%F(m,p))
              end do
+             call F%encap%copy(F%pQ(m), F%Q(m))
           end do
-          call F%encap%copy(F%pQ(1), F%Q(1))
+!          call F%encap%copy(F%pQ(1), F%Q(1))
        end if
     else
        if (associated(F%pQ)) then
