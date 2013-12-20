@@ -73,7 +73,8 @@ contains
 
              ! get new initial value (skip on first iteration)
              if (k > 1) then
-                call G%encap%pack(G%q0, G%Q(G%nnodes))
+!                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                call G%encap%pack(G%q0, G%qend))
                 if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0)
                 end if
@@ -107,7 +108,8 @@ contains
 
              ! get new initial value (skip on first iteration)
              if (k > 1) then
-                call G%encap%pack(G%q0, G%Q(G%nnodes))
+!                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                call G%encap%pack(G%q0, G%qend)
                 if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0k)
                 end if
@@ -287,7 +289,6 @@ contains
     else
        pf%state%nsteps = ceiling(1.0*tend/dt)
     end if
-
     do k = 1, 666666666
 
        qbroadcast = .false.
@@ -316,7 +317,6 @@ contains
           call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
-
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
             call pf_predictor(pf, pf%state%t0, dt)
@@ -343,7 +343,6 @@ contains
           call pf_residual(pf, F, dt)
 
        end if
-
        !
        ! check convergence, continue with iteration
        !
@@ -352,7 +351,6 @@ contains
 
        if (qexit)  exit
        if (qcycle) cycle
-
        do l = 2, pf%nlevels
           F => pf%levels(l)
           call pf_post(pf, F, F%level*10000+k)
@@ -372,7 +370,6 @@ contains
        end if
 
        call pf_v_cycle(pf, k, pf%state%t0, dt)
-
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
 
