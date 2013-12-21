@@ -74,7 +74,7 @@ contains
              ! get new initial value (skip on first iteration)
              if (k > 1) then
 !                call G%encap%pack(G%q0, G%Q(G%nnodes))
-                call G%encap%pack(G%q0, G%qend))
+                call G%encap%pack(G%q0, G%qend)
                 if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0)
                 end if
