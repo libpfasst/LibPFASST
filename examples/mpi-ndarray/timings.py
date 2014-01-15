@@ -3,7 +3,7 @@ speedup table for the 'A parallel full approximation scheme in space
 and time' paper by Emmett and Minion."""
 
 from itertools import product
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 Trial = namedtuple('Trial', [ 'problem', 'processors', 'levels', 'trial', 'timings' ])
 
@@ -19,12 +19,34 @@ levels     = [ 3 ]
 #host       = 'edison.r1'
 host       = 'edison'
 
+class TimingsContainer:
+    def __init__(self):
+        self._parallel = defaultdict(lambda: [])
+        self._serial   = {}
+    def add_parallel_trial(self, trial):
+        self._parallel[trial.problem].append(trial)
+    def add_serial_trial(self, trial):
+        self._serial[trial.problem] = trial
+    def iterparallel():
+        #prob, nlev, nproc, trial
+        for prob in self._parallel.iterkeys():
+            for nlev in set([ x.levels for x in self._parallel[prob] ]):
+                for nproc in set([ x.nproc for x in self._parallel[prob] if x.levels == nlev ]):
+                    pass
+                    # for trial in [ x.nproc for x in self._parallel[prob] if x.levels == nlev ]:
+    def parallel(prob,
+
+class SpeedupsContainer:
+    def __init__(self):
+        pass
+
 
 def load_timings(host='edison'):
     import pf
     import glob
     import jobtools.progressbar as pb
     import re
+    import pandas
 
     ptimings = glob.glob('timings/%s/*_t*' % host)
     stimings = glob.glob('timings/%s/*_p*' % host)
@@ -36,14 +58,13 @@ def load_timings(host='edison'):
                            maxval=len(ptimings) + len(stimings))
     pbar.start()
 
-    timings = []
+    timings = TimingsContainer()
+
     for t in ptimings:
         problem, trial, processors, levels = pparse.match(t).group(1, 2, 3, 4)
-        timings.append(Trial(problem, processors, levels, trial, pf.io.read_all_timings(t)))
-        # parallel = 'timings/%s/%s_t%02dp%02dl%d' % (host, prob, trial, nproc, nlev)
+        timings.add_parallel_trial(
+            Trial(problem, int(processors), int(levels), int(trial), pf.io.read_all_timings(t)))
         pbar.bump()
-
-    # should make a dict of probs with parallel and serial entries....
 
     # for prob in problems:
     #     serial = 'timings/%s/%s_p01l1' % (host, prob)
@@ -87,10 +108,9 @@ def compute_speedups(timings):
 
     speedups = {}
     levels = [ 3 ]
-    for prob, nlev, nproc, trial in product(problems, levels, processors, trials):
-
-        serial   = timings[prob, 1, 1, 0]
-        parallel = timings[prob, nlev, nproc, trial]
+    for prob, nlev, nproc, trial in timings.iterparallel():
+        serial   = timings.serial(prob)
+        parallel = timings.parallel(prob, nlev, nproc, trial)
         try:
             sp = pf.speedup.speedup(serial, parallel)
         except ValueError:
@@ -148,7 +168,7 @@ def echo_speedup_table(speedups):
     levels = [ 3 ]
 
 
-    for prob in problems:
+    for problem in speedups.problems:
 
         # HEAT & Serial SDC & 1  & 6 & 0.46s & & \\
         #      & PFASST 2   & 64 & 3 & 0.11s & 4.38 & 0.069 \\
@@ -159,8 +179,7 @@ def echo_speedup_table(speedups):
         #     prob=prob.upper(), niters=niters[prob][1], stime=stime)
 
         runs = []
-        for nprocs, nlevs in product(processors, levels):
-            s = [ speedups[prob, nlevs, nprocs, t] for t in trials ]
+        for nprocs, nlevs in product(problem.processors, problem.levels):
             runs.append({ 'nlevs': nlevs, 'nprocs': nprocs, 'niters': niters[prob][nprocs],
                           'time':       summary([ x.ptime for x in s ]),
                           'speedup':    summary([ x.speedup for x in s ]),
@@ -278,6 +297,3 @@ def speedup_boxplot(output, speedups, prob, nlev):
 if __name__ == '__main__':
     timings = load_timings()
     speedups = compute_speedups(timings)
-
-
-
