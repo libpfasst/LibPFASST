@@ -5,40 +5,21 @@ and time' paper by Emmett and Minion."""
 from itertools import product
 from collections import namedtuple, defaultdict
 
-Trial = namedtuple('Trial', [ 'problem', 'processors', 'levels', 'trial', 'timings' ])
-
-#problems   = [ 'heat' , 'burgers', 'ks' ] #'wave', 'ks' ]
-# problems   = [ 'navier-stokes' ]
-problems   = [ 'ks' ]
-processors = [ 4, 8, 16, 32  ]
-#trials     = [ 1, 2 ]
-#trials     = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
-trials     = [ 1, 2, 3, 4, 5 ]
-#levels     = [ 2, 3 ]
-levels     = [ 3 ]
-#host       = 'edison.r1'
-host       = 'edison'
+TimingTrial = namedtuple('TimingTrial', [ 'problem', 'processors', 'levels', 'trial', 'timings' ])
+SpeedupTrial = namedtuple('SpeedupTrial', [ 'problem', 'processors', 'levels', 'trial', 'speedup' ])
 
 class TimingsContainer:
     def __init__(self):
-        self._parallel = defaultdict(lambda: [])
-        self._serial   = {}
+        self.parallel = defaultdict(lambda: [])
+        self.serial   = {}
     def add_parallel_trial(self, trial):
-        self._parallel[trial.problem].append(trial)
-    def add_serial_trial(self, trial):
-        self._serial[trial.problem] = trial
-    def iterparallel():
-        #prob, nlev, nproc, trial
-        for prob in self._parallel.iterkeys():
-            for nlev in set([ x.levels for x in self._parallel[prob] ]):
-                for nproc in set([ x.nproc for x in self._parallel[prob] if x.levels == nlev ]):
-                    pass
-                    # for trial in [ x.nproc for x in self._parallel[prob] if x.levels == nlev ]:
-    def parallel(prob,
-
-class SpeedupsContainer:
-    def __init__(self):
-        pass
+        self.parallel[trial.problem].append(trial)
+    def add_serial_trial(self, problem, timings):
+        self.serial[problem] = timings
+    def parallel_trials(self):
+        for prob in self.parallel.iterkeys():
+            for t in self.parallel[prob]:
+                yield prob, t
 
 
 def load_timings(host='edison'):
@@ -52,7 +33,7 @@ def load_timings(host='edison'):
     stimings = glob.glob('timings/%s/*_p*' % host)
 
     pparse = re.compile('.*/([-a-z]+)_t(\d+)p(\d+)l(\d+)')
-    # sparse = re.compile('([-a-z]+)_t(\d+)p(\d+)l(\d+)')
+    sparse = re.compile('.*/([-a-z]+)_p01')
 
     pbar  = pb.ProgressBar(widgets=["Loading timings: ", pb.Percentage(), ' ', pb.Bar()],
                            maxval=len(ptimings) + len(stimings))
@@ -63,42 +44,17 @@ def load_timings(host='edison'):
     for t in ptimings:
         problem, trial, processors, levels = pparse.match(t).group(1, 2, 3, 4)
         timings.add_parallel_trial(
-            Trial(problem, int(processors), int(levels), int(trial), pf.io.read_all_timings(t)))
+            TimingTrial(problem, int(processors), int(levels), int(trial), pf.io.read_all_timings(t)))
         pbar.bump()
 
-    # for prob in problems:
-    #     serial = 'timings/%s/%s_p01l1' % (host, prob)
-    #     timings[prob, 1, 1, 0] = pf.io.read_all_timings(serial)
-    #     pbar.bump()
+    for t in stimings:
+        problem = sparse.match(t).group(1)
+        timings.add_serial_trial(problem, pf.io.read_all_timings(t))
+        pbar.bump()
 
     pbar.finish()
 
     return timings
-
-
-# def load_timings(host='edison'):
-#     import pf
-
-#     timings = {}
-
-#     import jobtools.progressbar as pb
-#     pbar  = pb.ProgressBar(widgets=["Loading timings: ", pb.Percentage(), ' ', pb.Bar()],
-#                            maxval=len(problems)*len(levels)*len(processors)*len(trials)+len(problems))
-#     pbar.start()
-
-#     for prob, nlev, nproc, trial in product(problems, levels, processors, trials):
-#         parallel = 'timings/%s/%s_t%02dp%02dl%d' % (host, prob, trial, nproc, nlev)
-#         timings[prob, nlev, nproc, trial] = pf.io.read_all_timings(parallel)
-#         pbar.bump()
-
-#     for prob in problems:
-#         serial = 'timings/%s/%s_p01l1' % (host, prob)
-#         timings[prob, 1, 1, 0] = pf.io.read_all_timings(serial)
-#         pbar.bump()
-
-#     pbar.finish()
-
-#     return timings
 
 
 def compute_speedups(timings):
@@ -106,21 +62,21 @@ def compute_speedups(timings):
     from pf.speedup import theoretical_speedup_fixed_block as theory
     from fabfile import nnodes, nvars
 
-    speedups = {}
-    levels = [ 3 ]
-    for prob, nlev, nproc, trial in timings.iterparallel():
-        serial   = timings.serial(prob)
-        parallel = timings.parallel(prob, nlev, nproc, trial)
+    speedups = defaultdict(lambda: [])
+
+    for prob, trial in timings.parallel_trials():
+        serial   = timings.serial[prob]
+        parallel = trial.timings
         try:
             sp = pf.speedup.speedup(serial, parallel)
         except ValueError:
-            print "warning: unable to compute speedup for:", prob, nlev, nproc, trial
+            print "warning: unable to compute speedup for:", prob, trial.levels, trial.processors, trial.trial
             continue
         sp = sp._replace(theory=theory(serial, parallel,
-                                       nnodes[prob][:nlev],
-                                       nvars[prob][:nlev], verbose=False))
-        print prob, nlev, nproc, trial, sp.efficiency, sp.theory/nproc
-        speedups[prob, nlev, nproc, trial] = sp
+                                       nnodes[prob][:trial.levels],
+                                       nvars[prob][:trial.levels], verbose=False))
+        speedups[prob].append(SpeedupTrial(prob, trial.processors, trial.levels, trial.trial, sp))
+
     return speedups
 
 
@@ -164,22 +120,14 @@ def echo_speedup_table(speedups):
     summary = lambda a: (np.mean(a), np.std(a))
 
     table = []
+    for prob in speedups:
 
-    levels = [ 3 ]
-
-
-    for problem in speedups.problems:
-
-        # HEAT & Serial SDC & 1  & 6 & 0.46s & & \\
-        #      & PFASST 2   & 64 & 3 & 0.11s & 4.38 & 0.069 \\
-        #      & PFASST 3   & 64 & 3 & 0.09s & 5.25 & 0.082 \\
-
-        # stime = speedups[prob, 2, 4, 1].stime
-        # print "{prob} & Serial SDC & 1 & {niters} & {stime:.02f}s & & \\\\".format(
-        #     prob=prob.upper(), niters=niters[prob][1], stime=stime)
+        processors = sorted(set([ x.processors for x in speedups[prob] ]))
+        levels = sorted(set([ x.levels for x in speedups[prob] ]))
 
         runs = []
-        for nprocs, nlevs in product(problem.processors, problem.levels):
+        for nprocs, nlevs in product(processors, levels):
+            s = [ x.speedup for x in speedups[prob] if x.processors == nprocs and x.levels == nlevs ]
             runs.append({ 'nlevs': nlevs, 'nprocs': nprocs, 'niters': niters[prob][nprocs],
                           'time':       summary([ x.ptime for x in s ]),
                           'speedup':    summary([ x.speedup for x in s ]),
@@ -187,7 +135,7 @@ def echo_speedup_table(speedups):
 
         table.append({ 'name': prob.upper(),
                        'serial_niters': niters[prob][1],
-                       'serial_time': speedups[prob, 3, 4, 1].stime,
+                       'serial_time': speedups[prob][0].speedup.stime,
                        'parallel_runs': runs })
 
     print speedup_table.render(problems=table)
@@ -266,12 +214,16 @@ def speedup_boxplot(output, speedups, prob, nlev):
     from rpy2.robjects import r as R
     from rpy2.robjects import DataFrame
 
+    processors = sorted(set([ x.processors for x in speedups[prob] if x.levels == nlev]))
+
     _nprocs = []
     _speedups = []
     _theory = []
     for nproc in processors:
-        s = [ speedups[prob, nlev, nproc, trial].speedup for trial in trials ]
-        t = [ speedups[prob, nlev, nproc, trial].theory for trial in trials ]
+        s = [ x.speedup.speedup for x in speedups[prob] if x.processors == nproc and x.levels == nlev ]
+        t = [ x.speedup.theory for x in speedups[prob] if x.processors == nproc and x.levels == nlev ]
+        # s = [ speedups[prob, nlev, nproc, trial].speedup for trial in trials ]
+        # t = [ speedups[prob, nlev, nproc, trial].theory for trial in trials ]
         _nprocs.extend(len(s) * [nproc])
         _speedups.extend(s)
         _theory.append(np.mean(t))
