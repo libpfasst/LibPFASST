@@ -27,17 +27,13 @@ niters = {
 sigma = defaultdict(lambda: 0.004, { 'wave': 0.001 })
 dt    = defaultdict(lambda: 0.01, { 'wave': 0.5/512, 'ks': 1.0, })
 
-
-# XXX: I broke the wave eqn recently...
-
-
 @task
 def timings1():
-  """Speedup/timing tests."""
+  """Speedup/timing tests for 1d and 2d examples."""
 
   setenv()
   jobs       = JobQueue(rwd=os.path.join(env.scratch, 'timings', env.host_nick), queue='regular')
-  problems   = [ 'heat', 'burgers', 'ks' ]
+  problems   = [ 'heat', 'burgers', 'ks', 'wave' ]
   processors = [ 4, 8, 16, 32, 64 ]
   trials     = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
   levels     = [ 2, 3 ]
@@ -86,7 +82,7 @@ def timings3():
   for trial, nprocs, nlevs in product(trials, processors, levels):
     name = '%s_t%02dp%02dl%d' % (prob, trial, nprocs, nlevs)
     job  = Job(name=name, rwd=name, width=nprocs, walltime="01:00:00",
-               depth=10, specialized=2, pernode=2)
+               depth=10, pernode=2, cmd_opts="nlevels=%d" % nlevs)
     jobs.add(job)
 
   jobs.submit_all()

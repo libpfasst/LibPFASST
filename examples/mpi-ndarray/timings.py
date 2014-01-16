@@ -220,10 +220,10 @@ def speedup_boxplot(output, speedups, prob, nlev):
     _speedups = []
     _theory = []
     for nproc in processors:
-        s = [ x.speedup.speedup for x in speedups[prob] if x.processors == nproc and x.levels == nlev ]
-        t = [ x.speedup.theory for x in speedups[prob] if x.processors == nproc and x.levels == nlev ]
-        # s = [ speedups[prob, nlev, nproc, trial].speedup for trial in trials ]
-        # t = [ speedups[prob, nlev, nproc, trial].theory for trial in trials ]
+        spds = [ x.speedup for x in speedups[prob]
+                                 if x.processors == nproc and x.levels == nlev ]
+        s = [ x.speedup for x in spds ]
+        t = [ x.theory for x in spds ]
         _nprocs.extend(len(s) * [nproc])
         _speedups.extend(s)
         _theory.append(np.mean(t))

@@ -5,8 +5,8 @@
 export TAU_MAKEFILE=/home/memmett/src/tau-2.22.2/x86_64/lib/Makefile.tau-mpi-openmp
 export MPICH_F90=/home/memmett/gcc-4.7/bin/gfortran
 
-FFLAGS += -Wall -g -Wno-unused-dummy-argument
-CFLAGS += -Wall -g 
+FFLAGS += -Wall -g -Wno-unused-dummy-argument -cpp -fbacktrace
+CFLAGS += -Wall -g
 
 # FC = tau_f90.sh -tau_options=-optTauSelectFile=tau.txt
 # CC = tau_cc.sh
