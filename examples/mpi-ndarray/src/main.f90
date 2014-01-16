@@ -11,12 +11,10 @@ program main
 
   implicit none
 
-  type(pf_pfasst_t) :: pf
-  type(pf_comm_t)   :: comm
-
-  type(ndarray),      target :: q1
-
-  type(pf_encap_t),   target :: encap
+  type(pf_pfasst_t)        :: pf
+  type(pf_comm_t)          :: comm
+  type(ndarray),    target :: q1
+  type(pf_encap_t), target :: encap
 
   integer        :: err, l
   character(256) :: probin_fname
@@ -79,7 +77,7 @@ program main
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
      pf%levels(l)%nnodes = nnodes(l)
 
-     if (dim == 1) then
+     if (dim == 1 .or. problem == PROB_WAVE) then
         call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
      else if (dim == 2) then
         call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
@@ -93,7 +91,7 @@ program main
      case (PROB_HEAT)
         call pf_implicit_create(pf%levels(l)%sweeper, f2eval1, f2comp1)
      case (PROB_WAVE)
-        call pf_explicit_create(pf%levels(l)%sweeper, f1eval2)
+        call pf_explicit_create(pf%levels(l)%sweeper, f1eval1wave)
      case (PROB_SHEAR)
         call pf_imex_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
      case default

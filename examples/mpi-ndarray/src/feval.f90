@@ -20,6 +20,35 @@ module feval
 
 contains
 
+  subroutine f1eval1wave(yptr, t, level, levelctx, f1ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f1ptr, levelctx
+    real(pfdp),     intent(in)         :: t
+    integer(c_int), intent(in)         :: level
+
+    real(pfdp),    pointer :: y(:,:), f1(:,:)
+    type(work1),   pointer :: work
+    complex(pfdp), pointer :: wk(:)
+
+    call c_f_pointer(levelctx, work)
+
+    y  => array2(yptr)
+    f1 => array2(f1ptr)
+    wk => work%wk
+
+    wk = y(:, 1)
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = work%ddx * wk / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    f1(:, 2) = real(wk)
+
+    wk = y(:, 2)
+    call fftw_execute_dft(work%ffft, wk, wk)
+    wk = work%ddx * wk / size(wk)
+    call fftw_execute_dft(work%ifft, wk, wk)
+    f1(:, 1) = real(wk)
+
+  end subroutine f1eval1wave
+
   subroutine f1eval1(yptr, t, level, levelctx, f1ptr)
     type(c_ptr),    intent(in), value  :: yptr, f1ptr, levelctx
     real(pfdp),     intent(in)         :: t
@@ -69,7 +98,7 @@ contains
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
-    
+
     select case(problem)
     case (PROB_HEAT)
        wk = nu * work%lap * wk / size(wk)
@@ -280,12 +309,12 @@ contains
     ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nvars**2, c_size_t))
     call c_f_pointer(wk, work%wk, [nvars,nvars])
-    
+
     work%ffft = fftw_plan_dft_2d(nvars, nvars, &
          work%wk, work%wk, FFTW_FORWARD, FFTW_ESTIMATE)
     work%ifft = fftw_plan_dft_2d(nvars, nvars, &
          work%wk, work%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
-    
+
     ! create operators
     allocate(work%k2(nvars,nvars))
     allocate(work%ddx(nvars,nvars))
@@ -297,16 +326,16 @@ contains
     allocate(work%w_x(nvars,nvars))
     allocate(work%w_y(nvars,nvars))
     allocate(work%w(nvars,nvars))
-    
+
     work%psidx = 0
     work%psidy = 0
-    
+
     do j = 1, nvars
        do i = 1, nvars
           work%k2(i,j) = kx(i)**2 + kx(j)**2
           work%ddx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i)
           work%ddy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j)
-    
+
           if (work%k2(i,j) > 0.0_pfdp) then
              work%psidx(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(i) / work%k2(i,j)
              work%psidy(i,j) = (0.0_pfdp, 1.0_pfdp) * kx(j) / work%k2(i,j)
