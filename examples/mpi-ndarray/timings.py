@@ -5,8 +5,11 @@ and time' paper by Emmett and Minion."""
 from itertools import product
 from collections import namedtuple, defaultdict
 
-TimingTrial = namedtuple('TimingTrial', [ 'problem', 'processors', 'levels', 'trial', 'timings' ])
-SpeedupTrial = namedtuple('SpeedupTrial', [ 'problem', 'processors', 'levels', 'trial', 'speedup' ])
+TimingTrial = namedtuple('TimingTrial',
+                         [ 'problem', 'processors', 'levels', 'trial', 'timings' ])
+
+SpeedupTrial = namedtuple('SpeedupTrial',
+                          [ 'problem', 'processors', 'levels', 'trial', 'speedup' ])
 
 class TimingsContainer:
     def __init__(self):
@@ -57,7 +60,7 @@ def load_timings(host='edison'):
     return timings
 
 
-def compute_speedups(timings):
+def compute_speedups(timings, verbose=False):
     import pf
     from pf.speedup import theoretical_speedup_fixed_block as theory
     from fabfile import nnodes, nvars
@@ -74,14 +77,14 @@ def compute_speedups(timings):
             continue
         sp = sp._replace(theory=theory(serial, parallel,
                                        nnodes[prob][:trial.levels],
-                                       nvars[prob][:trial.levels], verbose=False))
+                                       nvars[prob][:trial.levels], verbose=verbose))
         speedups[prob].append(SpeedupTrial(prob, trial.processors, trial.levels, trial.trial, sp))
 
     return speedups
 
 
 
-def echo_speedup_table(speedups):
+def speedup_table(speedups):
     import numpy as np
     import jinja2
 
@@ -105,9 +108,9 @@ def echo_speedup_table(speedups):
       {{p.name}} & Serial SDC & 1 & {{p.serial_niters}} & {{"%.02fs"|format(p.serial_time)}} & & \\
       {% for r in p.parallel_runs %}
                  & PFASST {{r.nlevs}} & {{r.nprocs}} & {{r.niters}}
-                   & {{"%.02fs \pm %.02fs"|format(*r.time)}}
-                   & {{"%.02f  \pm %.02f "|format(*r.speedup)}}
-                   & {{"%.02f  \pm %.02f "|format(*r.efficiency)}}
+                   & {{"%.02fs $\pm$ %.02fs"|format(*r.time)}}
+                   & {{"%.02f  $\pm$ %.02f "|format(*r.speedup)}}
+                   & {{"%.02f  $\pm$ %.02f "|format(*r.efficiency)}} \\
       {% endfor %}
     {% endfor %}
     \bottomrule
@@ -138,36 +141,7 @@ def echo_speedup_table(speedups):
                        'serial_time': speedups[prob][0].speedup.stime,
                        'parallel_runs': runs })
 
-    print speedup_table.render(problems=table)
-
-
-def dump_speedups(speedups):
-    import pandas
-    df = []
-    for x in speedups:
-        d = { 'prob': x[0] }
-        d.update(speedups[x]._asdict())
-        df.append(d)
-    df = pandas.DataFrame(df)
-    df.to_csv('speedups.csv', index=False)
-
-
-def dump_level_timings(timings, timer, prob, nproc, nlev):
-    import pandas
-    df = []
-    for trial in trials:
-        for l in range(nlev):
-            t = [ x.delta for x in timings[prob, nlev, nproc, trial] if x.timer == timer + str(l) ]
-            for delta in t:
-                df.append({ 'prob': prob, 'nlev': nlev, 'nproc': nproc, 'trial': trial, 'timer': timer,
-                            'level': l, 'delta': delta })
-    df = pandas.DataFrame(df)
-    df.to_csv('timings_%s_p%02dl%d_%s.csv' % (prob, nproc, nlev, timer), index=False)
-
-
-def filter_trials(timings, prob, nproc, nlev):
-    keys = [ k for k in timings.iterkeys() if k[:3] == (prob, nlev, nproc) ]
-    return [ timings[k] for k in keys ]
+    return speedup_table.render(problems=table)
 
 
 def timing_boxplot(output, timings, timer, prob, nproc, nlev):
@@ -179,13 +153,18 @@ def timing_boxplot(output, timings, timer, prob, nproc, nlev):
     from rpy2.robjects import r as R
     from rpy2.robjects import DataFrame
 
+    trials = sorted(set([ x.trial for x in timings.parallel[prob] if x.levels == nlev]))
+
     _trials = []
     _levels = []
     _deltas = []
     for trial in trials:
+        t = [ x.timings for x in timings.parallel[prob]
+                              if x.processors == nproc
+                              and x.levels == nlev
+                              and x.trial == trial ][0]
         for l in range(nlev):
-            d = [ x.delta for x in timings[prob, nlev, nproc, trial]
-                                if x.timer == timer + str(l) ]
+            d = [ x.delta for x in t if x.timer == timer + str(l) ]
             _trials.extend(len(d) * [trial])
             _levels.extend(len(d) * [l])
             _deltas.extend(d)
@@ -244,6 +223,89 @@ def speedup_boxplot(output, speedups, prob, nlev):
                geom_line(data=dft, aes(as.numeric(ordered(nproc)), theory), colour="red") +
                theme_few()
          ggsave('{fname}', plt)""".format(fname=output))
+
+
+def timing_plot(output, timings, prob, nproc, nlev, trial):
+
+    import pylab as pl
+
+    pl.clf()
+
+    pens = {
+        'total': { 'label': 'total', 'marker': 'o', 'linestyle': '-', 'color': 'k' },
+        'iteration': { 'label': 'iteration', 'marker': 's', 'linestyle': '-', 'color': 'k' },
+        'predictor': { 'label': 'predictor', 'marker': 's', 'linestyle': '-', 'color': 'r' },
+        ('recv', 0): { 'label': 'recv 0', 'marker': '^', 'linestyle': '-.', 'color': 'b' },
+        ('recv', 1): { 'label': 'recv 1', 'marker': '^', 'linestyle': '-.', 'color': 'g' },
+        ('recv', 2): { 'label': 'recv 2', 'marker': '^', 'linestyle': '-.', 'color': 'c' },
+        ('send', 0): { 'label': 'send 0', 'marker': 'x', 'linestyle': ':', 'color': 'b' },
+        ('send', 1): { 'label': 'send 1', 'marker': 'x', 'linestyle': ':', 'color': 'g' },
+        ('send', 2): { 'label': 'send 2', 'marker': 'x', 'linestyle': ':', 'color': 'c' },
+        ('sweep', 0): { 'label': 'sweep 0', 'marker': 'o', 'linestyle': '-', 'color': 'b' },
+        ('sweep', 1): { 'label': 'sweep 1', 'marker': 'o', 'linestyle': '-', 'color': 'g' },
+        ('sweep', 2): { 'label': 'sweep 2', 'marker': 'o', 'linestyle': '-', 'color': 'c' },
+        }
+
+    t = [ x.timings for x in timings.parallel[prob]
+                          if x.processors == nproc
+                          and x.levels == nlev
+                          and x.trial == trial ][0]
+
+    xmax = max([ x.rank for x in t ])
+
+    iterations = sorted(set([ x.iter for x in t if x.iter > 0 ]))
+    levels     = range(nlev)
+
+    unpack = lambda z: zip(*sorted(z))
+    select = lambda timer, k: unpack([ (x.step, x.delta) for x in t
+                                       if x.timer == timer and x.iter == k ])
+
+    ax = pl.axes([0.125,0.725,0.75-0.125,0.9-0.725])
+    pl.axes(ax)
+
+    pl.title("PFASST timing")
+    pl.ylabel("total elapsed time")
+    pl.xlim([0, xmax])
+
+    x, y = unpack([ (x.rank, x.delta) for x in t if x.timer == 'total' ])
+    pl.plot(x, y, 's-b', **pens['total'])
+
+
+    ax = pl.axes([0.125,0.1,0.75-0.125,0.65-0.1])
+    pl.axes(ax)
+
+    x, y = unpack([ (x.step, x.delta) for x in t if x.timer == 'predictor' ])
+    pl.plot(x, y, 's-b', **pens['predictor'])
+
+    for k in iterations:
+        x, y = select('iteration', k)
+        pl.plot(x, y, **pens['iteration'])
+
+        for l in levels:
+            x, y = select('sweep%d' % l, k)
+            pl.plot(x, y, **pens['sweep', l])
+
+            x, y = select('recv%d' % l, k)
+            pl.plot(x, y, **pens['recv', l])
+
+            x, y = select('send%d' % l, k)
+            pl.plot(x, y, **pens['send', l])
+
+    from collections import OrderedDict
+    handles, labels = pl.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    pl.figlegend(by_label.values(), by_label.keys(), loc='center right')
+
+
+    pl.ylabel("elapsed time")
+    pl.xlabel("processor")
+    pl.xlim([0, xmax])
+
+    pl.savefig(output)
+    # pl.show()
+
+
+
 
 
 if __name__ == '__main__':

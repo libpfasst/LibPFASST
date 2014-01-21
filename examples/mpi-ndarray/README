@@ -40,6 +40,9 @@ $ python timings.py
 Notes
 -----
 
-Using specialized CPUs on Edison doesn't seem to help (at least for
-the 1d problems).
+Using specialized CPUs on Edison, if done PROPERLY, seems to help A
+LOT (at least for the 3d problems).
+
+Timing plots: NS p32, l3, t1 looks OK.  Same for l2.
+
 

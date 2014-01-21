@@ -24,7 +24,10 @@ class HopperPBS(object):
         pbs.append("#PBS -N " + a.name)
         if a.queue:
             pbs.append("#PBS -q " + a.queue)
-        mppwidth = a.width * (a.get('depth', 1) + a.get('specialized', 0))
+        if a.pernode:
+            mppwidth = a.width * 24 / a.pernode
+        else:
+            mppwidth = a.width * a.get('depth', 1)
         pbs.append("#PBS -l mppwidth=" + str(mppwidth))
         if a.walltime:
             pbs.append("#PBS -l walltime=" + a.walltime)
@@ -56,7 +59,7 @@ class HopperPBS(object):
             opts.append('-d ' + str(a.depth))
         if a.pernode:
             opts.append('-N ' + str(a.pernode))
-            opts.append('-S ' + str(a.pernode/2))
+            # opts.append('-S ' + str(a.pernode/2))
             opts.append('-cc numa_node')
         if a.specialized:
             opts.append('-r ' + str(a.specialized))
@@ -65,7 +68,7 @@ class HopperPBS(object):
         if a.aprun_opts:
             opts.extend(a.aprun_opts)
 
-        pbs = '\n'.join(pbs).format(opts=' '.join(opts), rwd=a.rwd, exe=a.exe, inputs=a.inputs, cmd_opts=a.cmd_opts)
+        pbs = '\n'.join(pbs).format(opts=' '.join(opts), rwd=a.rwd, exe=a.exe, inputs=a.inputs, cmd_opts=a.cmd_opts or '')
 
         if not a.dry_run:
             run_script = a.rwd + '/pbs.sh'
