@@ -4,7 +4,7 @@ program fpfasst
   use hooks
   use encap
   use transfer
-  use pf_mod_mpi, only: MPI_COMM_WORLD
+  use pf_mod_mpi, only: MPI_THREAD_FUNNELED, MPI_COMM_WORLD
 
   implicit none
 
@@ -13,14 +13,14 @@ program fpfasst
   type(carray4), target :: q0
   integer               :: nprocs, nlevs, nthreads, nsteps, first
   integer               :: nx(3), nvars(3), nnodes(3)
-  integer               :: ierror, l
+  integer               :: ierror, iprovided, l
   double precision      :: dt
   character(len=32)     :: arg
 
   type(pf_encap_t),   target :: encaps
 
   ! initialize mpi
-  call mpi_init(ierror)
+  call mpi_init_thread(mpi_thread_funneled, iprovided, ierror)
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
@@ -105,6 +105,7 @@ program fpfasst
   end if
 
   ! call pf_logger_attach(pf)
+  call mpi_barrier(pf%comm%comm, ierror)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0d0, nsteps=nsteps)
 
 

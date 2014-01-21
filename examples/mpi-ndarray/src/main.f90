@@ -1,6 +1,6 @@
 program main
   use pfasst
-  use pf_mod_mpi, only: MPI_COMM_WORLD
+  use pf_mod_mpi, only: MPI_THREAD_FUNNELED, MPI_COMM_WORLD
   use pf_mod_ndarray
 
   use feval
@@ -16,7 +16,7 @@ program main
   type(ndarray),    target :: q1
   type(pf_encap_t), target :: encap
 
-  integer        :: err, l
+  integer        :: ierror, iprovided, l
   character(256) :: probin_fname
 
 
@@ -36,8 +36,8 @@ program main
   ! initialize mpi
   !
 
-  call mpi_init(err)
-  if (err .ne. 0) &
+  call mpi_init_thread(mpi_thread_funneled, iprovided, ierror)
+  if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
 
@@ -139,8 +139,7 @@ program main
 
   call pf_print_options(pf)
 
-  call mpi_barrier(MPI_COMM_WORLD, err)
-
+  call mpi_barrier(mpi_comm_world, ierror)
   call pf_pfasst_run(pf, c_loc(q1), dt, 0.0_pfdp, nsteps=nsteps)
 
 
@@ -160,7 +159,7 @@ program main
 
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
-  call mpi_finalize(err)
+  call mpi_finalize(ierror)
   call fftw_cleanup()
 
 end program main
