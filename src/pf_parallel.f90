@@ -34,7 +34,7 @@ contains
   !
   ! Spreads the fine initial condition (F%q0) to all levels and all
   ! nodes.  If we're running with more than one processor, performs
-  ! sweeps on the coarse accordingly and execute "start cycles".
+  ! sweeps on the coarsest level.
   !
   ! No time communication is performed during the predictor.
   !
@@ -71,9 +71,8 @@ contains
           do k = 1, pf%rank + 1
              pf%state%iter = -k
 
-             ! get new initial value (skip on first iteration)
+             ! Get new initial value (skip on first iteration)
              if (k > 1) then
-!                call G%encap%pack(G%q0, G%Q(G%nnodes))
                 call G%encap%pack(G%q0, G%qend)
                 if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0)
@@ -98,7 +97,7 @@ contains
              !  Send forward
              call pf_send(pf, G,  G%level*20000+pf%rank+1, .true.)
           end do
-          call pf_residual(pf, G, dt)  !  why is this here?
+          call pf_residual(pf, G, dt)
        else
           ! Normal predictor burn in
           G => pf%levels(1)
@@ -106,9 +105,8 @@ contains
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
 
-             ! get new initial value (skip on first iteration)
+             ! Get new initial value (skip on first iteration)
              if (k > 1) then
-!                call G%encap%pack(G%q0, G%Q(G%nnodes))
                 call G%encap%pack(G%q0, G%qend)
                 if (.not. pf%PFASST_pred) then
                    call spreadq0(G, t0k)
@@ -122,9 +120,9 @@ contains
              call call_hooks(pf, G%level, PF_POST_SWEEP)
              call pf_residual(pf, G, dt)
           end do
-       endif    ! (Pipeline_G)
+       end if
 
-       ! return to fine level...
+       ! Return to fine level...
        call pf_v_cycle_post_predictor(pf, t0, dt)
 
     end if
@@ -137,37 +135,54 @@ contains
 
   end subroutine pf_predictor
 
-  subroutine pf_check_convergence(pf, k, dt, res, qexit, qcycle)
+  subroutine pf_check_tolerances(pf, residual, energy)
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(inout) :: res
+    real(pfdp),        intent(inout) :: residual, energy
+
+    real(pfdp) :: residual1, energy1
+
+    residual1 = pf%levels(pf%nlevels)%residual
+    if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
+       if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
+            (abs(residual1)                          < pf%abs_res_tol) ) then
+          pf%state%status = PF_STATUS_CONVERGED
+       end if
+    end if
+    residual = residual1
+
+    pf%state%res = residual
+
+  end subroutine pf_check_tolerances
+
+  !
+  ! Test residuals to determine if the current processor has converged.
+  !
+  ! Note that if the previous processor hasn't converged yet
+  ! (pstatus), the current processor hasn't converged yet either,
+  ! regardless of the residual.
+  !
+  subroutine pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(inout) :: residual, energy
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
     logical,           intent(out)   :: qexit, qcycle
 
-    integer    :: steps_to_last
-    real(pfdp) :: res1
+    integer :: steps_to_last
 
     pf%state%nmoved = 0
 
     qexit  = .false.
     qcycle = .false.
 
+    ! shortcut for fixed block mode
     if (pf%window == PF_WINDOW_BLOCK .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return
     end if
 
-    res1 = pf%levels(pf%nlevels)%residual
-    if (pf%state%status == PF_STATUS_ITERATING .and. res > 0.0d0) then
-       if ( (abs(1.0_pfdp - abs(res1/res)) < pf%rel_res_tol) .or. &
-            (abs(res1)                     < pf%abs_res_tol) ) then
-          pf%state%status = PF_STATUS_CONVERGED
-       end if
-    end if
-    res = res1
-
-    pf%state%res = res
+    call pf_check_tolerances(pf, residual, energy)
 
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
     call pf_recv_status(pf, 8000+k)
@@ -214,7 +229,7 @@ contains
           pf%state%step    = pf%state%step + pf%comm%nproc
           pf%state%t0      = pf%state%step * dt
           pf%state%iter    = 1
-          res = -1
+          residual = -1
 
        else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
 
@@ -259,7 +274,7 @@ contains
 
     type(pf_level_t), pointer :: F, G
     integer                   :: j, k, l
-    real(pfdp)                :: res1
+    real(pfdp)                :: residual, energy
 
     logical :: qexit, qcycle, qbroadcast
 
@@ -279,7 +294,8 @@ contains
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
 
-    res1 = -1
+    residual = -1
+    energy   = -1
 
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
@@ -325,13 +341,13 @@ contains
        ! perform fine sweeps
        !
 
-       pf%state%iter   = pf%state%iter + 1
-       pf%state%cycle  = 1
+       pf%state%iter  = pf%state%iter + 1
+       pf%state%cycle = 1
 
        call start_timer(pf, TITERATION)
        call call_hooks(pf, -1, PF_PRE_ITERATION)
 
-       ! this if statement is necessary for block mode cycling...
+       ! XXX: this if statement is necessary for block mode cycling...
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           F => pf%levels(pf%nlevels)
@@ -343,11 +359,12 @@ contains
           call pf_residual(pf, F, dt)
 
        end if
+
        !
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, res1, qexit, qcycle)
+       call pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
 
        if (qexit)  exit
        if (qcycle) cycle
