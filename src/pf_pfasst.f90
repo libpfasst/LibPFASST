@@ -35,7 +35,7 @@ contains
     character(len=*),  intent(in   ), optional :: fname
     logical,           intent(in   ), optional :: nocmd
 
-    logical :: read_cmd 
+    logical :: read_cmd
     integer :: l
 
     if (present(nlevels)) pf%nlevels = nlevels
@@ -192,8 +192,13 @@ contains
     allocate(F%s0mat(nnodes-1,nnodes))
     allocate(F%qmat(nnodes-1,nnodes))
 
-    call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-         F%nodes, F%nflags, F%s0mat, F%qmat)
+    if (pf%qtype > SDC_COMPOSITE_NODES) then
+       call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
+            F%nodes, F%nflags, F%s0mat, F%qmat)
+    else
+       call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
+            F%nodes, F%nflags, F%s0mat, F%qmat)
+    end if
 
     call F%sweeper%initialize(F)
 
@@ -234,9 +239,9 @@ contains
     if (F%level < pf%nlevels) then
 
        if (F%Finterp) then
-          ! store F and Q(1) only  
+          ! store F and Q(1) only
           ! Changed by MM Dec. 20, 2013 to allocate all pQ as well
-          ! 
+          !
           allocate(F%pF(nnodes,npieces))
           allocate(F%pQ(nnodes))
           do m = 1, nnodes

@@ -144,7 +144,7 @@ contains
 
     case default
 
-       stop "ERROR: Invalid qtype in nodes.f90."
+       stop "ERROR: Invalid qtype in sdc_quadrature.f90."
 
     end select
 
