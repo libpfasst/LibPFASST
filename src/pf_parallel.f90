@@ -277,6 +277,7 @@ contains
     real(pfdp)                :: residual, energy
 
     logical :: qexit, qcycle, qbroadcast
+    logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
 
@@ -296,6 +297,7 @@ contains
 
     residual = -1
     energy   = -1
+    did_post_step_hook = .false.
 
     F => pf%levels(pf%nlevels)
     call F%encap%pack(F%q0, q0)
@@ -309,8 +311,17 @@ contains
 
        qbroadcast = .false.
 
+       if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
+         call call_hooks(pf, -1, PF_POST_STEP)
+         did_post_step_hook = .true.
+       end if
+
        ! in block mode, jump to next block if we've reached the max iteration count
        if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
+
+          if (.not. did_post_step_hook) call call_hooks(pf, -1, PF_POST_STEP)
+          did_post_step_hook = .false.
+
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
 
