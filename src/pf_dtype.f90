@@ -62,6 +62,8 @@ module pf_mod_dtype
      integer(c_int) :: nmoved       ! how many processors behind me have moved
      integer(c_int) :: first        ! rank of first processor in time block
      integer(c_int) :: last         ! rank of last processor in time block
+     integer(c_int) :: itcnt        ! iteration counter
+     integer(c_int) :: mysteps      ! steps I did
      real(c_double) :: res
   end type pf_state_t
 

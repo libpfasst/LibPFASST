@@ -290,10 +290,13 @@ contains
     pf%state%iter    = -1
     pf%state%cycle   = -1
     pf%state%first   = 0
+    pf%state%itcnt   = 0
+    pf%state%mysteps = 0
     pf%state%last    = pf%comm%nproc - 1
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
+
 
     residual = -1
     energy   = -1
@@ -314,12 +317,18 @@ contains
        if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
          call call_hooks(pf, -1, PF_POST_STEP)
          did_post_step_hook = .true.
+         pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
+         pf%state%mysteps = pf%state%mysteps + 1
        end if
 
        ! in block mode, jump to next block if we've reached the max iteration count
        if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
 
-          if (.not. did_post_step_hook) call call_hooks(pf, -1, PF_POST_STEP)
+          if (.not. did_post_step_hook) then
+            call call_hooks(pf, -1, PF_POST_STEP)
+            pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
+            pf%state%mysteps = pf%state%mysteps + 1
+          end if
           did_post_step_hook = .false.
 
           pf%state%step = pf%state%step + pf%comm%nproc
