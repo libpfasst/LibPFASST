@@ -12,7 +12,7 @@ include $(LIBPFASST)/Makefile.defaults
 VPATHS += src
 FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90 src/solutions.f90 src/probin.f90
 
-FFLAGS  += -I$(FFTW3)/include
+FFLAGS  += -g -I$(FFTW3)/include
 LDFLAGS += -L$(FFTW3)/lib -lfftw3
 
 all: $(EXE)

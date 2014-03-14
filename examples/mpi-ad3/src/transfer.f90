@@ -102,30 +102,20 @@ contains
     integer,     intent(in)        :: levelF, levelG
     real(pfdp),  intent(in) :: t
 
-    real(pfdp),      pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
+    real(pfdp), pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
 
-    if (dim == 1) then
+    select case(dim)
+    case(1)
        qF => array1(qFp)
        qG => array1(qGp)
-
        call interp1(qF, qG, levelctxF, levelctxG)
-
-    else if (problem == PROB_WAVE) then
-
+    case(2)
        qF2 => array2(qFp)
        qG2 => array2(qGp)
-
-       call interp1(qF2(:, 1), qG2(:, 1), levelctxF, levelctxG)
-       call interp1(qF2(:, 2), qG2(:, 2), levelctxF, levelctxG)
-
-    else if (problem == PROB_SHEAR) then
-
-       qF2 => array2(qFp)
-       qG2 => array2(qGp)
-
        call interp2(qF2, qG2, levelctxF, levelctxG)
-
-    end if
+    case(3)
+       stop
+    end select
   end subroutine interpolate
 
   subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
@@ -137,27 +127,11 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    if (problem == PROB_WAVE) then
-       qF2 => array2(qFp)
-       qG2 => array2(qGp)
-       nvarF = size(qF2, 2)
-       nvarG = size(qG2, 2)
-       xrat  = nvarF / nvarG
-       qG2 = qF2(::xrat,:)
-    else if (problem == PROB_SHEAR) then
-       qF2 => array2(qFp)
-       qG2 => array2(qGp)
-       nvarF = size(qF2, 2)
-       nvarG = size(qG2, 2)
-       xrat  = nvarF / nvarG
-       qG2 = qF2(::xrat,::xrat)
-    else
-       qF => array1(qFp)
-       qG => array1(qGp)
-       nvarF = size(qF)
-       nvarG = size(qG)
-       xrat  = nvarF / nvarG
-       qG = qF(::xrat)
-    end if
+    qF => array1(qFp)
+    qG => array1(qGp)
+    nvarF = size(qF)
+    nvarG = size(qG)
+    xrat  = nvarF / nvarG
+    qG = qF(::xrat)
   end subroutine restrict
 end module transfer
