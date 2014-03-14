@@ -14,7 +14,7 @@ contains
 
     ! select case(problem)
     ! case (PROB_AD)
-    !    call exact(0.0_pfdp, size(q0%flatarray), q0%flatarray)
+       call exact(0.0_pfdp, size(q0%flatarray), q0%flatarray)
     ! case (PROB_HEAT)
     !    call gaussian(q0%flatarray)
     ! case (PROB_VB)

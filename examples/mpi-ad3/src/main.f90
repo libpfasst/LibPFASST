@@ -73,35 +73,38 @@ program main
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
 
-     if (dim == 1) then
+     select case(dim)
+     case(1)
         call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
         call pf_imex_create(pf%levels(l)%sweeper, f1eval1, f2eval1, f2comp1)
-     ! else if (dim == 2) then
-     !    call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
-     !    call pf_imex_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
-     ! else
-     !    call create_work3(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
-     !    call pf_imex_create(pf%levels(l)%sweeper, f1eval3, f2eval3, f2comp3)
-     end if
+     case(2)
+        call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+        call pf_imex_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
+     case(3)
+        call create_work3(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+        call pf_imex_create(pf%levels(l)%sweeper, f1eval3, f2eval3, f2comp3)
+     end select
   end do
 
   call pf_mpi_setup(comm, pf)
   call pf_pfasst_setup(pf)
 
-  ! pf%outdir = output
+  pf%outdir = output
 
   !
   ! run
   !
 
+  call pf_add_hook(pf, nlevs, PF_POST_SWEEP, echo_error_hook)
+
   call ndarray_create_simple(q1, pf%levels(nlevs)%shape)
   call initial(q1)
 
-  ! if (len_trim(output) > 0) then
-  !    call ndarray_mkdir(output, len_trim(output))
-  !    ! call pf_add_hook(pf, nlevs, PF_POST_SWEEP, ndarray_dump_hook)
-  !    call pf_add_hook(pf, -1, PF_POST_SWEEP, ndarray_dump_hook)
-  ! end if
+  if (len_trim(output) > 0) then
+     call ndarray_mkdir(output, len_trim(output))
+     ! call pf_add_hook(pf, nlevs, PF_POST_SWEEP, ndarray_dump_hook)
+     call pf_add_hook(pf, -1, PF_POST_SWEEP, ndarray_dump_hook)
+  end if
 
   if (nsteps < comm%nproc) then
      nsteps = comm%nproc
