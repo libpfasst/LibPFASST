@@ -239,6 +239,7 @@ contains
 
     y  = real(wk)
     f2 = (y - rhs) / dt
+
   end subroutine f2comp2
 
   subroutine create_work1(levelctx, nvars)

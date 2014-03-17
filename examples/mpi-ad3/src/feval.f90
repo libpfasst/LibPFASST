@@ -76,28 +76,46 @@ contains
   end subroutine f2eval1
 
   subroutine f2comp1(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
+    use mg
     type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
     real(pfdp),    pointer :: y(:), rhs(:), f2(:)
+    real(pfdp)   :: nudt,maxresid
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
+    integer :: N_V,k
+    type(ndarray),pointer :: ymg
+    type(ndarray),pointer  :: rhsmg
+
 
     call c_f_pointer(levelctx, work)
+
 
     y   => array1(yptr)
     rhs => array1(rhsptr)
     f2  => array1(f2ptr)
-    wk  => work%wk
+!!$    wk  => work%wk
+!!$
+!!$    wk = rhs
+!!$    call fftw_execute_dft(work%ffft, wk, wk)
+!!$    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
+!!$    call fftw_execute_dft(work%ifft, wk, wk)
+!!$
+!!$    y  = real(wk)
 
-    wk = rhs
-    call fftw_execute_dft(work%ffft, wk, wk)
-    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
-    call fftw_execute_dft(work%ifft, wk, wk)
+   
+    nudt = nu*dt
+    N_V = 2
+    call c_f_pointer(yptr,ymg)
+    call c_f_pointer(rhsptr,rhsmg)
+    do k=1,N_V
+       call Vcycle(ymg, t, nudt, rhsmg, 0, c_null_ptr, 1,maxresid) 
+!       print *,'V=',k,maxresid
+    end do
 
-    y  = real(wk)
-    f2 = (y - rhs) / dt
+    f2 = (y - rhs) / dt    
   end subroutine f2comp1
 
   !

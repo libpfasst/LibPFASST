@@ -81,13 +81,13 @@ contains
 
     if (nu > 0) then
 
-       do ii = -3, 3
+!       do ii = -3, 3
           do i = 1, nvars
              x = dble(i-nvars/2-1)/dble(nvars) + ii - t*v
-             yex(i) = yex(i) + 1/(4.0_pfdp*pi*nu*(t+t0))**(0.5)*dexp(-x**2/(4.0_pfdp*nu*(t+t0)))
-             !yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
+             !yex(i) = yex(i) + 1/(4.0_pfdp*pi*nu*(t+t0))**(0.5)*dexp(-x**2/(4.0_pfdp*nu*(t+t0)))
+             yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
           end do
-       end do
+!       end do
 
     else
 

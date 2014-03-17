@@ -27,6 +27,8 @@ module probin
   integer, save :: nsteps          ! number of time steps
   integer, save :: niters          ! number of iterations
 
+  integer, save :: spatial_order   ! spatial order for operators
+
   character(len=64), save :: output ! directory name for output
 
 contains
@@ -39,7 +41,7 @@ contains
     namelist /prbin/ &
          dim, window_type, output, abs_tol, rel_tol, &
          v, nu, t0, dt, sigma, &
-         nlevs, nnodes, nvars, nsteps, niters
+         nlevs, nnodes, nvars, nsteps, niters, spatial_order
 
     !
     ! defaults
@@ -51,11 +53,11 @@ contains
     dim     = 1
     nlevs   = 2
     nnodes  = [ 2, 3, 5 ]
-    nvars   = [ 32, 64, 128 ]
+
     niters  = 8
     nsteps  = -1
 
-    v       = 1.d0
+    v       = 0.d0
     Lx      = 1.d0
     nu      = 0.02d0
     sigma   = 0.004d0
@@ -64,6 +66,8 @@ contains
 
     abs_tol = 0.d0
     rel_tol = 0.d0
+
+    spatial_order=2
 
     !
     ! read
