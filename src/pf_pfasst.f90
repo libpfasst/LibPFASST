@@ -192,7 +192,7 @@ contains
     allocate(F%s0mat(nnodes-1,nnodes))
     allocate(F%qmat(nnodes-1,nnodes))
 
-    if (pf%qtype > SDC_COMPOSITE_NODES) then
+    if (btest(pf%qtype, 8)) then
        call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
             F%nodes, F%nflags, F%s0mat, F%qmat)
     else

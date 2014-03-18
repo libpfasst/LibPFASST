@@ -92,11 +92,13 @@ contains
     endif
   end subroutine pf_read_opts
 
-  subroutine pf_print_options(pf, unitno)
+  subroutine pf_print_options(pf, unitno, show_mats)
     type(pf_pfasst_t), intent(inout)           :: pf
     integer,           intent(in   ), optional :: unitno
+    logical,           intent(in   ), optional :: show_mats
 
     integer :: un = 6
+    integer :: l, i
     character(8)   :: date
     character(10)  :: time
 
@@ -142,6 +144,27 @@ contains
     end if
 
     write(un,*) ''
+
+    if (present(show_mats)) then
+       if (show_mats) then
+          do l = 1, pf%nlevels
+             print *, "Level", l
+             print *, "-----------------"
+             print *, "  nodes"
+             print *, pf%levels(l)%nodes
+             ! print *, "  Q"
+             ! do i = 1, pf%levels(l)%nnodes-1
+             !    print *, pf%levels(l)%qmat(i,:)
+             ! end do
+             print *, "  S"
+             do i = 1, pf%levels(l)%nnodes-1
+                print *, pf%levels(l)%s0mat(i,:)
+             end do
+          end do
+       end if
+    end if
+
+
   end subroutine pf_print_options
 
 end module pf_mod_options

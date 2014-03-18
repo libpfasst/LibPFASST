@@ -23,8 +23,8 @@ module pf_mod_quadrature
   implicit none
 contains
 
-  subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat)
-    integer,    intent(in)  :: qtype, nnodes, nnodes0
+  subroutine pf_quadrature(qtype_in, nnodes, nnodes0, nodes, nflags, smat, qmat)
+    integer,    intent(in)  :: qtype_in, nnodes, nnodes0
     real(pfdp), intent(out) :: nodes(nnodes)
     real(pfdp), intent(out) :: smat(nnodes-1,nnodes), qmat(nnodes-1,nnodes)
     integer,    intent(out) :: nflags(nnodes)
@@ -33,12 +33,25 @@ contains
     real(pfdp)          :: qmat0(nnodes0-1,nnodes0), smat0(nnodes0-1,nnodes0)
     integer(c_int)      :: flags0(nnodes0)
 
-    integer :: i, r, refine
+    integer :: qtype, i, r, refine
+    logical :: composite, proper, no_left
+
+    proper    = btest(qtype_in, 8)
+    composite = btest(qtype_in, 9)
+    no_left   = btest(qtype_in, 10)
 
     qmat = 0
     smat = 0
+    flags0 = 0
+    nflags = 0
 
-    if (qtype > SDC_COMPOSITE_NODES) then
+    qtype = qtype_in
+    if (proper)    qtype = qtype - SDC_PROPER_NODES
+    if (composite) qtype = qtype - SDC_COMPOSITE_NODES
+    if (no_left)   qtype = qtype - SDC_NO_LEFT
+
+
+    if (composite) then
 
        ! nodes are given by repeating the coarsest set of nodes.  note
        ! that in this case nnodes0 corresponds to the coarsest number
@@ -58,7 +71,7 @@ contains
 
        nodes = real(qnodes, pfdp)
 
-    else if (qtype < SDC_COMPOSITE_NODES .and. qtype > SDC_PROPER_NODES) then
+    else if (proper) then
 
        ! nodes are given by proper quadrature rules
 
@@ -80,6 +93,8 @@ contains
        qnodes = qnodes0(::refine)
        nodes  = real(qnodes, pfdp)
        nflags = flags0(::refine)
+
+       if (no_left) nflags(1) = 0
 
        call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
 

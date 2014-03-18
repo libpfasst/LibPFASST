@@ -36,8 +36,9 @@ module pf_mod_dtype
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
-  integer, parameter :: SDC_PROPER_NODES    = 100
-  integer, parameter :: SDC_COMPOSITE_NODES = 200
+  integer, parameter :: SDC_PROPER_NODES    = 2**8
+  integer, parameter :: SDC_COMPOSITE_NODES = 2**9
+  integer, parameter :: SDC_NO_LEFT         = 2**10
 
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
