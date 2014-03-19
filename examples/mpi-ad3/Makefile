@@ -26,4 +26,4 @@ include $(LIBPFASST)/Makefile.rules
 build/solutions.o: build/pfasst.o build/probin.o
 build/feval.o:     build/pfasst.o build/probin.o build/multigrid.o
 build/hooks.o:     build/numpy.o build/solutions.o
-build/main.o:      build/feval.o build/hooks.o build/transfer.o
+build/main.o:      build/feval.o build/hooks.o build/transfer.o build/probin.o

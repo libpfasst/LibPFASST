@@ -1,15 +1,27 @@
-&prbin
+&PARAMS
+  nprob         = 0	 
+  ndim          = 1
 
-  dim          = 1
-  nlevs        = 3
-  niters       = 256
-  nsteps       = 64
-  dt           = 0.01
-  v            = 0
-  nu           = 1.0
-  nvars  = 32 64 128
-  nnodes = 3  5 9
+  niters       = 16
+  nsteps       = 128
 
-  output = "test"
+  poutmod  = 2
+  !  Advection diffusion
+  v            = 0.0
+  nu           = 0.25
+  !  Heat equation
+!  v            = 0.0
+!  nu           = 1.0
+  nlevs        = 1
+  nvars  = 512
+  nnodes = 3 
+  Finterp = F
+  dt           = 0.0078125
+  Tfin = 0.0
+  pfasst_nml = "pfasst.nml"
+  fbase = "test"
+  do_spec = 0
+  N_Vcycles = 2
+  mg_interp_order = 2
 
 /

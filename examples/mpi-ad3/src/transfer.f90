@@ -16,34 +16,42 @@ contains
 
     type(work1),   pointer :: workF, workG
     complex(pfdp), pointer :: wkF(:), wkG(:)
-    integer                :: nvarF, nvarG, xrat
-
-    nvarF = size(qF)
-    nvarG = size(qG)
-    xrat  = nvarF / nvarG
+    integer      :: NxF, NxG, xrat
+    real(pfdp) :: c1,c2
+    
+    NxF = size(qF)
+    NxG = size(qG)
+    xrat  = NxF / NxG
 
     if (xrat == 1) then
        qF = qG
        return
     endif
 
-    call c_f_pointer(levelctxF, workF)
-    call c_f_pointer(levelctxG, workG)
-
-    wkF => workF%wk
-    wkG => workG%wk
-
-    wkG = qG
-    call fftw_execute_dft(workG%ffft, wkG, wkG)
-    wkG = wkG / nvarG
-
-    wkF = 0.0d0
-    wkF(1:nvarG/2) = wkG(1:nvarG/2)
-    wkF(nvarF-nvarG/2+2:nvarF) = wkG(nvarG/2+2:nvarG)
-
-    call fftw_execute_dft(workF%ifft, wkF, wkF)
-
-    qF = real(wkF)
+    if (do_spec .eq. 1) then
+       call c_f_pointer(levelctxF, workF)
+       call c_f_pointer(levelctxG, workG)
+       
+       wkF => workF%wk
+       wkG => workG%wk
+       
+       wkG = qG
+       call fftw_execute_dft(workG%ffft, wkG, wkG)
+       wkG = wkG / NxG
+       
+       wkF = 0.0d0
+       wkF(1:NxG/2) = wkG(1:NxG/2)
+       wkF(NxF-NxG/2+2:NxF) = wkG(NxG/2+2:NxG)
+       
+       call fftw_execute_dft(workF%ifft, wkF, wkF)
+       
+       qF = real(wkF)
+    else
+       c1 = 9.0_pfdp/16.0_pfdp
+       c2 = -1.0_pfdp/16.0_pfdp
+       qF(1:NxF-1:2)=qG
+       qF(2:NxF:2)=c2*(CSHIFT(qG,-1)+CSHIFT(qG,2)) + c1*(qG+CSHIFT(qG,1))
+    endif
   end subroutine interp1
 
   subroutine interp2(qF, qG, levelctxF, levelctxG)
@@ -104,7 +112,7 @@ contains
 
     real(pfdp), pointer :: qF(:), qG(:), qF2(:,:), qG2(:,:)
 
-    select case(dim)
+    select case(ndim)
     case(1)
        qF => array1(qFp)
        qG => array1(qGp)

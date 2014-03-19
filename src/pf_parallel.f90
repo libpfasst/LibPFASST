@@ -81,8 +81,8 @@ contains
 
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              call G%sweeper%sweep(pf, G, t0, dt)
-             call call_hooks(pf, G%level, PF_POST_SWEEP)
              call pf_residual(pf, G, dt)  !  why is this here?
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
           end do
           ! Now we have mimicked the burn in and we must do pipe-lined sweeps
           do k = 1, G%nsweeps-1
@@ -117,8 +117,8 @@ contains
              do j = 1, G%nsweeps
                 call G%sweeper%sweep(pf, G, t0k, dt)
              end do
-             call call_hooks(pf, G%level, PF_POST_SWEEP)
              call pf_residual(pf, G, dt)
+             call call_hooks(pf, G%level, PF_POST_SWEEP)
           end do
        end if
 
@@ -375,8 +375,8 @@ contains
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, pf%state%t0, dt)
           end do
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
           call pf_residual(pf, F, dt)
+          call call_hooks(pf, F%level, PF_POST_SWEEP)
 
        end if
 
@@ -441,8 +441,8 @@ contains
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
     end do
 
     F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
@@ -477,8 +477,8 @@ contains
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
        end do
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_residual(pf, F, dt)
+       call call_hooks(pf, F%level, PF_POST_SWEEP)
        call pf_send(pf, F, F%level*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, F, G)
        call save(G)
@@ -493,8 +493,8 @@ contains
     do j = 1, F%nsweeps
        call F%sweeper%sweep(pf, F, t0, dt)
     end do
-    call call_hooks(pf, F%level, PF_POST_SWEEP)
     call pf_residual(pf, F, dt)
+    call call_hooks(pf, F%level, PF_POST_SWEEP)
     call pf_send(pf, F, F%level*10000+iteration, .true.)
 
     !
@@ -518,9 +518,11 @@ contains
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, t0, dt)
           end do
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
           call pf_residual(pf, F, dt)
+          call call_hooks(pf, F%level, PF_POST_SWEEP)
        end if
+
+          
     end do
 
   end subroutine pf_v_cycle

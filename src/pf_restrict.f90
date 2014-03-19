@@ -192,11 +192,11 @@ contains
        call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m))
        call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpG(m-1))
     end do
-!    if (pf%state%iter < 1)  then
-!       do m = 1, G%nnodes-1
-!          call G%encap%setval(G%tau(m), 0.0_pfdp)
-!       end do
-!    end if
+    if (pf%state%iter < 1)  then
+       do m = 1, G%nnodes-1
+          call G%encap%setval(G%tau(m), 0.0_pfdp)
+       end do
+    end if
     !
     ! tidy
     !

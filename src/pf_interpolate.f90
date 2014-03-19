@@ -97,15 +97,9 @@ contains
             call LevF%interpolate(delGF(m), delG(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(m))
          end do
 
-!           do n = 1, LevF%nnodes
-!               do m = 1, LevG%nnodes
-!                  call LevF%encap%axpy(LevF%F(n,p), LevF%tmat(n,m), delGF(m))
-!               end do
-!            end do
-!!$          
-         ! interpolate corrections 
+         ! interpolate corrections  in time
           call pf_apply_mat(LevF%F(:,p), 1.0_pfdp, LevF%tmat, delGF, LevF%encap, .false.)
-!!$
+
        end do !  Loop on npieces
 
        !  Do interpolation of qSDC(1) to update initial condition
@@ -123,10 +117,10 @@ contains
        ! end do
 
        ! recompute solution from new F, this is the old solution plus Residual
-!       call pf_integrate(pf,LevF, dt)
-!       do m = 1, LevF%nnodes-1
-!          call LevF%encap%axpy(LevF%Q(m+1), 1.0_pfdp, LevF%R(m))
-!      end do
+       !       call pf_integrate(pf,LevF, dt)
+       !       do m = 1, LevF%nnodes-1
+       !          call LevF%encap%axpy(LevF%Q(m+1), 1.0_pfdp, LevF%R(m))
+       !      end do
       
        ! recompute fs (for debugging)
        !       do m = 1, LevF%nnodes
@@ -141,6 +135,7 @@ contains
 
     !  Reset qend so that it is up to date
     call LevF%encap%copy(LevF%qend, LevF%Q(LevF%nnodes))
+
     ! destroy workspaces
     do m = 1, LevG%nnodes
        call LevG%encap%destroy(delG(m))

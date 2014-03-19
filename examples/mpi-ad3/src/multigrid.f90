@@ -431,6 +431,12 @@ contains
        ybc(Nx+i)=ybc(i)
        ybc(1-i)=ybc(Nx+1-i)
     end do
+
+!!$    ybc(Nx+1)=ybc(1)
+!!$    ybc(Nx+2)=-ybc(Nx)
+!!$    ybc(0)=-ybc(1)
+!!$    ybc(-1)=-ybc(2)
+
     
   end subroutine set_bc_1d
   subroutine set_bc_2d(ybc, Nx, Nbc)

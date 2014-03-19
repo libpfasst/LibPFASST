@@ -29,6 +29,7 @@ contains
   !
 
   subroutine f1eval1(yptr, t, level, levelctx, f1ptr)
+    use probin, only: nprob
     type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
@@ -45,14 +46,20 @@ contains
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
-    wk = -v * work%ddx * wk / size(wk)
+    if (nprob .eq. 0) then  ! spectral advection diffusion
+       wk = -v * work%ddx * wk / size(wk) 
+    else if (nprob .eq. 1) then  ! Backward Euler
+       wk = 0.0_pfdp*nu * work%lap * wk / size(wk)
+    else if (nprob .eq. 2) then  ! trapezoid rule
+       wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
+    end if
     call fftw_execute_dft(work%ifft, wk, wk)
-
     f1 = real(wk)
 
   end subroutine f1eval1
 
   subroutine f2eval1(yptr, t, level, levelctx, f2ptr)
+    use probin, only: nprob
     type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
@@ -69,7 +76,13 @@ contains
 
     wk = y
     call fftw_execute_dft(work%ffft, wk, wk)
-    wk = nu * work%lap * wk / size(wk)
+    if (nprob .eq. 0) then  ! spectral advection diffusion
+       wk = nu * work%lap * wk / size(wk)
+    else if (nprob .eq. 1) then  ! backward
+       wk = nu * work%lap * wk / size(wk)
+    else if (nprob .eq. 2) then  ! trapezoid rule
+       wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
+    endif
     call fftw_execute_dft(work%ifft, wk, wk)
 
     f2 = real(wk)
@@ -77,6 +90,7 @@ contains
 
   subroutine f2comp1(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
     use mg
+    use probin, only: N_Vcycles,do_spec,nprob
     type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
@@ -85,7 +99,7 @@ contains
     real(pfdp)   :: nudt,maxresid
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
-    integer :: N_V,k
+    integer :: k
     type(ndarray),pointer :: ymg
     type(ndarray),pointer  :: rhsmg
 
@@ -96,26 +110,35 @@ contains
     y   => array1(yptr)
     rhs => array1(rhsptr)
     f2  => array1(f2ptr)
-!!$    wk  => work%wk
-!!$
-!!$    wk = rhs
-!!$    call fftw_execute_dft(work%ffft, wk, wk)
-!!$    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
-!!$    call fftw_execute_dft(work%ifft, wk, wk)
-!!$
-!!$    y  = real(wk)
+    if (nprob .eq. 2) then
+       nudt = nu*dt*0.5_pfdp
+    else
+       nudt = nu*dt
+    endif
 
-   
-    nudt = nu*dt
-    N_V = 2
-    call c_f_pointer(yptr,ymg)
-    call c_f_pointer(rhsptr,rhsmg)
-    do k=1,N_V
-       call Vcycle(ymg, t, nudt, rhsmg, 0, c_null_ptr, 1,maxresid) 
-!       print *,'V=',k,maxresid
-    end do
+    if (do_spec .eq. 1) then
+       wk  => work%wk
+       wk = rhs
+       call fftw_execute_dft(work%ffft, wk, wk)
+       wk = wk / (1.0_pfdp - nudt*work%lap) / size(wk)
+       call fftw_execute_dft(work%ifft, wk, wk)
+       
+       y  = real(wk)
+       f2 = (y - rhs) / dt    
+   else
+      if (nprob .eq. 2) then
+         nudt = nu*dt*0.5_pfdp
+      else
+         nudt = nu*dt
+      endif
+      call c_f_pointer(yptr,ymg)
+      call c_f_pointer(rhsptr,rhsmg)
+      do k=1,N_Vcycles
+         call Vcycle(ymg, t, nudt, rhsmg, 0, c_null_ptr, 1,maxresid) 
+      end do
+      call f2eval1(yptr, t, level, levelctx, f2ptr)
+   endif
 
-    f2 = (y - rhs) / dt    
   end subroutine f2comp1
 
   !
@@ -186,7 +209,7 @@ contains
 
     wk = rhs
     call fftw_execute_dft(work%ffft, wk, wk)
-    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
+    wk = wk / (1.0_pfdp - 0.5_pfdp*nu*dt*work%lap) / size(wk)
     call fftw_execute_dft(work%ifft, wk, wk)
 
     y  = real(wk)
@@ -306,7 +329,7 @@ contains
     allocate(work%lap(nvars))
 
     work%ddx = (0.0_pfdp, 1.0_pfdp) * kx
-    ! work%lap = -kx**2
+     work%lap = -kx**2
     dx = Lx / nvars
     work%lap = (-2 + 2*cos(kx * dx)) / dx**2
 

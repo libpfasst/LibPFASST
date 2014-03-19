@@ -16,67 +16,106 @@ module probin
   double precision, save :: t0     ! initial time for exact solution
   double precision, save :: sigma  ! initial condition parameter
   double precision, save :: dt     ! time step
+  double precision, save :: Tfin   ! Final time
 
   double precision, save :: abs_tol ! absolute residual tolerance
   double precision, save :: rel_tol ! relative residual tolerance
 
-  integer, save :: dim             ! number of dimensions
+  integer, save :: ndim             ! number of dimensions
   integer, save :: nlevs           ! number of pfasst levels
   integer, save :: nnodes(maxlevs) ! number of nodes
   integer, save :: nvars(maxlevs)  ! number of grid points
+  integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   integer, save :: niters          ! number of iterations
-
+  logical, save :: Finterp
   integer, save :: spatial_order   ! spatial order for operators
+  integer, save :: interp_order
+  integer, save ::  mg_interp_order
+  integer, save ::  do_spec
+  integer, save ::  N_Vcycles
+
+  character(len=32), save :: pfasst_nml
+  character(len=20), save :: fbase   !  base name for run
+  character(len=64), save :: foutbase   !  base name for output file
+  character(len=44) :: foutfoo          !  temp used to create foutbase
+  integer, save    :: poutmod
 
   character(len=64), save :: output ! directory name for output
+  CHARACTER(LEN=255) :: istring  ! stores command line argument
+  CHARACTER(LEN=255) :: message           ! use for I/O error messages
+
+  integer :: ios,iostat
+  namelist /params/ Finterp, ndim,nlevs, nnodes, nvars,nprob, nsteps, niters
+  namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles
+  namelist /params/ window_type, pfasst_nml,fbase ,poutmod
+  namelist /params/  abs_tol, rel_tol 
+  namelist /params/  v, nu, t0, dt, Tfin,sigma 
 
 contains
 
   subroutine probin_init(filename)
     character(len=*), intent(in) :: filename
-
+    integer :: i
+    CHARACTER(len=32) :: arg
     integer :: un
 
-    namelist /prbin/ &
-         dim, window_type, output, abs_tol, rel_tol, &
-         v, nu, t0, dt, sigma, &
-         nlevs, nnodes, nvars, nsteps, niters, spatial_order
 
     !
     ! defaults
     !
 
     window_type  = "block"
-    output       = ""
-
-    dim     = 1
+    Finterp = .FALSE.
+    ndim     = 1
     nlevs   = 2
     nnodes  = [ 2, 3, 5 ]
 
     niters  = 8
     nsteps  = -1
 
-    v       = 0.d0
-    Lx      = 1.d0
-    nu      = 0.02d0
-    sigma   = 0.004d0
-    t0      = 0.25d0
-    dt      = 0.01d0
+    v       = 0.0_pfdp
+    Lx      = 1._pfdp
+    nu      = 0.02_pfdp
+    sigma   = 0.004_pfdp
+    t0      = 0.25_pfdp
+    dt      = 0.01_pfdp
+    Tfin    = 0.0_pfdp
 
-    abs_tol = 0.d0
-    rel_tol = 0.d0
+    abs_res_tol = 0.0
+    rel_res_tol = 0.0
 
     spatial_order=2
+    interp_order = 2
 
+    do_spec = 1
+    N_Vcycles = 1
+    mg_interp_order = 2
+    
+    poutmod = 1
     !
     ! read
     !
-
-    un = 66
-    open(unit=un, file=filename, status='old', action='read')
-    read(unit=un, nml=prbin)
+    !  Read in stuff from a file
+    un = 9
+    write(*,*) 'opening file ',TRIM(filename), '  for input'
+    open(unit=un, file = filename, status = 'old', action = 'read')
+    read(unit=un, nml = params)
     close(unit=un)
+          
+    i = 0
+    DO
+       CALL get_command_argument(i, arg)
+       IF (LEN_TRIM(arg) == 0) EXIT
+       if (i > 0) then
+          istring="&PARAMS "//TRIM(arg)//" /"    
+          READ(istring,nml=params,iostat=ios,iomsg=message) ! internal read of NAMELIST
+       end if
+       i = i+1
+    END DO
+
+    !  Reset dt if Tfin is set
+    if (Tfin .gt. 0.0) dt = Tfin/nsteps
 
     !
     ! init
