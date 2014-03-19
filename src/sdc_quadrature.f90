@@ -53,6 +53,8 @@ contains
 
     real(qp), parameter :: pi = 3.141592653589793115997963468544185161590576171875_qp
 
+    flags = 0
+
     select case(qtype)
 
     case (SDC_GAUSS_LEGENDRE)
@@ -128,7 +130,7 @@ contains
           qnodes(j+1) = 0.5_qp * (1.0_qp - cos(j * pi / (nnodes-1)))
        end do
 
-       do j = 2, nnodes-1
+       do j = 1, nnodes
           flags(j) = ibset(flags(j), 0)
        end do
 
@@ -138,7 +140,7 @@ contains
           qnodes(j+1) = j * (1.0_qp / (nnodes-1))
        end do
 
-       do j = 2, nnodes-1
+       do j = 1, nnodes
           flags(j) = ibset(flags(j), 0)
        end do
 
