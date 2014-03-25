@@ -19,18 +19,28 @@ pde_err = q128(:,6);
 ode_err = q128(:,7);
 res = q128(:,8);
 
-figure(log2(Nx));clf
-subplot(1,3,1)
-semilogy(iter,ode_err,'-ro');title('ODEerr'); 
-subplot(1,3,2)
-semilogy(iter,pde_err,'-bo');title('PDEerr') 
-subplot(1,3,3)
-semilogy(iter,res,'-ko'); title('Res') 
+  switch k
+   case 5,
+      clr = '-ro'
+   case 6,
+      clr = '-b*'
+   case 7,
+      clr = '-kx'
+  end
+
 figure(2)
 subplot(1,3,1)
-semilogy(iter,ode_err,'-ro'); title('ODEerr'), hold on;
+semilogy(iter,ode_err,clr,'MarkerSize',10); 
+title('ODE Err','FontSize',14), hold on;
+xlabel('Iteration','FontSize',14)
 subplot(1,3,2)
-semilogy(iter,pde_err,'-bo'); title('PDEerr'), hold on;
+semilogy(iter,pde_err,clr,'MarkerSize',10); 
+xlabel('Iteration','FontSize',14)
+title('PDE Err','FontSize',14), hold on;
 subplot(1,3,3)
-semilogy(iter,res,'-ko'); title('Res'); hold on;
+semilogy(iter,res,clr,'MarkerSize',10); 
+xlabel('Iteration','FontSize',14)
+title('Residual','FontSize',14);hold on;
+  set(gca,'FontSize',14)
 end
+legend('N=32','N=64','N=128')
