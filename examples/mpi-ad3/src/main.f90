@@ -52,17 +52,18 @@ program main
   call pf_pfasst_create(pf, comm,  fname=pfasst_nml)
 
   pf%niters = niters
-!  pf%qtype  = SDC_GAUSS_LOBATTO ! + SDC_PROPER_NODES
+!  pf%qtype  = SDC_GAUSS_LOBATTO ! + SDC_PROPER_NODES  
+!  pf%qtype  = SDC_GAUSS_RADAU ! + SDC_PROPER_NODES
   pf%qtype  = SDC_UNIFORM + SDC_NO_LEFT
   pf%window = wtype
 
   pf%abs_res_tol = abs_tol
   pf%rel_res_tol = rel_tol
 
-  pf%echo_timings = .true.
+  pf%echo_timings = .false.
 
   if (nlevs > 1) then
-     pf%levels(1)%nsweeps = 2
+     pf%levels(1)%nsweeps = 1
   end if
 
   do l = 1, nlevs
@@ -115,11 +116,20 @@ program main
      nsteps = comm%nproc
   end if
 
+  ! open output files
+  write (fname, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'Niter',pf%niters,'_Nx',nvars(nlevs),'_Nstep',nsteps,'_Nproc',comm%nproc
+  foutbase = 'Dat/'//trim(fbase)//'_'//trim(fname)
+
+  foutbase = 'Dat/'//trim(fbase)//'_'//trim(fname)
+  print *,'foutbase=',foutbase
+
+!  open(unit=101, file = foutbase, status = 'unknown', action = 'write')
 
   !  Output the run parameters
   if (pf%rank == 0) then
      call pf_print_options(pf, 6,.TRUE.)
      fout = 'Dat/'//trim(fbase)//'_'//trim(fname)//'_params.m'
+     print*, fout
      open(unit=103, file = fout, status = 'unknown', action = 'write')
      do iout=1,2
         if (iout .eq. 1) then
@@ -141,6 +151,7 @@ program main
         write(nout,*) 'do_spec',do_spec
         if (do_spec .eq. 0) then
            write(nout,*) 'N_Vcycles=',N_Vcycles
+           write(nout,*) 'Nrelax',Nrelax
            write(nout,*) 'mg_interp_order=',mg_interp_order
         endif
 

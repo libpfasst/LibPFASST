@@ -418,8 +418,8 @@ contains
 
     ybc(1:Nx)=y
     do i = 1,Nbc
-       ybc(Nx+i)=ybc(i)
-       ybc(1-i)=ybc(Nx+1-i)
+       ybc(Nx+i)=-ybc(i)
+       ybc(1-i)=-ybc(Nx+1-i)
     end do
     
   end subroutine fill_bc_1d
@@ -428,8 +428,8 @@ contains
     real(pfdp), intent(inout) :: ybc(1-Nbc:Nx+Nbc)
     integer   :: i
     do i = 1,Nbc
-       ybc(Nx+i)=ybc(i)
-       ybc(1-i)=ybc(Nx+1-i)
+       ybc(Nx+i)=-ybc(i)
+       ybc(1-i)=-ybc(Nx+1-i)
     end do
 
 !!$    ybc(Nx+1)=ybc(1)

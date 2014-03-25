@@ -56,7 +56,7 @@ contains
   subroutine sinusoidal(q)
     real(pfdp), intent(inout) :: q(:)
     integer :: nvars, i
-    double precision :: x
+    double precision :: x,dx
 
     nvars = size(q)
 
@@ -68,37 +68,39 @@ contains
     end do
   end subroutine sinusoidal
 
+  subroutine exact_ode(t, nvars, yex)
+    real(pfdp), intent(in)  :: t
+    integer,    intent(in)  :: nvars
+    real(pfdp), intent(out) :: yex(nvars)
+
+    integer :: i
+    real(pfdp) :: dx,x,rho
+
+    yex = 0.0_pfdp
+
+    dx = 1.0_pfdp/dble(nvars)
+    rho = (2.0_pfdp-2.0_pfdp*cos(pi*dx))/(dx*dx)
+    do i = 1, nvars
+       x = dx*dble(i-1) - t*v
+       yex(i) = yex(i) + dsin(pi*x)*dexp(-rho*nu*t)
+    end do
+
+  end subroutine exact_ode
   subroutine exact(t, nvars, yex)
     real(pfdp), intent(in)  :: t
     integer,    intent(in)  :: nvars
     real(pfdp), intent(out) :: yex(nvars)
 
     integer :: i, ii
-    real(pfdp) :: x
+    real(pfdp) :: x,dx
 
     yex = 0.0_pfdp
 
-
-    if (nu > 0) then
-
-!       do ii = -3, 3
-          do i = 1, nvars
-             x = dble(i-nvars/2-1)/dble(nvars) + ii - t*v
-             !yex(i) = yex(i) + 1/(4.0_pfdp*pi*nu*(t+t0))**(0.5)*dexp(-x**2/(4.0_pfdp*nu*(t+t0)))
-             yex(i) = yex(i) + dcos(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
-          end do
-!       end do
-
-    else
-
-       do ii = -3, 3
-          do i = 1, nvars
-             x = dble(i-nvars/2-1)/dble(nvars) + ii - t*v
-             yex(i) = yex(i) + 1.0/(4.0*pi*t0)**(0.5)*dexp(-x**2/(4.0*t0))
-          end do
-       end do
-
-    end if
+    dx = 1.0_pfdp/dble(nvars)
+    do i = 1, nvars
+       x = dx*dble(i-1) - t*v
+       yex(i) = yex(i) + dsin(pi*x)*dexp(-pi*pi*nu*t)
+    end do
 
   end subroutine exact
 

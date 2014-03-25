@@ -11,13 +11,15 @@ module transfer
 contains
 
   subroutine interp1(qF, qG, levelctxF, levelctxG)
+    use mg
     type(c_ptr), intent(in), value :: levelctxF, levelctxG
     real(pfdp),  intent(inout) :: qF(:), qG(:)
 
     type(work1),   pointer :: workF, workG
     complex(pfdp), pointer :: wkF(:), wkG(:)
-    integer      :: NxF, NxG, xrat
+    integer      :: NxF, NxG, xrat,i
     real(pfdp) :: c1,c2
+    real(pfdp), allocatable :: qbc(:)
     
     NxF = size(qF)
     NxG = size(qG)
@@ -47,10 +49,15 @@ contains
        
        qF = real(wkF)
     else
+       allocate(qbc(1-2:NxG+2))
+       call fill_bc_1d(qG,qbc,NxG,2)
        c1 = 9.0_pfdp/16.0_pfdp
        c2 = -1.0_pfdp/16.0_pfdp
        qF(1:NxF-1:2)=qG
-       qF(2:NxF:2)=c2*(CSHIFT(qG,-1)+CSHIFT(qG,2)) + c1*(qG+CSHIFT(qG,1))
+       do i = 1,NxG
+          qF(2*i)=c2*(qbc(i-1)+qbc(i+2)) + c1*(qbc(i)+ qbc(i+1))
+       end do
+    deallocate(qbc)
     endif
   end subroutine interp1
 
@@ -61,7 +68,7 @@ contains
     type(work2),   pointer :: workF, workG
     complex(pfdp), pointer :: wkF(:,:), wkG(:,:)
     integer                :: nvarF, nvarG, xrat, i, j
-
+    
     nvarF = size(qF, dim=1)
     nvarG = size(qG, dim=1)
     xrat  = nvarF / nvarG

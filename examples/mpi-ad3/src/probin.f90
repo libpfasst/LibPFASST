@@ -34,6 +34,7 @@ module probin
   integer, save ::  mg_interp_order
   integer, save ::  do_spec
   integer, save ::  N_Vcycles
+  integer, save ::  Nrelax
 
   character(len=32), save :: pfasst_nml
   character(len=20), save :: fbase   !  base name for run
@@ -47,7 +48,7 @@ module probin
 
   integer :: ios,iostat
   namelist /params/ Finterp, ndim,nlevs, nnodes, nvars,nprob, nsteps, niters
-  namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles
+  namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
   namelist /params/ window_type, pfasst_nml,fbase ,poutmod
   namelist /params/  abs_tol, rel_tol 
   namelist /params/  v, nu, t0, dt, Tfin,sigma 
@@ -90,6 +91,7 @@ contains
 
     do_spec = 1
     N_Vcycles = 1
+    Nrelax = 1
     mg_interp_order = 2
     
     poutmod = 1
@@ -98,7 +100,7 @@ contains
     !
     !  Read in stuff from a file
     un = 9
-    write(*,*) 'opening file ',TRIM(filename), '  for input'
+!    write(*,*) 'opening file ',TRIM(filename), '  for input'
     open(unit=un, file = filename, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)

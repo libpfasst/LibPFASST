@@ -5,12 +5,13 @@
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray
+  use probin, only: nprob,poutmod, fbase, foutbase
   implicit none
 contains
 
   subroutine echo_error_hook(pf, level, state, levelctx)
     use pf_mod_utils
-    use solutions, only: exact
+    use solutions, only: exact,exact_ode
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
@@ -18,20 +19,30 @@ contains
 
     real(c_double) :: yexact(level%nvars)
     real(pfdp), pointer :: qend(:)
-    real(pfdp) :: relres,res,relerr,err,t
-
+    real(pfdp) :: res,max_y,err,t,ODE_err
+    integer :: un
+    character(len=64) :: fout 
+    character(len=7) :: stepstring
     qend => array1(level%qend)
     t = state%t0+state%dt   
     call exact(t, level%nvars, yexact)
-
+    max_y=maxval(abs(yexact))
     err = maxval(abs(qend-yexact))
-    relerr = maxval(abs(qend-yexact))/maxval(abs(yexact))
+    call exact_ode(t, level%nvars, yexact)
+    ODE_err = maxval(abs(qend-yexact))
+
 
     call pf_residual(pf, level, state%dt)
     res= level%residual
-    relres = res/maxval(abs(yexact))
-    print '(" lev:",i5," step:",i5," t=",es10.3," iter:",i3," Err:",es13.6," RErr:",es13.6," Res:",es13.6," RRes:",es13.6)', &
-               level%level,state%step+1, t,state%iter, err,relerr,res,relres 
+!    print '(" lev:",i5," step:",i5," t=",es10.3," iter:",i3," Max_y:",es13.6," Err:",es13.6," ODEERR:",es13.6," Res:",es13.6)', &
+!               level%level,state%step+1, t,state%iter, max_y,err,ODE_err,res
+
+    un = 1000+state%step+1
+    write(stepstring,"(I0.3)") state%step+1
+    fout = trim(foutbase)//'_'//trim(stepstring)//'.m'
+    open(unit=un, file = fout, status = 'unknown', action = 'write', position='append')
+    write(un,*)  level%level,state%step+1,t,state%iter,max_y,err,ODE_err,res
+    close(un)
 
   end subroutine echo_error_hook
 

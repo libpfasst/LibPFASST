@@ -29,7 +29,8 @@ contains
   !
 
   subroutine f1eval1(yptr, t, level, levelctx, f1ptr)
-    use probin, only: nprob
+    use probin, only: nprob, do_spec
+    use mg, only: fill_bc_1d
     type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
@@ -37,29 +38,44 @@ contains
     type(work1),   pointer :: work
     real(pfdp),    pointer :: y(:), f1(:)
     complex(pfdp), pointer :: wk(:)
+    real(pfdp), allocatable :: ybc(:)
+    real(pfdp) :: dx
+    integer :: Nx,i
 
-    call c_f_pointer(levelctx, work)
+
 
     y  => array1(yptr)
     f1 => array1(f1ptr)
-    wk => work%wk
-
-    wk = y
-    call fftw_execute_dft(work%ffft, wk, wk)
-    if (nprob .eq. 0) then  ! spectral advection diffusion
-       wk = -v * work%ddx * wk / size(wk) 
-    else if (nprob .eq. 1) then  ! Backward Euler
-       wk = 0.0_pfdp*nu * work%lap * wk / size(wk)
-    else if (nprob .eq. 2) then  ! trapezoid rule
-       wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
-    end if
-    call fftw_execute_dft(work%ifft, wk, wk)
-    f1 = real(wk)
+    Nx = size(y)
+    if (do_spec==1) then
+       wk => work%wk
+       call c_f_pointer(levelctx, work)
+       wk = y
+       call fftw_execute_dft(work%ffft, wk, wk)
+       if (nprob .eq. 0) then  ! spectral advection diffusion
+          wk = -v * work%ddx * wk / size(wk) 
+       else if (nprob .eq. 1) then  ! Backward Euler
+          wk = 0.0_pfdp*nu * work%lap * wk / size(wk)
+       else if (nprob .eq. 2) then  ! trapezoid rule
+          wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
+       end if
+       call fftw_execute_dft(work%ifft, wk, wk)
+       f1 = real(wk)
+    else
+       dx = 1.0_pfdp/dble(Nx)
+       allocate(ybc(1-2:Nx+2))
+       call fill_bc_1d(y,ybc,Nx,2)
+       do i = 1,Nx
+          f1(i)=-v*(ybc(i+1)-ybc(i-1))/(2.0_pfdp*dx)
+       end do
+       deallocate(ybc)
+    endif
 
   end subroutine f1eval1
 
   subroutine f2eval1(yptr, t, level, levelctx, f2ptr)
-    use probin, only: nprob
+    use probin, only: nprob, do_spec
+    use mg, only: fill_bc_1d
     type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
@@ -67,30 +83,44 @@ contains
     real(pfdp),    pointer :: y(:), f2(:)
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
-
-    call c_f_pointer(levelctx, work)
+    real(pfdp), allocatable :: ybc(:)
+    real(pfdp) :: dx
+    integer :: Nx,i
 
     y  => array1(yptr)
     f2 => array1(f2ptr)
-    wk => work%wk
+    Nx = size(y)
+    if (do_spec==1) then
+       call c_f_pointer(levelctx, work)
+       wk => work%wk
+       
+       wk = y
+       call fftw_execute_dft(work%ffft, wk, wk)
+       if (nprob .eq. 0) then  ! spectral advection diffusion
+          wk = nu * work%lap * wk / size(wk)
+       else if (nprob .eq. 1) then  ! backward
+          wk = nu * work%lap * wk / size(wk)
+       else if (nprob .eq. 2) then  ! trapezoid rule
+          wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
+       endif
+       call fftw_execute_dft(work%ifft, wk, wk)
+       
+       f2 = real(wk)
+    else
+       dx = 1.0_pfdp/dble(Nx)
+       allocate(ybc(1-2:Nx+2))
+       call fill_bc_1d(y,ybc,Nx,2)
+       do i = 1,Nx
+          f2(i)=nu*(-2.0_pfdp*ybc(i) + ybc(i-1)+ybc(i+1))/(dx*dx)
+       end do
+       deallocate(ybc)
 
-    wk = y
-    call fftw_execute_dft(work%ffft, wk, wk)
-    if (nprob .eq. 0) then  ! spectral advection diffusion
-       wk = nu * work%lap * wk / size(wk)
-    else if (nprob .eq. 1) then  ! backward
-       wk = nu * work%lap * wk / size(wk)
-    else if (nprob .eq. 2) then  ! trapezoid rule
-       wk = 0.5_pfdp*nu * work%lap * wk / size(wk)
     endif
-    call fftw_execute_dft(work%ifft, wk, wk)
-
-    f2 = real(wk)
   end subroutine f2eval1
 
   subroutine f2comp1(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
     use mg
-    use probin, only: N_Vcycles,do_spec,nprob
+    use probin, only: N_Vcycles,do_spec,nprob,Nrelax
     type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
@@ -99,7 +129,7 @@ contains
     real(pfdp)   :: nudt,maxresid
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
-    integer :: k
+    integer :: k,N_V
     type(ndarray),pointer :: ymg
     type(ndarray),pointer  :: rhsmg
 
@@ -133,8 +163,13 @@ contains
       endif
       call c_f_pointer(yptr,ymg)
       call c_f_pointer(rhsptr,rhsmg)
+      if (level ==1 ) then
+         N_V=3
+      else
+         N_V=1
+      endif
       do k=1,N_Vcycles
-         call Vcycle(ymg, t, nudt, rhsmg, 0, c_null_ptr, 1,maxresid) 
+         call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
       end do
       call f2eval1(yptr, t, level, levelctx, f2ptr)
    endif
@@ -309,9 +344,9 @@ contains
 
     do i = 1, nvars
        if (i <= nvars/2+1) then
-          kx(i) = two_pi * dble(i-1) / Lx
+          kx(i) = pi * dble(i-1) / Lx
        else
-          kx(i) = two_pi * dble(-nvars + i - 1) / Lx
+          kx(i) = pi * dble(-nvars + i - 1) / Lx
        end if
     end do
 
