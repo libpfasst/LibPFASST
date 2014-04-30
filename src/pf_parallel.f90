@@ -128,7 +128,7 @@ contains
     end if
 
     call end_timer(pf, TPREDICTOR)
-    call call_hooks(pf, 1, PF_POST_PREDICTOR)
+    call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING

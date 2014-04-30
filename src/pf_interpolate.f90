@@ -128,9 +128,10 @@ contains
        !  end do
     else
        ! recompute fs
-       do m = 1, LevF%nnodes
-          call LevF%sweeper%evaluate(LevF, tF(m), m)
-       end do
+!       do m = 1, LevF%nnodes
+!          call LevF%sweeper%evaluate(LevF, tF(m), m)
+!       end do
+       call LevF%sweeper%evaluate_all(LevF, tF)
     end if  !  Feval
 
     !  Reset qend so that it is up to date

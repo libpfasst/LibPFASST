@@ -56,19 +56,19 @@ contains
   !
   ! Spread initial condition.
   !
-  subroutine spreadq0(F, t0)
-    type(pf_level_t), intent(inout) :: F
+  subroutine spreadq0(Lev, t0)
+    type(pf_level_t), intent(inout) :: Lev
     real(pfdp),       intent(in)    :: t0
 
     integer :: m, p
 
-    call F%encap%unpack(F%Q(1), F%q0)
-    call F%sweeper%evaluate(F, t0, 1)
+    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%sweeper%evaluate(Lev, t0, 1)
 
-    do m = 2, F%nnodes
-       call F%encap%copy(F%Q(m), F%Q(1))
-       do p = 1, F%sweeper%npieces
-          call F%encap%copy(F%F(m,p), F%F(1,p))
+    do m = 2, Lev%nnodes
+       call Lev%encap%copy(Lev%Q(m), Lev%Q(1))
+       do p = 1, Lev%sweeper%npieces
+          call Lev%encap%copy(Lev%F(m,p), Lev%F(1,p))
        end do
     end do
   end subroutine spreadq0
@@ -77,26 +77,26 @@ contains
   !
   ! Save current Q and F.
   !
-  subroutine save(F)
-    type(pf_level_t), intent(inout) :: F
+  subroutine save(Lev)
+    type(pf_level_t), intent(inout) :: Lev
 
     integer :: m, p
 
-    if (F%Finterp) then
+    if (Lev%Finterp) then
        !  Changed by MM Dec. 21, 2013 to save solutions too
-       if (associated(F%pF)) then
-          do m = 1, F%nnodes
-             do p = 1,size(F%F(1,:))
-                call F%encap%copy(F%pF(m,p), F%F(m,p))
+       if (associated(Lev%pF)) then
+          do m = 1, Lev%nnodes
+             do p = 1,size(Lev%F(1,:))
+                call Lev%encap%copy(Lev%pF(m,p), Lev%F(m,p))
              end do
-             call F%encap%copy(F%pQ(m), F%Q(m))
+             call Lev%encap%copy(Lev%pQ(m), Lev%Q(m))
           end do
-!          call F%encap%copy(F%pQ(1), F%Q(1))
+!          call Lev%encap%copy(Lev%pQ(1), Lev%Q(1))
        end if
     else
-       if (associated(F%pQ)) then
-          do m = 1, F%nnodes
-             call F%encap%copy(F%pQ(m), F%Q(m))
+       if (associated(Lev%pQ)) then
+          do m = 1, Lev%nnodes
+             call Lev%encap%copy(Lev%pQ(m), Lev%Q(m))
           end do
        end if
     end if
@@ -110,44 +110,27 @@ contains
   ! node' integral and store it in I.  This is used later when doing
   ! restriction (see restrict_time_space_fas).
   !
-  subroutine pf_residual(pf, F, dt)
+  subroutine pf_residual(pf, Lev, dt)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: F
+    type(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: dt
 
-    real(pfdp) :: norms(F%nnodes-1)
+    real(pfdp) :: norms(Lev%nnodes-1)
     integer :: m, n
 
-    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
+!    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
+!   I think we often want the residual for diagnostics.  Maybe need flag to turn this off
+!   for efficiency?
 
     call start_timer(pf, TRESIDUAL)
 
-    call F%sweeper%integrate(F, F%Q, F%F, dt, F%I)
-    do m = 2, F%nnodes-1
-       call F%encap%axpy(F%I(m), 1.0_pfdp, F%I(m-1))
-    end do
-
-    ! add tau (which is 'node to node')
-    if (associated(F%tau)) then
-       do m = 1, F%nnodes-1
-          do n = 1, m
-             call F%encap%axpy(F%I(m), 1.0_pfdp, F%tau(n))
-          end do
-       end do
-    end if
-
-    ! subtract out Q
-    do m = 1, F%nnodes-1
-       call F%encap%copy(F%R(m), F%Q(1))
-       call F%encap%axpy(F%R(m),  1.0_pfdp, F%I(m))
-       call F%encap%axpy(F%R(m), -1.0_pfdp, F%Q(m+1))
-    end do
+    call Lev%sweeper%residual(Lev, dt)
 
     ! compute max residual norm
-    do m = 1, F%nnodes-1
-       norms(m) = F%encap%norm(F%R(m))
+    do m = 1, Lev%nnodes-1
+       norms(m) = Lev%encap%norm(Lev%R(m))
     end do
-    F%residual = maxval(abs(norms))
+    Lev%residual = maxval(abs(norms))
 
     call end_timer(pf, TRESIDUAL)
 
