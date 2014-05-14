@@ -165,4 +165,49 @@ contains
     end do
   end subroutine pf_apply_mat
 
+  !
+  ! Generic residual
+  !
+  subroutine pf_generic_residual(Lev, dt)
+    type(pf_level_t),  intent(inout) :: Lev
+    real(pfdp),        intent(in)    :: dt
+
+    integer :: m, n
+
+    call Lev%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
+    do m = 2, Lev%nnodes-1
+       call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%I(m-1))
+    end do
+
+    ! add tau (which is 'node to node')
+    if (associated(Lev%tau)) then
+       do m = 1, Lev%nnodes-1
+          do n = 1, m
+             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
+          end do
+       end do
+    end if
+
+    ! subtract out Q
+    do m = 1, Lev%nnodes-1
+       call Lev%encap%copy(Lev%R(m), Lev%Q(1))
+       call Lev%encap%axpy(Lev%R(m),  1.0_pfdp, Lev%I(m))
+       call Lev%encap%axpy(Lev%R(m), -1.0_pfdp, Lev%Q(m+1))
+    end do
+
+  end subroutine pf_generic_residual
+
+  !
+  ! Generic evaluate all
+  !
+  subroutine pf_generic_evaluate_all(Lev, t)
+    type(pf_level_t),  intent(inout) :: Lev
+    real(pfdp),        intent(in)    :: t(:)
+
+    integer :: m
+    do m = 1, Lev%nnodes
+       call Lev%sweeper%evaluate(Lev, t(m), m)
+    end do
+  end subroutine pf_generic_evaluate_all
+
 end module pf_mod_utils

@@ -75,13 +75,13 @@ module pf_mod_dtype
   type :: pf_sweeper_t
      type(c_ptr) :: sweeperctx
      integer     :: npieces
-     procedure(pf_sweep_p),      pointer, nopass :: sweep
-     procedure(pf_initialize_p), pointer, nopass :: initialize
-     procedure(pf_evaluate_p),   pointer, nopass :: evaluate
-     procedure(pf_evaluate_all_p),   pointer, nopass :: evaluate_all
-     procedure(pf_integrate_p),  pointer, nopass :: integrate
-     procedure(pf_residual_p),   pointer, nopass :: residual
-     procedure(pf_sweepdestroy_p),  pointer, nopass :: destroy
+     procedure(pf_sweep_p),        pointer, nopass :: sweep
+     procedure(pf_initialize_p),   pointer, nopass :: initialize
+     procedure(pf_evaluate_p),     pointer, nopass :: evaluate
+     procedure(pf_evaluate_all_p), pointer, nopass :: evaluate_all
+     procedure(pf_integrate_p),    pointer, nopass :: integrate
+     procedure(pf_residual_p),     pointer, nopass :: residual
+     procedure(pf_sweepdestroy_p), pointer, nopass :: destroy
   end type pf_sweeper_t
 
   type :: pf_encap_t
@@ -252,7 +252,7 @@ module pf_mod_dtype
 
      subroutine pf_residual_p(Lev, dt)
        import pf_level_t, c_ptr, pfdp
-       type(pf_level_t),  intent(in)    :: Lev
+       type(pf_level_t),  intent(inout) :: Lev
        real(pfdp),        intent(in)    :: dt
      end subroutine pf_residual_p
 

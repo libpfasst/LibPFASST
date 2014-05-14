@@ -19,6 +19,7 @@
 
 module pf_mod_implicit
   use pf_mod_dtype
+  use pf_mod_utils
   implicit none
   integer, parameter, private :: npieces = 1
 
@@ -177,6 +178,8 @@ contains
     sweeper%evaluate   => implicit_evaluate
     sweeper%initialize => implicit_initialize
     sweeper%integrate  => implicit_integrate
+    sweeper%evaluate_all => pf_generic_evaluate_all
+    sweeper%residual     => pf_generic_residual
 
     sweeper%sweeperctx = c_loc(imp)
   end subroutine pf_implicit_create
