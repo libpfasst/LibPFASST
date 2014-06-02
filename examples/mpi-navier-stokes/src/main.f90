@@ -4,7 +4,8 @@ program fpfasst
   use hooks
   use encap
   use transfer
-  use pf_mod_mpi, only: MPI_THREAD_FUNNELED, MPI_COMM_WORLD
+  use pf_mod_ndarray
+  use pf_mod_mpi, only: MPI_THREAD_MULTIPLE, MPI_COMM_WORLD
 
   implicit none
 
@@ -20,14 +21,14 @@ program fpfasst
   type(pf_encap_t),   target :: encaps
 
   ! initialize mpi
-  call mpi_init_thread(mpi_thread_funneled, iprovided, ierror)
+  call mpi_init_thread(mpi_thread_multiple, iprovided, ierror)
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
   call mpi_comm_size(mpi_comm_world, nprocs, ierror)
 
   nthreads = -1
-  nsteps   = 32
+  nsteps   = 16
   if (nprocs == 1) then
      nlevs = 1
   else
@@ -47,13 +48,13 @@ program fpfasst
   nx     = [ 32, 64, 128 ]
   nvars  = 2 * 3 * nx**3
   nnodes = [ 2, 3, 5 ]
-  dt     = 0.001d0
+  dt     = 0.0001d0
 
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  nlevs = pf%nlevels
+  ! nlevs = pf%nlevels
   first = size(nx) - nlevs + 1
 
   if (nprocs == 1) then
@@ -87,7 +88,15 @@ program fpfasst
 
   ! initialize advection/diffusion
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  call vortex_sheets(q0)
+  if (pf%rank == 0) then
+     print *, 'generating initial condition...'
+  end if
+  ! call vortex_sheets(q0)
+  call random_full(q0)
+  if (pf%rank == 0) then
+     call dump(pf%outdir, 'initial.npy', q0)
+     print *, 'generating initial condition... done.'
+  end if
 
   do l = 1, nlevs
      call pf_add_hook(pf, l, PF_POST_SWEEP, project_hook)
@@ -102,12 +111,17 @@ program fpfasst
      print *, 'NTHREADS: ', nthreads
      print *, 'NSTEPS:   ', nsteps
      print *, 'NPROCS:   ', pf%comm%nproc
+     print *, 'OUTPUT:   ', len_trim(pf%outdir)
+  end if
+
+  if (len_trim(pf%outdir) > 0) then
+     call ndarray_mkdir(pf%outdir, len_trim(pf%outdir))
+     call pf_add_hook(pf, -1, PF_POST_SWEEP, dump_hook)
   end if
 
   ! call pf_logger_attach(pf)
   call mpi_barrier(pf%comm%comm, ierror)
   call pf_pfasst_run(pf, c_loc(q0), dt, 0.0d0, nsteps=nsteps)
-
 
   ! done
   call mpi_barrier(pf%comm%comm, ierror)

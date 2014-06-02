@@ -159,6 +159,84 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine random_full(q0)
+    type(carray4), intent(inout) :: q0
+
+    double precision :: kappa, scale
+    integer :: kx, ky, kz, i, j, k, n
+
+    double precision :: r(3)
+    double precision, parameter :: sigma = 99.0d0
+
+    complex(c_double), pointer :: x(:,:,:), y(:,:,:), z(:,:,:), u(:,:,:), v(:,:,:), w(:,:,:), wk(:,:,:)
+
+    type(c_ptr) :: ffft, wkp
+
+    n = q0%shape(1)
+
+    allocate(x(n,n,n), y(n,n,n), z(n,n,n), u(n,n,n), v(n,n,n), w(n,n,n))
+
+    do i = 1, n
+       do j = 1, n
+          do k = 1, n
+             x(k,j,i) = 6.28318530718d0 * dble(i-1) / n
+             y(k,j,i) = 6.28318530718d0 * dble(j-1) / n
+             z(k,j,i) = 6.28318530718d0 * dble(k-1) / n
+          end do
+       end do
+    end do
+
+    u = 0
+    v = 0
+    w = 0
+
+    do kz = 1, n/2
+       do ky = 1, n/2
+          do kx = 1, n/2
+             if (kx + ky + kz > n/2) cycle
+
+             kappa = dble(kx**2 + ky**2 + kz**2)**0.5
+             scale = kappa**(-5.0/3) * exp(-kappa**2/sigma)
+
+             call random_number(r)
+
+             ! print *, kx, ky, kz, kappa, scale
+
+             u = u + scale * r(1) * cos(ky*y) * cos(kz*z)
+             v = v + scale * r(2) * cos(kx*x) * cos(kz*z)
+             w = w + scale * r(3) * cos(kx*x) * cos(ky*y)
+          end do
+       end do
+    end do
+
+
+    wkp  = fftw_alloc_complex(int(n**3, c_size_t))
+    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
+
+    call c_f_pointer(wkp, wk, [ n, n, n ])
+
+    wk = u
+    call fftw_execute_dft(ffft, wk, wk)
+    q0%array(:,:,:,1) = wk
+
+    wk = v
+    call fftw_execute_dft(ffft, wk, wk)
+    q0%array(:,:,:,2) = wk
+
+    wk = w
+    call fftw_execute_dft(ffft, wk, wk)
+    q0%array(:,:,:,3) = wk
+
+    q0%array = q0%array / n**3
+
+    deallocate(x,y,z,u,v,w,wk)
+
+    call fftw_destroy_plan(ffft)
+
+  end subroutine random_full
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine divergence(cptr, n1, n2, n3, u, div)
     implicit none
     type(c_ptr),               intent(in), value :: cptr
@@ -265,7 +343,7 @@ contains
     call c_f_pointer(ctx%vw, vw, [ ctx%n, ctx%n, ctx%n ])
     call c_f_pointer(ctx%ww, ww, [ ctx%n, ctx%n, ctx%n ])
 
-    !$omp parallel workshare
+!xxx    !$omp parallel workshare
     u1 = y%array(:,:,:,1)
     v1 = y%array(:,:,:,2)
     w1 = y%array(:,:,:,3)
@@ -278,7 +356,7 @@ contains
     uw = y%array(:,:,:,1)
     vw = y%array(:,:,:,2)
     ww = y%array(:,:,:,3)
-    !$omp end parallel workshare
+!xxx    !$omp end parallel workshare
   end subroutine copy_for_convolve
 
   subroutine eval_f1(yptr, t, level, ctxptr, f1ptr)

@@ -38,10 +38,11 @@ contains
     character(len=32)  :: arg
     character(len=255) :: istring  ! stores command line argument
     character(len=255) :: message  ! use for i/o error messages
+    character(len=512) :: outdir
 
     ! define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, window
-    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0
+    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir
 
     ! set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
@@ -54,6 +55,7 @@ contains
     pfasst_pred  = pf%pfasst_pred
     echo_timings = pf%echo_timings
     taui0        = pf%taui0
+    outdir       = pf%outdir
 
     ! open the file fname and read the pfasst namelist
     if (present(fname))  then
@@ -87,6 +89,7 @@ contains
     pf%pfasst_pred  = pfasst_pred
     pf%echo_timings = echo_timings
     pf%taui0        = taui0
+    pf%outdir       = outdir
 
     if (pf%nlevels < 1) then
        write(*,*) 'Bad specification for nlevels=', pf%nlevels
