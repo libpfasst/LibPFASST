@@ -417,19 +417,26 @@ contains
     integer   :: i
 
     ybc(1:Nx)=y
-    do i = 1,Nbc
-       ybc(Nx+i)=-ybc(i)
-       ybc(1-i)=-ybc(Nx+1-i)
-    end do
-    
+    ! do i = 1,Nbc
+    !    ybc(Nx+i)=-ybc(Nx-i)
+    !    ybc(1-i)=-ybc(Nx+1-i)
+    ! end do
+
+    call set_bc_1d(ybc,Nx,Nbc)
+
   end subroutine fill_bc_1d
   subroutine set_bc_1d(ybc, Nx, Nbc)
     integer, intent(in)      ::  Nx, Nbc
     real(pfdp), intent(inout) :: ybc(1-Nbc:Nx+Nbc)
     integer   :: i
     do i = 1,Nbc
-       ybc(Nx+i)=-ybc(i)
-       ybc(1-i)=-ybc(Nx+1-i)
+       ! ybc(Nx+i)=-ybc(i)
+       ybc(1-i)=-ybc(1+i)
+    end do
+    ybc(Nx+1) = 0
+    do i = 1,Nbc-1
+       ybc(Nx+1+i)=-ybc(Nx+1-i)
+       ! ybc(1-i)=-ybc(Nx+1-i)
     end do
 
 !!$    ybc(Nx+1)=ybc(1)

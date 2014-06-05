@@ -125,6 +125,26 @@ contains
        ! Return to fine level...
        call pf_v_cycle_post_predictor(pf, t0, dt)
 
+    else
+
+       ! Single processor... sweep on coarse and return to fine level.
+
+       G => pf%levels(1)
+       do k = 1, pf%rank + 1
+          pf%state%iter = -k
+          t0k = t0-(pf%rank)*dt + (k-1)*dt
+
+          call call_hooks(pf, G%level, PF_PRE_SWEEP)
+          do j = 1, G%nsweeps
+             call G%sweeper%sweep(pf, G, t0k, dt)
+          end do
+          call pf_residual(pf, G, dt)
+          call call_hooks(pf, G%level, PF_POST_SWEEP)
+       end do
+
+       ! Return to fine level...
+       call pf_v_cycle_post_predictor(pf, t0, dt)
+
     end if
 
     call end_timer(pf, TPREDICTOR)
@@ -522,7 +542,7 @@ contains
           call call_hooks(pf, F%level, PF_POST_SWEEP)
        end if
 
-          
+
     end do
 
   end subroutine pf_v_cycle
