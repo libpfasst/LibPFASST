@@ -60,8 +60,8 @@ contains
     allocate(ybc(1-spatial_order:Nx+spatial_order))
 
 
-    select case (spatial_order)
-    case (2)  ! Centered diff
+!    select case (spatial_order)
+!    case (2)  ! Centered diff
        sig = nudt/(dx*dx)
        sigi = (dx*dx)/(nudt)
 !!$       do n = 1,Nrelax
@@ -109,9 +109,9 @@ contains
 !!$          end do
 !!$       end do
 
-    case default
-       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
-    end select
+ !   case default
+ !      write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
+ !   end select
 
     deallocate(ybc)
   end subroutine relax_1d
@@ -135,8 +135,8 @@ contains
     Nx = yptr%shape(1)
     dx    = Lx/dble(Nx)
 
-    select case (spatial_order)
-    case (2)  ! Centered diff
+!    select case (spatial_order)
+!    case (2)  ! Centered diff
 !!$       sigi = (dx*dx)/(nudt)
 !!$       do n = 1,Nrelax
 !!$          do irb = 1,2
@@ -161,9 +161,9 @@ contains
 !!$          end do
 !!$       end do
 
-    case default
-       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
-    end select
+!    case default
+!       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
+!    end select
   end subroutine relax_2d
   
   recursive subroutine Vcycle(yptr, t, nudt, rhsptr, level, ctx, Nrelax,maxresid)
@@ -297,7 +297,7 @@ contains
 !!$       Lap = (-30.0_pfdp*y%array + 16.0_pfdp*(yp + ym)-(ypp+ymm))/(12.0_pfdp*dx*dx)
 !!$
     case default
-       write(*,*) 'Bad case in feval.f90, feval_init:  spatial_order=', spatial_order
+       write(*,*) 'Bad case in feval.f90, feval_init:  dim=', yptr%dim
     end select
   end subroutine resid
 
@@ -394,7 +394,7 @@ contains
 !!$       Lap = (-30.0_pfdp*y%array + 16.0_pfdp*(yp + ym)-(ypp+ymm))/(12.0_pfdp*dx*dx)
 !!$
     case default
-       write(*,*) 'Bad case in feval.f90, feval_init:  spatial_order=', spatial_order
+       write(*,*) 'Bad case in feval.f90, feval_init:  dim=', yptr%dim
     end select
     res = rhs - (y - nudt*Lap)
 !!$    print *,'----------------------------------------------------'

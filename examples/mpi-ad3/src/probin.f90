@@ -15,6 +15,7 @@ module probin
   double precision, save :: nu     ! viscosity
   double precision, save :: t0     ! initial time for exact solution
   double precision, save :: sigma  ! initial condition parameter
+  integer,          save :: kfreq  ! initial condition parameter
   double precision, save :: dt     ! time step
   double precision, save :: Tfin   ! Final time
 
@@ -51,7 +52,7 @@ module probin
   namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
   namelist /params/ window_type, pfasst_nml,fbase ,poutmod
   namelist /params/  abs_tol, rel_tol 
-  namelist /params/  v, nu, t0, dt, Tfin,sigma 
+  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq
 
 contains
 
@@ -79,6 +80,7 @@ contains
     Lx      = 1._pfdp
     nu      = 0.02_pfdp
     sigma   = 0.004_pfdp
+    kfreq   = 1
     t0      = 0.25_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
@@ -100,7 +102,7 @@ contains
     !
     !  Read in stuff from a file
     un = 9
-!    write(*,*) 'opening file ',TRIM(filename), '  for input'
+    write(*,*) 'opening file ',TRIM(filename), '  for input'
     open(unit=un, file = filename, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)

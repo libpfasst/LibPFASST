@@ -14,21 +14,23 @@
 !  nu           = 1.0
   nlevs = 3
   nvars  =   32 64 128
+  nvars  =   8 16 32 
 !  nnodes =    3  5 9
   nnodes =   2 3  3 
   Finterp = F
 !  dt           = 0.0078125
-!  dt           = 0.015625
+  dt           = 0.015625
 !  dt           = 0.03125
 !  dt           = 0.04
 !  dt           = 0.3333333333
 !  dt           = 0.25
   Tfin = 0.0
   pfasst_nml = "pfasst.nml"
-  fbase = "pfasst_heat"
+  fbase = "pfasst_V"
   do_spec = 0
   N_Vcycles = 2 
   Nrelax = 2
   mg_interp_order = 2
+  spatial_order = 2
 
 /

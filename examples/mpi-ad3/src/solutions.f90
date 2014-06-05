@@ -69,6 +69,7 @@ contains
   end subroutine sinusoidal
 
   subroutine exact_ode(t, nvars, yex)
+    use probin, only:  nu, Lx, spatial_order, kfreq
     real(pfdp), intent(in)  :: t
     integer,    intent(in)  :: nvars
     real(pfdp), intent(out) :: yex(nvars)
@@ -79,10 +80,10 @@ contains
     yex = 0.0_pfdp
 
     dx = 1.0_pfdp/dble(nvars)
-    rho = (2.0_pfdp-2.0_pfdp*cos(pi*dx))/(dx*dx)
+    rho = (2.0_pfdp-2.0_pfdp*cos(kfreq*pi*dx))/(dx*dx)
     do i = 1, nvars
        x = dx*dble(i-1) - t*v
-       yex(i) = yex(i) + dsin(pi*x)*dexp(-rho*nu*t)
+       yex(i) = yex(i) + dsin(kfreq*pi*x)*dexp(-rho*nu*t)
     end do
 
   end subroutine exact_ode
@@ -99,7 +100,7 @@ contains
     dx = 1.0_pfdp/dble(nvars)
     do i = 1, nvars
        x = dx*dble(i-1) - t*v
-       yex(i) = yex(i) + dsin(pi*x)*dexp(-pi*pi*nu*t)
+       yex(i) = yex(i) + dsin(kfreq*pi*x)*dexp(-kfreq*kfreq*pi*pi*nu*t)
     end do
 
   end subroutine exact

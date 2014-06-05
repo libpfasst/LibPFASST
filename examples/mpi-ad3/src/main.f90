@@ -19,7 +19,8 @@ program main
   integer        :: ierror, iprovided, l
   character(len = 64) :: fout
   character(len = 64) :: fname
-  character(256) :: probin_fname
+  character(len = 64) :: probin_fname
+  character(len = 64) :: shell_cmd
   integer        :: iout,nout
 
 
@@ -27,7 +28,7 @@ program main
   ! read options
   !
 
-  if (command_argument_count() == 1) then
+  if (command_argument_count() > 1) then
      call get_command_argument(1, value=probin_fname)
   else
      probin_fname = "probin.nml"
@@ -41,7 +42,6 @@ program main
   call mpi_init_thread(mpi_thread_funneled, iprovided, ierror)
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
-
 
   !
   ! initialize pfasst
@@ -100,7 +100,7 @@ program main
   ! run
   !
 
-!  call pf_add_hook(pf, nlevs, PF_POST_SWEEP, echo_error_hook)
+  call pf_add_hook(pf, -1, PF_POST_PREDICTOR, echo_error_hook)
   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_error_hook)
 
   call ndarray_create_simple(q1, pf%levels(nlevs)%shape)
@@ -116,11 +116,19 @@ program main
      nsteps = comm%nproc
   end if
 
+  !  Make directory for Data if it does not exist
+  if (len_trim(output) > 0) then
+     call ndarray_mkdir(output, len_trim(output))
+     ! call pf_add_hook(pf, nlevs, PF_POST_SWEEP, ndarray_dump_hook)
+!     call pf_add_hook(pf, -1, PF_POST_SWEEP, ndarray_dump_hook)
+  end if
+
+  call system('if [ ! -e ./Dat ]; then mkdir Dat; fi')
+  shell_cmd = 'if [ ! -e ./Dat/'//trim(fbase)//' ]; then mkdir Dat/'//trim(fbase)//'; fi'
+  call system(shell_cmd)
   ! open output files
   write (fname, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'Niter',pf%niters,'_Nx',nvars(nlevs),'_Nstep',nsteps,'_Nproc',comm%nproc
-  foutbase = 'Dat/'//trim(fbase)//'_'//trim(fname)
-
-  foutbase = 'Dat/'//trim(fbase)//'_'//trim(fname)
+  foutbase = 'Dat/'//trim(fbase)//'/'//trim(fname)
   print *,'foutbase=',foutbase
 
 !  open(unit=101, file = foutbase, status = 'unknown', action = 'write')
@@ -128,7 +136,7 @@ program main
   !  Output the run parameters
   if (pf%rank == 0) then
      call pf_print_options(pf, 6,.TRUE.)
-     fout = 'Dat/'//trim(fbase)//'_'//trim(fname)//'_params.m'
+     fout = 'Dat/'//trim(fbase)//'/'//trim(fname)//'_params.m'
      print*, fout
      open(unit=103, file = fout, status = 'unknown', action = 'write')
      do iout=1,2
@@ -148,7 +156,9 @@ program main
         write(nout,*) 'dt=',dt
         write(nout,*) 'nu=',nu
         write(nout,*) 'v=',v
+        write(nout,*) 'kfreq=',kfreq
         write(nout,*) 'do_spec',do_spec
+        write(nout,*) 'fbase=',fbase
         if (do_spec .eq. 0) then
            write(nout,*) 'N_Vcycles=',N_Vcycles
            write(nout,*) 'Nrelax',Nrelax
