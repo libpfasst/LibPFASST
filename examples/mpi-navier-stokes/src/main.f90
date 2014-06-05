@@ -1,6 +1,7 @@
 program fpfasst
   use pfasst
   use feval
+  use initial
   use hooks
   use encap
   use transfer
@@ -32,7 +33,7 @@ program fpfasst
   if (nprocs == 1) then
      nlevs = 1
   else
-     nlevs = 3
+     nlevs = 2
   end if
 
   if (nthreads < 0) then
@@ -45,7 +46,8 @@ program fpfasst
   end if
 
   ! initialize pfasst
-  nx     = [ 32, 64, 128 ]
+!  nx     = [ 32, 64, 128 ]
+  nx     = [ 16, 32, 64 ]
   nvars  = 2 * 3 * nx**3
   nnodes = [ 2, 3, 5 ]
   dt     = 0.0001d0
@@ -92,7 +94,8 @@ program fpfasst
      print *, 'generating initial condition...'
   end if
   ! call vortex_sheets(q0)
-  call random_full(q0)
+  ! call random_full(q0)
+  call load(q0, 'full064_s990.h5')
   if (pf%rank == 0) then
      call dump(pf%outdir, 'initial.npy', q0)
      print *, 'generating initial condition... done.'
