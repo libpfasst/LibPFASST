@@ -65,6 +65,7 @@ contains
 
 
     if (pf%comm%nproc > 1) then
+       G => pf%levels(1)
        if (pf%Pipeline_G .and. (G%nsweeps > 1)) then
           !  This is the weird choice.  We burn in without communication, then do extra sweeps
           G => pf%levels(1)
@@ -159,7 +160,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
 
-    real(pfdp) :: residual1, energy1
+    real(pfdp) :: residual1
 
     residual1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
