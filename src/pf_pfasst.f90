@@ -40,6 +40,8 @@ contains
 
     if (present(nlevels)) pf%nlevels = nlevels
 
+    pf%outdir = ""
+
     ! gather some input from a file and command line
     read_cmd = .true.
     if (present(nocmd)) then

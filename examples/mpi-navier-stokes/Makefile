@@ -17,7 +17,7 @@ CXXSRC += src/cfftw++.cpp src/fftw++.cpp src/convolution.cpp
 
 FFLAGS  += -O3 -I$(FFTW3)/include -I$(HDF5)/include -fopenmp
 CFLAGS  += -I$(FFTW3)/include -fopenmp
-LDFLAGS += -L$(FFTW3)/lib -lfftw3 -L$(HDF5)/include -lhdf5 -fopenmp -lstdc++ -lfftw3_omp
+LDFLAGS += -fopenmp -lstdc++ -ldl -lz -L$(FFTW3)/lib -lfftw3 -lfftw3_omp -L$(HDF5)/lib -lhdf5_fortran -lhdf5
 
 vpath %.cpp $(VPATHS)
 

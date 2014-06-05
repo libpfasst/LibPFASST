@@ -89,16 +89,14 @@ program fpfasst
   call pf_pfasst_setup(pf)
 
   ! initialize advection/diffusion
+  if (len_trim(pf%outdir) == 0) pf%outdir = "."
+
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  if (pf%rank == 0) then
-     print *, 'generating initial condition...'
-  end if
   ! call vortex_sheets(q0)
   ! call random_full(q0)
   call load(q0, 'full064_s990.h5')
   if (pf%rank == 0) then
      call dump(pf%outdir, 'initial.npy', q0)
-     print *, 'generating initial condition... done.'
   end if
 
   do l = 1, nlevs
