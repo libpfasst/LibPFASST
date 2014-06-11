@@ -1,14 +1,14 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 3
+    nlevels  = 1
 
 
     !  These are internal pfasst variables that can be reset
     niters = 10   !  default is 5
 
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-!     qtype   = 1028
-     qtype   = 1
+     qtype   = 1028
+!     qtype   = 1
 
      !  Type of time step windowing   (default is 1 = block windowing)
      window = 1      
@@ -18,7 +18,7 @@
      rel_res_tol = 1.0d-14
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .true.
+     Pipeline_G =  .false.
      PFASST_pred = .true.
 
      echo_timings = .false.

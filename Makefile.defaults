@@ -2,7 +2,7 @@
 # Default build settings for libpfasst.
 #
 
-FC = gfortran
+FC = mpif90
 CC = mpicc
 AR = ar rcs
 PY = python

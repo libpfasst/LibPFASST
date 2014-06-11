@@ -60,10 +60,10 @@ contains
   !
   ! Restrict (in time and space) qF to qG.
   !
-  subroutine restrict_sdc(F, G, qF, qG, integral,tF)
+  subroutine restrict_sdc(LevF, LevG, qF, qG, integral,tF)
     use pf_mod_utils, only: pf_apply_mat
 
-    type(pf_level_t), intent(inout) :: F, G
+    type(pf_level_t), intent(inout) :: LevF, LevG
     type(c_ptr),      intent(inout) :: qF(:), qG(:)
     logical,          intent(in)    :: integral
     real(pfdp),       intent(in) :: tF(:)
@@ -73,34 +73,34 @@ contains
 
     if (integral) then
 
-       allocate(qFr(F%nnodes-1))
+       allocate(qFr(LevF%nnodes-1))
 
-       do m = 1, F%nnodes-1
-          call G%encap%create(qFr(m), G%level, SDC_KIND_INTEGRAL, &
-               G%nvars, G%shape, G%levelctx, G%encap%encapctx)
-          call F%restrict(qF(m), qFr(m), F%level, F%levelctx, G%level, G%levelctx,tF(m))
+       do m = 1, LevF%nnodes-1
+          call LevG%encap%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
+               LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+          call LevF%restrict(qF(m), qFr(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tF(m))
        end do
 
        ! when restricting '0 to node' integral terms, skip the first
        ! entry since it is zero
-       call pf_apply_mat(qG, 1.d0, F%rmat(2:,2:), qFr, G%encap)
+       call pf_apply_mat(qG, 1.d0, LevF%rmat(2:,2:), qFr, LevG%encap)
 
     else
 
-       allocate(qFr(F%nnodes))
+       allocate(qFr(LevF%nnodes))
 
-       do m = 1, F%nnodes
-          call G%encap%create(qFr(m), G%level, SDC_KIND_SOL_NO_FEVAL, &
-               G%nvars, G%shape, G%levelctx, G%encap%encapctx)
-          call F%restrict(qF(m), qFr(m), F%level, F%levelctx, G%level, G%levelctx,tF(m))
+       do m = 1, LevF%nnodes
+          call LevG%encap%create(qFr(m), LevG%level, SDC_KIND_SOL_NO_FEVAL, &
+               LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+          call LevF%restrict(qF(m), qFr(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tF(m))
        end do
 
-       call pf_apply_mat(qG, 1.d0, F%rmat, qFr, G%encap)
+       call pf_apply_mat(qG, 1.d0, LevF%rmat, qFr, LevG%encap)
 
     end if
 
     do m = 1, size(qFr)
-       call G%encap%destroy(qFr(m))
+       call LevG%encap%destroy(qFr(m))
     end do
     deallocate(qFr)
 
@@ -115,103 +115,103 @@ contains
   ! we should still compute the FAS correction since the function
   ! evaluations may be different.
   !
-  subroutine restrict_time_space_fas(pf, t0, dt, F, G)
+  subroutine restrict_time_space_fas(pf, t0, dt, LevF, LevG)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
-    type(pf_level_t),  intent(inout) :: F, G
+    type(pf_level_t),  intent(inout) :: LevF, LevG
 
     integer    :: m
-    real(pfdp) :: tG(G%nnodes)
-    real(pfdp) :: tF(F%nnodes)
+    real(pfdp) :: tG(LevG%nnodes)
+    real(pfdp) :: tF(LevF%nnodes)
     type(c_ptr) :: &
-         tmpG(G%nnodes), &    ! coarse integral of coarse function values
-         tmpF(F%nnodes), &    ! fine integral of fine function values
-         tmpFr(G%nnodes)      ! coarse integral of restricted fine function values
+         tmpG(LevG%nnodes), &    ! coarse integral of coarse function values
+         tmpF(LevF%nnodes), &    ! fine integral of fine function values
+         tmpFr(LevG%nnodes)      ! coarse integral of restricted fine function values
 
-    call call_hooks(pf, F%level, PF_PRE_RESTRICT_ALL)
-    call start_timer(pf, TRESTRICT + F%level - 1)
+    call call_hooks(pf, LevF%level, PF_PRE_RESTRICT_ALL)
+    call start_timer(pf, TRESTRICT + LevF%level - 1)
 
     !
     ! create workspaces
     !
-    do m = 1, G%nnodes
-       call G%encap%create(tmpG(m), G%level, SDC_KIND_INTEGRAL, &
-            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
-       call G%encap%create(tmpFr(m), G%level, SDC_KIND_INTEGRAL, &
-            G%nvars, G%shape, G%levelctx, G%encap%encapctx)
+    do m = 1, LevG%nnodes
+       call LevG%encap%create(tmpG(m), LevG%level, SDC_KIND_INTEGRAL, &
+            LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+       call LevG%encap%create(tmpFr(m), LevG%level, SDC_KIND_INTEGRAL, &
+            LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
     end do
 
-    do m = 1, F%nnodes
-       call F%encap%create(tmpF(m), F%level, SDC_KIND_INTEGRAL, &
-            F%nvars, F%shape, F%levelctx, F%encap%encapctx)
+    do m = 1, LevF%nnodes
+       call LevF%encap%create(tmpF(m), LevF%level, SDC_KIND_INTEGRAL, &
+            LevF%nvars, LevF%shape, LevF%levelctx, LevF%encap%encapctx)
     end do
 
 
     !
     ! restrict q's and recompute f's
     !
-    tG = t0 + dt*G%nodes
-    tF = t0 + dt*F%nodes
+    tG = t0 + dt*LevG%nodes
+    tF = t0 + dt*LevF%nodes
 
-    call restrict_sdc(F, G, F%Q, G%Q, .false.,tF)
+    call restrict_sdc(LevF, LevG, LevF%Q, LevG%Q, .false.,tF)
 
-    do m = 1, G%nnodes
-       call G%sweeper%evaluate(G, tG(m), m)
-    end do
+!    do m = 1, LevG%nnodes
+!       call LevG%sweeper%evaluate(LevG, tG(m), m)
+!    end do
+     call LevG%sweeper%evaluate_all(LevG, tG)
 
 
     !
     ! fas correction
     !
-
-    do m = 1, G%nnodes-1
-       call G%encap%setval(G%tau(m), 0.0_pfdp)
+    do m = 1, LevG%nnodes-1
+       call LevG%encap%setval(LevG%tau(m), 0.0_pfdp)
     end do
-
-    ! compute '0 to node' integral on the coarse level
-
-    call G%sweeper%integrate(G, G%Q, G%F, dt, tmpG)
-    do m = 2, G%nnodes-1
-       call G%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
-    end do
-
-    ! restrict '0 to node' integral on the fine level (which was
-    ! computed during the last call to pf_residual)
-
-    call restrict_sdc(F, G, F%I, tmpFr, .true.,tF)
-
-    ! compute 'node to node' tau correction
-
-    call G%encap%axpy(G%tau(1),  1.0_pfdp, tmpFr(1))
-    call G%encap%axpy(G%tau(1), -1.0_pfdp, tmpG(1))
-
-    do m = 2, G%nnodes-1
-       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpFr(m))
-       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpFr(m-1))
-
-       call G%encap%axpy(G%tau(m), -1.0_pfdp, tmpG(m))
-       call G%encap%axpy(G%tau(m),  1.0_pfdp, tmpG(m-1))
-    end do
-    if (pf%state%iter < 1)  then
-       do m = 1, G%nnodes-1
-          call G%encap%setval(G%tau(m), 0.0_pfdp)
+    if (pf%state%iter >= pf%taui0)  then
+       ! compute '0 to node' integral on the coarse level
+       call LevG%sweeper%integrate(LevG, LevG%Q, LevG%F, dt, tmpG)
+       do m = 2, LevG%nnodes-1
+          call LevG%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
        end do
-    end if
+       
+       ! compute '0 to node' integral on the fine level
+       call LevF%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
+       do m = 2, LevF%nnodes-1
+          call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%I(m-1))
+       end do
+       
+       ! restrict '0 to node' integral on the fine level (which was
+       ! computed during the last call to pf_residual)
+       call restrict_sdc(LevF, LevG, LevF%I, tmpFr, .true.,tF)
+       
+       ! compute 'node to node' tau correction
+       
+       call LevG%encap%axpy(LevG%tau(1),  1.0_pfdp, tmpFr(1))
+       call LevG%encap%axpy(LevG%tau(1), -1.0_pfdp, tmpG(1))
+       
+       do m = 2, LevG%nnodes-1
+          call LevG%encap%axpy(LevG%tau(m),  1.0_pfdp, tmpFr(m))
+          call LevG%encap%axpy(LevG%tau(m), -1.0_pfdp, tmpFr(m-1))
+          
+          call LevG%encap%axpy(LevG%tau(m), -1.0_pfdp, tmpG(m))
+          call LevG%encap%axpy(LevG%tau(m),  1.0_pfdp, tmpG(m-1))
+       end do
+      end if
     !
     ! tidy
     !
 
-    do m = 1, G%nnodes
-       call G%encap%destroy(tmpG(m))
-       call G%encap%destroy(tmpFr(m))
+    do m = 1, LevG%nnodes
+       call LevG%encap%destroy(tmpG(m))
+       call LevG%encap%destroy(tmpFr(m))
     end do
 
-    do m = 1, F%nnodes
-       call F%encap%destroy(tmpF(m))
+    do m = 1, LevF%nnodes
+       call LevF%encap%destroy(tmpF(m))
     end do
 
-    call end_timer(pf, TRESTRICT + F%level - 1)
-    call call_hooks(pf, F%level, PF_POST_RESTRICT_ALL)
+    call end_timer(pf, TRESTRICT + LevF%level - 1)
+    call call_hooks(pf, LevF%level, PF_POST_RESTRICT_ALL)
 
   end subroutine restrict_time_space_fas
 

@@ -75,11 +75,13 @@ module pf_mod_dtype
   type :: pf_sweeper_t
      type(c_ptr) :: sweeperctx
      integer     :: npieces
-     procedure(pf_sweep_p),      pointer, nopass :: sweep
-     procedure(pf_initialize_p), pointer, nopass :: initialize
-     procedure(pf_evaluate_p),   pointer, nopass :: evaluate
-     procedure(pf_integrate_p),  pointer, nopass :: integrate
-     procedure(pf_sweepdestroy_p),  pointer, nopass :: destroy
+     procedure(pf_sweep_p),        pointer, nopass :: sweep
+     procedure(pf_initialize_p),   pointer, nopass :: initialize
+     procedure(pf_evaluate_p),     pointer, nopass :: evaluate
+     procedure(pf_evaluate_all_p), pointer, nopass :: evaluate_all
+     procedure(pf_integrate_p),    pointer, nopass :: integrate
+     procedure(pf_residual_p),     pointer, nopass :: residual
+     procedure(pf_sweepdestroy_p), pointer, nopass :: destroy
   end type pf_sweeper_t
 
   type :: pf_encap_t
@@ -100,6 +102,7 @@ module pf_mod_dtype
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
      integer     :: level = -1          ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
+
 
      real(pfdp)  :: residual
 
@@ -177,6 +180,8 @@ module pf_mod_dtype
      logical :: Pipeline_G =  .false.
      logical :: PFASST_pred = .false.
 
+     integer     :: taui0 = -999999     ! Cutoff for tau inclusion
+
      ! pf objects
      type(pf_state_t), pointer :: state
      type(pf_level_t), pointer :: levels(:)
@@ -207,23 +212,29 @@ module pf_mod_dtype
      end subroutine pf_hook_p
 
      ! sweeper interfaces
-     subroutine pf_sweep_p(pf, F, t0, dt)
+     subroutine pf_sweep_p(pf, Lev, t0, dt)
        import pf_pfasst_t, pf_level_t, pfdp, c_ptr
        type(pf_pfasst_t), intent(inout) :: pf
        real(pfdp),        intent(in)    :: dt, t0
-       type(pf_level_t),  intent(inout) :: F
+       type(pf_level_t),  intent(inout) :: Lev
      end subroutine pf_sweep_p
 
-     subroutine pf_evaluate_p(F, t, m)
+     subroutine pf_evaluate_p(Lev, t, m)
        import pf_level_t, pfdp, c_ptr
-       type(pf_level_t), intent(inout) :: F
+       type(pf_level_t), intent(inout) :: Lev
        real(pfdp),       intent(in)    :: t
        integer,          intent(in)    :: m
      end subroutine pf_evaluate_p
 
-     subroutine pf_initialize_p(F)
+     subroutine pf_evaluate_all_p(Lev, t)
+       import pf_level_t, pfdp, c_ptr
+       type(pf_level_t), intent(inout) :: Lev
+       real(pfdp),       intent(in)    :: t(:)
+     end subroutine pf_evaluate_all_p
+
+     subroutine pf_initialize_p(Lev)
        import pf_level_t
-       type(pf_level_t), intent(inout) :: F
+       type(pf_level_t), intent(inout) :: Lev
      end subroutine pf_initialize_p
 
      subroutine pf_sweepdestroy_p(sweeper)
@@ -231,13 +242,19 @@ module pf_mod_dtype
        type(pf_sweeper_t), intent(inout)  :: sweeper
      end subroutine pf_sweepdestroy_p
 
-     subroutine pf_integrate_p(F, qSDC, fSDC, dt, fintSDC)
+     subroutine pf_integrate_p(Lev, qSDC, fSDC, dt, fintSDC)
        import pf_level_t, c_ptr, pfdp
-       type(pf_level_t),  intent(in)    :: F
+       type(pf_level_t),  intent(in)    :: Lev
        type(c_ptr),       intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),        intent(in)    :: dt
        type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
+
+     subroutine pf_residual_p(Lev, dt)
+       import pf_level_t, c_ptr, pfdp
+       type(pf_level_t),  intent(inout) :: Lev
+       real(pfdp),        intent(in)    :: dt
+     end subroutine pf_residual_p
 
      ! transfer interfaces
      subroutine pf_transfer_p(qF, qG, levelF, levelctxF, levelG, levelctxG, t)

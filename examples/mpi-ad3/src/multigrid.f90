@@ -60,8 +60,8 @@ contains
     allocate(ybc(1-spatial_order:Nx+spatial_order))
 
 
-    select case (spatial_order)
-    case (2)  ! Centered diff
+!    select case (spatial_order)
+!    case (2)  ! Centered diff
        sig = nudt/(dx*dx)
        sigi = (dx*dx)/(nudt)
 !!$       do n = 1,Nrelax
@@ -109,9 +109,9 @@ contains
 !!$          end do
 !!$       end do
 
-    case default
-       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
-    end select
+ !   case default
+ !      write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
+ !   end select
 
     deallocate(ybc)
   end subroutine relax_1d
@@ -135,8 +135,8 @@ contains
     Nx = yptr%shape(1)
     dx    = Lx/dble(Nx)
 
-    select case (spatial_order)
-    case (2)  ! Centered diff
+!    select case (spatial_order)
+!    case (2)  ! Centered diff
 !!$       sigi = (dx*dx)/(nudt)
 !!$       do n = 1,Nrelax
 !!$          do irb = 1,2
@@ -161,9 +161,9 @@ contains
 !!$          end do
 !!$       end do
 
-    case default
-       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
-    end select
+!    case default
+!       write(*,*) 'Bad case in multigrid.f90, relax:  spatial_order=',spatial_order
+!    end select
   end subroutine relax_2d
   
   recursive subroutine Vcycle(yptr, t, nudt, rhsptr, level, ctx, Nrelax,maxresid)
@@ -297,7 +297,7 @@ contains
 !!$       Lap = (-30.0_pfdp*y%array + 16.0_pfdp*(yp + ym)-(ypp+ymm))/(12.0_pfdp*dx*dx)
 !!$
     case default
-       write(*,*) 'Bad case in feval.f90, feval_init:  spatial_order=', spatial_order
+       write(*,*) 'Bad case in feval.f90, feval_init:  dim=', yptr%dim
     end select
   end subroutine resid
 
@@ -394,7 +394,7 @@ contains
 !!$       Lap = (-30.0_pfdp*y%array + 16.0_pfdp*(yp + ym)-(ypp+ymm))/(12.0_pfdp*dx*dx)
 !!$
     case default
-       write(*,*) 'Bad case in feval.f90, feval_init:  spatial_order=', spatial_order
+       write(*,*) 'Bad case in feval.f90, feval_init:  dim=', yptr%dim
     end select
     res = rhs - (y - nudt*Lap)
 !!$    print *,'----------------------------------------------------'
@@ -417,19 +417,26 @@ contains
     integer   :: i
 
     ybc(1:Nx)=y
-    do i = 1,Nbc
-       ybc(Nx+i)=-ybc(i)
-       ybc(1-i)=-ybc(Nx+1-i)
-    end do
-    
+    ! do i = 1,Nbc
+    !    ybc(Nx+i)=-ybc(Nx-i)
+    !    ybc(1-i)=-ybc(Nx+1-i)
+    ! end do
+
+    call set_bc_1d(ybc,Nx,Nbc)
+
   end subroutine fill_bc_1d
   subroutine set_bc_1d(ybc, Nx, Nbc)
     integer, intent(in)      ::  Nx, Nbc
     real(pfdp), intent(inout) :: ybc(1-Nbc:Nx+Nbc)
     integer   :: i
     do i = 1,Nbc
-       ybc(Nx+i)=-ybc(i)
-       ybc(1-i)=-ybc(Nx+1-i)
+       ! ybc(Nx+i)=-ybc(i)
+       ybc(1-i)=-ybc(1+i)
+    end do
+    ybc(Nx+1) = 0
+    do i = 1,Nbc-1
+       ybc(Nx+1+i)=-ybc(Nx+1-i)
+       ! ybc(1-i)=-ybc(Nx+1-i)
     end do
 
 !!$    ybc(Nx+1)=ybc(1)

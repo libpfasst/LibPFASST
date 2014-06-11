@@ -5,7 +5,7 @@
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray
-  use probin, only: nprob,poutmod, fbase, foutbase
+  use probin, only: nprob,poutmod, fbase, foutbase, N_Vcycles,kfreq
   implicit none
 contains
 
@@ -23,10 +23,14 @@ contains
     integer :: un
     character(len=64) :: fout 
     character(len=7) :: stepstring
-    qend => array1(level%qend)
+    character(len=3) :: Vstring
+    character(len=3) :: Kstring
+!    qend => array1(level%qend)
+    qend => array1(level%Q(level%Nnodes))
     t = state%t0+state%dt   
     call exact(t, level%nvars, yexact)
-    max_y=maxval(abs(yexact))
+!    max_y=maxval(abs(yexact))
+    max_y=maxval(abs(qend))
     err = maxval(abs(qend-yexact))
     call exact_ode(t, level%nvars, yexact)
     ODE_err = maxval(abs(qend-yexact))
@@ -34,12 +38,14 @@ contains
 
     call pf_residual(pf, level, state%dt)
     res= level%residual
-!    print '(" lev:",i5," step:",i5," t=",es10.3," iter:",i3," Max_y:",es13.6," Err:",es13.6," ODEERR:",es13.6," Res:",es13.6)', &
-!               level%level,state%step+1, t,state%iter, max_y,err,ODE_err,res
+    print '(" lev:",i5," step:",i5," t=",es10.3," iter:",i3," Max_y:",es13.6," Err:",es13.6," ODEERR:",es13.6," Res:",es13.6)', &
+               level%level,state%step+1, t,state%iter, max_y,err,ODE_err,res
 
     un = 1000+state%step+1
     write(stepstring,"(I0.3)") state%step+1
-    fout = trim(foutbase)//'_'//trim(stepstring)//'.m'
+    write(Vstring,"(I0.2)") N_Vcycles
+    write(Kstring,"(I0.3)") kfreq
+    fout = trim(foutbase)//'N_V'//trim(Vstring)//'N_step'//trim(stepstring)//'K'//trim(Kstring)//'.m'
     open(unit=un, file = fout, status = 'unknown', action = 'write', position='append')
     write(un,*)  level%level,state%step+1,t,state%iter,max_y,err,ODE_err,res
     close(un)

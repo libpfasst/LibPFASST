@@ -96,69 +96,6 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine vortex_sheets(q0)
-    type(carray4), intent(inout) :: q0
-
-    double precision :: x, y, z
-    integer :: ii, i, j, k, n
-
-    type(c_ptr) :: ffft, wkp
-
-    complex(c_double), pointer :: u(:,:,:), v(:,:,:), w(:,:,:), wk(:,:,:)
-    double precision, parameter :: delta = 0.1d0, rho=50.0d0
-
-    n = q0%shape(1)
-
-    allocate(u(n,n,n), v(n,n,n), w(n,n,n))
-
-    u = -1.0d0
-    w =  0.0d0
-
-    do i = 1, n
-       x = dble(i) / n
-       do j = 1, n
-          y = dble(j) / n
-          do k = 1, n
-             z = dble(k) / n
-
-             do ii = -4, 4
-                u(k, j, i) = u(k, j, i) + tanh(rho*(ii + y - 0.25d0))
-                u(k, j, i) = u(k, j, i) + tanh(rho*(ii + 0.75d0 - y))
-             end do
-
-             v(k, j, i) = delta * sin(6.28318530718d0*(x + 0.25d0))
-
-          end do
-       end do
-    end do
-
-    wkp  = fftw_alloc_complex(int(n**3, c_size_t))
-    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
-
-    call c_f_pointer(wkp, wk, [ n, n, n ])
-
-    wk = u
-    call fftw_execute_dft(ffft, wk, wk)
-    q0%array(:,:,:,1) = wk
-
-    wk = v
-    call fftw_execute_dft(ffft, wk, wk)
-    q0%array(:,:,:,2) = wk
-
-    wk = w
-    call fftw_execute_dft(ffft, wk, wk)
-    q0%array(:,:,:,3) = wk
-
-    q0%array = q0%array / n**3
-
-    deallocate(u,v,w,wk)
-
-    call fftw_destroy_plan(ffft)
-
-  end subroutine vortex_sheets
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   subroutine divergence(cptr, n1, n2, n3, u, div)
     implicit none
     type(c_ptr),               intent(in), value :: cptr
@@ -265,7 +202,7 @@ contains
     call c_f_pointer(ctx%vw, vw, [ ctx%n, ctx%n, ctx%n ])
     call c_f_pointer(ctx%ww, ww, [ ctx%n, ctx%n, ctx%n ])
 
-    !$omp parallel workshare
+!xxx    !$omp parallel workshare
     u1 = y%array(:,:,:,1)
     v1 = y%array(:,:,:,2)
     w1 = y%array(:,:,:,3)
@@ -278,7 +215,7 @@ contains
     uw = y%array(:,:,:,1)
     vw = y%array(:,:,:,2)
     ww = y%array(:,:,:,3)
-    !$omp end parallel workshare
+!xxx    !$omp end parallel workshare
   end subroutine copy_for_convolve
 
   subroutine eval_f1(yptr, t, level, ctxptr, f1ptr)

@@ -65,9 +65,15 @@ contains
        dx = 1.0_pfdp/dble(Nx)
        allocate(ybc(1-2:Nx+2))
        call fill_bc_1d(y,ybc,Nx,2)
-       do i = 1,Nx
-          f1(i)=-v*(ybc(i+1)-ybc(i-1))/(2.0_pfdp*dx)
-       end do
+       if (spatial_order == 2) then
+          do i = 1,Nx
+             f1(i)=-v*(ybc(i+1)-ybc(i-1))/(2.0_pfdp*dx)
+          end do
+       else
+          do i = 1,Nx
+             f1(i)=-v*(-(ybc(i+2)-ybc(i-2)) + 16.0_pfdp*(ybc(i+1)-ybc(i-1))/(12.0_pfdp*dx))
+          end do
+       endif
        deallocate(ybc)
     endif
 
@@ -110,9 +116,16 @@ contains
        dx = 1.0_pfdp/dble(Nx)
        allocate(ybc(1-2:Nx+2))
        call fill_bc_1d(y,ybc,Nx,2)
-       do i = 1,Nx
-          f2(i)=nu*(-2.0_pfdp*ybc(i) + ybc(i-1)+ybc(i+1))/(dx*dx)
-       end do
+       if (spatial_order == 2) then
+          do i = 1,Nx
+             f2(i)=nu*(-2.0_pfdp*ybc(i) + ybc(i-1)+ybc(i+1))/(dx*dx)
+          end do
+       else
+          do i = 1,Nx
+             f2(i)=nu*(-30.0_pfdp*ybc(i) + 16.0_pfdp*(ybc(i-1)+ybc(i+1))-ybc(i-2)-ybc(i+2))/(12.0_pfdp*dx*dx)
+!             f2(i)=nu*(-2.0_pfdp*ybc(i) + ybc(i-1)+ybc(i+1))/(dx*dx)
+          end do
+       endif
        deallocate(ybc)
 
     endif
@@ -126,16 +139,19 @@ contains
     integer(c_int), intent(in)         :: level
 
     real(pfdp),    pointer :: y(:), rhs(:), f2(:)
-    real(pfdp)   :: nudt,maxresid
+    real(pfdp)   :: nudt,maxresid,dx
     type(work1),   pointer :: work
     complex(pfdp), pointer :: wk(:)
-    integer :: k,N_V
-    type(ndarray),pointer :: ymg
+    integer :: k,N_V,Nx,i,j
     type(ndarray),pointer  :: rhsmg
+    type(ndarray),pointer  :: ymg
+    real(pfdp), allocatable :: y0(:)
+    real(pfdp), allocatable :: rhs0(:)
+    real(pfdp), allocatable :: ybc(:)
 
+    Nx = size(y)
 
     call c_f_pointer(levelctx, work)
-
 
     y   => array1(yptr)
     rhs => array1(rhsptr)
@@ -163,15 +179,39 @@ contains
       endif
       call c_f_pointer(yptr,ymg)
       call c_f_pointer(rhsptr,rhsmg)
-      if (level ==1 ) then
-         N_V=3
-      else
-         N_V=1
-      endif
-      do k=1,N_Vcycles
-         call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
-      end do
-      call f2eval1(yptr, t, level, levelctx, f2ptr)
+
+      allocate(y0(1:Nx))
+      dx = 1.0_pfdp/dble(Nx)
+      y0=rhs
+      if (spatial_order == 4) then
+         allocate(rhs0(1:Nx))
+         rhs0=rhs + dt*f2
+         y = rhs + dt*f2
+
+         !  Subtract L2 from rhs
+         allocate(ybc(1-2:Nx+2))
+         do j = 1,10
+            rhs = rhs0 - dt*f2
+            call fill_bc_1d(y,ybc,Nx,2)
+            do i = 1,Nx
+               rhs(i)=rhs0(i)-nu*dt*(-2.0_pfdp*ybc(i) + ybc(i-1)+ybc(i+1))/(dx*dx)
+               rhs(i)=rhs(i)+nu*dt*(-30.0_pfdp*ybc(i) + 16.0_pfdp*(ybc(i-1)+ybc(i+1))-ybc(i-2)-ybc(i+2))/(12.0_pfdp*dx*dx)
+            end do
+            do k=1,N_Vcycles
+               call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
+            end do
+            call f2eval1(yptr, t, level, levelctx, f2ptr)
+         end do
+         deallocate(ybc)
+       else
+          do k=1,N_Vcycles
+             call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
+          end do
+          call f2eval1(yptr, t, level, levelctx, f2ptr)
+       endif
+
+       deallocate(y0)          
+
    endif
 
   end subroutine f2comp1

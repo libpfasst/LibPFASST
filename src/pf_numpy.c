@@ -14,7 +14,7 @@ void ndarray_mkdir(char *dname, int dlen)
   mkdir(dname, 0755);
 }
 
-void ndarray_dump_numpy(char *dname, char *fname, char endian[4], int dim, int *shape, int nvars, double *array)
+void ndarray_dump_numpy(char *dname, char *fname, char endian[5], int dim, int *shape, int nvars, double *array)
 {
   unsigned short  i, len, pad;
   FILE*           fp;

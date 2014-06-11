@@ -19,7 +19,7 @@ $(FFTW3).tar.gz:
 # hdf5
 #
 
-HDF5 = hdf5-1.8.11
+HDF5 = hdf5-1.8.13
 HDF5_CONFIG = --enable-fortran --enable-parallel
 
 hdf5: $(HDF5).tar.gz

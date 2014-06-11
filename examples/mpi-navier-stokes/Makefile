@@ -4,19 +4,20 @@
 
 LIBPFASST ?= ../..
 FFTW3     ?= $(LIBPFASST)/fftw3
+HDF5      ?= $(LIBPFASST)/hdf5
 
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 
 VPATHS += src
-FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90 src/encap.f90 src/fftwpp.f90
+FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90 src/encap.f90 src/fftwpp.f90 src/initial.f90
 CSRC   += src/numpy.c
 CXXSRC += src/cfftw++.cpp src/fftw++.cpp src/convolution.cpp
 
-FFLAGS  += -I$(FFTW3)/include -fopenmp
+FFLAGS  += -O3 -I$(FFTW3)/include -I$(HDF5)/include -fopenmp
 CFLAGS  += -I$(FFTW3)/include -fopenmp
-LDFLAGS += -L$(FFTW3)/lib -lfftw3 -fopenmp -lstdc++ -lfftw3_omp
+LDFLAGS += -fopenmp -lstdc++ -ldl -lz -L$(FFTW3)/lib -lfftw3 -lfftw3_omp -L$(HDF5)/lib -lhdf5_fortran -lhdf5
 
 vpath %.cpp $(VPATHS)
 
@@ -37,4 +38,4 @@ include $(LIBPFASST)/Makefile.rules
 build/solutions.o: build/pfasst.o
 build/feval.o:     build/pfasst.o build/encap.o build/fftwpp.o
 build/hooks.o:     build/numpy.o build/solutions.o
-build/main.o:      build/feval.o build/hooks.o build/transfer.o
+build/main.o:      build/feval.o build/hooks.o build/transfer.o build/initial.o

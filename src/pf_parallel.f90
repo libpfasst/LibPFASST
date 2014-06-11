@@ -65,6 +65,7 @@ contains
 
 
     if (pf%comm%nproc > 1) then
+       G => pf%levels(1)
        if (pf%Pipeline_G .and. (G%nsweeps > 1)) then
           !  This is the weird choice.  We burn in without communication, then do extra sweeps
           G => pf%levels(1)
@@ -125,10 +126,30 @@ contains
        ! Return to fine level...
        call pf_v_cycle_post_predictor(pf, t0, dt)
 
+    else
+
+       ! Single processor... sweep on coarse and return to fine level.
+
+       G => pf%levels(1)
+       do k = 1, pf%rank + 1
+          pf%state%iter = -k
+          t0k = t0-(pf%rank)*dt + (k-1)*dt
+
+          call call_hooks(pf, G%level, PF_PRE_SWEEP)
+          do j = 1, G%nsweeps
+             call G%sweeper%sweep(pf, G, t0k, dt)
+          end do
+          call pf_residual(pf, G, dt)
+          call call_hooks(pf, G%level, PF_POST_SWEEP)
+       end do
+
+       ! Return to fine level...
+       call pf_v_cycle_post_predictor(pf, t0, dt)
+
     end if
 
     call end_timer(pf, TPREDICTOR)
-    call call_hooks(pf, 1, PF_POST_PREDICTOR)
+    call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING
@@ -139,7 +160,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
 
-    real(pfdp) :: residual1, energy1
+    real(pfdp) :: residual1
 
     residual1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
@@ -522,7 +543,7 @@ contains
           call call_hooks(pf, F%level, PF_POST_SWEEP)
        end if
 
-          
+
     end do
 
   end subroutine pf_v_cycle

@@ -19,6 +19,7 @@
 
 module pf_mod_imex
   use pf_mod_dtype
+  use pf_mod_utils
   use pf_mod_explicit, only: pf_f1eval_p
   use pf_mod_implicit, only: pf_f2eval_p, pf_f2comp_p
   implicit none
@@ -30,10 +31,8 @@ module pf_mod_imex
      procedure(pf_f2eval_p), pointer, nopass :: f2eval
      procedure(pf_f2comp_p), pointer, nopass :: f2comp
 
-     !  Matrices
-     real(pfdp), ALLOCATABLE :: SdiffE(:,:)
-     real(pfdp), ALLOCATABLE :: SdiffI(:,:)
-
+     real(pfdp), allocatable :: SdiffE(:,:)
+     real(pfdp), allocatable :: SdiffI(:,:)
   end type pf_imex_t
 
 contains
@@ -169,11 +168,13 @@ contains
     imex%f2comp => f2comp
 
     sweeper%npieces = npieces
-    sweeper%sweep      => imex_sweep
-    sweeper%evaluate   => imex_evaluate
-    sweeper%initialize => imex_initialize
-    sweeper%integrate  => imex_integrate
-    sweeper%destroy    => pf_imex_destroy
+    sweeper%sweep        => imex_sweep
+    sweeper%evaluate     => imex_evaluate
+    sweeper%initialize   => imex_initialize
+    sweeper%integrate    => imex_integrate
+    sweeper%destroy      => pf_imex_destroy
+    sweeper%evaluate_all => pf_generic_evaluate_all
+    sweeper%residual     => pf_generic_residual
 
     sweeper%sweeperctx = c_loc(imex)
   end subroutine pf_imex_create
