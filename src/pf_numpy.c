@@ -49,7 +49,7 @@ void ndarray_dump_numpy(char *dname, char *fname, char endian[4], int dim, int *
   }
 
   pad = 16 - (8 + len + 1) % 16;
-  for (i=len; i<len+pad; i++)
+  for (i=len; i<len+pad+1; i++)
     header[i] = ' ';
   header[len+pad+1] = '\n';
   header[len+pad+2] = '\0';
