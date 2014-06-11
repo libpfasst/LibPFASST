@@ -55,64 +55,87 @@ contains
     F => pf%levels(pf%nlevels)
     call spreadq0(F, t0)
 
-    do l = pf%nlevels, 2, -1
-       F => pf%levels(l); G => pf%levels(l-1)
-       call pf_residual(pf, F, dt)
-       call restrict_time_space_fas(pf, t0, dt, F, G)
-       call save(G)
-       call G%encap%pack(G%q0, G%Q(1))
-    end do
+    if (pf%nlevels > 1) then
+
+       do l = pf%nlevels, 2, -1
+          F => pf%levels(l); G => pf%levels(l-1)
+          call pf_residual(pf, F, dt)
+          call restrict_time_space_fas(pf, t0, dt, F, G)
+          call save(G)
+          call G%encap%pack(G%q0, G%Q(1))
+       end do
 
 
-    if (pf%comm%nproc > 1) then
-       G => pf%levels(1)
-       if (pf%Pipeline_G .and. (G%nsweeps > 1)) then
-          !  This is the weird choice.  We burn in without communication, then do extra sweeps
+       if (pf%comm%nproc > 1) then
           G => pf%levels(1)
-          do k = 1, pf%rank + 1
-             pf%state%iter = -k
+          if (pf%Pipeline_G .and. (G%nsweeps > 1)) then
+             !  This is the weird choice.  We burn in without communication, then do extra sweeps
+             G => pf%levels(1)
+             do k = 1, pf%rank + 1
+                pf%state%iter = -k
 
-             ! Get new initial value (skip on first iteration)
-             if (k > 1) then
-                call G%encap%pack(G%q0, G%qend)
-                if (.not. pf%PFASST_pred) then
-                   call spreadq0(G, t0)
+                ! Get new initial value (skip on first iteration)
+                if (k > 1) then
+                   call G%encap%pack(G%q0, G%qend)
+                   if (.not. pf%PFASST_pred) then
+                      call spreadq0(G, t0)
+                   end if
                 end if
-             end if
 
-             call call_hooks(pf, G%level, PF_PRE_SWEEP)
-             call G%sweeper%sweep(pf, G, t0, dt)
-             call pf_residual(pf, G, dt)  !  why is this here?
-             call call_hooks(pf, G%level, PF_POST_SWEEP)
-          end do
-          ! Now we have mimicked the burn in and we must do pipe-lined sweeps
-          do k = 1, G%nsweeps-1
-             pf%state%iter =-(pf%rank + 1) -k
+                call call_hooks(pf, G%level, PF_PRE_SWEEP)
+                call G%sweeper%sweep(pf, G, t0, dt)
+                call pf_residual(pf, G, dt)  !  why is this here?
+                call call_hooks(pf, G%level, PF_POST_SWEEP)
+             end do
+             ! Now we have mimicked the burn in and we must do pipe-lined sweeps
+             do k = 1, G%nsweeps-1
+                pf%state%iter =-(pf%rank + 1) -k
 
-             !  Get new initial conditions
-             call pf_recv(pf, G, G%level*20000+pf%rank, .true.)
-             !  Do a sweep
-             call call_hooks(pf, G%level, PF_PRE_SWEEP)
-             call G%sweeper%sweep(pf, G, t0, dt)
-             call call_hooks(pf, G%level, PF_POST_SWEEP)
-             !  Send forward
-             call pf_send(pf, G,  G%level*20000+pf%rank+1, .true.)
-          end do
-          call pf_residual(pf, G, dt)
+                !  Get new initial conditions
+                call pf_recv(pf, G, G%level*20000+pf%rank, .true.)
+                !  Do a sweep
+                call call_hooks(pf, G%level, PF_PRE_SWEEP)
+                call G%sweeper%sweep(pf, G, t0, dt)
+                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                !  Send forward
+                call pf_send(pf, G,  G%level*20000+pf%rank+1, .true.)
+             end do
+             call pf_residual(pf, G, dt)
+          else
+             ! Normal predictor burn in
+             G => pf%levels(1)
+             do k = 1, pf%rank + 1
+                pf%state%iter = -k
+                t0k = t0-(pf%rank)*dt + (k-1)*dt
+
+                ! Get new initial value (skip on first iteration)
+                if (k > 1) then
+                   call G%encap%pack(G%q0, G%qend)
+                   if (.not. pf%PFASST_pred) then
+                      call spreadq0(G, t0k)
+                   end if
+                end if
+
+                call call_hooks(pf, G%level, PF_PRE_SWEEP)
+                do j = 1, G%nsweeps
+                   call G%sweeper%sweep(pf, G, t0k, dt)
+                end do
+                call pf_residual(pf, G, dt)
+                call call_hooks(pf, G%level, PF_POST_SWEEP)
+             end do
+          end if
+
+          ! Return to fine level...
+          call pf_v_cycle_post_predictor(pf, t0, dt)
+
        else
-          ! Normal predictor burn in
+
+          ! Single processor... sweep on coarse and return to fine level.
+          
           G => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
-
-             ! Get new initial value (skip on first iteration)
-             if (k > 1) then
-                call G%encap%pack(G%q0, G%qend)
-                if (.not. pf%PFASST_pred) then
-                   call spreadq0(G, t0k)
-                end if
-             end if
 
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              do j = 1, G%nsweeps
@@ -121,30 +144,11 @@ contains
              call pf_residual(pf, G, dt)
              call call_hooks(pf, G%level, PF_POST_SWEEP)
           end do
+
+          ! Return to fine level...
+          call pf_v_cycle_post_predictor(pf, t0, dt)
+
        end if
-
-       ! Return to fine level...
-       call pf_v_cycle_post_predictor(pf, t0, dt)
-
-    else
-
-       ! Single processor... sweep on coarse and return to fine level.
-
-       G => pf%levels(1)
-       do k = 1, pf%rank + 1
-          pf%state%iter = -k
-          t0k = t0-(pf%rank)*dt + (k-1)*dt
-
-          call call_hooks(pf, G%level, PF_PRE_SWEEP)
-          do j = 1, G%nsweeps
-             call G%sweeper%sweep(pf, G, t0k, dt)
-          end do
-          call pf_residual(pf, G, dt)
-          call call_hooks(pf, G%level, PF_POST_SWEEP)
-       end do
-
-       ! Return to fine level...
-       call pf_v_cycle_post_predictor(pf, t0, dt)
 
     end if
 
