@@ -59,6 +59,8 @@ contains
     character(len=256)     :: fname
     type(carray4), pointer :: qend
 
+    if (state%iter < 0) return
+
     call c_f_pointer(level%qend, qend)
 
     write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &

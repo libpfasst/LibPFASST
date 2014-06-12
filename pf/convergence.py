@@ -53,8 +53,11 @@ def errors(reference, approximate, **kwargs):
   for step, aiter, alev in product(steps, iters, levels):
     ref = cache.get(rmap[step*trat, riter, rlev])
     app = cache.get(amap[step, aiter, alev])
-    err = abs(ref - app).max()
-    errors[step, aiter, alev] = err
+    try:
+      err = abs(ref - app).max()
+      errors[step, aiter, alev] = err
+    except:
+      print 'WARNING: size mismatch:', step, aiter, alev
 
   return errors, steps, iters, levels
 
