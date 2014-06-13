@@ -19,6 +19,8 @@ program fpfasst
   double precision      :: dt
   character(len=32)     :: arg
 
+  double precision, parameter :: nu = 1.d-4
+
   type(pf_encap_t),   target :: encaps
 
   ! initialize mpi
@@ -29,7 +31,7 @@ program fpfasst
   call mpi_comm_size(mpi_comm_world, nprocs, ierror)
 
   nthreads = -1
-  nsteps   = 16
+  nsteps   = 32
   if (nprocs == 1) then
      nlevs = 1
   else
@@ -47,10 +49,12 @@ program fpfasst
 
   ! initialize pfasst
 !  nx     = [ 32, 64, 128 ]
-  nx     = [ 16, 32, 64 ]
+  nx     = [ 8, 16, 32 ]
   nvars  = 2 * 3 * nx**3
   nnodes = [ 2, 3, 5 ]
-  dt     = 0.0001d0
+!  dt     = 0.0001d0
+  ! dt     = 1.d0/64
+  dt = 0.001d0
 
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
@@ -60,7 +64,7 @@ program fpfasst
   first = size(nx) - nlevs + 1
 
   if (nprocs == 1) then
-     pf%niters = 8
+     pf%niters = 12
   else
      pf%niters = 5
   end if
@@ -77,7 +81,7 @@ program fpfasst
 
      allocate(pf%levels(l)%shape(4))
      pf%levels(l)%shape = [ nx(first-1+l), nx(first-1+l), nx(first-1+l), 3 ]
-     call feval_create(nx(first-1+l), 1.0d0, 2.0d-3, nthreads, pf%levels(l)%levelctx)
+     call feval_create(nx(first-1+l), 1.0d0, nu, nthreads, pf%levels(l)%levelctx)
 
      pf%levels(l)%encap       => encaps
      pf%levels(l)%interpolate => interpolate
@@ -94,14 +98,16 @@ program fpfasst
   call carray4_create(q0, pf%levels(nlevs)%shape)
   ! call vortex_sheets(q0)
   ! call random_full(q0)
-  call load(q0, 'full064_s990.h5')
+  ! call load(q0, 'full064_s990.h5')
+  ! call load(q0, 'vortex_sheets.h5')
+  call exact(q0, nu, 0.0d0)
+
   if (pf%rank == 0) then
      call dump(pf%outdir, 'initial.npy', q0)
   end if
 
-  do l = 1, nlevs
-     call pf_add_hook(pf, l, PF_POST_SWEEP, project_hook)
-  end do
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
 
 
   ! run

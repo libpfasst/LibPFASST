@@ -96,40 +96,6 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine divergence(cptr, n1, n2, n3, u, div)
-    implicit none
-    type(c_ptr),               intent(in), value :: cptr
-    integer(c_int),            intent(in), value :: n1, n2, n3
-    complex(c_double_complex), intent(in)        :: u(n3, n2, n1, 3)
-    complex(c_double_complex), intent(out)       :: div(n3, n2, n1)
-
-    type(feval_t), pointer    :: fptr
-    integer                   :: i1, i2, i3
-    real(c_double)            :: kk(n1)
-
-    call c_f_pointer(cptr, fptr)
-    kk = fptr%k
-
-    !$omp parallel do private(i1, i2, i3)
-    do i1 = 1,  n1
-       do  i2 = 1,  n2
-          do  i3 = 1,  n3
-
-             ! phi = div(ustar)
-             div(i3, i2, i1) = &
-                  kk(i1) * (0.0d0,1.0d0) * u(i3, i2, i1, 1) + &
-                  kk(i2) * (0.0d0,1.0d0) * u(i3, i2, i1, 2) + &
-                  kk(i3) * (0.0d0,1.0d0) * u(i3, i2, i1, 3)
-
-          end do
-       end do
-    end do
-    !$omp end parallel do
-
-  end subroutine divergence
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   subroutine project(cptr, n1, n2, n3, ustar, u)
     ! Project ustar to divergence free u
     !
@@ -183,10 +149,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine copy_for_convolve(y, ctx)
-    type(carray4), intent(in) :: y
-    type(feval_t),    intent(in) :: ctx
+    type(carray4), intent(in   ) :: y
+    type(feval_t), intent(in   ) :: ctx
 
-    complex(c_double), dimension(:,:,:), pointer :: &
+    complex(c_double_complex), dimension(:,:,:), pointer :: &
          u1, v1, w1, v2, w2, w3, uu, uv, uw, vv, vw, ww
 
     call c_f_pointer(ctx%u1, u1, [ ctx%n, ctx%n, ctx%n ])
@@ -202,7 +168,7 @@ contains
     call c_f_pointer(ctx%vw, vw, [ ctx%n, ctx%n, ctx%n ])
     call c_f_pointer(ctx%ww, ww, [ ctx%n, ctx%n, ctx%n ])
 
-!xxx    !$omp parallel workshare
+    !$omp parallel workshare
     u1 = y%array(:,:,:,1)
     v1 = y%array(:,:,:,2)
     w1 = y%array(:,:,:,3)
@@ -215,7 +181,7 @@ contains
     uw = y%array(:,:,:,1)
     vw = y%array(:,:,:,2)
     ww = y%array(:,:,:,3)
-!xxx    !$omp end parallel workshare
+    !$omp end parallel workshare
   end subroutine copy_for_convolve
 
   subroutine eval_f1(yptr, t, level, ctxptr, f1ptr)
@@ -223,7 +189,8 @@ contains
     real(pfdp),  intent(in   )        :: t
     integer,     intent(in   )        :: level
 
-    complex(c_double), dimension(:,:,:), pointer :: uu, uv, uw, vv, vw, ww
+    complex(c_double_complex), dimension(:,:,:), pointer :: uu, uv, uw, vv, vw, ww
+    type(carray4)                                        :: u
 
     type(feval_t), pointer :: ctx
     type(carray4), pointer :: y, f1
@@ -232,7 +199,10 @@ contains
     call c_f_pointer(f1ptr, f1)
     call c_f_pointer(ctxptr, ctx)
 
-    call copy_for_convolve(y, ctx)
+    call carray4_create(u, y%shape)
+    call project(ctxptr, ctx%n, ctx%n, ctx%n, y%array, u%array)
+
+    call copy_for_convolve(u, ctx)
 
     call cconv3d_convolve(ctx%conv, ctx%uu, ctx%u1)
     call cconv3d_convolve(ctx%conv, ctx%uv, ctx%v1)
@@ -249,6 +219,8 @@ contains
     call c_f_pointer(ctx%ww, ww, [ ctx%n, ctx%n, ctx%n ])
 
     call f1eval(ctxptr, ctx%n, ctx%n, ctx%n, uu, uv, vv, uw, vw, ww, f1%array)
+
+    deallocate(u%array)
 
   end subroutine eval_f1
 
@@ -321,26 +293,26 @@ contains
     complex(c_double_complex), intent(out)       :: f2(n3, n2, n1, 3)
 
     type(feval_t), pointer :: fptr
-    integer                :: i1, i2, i3, c
+    integer                :: i1, i2, i3
     real(c_double)         :: kk(n1), lap
 
     call c_f_pointer(cptr, fptr)
     kk = fptr%k
 
-    do c = 1, 3
-       !$omp parallel do private(i1, i2, i3, lap)
-       do i1 = 1,  n1
-          do  i2 = 1,  n2
-             do  i3 = 1,  n3
+    !$omp parallel do private(i1, i2, i3, lap)
+    do i1 = 1,  n1
+       do  i2 = 1,  n2
+          do  i3 = 1,  n3
 
-                lap         = - (kk(i1)**2 + kk(i2)**2 + kk(i3)**2)
-                f2(i3, i2, i1, c) = nu * lap * ustar(i3, i2, i1, c)
+             lap = - (kk(i1)**2 + kk(i2)**2 + kk(i3)**2)
+             f2(i3, i2, i1, 1) = nu * lap * ustar(i3, i2, i1, 1)
+             f2(i3, i2, i1, 2) = nu * lap * ustar(i3, i2, i1, 2)
+             f2(i3, i2, i1, 3) = nu * lap * ustar(i3, i2, i1, 3)
 
-             end do
           end do
        end do
-       !$omp end parallel do
     end do
+    !$omp end parallel do
 
   end subroutine f2eval
 
@@ -371,27 +343,29 @@ contains
     complex(c_double_complex), intent(out)       :: ustar(n3, n2, n1, 3), f2(n3, n2, n1, 3)
 
     type(feval_t), pointer :: fptr
-    integer                :: i1, i2, i3, c
+    integer                :: i1, i2, i3
     real(c_double)         :: kk(n1), lap
 
     call c_f_pointer(cptr, fptr)
     kk = fptr%k
 
-    do c = 1, 3
-       !$omp parallel do private(i1, i2, i3, lap)
-       do i1 = 1,  n1
-          do  i2 = 1,  n2
-             do  i3 = 1,  n3
+    !$omp parallel do private(i1, i2, i3, lap)
+    do i1 = 1,  n1
+       do  i2 = 1,  n2
+          do  i3 = 1,  n3
 
-                lap            = -(kk(i1)**2 + kk(i2)**2 + kk(i3)**2)
-                ustar(i3, i2, i1, c) = rhs(i3, i2, i1, c) / (1.0d0 - nu*dt*lap)
-                f2(i3, i2, i1, c)    = nu * lap * ustar(i3, i2, i1, c)
+             lap = -(kk(i1)**2 + kk(i2)**2 + kk(i3)**2)
+             ustar(i3, i2, i1, 1) = rhs(i3, i2, i1, 1) / (1.0d0 - nu*dt*lap)
+             ustar(i3, i2, i1, 2) = rhs(i3, i2, i1, 2) / (1.0d0 - nu*dt*lap)
+             ustar(i3, i2, i1, 3) = rhs(i3, i2, i1, 3) / (1.0d0 - nu*dt*lap)
+             f2(i3, i2, i1, 1)    = nu * lap * ustar(i3, i2, i1, 1)
+             f2(i3, i2, i1, 2)    = nu * lap * ustar(i3, i2, i1, 2)
+             f2(i3, i2, i1, 3)    = nu * lap * ustar(i3, i2, i1, 3)
 
-             end do
           end do
        end do
-       !$omp end parallel do
     end do
+    !$omp end parallel do
 
   end subroutine f2solv
 

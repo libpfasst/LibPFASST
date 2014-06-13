@@ -1,6 +1,7 @@
 module hooks
   use pfasst
   use encap
+  use initial
   implicit none
 contains
 
@@ -29,6 +30,40 @@ contains
 
     deallocate(ustar)
   end subroutine project_hook
+
+  subroutine echo_error_hook(pf, level, state, levelctx)
+    use feval
+    implicit none
+
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_level_t),  intent(inout) :: level
+    type(pf_state_t),  intent(in)    :: state
+    type(c_ptr),       intent(in)    :: levelctx
+
+    type(carray4)          :: qex
+    type(carray4), pointer :: q
+    type(feval_t), pointer :: ctx
+
+    real(pfdp) :: e0, e1, r
+
+    call c_f_pointer(levelctx, ctx)
+    call carray4_create(qex, level%shape)
+
+    call c_f_pointer(level%q(1), q)
+    call exact(qex, ctx%nu, state%t0)
+    e0 = maxval(abs(qex%array-q%array))
+
+    call c_f_pointer(level%qend, q)
+    call exact(qex, ctx%nu, state%t0+state%dt)
+    e1 = maxval(abs(qex%array-q%array))
+
+    call c_f_pointer(level%R(level%nnodes-1), q)
+    r = maxval(abs(q%array))
+
+    print *, 'err0, err1, res: ', e0, e1, r
+
+    deallocate(qex%array)
+  end subroutine echo_error_hook
 
   subroutine dump(dname, fname, q)
     use pf_mod_ndarray

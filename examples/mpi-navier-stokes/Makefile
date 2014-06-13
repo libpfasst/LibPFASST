@@ -35,7 +35,7 @@ include $(LIBPFASST)/Makefile.rules
 # dependencies
 #
 
-build/solutions.o: build/pfasst.o
 build/feval.o:     build/pfasst.o build/encap.o build/fftwpp.o
-build/hooks.o:     build/numpy.o build/solutions.o
+build/hooks.o:     build/numpy.o build/initial.o
+build/transfer.o:  build/feval.o
 build/main.o:      build/feval.o build/hooks.o build/transfer.o build/initial.o
