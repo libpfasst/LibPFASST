@@ -16,7 +16,8 @@ void ndarray_mkdir(char *dname, int dlen)
 
 void ndarray_dump_numpy(char *dname, char *fname, char endian[5], int dim, int *shape, int nvars, double *array)
 {
-  unsigned short  i, len, pad;
+  unsigned short  len, pad;
+  int             i;
   FILE*           fp;
   char            errmsg[BUFLEN];
   char            header[256*256];

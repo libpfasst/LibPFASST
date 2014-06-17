@@ -79,37 +79,39 @@ contains
     real(pfdp),    intent(in   ) :: nu, t
 
     double precision :: x, y
-    integer          :: i, j, k, n
+    integer          :: i, j, k, kk, n
 
     type(c_ptr) :: ffft, wkp
 
-    complex(c_double), pointer :: u(:,:,:), v(:,:,:), w(:,:,:), wk(:,:,:)
+    complex(c_double_complex), pointer :: u(:,:,:), v(:,:,:), w(:,:,:), wk(:,:,:)
     double precision, parameter :: uc = 0.75d0, vc = 0.85d0
     double precision, parameter :: two_pi = 6.28318530718d0
     double precision, parameter :: eight_pi2 = 78.9568352087d0
 
     n = q0%shape(1)
-
     allocate(u(n,n,n), v(n,n,n), w(n,n,n))
 
-    k = 3
+    kk = 1
     w = 0
 
     do i = 1, n
-       x = dble(i) / n
+       x = dble(i-1) / n
        do j = 1, n
-          y = dble(j) / n
+          y = dble(j-1) / n
+          u(1,j,i) = uc + 0.25 * cos(two_pi*kk*(x-uc*t)) * sin(two_pi*kk*(y-vc*t)) * exp(-eight_pi2*nu*t)
+          v(1,j,i) = vc - 0.25 * sin(two_pi*kk*(x-uc*t)) * cos(two_pi*kk*(y-vc*t)) * exp(-eight_pi2*nu*t)
 
-          u(:,j,i) = uc + 0.25 * cos(two_pi*k*(x-uc*t)) * sin(two_pi*k*(y-vc*t)) * exp(-eight_pi2*nu*t)
-          v(:,j,i) = vc - 0.25 * sin(two_pi*k*(x-uc*t)) * cos(two_pi*k*(y-vc*t)) * exp(-eight_pi2*nu*t)
-
+          do k = 2, n
+             u(k,j,i) = u(1,j,i)
+             v(k,j,i) = v(1,j,i)
+          end do
        end do
     end do
 
     wkp  = fftw_alloc_complex(int(n**3, c_size_t))
-    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
-
     call c_f_pointer(wkp, wk, [ n, n, n ])
+
+    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
 
     wk = u
     call fftw_execute_dft(ffft, wk, wk)

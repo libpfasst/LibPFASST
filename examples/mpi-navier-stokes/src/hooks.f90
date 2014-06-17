@@ -74,14 +74,12 @@ contains
     type(c_ptr) :: tmp
 
     tmp = c_loc(q%array(1,1,1,1))
-    call c_f_pointer(tmp, rarray, [ product(2*q%shape) ])
+    call c_f_pointer(tmp, rarray, [ 2*product(q%shape) ])
 
     call ndarray_dump_numpy(trim(dname)//c_null_char, trim(fname)//c_null_char, '<c16'//c_null_char, &
-         4, q%shape, product(2*q%shape), rarray)
+         4, q%shape, 2*product(q%shape), rarray)
 
   end subroutine dump
-
-
 
   subroutine dump_hook(pf, level, state, levelctx)
     use pf_mod_ndarray

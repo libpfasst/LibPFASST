@@ -280,7 +280,7 @@ contains
     call c_f_pointer(yptr, y)
     call c_f_pointer(f2ptr, f2)
 
-    call f2eval(ctxptr, ctx%n, ctx%n, ctx%n, y%array, t, f2%array)
+    call f2eval(ctxptr, ctx%n, ctx%n, ctx%n, y%array, ctx%nu, f2%array)
   end subroutine eval_f2
 
   subroutine f2eval(cptr, n1, n2, n3, ustar, nu, f2)
