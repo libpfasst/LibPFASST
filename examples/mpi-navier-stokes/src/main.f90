@@ -19,7 +19,7 @@ program fpfasst
   double precision      :: dt
   character(len=32)     :: arg
 
-  double precision, parameter :: nu = 1.d-4
+  double precision, parameter :: nu = 2.d-3
 
   type(pf_encap_t),   target :: encaps
 
@@ -48,13 +48,12 @@ program fpfasst
   end if
 
   ! initialize pfasst
-!  nx     = [ 32, 64, 128 ]
-  nx     = [ 8, 16, 32 ]
+  ! nx     = [ 8, 16, 32 ]
+  nx     = [ 16, 32, 64 ]
+  ! nx     = [ 32, 64, 128 ]
   nvars  = 2 * 3 * nx**3
   nnodes = [ 2, 3, 5 ]
-!  dt     = 0.0001d0
-  ! dt     = 1.d0/64
-  dt = 0.001d0
+  dt     = 0.0001d0
 
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
@@ -64,7 +63,7 @@ program fpfasst
   first = size(nx) - nlevs + 1
 
   if (nprocs == 1) then
-     pf%niters = 12
+     pf%niters = 6
   else
      pf%niters = 5
   end if
@@ -96,19 +95,16 @@ program fpfasst
   if (len_trim(pf%outdir) == 0) pf%outdir = "."
 
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  ! call vortex_sheets(q0)
-  ! call random_full(q0)
-  ! call load(q0, 'full064_s990.h5')
+  call load(q0, 'full064_s990.h5')
   ! call load(q0, 'vortex_sheets.h5')
-  call exact(q0, nu, 0.0d0)
+  ! call load(q0, 'exact32.h5')
 
   if (pf%rank == 0) then
      call dump(pf%outdir, 'initial.npy', q0)
   end if
 
   call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
-  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
-
+  ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
 
   ! run
   if (pf%rank == 0) then
