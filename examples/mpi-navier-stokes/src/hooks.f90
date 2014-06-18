@@ -60,7 +60,7 @@ contains
     call c_f_pointer(level%R(level%nnodes-1), q)
     r = maxval(abs(q%array))
 
-    print *, 'err0, err1, res: ', e0, e1, r
+    print *, 'step, iter, level, err0, err1, res: ', state%step, state%iter, level%level, e0, e1, r
 
     deallocate(qex%array)
   end subroutine echo_error_hook

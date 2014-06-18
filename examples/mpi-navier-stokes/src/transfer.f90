@@ -24,7 +24,7 @@ contains
     call c_f_pointer(qGptr, qG)
 
     nG = qG%shape(1)
-    nF = qG%shape(1)
+    nF = qF%shape(1)
 
     !$omp parallel workshare
     qF%array = 0.0d0
@@ -35,7 +35,7 @@ contains
        if (k <= nG/2) then
           kk = k
        else if (k > nG/2+1) then
-          kk = nF + nG/2 - k
+          kk = nF - nG + k
        else
           cycle
        end if
@@ -44,7 +44,7 @@ contains
           if (j <= nG/2) then
              jj = j
           else if (j > nG/2+1) then
-             jj = nF + nG/2 - j
+             jj = nF - nG + j
           else
              cycle
           end if
@@ -53,7 +53,7 @@ contains
              if (i <= nG/2) then
                 ii = i
              else if (i > nG/2+1) then
-                ii = nF + nG/2 - i
+                ii = nF - nG + i
              else
                 cycle
              end if
@@ -79,10 +79,10 @@ contains
     call c_f_pointer(qGptr, qG)
 
     nG = qG%shape(1)
-    nF = qG%shape(1)
+    nF = qF%shape(1)
 
     !$omp parallel workshare
-    qF%array = 0.0d0
+    qG%array = 0.0d0
     !$omp end parallel workshare
 
     !$omp parallel do private(i,j,k,ii,jj,kk,c)
@@ -90,7 +90,7 @@ contains
        if (k <= nG/2) then
           kk = k
        else if (k > nG/2+1) then
-          kk = nF + nG/2 - k
+          kk = nF - nG + k
        else
           cycle
        end if
@@ -99,7 +99,7 @@ contains
           if (j <= nG/2) then
              jj = j
           else if (j > nG/2+1) then
-             jj = nF + nG/2 - j
+             jj = nF - nG + j
           else
              cycle
           end if
@@ -108,7 +108,7 @@ contains
              if (i <= nG/2) then
                 ii = i
              else if (i > nG/2+1) then
-                ii = nF + nG/2 - i
+                ii = nF - nG + i
              else
                 cycle
              end if
