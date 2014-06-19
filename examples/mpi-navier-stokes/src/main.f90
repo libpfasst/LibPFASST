@@ -5,7 +5,9 @@ program fpfasst
   use hooks
   use encap
   use transfer
+  use probin
   use pf_mod_ndarray
+  use pf_mod_version
   use pf_mod_mpi, only: MPI_THREAD_MULTIPLE, MPI_COMM_WORLD
 
   implicit none
@@ -13,13 +15,11 @@ program fpfasst
   type(pf_pfasst_t)     :: pf
   type(pf_comm_t)       :: tcomm
   type(carray4), target :: q0
-  integer               :: nprocs, nlevs, nthreads, nsteps, first
-  integer               :: nx(3), nvars(3), nnodes(3)
-  integer               :: ierror, iprovided, l
-  double precision      :: dt
-  character(len=32)     :: arg
+  integer               :: nthreads, first
 
-  double precision, parameter :: nu = 2.d-3
+  integer               :: ierror, iprovided, l
+  character(len=32)     :: arg
+  character(len=256)    :: probin_fname
 
   type(pf_encap_t),   target :: encaps
 
@@ -28,16 +28,8 @@ program fpfasst
   if (ierror .ne. 0) &
        stop "ERROR: Can't initialize MPI."
 
-  call mpi_comm_size(mpi_comm_world, nprocs, ierror)
-
+  ! set nthreads from environment
   nthreads = -1
-  nsteps   = 32
-  if (nprocs == 1) then
-     nlevs = 1
-  else
-     nlevs = 2
-  end if
-
   if (nthreads < 0) then
      call getenv("OMP_NUM_THREADS", arg)
      if (len_trim(arg) > 0) then
@@ -47,29 +39,25 @@ program fpfasst
      end if
   end if
 
-  ! initialize pfasst
-  ! nx     = [ 8, 16, 32 ]
-  nx     = [ 16, 32, 64 ]
-  ! nx     = [ 32, 64, 128 ]
-  nvars  = 2 * 3 * nx**3
-  nnodes = [ 2, 3, 5 ]
-  dt     = 0.0001d0
+  ! read probin
+  if (command_argument_count() == 1) then
+     call get_command_argument(1, value=probin_fname)
+  else
+     probin_fname = "probin.nml"
+  end if
+  call probin_init(probin_fname)
 
+  ! init pfasst
   call carray4_encap_create(encaps)
   call pf_mpi_create(tcomm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, tcomm, nlevs)
 
-  ! nlevs = pf%nlevels
   first = size(nx) - nlevs + 1
 
-  if (nprocs == 1) then
-     pf%niters = 6
-  else
-     pf%niters = 5
-  end if
-  pf%qtype  = 1
-
+  pf%niters       = niters
+  pf%qtype        = SDC_GAUSS_LOBATTO
   pf%echo_timings = .true.
+
   if (nlevs > 1) then
      pf%levels(1)%nsweeps = 2
   end if
@@ -91,30 +79,32 @@ program fpfasst
   call pf_mpi_setup(tcomm, pf)
   call pf_pfasst_setup(pf)
 
-  ! initialize advection/diffusion
-  if (len_trim(pf%outdir) == 0) pf%outdir = "."
+  pf%outdir = output
 
+  ! load initial condition, set hooks
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  call load(q0, 'full064_s990.h5')
-  ! call load(q0, 'vortex_sheets.h5')
-  ! call load(q0, 'exact32.h5')
-
-  if (pf%rank == 0) then
-     call dump(pf%outdir, 'initial.npy', q0)
-  end if
+  call load(q0, input)
 
   call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
 
   ! run
   if (pf%rank == 0) then
-     print *, 'NX:       ', nx(first:)
-     print *, 'NLEVS:    ', nlevs
-     print *, 'NNODES:   ', nnodes(first:)
-     print *, 'NTHREADS: ', nthreads
-     print *, 'NSTEPS:   ', nsteps
-     print *, 'NPROCS:   ', pf%comm%nproc
-     print *, 'OUTPUT:   ', len_trim(pf%outdir)
+     print *, 'ns run'
+     print *, '------'
+     print *, 'nx:       ', nx(first:)
+     print *, 'nlevs:    ', nlevs
+     print *, 'nnodes:   ', nnodes(first:)
+     print *, 'nthreads: ', nthreads
+     print *, 'nsteps:   ', nsteps
+     print *, 'niters:   ', niters
+     print *, 'nprocs:   ', pf%comm%nproc
+     print *, 'nu:       ', nu
+     print *, 'dt:       ', dt
+     print *, 'input:    ', trim(input)
+     print *, 'output:   ', trim(pf%outdir)
+     print *, 'version:  ', pf_git_version
+     print *, ''
   end if
 
   if (len_trim(pf%outdir) > 0) then
