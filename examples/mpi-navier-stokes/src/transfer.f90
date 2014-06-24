@@ -26,6 +26,11 @@ contains
     nG = qG%shape(1)
     nF = qF%shape(1)
 
+    if (nF == nG) then
+       qF%array = qG%array
+       return
+    end if
+
     !$omp parallel workshare
     qF%array = 0.0d0
     !$omp end parallel workshare
@@ -80,6 +85,11 @@ contains
 
     nG = qG%shape(1)
     nF = qF%shape(1)
+
+    if (nF == nG) then
+       qG%array = qF%array
+       return
+    end if
 
     !$omp parallel workshare
     qG%array = 0.0d0
