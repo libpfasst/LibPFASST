@@ -72,6 +72,61 @@ contains
     !$omp end parallel do
   end subroutine interpolate
 
+  subroutine restrictq(qF, qG)
+    type(carray4), intent(in   ) :: qF
+    type(carray4), intent(inout) :: qG
+
+    integer :: i, j, k, ii, jj, kk, c, nG, nF
+
+    nG = qG%shape(1)
+    nF = qF%shape(1)
+
+    if (nF == nG) then
+       qG%array = qF%array
+       return
+    end if
+
+    !$omp parallel workshare
+    qG%array = 0.0d0
+    !$omp end parallel workshare
+
+    !$omp parallel do private(i,j,k,ii,jj,kk,c)
+    do k = 1, nG
+       if (k <= nG/2) then
+          kk = k
+       else if (k > nG/2+1) then
+          kk = nF - nG + k
+       else
+          cycle
+       end if
+
+       do j = 1, nG
+          if (j <= nG/2) then
+             jj = j
+          else if (j > nG/2+1) then
+             jj = nF - nG + j
+          else
+             cycle
+          end if
+
+          do i = 1, nG
+             if (i <= nG/2) then
+                ii = i
+             else if (i > nG/2+1) then
+                ii = nF - nG + i
+             else
+                cycle
+             end if
+
+             do c = 1, 3
+                qG%array(i, j, k, c) = qF%array(ii, jj, kk, c)
+             end do
+          end do
+       end do
+    end do
+    !$omp end parallel do
+  end subroutine restrictq
+
   subroutine restrict(qFptr, qGptr, levelF, ctxF, levelG, ctxG, t)
     type(c_ptr), intent(in   ), value :: qFptr, qGptr, ctxF, ctxG
     integer,     intent(in   )        :: levelF, levelG

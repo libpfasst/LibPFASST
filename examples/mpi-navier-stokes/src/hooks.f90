@@ -65,6 +65,44 @@ contains
     deallocate(qex%array)
   end subroutine echo_error_hook
 
+  subroutine echo_energy_hook(pf, level, state, levelctx)
+    use feval
+    use transfer
+    implicit none
+
+    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_level_t),  intent(inout) :: level
+    type(pf_state_t),  intent(in)    :: state
+    type(c_ptr),       intent(in)    :: levelctx
+
+    type(carray4), pointer :: q
+    type(feval_t), pointer :: ctx
+
+    type(carray4) :: g
+    integer :: gshape(4)
+
+    real(pfdp) :: e0, e1
+    real(pfdp), save :: energy0 = 0
+
+    if (level%level /= pf%nlevels) return
+
+    call c_f_pointer(levelctx, ctx)
+    call c_f_pointer(level%qend, q)
+    call energy(q, e1)
+
+    gshape(1:3) = q%shape(1:3) / 2
+    gshape(4) = 3
+    call carray4_create(g, gshape)
+    call restrictq(q, g)
+    call energy(g, e0)
+
+    print *, 'step, iter, level, energy: ', state%step, state%iter, level%level, e1, e0, abs(e1-e0), abs(e1-e0-energy0)
+
+    energy0 = e1-e0
+
+    deallocate(g%array)
+  end subroutine echo_energy_hook
+
   subroutine dump(dname, fname, q)
     use pf_mod_ndarray
     character(len=*), intent(in   ) :: dname, fname

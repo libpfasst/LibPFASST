@@ -87,6 +87,7 @@ program fpfasst
 
   call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
+  call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_energy_hook)
 
   ! run
   if (pf%rank == 0) then

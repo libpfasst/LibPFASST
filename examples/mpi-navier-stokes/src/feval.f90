@@ -96,6 +96,33 @@ contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine energy(q, e)
+    type(carray4), intent(in   ) :: q
+    real(pfdp),    intent(  out) :: e
+
+    integer       :: n, c, i1, i2, i3
+    complex(pfdp) :: z
+
+    n = q%shape(1)
+
+    e = 0
+
+    do c = 1, 3
+       do i1 = 1,  n
+          do  i2 = 1,  n
+             do  i3 = 1,  n
+                z = q%array(i3, i2, i1, c)
+                e = e + real(z * conjg(z))
+             end do
+          end do
+       end do
+    end do
+
+    e = 0.5 * e
+  end subroutine energy
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine project(cptr, n1, n2, n3, ustar, u)
     ! Project ustar to divergence free u
     !
