@@ -83,8 +83,10 @@ program fpfasst
 
   ! load initial condition, set hooks
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  call load(q0, input)
+  !call load(q0, input)
+  call random_full(q0)
 
+  call dump(output, "initial.npy", q0)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error_hook)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_energy_hook)
