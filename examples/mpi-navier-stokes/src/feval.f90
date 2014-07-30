@@ -6,24 +6,72 @@ module feval
   use fftwpp
   include 'fftw3.f03'
 
+  integer, parameter :: maxamps = 32
+
+  type :: forcing_t
+     integer :: namps
+     double precision, dimension(maxamps) :: ax, ay, az, ft, kx, ky, kz, pt, px, py, pz
+  end type forcing_t
+
   type :: feval_t
-     integer :: n
+     integer :: n, namps
      real(8), allocatable :: k(:)       ! wave numbers
      real(8) :: nu
      type(c_ptr) :: conv, u1, v1, w1, v2, w2, w3, uu, uv, vv, uw, vw, ww
+     type(forcing_t), pointer :: forcing
+     type(c_ptr) :: ffft, wkp
+     complex(c_double), pointer :: wk(:,:,:)
   end type feval_t
 
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine feval_create(n, l, nu, nthreads, cptr)
+  subroutine forcing_create(forcing)
+    type(forcing_t), intent(inout) :: forcing
+    integer :: n, kx, ky, kz
+    double precision :: r(8)
+
+    n = 0
+
+    ! forcing amplitudes
+    do kz = 1, 4
+       do ky = 1, 4
+          do kx = 1, 4
+             if (kx + ky + kz > 4) cycle
+
+             n = n + 1
+
+             call random_number(r)
+             forcing%kx(n) = kx
+             forcing%ky(n) = ky
+             forcing%kz(n) = kz
+
+             forcing%ax(n) = r(1)
+             forcing%ay(n) = r(2)
+             forcing%az(n) = r(3)
+
+             forcing%ft(n) = (1 + r(4)) * 3.141592653598d0
+             forcing%px(n) = 2 * r(5) * 3.141592653598d0
+             forcing%py(n) = 2 * r(6) * 3.141592653598d0
+             forcing%pz(n) = 2 * r(7) * 3.141592653598d0
+             forcing%pt(n) = 2 * r(8) * 3.141592653598d0
+          end do
+       end do
+    end do
+
+    forcing%namps = n
+
+  end subroutine forcing_create
+
+  subroutine feval_create(n, l, nu, nthreads, forcing, cptr)
     use omp_lib
     implicit none
 
     integer(c_int), intent(in   ), value :: n, nthreads
     real(c_double), intent(in   ), value :: l, nu
     type(c_ptr),    intent(  out)        :: cptr
+    type(forcing_t), intent(in), target :: forcing
 
     type(feval_t), pointer :: ctx
     integer :: k
@@ -33,6 +81,11 @@ contains
 
     ctx%n = n
     ctx%nu = nu
+    ctx%forcing => forcing
+
+    ctx%wkp  = fftw_alloc_complex(int(n**3, c_size_t))
+    call c_f_pointer(ctx%wkp, ctx%wk, [ n, n, n ])
+    ctx%ffft = fftw_plan_dft_3d(n, n, n, ctx%wk, ctx%wk, FFTW_FORWARD, FFTW_ESTIMATE)
 
     allocate(ctx%k(n))
     do k = 1, n
@@ -60,7 +113,6 @@ contains
     ctx%vv = fftw_alloc_complex(int(n*n*n, c_size_t))
     ctx%vw = fftw_alloc_complex(int(n*n*n, c_size_t))
     ctx%ww = fftw_alloc_complex(int(n*n*n, c_size_t))
-
   end subroutine feval_create
 
   subroutine feval_destroy(cptr)
@@ -220,16 +272,61 @@ contains
     ! complex(c_double_complex), dimension(:,:,:), pointer :: uu, uv, uw, vv, vw, ww
     ! type(carray4)                                        :: u
 
-    type(feval_t), pointer :: ctx
-    type(carray4), pointer :: y, f
+    complex(c_double), pointer :: u(:,:,:), v(:,:,:), w(:,:,:)
+    double precision, allocatable :: cosx(:), cosy(:), cosz(:)
+    double precision :: x, cost
 
-    call c_f_pointer(yptr, y)
+
+    type(feval_t), pointer :: ctx
+    type(carray4), pointer :: f
+    integer :: a, n
+
     call c_f_pointer(fptr, f)
     call c_f_pointer(ctxptr, ctx)
 
-    ! print *, y%nvars, y%shape
-    ! print *, f%nvars, f%shape
-    f%array = 0
+    n = f%shape(1)
+    allocate(u(n,n,n), v(n,n,n), w(n,n,n), cosx(n), cosy(n), cosz(n))
+
+    do a = 1, ctx%forcing%namps
+
+       cost = cos(ctx%forcing%ft(a) * t + ctx%forcing%pt(a))
+
+       do i = 1, n
+          x = 6.28318530718d0 * dble(i-1) / n
+          cosx(i) = acost * cos(ctx%forcing%kx(a) * x + ctx%forcing%px(a))
+          cosy(i) =         cos(ctx%forcing%ky(a) * x + ctx%forcing%py(a))
+          cosz(i) =         cos(ctx%forcing%kz(a) * x + ctx%forcing%pz(a))
+       end do
+
+       !$omp parallel do private(i,j,k)
+       do i = 1, n
+          do j = 1, n
+             do k = 1, n
+                u(k,j,i) = u(k,j,i) + ctx%forcing%ax(a) * cosx(i) * cosy(j) * cosz(k)
+                v(k,j,i) = v(k,j,i) + ctx%forcing%ay(a) * cosx(i) * cosy(j) * cosz(k)
+                w(k,j,i) = w(k,j,i) + ctx%forcing%az(a) * cosx(i) * cosy(j) * cosz(k)
+             end do
+          end do
+       end do
+       !$omp end parallel do
+    end do
+
+
+    ctx%wk = u
+    call fftw_execute_dft(ctx%ffft, ctx%wk, ctx%wk)
+    f%array(:,:,:,1) = ctx%wk
+
+    ctx%wk = v
+    call fftw_execute_dft(ctx%ffft, ctx%wk, ctx%wk)
+    f%array(:,:,:,2) = ctx%wk
+
+    ctx%wk = w
+    call fftw_execute_dft(ctx%ffft, ctx%wk, ctx%wk)
+    f%array(:,:,:,3) = ctx%wk
+
+    f%array = f%array / n**3
+
+    deallocate(u,v,w,cosx,cosy,cosz)
 
   end subroutine eval_force
 

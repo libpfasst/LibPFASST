@@ -230,9 +230,9 @@ contains
     print *, 'computing u, v, w... done.'
 
     wkp  = fftw_alloc_complex(int(n**3, c_size_t))
-    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
-
     call c_f_pointer(wkp, wk, [ n, n, n ])
+
+    ffft = fftw_plan_dft_3d(n, n, n, wk, wk, FFTW_FORWARD, FFTW_ESTIMATE)
 
     wk = u
     call fftw_execute_dft(ffft, wk, wk)

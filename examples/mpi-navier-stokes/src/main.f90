@@ -23,6 +23,7 @@ program fpfasst
   character(len=256)    :: probin_fname
 
   type(pf_encap_t),   target :: encaps
+  type(forcing_t), target :: forcing
 
   ! initialize mpi
   call mpi_init_thread(mpi_thread_multiple, iprovided, ierror)
@@ -63,13 +64,15 @@ program fpfasst
      pf%levels(1)%nsweeps = 2
   end if
 
+  call forcing_create(forcing)
+
   do l = 1, pf%nlevels
      pf%levels(l)%nvars  = nvars(first-1+l)
      pf%levels(l)%nnodes = nnodes(first-1+l)
 
      allocate(pf%levels(l)%shape(4))
      pf%levels(l)%shape = [ nx(first-1+l), nx(first-1+l), nx(first-1+l), 3 ]
-     call feval_create(nx(first-1+l), 1.0d0, nu, nthreads, pf%levels(l)%levelctx)
+     call feval_create(nx(first-1+l), 1.0d0, nu, nthreads, forcing, pf%levels(l)%levelctx)
 
      pf%levels(l)%encap       => encaps
      pf%levels(l)%interpolate => interpolate

@@ -44,7 +44,7 @@ module pf_mod_fimex
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)
 
-     logical :: recompute_forcing
+     real(pfdp) :: last_forcing_time
 
      type(c_ptr), pointer :: F(:) ! forcing terms
 
@@ -72,7 +72,7 @@ contains
     call start_timer(pf, TLEVEL+Lev%level-1)
 
     ! compute forcing if necessary
-    if (fimex%recompute_forcing) then
+    if (fimex%last_forcing_time /= t0) then
        t = t0
        dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
        do m = 1, Lev%nnodes
@@ -84,6 +84,7 @@ contains
 
           if (m < Lev%nnodes) t = t + dtsdc(m)
        end do
+       fimex%last_forcing_time = t0
     end if
 
     ! compute integrals and add fas correction
@@ -158,7 +159,7 @@ contains
     fimex%SdiffE = Lev%s0mat
     fimex%SdiffI = Lev%s0mat
 
-    fimex%recompute_forcing = .true.
+    fimex%last_forcing_time = -1
     allocate(fimex%F(nnodes))
     do m = 1, nnodes
        fimex%F(m) = c_null_ptr
