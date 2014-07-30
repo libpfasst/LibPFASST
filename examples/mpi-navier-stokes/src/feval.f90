@@ -287,15 +287,17 @@ contains
     n = f%shape(1)
     allocate(u(n,n,n), v(n,n,n), w(n,n,n), cosx(n), cosy(n), cosz(n))
 
+    u = 0; v = 0; w = 0
+
     do a = 1, ctx%forcing%namps
 
        cost = cos(ctx%forcing%ft(a) * t + ctx%forcing%pt(a))
 
        do i = 1, n
           x = 6.28318530718d0 * dble(i-1) / n
-          cosx(i) = acost * cos(ctx%forcing%kx(a) * x + ctx%forcing%px(a))
-          cosy(i) =         cos(ctx%forcing%ky(a) * x + ctx%forcing%py(a))
-          cosz(i) =         cos(ctx%forcing%kz(a) * x + ctx%forcing%pz(a))
+          cosx(i) = cost * cos(ctx%forcing%kx(a) * x + ctx%forcing%px(a))
+          cosy(i) =        cos(ctx%forcing%ky(a) * x + ctx%forcing%py(a))
+          cosz(i) =        cos(ctx%forcing%kz(a) * x + ctx%forcing%pz(a))
        end do
 
        !$omp parallel do private(i,j,k)
