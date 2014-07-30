@@ -40,6 +40,7 @@ test_operators: test_operators.f90 $(OBJ)
 # dependencies
 #
 
+build/initial.o:   build/probin.o
 build/feval.o:     build/pfasst.o build/encap.o build/fftwpp.o
 build/hooks.o:     build/numpy.o build/initial.o build/transfer.o
 build/transfer.o:  build/feval.o

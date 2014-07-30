@@ -5,7 +5,7 @@ module probin
 
   integer, save           :: nlevs, nsteps, niters
   integer, save           :: nx(maxlevs), nvars(maxlevs), nnodes(maxlevs)
-  double precision, save  :: nu, dt
+  double precision, save  :: nu, dt, sigma
   character(len=64), save :: input, output
 
 contains
@@ -15,7 +15,7 @@ contains
 
     integer :: un
 
-    namelist /prbin/ input, output, nu, dt, nlevs, nx, nsteps, niters, nnodes
+    namelist /prbin/ input, output, nu, dt, nlevs, nx, nsteps, niters, nnodes, sigma
 
     !
     ! defaults
@@ -29,6 +29,7 @@ contains
 
     nu      = 7.6d-4
     dt      = 0.0001d0
+    sigma   = 99.0d0
 
     !
     ! read

@@ -136,6 +136,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine random_full(q0)
+    use probin, only: sigma
     type(carray4), intent(inout) :: q0
 
     type(amplitude), allocatable :: amps(:)
@@ -145,7 +146,6 @@ contains
     integer :: kx, ky, kz, i, j, k, n, a
 
     double precision :: x, y, z, r(3)
-    double precision, parameter :: sigma = 99.0d0
     double precision, allocatable :: cosx(:), cosy(:), cosz(:)
 
     complex(c_double), pointer :: u(:,:,:), v(:,:,:), w(:,:,:), wk(:,:,:)
