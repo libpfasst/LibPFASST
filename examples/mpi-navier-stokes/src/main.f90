@@ -8,6 +8,7 @@ program fpfasst
   use probin
   use pf_mod_ndarray
   use pf_mod_version
+  use pf_mod_fimex
   use pf_mod_mpi, only: MPI_THREAD_MULTIPLE, MPI_COMM_WORLD
 
   implicit none
@@ -73,7 +74,7 @@ program fpfasst
      pf%levels(l)%encap       => encaps
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
-     call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
+     call pf_fimex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2, eval_force)
   end do
 
   call pf_mpi_setup(tcomm, pf)

@@ -211,6 +211,28 @@ contains
     !$omp end parallel workshare
   end subroutine copy_for_convolve
 
+
+  subroutine eval_force(yptr, t, level, ctxptr, fptr)
+    type(c_ptr), intent(in   ), value :: yptr, ctxptr, fptr
+    real(pfdp),  intent(in   )        :: t
+    integer,     intent(in   )        :: level
+
+    ! complex(c_double_complex), dimension(:,:,:), pointer :: uu, uv, uw, vv, vw, ww
+    ! type(carray4)                                        :: u
+
+    type(feval_t), pointer :: ctx
+    type(carray4), pointer :: y, f
+
+    call c_f_pointer(yptr, y)
+    call c_f_pointer(fptr, f)
+    call c_f_pointer(ctxptr, ctx)
+
+    ! print *, y%nvars, y%shape
+    ! print *, f%nvars, f%shape
+    f%array = 0
+
+  end subroutine eval_force
+
   subroutine eval_f1(yptr, t, level, ctxptr, f1ptr)
     type(c_ptr), intent(in   ), value :: yptr, ctxptr, f1ptr
     real(pfdp),  intent(in   )        :: t
