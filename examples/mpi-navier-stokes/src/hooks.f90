@@ -121,6 +121,7 @@ contains
 
   subroutine dump_hook(pf, level, state, levelctx)
     use pf_mod_ndarray
+    use probin, only: nskip
 
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
@@ -131,6 +132,7 @@ contains
     type(carray4), pointer :: qend
 
     if (state%iter < 0) return
+    if (modulo(state%step, nskip) /= 0) return
 
     call c_f_pointer(level%qend, qend)
 

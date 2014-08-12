@@ -254,58 +254,60 @@ contains
 
   end subroutine random_full
 
-  ! subroutine load(q0, fname)
-  !   use hdf5
-  !   implicit none
-  !   type(carray4),    intent(inout) :: q0
-  !   character(len=*), intent(in   ) :: fname
+  subroutine load(q0, fname)
+    use hdf5
+    implicit none
+    type(carray4),    intent(inout) :: q0
+    character(len=*), intent(in   ) :: fname
 
-  !   integer(hid_t)   :: plist, ctype, file, group, dataset
-  !   integer(size_t)  :: re_size
-  !   integer(hsize_t) :: dims(4)
-  !   integer          :: err
+    integer(hid_t)   :: plist, ctype, file, group, dataset
+    integer(size_t)  :: re_size
+    integer(hsize_t) :: dims(4)
+    integer          :: err
 
-  !   real(8), pointer    :: buf(:)
-  !   complex(8), pointer :: cbuf(:,:,:,:)
+    real(8), pointer    :: buf(:)
+    complex(8), pointer :: cbuf(:,:,:,:)
+    type(c_ptr)         :: buf_c
 
-  !   type complex_t
-  !      double precision :: re
-  !      double precision :: im
-  !   end type complex_t
+    type complex_t
+       double precision :: re
+       double precision :: im
+    end type complex_t
 
-  !   call h5open_f(err)
+    call h5open_f(err)
 
-  !   ! create 'complex' compound type
-  !   call h5tget_size_f(H5T_NATIVE_DOUBLE, re_size, err)
-  !   call h5tcreate_f(H5T_COMPOUND_F, 2*re_size, ctype, err)
-  !   call h5tinsert_f(ctype, "r", int(0, size_t), H5T_NATIVE_DOUBLE, err)
-  !   call h5tinsert_f(ctype, "i", int(re_size, size_t), H5T_NATIVE_DOUBLE, err)
+    ! create 'complex' compound type
+    call h5tget_size_f(H5T_NATIVE_DOUBLE, re_size, err)
+    call h5tcreate_f(H5T_COMPOUND_F, 2*re_size, ctype, err)
+    call h5tinsert_f(ctype, "r", int(0, size_t), H5T_NATIVE_DOUBLE, err)
+    call h5tinsert_f(ctype, "i", int(re_size, size_t), H5T_NATIVE_DOUBLE, err)
 
-  !   ! open the initial condition file and root group
-  !   call h5pcreate_f(H5P_FILE_ACCESS_F, plist, err)
-  !   call h5fopen_f(fname, H5F_ACC_RDONLY_F, file, err, access_prp=plist)
-  !   call h5gopen_f(file, "/", group, err)
+    ! open the initial condition file and root group
+    call h5pcreate_f(H5P_FILE_ACCESS_F, plist, err)
+    call h5fopen_f(fname, H5F_ACC_RDONLY_F, file, err, access_prp=plist)
+    call h5gopen_f(file, "/", group, err)
 
-  !   ! read 'q0' dataset
-  !   dims = q0%shape
-  !   allocate(buf(2*product(q0%shape)))
+    ! read 'q0' dataset
+    dims = q0%shape
+    allocate(buf(2*product(q0%shape)))
 
-  !   call h5dopen_f(group, "q0", dataset, err)
-  !   call h5dread_f(dataset, ctype, buf, dims, err)
-  !   call h5dclose_f(dataset, err)
+    call h5dopen_f(group, "q0", dataset, err)
+    call h5dread_f(dataset, ctype, buf, dims, err)
+    call h5dclose_f(dataset, err)
 
-  !   call c_f_pointer(c_loc(buf(1)), cbuf, q0%shape)
-  !   q0%array = cbuf
+    buf_c = c_loc(buf(1))
+    call c_f_pointer(buf_c, cbuf, q0%shape)
+    q0%array = cbuf
 
-  !   deallocate(buf)
+    deallocate(buf)
 
-  !   ! tidy up
-  !   call h5gclose_f(group, err)
-  !   call h5fclose_f(file, err)
-  !   call h5tclose_f(ctype, err)
-  !   call h5pclose_f(plist, err)
-  !   call h5close_f(err)
-  ! end subroutine load
+    ! tidy up
+    call h5gclose_f(group, err)
+    call h5fclose_f(file, err)
+    call h5tclose_f(ctype, err)
+    call h5pclose_f(plist, err)
+    call h5close_f(err)
+  end subroutine load
 
 
 end module initial

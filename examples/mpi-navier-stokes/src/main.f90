@@ -64,7 +64,7 @@ program fpfasst
      pf%levels(1)%nsweeps = 2
   end if
 
-  call forcing_create(forcing)
+  call forcing_load('forcing.h5', forcing)
 
   do l = 1, pf%nlevels
      pf%levels(l)%nvars  = nvars(first-1+l)
@@ -87,8 +87,12 @@ program fpfasst
 
   ! load initial condition, set hooks
   call carray4_create(q0, pf%levels(nlevs)%shape)
-  !call load(q0, input)
-  call random_full(q0)
+  if (len_trim(input) > 0) then
+     call load(q0, input)
+  else
+     call random_full(q0)
+     input = 'RANDOM'
+  end if
 
   call dump(output, "initial.npy", q0)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, project_hook)
@@ -116,7 +120,7 @@ program fpfasst
 
   if (len_trim(pf%outdir) > 0) then
      call ndarray_mkdir(pf%outdir, len_trim(pf%outdir))
-     call pf_add_hook(pf, -1, PF_POST_SWEEP, dump_hook)
+     call pf_add_hook(pf, -1, PF_POST_STEP, dump_hook)
   end if
 
   ! call pf_logger_attach(pf)

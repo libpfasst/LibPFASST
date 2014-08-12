@@ -116,7 +116,7 @@ contains
     real(pfdp),        intent(in)    :: dt
 
     real(pfdp) :: norms(Lev%nnodes-1)
-    integer :: m, n
+    integer :: m
 
 !    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
 !   I think we often want the residual for diagnostics.  Maybe need flag to turn this off

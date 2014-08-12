@@ -64,6 +64,79 @@ contains
 
   end subroutine forcing_create
 
+  subroutine forcing_load(fname, forcing)
+    use hdf5
+    character(len=*), intent(in   ) :: fname
+    type(forcing_t),  intent(inout) :: forcing
+
+    integer(hid_t)   :: plist, file, group, dataset, dataspace
+    integer(hsize_t) :: dims(1), maxdims(1)
+    integer          :: err
+
+    call h5open_f(err)
+
+    call h5pcreate_f(H5P_FILE_ACCESS_F, plist, err)
+    call h5fopen_f(fname, H5F_ACC_RDONLY_F, file, err, access_prp=plist)
+    call h5gopen_f(file, "/", group, err)
+
+    call h5dopen_f(group, "kx", dataset, err)
+    call h5dget_space_f(dataset, dataspace, err)
+    call h5sget_simple_extent_dims_f(dataspace, dims, maxdims, err)
+    call h5sclose_f(dataspace, err)
+    if (dims(1) > maxamps) then
+       stop
+    end if
+    forcing%namps = dims(1)
+
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%kx, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "ky", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%ky, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "kz", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%kz, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "ax", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%ax, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "ay", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%ay, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "az", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%az, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "px", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%px, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "py", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%py, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "pz", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%pz, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "pt", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%pt, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5dopen_f(group, "ft", dataset, err)
+    call h5dread_f(dataset, H5T_NATIVE_DOUBLE, forcing%ft, dims, err)
+    call h5dclose_f(dataset, err)
+
+    call h5gclose_f(group, err)
+    call h5fclose_f(file, err)
+    call h5pclose_f(plist, err)
+    call h5close_f(err)
+  end subroutine forcing_load
+
   subroutine feval_create(n, l, nu, nthreads, forcing, cptr)
     use omp_lib
     implicit none
