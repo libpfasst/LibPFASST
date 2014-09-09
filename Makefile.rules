@@ -4,6 +4,7 @@
 
 vpath %.f90 $(VPATHS)
 vpath %.c   $(VPATHS)
+vpath %.f   $(VPATHS)
 
 $(EXE): $(OBJ)
 ifdef MKVERBOSE
@@ -29,6 +30,15 @@ ifdef MKVERBOSE
 else
 	@echo "Building $<..."
 	@$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+endif
+
+build/%.o: %.f
+	@mkdir -p build
+ifdef MKVERBOSE
+	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
+else
+	@echo "Building $<..."
+	@$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
 endif
 
 .PHONY: clean
