@@ -43,7 +43,6 @@ contains
     integer :: Nx,i
 
 
-
     y  => array1(yptr)
     f1 => array1(f1ptr)
     Nx = size(y)
@@ -171,6 +170,7 @@ contains
        
        y  = real(wk)
        f2 = (y - rhs) / dt    
+!       call f2eval1(yptr, t, level, levelctx, f2ptr)
    else
       if (nprob .eq. 2) then
          nudt = nu*dt*0.5_pfdp

@@ -44,25 +44,25 @@ switch(N_V)
   case 10,
    clr = '-mo'
 end
-xup = 1e-4
-figure(2)
-subplot(1,3,1)
-semilogy(iter,ode_err,clr,'MarkerSize',10); 
-axis([0 10,1e-7,xup])
-title('ODE Err','FontSize',14), hold on;
-xlabel('Iteration','FontSize',14)
-set(gca,'FontSize',14)
-subplot(1,3,2)
-semilogy(iter,pde_err,clr,'MarkerSize',10); 
-axis([0 10,1e-7,xup])
-xlabel('Iteration','FontSize',14)
-title('PDE Err','FontSize',14), hold on;
-set(gca,'FontSize',14)
-subplot(1,3,3)
-semilogy(iter,res,clr,'MarkerSize',10); 
-axis([0 10,1e-11,xup])
-xlabel('Iteration','FontSize',14)
-title('Residual','FontSize',14);hold on;
-set(gca,'FontSize',14)
+% $$$ xup = 1e-4
+% $$$ figure(2)
+% $$$ subplot(1,3,1)
+% $$$ semilogy(iter,ode_err,clr,'MarkerSize',10); 
+% $$$ axis([0 10,1e-7,xup])
+% $$$ title('ODE Err','FontSize',14), hold on;
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ set(gca,'FontSize',14)
+% $$$ subplot(1,3,2)
+% $$$ semilogy(iter,pde_err,clr,'MarkerSize',10); 
+% $$$ axis([0 10,1e-7,xup])
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ title('PDE Err','FontSize',14), hold on;
+% $$$ set(gca,'FontSize',14)
+% $$$ subplot(1,3,3)
+% $$$ semilogy(iter,res,clr,'MarkerSize',10); 
+% $$$ axis([0 10,1e-11,xup])
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ title('Residual','FontSize',14);hold on;
+% $$$ set(gca,'FontSize',14)
 end
-legend('NumV=1','NumV=2','NumV=3','NumV=4','NumV=10')
+%legend('NumV=1','NumV=2','NumV=3','NumV=4','NumV=10')

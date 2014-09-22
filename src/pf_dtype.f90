@@ -131,7 +131,8 @@ module pf_mod_dtype
           R(:), &                       ! full residuals
           I(:), &                       ! 0 to node integrals
           S(:), &                       ! node to node integrals
-          tau(:)                        ! fas correction
+          tau(:), &                     ! fas correction
+          tauQ(:)                       ! fas correction in Q form
 
      type(c_ptr) :: qend                ! solution at last node
 

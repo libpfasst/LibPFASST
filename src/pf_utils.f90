@@ -131,6 +131,7 @@ contains
        norms(m) = Lev%encap%norm(Lev%R(m))
     end do
     Lev%residual = maxval(abs(norms))
+!    Lev%residual = norms(Lev%nnodes-1)
 
     call end_timer(pf, TRESIDUAL)
 
@@ -175,23 +176,24 @@ contains
     integer :: m, n
 
     call Lev%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
-    do m = 2, Lev%nnodes-1
-       call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%I(m-1))
-    end do
+!MMQ    do m = 2, Lev%nnodes-1
+!       call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%I(m-1))
+!    end do
 
     ! add tau (which is 'node to node')
     if (associated(Lev%tau)) then
        do m = 1, Lev%nnodes-1
-          do n = 1, m
-             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
-          end do
+!  MMQ        do n = 1, m
+!             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
+!          end do
+          call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tauQ(m))
        end do
     end if
 
     ! subtract out Q
     do m = 1, Lev%nnodes-1
-       call Lev%encap%copy(Lev%R(m), Lev%Q(1))
-       call Lev%encap%axpy(Lev%R(m),  1.0_pfdp, Lev%I(m))
+       call Lev%encap%copy(Lev%R(m), Lev%I(m))
+       call Lev%encap%axpy(Lev%R(m), 1.0_pfdp, Lev%Q(1))
        call Lev%encap%axpy(Lev%R(m), -1.0_pfdp, Lev%Q(m+1))
     end do
 

@@ -1,10 +1,9 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 1
-
+    nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
-    niters = 10   !  default is 5
+    niters = 15   !  default is 5
 
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1028

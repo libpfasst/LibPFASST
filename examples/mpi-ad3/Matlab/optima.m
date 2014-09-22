@@ -28,19 +28,19 @@ res = q128(:,8);
       clr = '-kx'
   end
 
-figure(2)
-subplot(1,3,1)
-semilogy(iter,ode_err,clr,'MarkerSize',10); 
-title('ODE Err','FontSize',14), hold on;
-xlabel('Iteration','FontSize',14)
-subplot(1,3,2)
-semilogy(iter,pde_err,clr,'MarkerSize',10); 
-xlabel('Iteration','FontSize',14)
-title('PDE Err','FontSize',14), hold on;
-subplot(1,3,3)
-semilogy(iter,res,clr,'MarkerSize',10); 
-xlabel('Iteration','FontSize',14)
-title('Residual','FontSize',14);hold on;
-  set(gca,'FontSize',14)
-end
-legend('N=32','N=64','N=128')
+% $$$ figure(2)
+% $$$ subplot(1,3,1)
+% $$$ semilogy(iter,ode_err,clr,'MarkerSize',10); 
+% $$$ title('ODE Err','FontSize',14), hold on;
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ subplot(1,3,2)
+% $$$ semilogy(iter,pde_err,clr,'MarkerSize',10); 
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ title('PDE Err','FontSize',14), hold on;
+% $$$ subplot(1,3,3)
+% $$$ semilogy(iter,res,clr,'MarkerSize',10); 
+% $$$ xlabel('Iteration','FontSize',14)
+% $$$ title('Residual','FontSize',14);hold on;
+% $$$   set(gca,'FontSize',14)
+ end
+% $$$ legend('N=32','N=64','N=128')

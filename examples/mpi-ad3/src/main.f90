@@ -62,12 +62,14 @@ program main
 
   pf%echo_timings = .false.
 
-  if (nlevs > 1) then
-     pf%levels(1)%nsweeps = 1
-  end if
 
   do l = 1, nlevs
      allocate(pf%levels(l)%shape(ndim))
+     if (l > 2) then
+        pf%levels(l)%nsweeps = 1
+        else
+           pf%levels(l)%nsweeps = 1
+     end if
      pf%levels(l)%shape(ndim) = nvars(l)
 
      pf%levels(l)%nvars  = product(pf%levels(l)%shape)
@@ -81,13 +83,14 @@ program main
      select case(ndim)
      case(1)
         call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
-        call pf_imex_create(pf%levels(l)%sweeper, f1eval1, f2eval1, f2comp1)
+        call pf_imexQ_create(pf%levels(l)%sweeper, f1eval1, f2eval1, f2comp1)
+!        call pf_implicitQ_create(pf%levels(l)%sweeper,  f2eval1, f2comp1)
      case(2)
         call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
-        call pf_imex_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
+        call pf_imexQ_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
      case(3)
         call create_work3(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
-        call pf_imex_create(pf%levels(l)%sweeper, f1eval3, f2eval3, f2comp3)
+        call pf_imexQ_create(pf%levels(l)%sweeper, f1eval3, f2eval3, f2comp3)
      end select
   end do
 

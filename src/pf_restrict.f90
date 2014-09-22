@@ -121,6 +121,7 @@ contains
     type(pf_level_t),  intent(inout) :: LevF, LevG
 
     integer    :: m
+    logical    :: old_way
     real(pfdp) :: tG(LevG%nnodes)
     real(pfdp) :: tF(LevF%nnodes)
     type(c_ptr) :: &
@@ -166,26 +167,32 @@ contains
     !
     do m = 1, LevG%nnodes-1
        call LevG%encap%setval(LevG%tau(m), 0.0_pfdp)
+       call LevG%encap%setval(LevG%tauQ(m), 0.0_pfdp)
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
        call LevG%sweeper%integrate(LevG, LevG%Q, LevG%F, dt, tmpG)
-       do m = 2, LevG%nnodes-1
-          call LevG%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
-       end do
+       !MMQ       do m = 2, LevG%nnodes-1
+       !   call LevG%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
+       !end do
        
        ! compute '0 to node' integral on the fine level
        call LevF%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
-       do m = 2, LevF%nnodes-1
-          call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%I(m-1))
-       end do
+       !  put tau in
+       !MMQ do m = 2, LevF%nnodes-1
+       !   call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%I(m-1))
+       !end do
+       if (associated(LevF%tau)) then
+          do m = 1, LevF%nnodes-1
+             call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%tauQ(m))
+          end do
+       end if
        
        ! restrict '0 to node' integral on the fine level (which was
        ! computed during the last call to pf_residual)
        call restrict_sdc(LevF, LevG, LevF%I, tmpFr, .true.,tF)
        
        ! compute 'node to node' tau correction
-       
        call LevG%encap%axpy(LevG%tau(1),  1.0_pfdp, tmpFr(1))
        call LevG%encap%axpy(LevG%tau(1), -1.0_pfdp, tmpG(1))
        
@@ -196,8 +203,14 @@ contains
           call LevG%encap%axpy(LevG%tau(m), -1.0_pfdp, tmpG(m))
           call LevG%encap%axpy(LevG%tau(m),  1.0_pfdp, tmpG(m-1))
        end do
-      end if
-    !
+      ! compute '0 to node' tau correction
+       do m = 1, LevG%nnodes-1
+          call LevG%encap%axpy(LevG%tauQ(m),  1.0_pfdp, tmpFr(m))
+          call LevG%encap%axpy(LevG%tauQ(m), -1.0_pfdp, tmpG(m))
+       end do
+    end if
+ 
+       !
     ! tidy
     !
 

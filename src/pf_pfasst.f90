@@ -84,6 +84,7 @@ contains
     nullify(level%restrict)
     nullify(level%shape)
     nullify(level%tau)
+    nullify(level%tauQ)
     nullify(level%pF)
     nullify(level%pQ)
     nullify(level%rmat)
@@ -174,6 +175,24 @@ contains
     end if
 
     !
+    ! (re)allocate tauQ (may to need create/destroy tau dynamically
+    !                   when doing AMR)
+    !
+    if ((F%level < pf%nlevels) .and. (.not. associated(F%tauQ))) then
+       allocate(F%tauQ(nnodes-1))
+       do m = 1, nnodes-1
+          call F%encap%create(F%tauQ(m), F%level, SDC_KIND_INTEGRAL, &
+               nvars, F%shape, F%levelctx, F%encap%encapctx)
+       end do
+    else if ((F%level >= pf%nlevels) .and. (associated(F%tauQ))) then
+       do m = 1, nnodes-1
+          call F%encap%destroy(F%tauQ(m))
+       end do
+       deallocate(F%tauQ)
+       nullify(F%tauQ)
+    end if
+
+    !
     ! skip the rest if we're already allocated
     !
     if (F%allocated) return
@@ -203,6 +222,7 @@ contains
     end if
 
     call F%sweeper%initialize(F)
+
 
     !
     ! allocate Q and F
@@ -365,6 +385,15 @@ contains
        end do
        deallocate(F%tau)
        nullify(F%tau)
+    end if
+
+    ! tauQ
+    if (associated(F%tauQ)) then
+       do m = 1, F%nnodes-1
+          call F%encap%destroy(F%tauQ(m))
+       end do
+       deallocate(F%tauQ)
+       nullify(F%tauQ)
     end if
 
     ! other
