@@ -132,6 +132,9 @@ contains
           exp%QtilE(m,n)   =  dsdc(n)
        end do
     end do
+    !  Or do the LU trick
+!    call pf_LUexp(Lev%qmat,exp%QtilE,nnodes)
+
     exp%QdiffE = Lev%qmat-exp%QtilE
 
   end subroutine explicitQ_initialize
@@ -188,6 +191,37 @@ contains
 
     deallocate(explicitQ)
   end subroutine pf_explicitQ_destroy
+
+  subroutine pf_LUexp(A,U,Nnodes)
+    real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
+    real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
+    integer,        intent (in)     :: Nnodes
+    ! Return the transpose of U from LU decomposition of 
+    !  an explicit integration matrix       without pivoting
+    integer :: i,j
+    real(pfdp) :: c
+
+    U=transpose(A)
+    do i = 1,Nnodes-1
+       if (U(i,i+1) /= 0.0) then
+          do j=i+1,Nnodes
+             c = U(j,i+1)/U(i,i+1)
+             U(j,i:Nnodes)=U(j,i:Nnodes)-c*U(i,i:Nnodes)
+          end do
+       end if
+    end do
+    U=transpose(U)
+
+    !  Now scale the rows of U to match the sum of A
+    do j=1,Nnodes
+       c = sum(U(j,:))
+       if (c /=  0.0) then
+          U(j,:)=U(j,:)*sum(A(j,:))/c
+!          print *,c,sum(A(j,:))/c
+       end if
+    end do
+
+  end subroutine pf_LUexp
 
 end module pf_mod_explicitQ
 
