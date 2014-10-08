@@ -36,11 +36,32 @@ contains
     type(c_ptr),       intent(in)    :: levelctx
 
     real(pfdp), pointer :: r(:)
-
+    integer :: np
     r => array1(level%R(level%nnodes-1))
 
     print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          state%step+1, state%iter, level%level, maxval(abs(r))
+
+
+!!$    r => array1(level%Q(1))
+!!$    print *,'Q1',r
+!!$    r => array1(level%Q(level%nnodes))
+!!$    print *,'Qend',r
+!!$    r => array1(level%F(1,1))
+!!$    print *,'F1',r
+!!$    r => array1(level%F(level%nnodes,1))
+!!$    print *,'F1end',r
+!!$    r => array1(level%S(level%nnodes-1))
+!!$    print *,'S',r
+!!$
+!!$    np = size(level%F(level%nnodes,:))
+!!$    print *,'npieces',np
+!!$    if (np > 1) then
+!!$       r => array1(level%F(1,2))
+!!$       print *,'F21',r
+!!$       r => array1(level%F(level%nnodes,2))
+!!$       print *,'F2end',r
+!!$    end if
   end subroutine echo_residual
 
 

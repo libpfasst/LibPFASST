@@ -70,8 +70,8 @@ contains
     window_type  = "block"
     Finterp = .FALSE.
     ndim     = 1
-    nlevs   = 2
-    nnodes  = [ 2, 3, 5 ]
+    nlevs   = 3
+    nnodes  = [ 2, 3, 3 ]
 
     niters  = 8
     nsteps  = -1

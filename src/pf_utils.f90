@@ -212,4 +212,43 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
+
+  subroutine pf_myLUexp(A,L,U,Nnodes)
+    real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
+    real(pfdp),      intent(inout)  :: L(Nnodes,Nnodes)
+    real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
+    integer,        intent (in)     :: Nnodes
+    ! Return the LU decomposition of an explicit integration matrix
+    !   without pivoting
+    integer :: i,j
+    real(pfdp) :: c
+    L = 0.0_pfdp
+    U = 0.0_pfdp
+
+    do i = 1,Nnodes-1
+       L(i,i) = 1.0_pfdp
+    end do
+    U=transpose(A)
+    do i = 1,Nnodes-1
+       if (U(i,i+1) /= 0.0) then
+          do j=i+1,Nnodes
+             c = U(j,i+1)/U(i,i+1)
+             U(j,i:Nnodes)=U(j,i:Nnodes)-c*U(i,i:Nnodes)
+             L(j,:)=L(j,:)-c*L(i,:)
+          end do
+       end if
+    end do
+
+    print *,'U',U
+    !  Now scale the columns of U to match the sum of A
+    do j=1,Nnodes
+       c = sum(U(:,j))
+       if (c /=  0.0) then
+          U(:,j)=U(:,j)*sum(A(j,:))/c
+          print *,c,sum(A(j,:))/c
+       end if
+    end do
+    print *,'U',U
+  end subroutine pf_myLUexp
+
 end module pf_mod_utils

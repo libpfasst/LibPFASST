@@ -12,8 +12,9 @@ module feval
 
   real(pfdp), parameter :: &
        Lx     = 1.0_pfdp, &        ! domain size
+       kfreq  = 32.0_pfdp, &        ! domain size
        v      = 1.0_pfdp, &        ! velocity
-       nu     = 0.02_pfdp, &       ! viscosity
+       nu     = 0.0_pfdp, &       ! viscosity
        t00    = 0.15_pfdp           ! initial time for exact solution
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
@@ -117,12 +118,14 @@ contains
        tol  = 1e-16
        nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
 
-       do ii = -nbox, nbox
+!       do ii = -nbox, nbox
           do i = 1, nvars
              x = Lx*dble(i-nvars/2-1)/dble(nvars) + ii*Lx - t*v
              yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
+             x = Lx*dble(i)/dble(nvars)  - t*v
+             yex(i) =  dsin(two_pi*kfreq*x)
           end do
-       end do
+ !      end do
     end if
 
 
@@ -179,6 +182,7 @@ contains
     call fftw_execute_dft(work%ifft, wk, wk)
 
     f2 = real(wk)
+
   end subroutine eval_f2
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -207,6 +211,7 @@ contains
 
     y  = real(wk)
     f2 = (y - rhs) / dt
+
   end subroutine comp_f2
 
 end module feval

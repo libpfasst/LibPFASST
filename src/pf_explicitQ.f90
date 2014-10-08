@@ -129,7 +129,7 @@ contains
     dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
-          exp%QtilE(m,n)   =  dsdc(n)
+!          exp%QtilE(m,n)   =  dsdc(n)
        end do
     end do
     !  Or do the LU trick
