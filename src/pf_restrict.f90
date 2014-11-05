@@ -120,7 +120,7 @@ contains
     real(pfdp),        intent(in)    :: t0, dt
     type(pf_level_t),  intent(inout) :: LevF, LevG
 
-    integer    :: m
+    integer    :: m, n
     real(pfdp) :: tG(LevG%nnodes)
     real(pfdp) :: tF(LevF%nnodes)
     type(c_ptr) :: &
@@ -173,26 +173,35 @@ contains
        do m = 2, LevG%nnodes-1
           call LevG%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
        end do
-       
+
        ! compute '0 to node' integral on the fine level
        call LevF%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
        do m = 2, LevF%nnodes-1
           call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%I(m-1))
        end do
-       
+
+    if (associated(LevF%tau)) then
+       do m = 1, LevF%nnodes-1
+          do n = 1, m
+             call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%tau(n))
+          end do
+       end do
+    end if
+
+
        ! restrict '0 to node' integral on the fine level (which was
        ! computed during the last call to pf_residual)
        call restrict_sdc(LevF, LevG, LevF%I, tmpFr, .true.,tF)
-       
+
        ! compute 'node to node' tau correction
-       
+
        call LevG%encap%axpy(LevG%tau(1),  1.0_pfdp, tmpFr(1))
        call LevG%encap%axpy(LevG%tau(1), -1.0_pfdp, tmpG(1))
-       
+
        do m = 2, LevG%nnodes-1
           call LevG%encap%axpy(LevG%tau(m),  1.0_pfdp, tmpFr(m))
           call LevG%encap%axpy(LevG%tau(m), -1.0_pfdp, tmpFr(m-1))
-          
+
           call LevG%encap%axpy(LevG%tau(m), -1.0_pfdp, tmpG(m))
           call LevG%encap%axpy(LevG%tau(m),  1.0_pfdp, tmpG(m-1))
        end do
@@ -216,4 +225,3 @@ contains
   end subroutine restrict_time_space_fas
 
 end module pf_mod_restrict
-
