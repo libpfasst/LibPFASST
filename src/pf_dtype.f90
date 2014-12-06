@@ -89,6 +89,7 @@ module pf_mod_dtype
      procedure(pf_encap_create_p),  pointer, nopass :: create
      procedure(pf_encap_destroy_p), pointer, nopass :: destroy
      procedure(pf_encap_setval_p),  pointer, nopass :: setval
+     procedure(pf_encap_printme_p),  pointer, nopass :: printme
      procedure(pf_encap_copy_p),    pointer, nopass :: copy
      procedure(pf_encap_norm_p),    pointer, nopass :: norm
      procedure(pf_encap_pack_p),    pointer, nopass :: pack
@@ -285,6 +286,12 @@ module pf_mod_dtype
        real(pfdp),  intent(in)           :: val
        integer,     intent(in), optional :: flags
      end subroutine pf_encap_setval_p
+
+     subroutine pf_encap_printme_p(sol)
+       import c_ptr, pfdp
+       type(c_ptr), intent(in), value    :: sol
+
+     end subroutine pf_encap_printme_p
 
      subroutine pf_encap_copy_p(dst, src, flags)
        import c_ptr
