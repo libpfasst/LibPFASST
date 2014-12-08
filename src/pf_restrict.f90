@@ -84,7 +84,6 @@ contains
        ! when restricting '0 to node' integral terms, skip the first
        ! entry since it is zero
        call pf_apply_mat(qG, 1.d0, LevF%rmat(2:,2:), qFr, LevG%encap)
-
     else
 
        allocate(qFr(LevF%nnodes))
@@ -178,11 +177,12 @@ contains
        
        ! compute '0 to node' integral on the fine level
        call LevF%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
+
        !  put tau in
        !MMQ do m = 2, LevF%nnodes-1
        !   call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%I(m-1))
        !end do
-       if (associated(LevF%tau)) then
+       if (associated(LevF%tauQ)) then
           do m = 1, LevF%nnodes-1
              call LevF%encap%axpy(LevF%I(m), 1.0_pfdp, LevF%tauQ(m))
           end do

@@ -131,7 +131,7 @@ contains
        else
 
           ! Single processor... sweep on coarse and return to fine level.
-          
+
           G => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
@@ -461,7 +461,7 @@ contains
     do l = 2, pf%nlevels-1
        F => pf%levels(l); G => pf%levels(l-1)
        call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call G%encap%pack(F%q0, F%Q(1))
+       call F%encap%pack(F%q0, F%Q(1))
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
           call F%sweeper%sweep(pf, F, t0, dt)
@@ -472,7 +472,11 @@ contains
 
     F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
     call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-    call G%encap%pack(F%q0, F%Q(1))
+    call F%encap%pack(F%q0, F%Q(1))
+       ! MWE: I think this is redundant with the beginning of the regular PFASST iterations
+       ! do j = 1, F%nsweeps
+       !    call F%sweeper%sweep(pf, F, t0, dt)
+       ! end do
 
   end subroutine pf_v_cycle_post_predictor
 
