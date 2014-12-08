@@ -239,16 +239,13 @@ contains
        end if
     end do
 
-    print *,'U',U
     !  Now scale the columns of U to match the sum of A
     do j=1,Nnodes
        c = sum(U(:,j))
        if (c /=  0.0) then
           U(:,j)=U(:,j)*sum(A(j,:))/c
-          print *,c,sum(A(j,:))/c
        end if
     end do
-    print *,'U',U
   end subroutine pf_myLUexp
 
 end module pf_mod_utils
