@@ -238,13 +238,14 @@ contains
           end do
        end if
     end do
-
+    U=transpose(U)
     !  Now scale the columns of U to match the sum of A
     do j=1,Nnodes
-       c = sum(U(:,j))
+       c = sum(A(j,:))
        if (c /=  0.0) then
-          U(:,j)=U(:,j)*sum(A(j,:))/c
+          U(j,:)=U(j,:)*sum(U(j,:))/c
        end if
+       print *,'j=',j,U(j,:)
     end do
   end subroutine pf_myLUexp
 
