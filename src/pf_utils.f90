@@ -159,7 +159,7 @@ contains
     ! XXX: test for nan's in matrices...
 
     do i = 1, n
-       if (lzero) call encap%setval(dst(i), 0.0d0)
+       if (lzero) call encap%setval(dst(i), 0.0_pfdp)
        do j = 1, m
           call encap%axpy(dst(i), a * mat(i, j), src(j))
        end do
@@ -181,7 +181,7 @@ contains
 !    end do
 
     ! add tau (which is 'node to node')
-    if (associated(Lev%tau)) then
+    if (associated(Lev%tauQ)) then
        do m = 1, Lev%nnodes-1
 !  MMQ        do n = 1, m
 !             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
@@ -213,11 +213,12 @@ contains
   end subroutine pf_generic_evaluate_all
 
 
-  subroutine pf_myLUexp(A,L,U,Nnodes)
+  subroutine pf_myLUexp(A,L,U,Nnodes,scaleLU)
     real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
     real(pfdp),      intent(inout)  :: L(Nnodes,Nnodes)
     real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
     integer,        intent (in)     :: Nnodes
+    integer,        intent (in)     :: scaleLU
     ! Return the LU decomposition of an explicit integration matrix
     !   without pivoting
     integer :: i,j
@@ -238,15 +239,23 @@ contains
           end do
        end if
     end do
+
     U=transpose(U)
     !  Now scale the columns of U to match the sum of A
+    if (scaleLU .eq. 1) then
+       do j=1,Nnodes
+          c = sum(U(j,:))
+          if (c /=  0.0) then
+             U(j,:)=U(j,:)*sum(A(j,:))/c
+          end if
+       end do
+    end if
+
+    print *,'U from LU decomp'
     do j=1,Nnodes
-       c = sum(A(j,:))
-       if (c /=  0.0) then
-          U(j,:)=U(j,:)*sum(U(j,:))/c
-       end if
-       print *,'j=',j,U(j,:)
+          print *, j, U(j,:)
     end do
+
   end subroutine pf_myLUexp
 
 end module pf_mod_utils
