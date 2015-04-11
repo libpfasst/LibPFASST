@@ -257,5 +257,59 @@ contains
     end do
 
   end subroutine pf_myLUexp
+  subroutine myLUq(Q,Qtil,Nnodes,fillq)
+    real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
+    real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
+    integer,        intent (in)     :: Nnodes
+    integer,        intent (in)     :: fillq
+
+    ! Return the Qtil=U^T where U is the LU decomposition of Q without pivoting
+    ! if fillq is positive, then the first row of Qtil is filled to make
+    ! the matrix consistent
+
+    integer :: i,j,N
+    real(pfdp) :: c
+    real(pfdp)  :: U(Nnodes-1,Nnodes-1)
+    real(pfdp)  :: L(Nnodes-1,Nnodes-1)
+    L = 0.0_pfdp
+    U = 0.0_pfdp
+    N = Nnodes-1
+    U=transpose(Q(1:Nnodes-1,2:Nnodes))
+    do i = 1,N
+       print *,'row i of Qbefore', i,U(i,:)
+
+    end do
+    do i = 1,N
+       if (U(i,i) /= 0.0) then
+          do j=i+1,N
+             c = U(j,i)/U(i,i)
+              print *,j,c,U(j,:)
+
+             U(j,i:N)=U(j,i:N)-c*U(i,i:N)
+             L(j,i)=c
+             print *,j,U(j,:)
+          end do
+       end if
+       L(i,i) = 1.0_pfdp
+    end do
+
+    !  Check
+    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
+    
+    Qtil = 0.0_pfdp
+    Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
+    !  Now scale the columns of U to match the sum of A
+    if (fillq .eq. 1) then
+       do j=1,Nnodes-1
+          Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,2:Nnodes))
+       end do
+    end if
+
+    print *,'U from myLUq'
+    do j=1,Nnodes-1
+          print *, j, Qtil(j,:)
+    end do
+
+  end subroutine myLUq
 
 end module pf_mod_utils

@@ -96,7 +96,8 @@ contains
        call Lev%encap%axpy(rhs,1.0_pfdp, Lev%Q(1))
 
 
-       call imexQ%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
+!       call imexQ%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
+       call imexQ%f2comp(Lev%Q(m+1), t, dt*imexQ%QtilI(m,n), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
        call imexQ%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
 
     end do
@@ -148,9 +149,14 @@ contains
           imexQ%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
+
+    do m = 1,nnodes-1
+       print *,'row i of qmat', m,Lev%qmat(m,:)
+    end do
+!    call myLUq(Lev%qmat,imexQ%QtilI,Nnodes,0)
     imexQ%QdiffE = Lev%qmat-imexQ%QtilE
     imexQ%QdiffI = Lev%qmat-imexQ%QtilI
-
+    
   end subroutine imexQ_initialize
 
   ! Compute SDC integral
