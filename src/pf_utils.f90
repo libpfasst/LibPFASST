@@ -130,8 +130,8 @@ contains
     do m = 1, Lev%nnodes-1
        norms(m) = Lev%encap%norm(Lev%R(m))
     end do
-    Lev%residual = maxval(abs(norms))
-!    Lev%residual = norms(Lev%nnodes-1)
+!    Lev%residual = maxval(abs(norms))
+    Lev%residual = norms(Lev%nnodes-1)
 
     call end_timer(pf, TRESIDUAL)
 

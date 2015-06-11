@@ -145,7 +145,7 @@ contains
        end do
 
     case default
-
+       print *,'qtype = ',qtype
        stop "ERROR: Invalid qtype in sdc_quadrature.f90."
 
     end select
