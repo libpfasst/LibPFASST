@@ -49,6 +49,7 @@ contains
     integer                   :: j, k, l
     real(pfdp)                :: t0k
 
+    print *,'entering predictor ',pf%rank
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
@@ -89,16 +90,20 @@ contains
              end do
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
              do k = 1, G%nsweeps_pred-1
+                pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
-
+                print *,'recieving  in predictor iter=',k,pf%rank
                 !  Get new initial conditions
                 call pf_recv(pf, G, G%level*20000+pf%rank, .true.)
+                print *,'recieve  done iter=',k,pf%rank
                 !  Do a sweep
                 call call_hooks(pf, G%level, PF_PRE_SWEEP)
                 call G%sweeper%sweep(pf, G, t0, dt)
                 call call_hooks(pf, G%level, PF_POST_SWEEP)
                 !  Send forward
-                call pf_send(pf, G,  G%level*20000+pf%rank+1, .true.)
+                print *,'sending   in predictor iter=',k,pf%rank
+                call pf_send(pf, G,  G%level*20000+pf%rank+1, .false.)
+                print *,'send done  in predictor iter=',k,pf%rank
              end do
              call pf_residual(pf, G, dt)
           else
@@ -125,6 +130,7 @@ contains
              end do
           end if
 
+          print *,'done with predictor sweeps ',pf%rank
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
@@ -152,13 +158,13 @@ contains
        end if
 
     end if
-
+    print *,'finishing predictor ',pf%rank
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING
-
+    print *,'leaving predictor ',pf%rank
   end subroutine pf_predictor
 
   subroutine pf_check_tolerances(pf, residual, energy)
@@ -401,8 +407,8 @@ contains
           do j = 1, F%nsweeps
              call F%sweeper%sweep(pf, F, pf%state%t0, dt)
 
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+             call pf_residual(pf, F, dt)
+             call call_hooks(pf, F%level, PF_POST_SWEEP)
           end do
        end if
 
@@ -458,6 +464,7 @@ contains
     integer :: l, j
 
     if (pf%nlevels <= 1) return
+    print *,'entering post predictor ',pf%rank
 
     do l = 2, pf%nlevels-1
        F => pf%levels(l); G => pf%levels(l-1)
@@ -480,7 +487,7 @@ contains
           call pf_residual(pf, F, dt)
           call call_hooks(pf, F%level, PF_POST_SWEEP)
        end do
-
+       print *,'leaving post predictor ', pf%rank
   end subroutine pf_v_cycle_post_predictor
 
   !
@@ -607,7 +614,9 @@ contains
     call start_timer(pf, TSEND + level%level - 1)
     if (pf%rank /= pf%state%last &
          .and. pf%state%status == PF_STATUS_ITERATING) then
+       print *,'sending',tag,blocking,pf%rank
        call pf%comm%send(pf, level, tag, blocking)
+       print *,'done sending',tag,blocking,pf%rank
     end if
     call end_timer(pf, TSEND + level%level - 1)
   end subroutine pf_send
@@ -619,7 +628,9 @@ contains
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%level - 1)
     if (pf%rank /= pf%state%first .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-       call pf%comm%recv(pf, level, tag, blocking)
+       print *,'recv',tag,blocking,pf%rank
+       call pf%comm%recv(pf, level,tag, blocking)
+       print *,'done recv',tag,blocking,pf%rank
     end if
     call end_timer(pf, TRECEIVE + level%level - 1)
   end subroutine pf_recv
