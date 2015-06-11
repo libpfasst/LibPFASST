@@ -59,7 +59,7 @@ contains
 
        refine = (nnodes - 1) / (nnodes0 - 1)
 
-       call sdc_qnodes(qnodes0, flags0, qtype-SDC_COMPOSITE_NODES, nnodes0)
+       call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)
        call sdc_qmats(qmat0, smat0, qnodes0, qnodes0, flags0, nnodes0, nnodes0)
 
        dt = 1.q0 / refine
@@ -75,7 +75,7 @@ contains
 
        ! nodes are given by proper quadrature rules
 
-       call sdc_qnodes(qnodes, nflags, qtype-SDC_PROPER_NODES, nnodes)
+       call sdc_qnodes(qnodes, nflags, qtype, nnodes)
        nodes = real(qnodes, pfdp)
 
        call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
