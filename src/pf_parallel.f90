@@ -49,7 +49,7 @@ contains
     integer                   :: j, k, l
     real(pfdp)                :: t0k
 
- !   print *,'entering predictor ',pf%rank
+    print *,'entering predictor ',pf%rank
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 

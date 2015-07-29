@@ -107,6 +107,7 @@ contains
     character(8)   :: date
     character(10)  :: time
 
+        print *,'Print options', pf%rank
     if (pf%rank /= 0) return
     if (present(unitno)) un = unitno
 
