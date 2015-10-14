@@ -169,7 +169,8 @@ contains
   !
   ! Generic residual
   !
-  subroutine pf_generic_residual(Lev, dt)
+  subroutine pf_generic_residual(this, Lev, dt)
+    class(pf_sweeper_t), intent(in)  :: this
     type(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: dt
 
@@ -202,7 +203,8 @@ contains
   !
   ! Generic evaluate all
   !
-  subroutine pf_generic_evaluate_all(Lev, t)
+  subroutine pf_generic_evaluate_all(this, Lev, t)
+    class(pf_sweeper_t), intent(in)  :: this
     type(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: t(:)
 
@@ -211,7 +213,6 @@ contains
        call Lev%sweeper%evaluate(Lev, t(m), m)
     end do
   end subroutine pf_generic_evaluate_all
-
 
   subroutine pf_myLUexp(A,L,U,Nnodes,scaleLU)
     real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)

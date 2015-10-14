@@ -76,16 +76,17 @@ module pf_mod_dtype
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-  type :: pf_sweeper_t
+  type, abstract :: pf_sweeper_t
      type(c_ptr) :: sweeperctx
      integer     :: npieces
-     procedure(pf_sweep_p),        pointer, nopass :: sweep
-     procedure(pf_initialize_p),   pointer, nopass :: initialize
-     procedure(pf_evaluate_p),     pointer, nopass :: evaluate
-     procedure(pf_evaluate_all_p), pointer, nopass :: evaluate_all
-     procedure(pf_integrate_p),    pointer, nopass :: integrate
-     procedure(pf_residual_p),     pointer, nopass :: residual
-     procedure(pf_sweepdestroy_p), pointer, nopass :: destroy
+   contains
+     procedure(pf_sweep_p), deferred :: sweep
+     procedure(pf_initialize_p), deferred :: initialize
+     procedure(pf_evaluate_p), deferred :: evaluate
+     procedure(pf_integrate_p), deferred :: integrate
+     procedure(pf_evaluate_all_p), deferred :: evaluate_all
+     procedure(pf_residual_p), deferred :: residual
+     ! procedure(pf_sweepdestroy_p), deferred :: destroy
   end type pf_sweeper_t
 
   type :: pf_encap_t
@@ -110,11 +111,11 @@ module pf_mod_dtype
      integer     :: level = -1          ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
-
      real(pfdp)  :: residual
 
      type(pf_encap_t),         pointer         :: encap
-     type(pf_sweeper_t),       pointer         :: sweeper
+     !     type(pf_sweeper_t),       pointer         :: sweeper
+     class(pf_sweeper_t), pointer :: sweeper
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
@@ -220,46 +221,52 @@ module pf_mod_dtype
      end subroutine pf_hook_p
 
      ! sweeper interfaces
-     subroutine pf_sweep_p(pf, Lev, t0, dt)
-       import pf_pfasst_t, pf_level_t, pfdp, c_ptr
+     subroutine pf_sweep_p(this, pf, lev, t0, dt)
+       import pf_pfasst_t, pf_level_t, pf_sweeper_t, pfdp
+       class(pf_sweeper_t), intent(in)  :: this
        type(pf_pfasst_t), intent(inout) :: pf
        real(pfdp),        intent(in)    :: dt, t0
        type(pf_level_t),  intent(inout) :: Lev
      end subroutine pf_sweep_p
 
-     subroutine pf_evaluate_p(Lev, t, m)
-       import pf_level_t, pfdp, c_ptr
-       type(pf_level_t), intent(inout) :: Lev
+     subroutine pf_evaluate_p(this, lev, t, m)
+       import pf_sweeper_t, pf_level_t, pfdp
+       class(pf_sweeper_t), intent(in)  :: this
+       type(pf_level_t), intent(inout) :: lev
        real(pfdp),       intent(in)    :: t
        integer,          intent(in)    :: m
      end subroutine pf_evaluate_p
 
-     subroutine pf_evaluate_all_p(Lev, t)
-       import pf_level_t, pfdp, c_ptr
-       type(pf_level_t), intent(inout) :: Lev
+     subroutine pf_evaluate_all_p(this, lev, t)
+       import pf_sweeper_t, pf_level_t, pfdp
+       class(pf_sweeper_t), intent(in) :: this
+       type(pf_level_t), intent(inout) :: lev
        real(pfdp),       intent(in)    :: t(:)
      end subroutine pf_evaluate_all_p
 
-     subroutine pf_initialize_p(Lev)
-       import pf_level_t
-       type(pf_level_t), intent(inout) :: Lev
+     subroutine pf_initialize_p(this, lev)
+       import pf_sweeper_t, pf_level_t
+       class(pf_sweeper_t), intent(inout)  :: this
+       type(pf_level_t), intent(inout) :: lev
      end subroutine pf_initialize_p
 
-     subroutine pf_sweepdestroy_p(sweeper)
+     subroutine pf_sweepdestroy_p(this)
        import pf_sweeper_t
-       type(pf_sweeper_t), intent(inout)  :: sweeper
+       class(pf_sweeper_t), intent(inout)  :: this
      end subroutine pf_sweepdestroy_p
 
-     subroutine pf_integrate_p(Lev, qSDC, fSDC, dt, fintSDC)
-       import pf_level_t, c_ptr, pfdp
-       type(pf_level_t),  intent(in)    :: Lev
+     subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC)
+       import pf_sweeper_t, pf_level_t, c_ptr, pfdp
+       class(pf_sweeper_t), intent(in)   :: this
+       type(pf_level_t),  intent(in)    :: lev
        type(c_ptr),       intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),        intent(in)    :: dt
        type(c_ptr),       intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
 
-     subroutine pf_residual_p(Lev, dt)
-       import pf_level_t, c_ptr, pfdp
+     subroutine pf_residual_p(this, lev, dt)
+       import pf_sweeper_t, pf_level_t, c_ptr, pfdp
+       class(pf_sweeper_t), intent(in)   :: this
        type(pf_level_t),  intent(inout) :: Lev
        real(pfdp),        intent(in)    :: dt
      end subroutine pf_residual_p
@@ -276,7 +283,7 @@ module pf_mod_dtype
      subroutine pf_encap_create_p(sol, level, kind, nvars, shape, levelctx, encapctx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
-       type(c_ptr),  intent(in), value :: levelctx, encapctx
+       type(c_ptr),  intent(in), value :: encapctx, levelctx
        integer,      intent(in)        :: level, nvars, shape(:)
        integer,      intent(in)        :: kind
      end subroutine pf_encap_create_p

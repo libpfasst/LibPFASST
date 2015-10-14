@@ -31,9 +31,6 @@ module pfasst
   use pf_mod_implicit
   use pf_mod_explicit
   use pf_mod_imex
-  use pf_mod_implicitQ
-  use pf_mod_explicitQ
-  use pf_mod_imexQ
   use pf_mod_fake
   use pf_mod_options
 end module pfasst

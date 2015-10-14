@@ -7,6 +7,7 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
+  use pf_mod_imex
   implicit none
   include 'fftw3.f03'
 
@@ -25,6 +26,13 @@ module feval
      complex(pfdp), pointer :: wk(:)              ! work space
      complex(pfdp), pointer :: ddx(:), lap(:)     ! operators
   end type ad_work_t
+
+  type, extends(pf_imex_t) :: ad_sweeper_t
+   contains
+     procedure :: f1eval => eval_f1
+     procedure :: f2eval => eval_f2
+     procedure :: f2comp => comp_f2
+  end type ad_sweeper_t
 
 contains
 
@@ -134,83 +142,86 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine eval_f1(yptr, t, level, levelctx, f1ptr)
-    type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
+  subroutine eval_f1(this, y, t, level, levelctx, f1)
+    class(ad_sweeper_t), intent(in) :: this
+    type(c_ptr), intent(in), value :: y, f1, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
     type(ad_work_t), pointer :: work
-    real(pfdp),      pointer :: y(:), f1(:)
+    real(pfdp),      pointer :: yvec(:), f1vec(:)
     complex(pfdp),   pointer :: wk(:)
 
     call c_f_pointer(levelctx, work)
 
-    y  => array1(yptr)
-    f1 => array1(f1ptr)
+    yvec  => array1(y)
+    f1vec => array1(f1)
     wk => work%wk
 
-    wk = y
+    wk = yvec
     call fftw_execute_dft(work%ffft, wk, wk)
     wk = -v * work%ddx * wk / size(wk)
     call fftw_execute_dft(work%ifft, wk, wk)
 
-    f1 = real(wk)
+    f1vec = real(wk)
 
   end subroutine eval_f1
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine eval_f2(yptr, t, level, levelctx, f2ptr)
-    type(c_ptr), intent(in), value :: yptr, f2ptr, levelctx
+  subroutine eval_f2(this, y, t, level, levelctx, f2)
+    class(ad_sweeper_t), intent(in) :: this
+    type(c_ptr), intent(in), value :: y, f2, levelctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
     type(ad_work_t), pointer :: work
-    real(pfdp),      pointer :: y(:), f2(:)
+    real(pfdp),      pointer :: yvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
 
     call c_f_pointer(levelctx, work)
 
-    y  => array1(yptr)
-    f2 => array1(f2ptr)
+    yvec  => array1(y)
+    f2vec => array1(f2)
     wk => work%wk
 
-    wk = y
+    wk = yvec
     call fftw_execute_dft(work%ffft, wk, wk)
     wk = nu * work%lap * wk / size(wk)
     call fftw_execute_dft(work%ifft, wk, wk)
 
-    f2 = real(wk)
+    f2vec = real(wk)
 
   end subroutine eval_f2
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine comp_f2(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
-    type(c_ptr), intent(in), value :: yptr, rhsptr, f2ptr, levelctx
+  subroutine comp_f2(this, y, t, dt, rhs, level, levelctx, f2)
+    class(ad_sweeper_t), intent(in) :: this
+    type(c_ptr), intent(in), value :: y, rhs, f2, levelctx
     real(pfdp),  intent(in)        :: t, dt
     integer,     intent(in)        :: level
 
     type(ad_work_t), pointer :: work
-    real(pfdp),      pointer :: y(:), rhs(:), f2(:)
+    real(pfdp),      pointer :: yvec(:), rhsvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
 
     call c_f_pointer(levelctx, work)
 
-    y  => array1(yptr)
-    rhs => array1(rhsptr)
-    f2 => array1(f2ptr)
+    yvec  => array1(y)
+    rhsvec => array1(rhs)
+    f2vec => array1(f2)
     wk => work%wk
 
-    wk = rhs
+    wk = rhsvec
     call fftw_execute_dft(work%ffft, wk, wk)
     wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
     call fftw_execute_dft(work%ifft, wk, wk)
 
-    y  = real(wk)
-    f2 = (y - rhs) / dt
+    yvec  = real(wk)
+    f2vec = (yvec - rhsvec) / dt
 
   end subroutine comp_f2
 

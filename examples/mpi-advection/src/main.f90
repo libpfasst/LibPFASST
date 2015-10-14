@@ -17,6 +17,7 @@ program main
   type(pf_comm_t)          :: comm
   type(pf_encap_t), target :: encap
   type(ndarray), pointer   :: q0
+  type(ad_sweeper_t), target       :: sweepers(maxlevs)
   integer                  :: err, nvars(maxlevs), nnodes(maxlevs), l
   double precision         :: dt
 
@@ -63,7 +64,8 @@ program main
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
      pf%levels(l)%encap       => encap
-    call pf_imexQ_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
+     pf%levels(l)%sweeper     => sweepers(l)
+!    call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
 !     call pf_implicitQ_create(pf%levels(l)%sweeper,  eval_f2, comp_f2)
 
      allocate(pf%levels(l)%shape(1))
@@ -103,9 +105,9 @@ program main
 
   call ndarray_destroy(c_loc(q0))
 
-  do l = 1, pf%nlevels
-     call feval_destroy_workspace(pf%levels(l)%levelctx)
-  end do
+  ! do l = 1, pf%nlevels
+  !    call feval_destroy_workspace(pf%levels(l)%levelctx)
+  ! end do
 
 
   call pf_pfasst_destroy(pf)

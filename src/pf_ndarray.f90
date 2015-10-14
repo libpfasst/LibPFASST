@@ -81,7 +81,7 @@ contains
     type(c_ptr), intent(inout)        :: solptr
     integer,     intent(in   )        :: level, nvars, shape(:)
     integer,     intent(in   )        :: kind
-    type(c_ptr), intent(in   ), value :: levelctx, encapctx
+    type(c_ptr), intent(in   ), value :: encapctx, levelctx
 
     type(ndarray), pointer :: sol
 

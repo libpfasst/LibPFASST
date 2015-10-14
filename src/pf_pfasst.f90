@@ -89,8 +89,8 @@ contains
     nullify(level%pQ)
     nullify(level%rmat)
     nullify(level%tmat)
-    allocate(level%sweeper)
-    level%levelctx = c_null_ptr
+!    allocate(level%sweeper)
+!    level%levelctx = c_null_ptr
   end subroutine pf_level_create
 
 
@@ -152,7 +152,6 @@ contains
 
     nvars   = F%nvars
     nnodes  = F%nnodes
-    npieces = F%sweeper%npieces
 
     F%residual = -1.0_pfdp
 
@@ -227,6 +226,8 @@ contains
     !
     ! allocate Q and F
     !
+    npieces = F%sweeper%npieces
+    
     allocate(F%Q(nnodes))
     allocate(F%F(nnodes,npieces))
 
@@ -412,8 +413,8 @@ contains
     end if
 
     ! kill the sweeper
-    call F%sweeper%destroy(F%sweeper)
-    deallocate(F%sweeper)
+    ! call F%sweeper%destroy()
+    ! deallocate(F%sweeper)
 
   end subroutine pf_level_destroy
 

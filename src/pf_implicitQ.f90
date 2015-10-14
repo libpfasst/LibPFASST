@@ -25,8 +25,9 @@ module pf_mod_implicitQ
 
   interface
      subroutine pf_f2eval_p(y, t, level, levelctx, f2)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f2, levelctx
+       import c_ptr, c_int, pfdp, pf_context_T
+       type(c_ptr),    intent(in), value :: y, f2!, levelctx
+       class(pf_context_t), intent(in)   :: levelctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2eval_p
@@ -34,8 +35,9 @@ module pf_mod_implicitQ
 
   interface
      subroutine pf_f2comp_p(y, t, dt, rhs, level, levelctx, f2)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, rhs, f2, levelctx
+       import c_ptr, c_int, pfdp, pf_context_t
+       type(c_ptr),    intent(in), value :: y, rhs, f2!, levelctx
+       class(pf_context_t), intent(in)   :: levelctx
        real(pfdp),     intent(in)        :: t, dt
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2comp_p

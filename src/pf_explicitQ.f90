@@ -25,8 +25,9 @@ module pf_mod_explicitQ
 
   interface
      subroutine pf_f1eval_p(y, t, level, levelctx, f1)
-       import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f1, levelctx
+       import c_ptr, c_int, pfdp, pf_context_t
+       type(c_ptr),    intent(in), value :: y, f1!, levelctx
+       class(pf_context_t), intent(in) :: levelctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f1eval_p
