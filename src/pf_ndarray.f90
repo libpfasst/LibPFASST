@@ -290,7 +290,7 @@ contains
     write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
          state%step, state%iter, level%level
 
-    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
+    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
          qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
 
   end subroutine ndarray_dump_hook
