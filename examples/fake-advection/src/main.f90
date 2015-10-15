@@ -80,13 +80,13 @@ program fpfasst
   !
   call c_f_pointer(comm%pfs(1), pf0)
   do l = 1, nlevs
-     call feval_create_workspace(pf0%levels(l)%levelctx, pf0%levels(l)%nvars)
+     call feval_create_workspace(pf0%levels(l)%ctx, pf0%levels(l)%nvars)
   end do
 
   do p = 2, nprocs
      call c_f_pointer(comm%pfs(p), pf)
      do l = 1, nlevs
-        pf%levels(l)%levelctx = pf0%levels(l)%levelctx
+        pf%levels(l)%ctx = pf0%levels(l)%ctx
      end do
   end do
 
@@ -107,7 +107,7 @@ program fpfasst
   call ndarray_destroy(c_loc(q0))
 
   do l = 1, nlevs
-     call feval_destroy_workspace(pf0%levels(l)%levelctx)
+     call feval_destroy_workspace(pf0%levels(l)%ctx)
   end do
 
 

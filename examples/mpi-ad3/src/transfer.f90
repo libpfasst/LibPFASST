@@ -10,9 +10,9 @@ module transfer
   implicit none
 contains
 
-  subroutine interp1(qF, qG, levelctxF, levelctxG)
+  subroutine interp1(qF, qG, ctxF, ctxG)
     use mg
-    type(c_ptr), intent(in), value :: levelctxF, levelctxG
+    type(c_ptr), intent(in), value :: ctxF, ctxG
     real(pfdp),  intent(inout) :: qF(:), qG(:)
 
     type(work1),   pointer :: workF, workG
@@ -31,8 +31,8 @@ contains
     endif
 
     if (do_spec .eq. 1) then
-       call c_f_pointer(levelctxF, workF)
-       call c_f_pointer(levelctxG, workG)
+       call c_f_pointer(ctxF, workF)
+       call c_f_pointer(ctxG, workG)
        
        wkF => workF%wk
        wkG => workG%wk
@@ -61,8 +61,8 @@ contains
     endif
   end subroutine interp1
 
-  subroutine interp2(qF, qG, levelctxF, levelctxG)
-    type(c_ptr), intent(in), value :: levelctxF, levelctxG
+  subroutine interp2(qF, qG, ctxF, ctxG)
+    type(c_ptr), intent(in), value :: ctxF, ctxG
     real(pfdp),  intent(inout) :: qF(:,:), qG(:,:)
 
     type(work2),   pointer :: workF, workG
@@ -78,8 +78,8 @@ contains
        return
     endif
 
-    call c_f_pointer(levelctxF, workF)
-    call c_f_pointer(levelctxG, workG)
+    call c_f_pointer(ctxF, workF)
+    call c_f_pointer(ctxG, workG)
 
     wkF => workF%wk
     wkG => workG%wk
@@ -112,8 +112,8 @@ contains
   end subroutine interp2
 
 
-  subroutine interpolate(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
-    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
+  subroutine interpolate(qFp, qGp, levelF, ctxF, levelG, ctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
     real(pfdp),  intent(in) :: t
 
@@ -123,18 +123,18 @@ contains
     case(1)
        qF => array1(qFp)
        qG => array1(qGp)
-       call interp1(qF, qG, levelctxF, levelctxG)
+       call interp1(qF, qG, ctxF, ctxG)
     case(2)
        qF2 => array2(qFp)
        qG2 => array2(qGp)
-       call interp2(qF2, qG2, levelctxF, levelctxG)
+       call interp2(qF2, qG2, ctxF, ctxG)
     case(3)
        stop
     end select
   end subroutine interpolate
 
-  subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
-    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
+  subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
     real(pfdp),  intent(in) :: t
 

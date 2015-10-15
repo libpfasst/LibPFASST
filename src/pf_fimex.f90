@@ -27,9 +27,9 @@ module pf_mod_fimex
   integer, parameter, private :: npieces = 2
 
   interface
-     subroutine pf_force_p(y, t, level, levelctx, f)
+     subroutine pf_force_p(y, t, level, ctx, f)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f, levelctx
+       type(c_ptr),    intent(in), value :: y, f, ctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_force_p
@@ -78,9 +78,9 @@ contains
        do m = 1, Lev%nnodes
           if (.not. c_associated(fimex%F(m))) then
              call Lev%encap%create(fimex%F(m), Lev%level, SDC_KIND_SOL_FEVAL, &
-                  Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+                  Lev%nvars, Lev%shape, Lev%ctx)
           end if
-          call fimex%force(Lev%Q(m), t, Lev%level, Lev%levelctx, fimex%F(m))
+          call fimex%force(Lev%Q(m), t, Lev%level, Lev%ctx, fimex%F(m))
 
           if (m < Lev%nnodes) t = t + dtsdc(m)
        end do
@@ -103,10 +103,10 @@ contains
     ! do the time-stepping
     call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call fimex%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
-    call fimex%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,2))
+    call fimex%f1eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1))
+    call fimex%f2eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,2))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -117,8 +117,8 @@ contains
        call Lev%encap%axpy(rhs, dtsdc(m), Lev%F(m,1))
        call Lev%encap%axpy(rhs, 1.0d0, Lev%S(m))
 
-       call fimex%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call fimex%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+       call fimex%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%ctx, Lev%F(m+1,2))
+       call fimex%f1eval(Lev%Q(m+1), t, Lev%level, Lev%ctx, Lev%F(m+1,1))
     end do
 
     call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
@@ -138,8 +138,8 @@ contains
     type(pf_fimex_t), pointer :: fimex
     call c_f_pointer(Lev%sweeper%sweeperctx, fimex)
 
-    call fimex%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
-    call fimex%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,2))
+    call fimex%f1eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,1))
+    call fimex%f2eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,2))
   end subroutine fimex_evaluate
 
   ! Initialize matrices

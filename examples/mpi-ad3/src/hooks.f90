@@ -9,13 +9,13 @@ module hooks
   implicit none
 contains
 
-  subroutine echo_error_hook(pf, level, state, levelctx)
+  subroutine echo_error_hook(pf, level, state, ctx)
     use pf_mod_utils
     use solutions, only: exact,exact_ode
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    type(c_ptr),         intent(in)    :: levelctx
+    type(c_ptr),         intent(in)    :: ctx
 
     real(c_double) :: yexact(level%nvars)
     real(pfdp), pointer :: qend(:)
@@ -52,13 +52,13 @@ contains
 
   end subroutine echo_error_hook
 
-  subroutine echo_residual_hook(pf, level, state, levelctx)
+  subroutine echo_residual_hook(pf, level, state, ctx)
     use iso_c_binding
     use pf_mod_utils
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: level
     type(pf_state_t),  intent(in)    :: state
-    type(c_ptr),       intent(in)    :: levelctx
+    type(c_ptr),       intent(in)    :: ctx
 
     real(pfdp), pointer :: r(:)
 

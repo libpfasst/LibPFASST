@@ -24,9 +24,9 @@ module pf_mod_explicitQ
   integer, parameter, private :: npieces = 1
 
   interface
-     subroutine pf_f1eval_p(y, t, level, levelctx, f1)
+     subroutine pf_f1eval_p(y, t, level, ctx, f1)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f1, levelctx
+       type(c_ptr),    intent(in), value :: y, f1, ctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f1eval_p
@@ -71,7 +71,7 @@ contains
     ! do the time-stepping
     call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call exp%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
+    call exp%f1eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1))
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -86,7 +86,7 @@ contains
 !       call Lev%encap%axpy(Lev%Q(m+1), dtsdc(m), Lev%F(m,1))
        call Lev%encap%axpy(Lev%Q(m+1), 1.0_pfdp, Lev%S(m))
 
-       call exp%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+       call exp%f1eval(Lev%Q(m+1), t, Lev%level, Lev%ctx, Lev%F(m+1,1))
     end do
 
     call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
@@ -107,7 +107,7 @@ contains
 
     call c_f_pointer(Lev%sweeper%sweeperctx, exp)
 
-    call exp%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
+    call exp%f1eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,1))
   end subroutine explicitQ_evaluate
 
   ! Initialize matrix

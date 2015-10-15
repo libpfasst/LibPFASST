@@ -82,14 +82,14 @@ program main
 
      select case(ndim)
      case(1)
-        call create_work1(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+        call create_work1(pf%levels(l)%ctx, pf%levels(l)%shape(1))
         call pf_imexQ_create(pf%levels(l)%sweeper, f1eval1, f2eval1, f2comp1)
 !        call pf_implicitQ_create(pf%levels(l)%sweeper,  f2eval1, f2comp1)
      case(2)
-        call create_work2(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+        call create_work2(pf%levels(l)%ctx, pf%levels(l)%shape(1))
         call pf_imexQ_create(pf%levels(l)%sweeper, f1eval2, f2eval2, f2comp2)
      case(3)
-        call create_work3(pf%levels(l)%levelctx, pf%levels(l)%shape(1))
+        call create_work3(pf%levels(l)%ctx, pf%levels(l)%shape(1))
         call pf_imexQ_create(pf%levels(l)%sweeper, f1eval3, f2eval3, f2comp3)
      end select
   end do
@@ -183,9 +183,9 @@ program main
 
   ! do l = 1, nlevs
   !    if (ndim == 1) then
-  !       call destroy_work1(pf%levels(l)%levelctx)
+  !       call destroy_work1(pf%levels(l)%ctx)
   !    else
-  !       ! call destroy_work2(pf%levels(l)%levelctx)
+  !       ! call destroy_work2(pf%levels(l)%ctx)
   !    end if
   ! end do
 

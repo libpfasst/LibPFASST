@@ -28,10 +28,10 @@ contains
   ! one dimension
   !
 
-  subroutine f1eval1(yptr, t, level, levelctx, f1ptr)
+  subroutine f1eval1(yptr, t, level, ctx, f1ptr)
     use probin, only: nprob, do_spec
     use mg, only: fill_bc_1d
-    type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
+    type(c_ptr), intent(in), value :: yptr, f1ptr, ctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
@@ -48,7 +48,7 @@ contains
     Nx = size(y)
     if (do_spec==1) then
        wk => work%wk
-       call c_f_pointer(levelctx, work)
+       call c_f_pointer(ctx, work)
        wk = y
        call fftw_execute_dft(work%ffft, wk, wk)
        if (nprob .eq. 0) then  ! spectral advection diffusion
@@ -78,10 +78,10 @@ contains
 
   end subroutine f1eval1
 
-  subroutine f2eval1(yptr, t, level, levelctx, f2ptr)
+  subroutine f2eval1(yptr, t, level, ctx, f2ptr)
     use probin, only: nprob, do_spec
     use mg, only: fill_bc_1d
-    type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -96,7 +96,7 @@ contains
     f2 => array1(f2ptr)
     Nx = size(y)
     if (do_spec==1) then
-       call c_f_pointer(levelctx, work)
+       call c_f_pointer(ctx, work)
        wk => work%wk
        
        wk = y
@@ -130,10 +130,10 @@ contains
     endif
   end subroutine f2eval1
 
-  subroutine f2comp1(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
+  subroutine f2comp1(yptr, t, dt, rhsptr, level, ctx, f2ptr)
     use mg
     use probin, only: N_Vcycles,do_spec,nprob,Nrelax
-    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
@@ -150,7 +150,7 @@ contains
 
     Nx = size(y)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y   => array1(yptr)
     rhs => array1(rhsptr)
@@ -170,7 +170,7 @@ contains
        
        y  = real(wk)
        f2 = (y - rhs) / dt    
-!       call f2eval1(yptr, t, level, levelctx, f2ptr)
+!       call f2eval1(yptr, t, level, ctx, f2ptr)
    else
       if (nprob .eq. 2) then
          nudt = nu*dt*0.5_pfdp
@@ -200,14 +200,14 @@ contains
             do k=1,N_Vcycles
                call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
             end do
-            call f2eval1(yptr, t, level, levelctx, f2ptr)
+            call f2eval1(yptr, t, level, ctx, f2ptr)
          end do
          deallocate(ybc)
        else
           do k=1,N_Vcycles
              call Vcycle(ymg, t, nudt, rhsmg, level, c_null_ptr, Nrelax,maxresid) 
           end do
-          call f2eval1(yptr, t, level, levelctx, f2ptr)
+          call f2eval1(yptr, t, level, ctx, f2ptr)
        endif
 
        deallocate(y0)          
@@ -220,8 +220,8 @@ contains
   ! two dimension
   !
 
-  subroutine f1eval2(yptr, t, level, levelctx, f1ptr)
-    type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
+  subroutine f1eval2(yptr, t, level, ctx, f1ptr)
+    type(c_ptr), intent(in), value :: yptr, f1ptr, ctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
@@ -229,7 +229,7 @@ contains
     real(pfdp),    pointer :: y(:,:), f1(:,:)
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y  => array2(yptr)
     f1 => array2(f1ptr)
@@ -243,8 +243,8 @@ contains
     f1 = real(wk)
   end subroutine f1eval2
 
-  subroutine f2eval2(yptr, t, level, levelctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
+  subroutine f2eval2(yptr, t, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -252,7 +252,7 @@ contains
     type(work2),   pointer :: work
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y  => array2(yptr)
     f2 => array2(f2ptr)
@@ -266,8 +266,8 @@ contains
     f2 = real(wk)
   end subroutine f2eval2
 
-  subroutine f2comp2(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
+  subroutine f2comp2(yptr, t, dt, rhsptr, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
@@ -275,7 +275,7 @@ contains
     type(work2),   pointer :: work
     complex(pfdp), pointer :: wk(:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y   => array2(yptr)
     rhs => array2(rhsptr)
@@ -295,8 +295,8 @@ contains
   ! three dimension
   !
 
-  subroutine f1eval3(yptr, t, level, levelctx, f1ptr)
-    type(c_ptr), intent(in), value :: yptr, f1ptr, levelctx
+  subroutine f1eval3(yptr, t, level, ctx, f1ptr)
+    type(c_ptr), intent(in), value :: yptr, f1ptr, ctx
     real(pfdp),  intent(in)        :: t
     integer,     intent(in)        :: level
 
@@ -304,7 +304,7 @@ contains
     real(pfdp),    pointer :: y(:,:,:), f1(:,:,:)
     complex(pfdp), pointer :: wk(:,:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y  => array3(yptr)
     f1 => array3(f1ptr)
@@ -318,8 +318,8 @@ contains
     f1 = real(wk)
   end subroutine f1eval3
 
-  subroutine f2eval3(yptr, t, level, levelctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, f2ptr, levelctx
+  subroutine f2eval3(yptr, t, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t
     integer(c_int), intent(in)         :: level
 
@@ -327,7 +327,7 @@ contains
     type(work3),   pointer :: work
     complex(pfdp), pointer :: wk(:,:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y  => array3(yptr)
     f2 => array3(f2ptr)
@@ -341,8 +341,8 @@ contains
     f2 = real(wk)
   end subroutine f2eval3
 
-  subroutine f2comp3(yptr, t, dt, rhsptr, level, levelctx, f2ptr)
-    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, levelctx
+  subroutine f2comp3(yptr, t, dt, rhsptr, level, ctx, f2ptr)
+    type(c_ptr),    intent(in), value  :: yptr, rhsptr, f2ptr, ctx
     real(pfdp),     intent(in)         :: t, dt
     integer(c_int), intent(in)         :: level
 
@@ -350,7 +350,7 @@ contains
     type(work3),   pointer :: work
     complex(pfdp), pointer :: wk(:,:,:)
 
-    call c_f_pointer(levelctx, work)
+    call c_f_pointer(ctx, work)
 
     y   => array3(yptr)
     rhs => array3(rhsptr)
@@ -370,8 +370,8 @@ contains
   ! work stuff
   !
 
-  subroutine create_work1(levelctx, nvars)
-    type(c_ptr), intent(out) :: levelctx
+  subroutine create_work1(ctx, nvars)
+    type(c_ptr), intent(out) :: ctx
     integer,     intent(in)  :: nvars
 
     type(work1), pointer :: work
@@ -380,7 +380,7 @@ contains
     real(pfdp)  :: kx(nvars), dx
 
     allocate(work)
-    levelctx = c_loc(work)
+    ctx = c_loc(work)
 
     do i = 1, nvars
        if (i <= nvars/2+1) then
@@ -414,8 +414,8 @@ contains
 
   end subroutine create_work1
 
-  subroutine create_work2(levelctx, nvars)
-    type(c_ptr), intent(out) :: levelctx
+  subroutine create_work2(ctx, nvars)
+    type(c_ptr), intent(out) :: ctx
     integer,     intent(in)  :: nvars
 
     type(work2), pointer :: work
@@ -424,7 +424,7 @@ contains
     real(pfdp)  :: kx(nvars)
 
     allocate(work)
-    levelctx = c_loc(work)
+    ctx = c_loc(work)
 
     do i = 1, nvars
        if (i <= nvars/2+1) then
@@ -462,8 +462,8 @@ contains
     end do
   end subroutine create_work2
 
-  subroutine create_work3(levelctx, nvars)
-    type(c_ptr), intent(out) :: levelctx
+  subroutine create_work3(ctx, nvars)
+    type(c_ptr), intent(out) :: ctx
     integer,     intent(in)  :: nvars
 
     type(work3), pointer :: work
@@ -472,7 +472,7 @@ contains
     real(pfdp)  :: kx(nvars)
 
     allocate(work)
-    levelctx = c_loc(work)
+    ctx = c_loc(work)
 
     do i = 1, nvars
        if (i <= nvars/2+1) then

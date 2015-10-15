@@ -72,7 +72,7 @@ program fpfasst
 
      allocate(pf%levels(l)%shape(4))
      pf%levels(l)%shape = [ nx(first-1+l), nx(first-1+l), nx(first-1+l), 3 ]
-     call feval_create(nx(first-1+l), 1.0d0, nu, nthreads, forcing, pf%levels(l)%levelctx)
+     call feval_create(nx(first-1+l), 1.0d0, nu, nthreads, forcing, pf%levels(l)%ctx)
 
      pf%levels(l)%encap       => encaps
      pf%levels(l)%interpolate => interpolate
@@ -131,7 +131,7 @@ program fpfasst
   call mpi_barrier(pf%comm%comm, ierror)
 
   do l = 1, nlevs
-     call feval_destroy(pf%levels(l)%levelctx)
+     call feval_destroy(pf%levels(l)%ctx)
   end do
 
   call pf_pfasst_destroy(pf)

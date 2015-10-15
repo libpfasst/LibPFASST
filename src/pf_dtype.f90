@@ -89,7 +89,6 @@ module pf_mod_dtype
   end type pf_sweeper_t
 
   type :: pf_encap_t
-     type(c_ptr) :: encapctx
      procedure(pf_encap_create_p),  pointer, nopass :: create
      procedure(pf_encap_destroy_p), pointer, nopass :: destroy
      procedure(pf_encap_setval_p),  pointer, nopass :: setval
@@ -143,7 +142,7 @@ module pf_mod_dtype
 
      type(c_ptr) :: qend                ! solution at last node
 
-     type(c_ptr)      :: levelctx       ! user context
+     type(c_ptr)      :: ctx       ! user context
      integer, pointer :: shape(:)       ! user shape
 
      logical :: allocated = .false.
@@ -210,13 +209,13 @@ module pf_mod_dtype
 
   interface
      ! hook interface
-     subroutine pf_hook_p(pf, level, state, levelctx)
+     subroutine pf_hook_p(pf, level, state, ctx)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
        type(pf_pfasst_t), intent(inout) :: pf
        type(pf_level_t),  intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
-       type(c_ptr),       intent(in)    :: levelctx
+       type(c_ptr),       intent(in)    :: ctx
      end subroutine pf_hook_p
 
      ! sweeper interfaces
@@ -265,18 +264,18 @@ module pf_mod_dtype
      end subroutine pf_residual_p
 
      ! transfer interfaces
-     subroutine pf_transfer_p(qF, qG, levelF, levelctxF, levelG, levelctxG, t)
+     subroutine pf_transfer_p(qF, qG, levelF, ctxF, levelG, ctxG, t)
        import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: qF, qG, levelctxF, levelctxG
+       type(c_ptr), intent(in), value :: qF, qG, ctxF, ctxG
        integer,     intent(in)        :: levelF, levelG
        real(pfdp),  intent(in)        :: t
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
-     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, levelctx, encapctx)
+     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, ctx)
        import c_ptr
        type(c_ptr),  intent(inout)     :: sol
-       type(c_ptr),  intent(in), value :: levelctx, encapctx
+       type(c_ptr),  intent(in), value :: ctx
        integer,      intent(in)        :: level, nvars, shape(:)
        integer,      intent(in)        :: kind
      end subroutine pf_encap_create_p

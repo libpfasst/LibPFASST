@@ -9,8 +9,8 @@ module transfer
   implicit none
 contains
 
-  subroutine interpolate(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
-    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
+  subroutine interpolate(qFp, qGp, levelF, ctxF, levelG, ctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
     real(pfdp),  intent(in) :: t
 
@@ -20,8 +20,8 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    call c_f_pointer(levelctxF, workF)
-    call c_f_pointer(levelctxG, workG)
+    call c_f_pointer(ctxF, workF)
+    call c_f_pointer(ctxG, workG)
 
     qF => array1(qFp)
     qG => array1(qGp)
@@ -51,8 +51,8 @@ contains
     qF = real(wkF)
   end subroutine interpolate
 
-  subroutine restrict(qFp, qGp, levelF, levelctxF, levelG, levelctxG,t)
-    type(c_ptr), intent(in), value :: qFp, qGp, levelctxF, levelctxG
+  subroutine restrict(qFp, qGp, levelF, ctxF, levelG, ctxG,t)
+    type(c_ptr), intent(in), value :: qFp, qGp, ctxF, ctxG
     integer,     intent(in)        :: levelF, levelG
     real(pfdp),  intent(in) :: t
 

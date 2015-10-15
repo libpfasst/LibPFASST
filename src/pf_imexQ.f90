@@ -73,10 +73,10 @@ contains
     ! do the time-stepping
     call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call imexQ%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
-    call imexQ%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,2))
+    call imexQ%f1eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1))
+    call imexQ%f2eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,2))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -96,9 +96,9 @@ contains
        call Lev%encap%axpy(rhs,1.0_pfdp, Lev%Q(1))
 
 
-!       call imexQ%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call imexQ%f2comp(Lev%Q(m+1), t, dt*imexQ%QtilI(m,m+1), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call imexQ%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+!       call imexQ%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%ctx, Lev%F(m+1,2))
+       call imexQ%f2comp(Lev%Q(m+1), t, dt*imexQ%QtilI(m,m+1), rhs, Lev%level, Lev%ctx, Lev%F(m+1,2))
+       call imexQ%f1eval(Lev%Q(m+1), t, Lev%level, Lev%ctx, Lev%F(m+1,1))
 
     end do
 
@@ -119,8 +119,8 @@ contains
     type(pf_imexQ_t), pointer :: imexQ
     call c_f_pointer(Lev%sweeper%sweeperctx, imexQ)
 
-    call imexQ%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
-    call imexQ%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,2))
+    call imexQ%f1eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,1))
+    call imexQ%f2eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,2))
   end subroutine imexQ_evaluate
 
   ! Initialize matrices

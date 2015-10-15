@@ -31,14 +31,14 @@ contains
     deallocate(ustar)
   end subroutine project_hook
 
-  subroutine echo_error_hook(pf, level, state, levelctx)
+  subroutine echo_error_hook(pf, level, state, ctx)
     use feval
     implicit none
 
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: level
     type(pf_state_t),  intent(in)    :: state
-    type(c_ptr),       intent(in)    :: levelctx
+    type(c_ptr),       intent(in)    :: ctx
 
     type(carray4)          :: qex
     type(carray4), pointer :: q
@@ -46,7 +46,7 @@ contains
 
     real(pfdp) :: e0, e1, r
 
-    call c_f_pointer(levelctx, ctx)
+    call c_f_pointer(ctx, ctx)
     call carray4_create(qex, level%shape)
 
     call c_f_pointer(level%q(1), q)
@@ -65,7 +65,7 @@ contains
     deallocate(qex%array)
   end subroutine echo_error_hook
 
-  subroutine echo_energy_hook(pf, level, state, levelctx)
+  subroutine echo_energy_hook(pf, level, state, ctx)
     use feval
     use transfer
     implicit none
@@ -73,7 +73,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: level
     type(pf_state_t),  intent(in)    :: state
-    type(c_ptr),       intent(in)    :: levelctx
+    type(c_ptr),       intent(in)    :: ctx
 
     type(carray4), pointer :: q
     type(feval_t), pointer :: ctx
@@ -86,7 +86,7 @@ contains
 
     if (level%level /= pf%nlevels) return
 
-    call c_f_pointer(levelctx, ctx)
+    call c_f_pointer(ctx, ctx)
     call c_f_pointer(level%qend, q)
     call energy(q, e1)
 
@@ -119,14 +119,14 @@ contains
 
   end subroutine dump
 
-  subroutine dump_hook(pf, level, state, levelctx)
+  subroutine dump_hook(pf, level, state, ctx)
     use pf_mod_ndarray
     use probin, only: nskip
 
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    type(c_ptr),         intent(in)    :: levelctx
+    type(c_ptr),         intent(in)    :: ctx
 
     character(len=256)     :: fname
     type(carray4), pointer :: qend

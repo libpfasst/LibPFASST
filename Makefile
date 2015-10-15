@@ -10,8 +10,6 @@ include $(LIBPFASST)/Makefile.defaults
 # libpfasst
 #
 
-$(shell $(PY) mk/version.py src/pf_version.f90)
-
 build/libpfasst.a: $(OBJ)
 	$(AR) build/libpfasst.a $(OBJ)
 

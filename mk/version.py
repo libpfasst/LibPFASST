@@ -14,7 +14,7 @@ root    = os.environ.get('PFASST', '.')
 # checks
 
 if len(sys.argv) != 2:
-    print "ERROR: must pass output file name."
+    print( "ERROR: must pass output file name." )
     raise SystemExit
 
 # get the git version

@@ -36,11 +36,11 @@ contains
   ! Allocate/create solution (spatial data set) for the given level.
   !
   ! This is called for each SDC node.
-  subroutine encap_create(sol, level, kind, nvars, shape, levelctx, encapctx)
+  subroutine encap_create(sol, level, kind, nvars, shape, ctx)
     type(c_ptr),       intent(inout)     :: sol
     integer,           intent(in)        :: level, nvars, shape(:)
     integer,           intent(in)        :: kind
-    type(c_ptr),       intent(in), value :: levelctx, encapctx
+    type(c_ptr),       intent(in), value :: ctx
 
     type(array1d), pointer :: q
 

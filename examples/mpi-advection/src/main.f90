@@ -58,7 +58,7 @@ program main
      pf%levels(l)%nvars  = nvars(maxlevs-pf%nlevels+l)
      pf%levels(l)%nnodes = nnodes(maxlevs-pf%nlevels+l)
 
-     call feval_create_workspace(pf%levels(l)%levelctx, pf%levels(l)%nvars)
+     call feval_create_workspace(pf%levels(l)%ctx, pf%levels(l)%nvars)
 
      pf%levels(l)%interpolate => interpolate
      pf%levels(l)%restrict    => restrict
@@ -104,7 +104,7 @@ program main
   call ndarray_destroy(c_loc(q0))
 
   do l = 1, pf%nlevels
-     call feval_destroy_workspace(pf%levels(l)%levelctx)
+     call feval_destroy_workspace(pf%levels(l)%ctx)
   end do
 
 

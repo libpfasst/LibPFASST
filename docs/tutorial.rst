@@ -45,7 +45,7 @@ pre-computes various spectral operators.
 
 LIBPFASST allows you, the user, to attach an arbitrary C pointer to
 each PFASST level.  This is called a context (typically called
-``levelctx`` in the source) pointer (as in, "for the problem I'm
+``ctx`` in the source) pointer (as in, "for the problem I'm
 solving I have a specific context that I will be working in").  Your
 context pointer gets passed to your function evaluation routines and
 to your transfer routines.  In most of the examples this context

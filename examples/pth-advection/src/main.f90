@@ -53,7 +53,7 @@ program fpfasst
         allocate(pf%levels(l)%shape(1))
         pf%levels(l)%shape(1) = nvars(l)
 
-        call feval_create_workspace(pf%levels(l)%levelctx, nvars(l))
+        call feval_create_workspace(pf%levels(l)%ctx, nvars(l))
 
         pf%levels(l)%interpolate => interpolate
         pf%levels(l)%restrict    => restrict
@@ -74,7 +74,7 @@ program fpfasst
   do t = 1, nthreads
      call c_f_pointer(tcomm%pfs(t-1), pf)
      do l = 1, size(nvars)
-        call feval_destroy_workspace(pf%levels(l)%levelctx)
+        call feval_destroy_workspace(pf%levels(l)%ctx)
      end do
   end do
 

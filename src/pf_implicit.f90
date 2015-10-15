@@ -24,18 +24,18 @@ module pf_mod_implicit
   integer, parameter, private :: npieces = 1
 
   interface
-     subroutine pf_f2eval_p(y, t, level, levelctx, f2)
+     subroutine pf_f2eval_p(y, t, level, ctx, f2)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, f2, levelctx
+       type(c_ptr),    intent(in), value :: y, f2, ctx
        real(pfdp),     intent(in)        :: t
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2eval_p
   end interface
 
   interface
-     subroutine pf_f2comp_p(y, t, dt, rhs, level, levelctx, f2)
+     subroutine pf_f2comp_p(y, t, dt, rhs, level, ctx, f2)
        import c_ptr, c_int, pfdp
-       type(c_ptr),    intent(in), value :: y, rhs, f2, levelctx
+       type(c_ptr),    intent(in), value :: y, rhs, f2, ctx
        real(pfdp),     intent(in)        :: t, dt
        integer(c_int), intent(in)        :: level
      end subroutine pf_f2comp_p
@@ -83,9 +83,9 @@ contains
     ! do the time-stepping
     call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call imp%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
+    call imp%f2eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -95,7 +95,7 @@ contains
        call Lev%encap%copy(rhs, Lev%Q(m))
        call Lev%encap%axpy(rhs, 1.0_pfdp, Lev%S(m))
 
-       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%ctx, Lev%F(m+1,1))
     end do
 
     call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
@@ -115,7 +115,7 @@ contains
     type(pf_implicit_t), pointer :: imp
     call c_f_pointer(Lev%sweeper%sweeperctx, imp)
 
-    call imp%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
+    call imp%f2eval(Lev%Q(m), t, Lev%level, Lev%ctx, Lev%F(m,1))
   end subroutine implicit_evaluate
 
   ! Initialize matrix
