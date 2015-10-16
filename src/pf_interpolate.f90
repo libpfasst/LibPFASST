@@ -50,9 +50,9 @@ contains
     ! create workspaces
     do m = 1, LevG%nnodes
        call LevG%encap%create(delG(m),   LevG%level, SDC_KIND_CORRECTION, &
-            LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+            LevG%nvars, LevG%shape, LevG%encap%encapctx)
        call LevF%encap%create(delGF(m),  LevF%level, SDC_KIND_CORRECTION, &
-            LevF%nvars, LevF%shape, LevF%levelctx, LevF%encap%encapctx)
+            LevF%nvars, LevF%shape, LevF%encap%encapctx)
     end do
 
     ! set time at coarse and fine nodes
@@ -69,7 +69,7 @@ contains
     do m = 1, LevG%nnodes
        call LevG%encap%copy(delG(m), LevG%Q(m))
        call LevG%encap%axpy(delG(m), -1.0_pfdp, LevG%pQ(m))
-       call LevF%interpolate(delGF(m), delG(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(m))
+       call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
     end do
     
     ! interpolate corrections
@@ -93,7 +93,7 @@ contains
             call LevG%encap%copy(delG(m), LevG%F(m,p))
             call LevG%encap%axpy(delG(m), -1.0_pfdp, LevG%pF(m,p))
 
-            call LevF%interpolate(delGF(m), delG(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(m))
+            call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
          end do
 
          ! interpolate corrections  in time
@@ -160,13 +160,13 @@ contains
   
     ! create workspaces
     call LevG%encap%create(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, &
-         LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+         LevG%nvars, LevG%shape, LevG%encap%encapctx)
     call LevF%encap%create(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, &
-         LevF%nvars, LevF%shape, LevF%levelctx, LevF%encap%encapctx)
+         LevF%nvars, LevF%shape, LevF%encap%encapctx)
     call LevG%encap%create(delG, LevG%level, SDC_KIND_CORRECTION, &
-         LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+         LevG%nvars, LevG%shape, LevG%encap%encapctx)
     call LevF%encap%create(delF, LevF%level, SDC_KIND_CORRECTION, &
-         LevF%nvars, LevF%shape, LevF%levelctx, LevF%encap%encapctx)
+         LevF%nvars, LevF%shape, LevF%encap%encapctx)
 
     ! needed for amr
     call LevF%encap%setval(q0F,  0.0_pfdp)
@@ -177,10 +177,10 @@ contains
     call LevG%encap%unpack(q0G, LevG%q0)
     call LevF%encap%unpack(q0F, LevF%q0)
 
-    call LevF%restrict(q0F, delG, LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,pf%state%t0)
+    call LevF%sweeper%restrict(LevG%sweeper, q0F, delG, pf%state%t0)
     call LevG%encap%axpy(delG, -1.0_pfdp, q0G)
 
-    call LevF%interpolate(delF, delG, LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,pf%state%t0)
+    call LevF%sweeper%interpolate(levG%sweeper, delF, delG, pf%state%t0)
     call LevF%encap%axpy(q0F, -1.0_pfdp, delF)
 
     call LevF%encap%pack(LevF%q0, q0F)

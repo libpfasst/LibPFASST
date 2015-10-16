@@ -31,37 +31,37 @@ module pf_mod_imex
      procedure(pf_f1eval_p), deferred :: f1eval
      procedure(pf_f2eval_p), deferred :: f2eval
      procedure(pf_f2comp_p), deferred :: f2comp
-     procedure :: sweep => imex_sweep
-     procedure :: initialize => imex_initialize
-     procedure :: evaluate => imex_evaluate
-     procedure :: integrate => imex_integrate
-     procedure :: residual => imex_residual
+     procedure :: sweep        => imex_sweep
+     procedure :: initialize   => imex_initialize
+     procedure :: evaluate     => imex_evaluate
+     procedure :: integrate    => imex_integrate
+     procedure :: residual     => imex_residual
      procedure :: evaluate_all => imex_evaluate_all
   end type pf_imex_t
 
   interface
-     subroutine pf_f1eval_p(this, y, t, level, levelctx, f1)
+     subroutine pf_f1eval_p(this, y, t, level, f1)
        import pf_imex_t, c_ptr, c_int, pfdp
-       class(pf_imex_t), intent(in) :: this
-       type(c_ptr),    intent(in), value :: y, f1, levelctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
+       class(pf_imex_t), intent(inout)     :: this
+       type(c_ptr),      intent(in), value :: y, f1
+       real(pfdp),       intent(in)        :: t
+       integer(c_int),   intent(in)        :: level
      end subroutine pf_f1eval_p
 
-     subroutine pf_f2eval_p(this, y, t, level, levelctx, f2)
+     subroutine pf_f2eval_p(this, y, t, level, f2)
        import pf_imex_t, c_ptr, c_int, pfdp
-       class(pf_imex_t), intent(in) :: this
-       type(c_ptr),    intent(in), value :: y, f2, levelctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
+       class(pf_imex_t), intent(inout)     :: this
+       type(c_ptr),      intent(in), value :: y, f2
+       real(pfdp),       intent(in)        :: t
+       integer(c_int),   intent(in)        :: level
      end subroutine pf_f2eval_p
 
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, levelctx, f2)
+     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
        import pf_imex_t, c_ptr, c_int, pfdp
-       class(pf_imex_t), intent(in) :: this
-       type(c_ptr),    intent(in), value :: y, rhs, f2, levelctx
-       real(pfdp),     intent(in)        :: t, dt
-       integer(c_int), intent(in)        :: level
+       class(pf_imex_t), intent(inout)     :: this
+       type(c_ptr),      intent(in), value :: y, rhs, f2
+       real(pfdp),       intent(in)        :: t, dt
+       integer(c_int),   intent(in)        :: level
      end subroutine pf_f2comp_p
   end interface
 
@@ -71,7 +71,7 @@ contains
   subroutine imex_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
 
-    class(pf_imex_t), intent(in) :: this
+    class(pf_imex_t),  intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: dt, t0
     type(pf_level_t),  intent(inout) :: lev
@@ -98,10 +98,10 @@ contains
     ! do the time-stepping
     call lev%encap%unpack(lev%Q(1), lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%levelctx, lev%F(1,1))
-    call this%f2eval(lev%Q(1), t0, lev%level, lev%levelctx, lev%F(1,2))
+    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
 
-    call lev%encap%create(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape, lev%levelctx, lev%encap%encapctx)
+    call lev%encap%create(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape, lev%encap%encapctx)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -112,8 +112,8 @@ contains
        call lev%encap%axpy(rhs, dtsdc(m), lev%F(m,1))
        call lev%encap%axpy(rhs, 1.0_pfdp, lev%S(m))
 
-       call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%levelctx, lev%F(m+1,2))
-       call this%f1eval(lev%Q(m+1), t, lev%level, lev%levelctx, lev%F(m+1,1))
+       call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,2))
+       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
     end do
 
     call lev%encap%copy(lev%qend, lev%Q(lev%nnodes))
@@ -126,13 +126,13 @@ contains
 
   ! Evaluate function values
   subroutine imex_evaluate(this, lev, t, m)
-    class(pf_imex_t), intent(in) :: this
+    class(pf_imex_t), intent(inout) :: this
     real(pfdp),       intent(in   ) :: t
     integer,          intent(in   ) :: m
     type(pf_level_t), intent(inout) :: lev
 
-    call this%f1eval(lev%Q(m), t, lev%level, lev%levelctx, lev%F(m,1))
-    call this%f2eval(lev%Q(m), t, lev%level, lev%levelctx, lev%F(m,2))
+    call this%f1eval(lev%Q(m), t, lev%level, lev%F(m,1))
+    call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
   end subroutine imex_evaluate
 
   ! Initialize matrices
@@ -162,7 +162,7 @@ contains
 
   ! Compute SDC integral
   subroutine imex_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
-    class(pf_imex_t), intent(in) :: this
+    class(pf_imex_t), intent(inout) :: this
     type(pf_level_t), intent(in)    :: lev
     type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
@@ -180,22 +180,18 @@ contains
     end do
   end subroutine imex_integrate
 
-  subroutine imex_residual(this, Lev, dt)
-    class(pf_imex_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
-    real(pfdp),        intent(in)    :: dt
-
-    integer :: m, n
-
-    call pf_generic_residual(this, Lev, dt)
+  subroutine imex_residual(this, lev, dt)
+    class(pf_imex_t), intent(inout) :: this
+    type(pf_level_t), intent(inout) :: lev
+    real(pfdp),       intent(in)    :: dt
+    call pf_generic_residual(this, lev, dt)
   end subroutine imex_residual
 
-  subroutine imex_evaluate_all(this, Lev, t)
-    class(pf_imex_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
-    real(pfdp),        intent(in)    :: t(:)
-
-    call pf_generic_evaluate_all(this, Lev, t)
+  subroutine imex_evaluate_all(this, lev, t)
+    class(pf_imex_t), intent(inout) :: this
+    type(pf_level_t), intent(inout) :: lev
+    real(pfdp),       intent(in)    :: t(:)
+    call pf_generic_evaluate_all(this, lev, t)
   end subroutine imex_evaluate_all
 
 end module pf_mod_imex

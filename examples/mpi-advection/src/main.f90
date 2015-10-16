@@ -59,12 +59,12 @@ program main
      pf%levels(l)%nvars  = nvars(maxlevs-pf%nlevels+l)
      pf%levels(l)%nnodes = nnodes(maxlevs-pf%nlevels+l)
 
-     call feval_create_workspace(pf%levels(l)%levelctx, pf%levels(l)%nvars)
-
-     pf%levels(l)%interpolate => interpolate
-     pf%levels(l)%restrict    => restrict
+     ! pf%levels(l)%interpolate => interpolate
+     ! pf%levels(l)%restrict    => restrict
      pf%levels(l)%encap       => encap
      pf%levels(l)%sweeper     => sweepers(l)
+     call feval_create_workspace(sweepers(l)%work, pf%levels(l)%nvars)
+
 !    call pf_imex_create(pf%levels(l)%sweeper, eval_f1, eval_f2, comp_f2)
 !     call pf_implicitQ_create(pf%levels(l)%sweeper,  eval_f2, comp_f2)
 

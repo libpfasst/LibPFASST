@@ -77,11 +77,11 @@ contains
   end subroutine ndarray_create_simple
 
   ! Allocate/create solution (spatial data set).
-  subroutine ndarray_create(solptr, level, kind, nvars, shape, levelctx, encapctx)
+  subroutine ndarray_create(solptr, level, kind, nvars, shape, encapctx)
     type(c_ptr), intent(inout)        :: solptr
     integer,     intent(in   )        :: level, nvars, shape(:)
     integer,     intent(in   )        :: kind
-    type(c_ptr), intent(in   ), value :: encapctx, levelctx
+    type(c_ptr), intent(in   ), value :: encapctx
 
     type(ndarray), pointer :: sol
 
@@ -276,11 +276,10 @@ contains
     encap%axpy    => ndarray_saxpy
   end subroutine ndarray_encap_create
 
-  subroutine ndarray_dump_hook(pf, level, state, levelctx)
+  subroutine ndarray_dump_hook(pf, level, state)
     type(pf_pfasst_t),   intent(inout) :: pf
     type(pf_level_t),    intent(inout) :: level
     type(pf_state_t),    intent(in)    :: state
-    type(c_ptr),         intent(in)    :: levelctx
 
     character(len=256)     :: fname
     type(ndarray), pointer :: qend

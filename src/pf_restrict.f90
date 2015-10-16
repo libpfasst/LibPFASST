@@ -77,8 +77,8 @@ contains
 
        do m = 1, LevF%nnodes-1
           call LevG%encap%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
-               LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
-          call LevF%restrict(qF(m), qFr(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tF(m))
+               LevG%nvars, LevG%shape, LevG%encap%encapctx)
+          call LevF%sweeper%restrict(LevG%sweeper, qF(m), qFr(m), tF(m))
        end do
 
        ! when restricting '0 to node' integral terms, skip the first
@@ -90,8 +90,8 @@ contains
 
        do m = 1, LevF%nnodes
           call LevG%encap%create(qFr(m), LevG%level, SDC_KIND_SOL_NO_FEVAL, &
-               LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
-          call LevF%restrict(qF(m), qFr(m), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tF(m))
+               LevG%nvars, LevG%shape, LevG%encap%encapctx)
+          call LevF%sweeper%restrict(LevG%sweeper, qF(m), qFr(m), tF(m))
        end do
 
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat, qFr, LevG%encap)
@@ -140,14 +140,14 @@ contains
     !
     do m = 1, LevG%nnodes
        call LevG%encap%create(tmpG(m), LevG%level, SDC_KIND_INTEGRAL, &
-            LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+            LevG%nvars, LevG%shape, LevG%encap%encapctx)
        call LevG%encap%create(tmpFr(m), LevG%level, SDC_KIND_INTEGRAL, &
-            LevG%nvars, LevG%shape, LevG%levelctx, LevG%encap%encapctx)
+            LevG%nvars, LevG%shape, LevG%encap%encapctx)
     end do
 
     do m = 1, LevF%nnodes
        call LevF%encap%create(tmpF(m), LevF%level, SDC_KIND_INTEGRAL, &
-            LevF%nvars, LevF%shape, LevF%levelctx, LevF%encap%encapctx)
+            LevF%nvars, LevF%shape, LevF%encap%encapctx)
     end do
 
 

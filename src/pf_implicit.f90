@@ -28,123 +28,121 @@ module pf_mod_implicit
    contains
      procedure(pf_f2eval_p), deferred :: f2eval
      procedure(pf_f2comp_p), deferred :: f2comp
-     procedure :: sweep => implicit_sweep
-     procedure :: initialize => implicit_initialize
-     procedure :: evaluate => implicit_evaluate
-     procedure :: integrate => implicit_integrate
-     procedure :: residual => implicit_residual
+     procedure :: sweep        => implicit_sweep
+     procedure :: initialize   => implicit_initialize
+     procedure :: evaluate     => implicit_evaluate
+     procedure :: integrate    => implicit_integrate
+     procedure :: residual     => implicit_residual
      procedure :: evaluate_all => implicit_evaluate_all
   end type pf_implicit_t
 
   interface
-     subroutine pf_f2eval_p(this, y, t, level, levelctx, f2)
+     subroutine pf_f2eval_p(this, y, t, level, f2)
        import pf_implicit_t, c_ptr, c_int, pfdp
-       class(pf_implicit_t), intent(in) :: this
-       type(c_ptr),    intent(in), value :: y, f2, levelctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
+       class(pf_implicit_t), intent(inout)     :: this
+       type(c_ptr),          intent(in), value :: y, f2
+       real(pfdp),           intent(in)        :: t
+       integer(c_int),       intent(in)        :: level
      end subroutine pf_f2eval_p
 
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, levelctx, f2)
+     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
        import pf_implicit_t, c_ptr, c_int, pfdp
-       class(pf_implicit_t), intent(in) :: this
-       type(c_ptr),    intent(in), value :: y, rhs, f2, levelctx
-       real(pfdp),     intent(in)        :: t, dt
-       integer(c_int), intent(in)        :: level
+       class(pf_implicit_t), intent(inout)     :: this
+       type(c_ptr),          intent(in), value :: y, rhs, f2
+       real(pfdp),           intent(in)        :: t, dt
+       integer(c_int),       intent(in)        :: level
      end subroutine pf_f2comp_p
   end interface
 
 contains
 
-  ! Perform one SDC sweep on level Lev and set qend appropriately.
-  subroutine implicit_sweep(this, pf, Lev, t0, dt)
+  ! Perform one SDC sweep on level lev and set qend appropriately.
+  subroutine implicit_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
-
-    class(pf_implicit_t), intent(in) :: this
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, t0
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_implicit_t), intent(inout) :: this
+    type(pf_pfasst_t),    intent(inout) :: pf
+    real(pfdp),           intent(in)    :: dt, t0
+    type(pf_level_t),     intent(inout) :: lev
 
     integer    :: m, n
     real(pfdp) :: t
-    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
+    real(pfdp) :: dtsdc(1:lev%nnodes-1)
     type(c_ptr) :: rhs
 
     ! type(pf_implicit_t), pointer :: imp
 
-    ! call c_f_pointer(Lev%sweeper%sweeperctx, imp)
+    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
 
-    call start_timer(pf, TLEVEL+Lev%level-1)
+    call start_timer(pf, TLEVEL+lev%level-1)
 
     ! compute integrals and add fas correction
-    do m = 1, Lev%nnodes-1
-       call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
-       do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*this%SdiffI(m,n), Lev%F(n,1))
+    do m = 1, lev%nnodes-1
+       call lev%encap%setval(lev%S(m), 0.0_pfdp)
+       do n = 1, lev%nnodes
+          call lev%encap%axpy(lev%S(m), dt*this%SdiffI(m,n), lev%F(n,1))
        end do
-       if (associated(Lev%tau)) then
-          call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tau(m))
+       if (associated(lev%tau)) then
+          call lev%encap%axpy(lev%S(m), 1.0_pfdp, lev%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call lev%encap%unpack(lev%Q(1), lev%q0)
 
-    call this%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
+    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call lev%encap%create(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape, lev%encap%encapctx)
 
     t = t0
-    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
-    do m = 1, Lev%nnodes-1
+    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%encap%copy(rhs, Lev%Q(m))
-       call Lev%encap%axpy(rhs, 1.0_pfdp, Lev%S(m))
+       call lev%encap%copy(rhs, lev%Q(m))
+       call lev%encap%axpy(rhs, 1.0_pfdp, lev%S(m))
 
-       call this%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+       call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,1))
     end do
 
-    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
+    call lev%encap%copy(lev%qend, lev%Q(lev%nnodes))
 
     ! done
-    call Lev%encap%destroy(rhs)
+    call lev%encap%destroy(rhs)
 
-    call end_timer(pf, TLEVEL+Lev%level-1)
+    call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicit_sweep
 
   ! Evaluate function values
-  subroutine implicit_evaluate(this, Lev, t, m)
-    class(pf_implicit_t), intent(in) :: this
-    real(pfdp),       intent(in)    :: t
-    integer,          intent(in)    :: m
-    type(pf_level_t), intent(inout) :: Lev
+  subroutine implicit_evaluate(this, lev, t, m)
+    class(pf_implicit_t), intent(inout) :: this
+    real(pfdp),           intent(in)    :: t
+    integer,              intent(in)    :: m
+    type(pf_level_t),     intent(inout) :: lev
 
     ! type(pf_implicit_t), pointer :: imp
-    ! call c_f_pointer(Lev%sweeper%sweeperctx, imp)
+    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
 
-    call this%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
+    call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,1))
   end subroutine implicit_evaluate
 
   ! Initialize matrix
-  subroutine implicit_initialize(this, Lev)
+  subroutine implicit_initialize(this, lev)
     use pf_mod_dtype
     class(pf_implicit_t), intent(inout) :: this
-    
-    type(pf_level_t), intent(inout) :: Lev
+    type(pf_level_t),     intent(inout) :: lev
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
+    real(pfdp) :: dsdc(lev%nnodes-1)
 
     integer :: m,nnodes
     ! type(pf_implicit_t), pointer :: imp
-    ! call c_f_pointer(Lev%sweeper%sweeperctx, imp)
+    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
 
-    nnodes = Lev%nnodes
+    nnodes = lev%nnodes
     allocate(this%SdiffI(nnodes-1,nnodes))  !  S-BE
 
-    this%SdiffI = Lev%s0mat
+    this%SdiffI = lev%s0mat
 
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
+    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        this%SdiffI(m,m+1) = this%SdiffI(m,m+1) - dsdc(m)
     end do
@@ -153,41 +151,37 @@ contains
 
 
   ! Compute SDC integral
-  subroutine implicit_integrate(this, Lev, qSDC, fSDC, dt, fintSDC)
-    class(pf_implicit_t), intent(in) :: this
-    type(pf_level_t), intent(in)    :: Lev
-    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),       intent(in)    :: dt
-    type(c_ptr),      intent(inout) :: fintSDC(:)
+  subroutine implicit_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+    class(pf_implicit_t), intent(inout) :: this
+    type(pf_level_t),     intent(in)    :: lev
+    type(c_ptr),          intent(in)    :: qSDC(:), fSDC(:, :)
+    real(pfdp),           intent(in)    :: dt
+    type(c_ptr),          intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
-    do n = 1, Lev%nnodes-1
-       call Lev%encap%setval(fintSDC(n), 0.0_pfdp)
-       do m = 1, Lev%nnodes
+    do n = 1, lev%nnodes-1
+       call lev%encap%setval(fintSDC(n), 0.0_pfdp)
+       do m = 1, lev%nnodes
           do p = 1, npieces
-             call Lev%encap%axpy(fintSDC(n), dt*Lev%s0mat(n,m), fSDC(m,p))
+             call lev%encap%axpy(fintSDC(n), dt*lev%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do
   end subroutine implicit_integrate
 
-  subroutine implicit_residual(this, Lev, dt)
-    class(pf_implicit_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
-    real(pfdp),        intent(in)    :: dt
-
-    integer :: m, n
-
-    call pf_generic_residual(this, Lev, dt)
+  subroutine implicit_residual(this, lev, dt)
+    class(pf_implicit_t), intent(inout) :: this
+    type(pf_level_t),     intent(inout) :: lev
+    real(pfdp),           intent(in)    :: dt
+    call pf_generic_residual(this, lev, dt)
   end subroutine implicit_residual
 
-  subroutine implicit_evaluate_all(this, Lev, t)
-    class(pf_implicit_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
-    real(pfdp),        intent(in)    :: t(:)
-
-    call pf_generic_evaluate_all(this, Lev, t)
+  subroutine implicit_evaluate_all(this, lev, t)
+    class(pf_implicit_t), intent(inout) :: this
+    type(pf_level_t),     intent(inout) :: lev
+    real(pfdp),           intent(in)    :: t(:)
+    call pf_generic_evaluate_all(this, lev, t)
   end subroutine implicit_evaluate_all
 
 end module pf_mod_implicit

@@ -80,8 +80,8 @@ contains
 
     level%level = nlevel
     nullify(level%encap)
-    nullify(level%interpolate)
-    nullify(level%restrict)
+    ! nullify(level%interpolate)
+    ! nullify(level%restrict)
     nullify(level%shape)
     nullify(level%tau)
     nullify(level%tauQ)
@@ -89,8 +89,6 @@ contains
     nullify(level%pQ)
     nullify(level%rmat)
     nullify(level%tmat)
-!    allocate(level%sweeper)
-!    level%levelctx = c_null_ptr
   end subroutine pf_level_create
 
 
@@ -147,8 +145,8 @@ contains
     if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
     if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
     if (.not. associated(F%encap)) stop "ERROR: Missing encapsulation (pf_pfasst.f90)."
-    if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
-    if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
+    ! if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
+    ! if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
 
     nvars   = F%nvars
     nnodes  = F%nnodes
@@ -163,7 +161,7 @@ contains
        allocate(F%tau(nnodes-1))
        do m = 1, nnodes-1
           call F%encap%create(F%tau(m), F%level, SDC_KIND_INTEGRAL, &
-               nvars, F%shape, F%levelctx, F%encap%encapctx)
+               nvars, F%shape, F%encap%encapctx)
        end do
     else if ((F%level >= pf%nlevels) .and. (associated(F%tau))) then
        do m = 1, nnodes-1
@@ -181,7 +179,7 @@ contains
        allocate(F%tauQ(nnodes-1))
        do m = 1, nnodes-1
           call F%encap%create(F%tauQ(m), F%level, SDC_KIND_INTEGRAL, &
-               nvars, F%shape, F%levelctx, F%encap%encapctx)
+               nvars, F%shape, F%encap%encapctx)
        end do
     else if ((F%level >= pf%nlevels) .and. (associated(F%tauQ))) then
        do m = 1, nnodes-1
@@ -233,10 +231,10 @@ contains
 
     do m = 1, nnodes
        call F%encap%create(F%Q(m), F%level, SDC_KIND_SOL_FEVAL, &
-            nvars, F%shape, F%levelctx, F%encap%encapctx)
+            nvars, F%shape, F%encap%encapctx)
        do p = 1, npieces
           call F%encap%create(F%F(m,p), F%level, SDC_KIND_FEVAL, &
-               nvars, F%shape, F%levelctx, F%encap%encapctx)
+               nvars, F%shape, F%encap%encapctx)
        end do
     end do
 
@@ -249,11 +247,11 @@ contains
 
     do m = 1, nnodes-1
        call F%encap%create(F%S(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%levelctx, F%encap%encapctx)
+            nvars, F%shape, F%encap%encapctx)
        call F%encap%create(F%I(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%levelctx, F%encap%encapctx)
+            nvars, F%shape, F%encap%encapctx)
        call F%encap%create(F%R(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%levelctx, F%encap%encapctx)
+            nvars, F%shape, F%encap%encapctx)
     end do
 
     !
@@ -270,17 +268,17 @@ contains
           do m = 1, nnodes
              do p = 1, npieces
                 call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, &
-                     nvars, F%shape, F%levelctx, F%encap%encapctx)
+                     nvars, F%shape, F%encap%encapctx)
              end do
              call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                  nvars, F%shape, F%levelctx, F%encap%encapctx)
+                  nvars, F%shape, F%encap%encapctx)
           end do
        else
           ! store Q
           allocate(F%pQ(nnodes))
           do m = 1, nnodes
              call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                  nvars, F%shape, F%levelctx, F%encap%encapctx)
+                  nvars, F%shape, F%encap%encapctx)
           end do
        end if
 
@@ -290,7 +288,7 @@ contains
     ! allocate Qend
     !
     call F%encap%create(F%qend, F%level, SDC_KIND_SOL_NO_FEVAL, &
-         nvars, F%shape, F%levelctx, F%encap%encapctx)
+         nvars, F%shape, F%encap%encapctx)
 
   end subroutine pf_level_setup
 

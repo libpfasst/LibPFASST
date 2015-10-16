@@ -12,11 +12,11 @@ module feval
   include 'fftw3.f03'
 
   real(pfdp), parameter :: &
-       Lx     = 1.0_pfdp, &        ! domain size
-       kfreq  = 32.0_pfdp, &        ! domain size
-       v      = 1.0_pfdp, &        ! velocity
-       nu     = 0.0_pfdp, &       ! viscosity
-       t00    = 0.15_pfdp           ! initial time for exact solution
+       Lx     = 1.0_pfdp, &  ! domain size
+       kfreq  = 32.0_pfdp, & ! domain size
+       v      = 1.0_pfdp, &  ! velocity
+       nu     = 0.0_pfdp, &  ! viscosity
+       t00    = 0.15_pfdp    ! initial time for exact solution
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
@@ -28,27 +28,26 @@ module feval
   end type ad_work_t
 
   type, extends(pf_imex_t) :: ad_sweeper_t
+     type(ad_work_t) :: work
    contains
-     procedure :: f1eval => eval_f1
-     procedure :: f2eval => eval_f2
-     procedure :: f2comp => comp_f2
+     procedure :: f1eval      => eval_f1
+     procedure :: f2eval      => eval_f2
+     procedure :: f2comp      => comp_f2
+     procedure :: restrict    => restrict
+     procedure :: interpolate => interpolate
   end type ad_sweeper_t
 
 contains
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine feval_create_workspace(levelctx, nvars)
-    type(c_ptr), intent(out) :: levelctx
-    integer,     intent(in)  :: nvars
-
-    type(ad_work_t), pointer :: work
+  subroutine feval_create_workspace(work, nvars)
+    type(ad_work_t), intent(out) :: work
+    integer,         intent(in)  :: nvars
 
     integer     :: i
     type(c_ptr) :: wk
     real(pfdp)  :: kx
-
-    allocate(work)
 
     ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nvars, c_size_t))
@@ -77,23 +76,21 @@ contains
           work%lap(i) = -kx**2
        end if
     end do
-
-    levelctx = c_loc(work)
   end subroutine feval_create_workspace
 
-  subroutine feval_destroy_workspace(levelctx)
-    type(c_ptr), intent(in) :: levelctx
-    type(ad_work_t), pointer :: work
+  ! subroutine feval_destroy_workspace(levelctx)
+  !   type(c_ptr), intent(in) :: levelctx
+  !   type(ad_work_t), pointer :: work
 
-    call c_f_pointer(levelctx, work)
+  !   call c_f_pointer(levelctx, work)
 
-    deallocate(work%wk)
-    deallocate(work%ddx)
-    deallocate(work%lap)
-    call fftw_destroy_plan(work%ffft)
-    call fftw_destroy_plan(work%ifft)
-    deallocate(work)
-  end subroutine feval_destroy_workspace
+  !   deallocate(work%wk)
+  !   deallocate(work%ddx)
+  !   deallocate(work%lap)
+  !   call fftw_destroy_plan(work%ffft)
+  !   call fftw_destroy_plan(work%ifft)
+  !   deallocate(work)
+  ! end subroutine feval_destroy_workspace
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -142,26 +139,23 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine eval_f1(this, y, t, level, levelctx, f1)
-    class(ad_sweeper_t), intent(in) :: this
-    type(c_ptr), intent(in), value :: y, f1, levelctx
-    real(pfdp),  intent(in)        :: t
-    integer,     intent(in)        :: level
+  subroutine eval_f1(this, y, t, level, f1)
+    class(ad_sweeper_t), intent(inout)     :: this
+    type(c_ptr),         intent(in), value :: y, f1
+    real(pfdp),          intent(in)        :: t
+    integer,             intent(in)        :: level
 
-    type(ad_work_t), pointer :: work
     real(pfdp),      pointer :: yvec(:), f1vec(:)
     complex(pfdp),   pointer :: wk(:)
 
-    call c_f_pointer(levelctx, work)
-
     yvec  => array1(y)
     f1vec => array1(f1)
-    wk => work%wk
+    wk => this%work%wk
 
     wk = yvec
-    call fftw_execute_dft(work%ffft, wk, wk)
-    wk = -v * work%ddx * wk / size(wk)
-    call fftw_execute_dft(work%ifft, wk, wk)
+    call fftw_execute_dft(this%work%ffft, wk, wk)
+    wk = -v * this%work%ddx * wk / size(wk)
+    call fftw_execute_dft(this%work%ifft, wk, wk)
 
     f1vec = real(wk)
 
@@ -170,26 +164,23 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine eval_f2(this, y, t, level, levelctx, f2)
-    class(ad_sweeper_t), intent(in) :: this
-    type(c_ptr), intent(in), value :: y, f2, levelctx
-    real(pfdp),  intent(in)        :: t
-    integer,     intent(in)        :: level
+  subroutine eval_f2(this, y, t, level, f2)
+    class(ad_sweeper_t), intent(inout)     :: this
+    type(c_ptr),         intent(in), value :: y, f2
+    real(pfdp),          intent(in)        :: t
+    integer,             intent(in)        :: level
 
-    type(ad_work_t), pointer :: work
     real(pfdp),      pointer :: yvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
 
-    call c_f_pointer(levelctx, work)
-
     yvec  => array1(y)
     f2vec => array1(f2)
-    wk => work%wk
+    wk => this%work%wk
 
     wk = yvec
-    call fftw_execute_dft(work%ffft, wk, wk)
-    wk = nu * work%lap * wk / size(wk)
-    call fftw_execute_dft(work%ifft, wk, wk)
+    call fftw_execute_dft(this%work%ffft, wk, wk)
+    wk = nu * this%work%lap * wk / size(wk)
+    call fftw_execute_dft(this%work%ifft, wk, wk)
 
     f2vec = real(wk)
 
@@ -198,31 +189,96 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine comp_f2(this, y, t, dt, rhs, level, levelctx, f2)
-    class(ad_sweeper_t), intent(in) :: this
-    type(c_ptr), intent(in), value :: y, rhs, f2, levelctx
-    real(pfdp),  intent(in)        :: t, dt
-    integer,     intent(in)        :: level
+  subroutine comp_f2(this, y, t, dt, rhs, level, f2)
+    class(ad_sweeper_t), intent(inout)     :: this
+    type(c_ptr),         intent(in), value :: y, rhs, f2
+    real(pfdp),          intent(in)        :: t, dt
+    integer,             intent(in)        :: level
 
-    type(ad_work_t), pointer :: work
     real(pfdp),      pointer :: yvec(:), rhsvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
-
-    call c_f_pointer(levelctx, work)
 
     yvec  => array1(y)
     rhsvec => array1(rhs)
     f2vec => array1(f2)
-    wk => work%wk
+    wk => this%work%wk
 
     wk = rhsvec
-    call fftw_execute_dft(work%ffft, wk, wk)
-    wk = wk / (1.0_pfdp - nu*dt*work%lap) / size(wk)
-    call fftw_execute_dft(work%ifft, wk, wk)
+    call fftw_execute_dft(this%work%ffft, wk, wk)
+    wk = wk / (1.0_pfdp - nu*dt*this%work%lap) / size(wk)
+    call fftw_execute_dft(this%work%ifft, wk, wk)
 
     yvec  = real(wk)
     f2vec = (yvec - rhsvec) / dt
 
   end subroutine comp_f2
+
+  subroutine interpolate(levelF, levelG, qFp, qGp, t)
+    class(ad_sweeper_t), intent(inout) :: levelF
+    class(pf_sweeper_t), intent(inout) :: levelG
+    type(c_ptr), intent(in), value :: qFp, qGp
+    real(pfdp),  intent(in) :: t
+
+    real(pfdp),      pointer :: qF(:), qG(:)
+    complex(kind=8), pointer :: wkF(:), wkG(:)
+
+    integer :: nvarF, nvarG, xrat
+
+    type(ad_sweeper_t), pointer :: levelGad
+
+    select type(levelG)
+    type is (ad_sweeper_t)
+       levelGad => levelG
+    class default
+       stop
+    end select
+
+    qF => array1(qFp)
+    qG => array1(qGp)
+
+    nvarF = size(qF)
+    nvarG = size(qG)
+    xrat  = nvarF / nvarG
+
+    if (xrat == 1) then
+       qF = qG
+       return
+    endif
+
+    wkF => levelF%work%wk
+    wkG => levelGad%work%wk
+
+    wkG = qG
+    call fftw_execute_dft(levelGad%work%ffft, wkG, wkG)
+    wkG = wkG / nvarG
+
+    wkF = 0.0d0
+    wkF(1:nvarG/2) = wkG(1:nvarG/2)
+    wkF(nvarF-nvarG/2+2:nvarF) = wkG(nvarG/2+2:nvarG)
+
+    call fftw_execute_dft(levelF%work%ifft, wkF, wkF)
+
+    qF = real(wkF)
+  end subroutine interpolate
+
+  subroutine restrict(levelF, levelG, qFp, qGp, t)
+    class(ad_sweeper_t), intent(inout) :: levelF
+    class(pf_sweeper_T), intent(inout) :: levelG
+    type(c_ptr), intent(in), value :: qFp, qGp
+    real(pfdp),  intent(in) :: t
+
+    real(pfdp), pointer :: qF(:), qG(:)
+
+    integer :: nvarF, nvarG, xrat
+
+    qF => array1(qFp)
+    qG => array1(qGp)
+
+    nvarF = size(qF)
+    nvarG = size(qG)
+    xrat  = nvarF / nvarG
+
+    qG = qF(::xrat)
+  end subroutine restrict
 
 end module feval
