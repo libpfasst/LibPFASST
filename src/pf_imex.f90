@@ -22,8 +22,6 @@ module pf_mod_imex
   use pf_mod_utils
   implicit none
 
-  integer, parameter, private :: npieces = 2
-
   type, extends(pf_sweeper_t), abstract :: pf_imex_t
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)
@@ -143,7 +141,6 @@ contains
     real(pfdp) :: dsdc(lev%nnodes-1)
     integer    :: m, nnodes
 
-    print *, "YARRRRR!!!"
     this%npieces = 2
 
     nnodes = lev%nnodes
@@ -173,7 +170,7 @@ contains
     do n = 1, lev%nnodes-1
        call lev%encap%setval(fintSDC(n), 0.0_pfdp)
        do m = 1, lev%nnodes
-          do p = 1, npieces
+          do p = 1, this%npieces
              call lev%encap%axpy(fintSDC(n), dt*lev%s0mat(n,m), fSDC(m,p))
           end do
        end do

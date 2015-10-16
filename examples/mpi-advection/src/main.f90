@@ -47,7 +47,7 @@ program main
   call pf_pfasst_create(pf, comm, maxlevs)
 
   pf%qtype  = SDC_GAUSS_LOBATTO
-  pf%niters = 32
+  pf%niters = 4
 
   if (pf%nlevels > 1) then
      pf%levels(1)%nsweeps = 3

@@ -27,6 +27,7 @@ FSRC = src/pfasst.f90 \
        src/pf_fakecomm.f90 \
        src/pf_hooks.f90 \
        src/pf_imex.f90 \
+       src/pf_imexQ.f90 \
        src/pf_implicit.f90 \
        src/pf_interpolate.f90 \
        src/pf_logger.f90 \

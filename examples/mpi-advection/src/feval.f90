@@ -8,6 +8,7 @@ module feval
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_imex
+  use pf_mod_imexQ
   implicit none
   include 'fftw3.f03'
 
@@ -27,7 +28,7 @@ module feval
      complex(pfdp), pointer :: ddx(:), lap(:)     ! operators
   end type ad_work_t
 
-  type, extends(pf_imex_t) :: ad_sweeper_t
+  type, extends(pf_imexQ_t) :: ad_sweeper_t
      type(ad_work_t) :: work
    contains
      procedure :: f1eval      => eval_f1

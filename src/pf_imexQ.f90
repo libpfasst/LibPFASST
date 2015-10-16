@@ -18,31 +18,27 @@
 !
 
 module pf_mod_imexQ
-  use pf_mod_dtype
-  use pf_mod_utils
-  use pf_mod_explicitQ, only: pf_f1eval_p
-  use pf_mod_implicitQ, only: pf_f2eval_p, pf_f2comp_p
+  use pf_mod_imex
   implicit none
 
-  integer, parameter, private :: npieces = 2
-
-  type :: pf_imexQ_t
-     procedure(pf_f1eval_p), pointer, nopass :: f1eval
-     procedure(pf_f2eval_p), pointer, nopass :: f2eval
-     procedure(pf_f2comp_p), pointer, nopass :: f2comp
-
+  type, extends(pf_imex_t), abstract :: pf_imexQ_t
      real(pfdp), allocatable :: QdiffE(:,:)
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+   contains
+     procedure :: sweep      => imexQ_sweep
+     procedure :: initialize => imexQ_initialize
+     procedure :: integrate  => imexQ_integrate
   end type pf_imexQ_t
 
 contains
 
   ! Perform on SDC sweep on level Lev and set qend appropriately.
-  subroutine imexQ_sweep(pf, Lev, t0, dt)
+  subroutine imexQ_sweep(this, pf, Lev, t0, dt)
     use pf_mod_timer
 
+    class(pf_imexQ_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: dt, t0
     type(pf_level_t),  intent(inout) :: Lev
@@ -52,18 +48,14 @@ contains
     real(pfdp)  :: dtsdc(1:Lev%nnodes-1)
     type(c_ptr) :: rhs
 
-    type(pf_imexQ_t), pointer :: imexQ
-
-    call c_f_pointer(Lev%sweeper%sweeperctx, imexQ)
-
     call start_timer(pf, TLEVEL+Lev%level-1)
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
        call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
        do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*imexQ%QdiffE(m,n), Lev%F(n,1))
-          call Lev%encap%axpy(Lev%S(m), dt*imexQ%QdiffI(m,n), Lev%F(n,2))
+          call Lev%encap%axpy(Lev%S(m), dt*this%QdiffE(m,n), Lev%F(n,1))
+          call Lev%encap%axpy(Lev%S(m), dt*this%QdiffI(m,n), Lev%F(n,2))
        end do
        if (associated(Lev%tauQ)) then
           call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
@@ -73,10 +65,10 @@ contains
     ! do the time-stepping
     call Lev%encap%unpack(Lev%Q(1), Lev%q0)
 
-    call imexQ%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
-    call imexQ%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,2))
+    call this%f1eval(Lev%Q(1), t0, Lev%level, Lev%F(1,1))
+    call this%f2eval(Lev%Q(1), t0, Lev%level, Lev%F(1,2))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%encap%encapctx)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -85,8 +77,8 @@ contains
 
        call Lev%encap%setval(rhs, 0.0_pfdp)
        do n = 1, m
-          call Lev%encap%axpy(rhs, dt*imexQ%QtilE(m,n), Lev%F(n,1))  
-          call Lev%encap%axpy(rhs, dt*imexQ%QtilI(m,n), Lev%F(n,2))  
+          call Lev%encap%axpy(rhs, dt*this%QtilE(m,n), Lev%F(n,1))  
+          call Lev%encap%axpy(rhs, dt*this%QtilI(m,n), Lev%F(n,2))  
        end do
 
 
@@ -96,9 +88,9 @@ contains
        call Lev%encap%axpy(rhs,1.0_pfdp, Lev%Q(1))
 
 
-!       call imexQ%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call imexQ%f2comp(Lev%Q(m+1), t, dt*imexQ%QtilI(m,m+1), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call imexQ%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+!       call this%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
+       call this%f2comp(Lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, Lev%level,Lev%F(m+1,2))
+       call this%f1eval(Lev%Q(m+1), t, Lev%level, Lev%F(m+1,1))
 
     end do
 
@@ -110,57 +102,45 @@ contains
     call end_timer(pf, TLEVEL+Lev%level-1)
   end subroutine imexQ_sweep
 
-  ! Evaluate function values
-  subroutine imexQ_evaluate(Lev, t, m)
-    real(pfdp),       intent(in   ) :: t
-    integer,          intent(in   ) :: m
-    type(pf_level_t), intent(inout) :: Lev
-
-    type(pf_imexQ_t), pointer :: imexQ
-    call c_f_pointer(Lev%sweeper%sweeperctx, imexQ)
-
-    call imexQ%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
-    call imexQ%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,2))
-  end subroutine imexQ_evaluate
-
   ! Initialize matrices
-  subroutine imexQ_initialize(Lev)
-    type(pf_level_t), intent(inout) :: Lev
+  subroutine imexQ_initialize(this, Lev)
+    class(pf_imexQ_t), intent(inout) :: this
+    type(pf_level_t),  intent(inout) :: Lev
 
     real(pfdp) :: dsdc(Lev%nnodes-1)
     integer    :: m,n, nnodes
 
-    type(pf_imexQ_t), pointer :: imexQ
-    call c_f_pointer(Lev%sweeper%sweeperctx, imexQ)
+    this%npieces = 2
 
     nnodes = Lev%nnodes
-    allocate(imexQ%QdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(imexQ%QdiffI(nnodes-1,nnodes))  !  S-BE
-    allocate(imexQ%QtilE(nnodes-1,nnodes))  !  S-FE
-    allocate(imexQ%QtilI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
+    allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
+    allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    imexQ%QtilE = 0.0_pfdp
-    imexQ%QtilI = 0.0_pfdp
+    this%QtilE = 0.0_pfdp
+    this%QtilI = 0.0_pfdp
 
     dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
-          imexQ%QtilE(m,n)   =  dsdc(n)
-          imexQ%QtilI(m,n+1) =  dsdc(n)
+          this%QtilE(m,n)   =  dsdc(n)
+          this%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
 
-    do m = 1,nnodes-1
-       print *,'row i of qmat', m,Lev%qmat(m,:)
-    end do
-    call myLUq(Lev%qmat,imexQ%QtilI,Nnodes,0)
-    imexQ%QdiffE = Lev%qmat-imexQ%QtilE
-    imexQ%QdiffI = Lev%qmat-imexQ%QtilI
+    ! do m = 1,nnodes-1
+    !    print *,'row i of qmat', m,Lev%qmat(m,:)
+    ! end do
+    call myLUq(Lev%qmat,this%QtilI,Nnodes,0)
+    this%QdiffE = Lev%qmat-this%QtilE
+    this%QdiffI = Lev%qmat-this%QtilI
     
   end subroutine imexQ_initialize
 
   ! Compute SDC integral
-  subroutine imexQ_integrate(Lev, qSDC, fSDC, dt, fintSDC)
+  subroutine imexQ_integrate(this, Lev, qSDC, fSDC, dt, fintSDC)
+    class(pf_imexQ_t), intent(inout) :: this
     type(pf_level_t), intent(in)    :: Lev
     type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),       intent(in)    :: dt
@@ -171,52 +151,11 @@ contains
     do n = 1, Lev%nnodes-1
        call Lev%encap%setval(fintSDC(n), 0.0_pfdp)
        do m = 1, Lev%nnodes 
-          do p = 1, npieces
+          do p = 1, this%npieces
              call Lev%encap%axpy(fintSDC(n), dt*Lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do
   end subroutine imexQ_integrate
 
-  ! Create/destroy IMEXQ sweeper
-  subroutine pf_imexQ_create(sweeper, f1eval, f2eval, f2comp)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-    procedure(pf_f1eval_p) :: f1eval
-    procedure(pf_f2eval_p) :: f2eval
-    procedure(pf_f2comp_p) :: f2comp
-
-    type(pf_imexQ_t), pointer :: imexQ
-
-    allocate(imexQ)
-    imexQ%f1eval => f1eval
-    imexQ%f2eval => f2eval
-    imexQ%f2comp => f2comp
-
-    sweeper%npieces = npieces
-    sweeper%sweep        => imexQ_sweep
-    sweeper%evaluate     => imexQ_evaluate
-    sweeper%initialize   => imexQ_initialize
-    sweeper%integrate    => imexQ_integrate
-    sweeper%destroy      => pf_imexQ_destroy
-    sweeper%evaluate_all => pf_generic_evaluate_all
-    sweeper%residual     => pf_generic_residual
-
-    sweeper%sweeperctx = c_loc(imexQ)
-  end subroutine pf_imexQ_create
-
-  subroutine pf_imexQ_destroy(sweeper)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-
-    type(pf_imexQ_t), pointer :: imexQ
-    call c_f_pointer(sweeper%sweeperctx, imexQ)
-
-
-    deallocate(imexQ%QdiffI)
-    deallocate(imexQ%QdiffE)
-    deallocate(imexQ%QtilI)
-    deallocate(imexQ%QtilE)
-    deallocate(imexQ)
-  end subroutine pf_imexQ_destroy
-
 end module pf_mod_imexQ
-
