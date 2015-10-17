@@ -31,7 +31,6 @@ FSRC = src/pfasst.f90 \
        src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
-       src/pf_pthreads.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
@@ -40,8 +39,7 @@ FSRC = src/pfasst.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
 
-CSRC = src/pf_cpthreads.c \
-       src/pf_numpy.c
+CSRC = src/pf_numpy.c
 
 ifdef NOMPI
   FFLAGS += -DNOMPI

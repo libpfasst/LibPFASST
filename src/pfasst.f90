@@ -26,7 +26,6 @@ module pfasst
 #ifndef NOMPI
   use pf_mod_comm_mpi
 #endif
-  use pf_mod_comm_pthreads
   use pf_mod_comm_fake
   use pf_mod_implicit
   use pf_mod_explicit

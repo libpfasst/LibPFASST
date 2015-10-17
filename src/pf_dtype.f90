@@ -158,7 +158,7 @@ module pf_mod_dtype
           sendreq(:)                    ! send requests (indexed by level)
      integer :: statreq                 ! status send request
 
-     ! pthreads
+     ! fake
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
      type(c_ptr), pointer :: pfpth(:,:) ! mutexes and conditions (indexed by rank, level)
 
