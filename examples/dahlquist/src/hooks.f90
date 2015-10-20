@@ -1,8 +1,8 @@
 !
-! Copyright (c) 2015, Michael Minion and Andreas Kreienbuehl. All rights reserved.
+! Copyright (c) 2015, Andreas Kreienbuehl and Michael Minion. All rights reserved.
 !
 
-! ------------------------------------------------------ module *hooks*: start
+! ------------------------------------------------------ module `hooks`: start
 ! PFASST: Post-processing routines
 module hooks
 	! For, e.g., C-pointers
@@ -16,9 +16,9 @@ module hooks
 	! Encapsulation of data structure
 	use encap
 
-	! Variables starting with *i*, *j*, *k*, *l*, *m*, or *n* represent integers
+	! Variables starting with `i`, `j`, `k`, `l`, `m`, or `n` represent integers
 	implicit none
 
 contains
 end module hooks
-! ------------------------------------------------------ module *hooks*: stop
+! ------------------------------------------------------ module `hooks`: stop

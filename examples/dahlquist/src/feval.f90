@@ -1,9 +1,9 @@
 !
-! Copyright (c) 2015, Michael Minion and Andreas Kreienbuehl. All rights reserved.
+! Copyright (c) 2015, Andreas Kreienbuehl and Michael Minion. All rights reserved.
 !
 
-! ------------------------------------------------------ module *feval*: start
-! PFASST: RHS routines for compressible Navier-Stokes equations example (i.e. Cart)
+! ------------------------------------------------------ module `feval`: start
+! PFASST: RHS routines
 module feval
 	! For, e.g., C-pointers
 	use iso_c_binding 
@@ -16,134 +16,131 @@ module feval
 	! Encapsulation of data structure
 	use encap
 
-	! Variables starting with *i*, *j*, *k*, *l*, *m*, or *n* represent integers
+	! Variables starting with `i`, `j`, `k`, `l`, `m`, or `n` represent integers
 	implicit none
 
 contains
-	! ------------------------------------------------------ subroutine *f1eval*: start
+	! ------------------------------------------------------ subroutine `f1eval`: start
 	! Explicit time-integration
-	subroutine f1eval(Cptr2_u_dat, t, lvl, Cptr2_levctx, Cptr2_f1_dat)
-		type(c_ptr), intent(in), value :: Cptr2_u_dat   ! pointer to solution u
+	subroutine f1eval(Cptr2_sol_dat, t, lvl, Cptr2_ctx, Cptr2_f1_dat)
+		! C-pointer to solution `sol`
+		type(c_ptr), intent(in), value :: Cptr2_sol_dat
 		real(pfdp), intent(in) :: t
 		integer(c_int), intent(in) :: lvl
-		type(c_ptr), intent(in), value :: Cptr2_levctx   ! pointer to level context
-		type(c_ptr), intent(in), value :: Cptr2_f1_dat   ! pointer to solution f(u)
+		type(c_ptr), intent(in), value :: Cptr2_ctx
+		! C-pointer to `f1(t, sol)`
+		type(c_ptr), intent(in), value :: Cptr2_f1_dat
 
-		! Consider $\dot{u} = -f1(u)$ 
+		! Let `[f1(t, sol)](j) = -2*j*[sol(t, x, y, z)](j)`
 
-		! Determine number of grid points in x-, y-, and z-direction
-		integer :: nx, ny, nz
+		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
+		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
 
-		! Get data array associated to input data encapsulation
-		real(pfdp), pointer :: u_dat_arr(:, :, :, :)
+		real(pfdp), pointer :: f1_dat_u(:, :, :, :)
+		integer :: j
 
-		! Define data array associated to output data encapsulation
-		real(pfdp), pointer :: f1_dat_arr(:, :, :, :)
+		sol_dat_u => get_u(Cptr2_sol_dat)
+		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
+		sol_dat_nx = get_nx(Cptr2_sol_dat)
+		sol_dat_ny = get_ny(Cptr2_sol_dat)
+		sol_dat_nz = get_nz(Cptr2_sol_dat)
 
-		real(pfdp)  :: tau  !local variable for Andreas
-                integer :: k
+		f1_dat_u => get_u(Cptr2_f1_dat)
 
+		! Dirichlet values everywhere
+		f1_dat_u = 0.0_pfdp
 
-		! Determine number of grid points in x-, y-, and z-direction
-		nx = get_nx(Cptr2_u_dat)
-		ny = get_ny(Cptr2_u_dat)
-		nz = get_nz(Cptr2_u_dat)
-
-		! Get data array associated to input data encapsulation
-		u_dat_arr => get_arr(Cptr2_f1_dat)
-
-		! Define data array associated to output data encapsulation
-		f1_dat_arr => get_arr(Cptr2_f1_dat)
-
-		! Evaluate *f1_dat_arr* given *u_dat_arr*
-
-		! Set homogeneous Dirichlet boundary values
-                f1_dat_arr=0.0_pfdp
-
-		! Set bulk values and, therefore, have *f1_dat_arr = -tau*u_dat_arr*
-                do k = 1,5
-                   tau = dble(k)
-                   f1_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1) = &
-			-tau*u_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1)
-                end do
+		! Bulk values
+		do j = 1, sol_dat_nfields
+			f1_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				-2.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		end do
 	end subroutine f1eval
-	! ------------------------------------------------------ subroutine *f1eval*: stop
+	! ------------------------------------------------------ subroutine `f1eval`: stop
 
-	! ------------------------------------------------------ subroutine *f2eval*: start
+	! ------------------------------------------------------ subroutine `f2eval`: start
 	! Implicit time-integration
-	subroutine f2eval(Cptr2_u_dat, t, lvl, Cptr2_levctx, Cptr2_f2_dat)
-		type(c_ptr), intent(in), value :: Cptr2_u_dat   ! pointer to solution u
-		real(pfdp), intent(in) :: t                     ! time
-		integer(c_int), intent(in) :: lvl               ! level index
-		type(c_ptr), intent(in), value :: Cptr2_levctx  ! pointer to level context
-		type(c_ptr), intent(in), value :: Cptr2_f2_dat  ! pointer to f2(u)
+	subroutine f2eval(Cptr2_sol_dat, t, lvl, Cptr2_ctx, Cptr2_f2_dat)
+		! C-pointer to solution `sol`
+		type(c_ptr), intent(in), value :: Cptr2_sol_dat
+		real(pfdp), intent(in) :: t
+		integer(c_int), intent(in) :: lvl
+		type(c_ptr), intent(in), value :: Cptr2_ctx
+		! C-pointer to `f2(t, sol)`
+		type(c_ptr), intent(in), value :: Cptr2_f2_dat
 
-		! Define data array associated to Cptr arguments
-		real(pfdp), pointer :: u_dat_arr(:, :, :, :)
-		real(pfdp), pointer :: f2_dat_arr(:, :, :, :)
-		real(pfdp)  :: tau     !local variable for Andreas
-                integer :: k           !  loop counter
-		integer :: nx, ny,nz   ! size of the grids
+		! Let `[f2(t, sol)](j) = -4*j*[sol(t, x, y, z)](j)`
 
-		! Get fortran pointers 
-		u_dat_arr => get_arr(Cptr2_u_dat)
-		f2_dat_arr => get_arr(Cptr2_f2_dat)
+		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
+		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
 
-		nx = get_nx(Cptr2_u_dat)
-		ny = get_ny(Cptr2_u_dat)
-		nz = get_nz(Cptr2_u_dat)
+		real(pfdp), pointer :: f2_dat_u(:, :, :, :)
+		integer :: j
 
-		! Set variables
-                f2_dat_arr=0.0_pfdp
-                do k = 1,5
-                   tau = dble(k)
-                   f2_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1) = &
-			-2.0_pfdp*tau*u_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1)
-                end do
+		sol_dat_u => get_u(Cptr2_sol_dat)
+		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
+		sol_dat_nx = get_nx(Cptr2_sol_dat)
+		sol_dat_ny = get_ny(Cptr2_sol_dat)
+		sol_dat_nz = get_nz(Cptr2_sol_dat)
 
+		f2_dat_u => get_u(Cptr2_f2_dat)
+
+		! Dirichlet values everywhere
+		f2_dat_u = 0.0_pfdp
+
+		! Bulk values
+		do j = 1, sol_dat_nfields
+			f2_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				-4.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		end do
 	end subroutine f2eval
-	! ------------------------------------------------------ subroutine *f2eval*: stop
+	! ------------------------------------------------------ subroutine `f2eval`: stop
 
-	! ------------------------------------------------------ subroutine *f2comp*: start
-	! Solve system of equations for implicit time-step
-	subroutine f2comp(Cptr2_u_dat, t, dt, Cptr2_rhs_dat, lvl, Cptr2_levctx, Cptr2_f2_dat)
-		type(c_ptr), intent(in), value :: Cptr2_u_dat   ! pointer to solution f(u)
+	! ------------------------------------------------------ subroutine `f2comp`: start
+	! Source evaluation for implicit time-integration
+	subroutine f2comp(Cptr2_sol_dat, t, dt, Cptr2_rhs_dat, lvl, Cptr2_ctx, Cptr2_f2_dat)
+		! C-pointer to `sol`
+		type(c_ptr), intent(in), value :: Cptr2_sol_dat
 		real(pfdp), intent(in) :: t, dt
-		type(c_ptr), intent(in), value :: Cptr2_rhs_dat ! pointer to rhs
-		integer(c_int), intent(in) :: lvl  
-		type(c_ptr), intent(in), value :: Cptr2_levctx  ! pointer to level context
-		type(c_ptr), intent(in), value :: Cptr2_f2_dat  !  solution f(u)
+		! C-pointer to RHS `rhs` in `sol-dt*f2(t, sol) = rhs(t, sol)`
+		type(c_ptr), intent(in), value :: Cptr2_rhs_dat
+		integer(c_int), intent(in) :: lvl
+		type(c_ptr), intent(in), value :: Cptr2_ctx
+		! C-pointer to `f2(t, sol)`
+		type(c_ptr), intent(in), value :: Cptr2_f2_dat
 
-                ! Solve the equation u-dt*f_2(u,t) = rhs
+		! Solve `sol-dt*f2(t, sol) = rhs(t, sol)` for `f2(t, sol)`
 
-		! Get data array associated to input data encapsulation
-		real(pfdp), pointer :: u_dat_arr(:, :, :, :)
-		real(pfdp), pointer :: rhs_dat_arr(:, :, :, :)
-		real(pfdp), pointer :: f2_dat_arr(:, :, :, :)
-            
-		real(pfdp)  :: tau  !local variable for Andreas
-		integer :: nx, ny,nz   ! size of the grids
-                integer :: k           !  loop counter
+		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
+		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
 
-		u_dat_arr => get_arr(Cptr2_u_dat)
-		f2_dat_arr => get_arr(Cptr2_f2_dat)
-		rhs_dat_arr => get_arr(Cptr2_rhs_dat)
+		real(pfdp), pointer :: rhs_dat_u(:, :, :, :)
+		real(pfdp), pointer :: f2_dat_u(:, :, :, :)
+		integer :: j
 
-		nx = get_nx(Cptr2_u_dat)
-		ny = get_ny(Cptr2_u_dat)
-		nz = get_nz(Cptr2_u_dat)
+		sol_dat_u => get_u(Cptr2_sol_dat)
+		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
+		sol_dat_nx = get_nx(Cptr2_sol_dat)
+		sol_dat_ny = get_ny(Cptr2_sol_dat)
+		sol_dat_nz = get_nz(Cptr2_sol_dat)
 
-                do k = 1,5
-                   tau = dble(k)
-                    u_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1) = &
-			rhs_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1)/(1.0_pfdp+2.0_pfdp*tau)
-                    f2_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1) = &
-			-2.0_pfdp*tau*u_dat_arr(k, 2:nx-1, 2:ny-1, 2:nz-1)
-                end do
+		rhs_dat_u => get_u(Cptr2_rhs_dat)
 
-              !  f2_dat_arr=(u_dat_arr-rhs_dat_arr)/dt  !!!  seems easy, but not recommended
+		f2_dat_u => get_u(Cptr2_f2_dat)
 
+		! Dirichlet values everywhere
+		f2_dat_u = 0.0_pfdp
+
+		! Bulk values
+		do j = 1, sol_dat_nfields
+			! Solve `[u(t(n+1), x, y, z)](j)-dt*[f2(t(n+1), sol)](j) = [rhs(t(n), x, y, z)](j)` for `[u(t(n+1), x, y, z)](j)` given `[f2(t(n+1), sol)](j)`
+			sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				rhs_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)/(1.0_pfdp+4.0_pfdp*dble(j)*dt)
+			! We have `[f2(t(n+1), sol)](j) = -4*j*[sol(t(n+1), x, y, z)](j)`
+			f2_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				-4.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		end do
 	end subroutine f2comp
-	! ------------------------------------------------------ subroutine *f2comp*: stop
+	! ------------------------------------------------------ subroutine `f2comp`: stop
 end module feval
-! ------------------------------------------------------ module *feval*: stop
+! ------------------------------------------------------ module `feval`: stop

@@ -1,9 +1,9 @@
 !
-! Copyright (c) 2015, Michael Minion and Andreas Kreienbuehl. All rights reserved.
+! Copyright (c) 2015, Andreas Kreienbuehl and Michael Minion. All rights reserved.
 !
 
-! ------------------------------------------------------ Program *main*: start
-! PFASST: Main program for the Cart application
+! ------------------------------------------------------ Program `main`: start
+! PFASST: Main program for Dahlquist equation
 program main
 	! For, e.g., C-pointers
 	use iso_c_binding 
@@ -11,7 +11,7 @@ program main
 	! For LIBPFASST
 	use pfasst
 	! For MPI
-  use pf_mod_mpi, only: MPI_COMM_WORLD
+	use pf_mod_mpi, only: MPI_COMM_WORLD
 
 	! Problem parameters
 	use probin
@@ -28,7 +28,7 @@ program main
 	implicit none
 
 	! Input file name
-  character(256) :: probin_fname
+	character(len = 512) :: ifname
 
 	! MPI error
 	integer :: err
@@ -36,152 +36,179 @@ program main
 	! MPI rank
 	integer :: rank
 
-	! LIBPFASST data container defined in *libpfasst/src/pf_dtype_t.f90*
-  type(pf_pfasst_t) :: pf
+	! LIBPFASST data container defined in `libpfasst/src/pf_dtype_t.f90`
+	type(pf_pfasst_t) :: pf
 
-	! Communicator defined in *libpfasst/src/pf_dtype_t.f90*
-  type(pf_comm_t) :: comm
+	! Communicator defined in `libpfasst/src/pf_dtype_t.f90`
+	type(pf_comm_t) :: comm
 
-	! Encapsulated data defined in *pfasst-cart/src/encap.f90* (here, ultimately, a pointer destination)
-  type(pf_encap_t), target :: encap_dat
+	! Encapsulated data defined in `pfasst-cart/src/encap.f90` (here, ultimately, a pointer destination)
+	type(pf_encap_t), target :: pf_encap
 
 	! Timing
 	real t_start, t_stop
 
+	! Counter for levels
+	integer :: lvl
 
-
-
-	integer :: l
-
-
-
-
-
-	real(pfdp), parameter :: pi_pfdp = 3.141592653589793_pfdp
-
-	real(pfdp), parameter :: t_char_x_pfdp = 1.0_pfdp
-	real(pfdp), parameter :: t_char_y_pfdp = 2.0_pfdp
-	real(pfdp), parameter :: t_char_z_pfdp = 3.0_pfdp
-
+	! Initial data
 	type(c_ptr) :: Cptr2_ini_dat
 	type(dat), pointer :: Fptr2_ini_dat
-	real(pfdp), pointer :: ini_dat_arr(:, :, :, :)
+	real(pfdp), pointer :: ini_dat_u(:, :, :, :)
+	integer :: ini_dat_nx, ini_dat_ny, ini_dat_nz
+	real(pfdp), parameter :: pi_pfdp = 3.141592653589793_pfdp
+	real(pfdp), parameter :: x_char_pfdp = 2.0_pfdp
+	real(pfdp), parameter :: y_char_pfdp = 3.0_pfdp
+	real(pfdp), parameter :: z_char_pfdp = 4.0_pfdp
 
-
+	! Final data
 	type(c_ptr) :: Cptr2_end_dat
 
-	integer :: inx, iny, inz
-
-
-
-
-
-
-
 	!
-	! Init. input
+	! Initialization of input
 	!
 
-  if(command_argument_count() >= 1) then
-     call get_command_argument(1, value = probin_fname)
-  else
-     probin_fname = "probin.nml"
-  end if
+	if(command_argument_count() >= 1) then
+		 call get_command_argument(1, value = ifname)
+	else
+		 ifname = 'probin.nml'
+	end if
 
-  call probin_init(probin_fname)
-
-	!
-	! Init. MPI
-	!
-
-  call mpi_init(err)
-  if(err .ne. 0) stop "ERROR: Cannot initialize MPI"
-  call mpi_comm_rank(MPI_COMM_WORLD, rank, err)
+	call probin_init(ifname)
 
 	!
-	! Init. LIBPFASST
+	! Initialization of MPI
 	!
 
-	! See *libpfasst/src/pf_mpi.f90*
-  call pf_mpi_create(comm, MPI_COMM_WORLD)
-
-	! See *libpfasst/src/pf_pfasst.f90*
-  call pf_pfasst_create(pf, comm, fname = probin_fname)
+	call mpi_init(err)
+	if(err .ne. 0) stop 'Cannot initialize MPI'
+	call mpi_comm_rank(MPI_COMM_WORLD, rank, err)
 
 	!
-	! Init. user data encapsulation
+	! Initialization of LIBPFASST
 	!
 
-	call create_encap(encap_dat)
+	! See `libpfasst/src/pf_mpi.f90`
+	call pf_mpi_create(comm, MPI_COMM_WORLD)
+
+	! See `libpfasst/src/pf_pfasst.f90`
+	call pf_pfasst_create(pf, comm, fname = ifname)
+
+	!
+	! Initialization of user data encapsulation
+	!
+
+	call create_encap(pf_encap)
+
+	! Set level parameters
+	do lvl = 1, pf%nlevels
+		! Create `shape` array
+		allocate(pf%levels(lvl)%shape(4))
+
+		! Set `shape` values
+		pf%levels(lvl)%shape(1) = nfields(lvl)
+		pf%levels(lvl)%shape(2) = nx(lvl)
+		pf%levels(lvl)%shape(3) = ny(lvl)
+		pf%levels(lvl)%shape(4) = nz(lvl)
+
+		! Total number of variables in solution
+		pf%levels(lvl)%nvars = nfields(lvl)*nx(lvl)*ny(lvl)*nz(lvl)
+
+		! Number of nodes on each level
+		pf%levels(lvl)%nnodes = nnodes(lvl)
+
+		! Number of sweeps at each level
+		pf%levels(lvl)%nsweeps = nsweeps(lvl)
+
+		! Number of sweeps at each level during prediction
+		pf%levels(lvl)%nsweeps_pred = nsweeps_pred(lvl)
+
+		! Assign interpolation routine
+		pf%levels(lvl)%interpolate => interpolate
+
+		! Assing restriction routine
+		pf%levels(lvl)%restrict => restrict
+
+		! Assign instance of PFASST encapsulation
+		pf%levels(lvl)%encap => pf_encap
+
+		! Create solver/sweeper
+		call pf_imexQ_create(pf%levels(lvl)%sweeper, f1eval, f2eval, f2comp)
+	end do
+
+	!
+	! Define initial data
+	!
+
+	call c_f_pointer(Cptr2_ini_dat, Fptr2_ini_dat)
+	call create_dat(Cptr2_ini_dat, pf%nlevels, 1, pf%levels(pf%nlevels)%nvars, pf%levels(pf%nlevels)%shape, pf%levels(pf%nlevels)%ctx)
+	ini_dat_u => get_u(Cptr2_ini_dat)
+
+	do ini_dat_nx = 1, nx(pf%nlevels)
+		do ini_dat_ny = 1, ny(pf%nlevels)
+			do ini_dat_nz = 1, nz(pf%nlevels)
+				ini_dat_u(:, ini_dat_nx, ini_dat_ny, ini_dat_nz) = &
+					sin(pi_pfdp*ini_dat_nx/x_char_pfdp)*&
+					sin(pi_pfdp*ini_dat_ny/y_char_pfdp)*&
+					sin(pi_pfdp*ini_dat_nz/z_char_pfdp)
+			end do
+		end do
+	end do
+	!
+	! Create encapsulation for final solution
+	!
+
+	call create_dat(Cptr2_end_dat, pf%nlevels, 1, pf%levels(pf%nlevels)%nvars, pf%levels(pf%nlevels)%shape, pf%levels(pf%nlevels)%ctx)
+
+	!
+	! PFASST communicator setup
+	!
+
+	! See `libpfasst/src/pf_mpi.f90`
+	call pf_mpi_setup(comm, pf)
+
+	!
+	! PFASST object setup (for time-interpolation matrices)
+	!
+
+	! See `libpfasst/src/pf_pfasst.f90`
+	call pf_pfasst_setup(pf)
+
+	!
+	! Determine number of time-steps per processor
+	!
+	
+	! Perform one time-step per processor and temporal subinterval if `nsteps < 0`
+	if(nsteps < 0) then
+		nsteps = comm%nproc
+	end if
+
+	!
+	! All processes shall start the integration simultaneously
+	!
+
+	call mpi_barrier(MPI_COMM_WORLD, err)
 
 	!
 	! Start ticking
 	!
 
-  call cpu_time(t_start)
+	call cpu_time(t_start)
 
+	!
+	! Run PFASST
+	!
 
-  !  Set some level parameters
-  do l = 1, pf%nlevels
-     allocate(pf%levels(l)%shape(3))
-     pf%levels(l)%shape(1) = nx(l)
-     pf%levels(l)%shape(2) = ny(l)
-     pf%levels(l)%shape(3) = nz(l)
+	! See `libpfasst/src/pf_parallel.f90`
+	print *,'calling PFASST ...'
 
-		 ! This is the total number of variables in flatarray
-     pf%levels(l)%nvars = nflds*nx(l)*ny(l)*nz(l)
+	! Execute PFASST solver
+	call pf_pfasst_run(pf, Cptr2_ini_dat, dt, 0.0_pfdp, nsteps, Cptr2_end_dat)
 
-     pf%levels(l)%nnodes = nnodes(l)
-     pf%levels(l)%nsweeps = nsweeps(l)
+	!
+	! Stop ticking
+	!
 
-     pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
-
-
-     pf%levels(l)%interpolate => interpolate
-
-     pf%levels(l)%restrict => restrict
-
-     pf%levels(l)%encap => encap_dat
-
-		 call pf_imexQ_create(pf%levels(l)%sweeper, f1eval, f2eval, f2comp)
-  end do
-
-
-
-
-
-
-
-	! Set initial data
-	call c_f_pointer(Cptr2_ini_dat, Fptr2_ini_dat)
-
-	call create_dat(Cptr2_ini_dat, pf%nlevels, 1, pf%levels(pf%nlevels)%nvars, pf%levels(pf%nlevels)%shape, pf%levels(pf%nlevels)%ctx)
-	call create_dat(Cptr2_end_dat, pf%nlevels, 1, pf%levels(pf%nlevels)%nvars, pf%levels(pf%nlevels)%shape, pf%levels(pf%nlevels)%ctx)
-
-	ini_dat_arr => get_arr(Cptr2_ini_dat)
-
-	do inx = 1, nx(pf%nlevels)
-		do iny = 1, ny(pf%nlevels)
-			do inz = 1, nz(pf%nlevels)
-				ini_dat_arr(:, inx, iny, inz) = sin(pi_pfdp*inx/t_char_x_pfdp)*sin(pi_pfdp*iny/t_char_y_pfdp)*sin(pi_pfdp*inz/t_char_z_pfdp)
-			end do
-		end do
-	end do
-
-  call pf_mpi_setup(comm, pf)
-  call pf_pfasst_setup(pf)
-
-  print *,'Calling pfasst ...'
-  if (nsteps < 0) then
-     nsteps = comm%nproc
-  end if
-  call mpi_barrier(MPI_COMM_WORLD, err)
-  call pf_pfasst_run(pf, Cptr2_ini_dat, dt, 0.0_pfdp, nsteps, Cptr2_end_dat)
-
-  call cpu_time(t_stop)
-
-  call mpi_barrier(MPI_COMM_WORLD, err)
-
-!	call setval_dat(Cptr2_ini_dat, ini_dat_arr, 0)
+	call cpu_time(t_stop)
 end program main
 ! ------------------------------------------------------ Program *main*: stop

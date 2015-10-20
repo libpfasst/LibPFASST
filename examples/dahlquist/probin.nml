@@ -1,68 +1,50 @@
 !
-! Test parameters
+! PFASST specific parameters
 !
 
-! PFASST (see *libpfasst/src/pf_options.f90*)
+! See (1) `libpfasst/src/pf_dtype.f90` and (2) `libpfasst/src/pf_options.f90`
+
 &PF_PARAMS
-	! See (1) *libpfasst/src/pf_dtype.f90* and (2) *libpfasst/src/pf_options.f90*
 	nlevels = 1
 	niters = 5
 	qtype = 1
 	window = 1
-	abs_res_tol = 0.d0
-	rel_res_tol = 0.d0
+	abs_res_tol = 0.0
+	rel_res_tol = 0.0
 	Pipeline_g = .false.
 	PFASST_pred = .false.
 	echo_timings = .false.
 	taui0 = -999999
-
-
-!	Finterp = 0
-!	ndim =
-!	nfake =
-
-!	nprob =
-!	nstencil =
-!	nbcnr =
-!	nsteps = 128
-!	nx = 128
-!	ny = 128
-!	nz = 128
-!	doIMEX = 0
-!	dt =
-!	Tfin = 0.1
-!	nsweeps = 1 1
-!	nsweeps_pred = 1 1 
+	outdir = ''
 /
 
-! Cart
-&PARAMS
-!	nnodes = 5 
-!	nq = 9
-!	nvar = 5
-!	gamma
-!	timeMetric(3)
-!	dx
-!	dy
-!	dz
-!	jmax = 60
-!	kmax = 60
-!	lmax = 60
-!	flux_order = 2
-!	diss_order = 4
-!	efac
-!	istor = 'row'
+!
+! My (problem) specific parameters
+!
 
-    Finterp = 0   !  default is 0
-			nnodes =      5
-			nsweeps = 1
-			nsweeps_pred = 1
-    nx =   8
-    ny =   8
-    nz =   8
-
-    Tfin = 1.0
-    nsteps = 4
-
-    dt     = 0.25
+&MY_PARAMS
+	! Number of field variables
+	nfields = 5
+	! Number of grid points on each level
+	nx = 8
+	! Number of grid points on each level
+	ny = 8
+	! Number of grid points on each level
+	nz = 8
+	! Number of nodes on each level
+	nnodes = 5
+	! Sweeps at each levels
+	nsweeps = 1
+	! Sweeps during prediction
+	nsweeps_pred = 1
+	! Decides if interpolation of function values is done
+	Finterp = 0
+	! Equal 1 if IMEX time stepping
+	doIMEX = 0
+	! Number of time steps to take
+	nsteps = 4
+	! Time step
+	dt = 0.25
+	! Final time of run
+	Tfin = 1.0
 /
