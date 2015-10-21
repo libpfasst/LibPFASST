@@ -134,7 +134,8 @@ program main
 		pf%levels(lvl)%encap => pf_encap
 
 		! Create solver/sweeper
-		call pf_imexQ_create(pf%levels(lvl)%sweeper, f1eval, f2eval, f2comp)
+		call pf_explicitQ_create(pf%levels(lvl)%sweeper, f1eval)
+		!call pf_imexQ_create(pf%levels(lvl)%sweeper, f1eval, f2eval, f2comp)
 	end do
 
 	!

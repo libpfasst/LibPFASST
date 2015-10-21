@@ -91,6 +91,7 @@ contains
 		! Bulk values
 		do sol_dat_field = 1, sol_dat_nfields
 			f2_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				!0.0_pfdp
 				-4.0_pfdp*dble(sol_dat_field)*sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
 		end do
 	end subroutine f2eval
@@ -135,6 +136,7 @@ contains
 		do sol_dat_field = 1, sol_dat_nfields
 			! Solve `u[i](t(n+1), x, y, z)-dt*f2[i](t(n+1), sol) = rhs[i](t(n), x, y, z)` for `u[i](t(n+1), x, y, z)` given `f2[i](t(n+1), sol)`
 			sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				!rhs_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
 				rhs_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)/(1.0_pfdp+4.0_pfdp*dble(sol_dat_field)*dt)
 		end do
 

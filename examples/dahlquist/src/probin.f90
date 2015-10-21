@@ -95,7 +95,7 @@ contains
 
 		! See (1) `libpfasst/src/pf_dtype.f90` and (2) `libpfasst/src/pf_options.f90`
 
-		nlevels = -1
+		nlevels = 1
 		niters = 5
 		qtype = SDC_GAUSS_LOBATTO
 		window = PF_WINDOW_BLOCK

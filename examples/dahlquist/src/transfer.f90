@@ -35,7 +35,7 @@ contains
 		! Second-order interpolation from coarse to fine grid data
 
 		! Determine number of grid points
-		integer :: coarse_dat_nx, coarse_dat_ny, coarse_dat_nz
+		integer :: coarse_dat_nfields, coarse_dat_nx, coarse_dat_ny, coarse_dat_nz
 		integer :: fine_dat_nx, fine_dat_ny, fine_dat_nz
 
 		! Get data array associated to input data encapsulation
@@ -51,6 +51,7 @@ contains
 		fine_dat_u => get_u(Cptr2_fine_dat)
 
 		! Get number of coarse gird points
+		coarse_dat_nfields = get_nfields(Cptr2_coarse_dat)
 		coarse_dat_nx = get_nx(Cptr2_coarse_dat)
 		coarse_dat_ny = get_ny(Cptr2_coarse_dat)
 		coarse_dat_nz = get_nz(Cptr2_coarse_dat)
@@ -60,62 +61,62 @@ contains
 		fine_dat_ny = get_ny(Cptr2_fine_dat)
 		fine_dat_nz = get_nz(Cptr2_fine_dat)
 
-!		if(coarse_dat_nx == fine_dat_nx) then
-!			! Coarse and fine grid may be identical
+		if(coarse_dat_nx == fine_dat_nx) then
+			! Coarse and fine grid may be identical
 			fine_dat_u = coarse_dat_u
-!		else
-!			! Evaluate `fine_dat_u` given `coarse_dat_u`
-!			! Point injection
-!			fine_dat_u(:, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2) = &
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz)
-!	
-!			! Linear `x`-interpolation
-!			fine_dat_u(:, 2:fine_dat_nx-1:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2) = 0.5_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 1:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz))
-!	
-!			! Linear `y`-interpolation
-!			fine_dat_u(:, 1:fine_dat_nx:2, 2:fine_dat_ny-1:2, 1:fine_dat_nz:2) = 0.5_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz))
-!	
-!			! Linear `z`-interpolation
-!			fine_dat_u(:, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 2:fine_dat_nz-1:2) = 0.5_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny, 2:coarse_dat_nz))
-!	
-!			! Linear `xy`-interpolation
-!			fine_dat_u(:, 2:fine_dat_nx-1:2, 2:fine_dat_ny-1:2, 1:fine_dat_nz:2) = 0.25_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 1:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz))
-!	
-!			! Linear `xz`-interpolation
-!			fine_dat_u(:, 2:fine_dat_nx-1:2, 1:fine_dat_ny:2, 2:fine_dat_nz-1:2) = 0.25_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 2:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny, 2:coarse_dat_nz))
-!	
-!			! Linear `yz`-interpolation
-!			fine_dat_u(:, 1:fine_dat_nx:2, 2:fine_dat_ny-1:2, 2:fine_dat_nz-1:2) = 0.25_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx, 2:coarse_dat_ny, 2:coarse_dat_nz))
-!	
-!			! Linear `xyz`-interpolation
-!			fine_dat_u(:, 2:fine_dat_nx-1:2, 2:fine_dat_ny-1:2, 2:fine_dat_nz-1:2) = 0.125_pfdp*(&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 2:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
-!				coarse_dat_u(:, 2:coarse_dat_nx, 2:coarse_dat_ny, 2:coarse_dat_nz))
-!		end if
+		else
+			! Evaluate `fine_dat_u` given `coarse_dat_u`
+			! Point injection
+			fine_dat_u(1:coarse_dat_nfields, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2) = &
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz)
+	
+			! Linear `x`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 2:fine_dat_nx-1:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2) = 0.5_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 1:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz))
+	
+			! Linear `y`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 1:fine_dat_nx:2, 2:fine_dat_ny-1:2, 1:fine_dat_nz:2) = 0.5_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz))
+	
+			! Linear `z`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 2:fine_dat_nz-1:2) = 0.5_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny, 2:coarse_dat_nz))
+	
+			! Linear `xy`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 2:fine_dat_nx-1:2, 2:fine_dat_ny-1:2, 1:fine_dat_nz:2) = 0.25_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 1:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz))
+	
+			! Linear `xz`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 2:fine_dat_nx-1:2, 1:fine_dat_ny:2, 2:fine_dat_nz-1:2) = 0.25_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny, 2:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny, 2:coarse_dat_nz))
+	
+			! Linear `yz`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 1:fine_dat_nx:2, 2:fine_dat_ny-1:2, 2:fine_dat_nz-1:2) = 0.25_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx, 2:coarse_dat_ny, 2:coarse_dat_nz))
+	
+			! Linear `xyz`-interpolation
+			fine_dat_u(1:coarse_dat_nfields, 2:fine_dat_nx-1:2, 2:fine_dat_ny-1:2, 2:fine_dat_nz-1:2) = 0.125_pfdp*(&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 1:coarse_dat_nx-1, 2:coarse_dat_ny, 2:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 1:coarse_dat_ny-1, 2:coarse_dat_nz)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 2:coarse_dat_ny, 1:coarse_dat_nz-1)+&
+				coarse_dat_u(1:coarse_dat_nfields, 2:coarse_dat_nx, 2:coarse_dat_ny, 2:coarse_dat_nz))
+		end if
 	end subroutine interpolate
 	! ------------------------------------------------------ subroutine `interpolate`: stop
 
@@ -132,7 +133,7 @@ contains
 		! Point injection from coarse to fine grid data
 
 		! Determine number of grid points in x-, y-, and z-direction
-		integer :: fine_dat_nx, fine_dat_ny, fine_dat_nz
+		integer :: fine_dat_nfields, fine_dat_nx, fine_dat_ny, fine_dat_nz
 		integer :: coarse_dat_nx, coarse_dat_ny, coarse_dat_nz
 
 		! Get data array associated to input data encapsulation
@@ -148,6 +149,7 @@ contains
 		coarse_dat_u => get_u(Cptr2_coarse_dat)
 
 		! Get number of fine gird points
+		fine_dat_nfields = get_nfields(Cptr2_fine_dat)
 		fine_dat_nx = get_nx(Cptr2_fine_dat)
 		fine_dat_ny = get_ny(Cptr2_fine_dat)
 		fine_dat_nz = get_nz(Cptr2_fine_dat)
@@ -157,14 +159,14 @@ contains
 		coarse_dat_ny = get_ny(Cptr2_coarse_dat)
 		coarse_dat_nz = get_nz(Cptr2_coarse_dat)
 
-!		if(fine_dat_nx == coarse_dat_nx) then
-!			! Coarse and fine grid may be identical
+		if(fine_dat_nx == coarse_dat_nx) then
+			! Coarse and fine grid may be identical
 			coarse_dat_u = fine_dat_u
-!		else
-!			! Evaluate `coarse_dat_u` given `fine_dat_u`
-!			coarse_dat_u(:, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz) = &
-!				fine_dat_u(:, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2)
-!		end if
+		else
+			! Evaluate `coarse_dat_u` given `fine_dat_u`
+			coarse_dat_u(1:fine_dat_nfields, 1:coarse_dat_nx, 1:coarse_dat_ny, 1:coarse_dat_nz) = &
+				fine_dat_u(1:fine_dat_nfields, 1:fine_dat_nx:2, 1:fine_dat_ny:2, 1:fine_dat_nz:2)
+		end if
 	end subroutine restrict
 	! ------------------------------------------------------ subroutine `restrict`: stop
 end module transfer
