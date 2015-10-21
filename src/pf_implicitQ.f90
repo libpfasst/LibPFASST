@@ -149,9 +149,9 @@ contains
     end do
 
     imp%QdiffI = Lev%qmat-imp%QtilI
-    print *,'QtilI',imp%QtilI
-    print *,'QdiffI',imp%QdiffI
-    print *,'Qmat',Lev%qmat
+!    print *,'QtilI',imp%QtilI
+!    print *,'QdiffI',imp%QdiffI
+!    print *,'Qmat',Lev%qmat
 
   end subroutine implicitQ_initialize
 
