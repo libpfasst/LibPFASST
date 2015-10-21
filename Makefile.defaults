@@ -5,7 +5,6 @@
 FC = mpif90
 CC = mpicc
 AR = ar rcs
-PY = python
 NOSE = nosetests
 
 FFLAGS = -Ibuild -Jbuild -cpp
@@ -35,7 +34,6 @@ FSRC = src/pfasst.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
-       src/pf_version.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
 
