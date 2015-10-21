@@ -46,5 +46,5 @@
 	! Time step
 	dt = 0.25
 	! Final time of run
-	Tfin = 1.0
+	Tfin = -1.0
 /

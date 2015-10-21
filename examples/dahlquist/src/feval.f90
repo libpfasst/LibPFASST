@@ -31,13 +31,13 @@ contains
 		! C-pointer to `f1(t, sol)`
 		type(c_ptr), intent(in), value :: Cptr2_f1_dat
 
-		! Let `[f1(t, sol)](j) = -2*j*[sol(t, x, y, z)](j)`
+		! Let `f1[i](t, sol) = -2*i*sol[i](t, x, y, z)`
 
 		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
 		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
 
 		real(pfdp), pointer :: f1_dat_u(:, :, :, :)
-		integer :: j
+		integer :: sol_dat_field
 
 		sol_dat_u => get_u(Cptr2_sol_dat)
 		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
@@ -51,9 +51,9 @@ contains
 		f1_dat_u = 0.0_pfdp
 
 		! Bulk values
-		do j = 1, sol_dat_nfields
-			f1_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				-2.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		do sol_dat_field = 1, sol_dat_nfields
+			f1_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				-2.0_pfdp*dble(sol_dat_field)*sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
 		end do
 	end subroutine f1eval
 	! ------------------------------------------------------ subroutine `f1eval`: stop
@@ -69,13 +69,13 @@ contains
 		! C-pointer to `f2(t, sol)`
 		type(c_ptr), intent(in), value :: Cptr2_f2_dat
 
-		! Let `[f2(t, sol)](j) = -4*j*[sol(t, x, y, z)](j)`
+		! Let `f2[i](t, sol) = -4*i*sol[i](t, x, y, z)`
 
 		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
 		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
 
 		real(pfdp), pointer :: f2_dat_u(:, :, :, :)
-		integer :: j
+		integer :: sol_dat_field
 
 		sol_dat_u => get_u(Cptr2_sol_dat)
 		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
@@ -89,9 +89,9 @@ contains
 		f2_dat_u = 0.0_pfdp
 
 		! Bulk values
-		do j = 1, sol_dat_nfields
-			f2_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				-4.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		do sol_dat_field = 1, sol_dat_nfields
+			f2_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				-4.0_pfdp*dble(sol_dat_field)*sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
 		end do
 	end subroutine f2eval
 	! ------------------------------------------------------ subroutine `f2eval`: stop
@@ -116,7 +116,7 @@ contains
 
 		real(pfdp), pointer :: rhs_dat_u(:, :, :, :)
 		real(pfdp), pointer :: f2_dat_u(:, :, :, :)
-		integer :: j
+		integer :: sol_dat_field
 
 		sol_dat_u => get_u(Cptr2_sol_dat)
 		sol_dat_nfields = get_nfields(Cptr2_sol_dat)
@@ -132,14 +132,14 @@ contains
 		f2_dat_u = 0.0_pfdp
 
 		! Bulk values
-		do j = 1, sol_dat_nfields
-			! Solve `[u(t(n+1), x, y, z)](j)-dt*[f2(t(n+1), sol)](j) = [rhs(t(n), x, y, z)](j)` for `[u(t(n+1), x, y, z)](j)` given `[f2(t(n+1), sol)](j)`
-			sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				rhs_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)/(1.0_pfdp+4.0_pfdp*dble(j)*dt)
-			! We have `[f2(t(n+1), sol)](j) = -4*j*[sol(t(n+1), x, y, z)](j)`
-			f2_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				-4.0_pfdp*dble(j)*sol_dat_u(j, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
+		do sol_dat_field = 1, sol_dat_nfields
+			! Solve `u[i](t(n+1), x, y, z)-dt*f2[i](t(n+1), sol) = rhs[i](t(n), x, y, z)` for `u[i](t(n+1), x, y, z)` given `f2[i](t(n+1), sol)`
+			sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
+				rhs_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)/(1.0_pfdp+4.0_pfdp*dble(sol_dat_field)*dt)
 		end do
+
+		! We have `f2[i](t(n+1), sol) = -4*i*sol[i](t(n+1), x, y, z)`
+		call f2eval(Cptr2_sol_dat, t, lvl, Cptr2_ctx, Cptr2_f2_dat)
 	end subroutine f2comp
 	! ------------------------------------------------------ subroutine `f2comp`: stop
 end module feval

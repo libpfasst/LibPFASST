@@ -2,7 +2,7 @@
 ! Copyright (c) 2015, Andreas Kreienbuehl and Michael Minion. All rights reserved.
 !
 
-! ------------------------------------------------------ Program `main`: start
+! ------------------------------------------------------ program `main`: start
 ! PFASST: Main program for Dahlquist equation
 program main
 	! For, e.g., C-pointers
@@ -55,7 +55,8 @@ program main
 	type(c_ptr) :: Cptr2_ini_dat
 	type(dat), pointer :: Fptr2_ini_dat
 	real(pfdp), pointer :: ini_dat_u(:, :, :, :)
-	integer :: ini_dat_nx, ini_dat_ny, ini_dat_nz
+	real(pfdp) :: ini_dat_x, ini_dat_y, ini_dat_z
+	integer :: i_ini_dat_field, i_ini_dat_x, i_ini_dat_y, i_ini_dat_z
 	real(pfdp), parameter :: pi_pfdp = 3.141592653589793_pfdp
 	real(pfdp), parameter :: x_char_pfdp = 2.0_pfdp
 	real(pfdp), parameter :: y_char_pfdp = 3.0_pfdp
@@ -144,16 +145,22 @@ program main
 	call create_dat(Cptr2_ini_dat, pf%nlevels, 1, pf%levels(pf%nlevels)%nvars, pf%levels(pf%nlevels)%shape, pf%levels(pf%nlevels)%ctx)
 	ini_dat_u => get_u(Cptr2_ini_dat)
 
-	do ini_dat_nx = 1, nx(pf%nlevels)
-		do ini_dat_ny = 1, ny(pf%nlevels)
-			do ini_dat_nz = 1, nz(pf%nlevels)
-				ini_dat_u(:, ini_dat_nx, ini_dat_ny, ini_dat_nz) = &
-					sin(pi_pfdp*ini_dat_nx/x_char_pfdp)*&
-					sin(pi_pfdp*ini_dat_ny/y_char_pfdp)*&
-					sin(pi_pfdp*ini_dat_nz/z_char_pfdp)
+	do i_ini_dat_field = 1, nfields(pf%nlevels)
+		do i_ini_dat_x = 1, nx(pf%nlevels)
+			ini_dat_x = (i_ini_dat_x-1)*x_char_pfdp/(nx(pf%nlevels)-1.0_pfdp)
+			do i_ini_dat_y = 1, ny(pf%nlevels)
+				ini_dat_y = (i_ini_dat_y-1)*y_char_pfdp/(ny(pf%nlevels)-1.0_pfdp)
+				do i_ini_dat_z = 1, nz(pf%nlevels)
+					ini_dat_z = (i_ini_dat_z-1)*z_char_pfdp/(nz(pf%nlevels)-1.0_pfdp)
+					ini_dat_u(i_ini_dat_field, i_ini_dat_x, i_ini_dat_y, i_ini_dat_z) = &
+						sin(pi_pfdp*ini_dat_x/x_char_pfdp)*&
+						sin(pi_pfdp*ini_dat_y/y_char_pfdp)*&
+						sin(pi_pfdp*ini_dat_z/z_char_pfdp)/(6.0_pfdp*i_ini_dat_field)
+				end do
 			end do
 		end do
 	end do
+
 	!
 	! Create encapsulation for final solution
 	!
@@ -173,6 +180,12 @@ program main
 
 	! See `libpfasst/src/pf_pfasst.f90`
 	call pf_pfasst_setup(pf)
+
+	!
+	! Add hook(s)
+	!
+
+	call pf_add_hook(pf, -1, PF_POST_SWEEP, print_err)
 
 	!
 	! Determine number of time-steps per processor
@@ -199,10 +212,7 @@ program main
 	! Run PFASST
 	!
 
-	! See `libpfasst/src/pf_parallel.f90`
-	print *,'calling PFASST ...'
-
-	! Execute PFASST solver
+	! Execute PFASST solver (see `libpfasst/src/pf_parallel.f90` for STD output)
 	call pf_pfasst_run(pf, Cptr2_ini_dat, dt, 0.0_pfdp, nsteps, Cptr2_end_dat)
 
 	!
@@ -211,4 +221,4 @@ program main
 
 	call cpu_time(t_stop)
 end program main
-! ------------------------------------------------------ Program *main*: stop
+! ------------------------------------------------------ program `main`: stop
