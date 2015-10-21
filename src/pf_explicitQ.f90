@@ -63,7 +63,7 @@ contains
        do n = 1, Lev%nnodes
           call Lev%encap%axpy(Lev%S(m), dt*exp%QdiffE(m,n), Lev%F(n,1))
        end do
-       if (associated(Lev%tau)) then
+       if (associated(Lev%tauQ)) then
           call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
        end if
     end do
@@ -129,11 +129,11 @@ contains
     dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
-!          exp%QtilE(m,n)   =  dsdc(n)
+          exp%QtilE(m,n)   =  dsdc(n)
        end do
     end do
     !  Or do the LU trick
-!    call pf_LUexp(Lev%qmat,exp%QtilE,nnodes)
+    !    call pf_LUexp(Lev%qmat,exp%QtilE,nnodes)
 
     exp%QdiffE = Lev%qmat-exp%QtilE
 

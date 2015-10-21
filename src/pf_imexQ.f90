@@ -150,13 +150,13 @@ contains
        end do
     end do
 
-    do m = 1,nnodes-1
-       print *,'row i of qmat', m,Lev%qmat(m,:)
-    end do
-    call myLUq(Lev%qmat,imexQ%QtilI,Nnodes,0)
+!    do m = 1,nnodes-1
+!       print *,'row i of qmat', m,Lev%qmat(m,:)
+!    end do
+!    call myLUq(Lev%qmat,imexQ%QtilI,Nnodes,0)
     imexQ%QdiffE = Lev%qmat-imexQ%QtilE
     imexQ%QdiffI = Lev%qmat-imexQ%QtilI
-    
+
   end subroutine imexQ_initialize
 
   ! Compute SDC integral
