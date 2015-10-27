@@ -81,7 +81,7 @@ contains
 							exp(-2.0_pfdp*i_exact_start_dat_field*t_start)*&
 							sin(pi_pfdp*exact_start_dat_x/x_char_pfdp)*&
 							sin(pi_pfdp*exact_start_dat_y/y_char_pfdp)*&
-							sin(pi_pfdp*exact_start_dat_z/z_char_pfdp)/(2.0_pfdp*i_exact_start_dat_field)
+							sin(pi_pfdp*exact_start_dat_z/z_char_pfdp)/(6.0_pfdp*i_exact_start_dat_field)
 					end do
 				end do
 			end do
