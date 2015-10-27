@@ -26,11 +26,11 @@
 	! Number of field variables
 	nfields = 5
 	! Number of grid points on each level
-	nx = 65
+	nx = 3
 	! Number of grid points on each level
-	ny = 65
+	ny = 3
 	! Number of grid points on each level
-	nz = 65
+	nz = 3
 	! Number of nodes on each level
 	nnodes = 5
 	! Sweeps at each levels
@@ -42,9 +42,9 @@
 	! Equal 1 if IMEX time stepping
 	doIMEX = 0
 	! Number of time steps to take
-	nsteps = 33
+	nsteps = 4
 	! Time step
-	dt = 1.0
+	dt = 0.25
 	! Final time of run
-	Tfin = 32.0
+	Tfin = 1.0
 /

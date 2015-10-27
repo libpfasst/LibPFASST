@@ -69,8 +69,6 @@ contains
 		! C-pointer to `f2(t, sol)`
 		type(c_ptr), intent(in), value :: Cptr2_f2_dat
 
-		! Let `f2[i](t, sol) = -4*i*sol[i](t, x, y, z)`
-
 		real(pfdp), pointer :: sol_dat_u(:, :, :, :)
 		integer :: sol_dat_nfields, sol_dat_nx, sol_dat_ny, sol_dat_nz
 
@@ -85,15 +83,8 @@ contains
 
 		f2_dat_u => get_u(Cptr2_f2_dat)
 
-		! Dirichlet values everywhere
-		f2_dat_u = 0.0_pfdp
-
-		! Bulk values
-		do sol_dat_field = 1, sol_dat_nfields
-			f2_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				!0.0_pfdp
-				-4.0_pfdp*dble(sol_dat_field)*sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
-		end do
+		! All values set to zero
+		f2_dat_u(1:sol_dat_nfields, 1:sol_dat_nx, 1:sol_dat_ny, 1:sol_dat_nz) = 0.0_pfdp
 	end subroutine f2eval
 	! ------------------------------------------------------ subroutine `f2eval`: stop
 
@@ -129,16 +120,9 @@ contains
 
 		f2_dat_u => get_u(Cptr2_f2_dat)
 
-		! Dirichlet values everywhere
-		f2_dat_u = 0.0_pfdp
-
-		! Bulk values
-		do sol_dat_field = 1, sol_dat_nfields
-			! Solve `u[i](t(n+1), x, y, z)-dt*f2[i](t(n+1), sol) = rhs[i](t(n), x, y, z)` for `u[i](t(n+1), x, y, z)` given `f2[i](t(n+1), sol)`
-			sol_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
-				!rhs_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)
-				rhs_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1)/(1.0_pfdp+4.0_pfdp*dble(sol_dat_field)*dt)
-		end do
+		! Solve `u[i](t(n+1), x, y, z)-dt*f2[i](t(n+1), sol) = rhs[i](t(n), x, y, z)` for `u[i](t(n+1), x, y, z)` given `f2[i](t(n+1), sol)`
+		sol_dat_u(1:sol_dat_nfields, 1:sol_dat_nx, 1:sol_dat_ny, 1:sol_dat_nz) = &
+			rhs_dat_u(1:sol_dat_nfields, 1:sol_dat_nx, 1:sol_dat_ny, 1:sol_dat_nz)
 
 		! We have `f2[i](t(n+1), sol) = -4*i*sol[i](t(n+1), x, y, z)`
 		call f2eval(Cptr2_sol_dat, t, lvl, Cptr2_ctx, Cptr2_f2_dat)

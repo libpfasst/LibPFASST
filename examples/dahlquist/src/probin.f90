@@ -114,11 +114,11 @@ contains
 		! Number of field variables
 		nfields = 5
 		! Number of grid points on each level
-    nx = 8
+    nx = 3
 		! Number of grid points on each level
-    ny = 8
+    ny = 3
 		! Number of grid points on each level
-    nz = 8
+    nz = 3
 		! Number of nodes on each level
 		nnodes = 5
 		! Sweeps at each levels
@@ -159,9 +159,9 @@ contains
 
 		! Time-domain and step-size
     if(Tfin .gt. 0.0_pfdp) then
-       dt = Tfin/(nsteps-1)
+       dt = Tfin/nsteps
     else
-       Tfin = (nsteps-1)*dt
+       Tfin = nsteps*dt
     endif
 	end subroutine probin_init
 	! ------------------------------------------------------ subroutine `probin_init`: stop
