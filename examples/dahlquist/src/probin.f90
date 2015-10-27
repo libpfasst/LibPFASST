@@ -161,7 +161,7 @@ contains
     if(Tfin .gt. 0.0_pfdp) then
        dt = Tfin/nsteps
     else
-       Tfin = dt*nsteps
+       Tfin = nsteps*dt
     endif
 	end subroutine probin_init
 	! ------------------------------------------------------ subroutine `probin_init`: stop
