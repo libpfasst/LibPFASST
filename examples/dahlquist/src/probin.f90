@@ -159,9 +159,9 @@ contains
 
 		! Time-domain and step-size
     if(Tfin .gt. 0.0_pfdp) then
-       dt = Tfin/nsteps
+       dt = Tfin/(nsteps-1)
     else
-       Tfin = nsteps*dt
+       Tfin = (nsteps-1)*dt
     endif
 	end subroutine probin_init
 	! ------------------------------------------------------ subroutine `probin_init`: stop

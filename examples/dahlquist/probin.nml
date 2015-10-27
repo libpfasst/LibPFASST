@@ -42,7 +42,7 @@
 	! Equal 1 if IMEX time stepping
 	doIMEX = 0
 	! Number of time steps to take
-	nsteps = 32
+	nsteps = 33
 	! Time step
 	dt = 1.0
 	! Final time of run
