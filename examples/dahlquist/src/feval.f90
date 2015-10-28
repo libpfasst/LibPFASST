@@ -50,8 +50,6 @@ contains
 		! Dirichlet values everywhere
 		f1_dat_u = 0.0_pfdp
 
-print *, 'sol_dat_u(1, 2, 2, 2) = ', sol_dat_u(1, 2, 2, 2)
-
 		! Bulk values
 		do sol_dat_field = 1, sol_dat_nfields
 			f1_dat_u(sol_dat_field, 2:sol_dat_nx-1, 2:sol_dat_ny-1, 2:sol_dat_nz-1) = &
