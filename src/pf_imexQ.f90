@@ -71,7 +71,7 @@ contains
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%encap%copy(Lev%Q(1), Lev%q0)
 
     call imexQ%f1eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1))
     call imexQ%f2eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,2))

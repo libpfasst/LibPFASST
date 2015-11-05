@@ -174,8 +174,8 @@ contains
     call LevG%encap%setval(delG, 0.0_pfdp)
     call LevF%encap%setval(delF, 0.0_pfdp)
 
-    call LevG%encap%unpack(q0G, LevG%q0)
-    call LevF%encap%unpack(q0F, LevF%q0)
+    call LevG%encap%copy(q0G, LevG%q0)
+    call LevF%encap%copy(q0F, LevF%q0)
 
     call LevF%restrict(q0F, delG, LevF%level, LevF%ctx, LevG%level, LevG%ctx,pf%state%t0)
     call LevG%encap%axpy(delG, -1.0_pfdp, q0G)
@@ -183,7 +183,7 @@ contains
     call LevF%interpolate(delF, delG, LevF%level, LevF%ctx, LevG%level, LevG%ctx,pf%state%t0)
     call LevF%encap%axpy(q0F, -1.0_pfdp, delF)
 
-    call LevF%encap%pack(LevF%q0, q0F)
+    call LevF%encap%copy(LevF%q0, q0F)
     call LevG%encap%destroy(delG)
     call LevF%encap%destroy(delF)
     call LevF%encap%destroy(q0F)

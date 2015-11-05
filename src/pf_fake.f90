@@ -60,7 +60,7 @@ contains
           call pf_residual(pf, F, dt)
           call restrict_time_space_fas(pf, t0, dt, F, G)
           call save(G)
-          call G%encap%pack(G%q0, G%Q(1))
+          call G%encap%copy(G%q0, G%Q(1))
        end do
     end do
 
@@ -76,7 +76,7 @@ contains
 
              ! get new initial value (skip on first iteration)
              if (k > 1) then
-                call G%encap%pack(G%q0, G%Q(G%nnodes))
+                call G%encap%copy(G%q0, G%Q(G%nnodes))
                 call spreadq0(G, t0)
              end if
 
@@ -142,7 +142,7 @@ contains
        pf%state%last  = pf%comm%nproc - 1
 
        F => pf%levels(pf%nlevels)
-       call F%encap%pack(F%q0, q0)
+       call F%encap%copy(F%q0, q0)
 
        pf%state%nsteps = nsteps
     end do
@@ -251,7 +251,7 @@ contains
              call c_f_pointer(pfs(p), pf)
              Fb => pf%levels(pf%nlevels)
              call Fb%encap%copy(Fb%qend, F%qend)
-             call Fb%encap%pack(Fb%q0, Fb%qend)
+             call Fb%encap%copy(Fb%q0, Fb%qend)
           end do
        end if
 

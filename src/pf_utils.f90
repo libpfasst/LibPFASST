@@ -62,7 +62,7 @@ contains
 
     integer :: m, p
 
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%encap%copy(Lev%Q(1), Lev%q0)
     call Lev%sweeper%evaluate(Lev, t0, 1)
 
     do m = 2, Lev%nnodes

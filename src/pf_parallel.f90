@@ -63,7 +63,7 @@ contains
           call pf_residual(pf, F, dt)
           call restrict_time_space_fas(pf, t0, dt, F, G)
           call save(G)
-          call G%encap%pack(G%q0, G%Q(1))
+          call G%encap%copy(G%q0, G%Q(1))
        end do
 
 
@@ -77,7 +77,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%pack(G%q0, G%qend)
+                   call G%encap%copy(G%q0, G%qend)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(G, t0)
                    end if
@@ -117,7 +117,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%pack(G%q0, G%qend)
+                   call G%encap%copy(G%q0, G%qend)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(G, t0k)
                    end if
@@ -340,7 +340,7 @@ contains
     did_post_step_hook = .false.
 
     F => pf%levels(pf%nlevels)
-    call F%encap%pack(F%q0, q0)
+    call F%encap%copy(F%q0, q0)
 
     if (present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -388,7 +388,7 @@ contains
           call pf%comm%wait(pf, pf%nlevels)
           call F%encap%pack(F%send, F%qend)
           call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
-          F%q0 = F%send
+          call F%encap%unpack(F%q0,F%send)
        end if
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
@@ -474,7 +474,7 @@ contains
     do l = 2, pf%nlevels-1
        F => pf%levels(l); G => pf%levels(l-1)
        call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call F%encap%pack(F%q0, F%Q(1))
+       call F%encap%copy(F%q0, F%Q(1))
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps_pred
           call F%sweeper%sweep(pf, F, t0, dt)
@@ -486,7 +486,7 @@ contains
 
     F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
     call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-    call F%encap%pack(F%q0, F%Q(1))
+    call F%encap%copy(F%q0, F%Q(1))
 !    do j = 1, F%nsweeps_pred
 !          call F%sweeper%sweep(pf, F, t0, dt)
 !          call pf_residual(pf, F, dt)

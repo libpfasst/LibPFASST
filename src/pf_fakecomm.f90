@@ -95,7 +95,8 @@ contains
 
     if (pf%rank > 0) then
        call pf_fake_get(pf%comm, pf%rank-1, from)
-       level%q0 = from%levels(level%level)%send
+!       level%q0 = from%levels(level%level)%send
+       call level%encap%unpack(level%q0,from%levels(level%level)%send)
     end if
 
     call end_timer(pf, TRECEIVE)

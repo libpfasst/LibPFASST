@@ -117,7 +117,6 @@ module pf_mod_dtype
      procedure(pf_transfer_p), pointer, nopass :: interpolate, restrict
 
      real(pfdp), pointer :: &
-          q0(:), &                      ! initial condition (packed)
           send(:), &                    ! send buffer
           recv(:), &                    ! recv buffer
           nodes(:), &                   ! sdc nodes
@@ -130,6 +129,7 @@ module pf_mod_dtype
           nflags(:)                     ! sdc node flags
 
      type(c_ptr), pointer :: &
+          q0(:), &                      ! initial condition encap
           Q(:), &                       ! unknowns at sdc nodes
           pQ(:), &                      ! unknowns at sdc nodes, previous sweep
           F(:,:), &                     ! functions values at sdc nodes
