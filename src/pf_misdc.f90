@@ -27,8 +27,6 @@ module pf_mod_misdc
   integer, parameter, private :: npieces = 3
 
   interface
-
-  interface
      subroutine pf_f3eval_p(y, t, level, ctx, f3)
        import c_ptr, c_int, pfdp
        type(c_ptr),    intent(in), value :: y, f3, ctx
@@ -49,8 +47,8 @@ module pf_mod_misdc
      procedure(pf_f1eval_p), pointer, nopass :: f1eval
      procedure(pf_f2eval_p), pointer, nopass :: f2eval
      procedure(pf_f2comp_p), pointer, nopass :: f2comp
-     procedure(pf_f2eval_p), pointer, nopass :: f3eval
-     procedure(pf_f2comp_p), pointer, nopass :: f3comp
+     procedure(pf_f3eval_p), pointer, nopass :: f3eval
+     procedure(pf_f3comp_p), pointer, nopass :: f3comp
 
      real(pfdp), allocatable :: QdiffE(:,:)
      real(pfdp), allocatable :: QdiffI(:,:)
@@ -72,21 +70,28 @@ contains
     real(pfdp)  :: t
     real(pfdp)  :: dtsdc(1:Lev%nnodes-1)
     type(c_ptr) :: rhs
+    type(c_ptr), pointer :: S3(:)
 
     type(pf_misdc_t), pointer :: misdc
 
     call c_f_pointer(Lev%sweeper%sweeperctx, misdc)
 
     call start_timer(pf, TLEVEL+Lev%level-1)
+    allocate(S3(Lev%nnodes-1))
+    do m = 1, Lev%nnodes-1
+       call Lev%encap%create(S3(m),Lev%level,SDC_KIND_SOL_FEVAL,Lev%nvars,Lev%shape,Lev%ctx)
+    end do
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
        call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
+       call Lev%encap%setval(S3(m), 0.0d0)
        do n = 1, Lev%nnodes
           call Lev%encap%axpy(Lev%S(m), dt*misdc%QdiffE(m,n), Lev%F(n,1))
           call Lev%encap%axpy(Lev%S(m), dt*misdc%QdiffI(m,n), Lev%F(n,2))
-          !  Note we have to leave off the -dt*Qtil here and put it in after f2comp
           call Lev%encap%axpy(Lev%S(m), dt*Lev%qmat(m,n), Lev%F(n,3))
+          call Lev%encap%axpy(S3(m), dt*misdc%QtilI(m,n), Lev%F(n,3))
+          !  Note we have to leave off the -dt*Qtil here and put it in after f2comp
        end do
        if (associated(Lev%tauQ)) then
           call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
@@ -121,11 +126,15 @@ contains
 
        !  Now we need to do the final subtraction for the f3 piece
        call Lev%encap%copy(rhs, Lev%Q(m+1))       
-       do n = 1, Lev%nnodes
-          call Lev%encap%axpy(rhs, -dt*misdc%QtilI(m,n), Lev%F(n,3))
+       do n = 1, m
+          call Lev%encap%axpy(rhs, dt*misdc%QtilI(m,n), Lev%F(n,3))  
        end do
+
+       call Lev%encap%axpy(rhs, -1.0_pfdp, S3(m))
+
        call misdc%f3comp(Lev%Q(m+1), t, dt*misdc%QtilI(m,m+1), rhs, Lev%level, Lev%ctx, Lev%F(m+1,3))
        call misdc%f1eval(Lev%Q(m+1), t, Lev%level, Lev%ctx, Lev%F(m+1,1))
+       call misdc%f2eval(Lev%Q(m+1), t, Lev%level, Lev%ctx, Lev%F(m+1,2))
     end do
 
     call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
@@ -211,8 +220,8 @@ contains
     procedure(pf_f1eval_p) :: f1eval
     procedure(pf_f2eval_p) :: f2eval
     procedure(pf_f2comp_p) :: f2comp
-    procedure(pf_f2eval_p) :: f3eval
-    procedure(pf_f2comp_p) :: f3comp
+    procedure(pf_f3eval_p) :: f3eval
+    procedure(pf_f3comp_p) :: f3comp
 
     type(pf_misdc_t), pointer :: misdc
 
@@ -220,8 +229,8 @@ contains
     misdc%f1eval => f1eval
     misdc%f2eval => f2eval
     misdc%f2comp => f2comp
-    misdc%f2eval => f3eval
-    misdc%f2comp => f3comp
+    misdc%f3eval => f3eval
+    misdc%f3comp => f3comp
 
     sweeper%npieces = npieces
     sweeper%sweep        => misdc_sweep

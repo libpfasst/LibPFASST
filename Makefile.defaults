@@ -26,6 +26,7 @@ FSRC = src/pfasst.f90 \
        src/pf_implicitQ.f90 \
        src/pf_interpolate.f90 \
        src/pf_logger.f90 \
+       src/pf_misdc.f90 \
        src/pf_ndarray.f90 \
        src/pf_options.f90 \
        src/pf_parallel.f90 \

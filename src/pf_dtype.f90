@@ -129,7 +129,6 @@ module pf_mod_dtype
           nflags(:)                     ! sdc node flags
 
      type(c_ptr), pointer :: &
-          q0(:), &                      ! initial condition encap
           Q(:), &                       ! unknowns at sdc nodes
           pQ(:), &                      ! unknowns at sdc nodes, previous sweep
           F(:,:), &                     ! functions values at sdc nodes
@@ -140,6 +139,7 @@ module pf_mod_dtype
           tau(:), &                     ! fas correction
           tauQ(:)                       ! fas correction in Q form
 
+     type(c_ptr) :: q0                  ! Initial conditions
      type(c_ptr) :: qend                ! solution at last node
 
      type(c_ptr)      :: ctx       ! user context
