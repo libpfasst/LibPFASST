@@ -110,7 +110,8 @@ module pf_mod_dtype
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
 
-     real(pfdp)  :: residual
+     real(pfdp)  :: residual     !  defined in pf_utils: max over resid at nodes
+     real(pfdp)  :: end_residual !  norm of residual at the end
 
      type(pf_encap_t),         pointer         :: encap
      type(pf_sweeper_t),       pointer         :: sweeper
