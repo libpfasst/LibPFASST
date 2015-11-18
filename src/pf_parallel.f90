@@ -32,7 +32,7 @@ contains
   !
   ! Predictor.
   !
-  ! Spreads the fine initial condition (F%q0) to all levels and all
+  ! Spreads the fine initial condition (Flev%q0) to all levels and all
   ! nodes.  If we're running with more than one processor, performs
   ! sweeps on the coarsest level.
   !
@@ -45,90 +45,90 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: t0, dt
 
-    type(pf_level_t), pointer :: F, G
+    type(pf_level_t), pointer :: Flev, Glev
     integer                   :: j, k, l
     real(pfdp)                :: t0k
 
-    print *,'entering predictor ',pf%rank
+!    print *,'entering predictor ',pf%rank
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
-    F => pf%levels(pf%nlevels)
-    call spreadq0(F, t0)
+    Flev => pf%levels(pf%nlevels)
+    call spreadq0(Flev, t0)
 
     if (pf%nlevels > 1) then
 
        do l = pf%nlevels, 2, -1
-          F => pf%levels(l); G => pf%levels(l-1)
-          call pf_residual(pf, F, dt)
-          call restrict_time_space_fas(pf, t0, dt, F, G)
-          call save(G)
-          call G%encap%copy(G%q0, G%Q(1))
+          Flev => pf%levels(l); Glev => pf%levels(l-1)
+          call pf_residual(pf, Flev, dt)
+          call restrict_time_space_fas(pf, t0, dt, Flev, Glev)
+          call save(Glev)
+          call Glev%encap%copy(Glev%q0, Glev%Q(1))
        end do
 
 
        if (pf%comm%nproc > 1) then
-          G => pf%levels(1)
-          if (pf%Pipeline_G .and. (G%nsweeps_pred > 1)) then
+          Glev => pf%levels(1)
+          if (pf%Pipeline_G .and. (Glev%nsweeps_pred > 1)) then
              !  This is the weird choice.  We burn in without communication, then do extra sweeps
-             G => pf%levels(1)
+             Glev => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%copy(G%q0, G%qend)
+                   call Glev%encap%copy(Glev%q0, Glev%qend)
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(G, t0)
+                      call spreadq0(Glev, t0)
                    end if
                 end if
 
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%sweeper%sweep(pf, G, t0, dt)
-                call pf_residual(pf, G, dt)  !  why is this here?
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+                call Glev%sweeper%sweep(pf, Glev, t0, dt)
+                call pf_residual(pf, Glev, dt)  !  why is this here?
+                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
-             do k = 1, G%nsweeps_pred-1
+             do k = 1, Glev%nsweeps_pred-1
                 pf%state%pstatus = PF_STATUS_ITERATING
                 pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
 !                print *,'recieving  in predictor iter=',k,pf%rank
                 !  Get new initial conditions
-                call pf_recv(pf, G, G%level*20000+pf%rank+k, .true.)
+                call pf_recv(pf, Glev, Glev%level*20000+pf%rank+k, .true.)
 !                print *,'recieve  done iter=',k,pf%rank
                 !  Do a sweep
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%sweeper%sweep(pf, G, t0, dt )
-                call pf_residual(pf, G, dt)  !  why is this here?
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+                call Glev%sweeper%sweep(pf, Glev, t0, dt )
+                call pf_residual(pf, Glev, dt)  !  why is this here?
+                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
                 !  Send forward
 !                print *,'sending   in predictor iter=',k,pf%rank
-                call pf_send(pf, G,  G%level*20000+pf%rank+1+k, .false.)
+                call pf_send(pf, Glev,  Glev%level*20000+pf%rank+1+k, .false.)
 !                print *,'send done  in predictor iter=',k,pf%rank
              end do
-             call pf_residual(pf, G, dt)
+             call pf_residual(pf, Glev, dt)
           else
              ! Normal predictor burn in
-             G => pf%levels(1)
+             Glev => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
                 t0k = t0-(pf%rank)*dt + (k-1)*dt
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%copy(G%q0, G%qend)
+                   call Glev%encap%copy(Glev%q0, Glev%qend)
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(G, t0k)
+                      call spreadq0(Glev, t0k)
                    end if
                 end if
 
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                do j = 1, G%nsweeps_pred
-                   call G%sweeper%sweep(pf, G, t0k, dt)
+                call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+                do j = 1, Glev%nsweeps_pred
+                   call Glev%sweeper%sweep(pf, Glev, t0k, dt)
                 end do
-                call pf_residual(pf, G, dt)
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call pf_residual(pf, Glev, dt)
+                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
           end if
 
@@ -140,17 +140,17 @@ contains
 
           ! Single processor... sweep on coarse and return to fine level.
           
-          G => pf%levels(1)
+          Glev => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
 
-             call call_hooks(pf, G%level, PF_PRE_SWEEP)
-             do j = 1, G%nsweeps_pred
-                call G%sweeper%sweep(pf, G, t0k, dt)
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+             call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+             do j = 1, Glev%nsweeps_pred
+                call Glev%sweeper%sweep(pf, Glev, t0k, dt)
+                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
-             call pf_residual(pf, G, dt)
+             call pf_residual(pf, Glev, dt)
 
           end do
 
@@ -309,7 +309,7 @@ contains
     type(c_ptr),       intent(in), optional :: qend
     integer,           intent(in), optional :: nsteps
 
-    type(pf_level_t), pointer :: F, G
+    type(pf_level_t), pointer :: Flev, Glev
     integer                   :: j, k, l
     real(pfdp)                :: residual, energy
 
@@ -339,8 +339,8 @@ contains
     energy   = -1
     did_post_step_hook = .false.
 
-    F => pf%levels(pf%nlevels)
-    call F%encap%copy(F%q0, q0)
+    Flev => pf%levels(pf%nlevels)
+    if (c_associated(q0))     call Flev%encap%copy(Flev%q0, q0)
 
     if (present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -384,11 +384,11 @@ contains
        end if
 
        if (k > 1 .and. qbroadcast) then
-          F => pf%levels(pf%nlevels)
+          Flev => pf%levels(pf%nlevels)
           call pf%comm%wait(pf, pf%nlevels)
-          call F%encap%pack(F%send, F%qend)
-          call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
-          call F%encap%unpack(F%q0,F%send)
+          call Flev%encap%pack(Flev%send, Flev%qend)
+          call pf_broadcast(pf, Flev%send, Flev%nvars, pf%comm%nproc-1)
+          call Flev%encap%unpack(Flev%q0,Flev%send)
        end if
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
@@ -407,13 +407,13 @@ contains
        ! XXX: this if statement is necessary for block mode cycling...
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
-          F => pf%levels(pf%nlevels)
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          do j = 1, F%nsweeps_pred
-             call F%sweeper%sweep(pf, F, pf%state%t0, dt)
+          Flev => pf%levels(pf%nlevels)
+          call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+          do j = 1, Flev%nsweeps_pred
+             call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
 
-             call pf_residual(pf, F, dt)
-             call call_hooks(pf, F%level, PF_POST_SWEEP)
+             call pf_residual(pf, Flev, dt)
+             call call_hooks(pf, Flev%level, PF_POST_SWEEP)
           end do
        end if
 
@@ -426,19 +426,19 @@ contains
        if (qexit)  exit
        if (qcycle) cycle
        do l = 2, pf%nlevels
-          F => pf%levels(l)
-          call pf_post(pf, F, F%level*10000+k)
+          Flev => pf%levels(l)
+          call pf_post(pf, Flev, Flev%level*10000+k)
        end do
 
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
-          F => pf%levels(pf%nlevels)
-          call pf_send(pf, F, F%level*10000+k, .false.)
+          Flev => pf%levels(pf%nlevels)
+          call pf_send(pf, Flev, Flev%level*10000+k, .false.)
 
           if (pf%nlevels > 1) then
-             G => pf%levels(pf%nlevels-1)
-             call restrict_time_space_fas(pf, pf%state%t0, dt, F, G)
-             call save(G)
+             Glev => pf%levels(pf%nlevels-1)
+             call restrict_time_space_fas(pf, pf%state%t0, dt, Flev, Glev)
+             call save(Glev)
           end if
 
        end if
@@ -453,8 +453,8 @@ contains
     call end_timer(pf, TTOTAL)
 
     if (present(qend)) then
-       F => pf%levels(pf%nlevels)
-       call F%encap%copy(qend, F%qend)
+       Flev => pf%levels(pf%nlevels)
+       call Flev%encap%copy(qend, Flev%qend)
     end if
   end subroutine pf_pfasst_run
 
@@ -465,32 +465,32 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
-    type(pf_level_t), pointer :: F, G
+    type(pf_level_t), pointer :: Flev, Glev
     integer :: l, j
 
     if (pf%nlevels <= 1) return
 !    print *,'entering post predictor ',pf%rank
 
     do l = 2, pf%nlevels-1
-       F => pf%levels(l); G => pf%levels(l-1)
-       call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call F%encap%copy(F%q0, F%Q(1))
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps_pred
-          call F%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+       Flev => pf%levels(l); Glev => pf%levels(l-1)
+       call interpolate_time_space(pf, t0, dt, Flev, Glev, Glev%Finterp)
+       call Flev%encap%copy(Flev%q0, Flev%Q(1))
+       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+       do j = 1, Flev%nsweeps_pred
+          call Flev%sweeper%sweep(pf, Flev, t0, dt)
+          call pf_residual(pf, Flev, dt)
+          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
 
     end do
 
-    F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
-    call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-    call F%encap%copy(F%q0, F%Q(1))
-!    do j = 1, F%nsweeps_pred
-!          call F%sweeper%sweep(pf, F, t0, dt)
-!          call pf_residual(pf, F, dt)
-!          call call_hooks(pf, F%level, PF_POST_SWEEP)
+    Flev => pf%levels(pf%nlevels); Glev => pf%levels(pf%nlevels-1)
+    call interpolate_time_space(pf, t0, dt, Flev, Glev, Glev%Finterp)
+    call Flev%encap%copy(Flev%q0, Flev%Q(1))
+!    do j = 1, Flev%nsweeps_pred
+!          call Flev%sweeper%sweep(pf, Flev, t0, dt)
+!          call pf_residual(pf, Flev, dt)
+!          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
 !       end do
 !       print *,'leaving post predictor ', pf%rank
   end subroutine pf_v_cycle_post_predictor
@@ -503,12 +503,12 @@ contains
     real(pfdp),        intent(in)    :: t0, dt
     integer,           intent(in)    :: iteration
 
-    type(pf_level_t), pointer :: F, G
+    type(pf_level_t), pointer :: Flev, Glev
     integer :: l, j
 
     if (pf%nlevels == 1) then
-       F => pf%levels(1)
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
+       Flev => pf%levels(1)
+       call pf_recv(pf, Flev, Flev%level*10000+iteration, .true.)
        return
     end if
 
@@ -516,64 +516,64 @@ contains
     ! down
     !
     do l = pf%nlevels-1, 2, -1
-       F => pf%levels(l); G => pf%levels(l-1)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+       Flev => pf%levels(l); Glev => pf%levels(l-1)
+       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+       do j = 1, Flev%nsweeps
+          call Flev%sweeper%sweep(pf, Flev, t0, dt)
+          call pf_residual(pf, Flev, dt)
+          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
-       call pf_send(pf, F, F%level*10000+iteration, .false.)
-       call restrict_time_space_fas(pf, t0, dt, F, G)
-       call save(G)
+       call pf_send(pf, Flev, Flev%level*10000+iteration, .false.)
+       call restrict_time_space_fas(pf, t0, dt, Flev, Glev)
+       call save(Glev)
     end do
 
     !
     ! bottom
     !
-    F => pf%levels(1)
+    Flev => pf%levels(1)
     if (pf%Pipeline_G) then
-       do j = 1, F%nsweeps
-          call pf_recv(pf, F, F%level*10000+iteration+j, .true.)
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          call F%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
-          call pf_send(pf, F, F%level*10000+iteration+j, .false.)
+       do j = 1, Flev%nsweeps
+          call pf_recv(pf, Flev, Flev%level*10000+iteration+j, .true.)
+          call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+          call Flev%sweeper%sweep(pf, Flev, t0, dt)
+          call pf_residual(pf, Flev, dt)
+          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
+          call pf_send(pf, Flev, Flev%level*10000+iteration+j, .false.)
        end do
     else
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
+       call pf_recv(pf, Flev, Flev%level*10000+iteration, .true.)
+       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+       do j = 1, Flev%nsweeps
+          call Flev%sweeper%sweep(pf, Flev, t0, dt)
        end do
-       call pf_residual(pf, F, dt)
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_send(pf, F, F%level*10000+iteration, .false.)
+       call pf_residual(pf, Flev, dt)
+       call call_hooks(pf, Flev%level, PF_POST_SWEEP)
+       call pf_send(pf, Flev, Flev%level*10000+iteration, .false.)
     endif
     !
     ! up
     !
     do l = 2, pf%nlevels
-       F => pf%levels(l); G => pf%levels(l-1)
+       Flev => pf%levels(l); Glev => pf%levels(l-1)
 
-       call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
-       call pf_recv(pf, F, F%level*10000+iteration, .false.)
+       call interpolate_time_space(pf, t0, dt, Flev, Glev,Glev%Finterp)
+       call pf_recv(pf, Flev, Flev%level*10000+iteration, .false.)
 
        if (pf%rank /= pf%state%first) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
-          call interpolate_q0(pf,F, G)
+          call interpolate_q0(pf,Flev, Glev)
        end if
 
-       if (F%level < pf%nlevels) then
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          do j = 1, F%nsweeps
-             call F%sweeper%sweep(pf, F, t0, dt)
+       if (Flev%level < pf%nlevels) then
+          call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+          do j = 1, Flev%nsweeps
+             call Flev%sweeper%sweep(pf, Flev, t0, dt)
           end do
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+          call pf_residual(pf, Flev, dt)
+          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end if
 
 
