@@ -2,12 +2,12 @@
 # Default build settings for libpfasst.
 #
 
-FC = mpif90
+FC = mpifort
 CC = mpicc
 AR = ar rcs
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jbuild -cpp
+FFLAGS = -Iinclude -Jinclude -cpp
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
