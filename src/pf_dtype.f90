@@ -60,7 +60,7 @@ module pf_mod_dtype
   type, bind(c) :: pf_state_t
      real(pfdp) :: t0, dt
 !     real(c_double) :: t0, dt
-     integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
+     integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc, sweep
      integer(c_int) :: status       ! status (iterating, converged etc)
      integer(c_int) :: pstatus      ! previous rank's status
      integer(c_int) :: nmoved       ! how many processors behind me have moved
