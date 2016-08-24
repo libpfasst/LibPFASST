@@ -86,7 +86,7 @@ contains
                 call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
                 call Glev%sweeper%sweep(pf, Glev, t0, dt)
                 call pf_residual(pf, Glev, dt)  !  why is this here?
-                pf%state%sweep = k
+                pf%state%sweep = -k
                 call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
@@ -102,7 +102,7 @@ contains
                 call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
                 call Glev%sweeper%sweep(pf, Glev, t0, dt )
                 call pf_residual(pf, Glev, dt)  !  why is this here?
-                pf%state%sweep = k
+                pf%state%sweep = -(pf%rank+1)-k
                 call call_hooks(pf, Glev%level, PF_POST_SWEEP)
                 !  Send forward
 !                print *,'sending   in predictor iter=',k,pf%rank
@@ -130,7 +130,7 @@ contains
                    call Glev%sweeper%sweep(pf, Glev, t0k, dt)
                 end do
                 call pf_residual(pf, Glev, dt)
-                pf%state%sweep = k
+                pf%state%sweep = -k
                 call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
           end if
@@ -151,7 +151,7 @@ contains
              call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
              do j = 1, Glev%nsweeps_pred
                 call Glev%sweeper%sweep(pf, Glev, t0k, dt)
-                pf%state%sweep = j
+                pf%state%sweep = -j
                 call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
              call pf_residual(pf, Glev, dt)
@@ -417,7 +417,7 @@ contains
              call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
 
              call pf_residual(pf, Flev, dt)
-             pf%state%sweep = j
+             pf%state%sweep = -j
              call call_hooks(pf, Flev%level, PF_POST_SWEEP)
           end do
        end if
@@ -484,7 +484,7 @@ contains
        do j = 1, Flev%nsweeps_pred
           call Flev%sweeper%sweep(pf, Flev, t0, dt)
           call pf_residual(pf, Flev, dt)
-          pf%state%sweep = j
+          pf%state%sweep = -j
           call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
 
