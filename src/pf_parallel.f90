@@ -553,11 +553,11 @@ contains
        call pf_recv(pf, Flev, Flev%level*10000+iteration, .true.)
        call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
        do j = 1, Flev%nsweeps
-          call Flev%sweeper%sweep(pf, Flev, t0, dt)
+         call Flev%sweeper%sweep(pf, Flev, t0, dt)
+         call pf_residual(pf, Flev, dt)
+         pf%state%sweep = j
+         call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
-       call pf_residual(pf, Flev, dt)
-       pf%state%sweep = Flev%nsweeps
-       call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        call pf_send(pf, Flev, Flev%level*10000+iteration, .false.)
     endif
     !
@@ -580,10 +580,10 @@ contains
           call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
           do j = 1, Flev%nsweeps
              call Flev%sweeper%sweep(pf, Flev, t0, dt)
+            call pf_residual(pf, Flev, dt)
+            pf%state%sweep = j
+            call call_hooks(pf, Flev%level, PF_POST_SWEEP)
           end do
-          call pf_residual(pf, Flev, dt)
-          pf%state%sweep = Flev%nsweeps
-          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end if
 
 
