@@ -417,7 +417,7 @@ contains
              call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
 
              call pf_residual(pf, Flev, dt)
-             pf%state%sweep = -j
+             pf%state%sweep = j
              call call_hooks(pf, Flev%level, PF_POST_SWEEP)
           end do
        end if
@@ -484,7 +484,7 @@ contains
        do j = 1, Flev%nsweeps_pred
           call Flev%sweeper%sweep(pf, Flev, t0, dt)
           call pf_residual(pf, Flev, dt)
-          pf%state%sweep = -j
+          pf%state%sweep = j
           call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
 
