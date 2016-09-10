@@ -100,7 +100,7 @@ contains
        call Lev%encap%axpy(rhs, 1.0_pfdp,lev%S(m))
        call Lev%encap%axpy(rhs, 1.0_pfdp, Lev%Q(1))
 
-       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%ctx, Lev%F(m+1,1))    
+       call imp%f2comp(Lev%Q(m+1), t, dt*imp%QtilI(m,m+1), rhs, Lev%level, Lev%ctx, Lev%F(m+1,1))    
 
     end do
        
@@ -147,8 +147,10 @@ contains
           imp%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
+    call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
 
     imp%QdiffI = Lev%qmat-imp%QtilI
+
 !    print *,'QtilI',imp%QtilI
 !    print *,'QdiffI',imp%QdiffI
 !    print *,'Qmat',Lev%qmat
