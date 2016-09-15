@@ -251,9 +251,9 @@ contains
        end do
     end if
 
-    print *,'U from LU decomp'
+!    print *,'U from LU decomp'
     do j=1,Nnodes
-          print *, j, U(j,:)
+!          print *, j, U(j,:)
     end do
 
   end subroutine pf_myLUexp
@@ -276,25 +276,25 @@ contains
     N = Nnodes-1
     U=transpose(Q(1:Nnodes-1,2:Nnodes))
     do i = 1,N
-       print *,'row i of Qbefore', i,U(i,:)
+!       print *,'row i of Qbefore', i,U(i,:)
 
     end do
     do i = 1,N
        if (U(i,i) /= 0.0) then
           do j=i+1,N
              c = U(j,i)/U(i,i)
-              print *,j,c,U(j,:)
+!              print *,j,c,U(j,:)
 
              U(j,i:N)=U(j,i:N)-c*U(i,i:N)
              L(j,i)=c
-             print *,j,U(j,:)
+!             print *,j,U(j,:)
           end do
        end if
        L(i,i) = 1.0_pfdp
     end do
 
     !  Check
-    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
+!    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
     
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
@@ -305,9 +305,9 @@ contains
        end do
     end if
 
-    print *,'U from myLUq'
+!    print *,'U from myLUq'
     do j=1,Nnodes-1
-          print *, j, Qtil(j,:)
+!          print *, j, Qtil(j,:)
     end do
 
   end subroutine myLUq

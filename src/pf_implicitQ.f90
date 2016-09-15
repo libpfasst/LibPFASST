@@ -147,7 +147,10 @@ contains
           imp%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
-    call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
+
+!    if(use_LUq) then
+!      call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
+!    end if
 
     imp%QdiffI = Lev%qmat-imp%QtilI
 
