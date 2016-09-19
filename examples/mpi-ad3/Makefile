@@ -1,29 +1,29 @@
 #
-# Makefile for mpi-advection example.
+# Makefile for mpi-advection example
 #
 
 LIBPFASST ?= ../..
-FFTW3     ?= $(LIBPFASST)/fftw3
-
-EXE = main.exe
-
 include $(LIBPFASST)/Makefile.defaults
 
-VPATHS += src
-FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/multigrid.f90
+FFTW3 ?= /home/akreie/opt/fftw/3.3.4
 
-FFLAGS  += -g -I$(FFTW3)/include
-LDFLAGS += -L$(FFTW3)/lib -lfftw3
+FFLAGS += -g -I$(LIBPFASST)/include -I$(FFTW3)/include
+LDFLAGS += -L$(LIBPFASST)/lib -lpfasst -L$(FFTW3)/lib -lfftw3
 
+FSRC = main.f90 feval.f90 transfer.f90 hooks.f90 solutions.f90 probin.f90 multigrid.f90
+OBJ = $(addprefix build/,$(FSRC:.f90=.o))
+
+EXE = main.exe
 all: $(EXE)
 
+VPATHS += src
 include $(LIBPFASST)/Makefile.rules
 
 #
-# dependencies
+# Dependencies
 #
 
-build/solutions.o: build/pfasst.o build/probin.o
-build/feval.o:     build/pfasst.o build/probin.o build/multigrid.o
-build/hooks.o:     build/numpy.o build/solutions.o
-build/main.o:      build/feval.o build/hooks.o build/transfer.o build/probin.o
+build/solutions.o: build/probin.o
+build/feval.o: build/probin.o build/multigrid.o
+build/hooks.o: build/numpy.o build/solutions.o
+build/main.o: build/feval.o build/hooks.o build/transfer.o build/probin.o

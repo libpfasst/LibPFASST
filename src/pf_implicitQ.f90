@@ -21,7 +21,8 @@ module pf_mod_implicitQ
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
-  integer, parameter, private :: npieces = 1
+  integer,parameter,private :: npieces = 1
+  logical,save,private :: use_LUq_ = .false.
 
   interface
      subroutine pf_f2eval_p(y, t, level, ctx, f2)
@@ -148,9 +149,9 @@ contains
        end do
     end do
 
-!    if(use_LUq) then
-!      call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
-!    end if
+    if(use_LUq_) then
+      call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
+    end if
 
     imp%QdiffI = Lev%qmat-imp%QtilI
 
@@ -181,12 +182,17 @@ contains
   end subroutine implicitQ_integrate
 
   ! Create implicitQ sweeper
-  subroutine pf_implicitQ_create(sweeper, f2eval, f2comp)
-    type(pf_sweeper_t), intent(inout) :: sweeper
+  subroutine pf_implicitQ_create(sweeper,f2eval,f2comp,use_LUq)
+    type(pf_sweeper_t),intent(inout) :: sweeper
     procedure(pf_f2eval_p) :: f2eval
     procedure(pf_f2comp_p) :: f2comp
+    logical,intent(in),optional :: use_LUq
 
     type(pf_implicitQ_t), pointer :: imp
+
+    if(present(use_LUq)) then
+      use_LUq_ = use_LUq
+    endif
 
     allocate(imp)
     imp%f2eval => f2eval
