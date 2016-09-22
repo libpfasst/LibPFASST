@@ -55,10 +55,8 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
-
   type, bind(c) :: pf_state_t
      real(pfdp) :: t0, dt
-!     real(c_double) :: t0, dt
      integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
      integer(c_int) :: status       ! status (iterating, converged etc)
      integer(c_int) :: pstatus      ! previous rank's status
@@ -67,7 +65,6 @@ module pf_mod_dtype
      integer(c_int) :: last         ! rank of last processor in time block
      integer(c_int) :: itcnt        ! iteration counter
      integer(c_int) :: mysteps      ! steps I did
-!     real(c_double) :: res
      real(pfdp) :: res
   end type pf_state_t
 
@@ -76,7 +73,6 @@ module pf_mod_dtype
   end type pf_hook_t
 
   type, abstract :: pf_sweeper_t
-     type(c_ptr) :: sweeperctx
      integer     :: npieces
    contains
      procedure(pf_sweep_p),        deferred :: sweep
@@ -89,19 +85,24 @@ module pf_mod_dtype
      procedure(pf_transfer_p),     deferred :: interpolate
   end type pf_sweeper_t
 
-  type :: pf_encap_t
-     type(c_ptr) :: encapctx
-     procedure(pf_encap_create_p),  pointer, nopass :: create
-     procedure(pf_encap_destroy_p), pointer, nopass :: destroy
-     procedure(pf_encap_setval_p),  pointer, nopass :: setval
-     procedure(pf_encap_printme_p),  pointer, nopass :: printme
-     procedure(pf_encap_copy_p),    pointer, nopass :: copy
-     procedure(pf_encap_norm_p),    pointer, nopass :: norm
-     procedure(pf_encap_pack_p),    pointer, nopass :: pack
-     procedure(pf_encap_unpack_p),  pointer, nopass :: unpack
-     procedure(pf_encap_axpy_p),    pointer, nopass :: axpy
-     procedure(pf_encap_eprint_p),    pointer, nopass :: eprint
+  type, abstract :: pf_encap_t
+   contains
+     procedure(pf_encap_setval_p),  deferred :: setval
+     procedure(pf_encap_printme_p), deferred :: printme
+     procedure(pf_encap_copy_p),    deferred :: copy
+     procedure(pf_encap_norm_p),    deferred :: norm
+     procedure(pf_encap_pack_p),    deferred :: pack
+     procedure(pf_encap_unpack_p),  deferred :: unpack
+     procedure(pf_encap_axpy_p),    deferred :: axpy
+     procedure(pf_encap_eprint_p),  deferred :: eprint
   end type pf_encap_t
+
+  type, abstract :: pf_factory_t
+   contains
+     procedure(pf_encap_create0_p),  deferred :: create0
+     procedure(pf_encap_create1_p),  deferred :: create1
+     procedure(pf_encap_create2_p),  deferred :: create2
+  end type pf_factory_t
 
   type :: pf_level_t
      integer     :: nvars = -1          ! number of variables (dofs)
@@ -113,10 +114,10 @@ module pf_mod_dtype
 
      real(pfdp)  :: residual
 
-     type(pf_encap_t),    pointer :: encap
+     class(pf_factory_t), pointer :: factory
      class(pf_sweeper_t), pointer :: sweeper
 
-     real(pfdp), pointer :: &
+     real(pfdp), allocatable :: &
           q0(:), &                      ! initial condition (packed)
           send(:), &                    ! send buffer
           recv(:), &                    ! recv buffer
@@ -126,23 +127,22 @@ module pf_mod_dtype
           rmat(:,:), &                  ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
-     integer(c_int), pointer :: &
+     integer(c_int), allocatable :: &
           nflags(:)                     ! sdc node flags
 
-     type(c_ptr), pointer :: &
+     class(pf_encap_t), allocatable :: &
           Q(:), &                       ! unknowns at sdc nodes
           pQ(:), &                      ! unknowns at sdc nodes, previous sweep
-          F(:,:), &                     ! functions values at sdc nodes
-          pF(:,:), &                    ! functions at sdc nodes, previous sweep
           R(:), &                       ! full residuals
           I(:), &                       ! 0 to node integrals
           S(:), &                       ! node to node integrals
           tau(:), &                     ! fas correction
-          tauQ(:)                       ! fas correction in Q form
+          tauQ(:), &                    ! fas correction in Q form
+          F(:,:), &                     ! functions values at sdc nodes
+          pF(:,:), &                    ! functions at sdc nodes, previous sweep
+          qend
 
-     type(c_ptr) :: qend                ! solution at last node
-
-     integer, pointer :: shape(:)       ! user shape
+     integer, allocatable :: shape(:) ! user shape
 
      logical :: allocated = .false.
   end type pf_level_t
@@ -204,6 +204,7 @@ module pf_mod_dtype
 
      ! misc
      character(512) :: outdir
+
   end type pf_pfasst_t
 
   interface
@@ -252,12 +253,12 @@ module pf_mod_dtype
      end subroutine pf_sweepdestroy_p
 
      subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC)
-       import pf_sweeper_t, pf_level_t, c_ptr, pfdp
+       import pf_sweeper_t, pf_level_t, pf_encap_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_level_t),    intent(in)    :: lev
-       type(c_ptr),         intent(in)    :: qSDC(:), fSDC(:, :)
+       class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),          intent(in)    :: dt
-       type(c_ptr),         intent(inout) :: fintSDC(:)
+       class(pf_encap_t),   intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
 
      subroutine pf_residual_p(this, lev, dt)
@@ -269,73 +270,82 @@ module pf_mod_dtype
 
      ! transfer interfaces
      subroutine pf_transfer_p(levelF, levelG, qFp, qGp, t)
-       import pf_sweeper_t, c_ptr, pfdp
-       class(pf_sweeper_t), intent(inout)     :: levelF, levelG
-       type(c_ptr),         intent(in), value :: qFp, qGp
-       real(pfdp),          intent(in)        :: t
+       import pf_sweeper_t, pf_encap_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: levelF, levelG
+       class(pf_encap_t),   intent(inout) :: qFp, qGp
+       real(pfdp),          intent(in)    :: t
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
-     subroutine pf_encap_create_p(sol, level, kind, nvars, shape, encapctx)
-       import c_ptr
-       type(c_ptr),  intent(inout)     :: sol
-       type(c_ptr),  intent(in), value :: encapctx
-       integer,      intent(in)        :: level, nvars, shape(:)
-       integer,      intent(in)        :: kind
-     end subroutine pf_encap_create_p
+     subroutine pf_encap_create0_p(this, x, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x
+       integer,             intent(in   )              :: level, kind, nvars, shape(:)
+     end subroutine pf_encap_create0_p
 
-     subroutine pf_encap_destroy_p(sol)
-       import c_ptr
-       type(c_ptr), intent(in), value :: sol
-     end subroutine pf_encap_destroy_p
+     subroutine pf_encap_create1_p(this, x, n, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x(:)
+       integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
+     end subroutine pf_encap_create1_p
 
-     subroutine pf_encap_setval_p(sol, val, flags)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value    :: sol
-       real(pfdp),  intent(in)           :: val
-       integer,     intent(in), optional :: flags
+     subroutine pf_encap_create2_p(this, x, n, m, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x(:, :)
+       integer,             intent(in   )              :: n, m, level, kind, nvars, shape(:)
+     end subroutine pf_encap_create2_p
+
+     subroutine pf_encap_setval_p(this, val, flags)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(inout)        :: this
+       real(pfdp),        intent(in)           :: val
+       integer,           intent(in), optional :: flags
      end subroutine pf_encap_setval_p
 
-     subroutine pf_encap_printme_p(sol)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value    :: sol
-
+     subroutine pf_encap_printme_p(this)
+       import pf_encap_t
+       class(pf_encap_t), intent(inout) :: this
      end subroutine pf_encap_printme_p
 
-     subroutine pf_encap_copy_p(dst, src, flags)
-       import c_ptr
-       type(c_ptr), intent(in), value    :: dst, src
-       integer,     intent(in), optional :: flags
+     subroutine pf_encap_copy_p(this, src, flags)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(inout)           :: this
+       class(pf_encap_t), intent(in   )           :: src
+       integer,           intent(in   ), optional :: flags
      end subroutine pf_encap_copy_p
 
-     function pf_encap_norm_p(sol) result (norm)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value    :: sol
+     function pf_encap_norm_p(this) result (norm)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(in   ) :: this
        real(pfdp) :: norm
      end function pf_encap_norm_p
 
-     subroutine pf_encap_pack_p(z, q)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: q
-       real(pfdp),  intent(out)       :: z(:)
+     subroutine pf_encap_pack_p(this, z)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(in   ) :: this
+       real(pfdp),        intent(  out) :: z(:)
      end subroutine pf_encap_pack_p
 
-     subroutine pf_encap_unpack_p(q, z)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value :: q
-       real(pfdp),  intent(in)        :: z(:)
+     subroutine pf_encap_unpack_p(this, z)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(inout) :: this
+       real(pfdp),        intent(in   ) :: z(:)
      end subroutine pf_encap_unpack_p
 
-     subroutine pf_encap_axpy_p(y, a, x, flags)
-       import c_ptr, pfdp
+     subroutine pf_encap_axpy_p(this, a, x, flags)
+       import pf_encap_t, pfdp
+       class(pf_encap_t), intent(inout)  :: this
+       class(pf_encap_t), intent(in   )  :: x
        real(pfdp),  intent(in)           :: a
-       type(c_ptr), intent(in), value    :: x, y
        integer,     intent(in), optional :: flags
      end subroutine pf_encap_axpy_p
 
-     subroutine pf_encap_eprint_p(x)
-       import c_ptr, pfdp
-       type(c_ptr), intent(in), value    :: x
+     subroutine pf_encap_eprint_p(this)
+       import pf_encap_t
+       class(pf_encap_t), intent(inout) :: this
      end subroutine pf_encap_eprint_p
 
      ! communicator interfaces

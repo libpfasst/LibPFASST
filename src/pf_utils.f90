@@ -62,13 +62,13 @@ contains
 
     integer :: m, p
 
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%Q(1)%unpack(Lev%q0)
     call Lev%sweeper%evaluate(Lev, t0, 1)
 
     do m = 2, Lev%nnodes
-       call Lev%encap%copy(Lev%Q(m), Lev%Q(1))
+       call Lev%Q(m)%copy(Lev%Q(1))
        do p = 1, Lev%sweeper%npieces
-          call Lev%encap%copy(Lev%F(m,p), Lev%F(1,p))
+          call Lev%F(m,p)%copy(Lev%F(1,p))
        end do
     end do
   end subroutine spreadq0
@@ -83,20 +83,18 @@ contains
     integer :: m, p
 
     if (Lev%Finterp) then
-       !  Changed by MM Dec. 21, 2013 to save solutions too
-       if (associated(Lev%pF)) then
+       if (allocated(Lev%pF)) then
           do m = 1, Lev%nnodes
              do p = 1,size(Lev%F(1,:))
-                call Lev%encap%copy(Lev%pF(m,p), Lev%F(m,p))
+                call Lev%pF(m,p)%copy(Lev%F(m,p))
              end do
-             call Lev%encap%copy(Lev%pQ(m), Lev%Q(m))
+             call Lev%pQ(m)%copy(Lev%Q(m))
           end do
-!          call Lev%encap%copy(Lev%pQ(1), Lev%Q(1))
        end if
     else
-       if (associated(Lev%pQ)) then
+       if (allocated(Lev%pQ)) then
           do m = 1, Lev%nnodes
-             call Lev%encap%copy(Lev%pQ(m), Lev%Q(m))
+             call Lev%pQ(m)%copy(Lev%Q(m))
           end do
        end if
     end if
@@ -128,7 +126,7 @@ contains
 
     ! compute max residual norm
     do m = 1, Lev%nnodes-1
-       norms(m) = Lev%encap%norm(Lev%R(m))
+       norms(m) = Lev%R(m)%norm()
     end do
 !    Lev%residual = maxval(abs(norms))
     Lev%residual = norms(Lev%nnodes-1)
@@ -141,11 +139,10 @@ contains
   !
   ! Apply an interpolation matrix (tmat or rmat) to src.
   !
-  subroutine pf_apply_mat(dst, a, mat, src, encap, zero)
-    type(c_ptr),       intent(inout) :: dst(:)
+  subroutine pf_apply_mat(dst, a, mat, src, zero)
+    class(pf_encap_t), intent(inout) :: dst(:)
     real(pfdp),        intent(in)    :: a, mat(:, :)
-    type(c_ptr),       intent(in)    :: src(:)
-    type(pf_encap_t),  intent(in)    :: encap
+    class(pf_encap_t), intent(in)    :: src(:)
     logical,           intent(in), optional :: zero
 
     logical :: lzero
@@ -159,9 +156,9 @@ contains
     ! XXX: test for nan's in matrices...
 
     do i = 1, n
-       if (lzero) call encap%setval(dst(i), 0.0_pfdp)
+       if (lzero) call dst(i)%setval(0.0_pfdp)
        do j = 1, m
-          call encap%axpy(dst(i), a * mat(i, j), src(j))
+          call dst(i)%axpy(a * mat(i, j), src(j))
        end do
     end do
   end subroutine pf_apply_mat
@@ -182,20 +179,20 @@ contains
 !    end do
 
     ! add tau (which is 'node to node')
-    if (associated(Lev%tauQ)) then
+    if (allocated(Lev%tauQ)) then
        do m = 1, Lev%nnodes-1
 !  MMQ        do n = 1, m
 !             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
 !          end do
-          call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tauQ(m))
+          call Lev%I(m)%axpy(1.0_pfdp, Lev%tauQ(m))
        end do
     end if
 
     ! subtract out Q
     do m = 1, Lev%nnodes-1
-       call Lev%encap%copy(Lev%R(m), Lev%I(m))
-       call Lev%encap%axpy(Lev%R(m), 1.0_pfdp, Lev%Q(1))
-       call Lev%encap%axpy(Lev%R(m), -1.0_pfdp, Lev%Q(m+1))
+       call Lev%R(m)%copy(Lev%I(m))
+       call Lev%R(m)%axpy(1.0_pfdp, Lev%Q(1))
+       call Lev%R(m)%axpy(-1.0_pfdp, Lev%Q(m+1))
     end do
 
   end subroutine pf_generic_residual
@@ -296,7 +293,7 @@ contains
 
     !  Check
     print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
-    
+
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
     !  Now scale the columns of U to match the sum of A

@@ -63,7 +63,7 @@ contains
           call pf_residual(pf, F, dt)
           call restrict_time_space_fas(pf, t0, dt, F, G)
           call save(G)
-          call G%encap%pack(G%q0, G%Q(1))
+          call G%Q(1)%pack(G%q0)
        end do
 
 
@@ -77,7 +77,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%pack(G%q0, G%qend)
+                   call G%qend%pack(G%q0)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(G, t0)
                    end if
@@ -117,7 +117,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%encap%pack(G%q0, G%qend)
+                   call G%qend%pack(G%q0)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(G, t0k)
                    end if
@@ -139,7 +139,7 @@ contains
        else
 
           ! Single processor... sweep on coarse and return to fine level.
-          
+
           G => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
@@ -304,10 +304,10 @@ contains
   !
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(c_ptr),       intent(in)    :: q0
+    class(pf_encap_t), intent(in)    :: q0
     real(pfdp),        intent(in)    :: dt, tend
-    type(c_ptr),       intent(in), optional :: qend
-    integer,           intent(in), optional :: nsteps
+    class(pf_encap_t), intent(inout), optional :: qend
+    integer,           intent(in),    optional :: nsteps
 
     type(pf_level_t), pointer :: F, G
     integer                   :: j, k, l
@@ -340,7 +340,7 @@ contains
     did_post_step_hook = .false.
 
     F => pf%levels(pf%nlevels)
-    call F%encap%pack(F%q0, q0)
+    call q0%pack(F%q0)
 
     if (present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -386,7 +386,7 @@ contains
        if (k > 1 .and. qbroadcast) then
           F => pf%levels(pf%nlevels)
           call pf%comm%wait(pf, pf%nlevels)
-          call F%encap%pack(F%send, F%qend)
+          call F%qend%pack(F%send)
           call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
@@ -454,7 +454,7 @@ contains
 
     if (present(qend)) then
        F => pf%levels(pf%nlevels)
-       call F%encap%copy(qend, F%qend)
+       call qend%copy(F%qend)
     end if
   end subroutine pf_pfasst_run
 
@@ -474,7 +474,7 @@ contains
     do l = 2, pf%nlevels-1
        F => pf%levels(l); G => pf%levels(l-1)
        call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call F%encap%pack(F%q0, F%Q(1))
+       call F%Q(1)%pack(F%q0)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps_pred
           call F%sweeper%sweep(pf, F, t0, dt)
@@ -486,7 +486,7 @@ contains
 
     F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
     call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-    call F%encap%pack(F%q0, F%Q(1))
+    call F%Q(1)%pack(F%q0)
 !    do j = 1, F%nsweeps_pred
 !          call F%sweeper%sweep(pf, F, t0, dt)
 !          call pf_residual(pf, F, dt)

@@ -38,19 +38,19 @@ module pf_mod_implicit
 
   interface
      subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_implicit_t, c_ptr, c_int, pfdp
-       class(pf_implicit_t), intent(inout)     :: this
-       type(c_ptr),          intent(in), value :: y, f2
-       real(pfdp),           intent(in)        :: t
-       integer(c_int),       intent(in)        :: level
+       import pf_implicit_t, pf_encap_t, c_int, pfdp
+       class(pf_implicit_t), intent(inout) :: this
+       class(pf_encap_t),    intent(in   ) :: y, f2
+       real(pfdp),           intent(in   ) :: t
+       integer(c_int),       intent(in   ) :: level
      end subroutine pf_f2eval_p
 
      subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_implicit_t, c_ptr, c_int, pfdp
-       class(pf_implicit_t), intent(inout)     :: this
-       type(c_ptr),          intent(in), value :: y, rhs, f2
-       real(pfdp),           intent(in)        :: t, dt
-       integer(c_int),       intent(in)        :: level
+       import pf_implicit_t, pf_encap_t, c_int, pfdp
+       class(pf_implicit_t), intent(inout) :: this
+       class(pf_encap_t),    intent(in   ) :: y, rhs, f2
+       real(pfdp),           intent(in   ) :: t, dt
+       integer(c_int),       intent(in   ) :: level
      end subroutine pf_f2comp_p
   end interface
 
@@ -67,7 +67,7 @@ contains
     integer    :: m, n
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
-    type(c_ptr) :: rhs
+    class(pf_encap_t), allocatable :: rhs
 
     ! type(pf_implicit_t), pointer :: imp
 
@@ -77,38 +77,34 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
-       call lev%encap%setval(lev%S(m), 0.0_pfdp)
+       call lev%S(m)%setval(0.0_pfdp)
        do n = 1, lev%nnodes
-          call lev%encap%axpy(lev%S(m), dt*this%SdiffI(m,n), lev%F(n,1))
+          call lev%S(m)%axpy(dt*this%SdiffI(m,n), lev%F(n,1))
        end do
-       if (associated(lev%tau)) then
-          call lev%encap%axpy(lev%S(m), 1.0_pfdp, lev%tau(m))
+       if (allocated(lev%tau)) then
+          call lev%S(m)%axpy(1.0_pfdp, lev%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call lev%encap%unpack(lev%Q(1), lev%q0)
+    call lev%Q(1)%unpack(lev%q0)
 
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
-    call lev%encap%create(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape, lev%encap%encapctx)
+    call lev%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
 
-       call lev%encap%copy(rhs, lev%Q(m))
-       call lev%encap%axpy(rhs, 1.0_pfdp, lev%S(m))
+       call rhs%copy(lev%Q(m))
+       call rhs%axpy(1.0_pfdp, lev%S(m))
 
        call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,1))
     end do
 
-    call lev%encap%copy(lev%qend, lev%Q(lev%nnodes))
-
-    ! done
-    call lev%encap%destroy(rhs)
-
+    call lev%qend%copy(lev%Q(lev%nnodes))
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicit_sweep
 
@@ -154,17 +150,17 @@ contains
   subroutine implicit_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_implicit_t), intent(inout) :: this
     type(pf_level_t),     intent(in)    :: lev
-    type(c_ptr),          intent(in)    :: qSDC(:), fSDC(:, :)
+    class(pf_encap_t),          intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),           intent(in)    :: dt
-    type(c_ptr),          intent(inout) :: fintSDC(:)
+    class(pf_encap_t),          intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
     do n = 1, lev%nnodes-1
-       call lev%encap%setval(fintSDC(n), 0.0_pfdp)
+       call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
           do p = 1, npieces
-             call lev%encap%axpy(fintSDC(n), dt*lev%s0mat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*lev%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do
@@ -185,4 +181,3 @@ contains
   end subroutine implicit_evaluate_all
 
 end module pf_mod_implicit
-

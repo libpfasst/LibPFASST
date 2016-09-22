@@ -41,19 +41,15 @@ contains
     real(pfdp) :: tG(LevG%nnodes)
     logical :: Finterp_loc
 
-    type(c_ptr) ::  delG(LevG%nnodes)   !  Coarse in time and space 
-    type(c_ptr) ::  delGF(LevG%nnodes)  !  Coarse in time but fine in space
+    class(pf_encap_t), allocatable :: delG(:) !delG(LevG%nnodes)   !  Coarse in time and space
+    class(pf_encap_t), allocatable :: delGF(:) !delGF(LevG%nnodes)  !  Coarse in time but fine in space
 
     call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
-    do m = 1, LevG%nnodes
-       call LevG%encap%create(delG(m),   LevG%level, SDC_KIND_CORRECTION, &
-            LevG%nvars, LevG%shape, LevG%encap%encapctx)
-       call LevF%encap%create(delGF(m),  LevF%level, SDC_KIND_CORRECTION, &
-            LevF%nvars, LevF%shape, LevF%encap%encapctx)
-    end do
+    call LevG%factory%create1(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
+    call LevF%factory%create1(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
 
     ! set time at coarse and fine nodes
     tG = t0 + dt*LevG%nodes
@@ -61,19 +57,19 @@ contains
 
     ! needed for amr
     do m = 1, LevG%nnodes
-       call LevG%encap%setval(delG(m),   0.0_pfdp)
-       call LevF%encap%setval(delGF(m),  0.0_pfdp)
+       call delG(m)%setval(0.0_pfdp)
+       call delGF(m)%setval(0.0_pfdp)
     end do
 
     !!  Interpolating q
     do m = 1, LevG%nnodes
-       call LevG%encap%copy(delG(m), LevG%Q(m))
-       call LevG%encap%axpy(delG(m), -1.0_pfdp, LevG%pQ(m))
+       call delG(m)%copy(LevG%Q(m))
+       call delG(m)%axpy(-1.0_pfdp, LevG%pQ(m))
        call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
     end do
-    
+
     ! interpolate corrections
-    call pf_apply_mat(LevF%Q, 1.0_pfdp, LevF%tmat, delGF, LevF%encap, .false.)
+    call pf_apply_mat(LevF%Q, 1.0_pfdp, LevF%tmat, delGF, .false.)
 
     Finterp_loc = .FALSE.
     if(present(Finterp)) then
@@ -86,18 +82,18 @@ contains
        !!  Interpolating F
        do p = 1,size(LevG%F(1,:))
           do m = 1, LevG%nnodes
-             call LevG%encap%setval(delG(m),   0.0_pfdp)
-             call LevF%encap%setval(delGF(m),  0.0_pfdp)
+             call delG(m)%setval(0.0_pfdp)
+             call delGF(m)%setval(0.0_pfdp)
           end do
           do m = 1, LevG%nnodes
-            call LevG%encap%copy(delG(m), LevG%F(m,p))
-            call LevG%encap%axpy(delG(m), -1.0_pfdp, LevG%pF(m,p))
+            call delG(m)%copy(LevG%F(m,p))
+            call delG(m)%axpy(-1.0_pfdp, LevG%pF(m,p))
 
             call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
          end do
 
          ! interpolate corrections  in time
-          call pf_apply_mat(LevF%F(:,p), 1.0_pfdp, LevF%tmat, delGF, LevF%encap, .false.)
+          call pf_apply_mat(LevF%F(:,p), 1.0_pfdp, LevF%tmat, delGF, .false.)
 
        end do !  Loop on npieces
 
@@ -109,7 +105,7 @@ contains
        !  call LevG%encap%axpy(delG(1), -1.0_pfdp, LevG%pQ(1))
        ! call LevF%interpolate(delGF(1), delG(1), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(1))
 
-       ! This updates all solutions with jump in initial data       
+       ! This updates all solutions with jump in initial data
        ! interpolate corrections
        ! do n = 1, LevF%nnodes
        !   call LevF%encap%axpy(LevF%Q(n), LevF%tmat(n,1), delGF(1))
@@ -120,7 +116,7 @@ contains
        !       do m = 1, LevF%nnodes-1
        !          call LevF%encap%axpy(LevF%Q(m+1), 1.0_pfdp, LevF%R(m))
        !      end do
-      
+
        ! recompute fs (for debugging)
        !       do m = 1, LevF%nnodes
        !   call LevF%sweeper%evaluate(LevF, tF(m), m)
@@ -134,13 +130,7 @@ contains
     end if  !  Feval
 
     !  Reset qend so that it is up to date
-    call LevF%encap%copy(LevF%qend, LevF%Q(LevF%nnodes))
-
-    ! destroy workspaces
-    do m = 1, LevG%nnodes
-       call LevG%encap%destroy(delG(m))
-       call LevG%encap%destroy(delGF(m))
-    end do
+    call LevF%qend%copy(LevF%Q(LevF%nnodes))
 
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
     call call_hooks(pf, LevF%level, PF_POST_INTERP_ALL)
@@ -152,42 +142,33 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     type(pf_level_t),  intent(inout) :: LevF, LevG
 
-    type(c_ptr) ::    delG, delF
-    type(c_ptr) ::    q0F,q0G
+    class(pf_encap_t), allocatable ::    delG, delF
+    class(pf_encap_t), allocatable ::    q0F,q0G
 
     call call_hooks(pf, LevF%level, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
-  
+
     ! create workspaces
-    call LevG%encap%create(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, &
-         LevG%nvars, LevG%shape, LevG%encap%encapctx)
-    call LevF%encap%create(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, &
-         LevF%nvars, LevF%shape, LevF%encap%encapctx)
-    call LevG%encap%create(delG, LevG%level, SDC_KIND_CORRECTION, &
-         LevG%nvars, LevG%shape, LevG%encap%encapctx)
-    call LevF%encap%create(delF, LevF%level, SDC_KIND_CORRECTION, &
-         LevF%nvars, LevF%shape, LevF%encap%encapctx)
+    call LevG%factory%create0(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+    call LevF%factory%create0(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
+    call LevG%factory%create0(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
+    call LevF%factory%create0(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
 
     ! needed for amr
-    call LevF%encap%setval(q0F,  0.0_pfdp)
-    call LevG%encap%setval(q0G,  0.0_pfdp)
-    call LevG%encap%setval(delG, 0.0_pfdp)
-    call LevF%encap%setval(delF, 0.0_pfdp)
+    call q0F%setval(0.0_pfdp)
+    call q0G%setval(0.0_pfdp)
+    call delG%setval(0.0_pfdp)
+    call delF%setval(0.0_pfdp)
 
-    call LevG%encap%unpack(q0G, LevG%q0)
-    call LevF%encap%unpack(q0F, LevF%q0)
+    call q0G%unpack(LevG%q0)
+    call q0F%unpack(LevF%q0)
 
     call LevF%sweeper%restrict(LevG%sweeper, q0F, delG, pf%state%t0)
-    call LevG%encap%axpy(delG, -1.0_pfdp, q0G)
+    call delG%axpy(-1.0_pfdp, q0G)
 
     call LevF%sweeper%interpolate(levG%sweeper, delF, delG, pf%state%t0)
-    call LevF%encap%axpy(q0F, -1.0_pfdp, delF)
-
-    call LevF%encap%pack(LevF%q0, q0F)
-    call LevG%encap%destroy(delG)
-    call LevF%encap%destroy(delF)
-    call LevF%encap%destroy(q0F)
-    call LevG%encap%destroy(q0G)
+    call q0F%axpy(-1.0_pfdp, delF)
+    call q0F%pack(LevF%q0)
 
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
     call call_hooks(pf, LevF%level, PF_POST_INTERP_Q0)

@@ -46,46 +46,46 @@ contains
     integer     :: m, n
     real(pfdp)  :: t
     real(pfdp)  :: dtsdc(1:Lev%nnodes-1)
-    type(c_ptr) :: rhs
+    class(pf_encap_t), allocatable :: rhs
 
     call start_timer(pf, TLEVEL+Lev%level-1)
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
-       call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
+       call Lev%S(m)%setval(0.0_pfdp)
        do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*this%QdiffE(m,n), Lev%F(n,1))
-          call Lev%encap%axpy(Lev%S(m), dt*this%QdiffI(m,n), Lev%F(n,2))
+          call Lev%S(m)%axpy(dt*this%QdiffE(m,n), Lev%F(n,1))
+          call Lev%S(m)%axpy(dt*this%QdiffI(m,n), Lev%F(n,2))
        end do
-       if (associated(Lev%tauQ)) then
-          call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
+       if (allocated(Lev%tauQ)) then
+          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%Q(1)%unpack(Lev%q0)
 
     call this%f1eval(Lev%Q(1), t0, Lev%level, Lev%F(1,1))
     call this%f2eval(Lev%Q(1), t0, Lev%level, Lev%F(1,2))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%encap%encapctx)
+    call Lev%factory%create0(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
     do m = 1, Lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%encap%setval(rhs, 0.0_pfdp)
+       call rhs%setval(0.0_pfdp)
        do n = 1, m
-          call Lev%encap%axpy(rhs, dt*this%QtilE(m,n), Lev%F(n,1))  
-          call Lev%encap%axpy(rhs, dt*this%QtilI(m,n), Lev%F(n,2))  
+          call rhs%axpy(dt*this%QtilE(m,n), Lev%F(n,1))
+          call rhs%axpy(dt*this%QtilI(m,n), Lev%F(n,2))
        end do
 
 
-!       call Lev%encap%axpy(rhs, dtsdc(m), Lev%F(m,1))
-       call Lev%encap%axpy(rhs, 1.0_pfdp, Lev%S(m))
+!       call rhs%axpy(dtsdc(m), Lev%F(m,1))
+       call rhs%axpy(1.0_pfdp, Lev%S(m))
        !  Add the starting value
-       call Lev%encap%axpy(rhs,1.0_pfdp, Lev%Q(1))
+       call rhs%axpy(1.0_pfdp, Lev%Q(1))
 
 
 !       call this%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
@@ -94,10 +94,10 @@ contains
 
     end do
 
-    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
+    call Lev%qend%copy(Lev%Q(Lev%nnodes))
 
     ! done
-    call Lev%encap%destroy(rhs)
+    !call Lev%encap%destroy(rhs)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
   end subroutine imexQ_sweep
@@ -135,24 +135,24 @@ contains
     call myLUq(Lev%qmat,this%QtilI,Nnodes,0)
     this%QdiffE = Lev%qmat-this%QtilE
     this%QdiffI = Lev%qmat-this%QtilI
-    
+
   end subroutine imexQ_initialize
 
   ! Compute SDC integral
   subroutine imexQ_integrate(this, Lev, qSDC, fSDC, dt, fintSDC)
     class(pf_imexQ_t), intent(inout) :: this
-    type(pf_level_t), intent(in)    :: Lev
-    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),       intent(in)    :: dt
-    type(c_ptr),      intent(inout) :: fintSDC(:)
+    type(pf_level_t),  intent(in   ) :: Lev
+    class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
+    real(pfdp),        intent(in   ) :: dt
+    class(pf_encap_t), intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
     do n = 1, Lev%nnodes-1
-       call Lev%encap%setval(fintSDC(n), 0.0_pfdp)
-       do m = 1, Lev%nnodes 
+       call fintSDC(n)%setval(0.0_pfdp)
+       do m = 1, Lev%nnodes
           do p = 1, this%npieces
-             call Lev%encap%axpy(fintSDC(n), dt*Lev%qmat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do

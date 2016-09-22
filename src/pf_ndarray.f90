@@ -39,11 +39,26 @@ module pf_mod_ndarray
   use pf_mod_dtype
   implicit none
 
-  type :: ndarray
+  type, extends(pf_factory_t) :: ndarray_factory
+   contains
+     procedure :: create0 => ndarray_create0
+     procedure :: create1 => ndarray_create1
+     procedure :: create2 => ndarray_create2
+  end type ndarray_factory
+
+  type, extends(pf_encap_t) :: ndarray
      integer             :: dim
-     integer,    pointer :: shape(:)
-     real(pfdp), pointer :: flatarray(:)
-     type(c_ptr)         :: aptr
+     integer,    allocatable :: shape(:)
+     real(pfdp), allocatable :: flatarray(:)
+   contains
+     procedure :: setval => ndarray_setval
+     procedure :: printme => ndarray_printme
+     procedure :: copy => ndarray_copy
+     procedure :: norm => ndarray_norm
+     procedure :: pack => ndarray_pack
+     procedure :: unpack => ndarray_unpack
+     procedure :: axpy => ndarray_axpy
+     procedure :: eprint => ndarray_eprint
   end type ndarray
 
   ! interfaces to routines in pf_numpy.c
@@ -65,234 +80,244 @@ module pf_mod_ndarray
 
 contains
 
-  subroutine ndarray_create_simple(q, shape)
-    type(ndarray), intent(inout) :: q
-    integer,       intent(in   ) :: shape(:)
+  subroutine ndarray_build(q, shape)
+    class(pf_encap_t), intent(inout) :: q
+    integer,           intent(in   ) :: shape(:)
 
-    allocate(q%shape(size(shape)))
-    allocate(q%flatarray(product(shape)))
-    q%dim   = size(shape)
-    q%shape = shape
-    q%aptr  = c_loc(q%flatarray(1))
-  end subroutine ndarray_create_simple
+    select type (q)
+    class is (ndarray)
+       allocate(q%shape(size(shape)))
+       allocate(q%flatarray(product(shape)))
+       q%dim   = size(shape)
+       q%shape = shape
+    end select
+  end subroutine ndarray_build
 
   ! Allocate/create solution (spatial data set).
-  subroutine ndarray_create(solptr, level, kind, nvars, shape, encapctx)
-    type(c_ptr), intent(inout)        :: solptr
-    integer,     intent(in   )        :: level, nvars, shape(:)
-    integer,     intent(in   )        :: kind
-    type(c_ptr), intent(in   ), value :: encapctx
+  subroutine ndarray_create0(this, x, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x
+    integer,                intent(in   )              :: level, kind, nvars, shape(:)
+    integer :: i
+    allocate(ndarray::x)
+    call ndarray_build(x, shape)
+  end subroutine ndarray_create0
 
-    type(ndarray), pointer :: sol
+  subroutine ndarray_create1(this, x, n, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x(:)
+    integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
+    integer :: i
+    allocate(ndarray::x(n))
+    do i = 1, n
+       call ndarray_build(x(i), shape)
+    end do
+  end subroutine ndarray_create1
 
-    allocate(sol)
-    call ndarray_create_simple(sol, shape)
-    solptr = c_loc(sol)
-  end subroutine ndarray_create
+  subroutine ndarray_create2(this, x, n, m, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x(:, :)
+    integer,                intent(in   )              :: n, m, level, kind, nvars, shape(:)
+    integer :: i, j
+    allocate(ndarray::x(n,m))
+    do i = 1, n
+       do j = 1, m
+          call ndarray_build(x(i,j), shape)
+       end do
+    end do
+  end subroutine ndarray_create2
 
   ! Deallocate/destroy solution.
-  subroutine ndarray_destroy(solptr)
-    type(c_ptr), intent(in   ), value :: solptr
+  ! subroutine ndarray_destroy(solptr)
+  !   type(c_ptr), intent(in   ), value :: solptr
 
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-    deallocate(sol%flatarray)
-    deallocate(sol%shape)
-    deallocate(sol)
-  end subroutine ndarray_destroy
+  !   deallocate(sol%flatarray)
+  !   deallocate(sol%shape)
+  !   deallocate(sol)
+  ! end subroutine ndarray_destroy
 
   ! Set solution value.
-  subroutine ndarray_setval(solptr, val, flags)
-    type(c_ptr), intent(in   ), value    :: solptr
-    real(pfdp),  intent(in   )           :: val
-    integer,     intent(in   ), optional :: flags
-
-    type(ndarray), pointer :: sol
-
-    call c_f_pointer(solptr, sol)
-    sol%flatarray = val
+  subroutine ndarray_setval(this, val, flags)
+    class(ndarray), intent(inout)           :: this
+    real(pfdp),     intent(in   )           :: val
+    integer,        intent(in   ), optional :: flags
+    this%flatarray = val
   end subroutine ndarray_setval
 
   ! Copy solution value.
-  subroutine ndarray_copy(dstptr, srcptr, flags)
-    type(c_ptr), intent(in   ), value    :: dstptr, srcptr
-    integer,     intent(in   ), optional :: flags
-
-    type(ndarray), pointer :: dst, src
-    call c_f_pointer(dstptr, dst)
-    call c_f_pointer(srcptr, src)
-
-    dst%flatarray = src%flatarray
+  subroutine ndarray_copy(this, src, flags)
+    class(ndarray),    intent(inout)           :: this
+    class(pf_encap_t), intent(in   )           :: src
+    integer,           intent(in   ), optional :: flags
+    select type(src)
+    type is (ndarray)
+       this%flatarray = src%flatarray
+    class default
+       stop "TYPE ERROR"
+    end select
   end subroutine ndarray_copy
 
   ! Pack solution q into a flat array.
-  subroutine ndarray_pack(z, ptr)
-    type(c_ptr), intent(in   ), value :: ptr
-    real(pfdp),  intent(  out)        :: z(:)
-
-    type(ndarray), pointer :: y
-
-    call c_f_pointer(ptr, y)
-    z = y%flatarray
+  subroutine ndarray_pack(this, z)
+    class(ndarray), intent(in   ) :: this
+    real(pfdp),     intent(  out) :: z(:)
+    z = this%flatarray
   end subroutine ndarray_pack
 
   ! Unpack solution from a flat array.
-  subroutine ndarray_unpack(ptr, z)
-    type(c_ptr), intent(in   ), value :: ptr
-    real(pfdp),  intent(in   )        :: z(:)
-
-    type(ndarray), pointer :: y
-    call c_f_pointer(ptr, y)
-
-    y%flatarray = z
+  subroutine ndarray_unpack(this, z)
+    class(ndarray), intent(inout) :: this
+    real(pfdp),     intent(in   ) :: z(:)
+    this%flatarray = z
   end subroutine ndarray_unpack
 
   ! Compute norm of solution
-  function ndarray_norm(ptr) result (norm)
-    type(c_ptr), intent(in   ), value :: ptr
-    real(pfdp)   :: norm
-
-    type(ndarray), pointer :: y
-    call c_f_pointer(ptr, y)
-
-    norm = maxval(abs(y%flatarray))
+  function ndarray_norm(this) result (norm)
+    class(ndarray), intent(in   ) :: this
+    real(pfdp) :: norm
+    norm = maxval(abs(this%flatarray))
   end function ndarray_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
-  subroutine ndarray_saxpy(yptr, a, xptr, flags)
-    type(c_ptr), intent(in   ), value    :: yptr, xptr
-    real(pfdp),  intent(in   )           :: a
-    integer,     intent(in   ), optional :: flags
+  subroutine ndarray_axpy(this, a, x, flags)
+    class(ndarray),    intent(inout)           :: this
+    class(pf_encap_t), intent(in   )           :: x
+    real(pfdp),        intent(in   )           :: a
+    integer,           intent(in   ), optional :: flags
 
-    type(ndarray), pointer :: y, x
-    call c_f_pointer(yptr, y)
-    call c_f_pointer(xptr, x)
+    select type(x)
+    type is (ndarray)
+       this%flatarray = a * x%flatarray + this%flatarray
+    class default
+       stop "TYPE ERROR"
+    end select
+  end subroutine ndarray_axpy
 
-    y%flatarray = a * x%flatarray + y%flatarray
-  end subroutine ndarray_saxpy
+  subroutine ndarray_eprint(this)
+    class(ndarray), intent(inout) :: this
+  end subroutine ndarray_eprint
 
-  ! Helpers
-  function dims(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
-    integer :: r
+  subroutine ndarray_printme(this)
+    class(ndarray), intent(inout) :: this
+  end subroutine ndarray_printme
 
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  ! ! Helpers
+  ! function dims(solptr) result(r)
+  !   type(ndarray), intent(in   ), value :: solptr
+  !   integer :: r
 
-    r = sol%dim
-  end function dims
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-  function array1(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
+  !   r = sol%dim
+  ! end function dims
+
+  function array1(x) result(r)
+    class(pf_encap_t), intent(in) :: x
     real(pfdp), pointer :: r(:)
-
-    integer                :: shp(1)
-    type(ndarray), pointer :: sol
-
-    call c_f_pointer(solptr, sol)
-    if (sol%dim == 1) then
-       shp = sol%shape
-       call c_f_pointer(sol%aptr, r, shp)
-    else
-       stop "ERROR: array1 dimension mismatch."
-    end if
+    select type (x)
+    type is (ndarray)
+       r => x%flatarray
+    end select
   end function array1
 
-  function array2(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
-    real(pfdp), pointer :: r(:,:)
+  ! function array2(solptr) result(r)
+  !   type(ndarray), intent(in   ), value :: solptr
+  !   real(pfdp), pointer :: r(:,:)
 
-    integer                :: shp(2)
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  !   integer                :: shp(2)
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-    if (sol%dim == 2) then
-       shp = sol%shape
-       call c_f_pointer(sol%aptr, r, shp)
-    else
-       stop "ERROR: array2 dimension mismatch."
-    end if
-  end function array2
+  !   if (sol%dim == 2) then
+  !      shp = sol%shape
+  !      call c_f_pointer(sol%aptr, r, shp)
+  !   else
+  !      stop "ERROR: array2 dimension mismatch."
+  !   end if
+  ! end function array2
 
-  function array3(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
-    real(pfdp), pointer :: r(:,:,:)
+  ! function array3(solptr) result(r)
+  !   type(ndarray), intent(in   ), value :: solptr
+  !   real(pfdp), pointer :: r(:,:,:)
 
-    integer                :: shp(3)
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  !   integer                :: shp(3)
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-    if (sol%dim == 3) then
-       shp = sol%shape
-       call c_f_pointer(sol%aptr, r, shp)
-    else
-       stop "ERROR: array3 dimension mismatch."
-    end if
-  end function array3
+  !   if (sol%dim == 3) then
+  !      shp = sol%shape
+  !      call c_f_pointer(sol%aptr, r, shp)
+  !   else
+  !      stop "ERROR: array3 dimension mismatch."
+  !   end if
+  ! end function array3
 
-  function array4(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
-    real(pfdp), pointer :: r(:,:,:,:)
+  ! function array4(solptr) result(r)
+  !   type(ndarray), intent(in   ), value :: solptr
+  !   real(pfdp), pointer :: r(:,:,:,:)
 
-    integer                :: shp(4)
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  !   integer                :: shp(4)
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-    if (sol%dim == 4) then
-       shp = sol%shape
-       call c_f_pointer(sol%aptr, r, shp)
-    else
-       stop "ERROR: array4 dimension mismatch."
-    end if
-  end function array4
+  !   if (sol%dim == 4) then
+  !      shp = sol%shape
+  !      call c_f_pointer(sol%aptr, r, shp)
+  !   else
+  !      stop "ERROR: array4 dimension mismatch."
+  !   end if
+  ! end function array4
 
-  function array5(solptr) result(r)
-    type(c_ptr), intent(in   ), value :: solptr
-    real(pfdp), pointer :: r(:,:,:,:,:)
+  ! function array5(solptr) result(r)
+  !   type(ndarray), intent(in   ), value :: solptr
+  !   real(pfdp), pointer :: r(:,:,:,:,:)
 
-    integer                :: shp(5)
-    type(ndarray), pointer :: sol
-    call c_f_pointer(solptr, sol)
+  !   integer                :: shp(5)
+  !   type(ndarray), pointer :: sol
+  !   call c_f_pointer(solptr, sol)
 
-    if (sol%dim == 5) then
-       shp = sol%shape
-       call c_f_pointer(sol%aptr, r, shp)
-    else
-       stop "ERROR: array5 dimension mismatch."
-    end if
-  end function array5
+  !   if (sol%dim == 5) then
+  !      shp = sol%shape
+  !      call c_f_pointer(sol%aptr, r, shp)
+  !   else
+  !      stop "ERROR: array5 dimension mismatch."
+  !   end if
+  ! end function array5
 
-  subroutine ndarray_encap_create(encap)
-    type(pf_encap_t), intent(out) :: encap
+  ! subroutine ndarray_encap_create(encap)
+  !   type(pf_encap_t), intent(out) :: encap
 
-    encap%create  => ndarray_create
-    encap%destroy => ndarray_destroy
-    encap%setval  => ndarray_setval
-    encap%copy    => ndarray_copy
-    encap%norm    => ndarray_norm
-    encap%pack    => ndarray_pack
-    encap%unpack  => ndarray_unpack
-    encap%axpy    => ndarray_saxpy
-  end subroutine ndarray_encap_create
+  !   encap%create  => ndarray_create
+  !   encap%destroy => ndarray_destroy
+  !   encap%setval  => ndarray_setval
+  !   encap%copy    => ndarray_copy
+  !   encap%norm    => ndarray_norm
+  !   encap%pack    => ndarray_pack
+  !   encap%unpack  => ndarray_unpack
+  !   encap%axpy    => ndarray_saxpy
+  ! end subroutine ndarray_encap_create
 
-  subroutine ndarray_dump_hook(pf, level, state)
-    type(pf_pfasst_t),   intent(inout) :: pf
-    type(pf_level_t),    intent(inout) :: level
-    type(pf_state_t),    intent(in)    :: state
+  ! subroutine ndarray_dump_hook(pf, level, state)
+  !   type(pf_pfasst_t),   intent(inout) :: pf
+  !   type(pf_level_t),    intent(inout) :: level
+  !   type(pf_state_t),    intent(in)    :: state
 
-    character(len=256)     :: fname
-    type(ndarray), pointer :: qend
+  !   character(len=256)     :: fname
+  !   type(ndarray), pointer :: qend
 
-    call c_f_pointer(level%qend, qend)
+  !   call c_f_pointer(level%qend, qend)
 
-    write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
-         state%step, state%iter, level%level
+  !   write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
+  !        state%step, state%iter, level%level
 
-    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
-         qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
+  !   call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
+  !        qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
 
-  end subroutine ndarray_dump_hook
+  ! end subroutine ndarray_dump_hook
 
 
 end module pf_mod_ndarray

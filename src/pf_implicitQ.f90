@@ -74,17 +74,17 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
-       call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
+       call Lev%S(m)%setval(0.0_pfdp)
        do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*imp%QdiffI(m,n), Lev%F(n,1))
+          call Lev%S(m)%axpy(dt*imp%QdiffI(m,n), Lev%F(n,1))
        end do
        if (associated(Lev%tauQ)) then
-          call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
+          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%Q(1)%unpack(Lev%q0)
 
     call imp%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
 
@@ -95,22 +95,22 @@ contains
     do m = 1, Lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%encap%setval(rhs, 0.0_pfdp)
+       call rhs%setval(0.0_pfdp)
        do n = 1, m
-          call Lev%encap%axpy(rhs, dt*imp%QtilI(m,n), Lev%F(n,1))  
+          call rhs%axpy(dt*imp%QtilI(m,n), Lev%F(n,1))
        end do
-       call Lev%encap%axpy(rhs, 1.0_pfdp,lev%S(m))
-       call Lev%encap%axpy(rhs, 1.0_pfdp, Lev%Q(1))
+       call rhs%axpy(1.0_pfdp,lev%S(m))
+       call rhs%axpy(1.0_pfdp, Lev%Q(1))
 
-       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,1))    
+       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,1))
 
     end do
-       
+
     ! Put the last node value into qend
-    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
+    call Lev%qend%copy(Lev%Q(Lev%nnodes))
 
     ! done
-    call Lev%encap%destroy(rhs)
+    !call Lev%encap%destroy(rhs)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
   end subroutine implicitQ_sweep
@@ -168,10 +168,10 @@ contains
     integer :: n, m, p
 
     do n = 1, Lev%nnodes-1
-       call Lev%encap%setval(fintSDC(n), 0.0_pfdp)
+       call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, Lev%nnodes
           do p = 1, npieces
-             call Lev%encap%axpy(fintSDC(n), dt*Lev%qmat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do
@@ -212,4 +212,3 @@ contains
   end subroutine pf_implicitQ_destroy
 
 end module pf_mod_implicitQ
-

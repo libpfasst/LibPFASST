@@ -118,7 +118,7 @@ contains
     ! first two integer4's always get set to zero on the receiving
     ! end.  hence we use 8 integer4's and put the message in the
     ! last two slots.
-    
+
     message = 666
     message(7) = pf%state%status
     message(8) = pf%state%nmoved
@@ -207,12 +207,12 @@ contains
     integer :: ierror, stat(MPI_STATUS_SIZE)
 
     if (blocking) then
-       call level%encap%pack(level%send, level%qend)
+       call level%qend%pack(level%send)
        call mpi_send(level%send, level%nvars, MPI_REAL8, &
                      modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%sendreq(level%level), stat, ierror)
-       call level%encap%pack(level%send, level%qend)
+       call level%qend%pack(level%send)
        call mpi_isend(level%send, level%nvars, MPI_REAL8, &
                       modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
     end if

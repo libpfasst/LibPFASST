@@ -89,19 +89,19 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
-       call Lev%encap%setval(Lev%S(m), 0.0d0)
+       call Lev%S(m)%setval(0.0d0)
        do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*Lev%s0mat(m,n), fimex%F(n))
-          call Lev%encap%axpy(Lev%S(m), dt*fimex%SdiffE(m,n), Lev%F(n,1))
-          call Lev%encap%axpy(Lev%S(m), dt*fimex%SdiffI(m,n), Lev%F(n,2))
+          call Lev%S(m)%axpy(dt*Lev%s0mat(m,n), fimex%F(n))
+          call Lev%S(m)%axpy(dt*fimex%SdiffE(m,n), Lev%F(n,1))
+          call Lev%S(m)%axpy(dt*fimex%SdiffI(m,n), Lev%F(n,2))
        end do
        if (associated(Lev%tau)) then
-          call Lev%encap%axpy(Lev%S(m), 1.0d0, Lev%tau(m))
+          call Lev%S(m)%axpy(1.0d0, Lev%tau(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%Q(1)%unpack(Lev%q0)
 
     call fimex%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
     call fimex%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,2))
@@ -113,18 +113,18 @@ contains
     do m = 1, Lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%encap%copy(rhs, Lev%Q(m))
-       call Lev%encap%axpy(rhs, dtsdc(m), Lev%F(m,1))
-       call Lev%encap%axpy(rhs, 1.0d0, Lev%S(m))
+       call rhs%copy(Lev%Q(m))
+       call rhs%axpy(dtsdc(m), Lev%F(m,1))
+       call rhs%axpy(1.0d0, Lev%S(m))
 
        call fimex%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
        call fimex%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
     end do
 
-    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
+    call Lev%qend%copy(Lev%Q(Lev%nnodes))
 
     ! done
-    call Lev%encap%destroy(rhs)
+    call rhs)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
   end subroutine fimex_sweep
@@ -182,10 +182,10 @@ contains
     integer :: n, m, p
 
     do n = 1, Lev%nnodes-1
-       call Lev%encap%setval(fintSDC(n), 0.0d0)
+       call Lev%encap%setval(fintSDC(n)%destroy(0.0d0)
        do m = 1, Lev%nnodes
           do p = 1, npieces
-             call Lev%encap%axpy(fintSDC(n), dt*Lev%s0mat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*Lev%s0mat(n,m), fSDC(m,p))
           end do
        end do
     end do
@@ -231,4 +231,3 @@ contains
   end subroutine pf_fimex_destroy
 
 end module pf_mod_fimex
-

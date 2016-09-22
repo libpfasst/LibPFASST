@@ -13,13 +13,13 @@ program main
 
   integer, parameter :: maxlevs = 3
 
-  type(pf_pfasst_t)        :: pf
-  type(pf_comm_t)          :: comm
-  type(pf_encap_t), target :: encap
-  type(ndarray), pointer   :: q0
-  type(ad_sweeper_t), target       :: sweepers(maxlevs)
-  integer                  :: err, nvars(maxlevs), nnodes(maxlevs), l
-  double precision         :: dt
+  type(pf_pfasst_t)             :: pf
+  type(pf_comm_t)               :: comm
+  type(ndarray_factory), target :: factory
+  type(ndarray), allocatable    :: q0
+  type(ad_sweeper_t), target    :: sweepers(maxlevs)
+  integer                       :: err, nvars(maxlevs), nnodes(maxlevs), l
+  double precision              :: dt
 
 
   !
@@ -42,7 +42,7 @@ program main
 !  nnodes = [ 2 ]       ! number of sdc nodes on time/space levels
   dt     = 0.005_pfdp
 
-  call ndarray_encap_create(encap)
+  ! call ndarray_encap_create(encap)
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, comm, maxlevs)
 
@@ -61,7 +61,7 @@ program main
 
      ! pf%levels(l)%interpolate => interpolate
      ! pf%levels(l)%restrict    => restrict
-     pf%levels(l)%encap       => encap
+     pf%levels(l)%factory     => factory
      pf%levels(l)%sweeper     => sweepers(l)
      call feval_create_workspace(sweepers(l)%work, pf%levels(l)%nvars)
 
@@ -87,7 +87,7 @@ program main
   !
 
   allocate(q0)
-  call ndarray_create_simple(q0, [ pf%levels(pf%nlevels)%nvars ])
+  call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
   call initial(q0)
 
   if (pf%window == PF_WINDOW_RING) pf%abs_res_tol = 1.d-9
@@ -97,19 +97,18 @@ program main
   call pf_add_hook(pf, pf%nlevels, PF_POST_ITERATION, echo_error)
   ! call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
   call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-  call pf_pfasst_run(pf, c_loc(q0), dt, tend=0.d0, nsteps=1*comm%nproc)
+  call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=1*comm%nproc)
+
+  deallocate(q0)
+
+  do l = 1, pf%nlevels
+     call feval_destroy_workspace(sweepers(l)%work)
+  end do
+
 
   !
   ! cleanup
   !
-
-  call ndarray_destroy(c_loc(q0))
-
-  ! do l = 1, pf%nlevels
-  !    call feval_destroy_workspace(pf%levels(l)%levelctx)
-  ! end do
-
-
   call pf_pfasst_destroy(pf)
   call pf_mpi_destroy(comm)
   call mpi_finalize(err)

@@ -43,8 +43,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine feval_create_workspace(work, nvars)
-    type(ad_work_t), intent(out) :: work
-    integer,         intent(in)  :: nvars
+    type(ad_work_t), intent(inout) :: work
+    integer,         intent(in   ) :: nvars
 
     integer     :: i
     type(c_ptr) :: wk
@@ -79,19 +79,15 @@ contains
     end do
   end subroutine feval_create_workspace
 
-  ! subroutine feval_destroy_workspace(levelctx)
-  !   type(c_ptr), intent(in) :: levelctx
-  !   type(ad_work_t), pointer :: work
-
-  !   call c_f_pointer(levelctx, work)
-
-  !   deallocate(work%wk)
-  !   deallocate(work%ddx)
-  !   deallocate(work%lap)
-  !   call fftw_destroy_plan(work%ffft)
-  !   call fftw_destroy_plan(work%ifft)
-  !   deallocate(work)
-  ! end subroutine feval_destroy_workspace
+  subroutine feval_destroy_workspace(work)
+    type(ad_work_t), intent(inout) :: work
+    deallocate(work%wk)
+    deallocate(work%ddx)
+    deallocate(work%lap)
+    call fftw_destroy_plan(work%ffft)
+    call fftw_destroy_plan(work%ifft)
+!    deallocate(work)
+  end subroutine feval_destroy_workspace
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -122,54 +118,55 @@ contains
 
        ! decide how many images so that contribution is neglible
        tol  = 1e-16
-       nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
+       !nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
+       nbox = 2
 
-!       do ii = -nbox, nbox
+       do ii = -nbox, nbox
           do i = 1, nvars
              x = Lx*dble(i-nvars/2-1)/dble(nvars) + ii*Lx - t*v
              yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
              x = Lx*dble(i)/dble(nvars)  - t*v
              yex(i) =  dsin(two_pi*kfreq*x)
           end do
- !      end do
+       end do
     end if
-
-
   end subroutine exact
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
   subroutine eval_f1(this, y, t, level, f1)
-    class(ad_sweeper_t), intent(inout)     :: this
-    type(c_ptr),         intent(in), value :: y, f1
-    real(pfdp),          intent(in)        :: t
-    integer,             intent(in)        :: level
+    class(ad_sweeper_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: y
+    class(pf_encap_t),   intent(inout) :: f1
+    real(pfdp),          intent(in   ) :: t
+    integer,             intent(in   ) :: level
 
     real(pfdp),      pointer :: yvec(:), f1vec(:)
     complex(pfdp),   pointer :: wk(:)
 
     yvec  => array1(y)
     f1vec => array1(f1)
-    wk => this%work%wk
+    wk    => this%work%wk
 
     wk = yvec
+
     call fftw_execute_dft(this%work%ffft, wk, wk)
     wk = -v * this%work%ddx * wk / size(wk)
     call fftw_execute_dft(this%work%ifft, wk, wk)
 
     f1vec = real(wk)
-
   end subroutine eval_f1
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
   subroutine eval_f2(this, y, t, level, f2)
-    class(ad_sweeper_t), intent(inout)     :: this
-    type(c_ptr),         intent(in), value :: y, f2
-    real(pfdp),          intent(in)        :: t
-    integer,             intent(in)        :: level
+    class(ad_sweeper_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: y
+    class(pf_encap_t),   intent(inout) :: f2
+    real(pfdp),          intent(in   ) :: t
+    integer,             intent(in   ) :: level
 
     real(pfdp),      pointer :: yvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
@@ -191,10 +188,11 @@ contains
 
   ! Solve for y and return f2 also.
   subroutine comp_f2(this, y, t, dt, rhs, level, f2)
-    class(ad_sweeper_t), intent(inout)     :: this
-    type(c_ptr),         intent(in), value :: y, rhs, f2
-    real(pfdp),          intent(in)        :: t, dt
-    integer,             intent(in)        :: level
+    class(ad_sweeper_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: rhs
+    class(pf_encap_t),   intent(inout) :: y, f2
+    real(pfdp),          intent(in   ) :: t, dt
+    integer,             intent(in   ) :: level
 
     real(pfdp),      pointer :: yvec(:), rhsvec(:), f2vec(:)
     complex(pfdp),   pointer :: wk(:)
@@ -217,8 +215,8 @@ contains
   subroutine interpolate(levelF, levelG, qFp, qGp, t)
     class(ad_sweeper_t), intent(inout) :: levelF
     class(pf_sweeper_t), intent(inout) :: levelG
-    type(c_ptr), intent(in), value :: qFp, qGp
-    real(pfdp),  intent(in) :: t
+    class(pf_encap_t),   intent(inout) :: qFp, qGp
+    real(pfdp),          intent(in   ) :: t
 
     real(pfdp),      pointer :: qF(:), qG(:)
     complex(kind=8), pointer :: wkF(:), wkG(:)
@@ -265,8 +263,8 @@ contains
   subroutine restrict(levelF, levelG, qFp, qGp, t)
     class(ad_sweeper_t), intent(inout) :: levelF
     class(pf_sweeper_T), intent(inout) :: levelG
-    type(c_ptr), intent(in), value :: qFp, qGp
-    real(pfdp),  intent(in) :: t
+    class(pf_encap_t),   intent(inout) :: qFp, qGp
+    real(pfdp),          intent(in   ) :: t
 
     real(pfdp), pointer :: qF(:), qG(:)
 

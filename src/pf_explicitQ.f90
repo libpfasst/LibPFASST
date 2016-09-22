@@ -60,17 +60,17 @@ contains
 
     ! compute integrals and add fas correction
     do m = 1, Lev%nnodes-1
-       call Lev%encap%setval(Lev%S(m), 0.0_pfdp)
+       call Lev%S(m)%setval(0.0_pfdp)
        do n = 1, Lev%nnodes
-          call Lev%encap%axpy(Lev%S(m), dt*exp%QdiffE(m,n), Lev%F(n,1))
+          call Lev%S(m)%axpy(dt*exp%QdiffE(m,n), Lev%F(n,1))
        end do
        if (associated(Lev%tau)) then
-          call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m))
+          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%encap%unpack(Lev%Q(1), Lev%q0)
+    call Lev%Q(1)%unpack(Lev%q0)
 
     call exp%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
 
@@ -79,18 +79,18 @@ contains
     do m = 1, Lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%encap%copy(Lev%Q(m+1), Lev%Q(1))
+       call Lev%Q(m+1)%copy(Lev%Q(1))
        do n = 1, m
-          call Lev%encap%axpy(Lev%Q(m+1), dt*exp%QtilE(m,n), Lev%F(n,1))  
+          call Lev%Q(m+1)%axpy(dt*exp%QtilE(m,n), Lev%F(n,1))
        end do
 
 !       call Lev%encap%axpy(Lev%Q(m+1), dtsdc(m), Lev%F(m,1))
-       call Lev%encap%axpy(Lev%Q(m+1), 1.0_pfdp, Lev%S(m))
+       call Lev%Q(m+1)%axpy(1.0_pfdp, Lev%S(m))
 
        call exp%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
     end do
 
-    call Lev%encap%copy(Lev%qend, Lev%Q(Lev%nnodes))
+    call Lev%qend%copy(Lev%Q(Lev%nnodes))
 
     ! done
     call end_timer(pf, TLEVEL+Lev%level-1)
@@ -151,10 +151,10 @@ contains
     integer :: n, m, p
 
     do n = 1, Lev%nnodes-1
-       call Lev%encap%setval(fintSDC(n), 0.0_pfdp)
+       call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, Lev%nnodes
           do p = 1, npieces
-             call Lev%encap%axpy(fintSDC(n), dt*Lev%qmat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do
@@ -197,7 +197,7 @@ contains
     real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
     real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
     integer,        intent (in)     :: Nnodes
-    ! Return the transpose of U from LU decomposition of 
+    ! Return the transpose of U from LU decomposition of
     !  an explicit integration matrix       without pivoting
     integer :: i,j
     real(pfdp) :: c
@@ -225,4 +225,3 @@ contains
   end subroutine pf_LUexp
 
 end module pf_mod_explicitQ
-

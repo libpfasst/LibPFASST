@@ -15,7 +15,7 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jbuild -cpp
+FFLAGS = -g -Ibuild -Jbuild -cpp -fbacktrace
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
@@ -24,7 +24,6 @@ VPATHS = $(LIBPFASST)/src
 FSRC = src/pfasst.f90 \
        src/pf_dtype.f90 \
        src/pf_explicit.f90 \
-       src/pf_fakecomm.f90 \
        src/pf_hooks.f90 \
        src/pf_imex.f90 \
        src/pf_imexQ.f90 \
@@ -35,7 +34,6 @@ FSRC = src/pfasst.f90 \
        src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
-       src/pf_pthreads.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
@@ -58,8 +56,8 @@ OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 VPATHS += src
 FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90
 
-FFLAGS  += -I$(FFTW3)/include 
-LDFLAGS += -L$(FFTW3)/lib -lfftw3
+FFLAGS  += -I$(FFTW3)/include
+LDFLAGS += -g -L$(FFTW3)/lib -lfftw3
 
 all: $(EXE)
 

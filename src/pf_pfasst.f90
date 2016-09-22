@@ -37,7 +37,7 @@ contains
 
     logical :: read_cmd
     integer :: l
-    
+
     if (present(nlevels)) pf%nlevels = nlevels
 
     pf%outdir = ""
@@ -45,12 +45,12 @@ contains
     ! gather some input from a file and command line
     read_cmd = .true.
     if (present(nocmd)) then
-         if (nocmd)  read_cmd = .false.
+         if (nocmd) read_cmd = .false.
     end if
-    if (present(fname))  then
+    if (present(fname)) then
        call pf_read_opts(pf, read_cmd, fname)
     else
-       if (read_cmd)   call pf_read_opts(pf, read_cmd)
+       if (read_cmd) call pf_read_opts(pf, read_cmd)
     end if
 
     pf%comm => comm
@@ -67,9 +67,7 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
-
   end subroutine pf_pfasst_create
-
 
   !
   ! Create a PFASST level object
@@ -77,34 +75,21 @@ contains
   subroutine pf_level_create(level, nlevel)
     type(pf_level_t), intent(inout) :: level
     integer,          intent(in   ) :: nlevel
-
     level%level = nlevel
-    nullify(level%encap)
-    ! nullify(level%interpolate)
-    ! nullify(level%restrict)
-    nullify(level%shape)
-    nullify(level%tau)
-    nullify(level%tauQ)
-    nullify(level%pF)
-    nullify(level%pQ)
-    nullify(level%rmat)
-    nullify(level%tmat)
   end subroutine pf_level_create
-
 
   !
   ! Setup PFASST object
   !
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
-
     type(pf_pfasst_t), intent(inout) :: pf
 
     type(pf_level_t), pointer :: F, G
     integer                   :: l
 
     if (pf%rank < 0) then
-       stop 'invalid PF rank: did you call setup correctly?'
+       stop 'Invalid PF rank: did you call setup correctly?'
     end if
 
     do l = 1, pf%nlevels
@@ -112,13 +97,10 @@ contains
     end do
 
     do l = pf%nlevels, 2, -1
-       F => pf%levels(l)
-       G => pf%levels(l-1)
-
+       F => pf%levels(l); G => pf%levels(l-1)
        allocate(F%tmat(F%nnodes,G%nnodes))
-       call pf_time_interpolation_matrix(F%nodes, F%nnodes, G%nodes, G%nnodes, F%tmat)
-
        allocate(F%rmat(G%nnodes,F%nnodes))
+       call pf_time_interpolation_matrix(F%nodes, F%nnodes, G%nodes, G%nnodes, F%tmat)
        call pf_time_interpolation_matrix(G%nodes, G%nnodes, F%nodes, F%nnodes, F%rmat)
     end do
 
@@ -144,12 +126,9 @@ contains
     if (F%nvars <= 0) stop "ERROR: Invalid nvars/dofs (pf_pfasst.f90)."
     if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
     if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
-    if (.not. associated(F%encap)) stop "ERROR: Missing encapsulation (pf_pfasst.f90)."
-    ! if (.not. associated(F%interpolate)) stop "ERROR: Missing spatial interpolation (pf_pfasst.f90)."
-    ! if (.not. associated(F%restrict)) stop "ERROR: Missing spatial restriction (pf_pfasst.f90)."
 
-    nvars   = F%nvars
-    nnodes  = F%nnodes
+    nvars  = F%nvars
+    nnodes = F%nnodes
 
     F%residual = -1.0_pfdp
 
@@ -157,36 +136,20 @@ contains
     ! (re)allocate tau (may to need create/destroy tau dynamically
     !                   when doing AMR)
     !
-    if ((F%level < pf%nlevels) .and. (.not. associated(F%tau))) then
-       allocate(F%tau(nnodes-1))
-       do m = 1, nnodes-1
-          call F%encap%create(F%tau(m), F%level, SDC_KIND_INTEGRAL, &
-               nvars, F%shape, F%encap%encapctx)
-       end do
-    else if ((F%level >= pf%nlevels) .and. (associated(F%tau))) then
-       do m = 1, nnodes-1
-          call F%encap%destroy(F%tau(m))
-       end do
+    if ((F%level < pf%nlevels) .and. (.not. allocated(F%tau))) then
+       call F%factory%create1(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    else if ((F%level >= pf%nlevels) .and. (allocated(F%tau))) then
        deallocate(F%tau)
-       nullify(F%tau)
     end if
 
     !
     ! (re)allocate tauQ (may to need create/destroy tau dynamically
     !                   when doing AMR)
     !
-    if ((F%level < pf%nlevels) .and. (.not. associated(F%tauQ))) then
-       allocate(F%tauQ(nnodes-1))
-       do m = 1, nnodes-1
-          call F%encap%create(F%tauQ(m), F%level, SDC_KIND_INTEGRAL, &
-               nvars, F%shape, F%encap%encapctx)
-       end do
-    else if ((F%level >= pf%nlevels) .and. (associated(F%tauQ))) then
-       do m = 1, nnodes-1
-          call F%encap%destroy(F%tauQ(m))
-       end do
+    if ((F%level < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
+       call F%factory%create1(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    else if ((F%level >= pf%nlevels) .and. (allocated(F%tauQ))) then
        deallocate(F%tauQ)
-       nullify(F%tauQ)
     end if
 
     !
@@ -222,76 +185,23 @@ contains
 
 
     !
-    ! allocate Q and F
+    ! encaps
     !
     npieces = F%sweeper%npieces
-    
-    allocate(F%Q(nnodes))
-    allocate(F%F(nnodes,npieces))
-
-    do m = 1, nnodes
-       call F%encap%create(F%Q(m), F%level, SDC_KIND_SOL_FEVAL, &
-            nvars, F%shape, F%encap%encapctx)
-       do p = 1, npieces
-          call F%encap%create(F%F(m,p), F%level, SDC_KIND_FEVAL, &
-               nvars, F%shape, F%encap%encapctx)
-       end do
-    end do
-
-    !
-    ! allocate S, I, and R
-    !
-    allocate(F%S(nnodes-1))
-    allocate(F%I(nnodes-1))
-    allocate(F%R(nnodes-1))
-
-    do m = 1, nnodes-1
-       call F%encap%create(F%S(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%encap%encapctx)
-       call F%encap%create(F%I(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%encap%encapctx)
-       call F%encap%create(F%R(m), F%level, SDC_KIND_INTEGRAL, &
-            nvars, F%shape, F%encap%encapctx)
-    end do
-
-    !
-    ! allocate pQ and pF
-    !
+    call F%factory%create1(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
+    call F%factory%create2(F%F, nnodes, npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%factory%create1(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%factory%create1(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%factory%create1(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     if (F%level < pf%nlevels) then
-
        if (F%Finterp) then
-          ! store F and Q(1) only
-          ! Changed by MM Dec. 20, 2013 to allocate all pQ as well
-          !
-          allocate(F%pF(nnodes,npieces))
-          allocate(F%pQ(nnodes))
-          do m = 1, nnodes
-             do p = 1, npieces
-                call F%encap%create(F%pF(m,p), F%level, SDC_KIND_FEVAL, &
-                     nvars, F%shape, F%encap%encapctx)
-             end do
-             call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                  nvars, F%shape, F%encap%encapctx)
-          end do
-       else
-          ! store Q
-          allocate(F%pQ(nnodes))
-          do m = 1, nnodes
-             call F%encap%create(F%pQ(m), F%level, SDC_KIND_SOL_NO_FEVAL, &
-                  nvars, F%shape, F%encap%encapctx)
-          end do
+          call F%factory%create2(F%pF, nnodes, npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
        end if
-
+       call F%factory%create1(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
-
-    !
-    ! allocate Qend
-    !
-    call F%encap%create(F%qend, F%level, SDC_KIND_SOL_NO_FEVAL, &
-         nvars, F%shape, F%encap%encapctx)
+    call F%factory%create0(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
 
   end subroutine pf_level_setup
-
 
   !
   ! Deallocate PFASST object
@@ -300,15 +210,12 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
 
     integer :: l
-
     do l = 1, pf%nlevels
        call pf_level_destroy(pf%levels(l))
     end do
-
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
-
     deallocate(pf%state)
   end subroutine pf_pfasst_destroy
 
@@ -334,86 +241,38 @@ contains
     deallocate(F%qmat)
     deallocate(F%s0mat)
 
-    ! Q and F
-    do m = 1, F%nnodes
-       call F%encap%destroy(F%Q(m))
-       do p = 1, size(F%F(m,:))
-          call F%encap%destroy(F%F(m,p))
-       end do
-    end do
+    ! encaps
     deallocate(F%Q)
     deallocate(F%F)
-
-    ! S, I, and R
-    do m = 1, F%nnodes-1
-       call F%encap%destroy(F%S(m))
-       call F%encap%destroy(F%I(m))
-       call F%encap%destroy(F%R(m))
-    end do
     deallocate(F%S)
     deallocate(F%I)
     deallocate(F%R)
-
-    ! pQ and pF
-    if (associated(F%pQ)) then
+    if (allocated(F%pQ)) then
        if (F%Finterp) then
-          do m = 1, F%nnodes
-             do p = 1, size(F%F(m,:))
-                call F%encap%destroy(F%pF(m,p))
-             end do
-          end do
-          call F%encap%destroy(F%pQ(1))
           deallocate(F%pF)
-          deallocate(F%pQ)
-       else
-          do m = 1, F%nnodes
-             call F%encap%destroy(F%pQ(m))
-          end do
-          deallocate(F%pQ)
        end if
-       nullify(F%pQ)
+       deallocate(F%pQ)
     end if
-
-    ! qend
-    call F%encap%destroy(F%qend)
-
-    ! tau
-    if (associated(F%tau)) then
-       do m = 1, F%nnodes-1
-          call F%encap%destroy(F%tau(m))
-       end do
+    deallocate(F%qend)
+    if (allocated(F%tau)) then
        deallocate(F%tau)
-       nullify(F%tau)
     end if
-
-    ! tauQ
-    if (associated(F%tauQ)) then
-       do m = 1, F%nnodes-1
-          call F%encap%destroy(F%tauQ(m))
-       end do
+    if (allocated(F%tauQ)) then
        deallocate(F%tauQ)
-       nullify(F%tauQ)
     end if
 
     ! other
-    if (associated(F%shape)) then
+    if (allocated(F%shape)) then
        deallocate(F%shape)
     end if
 
-    if (associated(F%tmat)) then
+    if (allocated(F%tmat)) then
        deallocate(F%tmat)
-       nullify(F%tmat)
     end if
 
-    if (associated(F%rmat)) then
+    if (allocated(F%rmat)) then
        deallocate(F%rmat)
-       nullify(F%rmat)
     end if
-
-    ! kill the sweeper
-    ! call F%sweeper%destroy()
-    ! deallocate(F%sweeper)
-
   end subroutine pf_level_destroy
 
 end module pf_mod_pfasst
