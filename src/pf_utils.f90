@@ -131,8 +131,8 @@ contains
        norms(m) = Lev%encap%norm(Lev%R(m))
     end do
     Lev%resid_tic = abs(norms(1))
-    Lev%residual = maxVal(abs(norms))
     Lev%resid_toc = abs(norms(Lev%nnodes-1))
+    Lev%residual = maxVal(abs(norms))
 
     call end_timer(pf, TRESIDUAL)
 

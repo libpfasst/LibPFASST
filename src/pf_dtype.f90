@@ -111,8 +111,8 @@ module pf_mod_dtype
 
 
      real(pfdp)  :: resid_tic    !  norm of residual at `clic = tic`
-     real(pfdp)  :: residual     !  defined in pf_utils: max over resid at nodes
      real(pfdp)  :: resid_toc    !  norm of residual at `clic = toc`
+     real(pfdp)  :: residual     !  defined in pf_utils: max over resid at nodes
 
      type(pf_encap_t),         pointer         :: encap
      type(pf_sweeper_t),       pointer         :: sweeper
