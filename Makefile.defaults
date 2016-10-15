@@ -7,8 +7,7 @@ CC = mpicc
 AR = ar rcs
 NOSE = nosetests
 
-#FFLAGS = -Iinclude -Jinclude -cpp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow,underflow -fbounds-check -fbacktrace -g3 -ggdb
-FFLAGS = -Iinclude -Jinclude -cpp -fbacktrace -ffree-line-length-none
+FFLAGS = -Iinclude -Jinclude -cpp -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -ffpe-summary=all -fbounds-check -fbacktrace -g3 -ggdb
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
