@@ -291,7 +291,7 @@ contains
          state%step, state%iter, level%level
 
     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-         qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
+         qend%dim, qend%shape, size(qend%flatarray), real(qend%flatarray,c_double))
 
   end subroutine ndarray_dump_hook
 
