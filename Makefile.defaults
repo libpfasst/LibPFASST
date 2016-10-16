@@ -2,12 +2,12 @@
 # Default build settings for libpfasst.
 #
 
-FC = mpifort
-CC = mpicc
 AR = ar rcs
+CC = mpicc
+FC = mpifort
 NOSE = nosetests
 
-FFLAGS = -Iinclude -Jinclude -cpp -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -ffpe-summary=all -fbounds-check -fbacktrace -g3 -ggdb
+FFLAGS = -Iinclude -Jinclude -msse2 -cpp -frecord-gcc-switches -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow,underflow,inexact,denormal -ffpe-summary=all -fbounds-check -fbacktrace -g3 -ggdb
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
