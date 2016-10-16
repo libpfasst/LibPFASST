@@ -302,7 +302,8 @@ contains
     !  Now scale the columns of U to match the sum of A
     if (fillq .eq. 1) then
        do j=1,Nnodes-1
-          Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,2:Nnodes))
+!          Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,2:Nnodes))
+          Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,2:N))
        end do
     end if
 
