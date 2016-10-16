@@ -125,13 +125,13 @@ contains
                    end if
                 end if
 
-                call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
                 do j = 1, Glev%nsweeps_pred
-                   call Glev%sweeper%sweep(pf, Glev, t0k, dt)
+                  call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+                  call Glev%sweeper%sweep(pf, Glev, t0k, dt)
+                  call pf_residual(pf, Glev, dt)
+                  pf%state%sweep = -j
+                  call call_hooks(pf, Glev%level, PF_POST_SWEEP)
                 end do
-                call pf_residual(pf, Glev, dt)
-                pf%state%sweep = -k
-                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
           end if
 
@@ -148,13 +148,13 @@ contains
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
 
-             call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
              do j = 1, Glev%nsweeps_pred
-                call Glev%sweeper%sweep(pf, Glev, t0k, dt)
-                pf%state%sweep = -j
-                call call_hooks(pf, Glev%level, PF_POST_SWEEP)
+               call call_hooks(pf, Glev%level, PF_PRE_SWEEP)
+               call Glev%sweeper%sweep(pf, Glev, t0k, dt)
+               call pf_residual(pf, Glev, dt)
+               pf%state%sweep = -j
+               call call_hooks(pf, Glev%level, PF_POST_SWEEP)
              end do
-             call pf_residual(pf, Glev, dt)
 
           end do
 
@@ -415,7 +415,6 @@ contains
           call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
           do j = 1, Flev%nsweeps_pred
              call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
-
              call pf_residual(pf, Flev, dt)
              pf%state%sweep = j
              call call_hooks(pf, Flev%level, PF_POST_SWEEP)
@@ -480,12 +479,12 @@ contains
        Flev => pf%levels(l); Glev => pf%levels(l-1)
        call interpolate_time_space(pf, t0, dt, Flev, Glev, Glev%Finterp)
        call Flev%encap%copy(Flev%q0, Flev%Q(1))
-       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
        do j = 1, Flev%nsweeps_pred
-          call Flev%sweeper%sweep(pf, Flev, t0, dt)
-          call pf_residual(pf, Flev, dt)
-          pf%state%sweep = j
-          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
+         call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+         call Flev%sweeper%sweep(pf, Flev, t0, dt)
+         call pf_residual(pf, Flev, dt)
+         pf%state%sweep = j
+         call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
 
     end do
@@ -523,12 +522,12 @@ contains
     !
     do l = pf%nlevels-1, 2, -1
        Flev => pf%levels(l); Glev => pf%levels(l-1)
-       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
        do j = 1, Flev%nsweeps
-          call Flev%sweeper%sweep(pf, Flev, t0, dt)
-          call pf_residual(pf, Flev, dt)
-          pf%state%sweep = j
-          call call_hooks(pf, Flev%level, PF_POST_SWEEP)
+         call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+         call Flev%sweeper%sweep(pf, Flev, t0, dt)
+         call pf_residual(pf, Flev, dt)
+         pf%state%sweep = j
+         call call_hooks(pf, Flev%level, PF_POST_SWEEP)
        end do
        call pf_send(pf, Flev, Flev%level*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, Flev, Glev)
@@ -551,8 +550,8 @@ contains
        end do
     else
        call pf_recv(pf, Flev, Flev%level*10000+iteration, .true.)
-       call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
        do j = 1, Flev%nsweeps
+         call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
          call Flev%sweeper%sweep(pf, Flev, t0, dt)
          call pf_residual(pf, Flev, dt)
          pf%state%sweep = j
@@ -577,9 +576,9 @@ contains
        end if
 
        if (Flev%level < pf%nlevels) then
-          call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
           do j = 1, Flev%nsweeps
-             call Flev%sweeper%sweep(pf, Flev, t0, dt)
+            call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+            call Flev%sweeper%sweep(pf, Flev, t0, dt)
             call pf_residual(pf, Flev, dt)
             pf%state%sweep = j
             call call_hooks(pf, Flev%level, PF_POST_SWEEP)
