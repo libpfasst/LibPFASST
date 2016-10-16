@@ -412,12 +412,12 @@ contains
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           Flev => pf%levels(pf%nlevels)
-          call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
           do j = 1, Flev%nsweeps_pred
-             call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
-             call pf_residual(pf, Flev, dt)
-             pf%state%sweep = j
-             call call_hooks(pf, Flev%level, PF_POST_SWEEP)
+            call call_hooks(pf, Flev%level, PF_PRE_SWEEP)
+            call Flev%sweeper%sweep(pf, Flev, pf%state%t0, dt)
+            call pf_residual(pf, Flev, dt)
+            pf%state%sweep = j
+            call call_hooks(pf, Flev%level, PF_POST_SWEEP)
           end do
        end if
 
