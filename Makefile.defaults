@@ -7,7 +7,7 @@ CC = mpicc
 FC = mpifort
 NOSE = nosetests
 
-FFLAGS = -Iinclude -Jinclude -msse2 -cpp -frecord-gcc-switches -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow -fcheck=all -g3 -ggdb
+FFLAGS = -Iinclude -Jinclude -cpp -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow -fcheck=all -g3 -ggdb
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
