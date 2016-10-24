@@ -50,7 +50,7 @@ contains
     real(pfdp)                :: t0k
 
 !    print *,'entering predictor ',pf%rank
-    pf%state%sweep = -1
+    pf%state%sweep = -2
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
@@ -171,7 +171,7 @@ contains
     end if
 !    print *,'finishing predictor ',pf%rank
     call end_timer(pf, TPREDICTOR)
-    pf%state%sweep = 0
+    pf%state%sweep = -1
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
@@ -239,7 +239,7 @@ contains
          pf%state%status = PF_STATUS_ITERATING
 
     call pf_send_status(pf, 8000+k)
-    pf%state%sweep = 1
+    pf%state%sweep = 0
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
     if (pf%window == PF_WINDOW_BLOCK) then
@@ -365,7 +365,7 @@ contains
        qbroadcast = .false.
 
        if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
-         pf%state%sweep = k-1
+         pf%state%sweep = 0
          call call_hooks(pf, -1, PF_POST_STEP)
          did_post_step_hook = .true.
          pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
@@ -376,7 +376,7 @@ contains
        if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
 
           if (.not. did_post_step_hook) then
-            pf%state%sweep = k-1
+            pf%state%sweep = 0
             call call_hooks(pf, -1, PF_POST_STEP)
             pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
             pf%state%mysteps = pf%state%mysteps + 1
@@ -417,7 +417,7 @@ contains
        pf%state%cycle = 1
 
        call start_timer(pf, TITERATION)
-       pf%state%sweep = k-1
+       pf%state%sweep = 0
        call call_hooks(pf, -1, PF_PRE_ITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
@@ -461,7 +461,7 @@ contains
        end if
 
        call pf_v_cycle(pf, k, pf%state%t0, dt)
-       pf%state%sweep = k
+       pf%state%sweep = 0
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
 
