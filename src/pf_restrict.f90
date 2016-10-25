@@ -132,8 +132,9 @@ contains
          tmpF(LevF%nnodes), &    ! fine integral of fine function values
          tmpFr(LevG%nnodes)      ! coarse integral of restricted fine function values
 
-    pf%state%sweep = 0
-    call call_hooks(pf, LevF%level, PF_PRE_RESTRICT_ALL)
+    pf%state%sweep = 1
+!    call call_hooks(pf, LevF%level, PF_PRE_RESTRICT_ALL)
+    call call_hooks(pf, -1, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + LevF%level - 1)
 
     !
@@ -226,8 +227,9 @@ contains
     end do
 
     call end_timer(pf, TRESTRICT + LevF%level - 1)
-    pf%state%sweep = 0
-    call call_hooks(pf, LevF%level, PF_POST_RESTRICT_ALL)
+    pf%state%sweep = 1
+!    call call_hooks(pf, LevF%level, PF_POST_RESTRICT_ALL)
+    call call_hooks(pf, -1, PF_POST_RESTRICT_ALL)
 
   end subroutine restrict_time_space_fas
 
