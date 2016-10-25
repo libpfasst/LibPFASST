@@ -416,20 +416,31 @@ contains
           call pf_broadcast(pf, Flev%send, Flev%nvars, pf%comm%nproc-1)
           call Flev%encap%unpack(Flev%q0,Flev%send)
        end if
+
+       !
        ! predictor, if requested
+       !
+
        if (pf%state%status == PF_STATUS_PREDICTOR) &
             call pf_predictor(pf, pf%state%t0, dt)
 
        !
-       ! perform fine sweeps
+       ! start iteration
        !
 
        pf%state%iter  = pf%state%iter + 1
        pf%state%cycle = 1
 
        call start_timer(pf, TITERATION)
+       do l = 1,pf%nlevels
+         call pf_residual(pf,pf%levels(l),dt)
+       end do ! `l`
        pf%state%sweep = 1
        call call_hooks(pf, -1, PF_PRE_ITERATION)
+
+       !
+       ! perform fine sweeps
+       !
 
        ! XXX: this if statement is necessary for block mode cycling...
        if (pf%state%status /= PF_STATUS_CONVERGED) then
@@ -460,6 +471,10 @@ contains
           call pf_post(pf, Flev, Flev%level*10000+k)
        end do
 
+       !
+       ! among other things restrict
+       !
+
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           Flev => pf%levels(pf%nlevels)
@@ -473,7 +488,19 @@ contains
 
        end if
 
+       !
+       ! V-cycle
+       !
+
        call pf_v_cycle(pf, k, pf%state%t0, dt)
+
+       !
+       ! hook
+       !
+
+       do l = 1,pf%nlevels
+         call pf_residual(pf,pf%levels(l),dt)
+       end do ! `l`
        pf%state%sweep = 1
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
