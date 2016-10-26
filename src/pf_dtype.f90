@@ -201,9 +201,10 @@ module pf_mod_dtype
      integer,         pointer :: nhooks(:,:)
 
      ! timing
-     logical    :: echo_timings  = .false.
-     integer(8) :: timers(100)   = 0
-     integer(8) :: runtimes(100) = 0
+     logical    :: calc_residual = .true.
+     logical    :: echo_timings   = .false.
+     integer(8) :: timers(100)    = 0
+     integer(8) :: runtimes(100)  = 0
 
      ! misc
      character(512) :: outdir

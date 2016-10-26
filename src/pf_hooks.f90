@@ -19,6 +19,7 @@
 
 module pf_mod_hooks
   use pf_mod_dtype
+  use pf_mod_utils
   implicit none
 
   integer, parameter :: &
@@ -98,6 +99,16 @@ contains
     integer,           intent(in)            :: level, hook
 
     integer :: i, l
+
+    if(pf%calc_residual) then
+      if(level .eq. -1) then
+        do l = 1,pf%nlevels
+          call pf_residual(pf,pf%levels(l),pf%state%dt)
+        end do
+      else
+        call pf_residual(pf,pf%levels(level),pf%state%dt)
+      end if
+    end if
 
     call start_timer(pf, THOOKS)
 

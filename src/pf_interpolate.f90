@@ -45,8 +45,8 @@ contains
     type(c_ptr) ::  delGF(LevG%nnodes)  !  Coarse in time but fine in space
 
     pf%state%sweep = 1
-!    call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
-    call call_hooks(pf, -1, PF_PRE_INTERP_ALL)
+    call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
+
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
@@ -145,9 +145,10 @@ contains
     end do
 
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
+
     pf%state%sweep = 1
-!    call call_hooks(pf, LevF%level, PF_POST_INTERP_ALL)
-    call call_hooks(pf, -1, PF_POST_INTERP_ALL)
+    call call_hooks(pf, LevF%level, PF_POST_INTERP_ALL)
+
   end subroutine interpolate_time_space
 
   subroutine interpolate_q0(pf, LevF, LevG)
@@ -160,8 +161,8 @@ contains
     type(c_ptr) ::    q0F,q0G
 
     pf%state%sweep = 1
-!    call call_hooks(pf, LevF%level, PF_PRE_INTERP_Q0)
-    call call_hooks(pf, -1, PF_PRE_INTERP_Q0)
+    call call_hooks(pf, LevF%level, PF_PRE_INTERP_Q0)
+
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
   
     ! create workspaces
@@ -196,9 +197,9 @@ contains
     call LevG%encap%destroy(q0G)
 
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
+
     pf%state%sweep = 1
-!    call call_hooks(pf, LevF%level, PF_POST_INTERP_Q0)
-    call call_hooks(pf, -1, PF_POST_INTERP_Q0)
+    call call_hooks(pf, LevF%level, PF_POST_INTERP_Q0)
   end subroutine interpolate_q0
 
 end module pf_mod_interpolate

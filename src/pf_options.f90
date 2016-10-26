@@ -30,7 +30,7 @@ contains
     ! local versions of pfasst parameters
     integer          :: niters, nlevels, qtype, window, taui0
     double precision :: abs_res_tol, rel_res_tol
-    logical          :: pipeline_g , pfasst_pred, echo_timings
+    logical          :: pipeline_g , pfasst_pred, calc_residual, echo_timings
 
     ! stuff for reading the command line
     integer, parameter :: un = 9
@@ -42,20 +42,22 @@ contains
 
     ! define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, window
-    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir
+    namelist /pf_params/ pipeline_g, pfasst_pred, calc_residual, echo_timings
+    namelist /pf_params/ taui0, outdir
 
     ! set local variables to pf_pfasst defaults
-    nlevels      = pf%nlevels
-    niters       = pf%niters
-    qtype        = pf%qtype
-    window       = pf%window
-    abs_res_tol  = pf%abs_res_tol
-    rel_res_tol  = pf%rel_res_tol
-    pipeline_g   = pf%pipeline_g
-    pfasst_pred  = pf%pfasst_pred
-    echo_timings = pf%echo_timings
-    taui0        = pf%taui0
-    outdir       = pf%outdir
+    nlevels       = pf%nlevels
+    niters        = pf%niters
+    qtype         = pf%qtype
+    window        = pf%window
+    abs_res_tol   = pf%abs_res_tol
+    rel_res_tol   = pf%rel_res_tol
+    pipeline_g    = pf%pipeline_g
+    pfasst_pred   = pf%pfasst_pred
+    calc_residual = pf%calc_residual
+    echo_timings  = pf%echo_timings
+    taui0         = pf%taui0
+    outdir        = pf%outdir
 
     ! open the file fname and read the pfasst namelist
     if (present(fname))  then
@@ -79,17 +81,18 @@ contains
     end if
 
     ! re-assign the pfasst internals
-    pf%niters       = niters
-    pf%nlevels      = nlevels
-    pf%qtype        = qtype
-    pf%window       = window
-    pf%abs_res_tol  = abs_res_tol
-    pf%rel_res_tol  = rel_res_tol
-    pf%pipeline_g   = pipeline_g
-    pf%pfasst_pred  = pfasst_pred
-    pf%echo_timings = echo_timings
-    pf%taui0        = taui0
-    pf%outdir       = outdir
+    pf%niters        = niters
+    pf%nlevels       = nlevels
+    pf%qtype         = qtype
+    pf%window        = window
+    pf%abs_res_tol   = abs_res_tol
+    pf%rel_res_tol   = rel_res_tol
+    pf%pipeline_g    = pipeline_g
+    pf%pfasst_pred   = pfasst_pred
+    pf%calc_residual = calc_residual
+    pf%echo_timings  = echo_timings
+    pf%taui0         = taui0
+    pf%outdir        = outdir
 
     if (pf%nlevels < 1) then
        write(*,*) 'Bad specification for nlevels=', pf%nlevels
@@ -149,6 +152,11 @@ contains
        write(un,*) 'PFASST Predictor style  '
     else
        write(un,*) 'Serial Predictor style  '
+    end if
+    if(pf%calc_residual) then
+       write(un,*) 'Residuals are calculated  '
+    else
+       write(un,*) 'Residuals are not calculated  '
     end if
 
     write(un,*) ''
