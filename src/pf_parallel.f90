@@ -61,7 +61,6 @@ contains
 
        do l = pf%nlevels, 2, -1
           Flev => pf%levels(l); Glev => pf%levels(l-1)
-          call pf_residual(pf, Flev, dt)
           call restrict_time_space_fas(pf, t0, dt, Flev, Glev)
           call save(Glev)
           call Glev%encap%copy(Glev%q0, Glev%Q(1))
@@ -527,7 +526,6 @@ contains
 
 !    do j = 1, Flev%nsweeps_pred
 !      call Flev%sweeper%sweep(pf, Flev, t0, dt)
-!      call pf_residual(pf, Flev, dt)
 !      call call_hooks(pf, Flev%level, PF_POST_SWEEP)
 !    end do
 
