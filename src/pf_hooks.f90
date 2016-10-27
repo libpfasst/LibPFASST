@@ -100,6 +100,8 @@ contains
 
     integer :: i, l
 
+    call start_timer(pf, THOOKS)
+
     if(pf%calc_residual) then
       if(level .eq. -1) then
         do l = 1,pf%nlevels
@@ -109,8 +111,6 @@ contains
         call pf_residual(pf,pf%levels(level),pf%state%dt)
       end if
     end if
-
-    call start_timer(pf, THOOKS)
 
     pf%state%hook = hook
 
