@@ -107,7 +107,7 @@ contains
     if(level .eq. -1) then
       do l = 1,pf%nlevels
         do i = 1,pf%nhooks(l,hook)
-          if(pf%calc_residual) then ! If requested (i.e. `nhooks .eq. 1`), calculate residual (there are not so many hooks and not so many calls so the number of `if` checks should be acceptable; otherwise, move the residual check outside the level check but then the whole level `if-then-else` block has to be duplicated)
+          if(pf%calc_residual) then ! If requested [i.e. `(calc_residual .eq. .true.) .and. (nhooks .eq. 1)`], calculate residual (there are not so many hooks and not so many calls so the number of `if` checks should be acceptable; otherwise, move the residual check outside the level check but then the whole level `if-then-else` block has to be duplicated)
             call pf_residual(pf,pf%levels(l),pf%state%dt)
           end if
           call pf%hooks(l,hook,i)%proc(pf,pf%levels(l),pf%state,pf%levels(l)%ctx)
@@ -116,7 +116,7 @@ contains
     else
       l = level
       do i = 1,pf%nhooks(l,hook)
-        if(pf%calc_residual) then ! If requested (i.e. `nhooks .eq. 1`), calculate residual (there are not so many hooks and not so many calls so the number of `if` checks should be acceptable; otherwise, move the residual check outside the level check but then the whole level `if-then-else` block has to be duplicated)
+        if(pf%calc_residual) then ! If requested [i.e. `(calc_residual .eq. .true.) .and. (nhooks .eq. 1)`], calculate residual (there are not so many hooks and not so many calls so the number of `if` checks should be acceptable; otherwise, move the residual check outside the level check but then the whole level `if-then-else` block has to be duplicated)
           call pf_residual(pf,pf%levels(level),pf%state%dt)
         end if
         call pf%hooks(l,hook,i)%proc(pf,pf%levels(l),pf%state,pf%levels(l)%ctx)
