@@ -50,7 +50,7 @@ contains
     real(pfdp)                :: t0k
 
     pf%state%sweep = 1
-    call call_hooks(pf, pf%nlevels, PF_PRE_PREDICTOR) ! Only the finest level is initialized
+    call call_hooks(pf, 1, PF_PRE_PREDICTOR) ! Only the finest level is initialized
 
     call start_timer(pf, TPREDICTOR)
 
