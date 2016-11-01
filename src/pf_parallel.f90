@@ -50,7 +50,7 @@ contains
     real(pfdp)                :: t0k
 
     pf%state%sweep = 1
-    call call_hooks(pf, 1, PF_PRE_PREDICTOR) ! Only the finest level is initialized
+    call call_hooks(pf, 1, PF_PRE_PREDICTOR) ! Only the coarsest level is initialized
 
     call start_timer(pf, TPREDICTOR)
 
@@ -162,7 +162,7 @@ contains
     call end_timer(pf, TPREDICTOR)
 
     pf%state%sweep = 1
-    call call_hooks(pf, -1, PF_POST_PREDICTOR)
+    call call_hooks(pf, 1, PF_POST_PREDICTOR) ! The coarse level better have meaningful data now
 
     pf%state%iter = 0
     pf%state%status = PF_STATUS_ITERATING
