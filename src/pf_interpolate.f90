@@ -45,7 +45,7 @@ contains
     type(c_ptr) ::  delGF(LevG%nnodes)  !  Coarse in time but fine in space
 
     pf%state%sweep = 1
-    call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
+    call call_hooks(pf, LevG%level, PF_PRE_INTERP_ALL)
 
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
@@ -161,7 +161,7 @@ contains
     type(c_ptr) ::    q0F,q0G
 
     pf%state%sweep = 1
-    call call_hooks(pf, LevF%level, PF_PRE_INTERP_Q0)
+    call call_hooks(pf, LevG%level, PF_PRE_INTERP_Q0)
 
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
   

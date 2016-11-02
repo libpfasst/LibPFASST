@@ -133,7 +133,7 @@ contains
          tmpFr(LevG%nnodes)      ! coarse integral of restricted fine function values
 
     pf%state%sweep = 1
-    call call_hooks(pf, LevG%level, PF_PRE_RESTRICT_ALL)
+    call call_hooks(pf, LevF%level, PF_PRE_RESTRICT_ALL)
 
     call start_timer(pf, TRESTRICT + LevF%level - 1)
 
