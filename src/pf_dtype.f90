@@ -201,7 +201,7 @@ module pf_mod_dtype
      integer,         pointer :: nhooks(:,:)
 
      ! timing
-     logical    :: calc_residual = .true.
+     logical    :: calc_residuals = .true.
      logical    :: echo_timings   = .false.
      integer(8) :: timers(100)    = 0
      integer(8) :: runtimes(100)  = 0
