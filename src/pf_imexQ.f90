@@ -25,6 +25,7 @@ module pf_mod_imexQ
   implicit none
 
   integer, parameter, private :: npieces = 2
+  logical,save,private :: use_LUq_ = .false.
 
   type :: pf_imexQ_t
      procedure(pf_f1eval_p), pointer, nopass :: f1eval
@@ -139,9 +140,11 @@ contains
     allocate(imexQ%QtilI(nnodes-1,nnodes))  !  S-BE
 
     imexQ%QtilE = Lev%FEmat
-    imexQ%QtilI = Lev%BEmat
-    imexQ%QtilI = Lev%LUmat
-
+    if (use_LUq_) then
+      imexQ%QtilI = Lev%LUmat
+    else
+      imexQ%QtilI = Lev%BEmat
+    end if
 
     imexQ%QdiffE = Lev%qmat-imexQ%QtilE
     imexQ%QdiffI = Lev%qmat-imexQ%QtilI
@@ -168,13 +171,19 @@ contains
   end subroutine imexQ_integrate
 
   ! Create/destroy IMEXQ sweeper
-  subroutine pf_imexQ_create(sweeper, f1eval, f2eval, f2comp)
+  subroutine pf_imexQ_create(sweeper, f1eval, f2eval, f2comp,use_LUq)
     type(pf_sweeper_t), intent(inout) :: sweeper
     procedure(pf_f1eval_p) :: f1eval
     procedure(pf_f2eval_p) :: f2eval
     procedure(pf_f2comp_p) :: f2comp
-
+    logical,intent(in),optional :: use_LUq
     type(pf_imexQ_t), pointer :: imexQ
+
+
+    if(present(use_LUq)) then
+      use_LUq_ = use_LUq
+    endif
+
 
     allocate(imexQ)
     imexQ%f1eval => f1eval
@@ -198,7 +207,6 @@ contains
 
     type(pf_imexQ_t), pointer :: imexQ
     call c_f_pointer(sweeper%sweeperctx, imexQ)
-
 
     deallocate(imexQ%QdiffI)
     deallocate(imexQ%QdiffE)

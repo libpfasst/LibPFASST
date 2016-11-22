@@ -121,7 +121,7 @@ contains
     end do
     ! Get the LU
     call myLUq(qmat,LUmat,nnodes,1)
-    print *,LUmat
+!    print *,LUmat
 
   end subroutine pf_quadrature
   subroutine pf_myLUexp(A,L,U,Nnodes,scaleLU)
@@ -162,11 +162,6 @@ contains
        end do
     end if
 
-!    print *,'U from LU decomp'
-    do j=1,Nnodes
-!          print *, j, U(j,:)
-    end do
-
   end subroutine pf_myLUexp
   subroutine myLUq(Q,Qtil,Nnodes,fillq)
     real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
@@ -186,9 +181,6 @@ contains
     U = 0.0_pfdp
     N = Nnodes-1
     U=transpose(Q(1:Nnodes-1,2:Nnodes))
-!    do i = 1,N
-!       print *,'row i of Qbefore', i,U(i,:)
-!    end do
 
     do i = 1,N
        if (U(i,i) /= 0.0) then
@@ -202,7 +194,7 @@ contains
     end do
 
     !  Check
-    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
+    if (maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes)))) > 1.0d-12)  print *,'LU error'
     
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
@@ -212,8 +204,6 @@ contains
           Qtil(i,1)=sum(Q(i,1:Nnodes))-sum(Qtil(i,2:Nnodes))
        end do
     end if
-
-    print *,'U from myLUq'
 
   end subroutine myLUq
 

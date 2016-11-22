@@ -142,10 +142,12 @@ contains
     allocate(imp%QdiffI(nnodes-1,nnodes))  !  S-BE
     allocate(imp%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    imp%QtilI = Lev%BEmat
+
 
     if(use_LUq_) then
        imp%QtilI = Lev%LUmat
+     else
+       imp%QtilI = Lev%BEmat
     end if
 
     imp%QdiffI = Lev%qmat-imp%QtilI
