@@ -114,9 +114,7 @@ contains
   subroutine explicitQ_initialize(Lev)
     use pf_mod_dtype
     type(pf_level_t), intent(inout) :: Lev
-    real(pfdp) :: dsdc(Lev%nnodes-1)
-
-    integer :: m,n,nnodes
+    integer :: nnodes
     type(pf_explicitQ_t), pointer :: exp
     call c_f_pointer(Lev%sweeper%sweeperctx, exp)
 
@@ -124,16 +122,8 @@ contains
     allocate(exp%QdiffE(nnodes-1,nnodes))  ! S-FE
     allocate(exp%QtilE(nnodes-1,nnodes))  ! S-FE
 
-    exp%QtilE = 0.0_pfdp
+    exp%QtilE = Lev%FEmat
 
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          exp%QtilE(m,n)   =  dsdc(n)
-       end do
-    end do
-    !  Or do the LU trick
-    !call pf_LUexp(Lev%qmat,exp%QtilE,nnodes)
 
     exp%QdiffE = Lev%qmat-exp%QtilE
 

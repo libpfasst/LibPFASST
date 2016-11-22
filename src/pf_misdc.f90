@@ -163,8 +163,7 @@ contains
   subroutine misdc_initialize(Lev)
     type(pf_level_t), intent(inout) :: Lev
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
-    integer    :: m,n, nnodes
+    integer    ::  nnodes
 
     type(pf_misdc_t), pointer :: misdc
     call c_f_pointer(Lev%sweeper%sweeperctx, misdc)
@@ -175,21 +174,9 @@ contains
     allocate(misdc%QtilE(nnodes-1,nnodes))  !  S-FE
     allocate(misdc%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    misdc%QtilE = 0.0_pfdp
-    misdc%QtilI = 0.0_pfdp
-
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          misdc%QtilE(m,n)   =  dsdc(n)
-          misdc%QtilI(m,n+1) =  dsdc(n)
-       end do
-    end do
-
-!    do m = 1,nnodes-1
-!       print *,'row i of qmat', m,Lev%qmat(m,:)
-!    end do
-!    call myLUq(Lev%qmat,misdc%QtilI,Nnodes,0)
+    misdc%QtilE = Lev%FEmat
+    misdc%QtilI = Lev%BEmat
+!       misdc%QtilI = Lev%LUmat
     misdc%QdiffE = Lev%qmat-misdc%QtilE
     misdc%QdiffI = Lev%qmat-misdc%QtilI
 

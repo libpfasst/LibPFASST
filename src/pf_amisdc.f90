@@ -163,8 +163,7 @@ contains
   subroutine amisdc_initialize(Lev)
     type(pf_level_t), intent(inout) :: Lev
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
-    integer    :: m,n, nnodes
+    integer    ::  nnodes
 
     type(pf_amisdc_t), pointer :: amisdc
     call c_f_pointer(Lev%sweeper%sweeperctx, amisdc)
@@ -175,21 +174,10 @@ contains
     allocate(amisdc%QtilE(nnodes-1,nnodes))  !  S-FE
     allocate(amisdc%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    amisdc%QtilE = 0.0_pfdp
-    amisdc%QtilI = 0.0_pfdp
+    amisdc%QtilE = Lev%FEmat
+    amisdc%QtilI = Lev%BEmat
 
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          amisdc%QtilE(m,n)   =  dsdc(n)
-          amisdc%QtilI(m,n+1) =  dsdc(n)
-       end do
-    end do
-
-!    do m = 1,nnodes-1
-!       print *,'row i of qmat', m,Lev%qmat(m,:)
-!    end do
-!    call myLUq(Lev%qmat,amisdc%QtilI,Nnodes,0)
+!       amisdc%QtilI = Lev%LUmat
     amisdc%QdiffE = Lev%qmat-amisdc%QtilE
     amisdc%QdiffI = Lev%qmat-amisdc%QtilI
 

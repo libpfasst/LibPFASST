@@ -127,8 +127,7 @@ contains
   subroutine imexQ_initialize(Lev)
     type(pf_level_t), intent(inout) :: Lev
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
-    integer    :: m,n, nnodes
+    integer    :: nnodes
 
     type(pf_imexQ_t), pointer :: imexQ
     call c_f_pointer(Lev%sweeper%sweeperctx, imexQ)
@@ -139,21 +138,11 @@ contains
     allocate(imexQ%QtilE(nnodes-1,nnodes))  !  S-FE
     allocate(imexQ%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    imexQ%QtilE = 0.0_pfdp
-    imexQ%QtilI = 0.0_pfdp
+    imexQ%QtilE = Lev%FEmat
+    imexQ%QtilI = Lev%BEmat
+    imexQ%QtilI = Lev%LUmat
 
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          imexQ%QtilE(m,n)   =  dsdc(n)
-          imexQ%QtilI(m,n+1) =  dsdc(n)
-       end do
-    end do
 
-!    do m = 1,nnodes-1
-!       print *,'row i of qmat', m,Lev%qmat(m,:)
-!    end do
-!    call myLUq(Lev%qmat,imexQ%QtilI,Nnodes,0)
     imexQ%QdiffE = Lev%qmat-imexQ%QtilE
     imexQ%QdiffI = Lev%qmat-imexQ%QtilI
 
