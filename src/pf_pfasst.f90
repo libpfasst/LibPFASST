@@ -211,13 +211,16 @@ contains
     allocate(Lev%nflags(nnodes))
     allocate(Lev%s0mat(nnodes-1,nnodes))
     allocate(Lev%qmat(nnodes-1,nnodes))
+    allocate(Lev%LUmat(nnodes-1,nnodes))
+    allocate(Lev%FEmat(nnodes-1,nnodes))
+    allocate(Lev%BEmat(nnodes-1,nnodes))
 
     if (btest(pf%qtype, 8)) then
        call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
-            Lev%nodes, Lev%nflags, Lev%s0mat, Lev%qmat)
+            Lev%nodes, Lev%nflags, Lev%s0mat, Lev%qmat,Lev%LUmat,Lev%FEmat,Lev%BEmat)
     else
        call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            Lev%nodes, Lev%nflags, Lev%s0mat, Lev%qmat)
+            Lev%nodes, Lev%nflags, Lev%s0mat, Lev%qmat,Lev%LUmat,Lev%FEmat,Lev%BEmat)
     end if
 
     call Lev%sweeper%initialize(Lev)
@@ -334,6 +337,9 @@ contains
     deallocate(Lev%nflags)
     deallocate(Lev%qmat)
     deallocate(Lev%s0mat)
+    deallocate(Lev%LUmat)
+    deallocate(Lev%BEmat)
+    deallocate(Lev%FEmat)
 
     ! Q and F
     do m = 1, Lev%nnodes

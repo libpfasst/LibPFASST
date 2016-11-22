@@ -67,6 +67,7 @@ contains
 
     type(pf_implicitQ_t), pointer :: imp
 
+!    if (Lev%residual < 1d-3) return
     call c_f_pointer(Lev%sweeper%sweeperctx, imp)
 
     call start_timer(pf, TLEVEL+Lev%level-1)
@@ -133,7 +134,7 @@ contains
 
     real(pfdp) :: dsdc(Lev%nnodes-1)
 
-    integer :: m,n,nnodes
+    integer :: nnodes
     type(pf_implicitQ_t), pointer :: imp
     call c_f_pointer(Lev%sweeper%sweeperctx, imp)
 
@@ -141,16 +142,10 @@ contains
     allocate(imp%QdiffI(nnodes-1,nnodes))  !  S-BE
     allocate(imp%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    imp%QtilI = 0.0_pfdp
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          imp%QtilI(m,n+1) =  dsdc(n)
-       end do
-    end do
+    imp%QtilI = Lev%BEmat
 
     if(use_LUq_) then
-      call myLUq(Lev%qmat,imp%QtilI,Nnodes,1)
+       imp%QtilI = Lev%LUmat
     end if
 
     imp%QdiffI = Lev%qmat-imp%QtilI

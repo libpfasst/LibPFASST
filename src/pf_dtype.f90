@@ -125,7 +125,10 @@ module pf_mod_dtype
           qmat(:,:), &                  ! integration matrix (0 to node)
           s0mat(:,:), &                 ! integration matrix (node to node)
           rmat(:,:), &                  ! time restriction matrix
-          tmat(:,:)                     ! time interpolation matrix
+          tmat(:,:),  &                 ! time interpolation matrix
+          LUmat(:,:), &                 ! LU version of approximate integration matrix
+          FEmat(:,:), &                 ! Forward Euler version of approximate integration matrix
+          BEmat(:,:)                    ! Backward Euler version of approximate integration matrix
 
      integer(c_int), pointer :: &
           nflags(:)                     ! sdc node flags
