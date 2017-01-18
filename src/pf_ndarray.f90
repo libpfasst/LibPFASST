@@ -43,7 +43,6 @@ module pf_mod_ndarray
    contains
      procedure :: create0 => ndarray_create0
      procedure :: create1 => ndarray_create1
-     procedure :: create2 => ndarray_create2
   end type ndarray_factory
 
   type, extends(pf_encap_t) :: ndarray
@@ -113,19 +112,6 @@ contains
        call ndarray_build(x(i), shape)
     end do
   end subroutine ndarray_create1
-
-  subroutine ndarray_create2(this, x, n, m, level, kind, nvars, shape)
-    class(ndarray_factory), intent(inout)              :: this
-    class(pf_encap_t),      intent(inout), allocatable :: x(:, :)
-    integer,                intent(in   )              :: n, m, level, kind, nvars, shape(:)
-    integer :: i, j
-    allocate(ndarray::x(n,m))
-    do i = 1, n
-       do j = 1, m
-          call ndarray_build(x(i,j), shape)
-       end do
-    end do
-  end subroutine ndarray_create2
 
   ! Deallocate/destroy solution.
   ! subroutine ndarray_destroy(solptr)

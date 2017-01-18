@@ -101,7 +101,6 @@ module pf_mod_dtype
    contains
      procedure(pf_encap_create0_p),  deferred :: create0
      procedure(pf_encap_create1_p),  deferred :: create1
-     procedure(pf_encap_create2_p),  deferred :: create2
   end type pf_factory_t
 
   type :: pf_level_t
@@ -136,11 +135,15 @@ module pf_mod_dtype
           R(:), &                       ! full residuals
           I(:), &                       ! 0 to node integrals
           S(:), &                       ! node to node integrals
+          Fflt(:), &                    ! functions values at sdc nodes (flat)
           tau(:), &                     ! fas correction
           tauQ(:), &                    ! fas correction in Q form
-          F(:,:), &                     ! functions values at sdc nodes
-          pF(:,:), &                    ! functions at sdc nodes, previous sweep
+          pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
           qend
+
+     class(pf_encap_t), pointer :: &
+          F(:,:), &                     ! functions values at sdc nodes
+          pF(:,:)                       ! functions at sdc nodes, previous sweep
 
      integer, allocatable :: shape(:) ! user shape
 
@@ -290,13 +293,6 @@ module pf_mod_dtype
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
        integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
      end subroutine pf_encap_create1_p
-
-     subroutine pf_encap_create2_p(this, x, n, m, level, kind, nvars, shape)
-       import pf_factory_t, pf_encap_t
-       class(pf_factory_t), intent(inout)              :: this
-       class(pf_encap_t),   intent(inout), allocatable :: x(:, :)
-       integer,             intent(in   )              :: n, m, level, kind, nvars, shape(:)
-     end subroutine pf_encap_create2_p
 
      subroutine pf_encap_setval_p(this, val, flags)
        import pf_encap_t, pfdp

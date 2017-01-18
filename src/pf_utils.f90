@@ -83,7 +83,7 @@ contains
     integer :: m, p
 
     if (Lev%Finterp) then
-       if (allocated(Lev%pF)) then
+       if (allocated(Lev%pFflt)) then
           do m = 1, Lev%nnodes
              do p = 1,size(Lev%F(1,:))
                 call Lev%pF(m,p)%copy(Lev%F(m,p))

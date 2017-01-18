@@ -115,7 +115,7 @@ contains
   subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
     type(pf_pfasst_t), intent(in   ) :: pf
-    type(pf_level_t),  intent(inout) :: F
+    type(pf_level_t),  intent(inout), target :: F
 
     integer :: m, p, nvars, nnodes, npieces
 
@@ -189,13 +189,15 @@ contains
     !
     npieces = F%sweeper%npieces
     call F%factory%create1(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
-    call F%factory%create2(F%F, nnodes, npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%factory%create1(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    F%F(1:nnodes,1:npieces) => F%Fflt
     call F%factory%create1(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%factory%create1(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%factory%create1(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     if (F%level < pf%nlevels) then
        if (F%Finterp) then
-          call F%factory%create2(F%pF, nnodes, npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+          call F%factory%create1(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+          F%pF(1:nnodes,1:npieces) => F%pFflt
        end if
        call F%factory%create1(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
