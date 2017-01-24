@@ -81,8 +81,6 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
-     procedure(pf_transfer_p),     deferred :: restrict
-     procedure(pf_transfer_p),     deferred :: interpolate
   end type pf_sweeper_t
 
   type, abstract :: pf_encap_t
@@ -103,11 +101,11 @@ module pf_mod_dtype
      procedure(pf_encap_create1_p),  deferred :: create1
   end type pf_factory_t
 
-  type :: pf_level_t
+  type, abstract :: pf_level_t
      integer     :: nvars = -1          ! number of variables (dofs)
      integer     :: nnodes = -1         ! number of sdc nodes
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     integer     :: nsweeps_pred = 1         ! number of sdc sweeps to perform
+     integer     :: nsweeps_pred = 1    ! number of sdc sweeps to perform (predictor)
      integer     :: level = -1          ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
@@ -145,9 +143,13 @@ module pf_mod_dtype
           F(:,:), &                     ! functions values at sdc nodes
           pF(:,:)                       ! functions at sdc nodes, previous sweep
 
-     integer, allocatable :: shape(:) ! user shape
+     integer, allocatable :: shape(:)   ! user shape
 
      logical :: allocated = .false.
+
+   contains
+     procedure(pf_transfer_p),     deferred :: restrict
+     procedure(pf_transfer_p),     deferred :: interpolate
   end type pf_level_t
 
   type :: pf_comm_t
@@ -176,6 +178,7 @@ module pf_mod_dtype
   end type pf_comm_t
 
   type :: pf_pfasst_t
+
      integer :: nlevels = -1            ! number of pfasst levels
      integer :: niters  = 5             ! number of iterations
      integer :: rank    = -1            ! rank of current processor
@@ -193,7 +196,8 @@ module pf_mod_dtype
 
      ! pf objects
      type(pf_state_t), pointer :: state
-     type(pf_level_t), pointer :: levels(:)
+     class(pf_level_t), pointer :: levels(:)
+!     class(pf_level_t), allocatable :: levels(:)
      type(pf_comm_t),  pointer :: comm
 
      ! hooks
@@ -216,7 +220,7 @@ module pf_mod_dtype
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
        type(pf_pfasst_t), intent(inout) :: pf
-       type(pf_level_t),  intent(inout) :: level
+       class(pf_level_t), intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
      end subroutine pf_hook_p
 
@@ -226,13 +230,13 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout) :: pf
        real(pfdp),          intent(in)    :: dt, t0
-       type(pf_level_t),    intent(inout) :: Lev
+       class(pf_level_t),   intent(inout) :: Lev
      end subroutine pf_sweep_p
 
      subroutine pf_evaluate_p(this, lev, t, m)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_level_t),    intent(inout) :: lev
+       class(pf_level_t),   intent(inout) :: lev
        real(pfdp),          intent(in)    :: t
        integer,             intent(in)    :: m
      end subroutine pf_evaluate_p
@@ -240,14 +244,14 @@ module pf_mod_dtype
      subroutine pf_evaluate_all_p(this, lev, t)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_level_t),    intent(inout) :: lev
+       class(pf_level_t),   intent(inout) :: lev
        real(pfdp),          intent(in)    :: t(:)
      end subroutine pf_evaluate_all_p
 
      subroutine pf_initialize_p(this, lev)
        import pf_sweeper_t, pf_level_t
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_level_t),    intent(inout) :: lev
+       class(pf_level_t),   intent(inout) :: lev
      end subroutine pf_initialize_p
 
      subroutine pf_sweepdestroy_p(this)
@@ -258,7 +262,7 @@ module pf_mod_dtype
      subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC)
        import pf_sweeper_t, pf_level_t, pf_encap_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_level_t),    intent(in)    :: lev
+       class(pf_level_t),   intent(in)    :: lev
        class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),          intent(in)    :: dt
        class(pf_encap_t),   intent(inout) :: fintSDC(:)
@@ -267,14 +271,16 @@ module pf_mod_dtype
      subroutine pf_residual_p(this, lev, dt)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_level_t),    intent(inout) :: Lev
+       class(pf_level_t),   intent(inout) :: Lev
        real(pfdp),          intent(in)    :: dt
      end subroutine pf_residual_p
 
      ! transfer interfaces
      subroutine pf_transfer_p(levelF, levelG, qFp, qGp, t)
-       import pf_sweeper_t, pf_encap_t, pfdp
-       class(pf_sweeper_t), intent(inout) :: levelF, levelG
+       ! import pf_sweeper_t, pf_encap_t, pfdp
+       ! class(pf_sweeper_t), intent(inout) :: levelF, levelG
+       import pf_level_t, pf_encap_t, pfdp
+       class(pf_level_t), intent(inout) :: levelF, levelG
        class(pf_encap_t),   intent(inout) :: qFp, qGp
        real(pfdp),          intent(in)    :: t
      end subroutine pf_transfer_p
@@ -348,14 +354,14 @@ module pf_mod_dtype
      subroutine pf_post_p(pf, level, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf
-       type(pf_level_t),  intent(inout) :: level
+       class(pf_level_t), intent(inout) :: level
        integer,           intent(in)    :: tag
      end subroutine pf_post_p
 
      subroutine pf_recv_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
-       type(pf_level_t),  intent(inout) :: level
+       class(pf_level_t), intent(inout) :: level
        integer,           intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_recv_p
@@ -369,7 +375,7 @@ module pf_mod_dtype
      subroutine pf_send_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
-       type(pf_level_t),  intent(inout) :: level
+       class(pf_level_t), intent(inout) :: level
        integer,           intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_send_p

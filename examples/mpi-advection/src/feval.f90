@@ -22,6 +22,12 @@ module feval
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
+  type, extends(pf_level_t) :: ad_level_t
+   contains
+     procedure :: restrict
+     procedure :: interpolate
+  end type ad_level_t
+
   type, extends(pf_imexQ_t) :: ad_sweeper_t
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:)              ! work space
@@ -31,8 +37,8 @@ module feval
      procedure :: f1eval
      procedure :: f2eval
      procedure :: f2comp
-     procedure :: restrict
-     procedure :: interpolate
+     ! procedure :: restrict
+     ! procedure :: interpolate
      final :: destroy0, destroy1
   end type ad_sweeper_t
 
@@ -216,21 +222,28 @@ contains
   end subroutine f2comp
 
   subroutine interpolate(levelF, levelG, qFp, qGp, t)
-    class(ad_sweeper_t), intent(inout) :: levelF
-    class(pf_sweeper_t), intent(inout) :: levelG
-    class(pf_encap_t),   intent(inout) :: qFp, qGp
-    real(pfdp),          intent(in   ) :: t
+    class(ad_level_t), intent(inout) :: levelF
+    class(pf_level_t), intent(inout) :: levelG
+    class(pf_encap_t), intent(inout) :: qFp, qGp
+    real(pfdp),        intent(in   ) :: t
 
     real(pfdp),      pointer :: qF(:), qG(:)
     complex(kind=8), pointer :: wkF(:), wkG(:)
 
     integer :: nvarF, nvarG, xrat
 
-    type(ad_sweeper_t), pointer :: levelGad
+    type(ad_sweeper_t), pointer :: adF, adG
 
-    select type(levelG)
+    select type(swp => levelG%sweeper)
     type is (ad_sweeper_t)
-       levelGad => levelG
+       adG => swp
+    class default
+       stop
+    end select
+
+    select type(swp => levelF%sweeper)
+    type is (ad_sweeper_t)
+       adF => swp
     class default
        stop
     end select
@@ -247,27 +260,27 @@ contains
        return
     endif
 
-    wkF => levelF%wk
-    wkG => levelGad%wk
+    wkF => adF%wk
+    wkG => adG%wk
 
     wkG = qG
-    call fftw_execute_dft(levelGad%ffft, wkG, wkG)
+    call fftw_execute_dft(adG%ffft, wkG, wkG)
     wkG = wkG / nvarG
 
     wkF = 0.0d0
     wkF(1:nvarG/2) = wkG(1:nvarG/2)
     wkF(nvarF-nvarG/2+2:nvarF) = wkG(nvarG/2+2:nvarG)
 
-    call fftw_execute_dft(levelF%ifft, wkF, wkF)
+    call fftw_execute_dft(adF%ifft, wkF, wkF)
 
     qF = real(wkF)
   end subroutine interpolate
 
   subroutine restrict(levelF, levelG, qFp, qGp, t)
-    class(ad_sweeper_t), intent(inout) :: levelF
-    class(pf_sweeper_T), intent(inout) :: levelG
-    class(pf_encap_t),   intent(inout) :: qFp, qGp
-    real(pfdp),          intent(in   ) :: t
+    class(ad_level_t), intent(inout) :: levelF
+    class(pf_level_t), intent(inout) :: levelG
+    class(pf_encap_t), intent(inout) :: qFp, qGp
+    real(pfdp),        intent(in   ) :: t
 
     real(pfdp), pointer :: qF(:), qG(:)
 

@@ -63,7 +63,7 @@ contains
   subroutine restrict_sdc(LevF, LevG, qF, qG, integral,tF)
     use pf_mod_utils, only: pf_apply_mat
 
-    type(pf_level_t),  intent(inout) :: LevF, LevG
+    class(pf_level_t),  intent(inout) :: LevF, LevG
     class(pf_encap_t), intent(inout) :: qF(:), qG(:)
     logical,           intent(in)    :: integral
     real(pfdp),        intent(in) :: tF(:)
@@ -78,7 +78,7 @@ contains
        do m = 1, LevF%nnodes-1
           ! call LevG%factory%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
           !      LevG%nvars, LevG%shape)
-          call LevF%sweeper%restrict(LevG%sweeper, qF(m), qFr(m), tF(m))
+          call LevF%restrict(LevG, qF(m), qFr(m), tF(m))
        end do
 
        ! when restricting '0 to node' integral terms, skip the first
@@ -88,7 +88,7 @@ contains
 
        call LevG%factory%create1(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
        do m = 1, LevF%nnodes
-          call LevF%sweeper%restrict(LevG%sweeper, qF(m), qFr(m), tF(m))
+          call LevF%restrict(LevG, qF(m), qFr(m), tF(m))
        end do
 
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat, qFr)
@@ -108,7 +108,7 @@ contains
   subroutine restrict_time_space_fas(pf, t0, dt, LevF, LevG)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
-    type(pf_level_t),  intent(inout) :: LevF, LevG
+    class(pf_level_t),  intent(inout) :: LevF, LevG
 
     integer    :: m, n
     real(pfdp) :: tG(LevG%nnodes)

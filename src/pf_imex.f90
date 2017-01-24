@@ -75,7 +75,7 @@ contains
     class(pf_imex_t),  intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: dt, t0
-    type(pf_level_t),  intent(inout) :: lev
+    class(pf_level_t), intent(inout) :: lev
 
     integer     :: m, n
     real(pfdp)  :: t
@@ -127,10 +127,10 @@ contains
 
   ! Evaluate function values
   subroutine imex_evaluate(this, lev, t, m)
-    class(pf_imex_t), intent(inout) :: this
-    real(pfdp),       intent(in   ) :: t
-    integer,          intent(in   ) :: m
-    type(pf_level_t), intent(inout) :: lev
+    class(pf_imex_t),  intent(inout) :: this
+    real(pfdp),        intent(in   ) :: t
+    integer,           intent(in   ) :: m
+    class(pf_level_t), intent(inout) :: lev
 
     call this%f1eval(lev%Q(m), t, lev%level, lev%F(m,1))
     call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
@@ -138,8 +138,8 @@ contains
 
   ! Initialize matrices
   subroutine imex_initialize(this, lev)
-    class(pf_imex_t), intent(inout) :: this
-    type(pf_level_t), intent(inout) :: lev
+    class(pf_imex_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
     integer    :: m, nnodes
@@ -163,9 +163,9 @@ contains
   ! Compute SDC integral
   subroutine imex_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_imex_t),  intent(inout) :: this
-    type(pf_level_t),  intent(in)    :: lev
-    class(pf_encap_t), intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),        intent(in)    :: dt
+    class(pf_level_t), intent(in   ) :: lev
+    class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
+    real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
@@ -181,16 +181,16 @@ contains
   end subroutine imex_integrate
 
   subroutine imex_residual(this, lev, dt)
-    class(pf_imex_t), intent(inout) :: this
-    type(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: dt
+    class(pf_imex_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    real(pfdp),        intent(in   ) :: dt
     call pf_generic_residual(this, lev, dt)
   end subroutine imex_residual
 
   subroutine imex_evaluate_all(this, lev, t)
-    class(pf_imex_t), intent(inout) :: this
-    type(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: t(:)
+    class(pf_imex_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    real(pfdp),        intent(in   ) :: t(:)
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine imex_evaluate_all
 

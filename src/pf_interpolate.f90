@@ -33,7 +33,7 @@ contains
   subroutine interpolate_time_space(pf, t0, dt, LevF, LevG, Finterp)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
-    type(pf_level_t),  intent(inout) :: LevF, LevG
+    class(pf_level_t),  intent(inout) :: LevF, LevG
     logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
 
     integer    :: m, n, p
@@ -65,7 +65,7 @@ contains
     do m = 1, LevG%nnodes
        call delG(m)%copy(LevG%Q(m))
        call delG(m)%axpy(-1.0_pfdp, LevG%pQ(m))
-       call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
+       call LevF%interpolate(LevG, delGF(m), delG(m), tG(m))
     end do
 
     ! interpolate corrections
@@ -89,7 +89,7 @@ contains
             call delG(m)%copy(LevG%F(m,p))
             call delG(m)%axpy(-1.0_pfdp, LevG%pF(m,p))
 
-            call LevF%sweeper%interpolate(LevG%sweeper, delGF(m), delG(m), tG(m))
+            call LevF%interpolate(LevG, delGF(m), delG(m), tG(m))
          end do
 
          ! interpolate corrections  in time
@@ -140,7 +140,7 @@ contains
     !  Use to update the fine initial condition from increment
 
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: LevF, LevG
+    class(pf_level_t),  intent(inout) :: LevF, LevG
 
     class(pf_encap_t), allocatable ::    delG, delF
     class(pf_encap_t), allocatable ::    q0F,q0G
@@ -163,10 +163,10 @@ contains
     call q0G%unpack(LevG%q0)
     call q0F%unpack(LevF%q0)
 
-    call LevF%sweeper%restrict(LevG%sweeper, q0F, delG, pf%state%t0)
+    call LevF%restrict(LevG, q0F, delG, pf%state%t0)
     call delG%axpy(-1.0_pfdp, q0G)
 
-    call LevF%sweeper%interpolate(levG%sweeper, delF, delG, pf%state%t0)
+    call LevF%interpolate(levG, delF, delG, pf%state%t0)
     call q0F%axpy(-1.0_pfdp, delF)
     call q0F%pack(LevF%q0)
 

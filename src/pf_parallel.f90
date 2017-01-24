@@ -42,10 +42,10 @@ contains
   ! ITERATING.
   !
   subroutine pf_predictor(pf, t0, dt)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in   ) :: t0, dt
+    type(pf_pfasst_t), intent(inout), target :: pf
+    real(pfdp),        intent(in   )         :: t0, dt
 
-    type(pf_level_t), pointer :: F, G
+    class(pf_level_t), pointer :: F, G
     integer                   :: j, k, l
     real(pfdp)                :: t0k
 
@@ -303,13 +303,13 @@ contains
   ! Run in parallel using PFASST.
   !
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
-    type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_encap_t), intent(in)    :: q0
-    real(pfdp),        intent(in)    :: dt, tend
+    type(pf_pfasst_t), intent(inout), target   :: pf
+    class(pf_encap_t), intent(in   )           :: q0
+    real(pfdp),        intent(in   )           :: dt, tend
     class(pf_encap_t), intent(inout), optional :: qend
-    integer,           intent(in),    optional :: nsteps
+    integer,           intent(in   ), optional :: nsteps
 
-    type(pf_level_t), pointer :: F, G
+    class(pf_level_t), pointer :: F, G
     integer                   :: j, k, l
     real(pfdp)                :: residual, energy
 
@@ -462,10 +462,10 @@ contains
   ! After predictor, return to fine level.
   !
   subroutine pf_v_cycle_post_predictor(pf, t0, dt)
-    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
-    type(pf_level_t), pointer :: F, G
+    class(pf_level_t), pointer :: F, G
     integer :: l, j
 
     if (pf%nlevels <= 1) return
@@ -499,11 +499,11 @@ contains
   ! Execute a V-cycle, starting and ending from the middle level.
   !
   subroutine pf_v_cycle(pf, iteration, t0, dt)
-    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
     integer,           intent(in)    :: iteration
 
-    type(pf_level_t), pointer :: F, G
+    class(pf_level_t), pointer :: F, G
     integer :: l, j
 
     if (pf%nlevels == 1) then
@@ -586,7 +586,7 @@ contains
   !
   subroutine pf_post(pf, level, tag)
     type(pf_pfasst_t), intent(in)    :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) then
        call pf%comm%post(pf, level, tag)
@@ -623,7 +623,7 @@ contains
 
   subroutine pf_send(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TSEND + level%level - 1)
@@ -638,7 +638,7 @@ contains
 
   subroutine pf_recv(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%level - 1)

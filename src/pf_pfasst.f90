@@ -55,14 +55,10 @@ contains
 
     pf%comm => comm
 
-    allocate(pf%levels(pf%nlevels))
+!    allocate(pf%levels(pf%nlevels))
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
     allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK))
     pf%nhooks = 0
-
-    do l = 1, pf%nlevels
-       call pf_level_create(pf%levels(l), l)
-    end do
 
     allocate(pf%state)
     pf%state%pstatus = 0
@@ -70,22 +66,13 @@ contains
   end subroutine pf_pfasst_create
 
   !
-  ! Create a PFASST level object
-  !
-  subroutine pf_level_create(level, nlevel)
-    type(pf_level_t), intent(inout) :: level
-    integer,          intent(in   ) :: nlevel
-    level%level = nlevel
-  end subroutine pf_level_create
-
-  !
   ! Setup PFASST object
   !
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
-    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_pfasst_t), intent(inout), target :: pf
 
-    type(pf_level_t), pointer :: F, G
+    class(pf_level_t), pointer :: F, G
     integer                   :: l
 
     if (pf%rank < 0) then
@@ -93,6 +80,7 @@ contains
     end if
 
     do l = 1, pf%nlevels
+       pf%levels(l)%level = l
        call pf_level_setup(pf, pf%levels(l))
     end do
 
@@ -114,8 +102,8 @@ contains
   !
   subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
-    type(pf_pfasst_t), intent(in   ) :: pf
-    type(pf_level_t),  intent(inout), target :: F
+    type(pf_pfasst_t), intent(in   )         :: pf
+    class(pf_level_t), intent(inout), target :: F
 
     integer :: m, p, nvars, nnodes, npieces
 
@@ -226,7 +214,7 @@ contains
   ! Deallocate PFASST level
   !
   subroutine pf_level_destroy(F)
-    type(pf_level_t), intent(inout) :: F
+    class(pf_level_t), intent(inout) :: F
 
     integer :: m, p
 

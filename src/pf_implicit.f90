@@ -61,8 +61,8 @@ contains
     use pf_mod_timer
     class(pf_implicit_t), intent(inout) :: this
     type(pf_pfasst_t),    intent(inout) :: pf
-    real(pfdp),           intent(in)    :: dt, t0
-    type(pf_level_t),     intent(inout) :: lev
+    real(pfdp),           intent(in   ) :: dt, t0
+    class(pf_level_t),    intent(inout) :: lev
 
     integer    :: m, n
     real(pfdp) :: t
@@ -111,9 +111,9 @@ contains
   ! Evaluate function values
   subroutine implicit_evaluate(this, lev, t, m)
     class(pf_implicit_t), intent(inout) :: this
-    real(pfdp),           intent(in)    :: t
-    integer,              intent(in)    :: m
-    type(pf_level_t),     intent(inout) :: lev
+    real(pfdp),           intent(in   ) :: t
+    integer,              intent(in   ) :: m
+    class(pf_level_t),    intent(inout) :: lev
 
     ! type(pf_implicit_t), pointer :: imp
     ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
@@ -125,7 +125,7 @@ contains
   subroutine implicit_initialize(this, lev)
     use pf_mod_dtype
     class(pf_implicit_t), intent(inout) :: this
-    type(pf_level_t),     intent(inout) :: lev
+    class(pf_level_t),    intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
 
@@ -149,10 +149,10 @@ contains
   ! Compute SDC integral
   subroutine implicit_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_implicit_t), intent(inout) :: this
-    type(pf_level_t),     intent(in)    :: lev
-    class(pf_encap_t),          intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),           intent(in)    :: dt
-    class(pf_encap_t),          intent(inout) :: fintSDC(:)
+    class(pf_level_t),    intent(in   ) :: lev
+    class(pf_encap_t),    intent(in   ) :: qSDC(:), fSDC(:, :)
+    real(pfdp),           intent(in   ) :: dt
+    class(pf_encap_t),    intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
@@ -168,15 +168,15 @@ contains
 
   subroutine implicit_residual(this, lev, dt)
     class(pf_implicit_t), intent(inout) :: this
-    type(pf_level_t),     intent(inout) :: lev
-    real(pfdp),           intent(in)    :: dt
+    class(pf_level_t),    intent(inout) :: lev
+    real(pfdp),           intent(in   ) :: dt
     call pf_generic_residual(this, lev, dt)
   end subroutine implicit_residual
 
   subroutine implicit_evaluate_all(this, lev, t)
     class(pf_implicit_t), intent(inout) :: this
-    type(pf_level_t),     intent(inout) :: lev
-    real(pfdp),           intent(in)    :: t(:)
+    class(pf_level_t),    intent(inout) :: lev
+    real(pfdp),           intent(in   ) :: t(:)
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine implicit_evaluate_all
 

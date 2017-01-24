@@ -92,9 +92,9 @@ contains
   subroutine pf_mpi_post(pf, level, tag)
     use pf_mod_mpi, only: MPI_REAL8
 
-    type(pf_pfasst_t), intent(in)    :: pf
-    type(pf_level_t),  intent(inout) :: level
-    integer,           intent(in)    :: tag
+    type(pf_pfasst_t), intent(in   ) :: pf
+    class(pf_level_t), intent(inout) :: level
+    integer,           intent(in   ) :: tag
 
     integer :: ierror
 
@@ -200,9 +200,9 @@ contains
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
-    integer,           intent(in)    :: tag
-    logical,           intent(in)    :: blocking
+    class(pf_level_t), intent(inout) :: level
+    integer,           intent(in   ) :: tag
+    logical,           intent(in   ) :: blocking
 
     integer :: ierror, stat(MPI_STATUS_SIZE)
 
@@ -221,9 +221,9 @@ contains
   subroutine pf_mpi_recv(pf, level, tag, blocking)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
-    integer,           intent(in)    :: tag
-    logical,           intent(in)    :: blocking
+    class(pf_level_t), intent(inout) :: level
+    integer,           intent(in   ) :: tag
+    logical,           intent(in   ) :: blocking
 
     integer :: ierror, stat(MPI_STATUS_SIZE)
 

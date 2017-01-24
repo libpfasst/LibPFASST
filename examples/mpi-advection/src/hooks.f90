@@ -12,8 +12,8 @@ contains
     use iso_c_binding
     use feval, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
-    type(pf_state_t),  intent(in)    :: state
+    class(pf_level_t), intent(inout) :: level
+    type(pf_state_t),  intent(in   ) :: state
 
     real(c_double) :: yexact(level%nvars)
     real(pfdp), pointer :: qend(:)
@@ -30,8 +30,8 @@ contains
     use iso_c_binding
     use pf_mod_utils
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
-    type(pf_state_t),  intent(in)    :: state
+    class(pf_level_t), intent(inout) :: level
+    type(pf_state_t),  intent(in   ) :: state
 
     real(pfdp), pointer :: r(:)
     integer :: np

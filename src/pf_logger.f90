@@ -6,8 +6,8 @@ contains
 
   subroutine pf_logger_hook(pf, level, state)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
-    type(pf_state_t),  intent(in)    :: state
+    class(pf_level_t), intent(inout) :: level
+    type(pf_state_t),  intent(in   ) :: state
 
     print '("PF:: trank: ",i4,", step: ",i6,", iter: ",i3,", level: ",i2," location: ",a)', &
          pf%rank, state%step, state%iter, level%level, hook_names(state%hook)

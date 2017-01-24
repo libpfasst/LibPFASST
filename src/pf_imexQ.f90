@@ -41,7 +41,7 @@ contains
     class(pf_imexQ_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: dt, t0
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: Lev
 
     integer     :: m, n
     real(pfdp)  :: t
@@ -105,7 +105,7 @@ contains
   ! Initialize matrices
   subroutine imexQ_initialize(this, Lev)
     class(pf_imexQ_t), intent(inout) :: this
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: Lev
 
     real(pfdp) :: dsdc(Lev%nnodes-1)
     integer    :: m,n, nnodes
@@ -141,7 +141,7 @@ contains
   ! Compute SDC integral
   subroutine imexQ_integrate(this, Lev, qSDC, fSDC, dt, fintSDC)
     class(pf_imexQ_t), intent(inout) :: this
-    type(pf_level_t),  intent(in   ) :: Lev
+    class(pf_level_t), intent(in   ) :: Lev
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)

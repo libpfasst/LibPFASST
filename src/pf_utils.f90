@@ -57,7 +57,7 @@ contains
   ! Spread initial condition.
   !
   subroutine spreadq0(Lev, t0)
-    type(pf_level_t), intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: Lev
     real(pfdp),       intent(in)    :: t0
 
     integer :: m, p
@@ -78,7 +78,7 @@ contains
   ! Save current Q and F.
   !
   subroutine save(Lev)
-    type(pf_level_t), intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: Lev
 
     integer :: m, p
 
@@ -110,7 +110,7 @@ contains
   !
   subroutine pf_residual(pf, Lev, dt)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: dt
 
     real(pfdp) :: norms(Lev%nnodes-1)
@@ -168,7 +168,7 @@ contains
   !
   subroutine pf_generic_residual(this, Lev, dt)
     class(pf_sweeper_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: dt
 
     integer :: m, n
@@ -202,7 +202,7 @@ contains
   !
   subroutine pf_generic_evaluate_all(this, Lev, t)
     class(pf_sweeper_t), intent(in)  :: this
-    type(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: t(:)
 
     integer :: m
