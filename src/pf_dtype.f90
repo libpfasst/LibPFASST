@@ -203,14 +203,14 @@ module pf_mod_dtype
      integer     :: taui0 = -999999     ! Cutoff for tau inclusion
 
      ! pf objects
-     type(pf_state_t), pointer :: state
-     type(pf_level_t), pointer :: levels(:)
+     type(pf_state_t), allocatable :: state
+     type(pf_level_t), allocatable :: levels(:)
 !     class(pf_level_t), allocatable :: levels(:)
      type(pf_comm_t),  pointer :: comm
 
      ! hooks
-     type(pf_hook_t), pointer :: hooks(:,:,:)
-     integer,         pointer :: nhooks(:,:)
+     type(pf_hook_t), allocatable :: hooks(:,:,:)
+     integer,         allocatable :: nhooks(:,:)
 
      ! timing
      logical    :: echo_timings  = .false.

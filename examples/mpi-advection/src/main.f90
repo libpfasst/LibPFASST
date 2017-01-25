@@ -85,7 +85,6 @@ contains
     !
     ! cleanup
     !
-!    call pf_pfasst_destroy(pf)    ! XXX
     call pf_mpi_destroy(comm)     ! XXX
 
   end subroutine ad
