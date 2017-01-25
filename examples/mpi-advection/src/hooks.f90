@@ -34,7 +34,7 @@ contains
     type(pf_state_t),  intent(in   ) :: state
 
     real(pfdp), pointer :: r(:)
-    integer :: np
+
     r => array1(level%R(level%nnodes-1))
 
     print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &

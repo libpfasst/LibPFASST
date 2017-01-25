@@ -29,7 +29,7 @@ contains
     type(pf_pfasst_t)              :: pf
     type(pf_comm_t)                :: comm
     type(ndarray), allocatable     :: q0
-    integer                        :: err, nvars(maxlevs), nnodes(maxlevs), l
+    integer                        :: nvars(maxlevs), nnodes(maxlevs), l
     double precision               :: dt
 
 

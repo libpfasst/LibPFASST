@@ -36,7 +36,6 @@ contains
     logical,           intent(in   ), optional :: nocmd
 
     logical :: read_cmd
-    integer :: l
 
     if (present(nlevels)) pf%nlevels = nlevels
 
@@ -105,7 +104,7 @@ contains
     type(pf_pfasst_t), intent(in   )         :: pf
     class(pf_level_t), intent(inout), target :: F
 
-    integer :: m, p, nvars, nnodes, npieces
+    integer :: nvars, nnodes, npieces
 
     !
     ! do some sanity checks
@@ -215,8 +214,6 @@ contains
   !
   subroutine pf_level_destroy(F)
     class(pf_level_t), intent(inout) :: F
-
-    integer :: m, p
 
     if (.not. F%allocated) return
 

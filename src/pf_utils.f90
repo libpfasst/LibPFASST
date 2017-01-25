@@ -171,7 +171,7 @@ contains
     class(pf_level_t),  intent(inout) :: Lev
     real(pfdp),        intent(in)    :: dt
 
-    integer :: m, n
+    integer :: m
 
     call Lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
 !MMQ    do m = 2, Lev%nnodes-1

@@ -110,7 +110,7 @@ contains
     real(pfdp),        intent(in)    :: t0, dt
     class(pf_level_t),  intent(inout) :: LevF, LevG
 
-    integer    :: m, n
+    integer    :: m
     real(pfdp) :: tG(LevG%nnodes)
     real(pfdp) :: tF(LevF%nnodes)
     class(pf_encap_t), allocatable :: &

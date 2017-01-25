@@ -36,7 +36,7 @@ contains
     class(pf_level_t),  intent(inout) :: LevF, LevG
     logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
 
-    integer    :: m, n, p
+    integer    :: m, p
     real(pfdp) :: tF(LevF%nnodes)
     real(pfdp) :: tG(LevG%nnodes)
     logical :: Finterp_loc
