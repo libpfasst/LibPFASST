@@ -73,12 +73,12 @@ contains
 
     if (integral) then
 
-       call LevG%factory%create1(qFr, LevF%nnodes-1, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+       call LevG%ulevel%factory%create1(qFr, LevF%nnodes-1, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
 
        do m = 1, LevF%nnodes-1
-          ! call LevG%factory%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
+          ! call LevG%ulevel%factory%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
           !      LevG%nvars, LevG%shape)
-          call LevF%restrict(LevG, qF(m), qFr(m), tF(m))
+          call LevF%ulevel%restrict(LevF, LevG, qF(m), qFr(m), tF(m))
        end do
 
        ! when restricting '0 to node' integral terms, skip the first
@@ -86,9 +86,9 @@ contains
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat(2:,2:), qFr)
     else
 
-       call LevG%factory%create1(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+       call LevG%ulevel%factory%create1(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
        do m = 1, LevF%nnodes
-          call LevF%restrict(LevG, qF(m), qFr(m), tF(m))
+          call LevF%ulevel%restrict(LevF, LevG, qF(m), qFr(m), tF(m))
        end do
 
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat, qFr)
@@ -124,9 +124,9 @@ contains
     !
     ! create workspaces
     !
-    call LevG%factory%create1(tmpG, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
-    call LevG%factory%create1(tmpFr, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
-    call LevG%factory%create1(tmpF, LevF%nnodes, LevF%level, SDC_KIND_INTEGRAL, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create1(tmpG, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%create1(tmpFr, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%create1(tmpF, LevF%nnodes, LevF%level, SDC_KIND_INTEGRAL, LevF%nvars, LevF%shape)
 
     !
     ! restrict q's and recompute f's
@@ -137,9 +137,9 @@ contains
     call restrict_sdc(LevF, LevG, LevF%Q, LevG%Q, .false.,tF)
 
 !    do m = 1, LevG%nnodes
-!       call LevG%sweeper%evaluate(LevG, tG(m), m)
+!       call LevG%ulevel%sweeper%evaluate(LevG, tG(m), m)
 !    end do
-     call LevG%sweeper%evaluate_all(LevG, tG)
+     call LevG%ulevel%sweeper%evaluate_all(LevG, tG)
 
 
     !
@@ -151,13 +151,13 @@ contains
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
-       call LevG%sweeper%integrate(LevG, LevG%Q, LevG%F, dt, tmpG)
+       call LevG%ulevel%sweeper%integrate(LevG, LevG%Q, LevG%F, dt, tmpG)
 !!$       !MMQ       do m = 2, LevG%nnodes-1
 !!$       !   call LevG%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
 !!$       !end do
 !!$
        ! compute '0 to node' integral on the fine level
-       call LevF%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
+       call LevF%ulevel%sweeper%integrate(LevF, LevF%Q, LevF%F, dt, LevF%I)
        !  put tau in
        !MMQ do m = 2, LevF%nnodes-1
        if (allocated(LevF%tauQ)) then

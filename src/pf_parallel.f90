@@ -84,7 +84,7 @@ contains
                 end if
 
                 call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%sweeper%sweep(pf, G, t0, dt)
+                call G%ulevel%sweeper%sweep(pf, G, t0, dt)
                 call pf_residual(pf, G, dt)  !  why is this here?
                 call call_hooks(pf, G%level, PF_POST_SWEEP)
              end do
@@ -99,7 +99,7 @@ contains
 !                print *,'recieve  done iter=',k,pf%rank
                 !  Do a sweep
                 call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%sweeper%sweep(pf, G, t0, dt )
+                call G%ulevel%sweeper%sweep(pf, G, t0, dt )
                 call pf_residual(pf, G, dt)  !  why is this here?
                 call call_hooks(pf, G%level, PF_POST_SWEEP)
                 !  Send forward
@@ -125,7 +125,7 @@ contains
 
                 call call_hooks(pf, G%level, PF_PRE_SWEEP)
                 do j = 1, G%nsweeps_pred
-                   call G%sweeper%sweep(pf, G, t0k, dt)
+                   call G%ulevel%sweeper%sweep(pf, G, t0k, dt)
                 end do
                 call pf_residual(pf, G, dt)
                 call call_hooks(pf, G%level, PF_POST_SWEEP)
@@ -147,7 +147,7 @@ contains
 
              call call_hooks(pf, G%level, PF_PRE_SWEEP)
              do j = 1, G%nsweeps_pred
-                call G%sweeper%sweep(pf, G, t0k, dt)
+                call G%ulevel%sweeper%sweep(pf, G, t0k, dt)
                 call call_hooks(pf, G%level, PF_POST_SWEEP)
              end do
              call pf_residual(pf, G, dt)
@@ -410,7 +410,7 @@ contains
           F => pf%levels(pf%nlevels)
           call call_hooks(pf, F%level, PF_PRE_SWEEP)
           do j = 1, F%nsweeps_pred
-             call F%sweeper%sweep(pf, F, pf%state%t0, dt)
+             call F%ulevel%sweeper%sweep(pf, F, pf%state%t0, dt)
 
              call pf_residual(pf, F, dt)
              call call_hooks(pf, F%level, PF_POST_SWEEP)
@@ -477,7 +477,7 @@ contains
        call F%Q(1)%pack(F%q0)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps_pred
-          call F%sweeper%sweep(pf, F, t0, dt)
+          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
           call pf_residual(pf, F, dt)
           call call_hooks(pf, F%level, PF_POST_SWEEP)
        end do
@@ -488,7 +488,7 @@ contains
     call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
     call F%Q(1)%pack(F%q0)
 !    do j = 1, F%nsweeps_pred
-!          call F%sweeper%sweep(pf, F, t0, dt)
+!          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
 !          call pf_residual(pf, F, dt)
 !          call call_hooks(pf, F%level, PF_POST_SWEEP)
 !       end do
@@ -519,7 +519,7 @@ contains
        F => pf%levels(l); G => pf%levels(l-1)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
+          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
           call pf_residual(pf, F, dt)
           call call_hooks(pf, F%level, PF_POST_SWEEP)
        end do
@@ -536,7 +536,7 @@ contains
        do j = 1, F%nsweeps
           call pf_recv(pf, F, F%level*10000+iteration+j, .true.)
           call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          call F%sweeper%sweep(pf, F, t0, dt)
+          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
           call pf_residual(pf, F, dt)
           call call_hooks(pf, F%level, PF_POST_SWEEP)
           call pf_send(pf, F, F%level*10000+iteration+j, .false.)
@@ -545,7 +545,7 @@ contains
        call pf_recv(pf, F, F%level*10000+iteration, .true.)
        call call_hooks(pf, F%level, PF_PRE_SWEEP)
        do j = 1, F%nsweeps
-          call F%sweeper%sweep(pf, F, t0, dt)
+          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
        end do
        call pf_residual(pf, F, dt)
        call call_hooks(pf, F%level, PF_POST_SWEEP)
@@ -570,7 +570,7 @@ contains
        if (F%level < pf%nlevels) then
           call call_hooks(pf, F%level, PF_PRE_SWEEP)
           do j = 1, F%nsweeps
-             call F%sweeper%sweep(pf, F, t0, dt)
+             call F%ulevel%sweeper%sweep(pf, F, t0, dt)
           end do
           call pf_residual(pf, F, dt)
           call call_hooks(pf, F%level, PF_POST_SWEEP)

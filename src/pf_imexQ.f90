@@ -68,7 +68,7 @@ contains
     call this%f1eval(Lev%Q(1), t0, Lev%level, Lev%F(1,1))
     call this%f2eval(Lev%Q(1), t0, Lev%level, Lev%F(1,2))
 
-    call Lev%factory%create0(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape)
+    call Lev%ulevel%factory%create0(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))

@@ -55,7 +55,7 @@ contains
 
     pf%comm => comm
 
-!    allocate(pf%levels(pf%nlevels))
+    allocate(pf%levels(pf%nlevels))
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
     allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK))
     pf%nhooks = 0
@@ -125,7 +125,7 @@ contains
     !                   when doing AMR)
     !
     if ((F%level < pf%nlevels) .and. (.not. allocated(F%tau))) then
-       call F%factory%create1(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+       call F%ulevel%factory%create1(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     else if ((F%level >= pf%nlevels) .and. (allocated(F%tau))) then
        deallocate(F%tau)
     end if
@@ -135,7 +135,7 @@ contains
     !                   when doing AMR)
     !
     if ((F%level < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
-       call F%factory%create1(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+       call F%ulevel%factory%create1(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     else if ((F%level >= pf%nlevels) .and. (allocated(F%tauQ))) then
        deallocate(F%tauQ)
     end if
@@ -169,27 +169,27 @@ contains
             F%nodes, F%nflags, F%s0mat, F%qmat)
     end if
 
-    call F%sweeper%initialize(F)
+    call F%ulevel%sweeper%initialize(F)
 
 
     !
     ! encaps
     !
-    npieces = F%sweeper%npieces
-    call F%factory%create1(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
-    call F%factory%create1(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    npieces = F%ulevel%sweeper%npieces
+    call F%ulevel%factory%create1(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create1(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
     F%F(1:nnodes,1:npieces) => F%Fflt
-    call F%factory%create1(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%factory%create1(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%factory%create1(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create1(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create1(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create1(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     if (F%level < pf%nlevels) then
        if (F%Finterp) then
-          call F%factory%create1(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+          call F%ulevel%factory%create1(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
           F%pF(1:nnodes,1:npieces) => F%pFflt
        end if
-       call F%factory%create1(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
+       call F%ulevel%factory%create1(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
-    call F%factory%create0(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create0(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
 
   end subroutine pf_level_setup
 

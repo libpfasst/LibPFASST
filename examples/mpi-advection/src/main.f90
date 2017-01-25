@@ -20,20 +20,17 @@ contains
     use pfasst
     use feval
     use hooks
-    use transfer
     use pf_mod_mpi
 
     implicit none
 
     integer, parameter :: maxlevs = 3
 
-    type(pf_pfasst_t)             :: pf
-    type(pf_comm_t)               :: comm
-    type(ndarray_factory), target :: factory
-    type(ndarray), allocatable    :: q0
-    type(ad_sweeper_t), target    :: sweepers(maxlevs)
-    integer                       :: err, nvars(maxlevs), nnodes(maxlevs), l
-    double precision              :: dt
+    type(pf_pfasst_t)              :: pf
+    type(pf_comm_t)                :: comm
+    type(ndarray), allocatable     :: q0
+    integer                        :: err, nvars(maxlevs), nnodes(maxlevs), l
+    double precision               :: dt
 
 
     !
@@ -50,23 +47,20 @@ contains
     pf%qtype  = SDC_GAUSS_LOBATTO
     pf%niters = 4
 
-   allocate(ad_level_t::pf%levels(pf%nlevels))
-!    allocate(pf%levels(3))
-
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
 
        pf%levels(l)%nvars  = nvars(maxlevs-pf%nlevels+l)
        pf%levels(l)%nnodes = nnodes(maxlevs-pf%nlevels+l)
 
-       pf%levels(l)%factory => factory
-       pf%levels(l)%sweeper => sweepers(l)
-       call sweepers(l)%setup(pf%levels(l)%nvars)
+       allocate(ad_level_t::pf%levels(l)%ulevel)
+       allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
+       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
- !      allocate(ad_level_t::pf%levels(l))
+       call setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%nvars)
 
        allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1)    = pf%levels(l)%nvars
+       pf%levels(l)%shape(1) = pf%levels(l)%nvars
     end do
 
     if (pf%nlevels > 1) then

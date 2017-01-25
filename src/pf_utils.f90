@@ -63,11 +63,11 @@ contains
     integer :: m, p
 
     call Lev%Q(1)%unpack(Lev%q0)
-    call Lev%sweeper%evaluate(Lev, t0, 1)
+    call Lev%ulevel%sweeper%evaluate(Lev, t0, 1)
 
     do m = 2, Lev%nnodes
        call Lev%Q(m)%copy(Lev%Q(1))
-       do p = 1, Lev%sweeper%npieces
+       do p = 1, Lev%ulevel%sweeper%npieces
           call Lev%F(m,p)%copy(Lev%F(1,p))
        end do
     end do
@@ -122,7 +122,7 @@ contains
 
     call start_timer(pf, TRESIDUAL)
 
-    call Lev%sweeper%residual(Lev, dt)
+    call Lev%ulevel%sweeper%residual(Lev, dt)
 
     ! compute max residual norm
     do m = 1, Lev%nnodes-1
@@ -173,7 +173,7 @@ contains
 
     integer :: m, n
 
-    call Lev%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
+    call Lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
 !MMQ    do m = 2, Lev%nnodes-1
 !       call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%I(m-1))
 !    end do
@@ -207,7 +207,7 @@ contains
 
     integer :: m
     do m = 1, Lev%nnodes
-       call Lev%sweeper%evaluate(Lev, t(m), m)
+       call Lev%ulevel%sweeper%evaluate(Lev, t(m), m)
     end do
   end subroutine pf_generic_evaluate_all
 

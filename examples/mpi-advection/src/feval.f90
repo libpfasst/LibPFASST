@@ -22,7 +22,7 @@ module feval
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
-  type, extends(pf_level_t) :: ad_level_t
+  type, extends(pf_user_level_t) :: ad_level_t
    contains
      procedure :: restrict
      procedure :: interpolate
@@ -31,26 +31,37 @@ module feval
   type, extends(pf_imexQ_t) :: ad_sweeper_t
      type(c_ptr) :: ffft, ifft
      complex(pfdp), pointer :: wk(:)              ! work space
-     complex(pfdp), allocatable :: ddx(:), lap(:)     ! operators
+     complex(pfdp), allocatable :: ddx(:), lap(:) ! operators
    contains
-     procedure :: setup
      procedure :: f1eval
      procedure :: f2eval
      procedure :: f2comp
-     ! procedure :: restrict
-     ! procedure :: interpolate
      final :: destroy0, destroy1
   end type ad_sweeper_t
 
 contains
 
-  subroutine setup(this, nvars)
-    class(ad_sweeper_t), intent(inout) :: this
+  function as_ad_sweeper(sweeper) result(r)
+    class(pf_sweeper_t), intent(inout), target :: sweeper
+    class(ad_sweeper_t), pointer :: r
+    select type(sweeper)
+    type is (ad_sweeper_t)
+       r => sweeper
+    class default
+       stop
+    end select
+  end function as_ad_sweeper
+
+  subroutine setup(sweeper, nvars)
+    class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: nvars
 
+    class(ad_sweeper_t), pointer :: this
     integer     :: i
     type(c_ptr) :: wk
     real(pfdp)  :: kx
+
+    this => as_ad_sweeper(sweeper)
 
     ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nvars, c_size_t))
@@ -221,8 +232,9 @@ contains
 
   end subroutine f2comp
 
-  subroutine interpolate(levelF, levelG, qFp, qGp, t)
-    class(ad_level_t), intent(inout) :: levelF
+  subroutine interpolate(this, levelF, levelG, qFp, qGp, t)
+    class(ad_level_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
     class(pf_encap_t), intent(inout) :: qFp, qGp
     real(pfdp),        intent(in   ) :: t
@@ -234,19 +246,8 @@ contains
 
     type(ad_sweeper_t), pointer :: adF, adG
 
-    select type(swp => levelG%sweeper)
-    type is (ad_sweeper_t)
-       adG => swp
-    class default
-       stop
-    end select
-
-    select type(swp => levelF%sweeper)
-    type is (ad_sweeper_t)
-       adF => swp
-    class default
-       stop
-    end select
+    adG => as_ad_sweeper(levelG%ulevel%sweeper)
+    adF => as_ad_sweeper(levelF%ulevel%sweeper)
 
     qF => array1(qFp)
     qG => array1(qGp)
@@ -276,8 +277,9 @@ contains
     qF = real(wkF)
   end subroutine interpolate
 
-  subroutine restrict(levelF, levelG, qFp, qGp, t)
-    class(ad_level_t), intent(inout) :: levelF
+  subroutine restrict(this, levelF, levelG, qFp, qGp, t)
+    class(ad_level_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
     class(pf_encap_t), intent(inout) :: qFp, qGp
     real(pfdp),        intent(in   ) :: t

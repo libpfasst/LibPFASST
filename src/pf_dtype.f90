@@ -101,7 +101,17 @@ module pf_mod_dtype
      procedure(pf_encap_create1_p),  deferred :: create1
   end type pf_factory_t
 
-  type, abstract :: pf_level_t
+  type, abstract :: pf_user_level_t
+     ! class(pf_factory_t), pointer :: factory
+     ! class(pf_sweeper_t), pointer :: sweeper
+     class(pf_factory_t), allocatable :: factory
+     class(pf_sweeper_t), allocatable :: sweeper
+   contains
+     procedure(pf_transfer_p), deferred :: restrict
+     procedure(pf_transfer_p), deferred :: interpolate
+  end type pf_user_level_t
+
+  type :: pf_level_t
      integer     :: nvars = -1          ! number of variables (dofs)
      integer     :: nnodes = -1         ! number of sdc nodes
      integer     :: nsweeps = 1         ! number of sdc sweeps to perform
@@ -111,8 +121,10 @@ module pf_mod_dtype
 
      real(pfdp)  :: residual
 
-     class(pf_factory_t), pointer :: factory
-     class(pf_sweeper_t), pointer :: sweeper
+     ! class(pf_factory_t), pointer :: factory
+     ! class(pf_sweeper_t), pointer :: sweeper
+
+     class(pf_user_level_t), allocatable :: ulevel
 
      real(pfdp), allocatable :: &
           q0(:), &                      ! initial condition (packed)
@@ -146,10 +158,6 @@ module pf_mod_dtype
      integer, allocatable :: shape(:)   ! user shape
 
      logical :: allocated = .false.
-
-   contains
-     procedure(pf_transfer_p),     deferred :: restrict
-     procedure(pf_transfer_p),     deferred :: interpolate
   end type pf_level_t
 
   type :: pf_comm_t
@@ -196,7 +204,7 @@ module pf_mod_dtype
 
      ! pf objects
      type(pf_state_t), pointer :: state
-     class(pf_level_t), pointer :: levels(:)
+     type(pf_level_t), pointer :: levels(:)
 !     class(pf_level_t), allocatable :: levels(:)
      type(pf_comm_t),  pointer :: comm
 
@@ -276,10 +284,11 @@ module pf_mod_dtype
      end subroutine pf_residual_p
 
      ! transfer interfaces
-     subroutine pf_transfer_p(levelF, levelG, qFp, qGp, t)
+     subroutine pf_transfer_p(this, levelF, levelG, qFp, qGp, t)
        ! import pf_sweeper_t, pf_encap_t, pfdp
        ! class(pf_sweeper_t), intent(inout) :: levelF, levelG
-       import pf_level_t, pf_encap_t, pfdp
+       import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
+       class(pf_user_level_t), intent(inout) :: this
        class(pf_level_t), intent(inout) :: levelF, levelG
        class(pf_encap_t),   intent(inout) :: qFp, qGp
        real(pfdp),          intent(in)    :: t

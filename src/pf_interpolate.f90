@@ -48,8 +48,8 @@ contains
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
-    call LevG%factory%create1(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
-    call LevF%factory%create1(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create1(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create1(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
 
     ! set time at coarse and fine nodes
     tG = t0 + dt*LevG%nodes
@@ -65,7 +65,7 @@ contains
     do m = 1, LevG%nnodes
        call delG(m)%copy(LevG%Q(m))
        call delG(m)%axpy(-1.0_pfdp, LevG%pQ(m))
-       call LevF%interpolate(LevG, delGF(m), delG(m), tG(m))
+       call LevF%ulevel%interpolate(LevF, LevG, delGF(m), delG(m), tG(m))
     end do
 
     ! interpolate corrections
@@ -89,7 +89,7 @@ contains
             call delG(m)%copy(LevG%F(m,p))
             call delG(m)%axpy(-1.0_pfdp, LevG%pF(m,p))
 
-            call LevF%interpolate(LevG, delGF(m), delG(m), tG(m))
+            call LevF%ulevel%interpolate(LevF, LevG, delGF(m), delG(m), tG(m))
          end do
 
          ! interpolate corrections  in time
@@ -103,7 +103,7 @@ contains
        !  call LevG%encap%setval(delGF(1),  0.0_pfdp)
        !  call LevG%encap%copy(delG(1), LevG%Q(1))
        !  call LevG%encap%axpy(delG(1), -1.0_pfdp, LevG%pQ(1))
-       ! call LevF%interpolate(delGF(1), delG(1), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(1))
+       ! call LevF%ulevel%interpolate(delGF(1), delG(1), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(1))
 
        ! This updates all solutions with jump in initial data
        ! interpolate corrections
@@ -119,14 +119,14 @@ contains
 
        ! recompute fs (for debugging)
        !       do m = 1, LevF%nnodes
-       !   call LevF%sweeper%evaluate(LevF, tF(m), m)
+       !   call LevF%ulevel%sweeper%evaluate(LevF, tF(m), m)
        !  end do
     else
        ! recompute fs
 !       do m = 1, LevF%nnodes
-!          call LevF%sweeper%evaluate(LevF, tF(m), m)
+!          call LevF%ulevel%sweeper%evaluate(LevF, tF(m), m)
 !       end do
-       call LevF%sweeper%evaluate_all(LevF, tF)
+       call LevF%ulevel%sweeper%evaluate_all(LevF, tF)
     end if  !  Feval
 
     !  Reset qend so that it is up to date
@@ -149,10 +149,10 @@ contains
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
-    call LevG%factory%create0(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
-    call LevF%factory%create0(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
-    call LevG%factory%create0(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
-    call LevF%factory%create0(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create0(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create0(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create0(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create0(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
 
     ! needed for amr
     call q0F%setval(0.0_pfdp)
@@ -163,10 +163,10 @@ contains
     call q0G%unpack(LevG%q0)
     call q0F%unpack(LevF%q0)
 
-    call LevF%restrict(LevG, q0F, delG, pf%state%t0)
+    call LevF%ulevel%restrict(LevF, LevG, q0F, delG, pf%state%t0)
     call delG%axpy(-1.0_pfdp, q0G)
 
-    call LevF%interpolate(levG, delF, delG, pf%state%t0)
+    call LevF%ulevel%interpolate(LevF, levG, delF, delG, pf%state%t0)
     call q0F%axpy(-1.0_pfdp, delF)
     call q0F%pack(LevF%q0)
 
