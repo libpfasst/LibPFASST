@@ -10,10 +10,10 @@ def run(exe):
   p = subprocess.Popen(exe, stdout=subprocess.PIPE, shell=True)
   stdout, stderr = p.communicate()
 
-  print '==== stdout ===='
-  print stdout
-  print '==== stderr ===='
-  print stderr
+  # print '==== stdout ===='
+  # print stdout
+  # print '==== stderr ===='
+  # print stderr
 
   assert stderr is None
   return stdout
@@ -40,22 +40,18 @@ def check_last_error(exe, tol):
   maxiter = max([ x.iter for x in err if x.step == maxstep ])
   lasterr = max([ x.error for x in err if x.step == maxstep and x.iter == maxiter ])
 
+  print maxstep, maxiter, lasterr
+
   print "check_last_error:", lasterr, tol
 
   assert lasterr < tol
 
 
-# def test_fake_advection():
-#   check_last_error('examples/fake-advection/main.exe', 5e-9)
-
-def test_mpi_advection_1level():
-  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe nlevels=1', 5e-7)
-
-def test_mpi_advection_block4():
+def test_mpi_advection_n4():
   check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe', 5e-8)
 
-def test_mpi_advection_block8():
+def test_mpi_advection_n8():
   check_last_error('mpiexec -n 8 examples/mpi-advection/main.exe', 5e-8)
 
-def test_mpi_advection_ring4():
-  check_last_error('mpiexec -n 4 examples/mpi-advection/main.exe window=2', 5e-8)
+if __name__ == '__main__':
+  test_mpi_advection_n4()

@@ -38,14 +38,14 @@ contains
     !
 
     nvars  = [ 32, 64, 128 ]   ! number of dofs on the time/space levels
-    nnodes = [ 3, 5, 9 ]       ! number of sdc nodes on time/space levels
-    dt     = 0.005_pfdp
+    nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
+    dt     = 0.05_pfdp
 
     call pf_mpi_create(comm, MPI_COMM_WORLD)
     call pf_pfasst_create(pf, comm, maxlevs)
 
     pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 4
+    pf%niters = 12
 
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
@@ -64,7 +64,8 @@ contains
     end do
 
     if (pf%nlevels > 1) then
-       pf%levels(1)%nsweeps = 3
+       pf%levels(1)%nsweeps = 2 
+       pf%levels(1)%nsweeps_pred = 2
     end if
 
     call pf_mpi_setup(comm, pf) ! XXX: move this into pf_pfasst_setup
@@ -79,7 +80,7 @@ contains
 
     call pf_add_hook(pf, pf%nlevels, PF_POST_ITERATION, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=1*comm%nproc)
+    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=4*comm%nproc)
 
     !
     ! cleanup
