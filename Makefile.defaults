@@ -4,7 +4,7 @@
 
 AR = ar rcs
 CC = mpicc
-FC = mpifort
+FC = mpif90 
 NOSE = nosetests
 
 FFLAGS = -Iinclude -Jinclude -cpp -fPIC -fopenmp -ffree-line-length-none -ffpe-trap=invalid,zero,overflow -fcheck=all -g3 -ggdb
