@@ -20,3 +20,6 @@ lib/
 staging/
 src/pf_version.f90
 /.project
+
+html
+
