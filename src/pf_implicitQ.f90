@@ -18,197 +18,122 @@
 !
 
 module pf_mod_implicitQ
-  use pf_mod_dtype
-  use pf_mod_utils
+  use pf_mod_implicit
   implicit none
-  integer, parameter, private :: npieces = 1
 
-  interface
-     subroutine pf_f2eval_p(y, t, level, levelctx, f2)
-       import c_ptr, c_int, pfdp, pf_context_T
-       type(c_ptr),    intent(in), value :: y, f2!, levelctx
-       class(pf_context_t), intent(in)   :: levelctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f2eval_p
-  end interface
-
-  interface
-     subroutine pf_f2comp_p(y, t, dt, rhs, level, levelctx, f2)
-       import c_ptr, c_int, pfdp, pf_context_t
-       type(c_ptr),    intent(in), value :: y, rhs, f2!, levelctx
-       class(pf_context_t), intent(in)   :: levelctx
-       real(pfdp),     intent(in)        :: t, dt
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f2comp_p
-  end interface
-
-  type :: pf_implicitQ_t
-     procedure(pf_f2eval_p),  pointer, nopass :: f2eval
-     procedure(pf_f2comp_p),  pointer, nopass :: f2comp
-
-     real(pfdp), ALLOCATABLE :: QdiffI(:,:)
-     real(pfdp), ALLOCATABLE :: QtilI(:,:)
+  type, extends(pf_implicit_t), abstract :: pf_implicitQ_t
+     real(pfdp), allocatable :: QdiffI(:,:)
+     real(pfdp), allocatable :: QtilI(:,:)
+   contains
+     procedure :: sweep      => implicitQ_sweep
+     procedure :: initialize => implicitQ_initialize
+     procedure :: integrate  => implicitQ_integrate
   end type pf_implicitQ_t
 
 contains
 
-  ! Perform one SDC sweep on level Lev and set qend appropriately.
-  subroutine implicitQ_sweep(pf, Lev, t0, dt)
+  ! Perform on SDC sweep on level lev and set qend appropriately.
+  subroutine implicitQ_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
 
+    class(pf_implicitQ_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, t0
-    type(pf_level_t),  intent(inout) :: Lev
+    real(pfdp),        intent(in   ) :: dt, t0
+    class(pf_level_t), intent(inout) :: lev
 
-    integer    :: m, n
-    real(pfdp) :: t
-    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
-    type(c_ptr) :: rhs
+    integer     :: m, n
+    real(pfdp)  :: t
+    real(pfdp)  :: dtsdc(1:lev%nnodes-1)
+    class(pf_encap_t), allocatable :: rhs
 
-    type(pf_implicitQ_t), pointer :: imp
-
-    call c_f_pointer(Lev%sweeper%sweeperctx, imp)
-
-    call start_timer(pf, TLEVEL+Lev%level-1)
+    call start_timer(pf, TLEVEL+lev%level-1)
 
     ! compute integrals and add fas correction
-    do m = 1, Lev%nnodes-1
-       call Lev%S(m)%setval(0.0_pfdp)
-       do n = 1, Lev%nnodes
-          call Lev%S(m)%axpy(dt*imp%QdiffI(m,n), Lev%F(n,1))
+    do m = 1, lev%nnodes-1
+       call lev%S(m)%setval(0.0_pfdp)
+       do n = 1, lev%nnodes
+          call lev%S(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,1))
        end do
-       if (associated(Lev%tauQ)) then
-          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
+       if (allocated(lev%tauQ)) then
+          call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%Q(1)%unpack(Lev%q0)
+    call lev%Q(1)%unpack(lev%q0)
 
-    call imp%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
+    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
-    call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%levelctx, Lev%encap%encapctx)
+    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
-    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
-    do m = 1, Lev%nnodes-1
+    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
 
        call rhs%setval(0.0_pfdp)
        do n = 1, m
-          call rhs%axpy(dt*imp%QtilI(m,n), Lev%F(n,1))
+          call rhs%axpy(dt*this%QtilI(m,n), lev%F(n,1))
        end do
-       call rhs%axpy(1.0_pfdp,lev%S(m))
-       call rhs%axpy(1.0_pfdp, Lev%Q(1))
+       !  Add the tau term
+       call rhs%axpy(1.0_pfdp, lev%S(m))
+       !  Add the starting value
+       call rhs%axpy(1.0_pfdp, lev%Q(1))
 
-       call imp%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,1))
+       call this%f2comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%level,lev%F(m+1,1))
 
     end do
 
-    ! Put the last node value into qend
-    call Lev%qend%copy(Lev%Q(Lev%nnodes))
+    call lev%qend%copy(lev%Q(lev%nnodes))
 
-    ! done
-    !call Lev%encap%destroy(rhs)
-
-    call end_timer(pf, TLEVEL+Lev%level-1)
+    call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicitQ_sweep
 
-  ! Evaluate function values
-  subroutine implicitQ_evaluate(Lev, t, m)
-    real(pfdp),       intent(in)    :: t
-    integer,          intent(in)    :: m
-    type(pf_level_t), intent(inout) :: Lev
+  ! Initialize matrices
+  subroutine implicitQ_initialize(this, lev)
+    class(pf_implicitQ_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
 
-    type(pf_implicitQ_t), pointer :: imp
-    call c_f_pointer(Lev%sweeper%sweeperctx, imp)
+    real(pfdp) :: dsdc(lev%nnodes-1)
+    integer    :: m,n, nnodes
 
-    call imp%f2eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
-  end subroutine implicitQ_evaluate
+    this%npieces = 1
 
-  ! Initialize matrix
-  subroutine implicitQ_initialize(Lev)
-    use pf_mod_dtype
-    type(pf_level_t), intent(inout) :: Lev
+    nnodes = lev%nnodes
+    allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
+    this%QtilI = 0.0_pfdp
 
-    integer :: m,n,nnodes
-    type(pf_implicitQ_t), pointer :: imp
-    call c_f_pointer(Lev%sweeper%sweeperctx, imp)
-
-    nnodes = Lev%nnodes
-    allocate(imp%QdiffI(nnodes-1,nnodes))  !  S-BE
-    allocate(imp%QtilI(nnodes-1,nnodes))  !  S-BE
-
-    imp%QtilI = 0.0_pfdp
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
+    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
-          imp%QtilI(m,n+1) =  dsdc(n)
+          this%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
 
-    imp%QdiffI = Lev%qmat-imp%QtilI
-    print *,'QtilI',imp%QtilI
-    print *,'QdiffI',imp%QdiffI
-    print *,'Qmat',Lev%qmat
+    this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine implicitQ_initialize
 
-
   ! Compute SDC integral
-  subroutine implicitQ_integrate(Lev, qSDC, fSDC, dt, fintSDC)
-    type(pf_level_t), intent(in)    :: Lev
-    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),       intent(in)    :: dt
-    type(c_ptr),      intent(inout) :: fintSDC(:)
+  subroutine implicitQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+    class(pf_implicitQ_t), intent(inout) :: this
+    class(pf_level_t), intent(in   ) :: lev
+    class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
+    real(pfdp),        intent(in   ) :: dt
+    class(pf_encap_t), intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
-    do n = 1, Lev%nnodes-1
+    do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
-       do m = 1, Lev%nnodes
-          do p = 1, npieces
-             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
+       do m = 1, lev%nnodes
+          do p = 1, this%npieces
+             call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do
   end subroutine implicitQ_integrate
-
-  ! Create implicitQ sweeper
-  subroutine pf_implicitQ_create(sweeper, f2eval, f2comp)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-    procedure(pf_f2eval_p) :: f2eval
-    procedure(pf_f2comp_p) :: f2comp
-
-    type(pf_implicitQ_t), pointer :: imp
-
-    allocate(imp)
-    imp%f2eval => f2eval
-    imp%f2comp => f2comp
-
-    sweeper%npieces = npieces
-    sweeper%sweep      => implicitQ_sweep
-    sweeper%evaluate   => implicitQ_evaluate
-    sweeper%destroy   => pf_implicitQ_destroy
-    sweeper%initialize => implicitQ_initialize
-    sweeper%integrate  => implicitQ_integrate
-    sweeper%evaluate_all => pf_generic_evaluate_all
-    sweeper%residual     => pf_generic_residual
-
-    sweeper%sweeperctx = c_loc(imp)
-  end subroutine pf_implicitQ_create
-
-  subroutine pf_implicitQ_destroy(sweeper)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-
-    type(pf_implicitQ_t), pointer :: imp
-    call c_f_pointer(sweeper%sweeperctx, imp)
-    deallocate(imp%QdiffI)
-    deallocate(imp%QtilI)
-    deallocate(imp)
-  end subroutine pf_implicitQ_destroy
 
 end module pf_mod_implicitQ

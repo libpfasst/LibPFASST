@@ -21,7 +21,6 @@ module pf_mod_explicit
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
-  integer, parameter, private :: npieces = 1
 
   type, extends(pf_sweeper_t), abstract :: pf_explicit_t
      real(pfdp), allocatable :: SdiffE(:,:)
@@ -39,7 +38,8 @@ module pf_mod_explicit
      subroutine pf_f1eval_p(this, y, t, level, f1)
        import pf_explicit_t, pf_encap_t, c_int, pfdp
        class(pf_explicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: y, f1
+       class(pf_encap_t),    intent(in   ) :: y
+       class(pf_encap_t),    intent(inout) :: f1
        real(pfdp),           intent(in   ) :: t
        integer(c_int),       intent(in   ) :: level
      end subroutine pf_f1eval_p
@@ -113,8 +113,9 @@ contains
     class(pf_level_t),    intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
+    integer    :: m,nnodes
 
-    integer :: m,nnodes
+    this%npieces = 1
 
     nnodes = lev%nnodes
     allocate(this%SdiffE(nnodes-1,nnodes))  ! S-FE
@@ -141,7 +142,7 @@ contains
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
-          do p = 1, npieces
+          do p = 1, this%npieces
              call fintSDC(n)%axpy(dt*lev%s0mat(n,m), fSDC(m,p))
           end do
        end do

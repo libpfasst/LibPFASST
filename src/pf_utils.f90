@@ -56,18 +56,19 @@ contains
   !
   ! Spread initial condition.
   !
-  subroutine spreadq0(Lev, t0)
-    class(pf_level_t), intent(inout) :: Lev
+  subroutine spreadq0(lev, t0)
+    class(pf_level_t), intent(inout) :: lev
     real(pfdp),       intent(in)    :: t0
 
     integer :: m, p
 
-    call Lev%Q(1)%unpack(Lev%q0)
-    call Lev%ulevel%sweeper%evaluate(Lev, t0, 1)
+    call Lev%Q(1)%unpack(lev%q0)
 
-    do m = 2, Lev%nnodes
+    call Lev%ulevel%sweeper%evaluate(lev, t0, 1)
+
+    do m = 2, lev%nnodes
        call Lev%Q(m)%copy(Lev%Q(1))
-       do p = 1, Lev%ulevel%sweeper%npieces
+       do p = 1, lev%ulevel%sweeper%npieces
           call Lev%F(m,p)%copy(Lev%F(1,p))
        end do
     end do
@@ -173,26 +174,23 @@ contains
 
     integer :: m
 
-    call Lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
-!MMQ    do m = 2, Lev%nnodes-1
-!       call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%I(m-1))
-!    end do
+    call lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
+    !do m = 2, Lev%nnodes-1
+    !   call lev%I(M)%axpy(1.0_pfdp, lev%I(m-1))
+    !end do
 
     ! add tau (which is 'node to node')
-    if (allocated(Lev%tauQ)) then
-       do m = 1, Lev%nnodes-1
-!  MMQ        do n = 1, m
-!             call Lev%encap%axpy(Lev%I(m), 1.0_pfdp, Lev%tau(n))
-!          end do
-          call Lev%I(m)%axpy(1.0_pfdp, Lev%tauQ(m))
+    if (allocated(lev%tauQ)) then
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end do
     end if
 
     ! subtract out Q
-    do m = 1, Lev%nnodes-1
-       call Lev%R(m)%copy(Lev%I(m))
-       call Lev%R(m)%axpy(1.0_pfdp, Lev%Q(1))
-       call Lev%R(m)%axpy(-1.0_pfdp, Lev%Q(m+1))
+    do m = 1, lev%nnodes-1
+       call lev%R(m)%copy(lev%I(m))
+       call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
 
   end subroutine pf_generic_residual
@@ -200,14 +198,14 @@ contains
   !
   ! Generic evaluate all
   !
-  subroutine pf_generic_evaluate_all(this, Lev, t)
+  subroutine pf_generic_evaluate_all(this, lev, t)
     class(pf_sweeper_t), intent(in)  :: this
-    class(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: t(:)
 
     integer :: m
-    do m = 1, Lev%nnodes
-       call Lev%ulevel%sweeper%evaluate(Lev, t(m), m)
+    do m = 1, lev%nnodes
+       call lev%ulevel%sweeper%evaluate(lev, t(m), m)
     end do
   end subroutine pf_generic_evaluate_all
 

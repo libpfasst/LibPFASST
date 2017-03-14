@@ -41,78 +41,71 @@ contains
     class(pf_imexQ_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in   ) :: dt, t0
-    class(pf_level_t), intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: lev
 
     integer     :: m, n
     real(pfdp)  :: t
     real(pfdp)  :: dtsdc(1:Lev%nnodes-1)
     class(pf_encap_t), allocatable :: rhs
 
-    call start_timer(pf, TLEVEL+Lev%level-1)
+    call start_timer(pf, TLEVEL+lev%level-1)
 
     ! compute integrals and add fas correction
-    do m = 1, Lev%nnodes-1
-       call Lev%S(m)%setval(0.0_pfdp)
-       do n = 1, Lev%nnodes
-          call Lev%S(m)%axpy(dt*this%QdiffE(m,n), Lev%F(n,1))
-          call Lev%S(m)%axpy(dt*this%QdiffI(m,n), Lev%F(n,2))
+    do m = 1, lev%nnodes-1
+       call lev%S(m)%setval(0.0_pfdp)
+       do n = 1, lev%nnodes
+          call lev%S(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
+          call lev%S(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
        end do
-       if (allocated(Lev%tauQ)) then
-          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
+       if (allocated(lev%tauQ)) then
+          call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%Q(1)%unpack(Lev%q0)
+    call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(Lev%Q(1), t0, Lev%level, Lev%F(1,1))
-    call this%f2eval(Lev%Q(1), t0, Lev%level, Lev%F(1,2))
+    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
 
-    call Lev%ulevel%factory%create0(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape)
+    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
-    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
-    do m = 1, Lev%nnodes-1
+    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
 
        call rhs%setval(0.0_pfdp)
        do n = 1, m
-          call rhs%axpy(dt*this%QtilE(m,n), Lev%F(n,1))
-          call rhs%axpy(dt*this%QtilI(m,n), Lev%F(n,2))
+          call rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1))
+          call rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
        end do
-
-
-!       call rhs%axpy(dtsdc(m), Lev%F(m,1))
-       call rhs%axpy(1.0_pfdp, Lev%S(m))
+       !  Add the tau term
+       call rhs%axpy(1.0_pfdp, lev%S(m))
        !  Add the starting value
-       call rhs%axpy(1.0_pfdp, Lev%Q(1))
+       call rhs%axpy(1.0_pfdp, lev%Q(1))
 
-
-!       call this%f2comp(Lev%Q(m+1), t, dtsdc(m), rhs, Lev%level, Lev%levelctx, Lev%F(m+1,2))
-       call this%f2comp(Lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, Lev%level,Lev%F(m+1,2))
-       call this%f1eval(Lev%Q(m+1), t, Lev%level, Lev%F(m+1,1))
+       call this%f2comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%level,lev%F(m+1,2))
+       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
 
     end do
 
-    call Lev%qend%copy(Lev%Q(Lev%nnodes))
+    call lev%qend%copy(lev%Q(lev%nnodes))
 
-    ! done
-    !call Lev%encap%destroy(rhs)
-
-    call end_timer(pf, TLEVEL+Lev%level-1)
+    call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine imexQ_sweep
 
   ! Initialize matrices
-  subroutine imexQ_initialize(this, Lev)
+  subroutine imexQ_initialize(this, lev)
     class(pf_imexQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: Lev
+    class(pf_level_t), intent(inout) :: lev
 
-    real(pfdp) :: dsdc(Lev%nnodes-1)
+    real(pfdp) :: dsdc(lev%nnodes-1)
     integer    :: m,n, nnodes
 
     this%npieces = 2
 
-    nnodes = Lev%nnodes
+    nnodes = lev%nnodes
     allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
     allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
     allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
@@ -121,7 +114,7 @@ contains
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
 
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
+    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
           this%QtilE(m,n)   =  dsdc(n)
@@ -129,30 +122,26 @@ contains
        end do
     end do
 
-    ! do m = 1,nnodes-1
-    !    print *,'row i of qmat', m,Lev%qmat(m,:)
-    ! end do
-    call myLUq(Lev%qmat,this%QtilI,Nnodes,0)
-    this%QdiffE = Lev%qmat-this%QtilE
-    this%QdiffI = Lev%qmat-this%QtilI
+    this%QdiffE = lev%qmat-this%QtilE
+    this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine imexQ_initialize
 
   ! Compute SDC integral
-  subroutine imexQ_integrate(this, Lev, qSDC, fSDC, dt, fintSDC)
+  subroutine imexQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_imexQ_t), intent(inout) :: this
-    class(pf_level_t), intent(in   ) :: Lev
+    class(pf_level_t), intent(in   ) :: lev
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
-    do n = 1, Lev%nnodes-1
+    do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
-       do m = 1, Lev%nnodes
+       do m = 1, lev%nnodes
           do p = 1, this%npieces
-             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do

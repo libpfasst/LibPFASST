@@ -18,210 +18,118 @@
 !
 
 module pf_mod_explicitQ
-  use pf_mod_dtype
-  use pf_mod_utils
+  use pf_mod_explicit
   implicit none
-  integer, parameter, private :: npieces = 1
 
-  interface
-     subroutine pf_f1eval_p(y, t, level, levelctx, f1)
-       import c_ptr, c_int, pfdp, pf_context_t
-       type(c_ptr),    intent(in), value :: y, f1!, levelctx
-       class(pf_context_t), intent(in) :: levelctx
-       real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
-     end subroutine pf_f1eval_p
-  end interface
-
-  type :: pf_explicitQ_t
-     procedure(pf_f1eval_p),   pointer, nopass :: f1eval
-     real(pfdp), ALLOCATABLE :: QdiffE(:,:)
-     real(pfdp), ALLOCATABLE :: QtilE(:,:)
+  type, extends(pf_explicit_t), abstract :: pf_explicitQ_t
+     real(pfdp), allocatable :: QdiffE(:,:)
+     real(pfdp), allocatable :: QtilE(:,:)
+   contains
+     procedure :: sweep      => explicitQ_sweep
+     procedure :: initialize => explicitQ_initialize
+     procedure :: integrate  => explicitQ_integrate
   end type pf_explicitQ_t
 
 contains
 
-  ! Perform on SDC sweep on level Lev and set qend appropriately.
-  subroutine explicitQ_sweep(pf, Lev, t0, dt)
+  ! Perform on SDC sweep on level lev and set qend appropriately.
+  subroutine explicitQ_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
 
+    class(pf_explicitQ_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: dt, t0
-    type(pf_level_t),  intent(inout) :: Lev
+    real(pfdp),        intent(in   ) :: dt, t0
+    class(pf_level_t), intent(inout) :: lev
 
-    integer    :: m, n
-    real(pfdp) :: t
-    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
-    type(pf_explicitQ_t), pointer :: exp
+    integer     :: m, n
+    real(pfdp)  :: t
+    real(pfdp)  :: dtsdc(1:lev%nnodes-1)
+    class(pf_encap_t), allocatable :: rhs
 
-    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
-
-    call start_timer(pf, TLEVEL+Lev%level-1)
+    call start_timer(pf, TLEVEL+lev%level-1)
 
     ! compute integrals and add fas correction
-    do m = 1, Lev%nnodes-1
-       call Lev%S(m)%setval(0.0_pfdp)
-       do n = 1, Lev%nnodes
-          call Lev%S(m)%axpy(dt*exp%QdiffE(m,n), Lev%F(n,1))
+    do m = 1, lev%nnodes-1
+       call lev%S(m)%setval(0.0_pfdp)
+       do n = 1, lev%nnodes
+          call lev%S(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
        end do
-       if (associated(Lev%tau)) then
-          call Lev%S(m)%axpy(1.0_pfdp, Lev%tauQ(m))
+       if (allocated(lev%tauQ)) then
+          call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end if
     end do
 
     ! do the time-stepping
-    call Lev%Q(1)%unpack(Lev%q0)
+    call lev%Q(1)%unpack(lev%q0)
 
-    call exp%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
+    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
     t = t0
-    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
-    do m = 1, Lev%nnodes-1
+    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
 
-       call Lev%Q(m+1)%copy(Lev%Q(1))
+       call lev%Q(m+1)%copy(lev%Q(1))
+       !  Add the tau term
+       call lev%Q(m+1)%axpy(1.0_pfdp, lev%S(m))
+
        do n = 1, m
-          call Lev%Q(m+1)%axpy(dt*exp%QtilE(m,n), Lev%F(n,1))
+          call lev%Q(m+1)%axpy(dt*this%QtilE(m,n), lev%F(n,1))
        end do
+       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
 
-!       call Lev%encap%axpy(Lev%Q(m+1), dtsdc(m), Lev%F(m,1))
-       call Lev%Q(m+1)%axpy(1.0_pfdp, Lev%S(m))
-
-       call exp%f1eval(Lev%Q(m+1), t, Lev%level, Lev%levelctx, Lev%F(m+1,1))
     end do
 
-    call Lev%qend%copy(Lev%Q(Lev%nnodes))
+    call lev%qend%copy(lev%Q(lev%nnodes))
 
-    ! done
-    call end_timer(pf, TLEVEL+Lev%level-1)
+    call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine explicitQ_sweep
 
-  ! Evaluate function values
-  subroutine explicitQ_evaluate(Lev, t, m)
-    use pf_mod_dtype
+  ! Initialize matrices
+  subroutine explicitQ_initialize(this, lev)
+    class(pf_explicitQ_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
 
-    real(pfdp),       intent(in)    :: t
-    integer,          intent(in)    :: m
-    type(pf_level_t), intent(inout) :: Lev
+    real(pfdp) :: dsdc(lev%nnodes-1)
+    integer    :: m,n, nnodes
 
-    type(pf_explicitQ_t), pointer :: exp
+    this%npieces = 1
 
-    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
+    nnodes = lev%nnodes
+    allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
+    allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
 
-    call exp%f1eval(Lev%Q(m), t, Lev%level, Lev%levelctx, Lev%F(m,1))
-  end subroutine explicitQ_evaluate
+    this%QtilE = 0.0_pfdp
 
-  ! Initialize matrix
-  subroutine explicitQ_initialize(Lev)
-    use pf_mod_dtype
-    type(pf_level_t), intent(inout) :: Lev
-    real(pfdp) :: dsdc(Lev%nnodes-1)
-
-    integer :: m,n,nnodes
-    type(pf_explicitQ_t), pointer :: exp
-    call c_f_pointer(Lev%sweeper%sweeperctx, exp)
-
-    nnodes = Lev%nnodes
-    allocate(exp%QdiffE(nnodes-1,nnodes))  ! S-FE
-    allocate(exp%QtilE(nnodes-1,nnodes))  ! S-FE
-
-    exp%QtilE = 0.0_pfdp
-
-    dsdc = Lev%nodes(2:nnodes) - Lev%nodes(1:nnodes-1)
+    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     do m = 1, nnodes-1
        do n = 1,m
-!          exp%QtilE(m,n)   =  dsdc(n)
+          this%QtilE(m,n)   =  dsdc(n)
        end do
     end do
-    !  Or do the LU trick
-!    call pf_LUexp(Lev%qmat,exp%QtilE,nnodes)
 
-    exp%QdiffE = Lev%qmat-exp%QtilE
-
+    this%QdiffE = lev%qmat-this%QtilE
+    
   end subroutine explicitQ_initialize
 
-
   ! Compute SDC integral
-  subroutine explicitQ_integrate(Lev, qSDC, fSDC, dt, fintSDC)
-    type(pf_level_t), intent(in)    :: Lev
-    type(c_ptr),      intent(in)    :: qSDC(:), fSDC(:, :)
-    real(pfdp),       intent(in)    :: dt
-    type(c_ptr),      intent(inout) :: fintSDC(:)
+  subroutine explicitQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+    class(pf_explicitQ_t), intent(inout) :: this
+    class(pf_level_t), intent(in   ) :: lev
+    class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
+    real(pfdp),        intent(in   ) :: dt
+    class(pf_encap_t), intent(inout) :: fintSDC(:)
 
     integer :: n, m, p
 
-    do n = 1, Lev%nnodes-1
+    do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
-       do m = 1, Lev%nnodes
-          do p = 1, npieces
-             call fintSDC(n)%axpy(dt*Lev%qmat(n,m), fSDC(m,p))
+       do m = 1, lev%nnodes
+          do p = 1, this%npieces
+             call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do
   end subroutine explicitQ_integrate
-
-  ! Create explicitQ sweeper
-  subroutine pf_explicitQ_create(sweeper, f1eval)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-    procedure(pf_f1eval_p) :: f1eval
-
-    type(pf_explicitQ_t), pointer :: exp
-
-    allocate(exp)
-    exp%f1eval => f1eval
-
-    sweeper%npieces = npieces
-    sweeper%sweep      => explicitQ_sweep
-    sweeper%evaluate   => explicitQ_evaluate
-    sweeper%initialize => explicitQ_initialize
-    sweeper%integrate  => explicitQ_integrate
-    sweeper%destroy    => pf_explicitQ_destroy
-    sweeper%evaluate_all => pf_generic_evaluate_all
-    sweeper%residual     => pf_generic_residual
-
-    sweeper%sweeperctx = c_loc(exp)
-  end subroutine pf_explicitQ_create
-
-  subroutine pf_explicitQ_destroy(sweeper)
-    type(pf_sweeper_t), intent(inout) :: sweeper
-
-    type(pf_explicitQ_t), pointer :: explicitQ
-    call c_f_pointer(sweeper%sweeperctx, explicitQ)
-    deallocate(explicitQ%QtilE)
-    deallocate(explicitQ%QdiffE)
-
-    deallocate(explicitQ)
-  end subroutine pf_explicitQ_destroy
-
-  subroutine pf_LUexp(A,U,Nnodes)
-    real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
-    real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
-    integer,        intent (in)     :: Nnodes
-    ! Return the transpose of U from LU decomposition of
-    !  an explicit integration matrix       without pivoting
-    integer :: i,j
-    real(pfdp) :: c
-
-    U=transpose(A)
-    do i = 1,Nnodes-1
-       if (U(i,i+1) /= 0.0) then
-          do j=i+1,Nnodes
-             c = U(j,i+1)/U(i,i+1)
-             U(j,i:Nnodes)=U(j,i:Nnodes)-c*U(i,i:Nnodes)
-          end do
-       end if
-    end do
-    U=transpose(U)
-
-    !  Now scale the rows of U to match the sum of A
-    do j=1,Nnodes
-       c = sum(U(j,:))
-       if (c /=  0.0) then
-          U(j,:)=U(j,:)*sum(A(j,:))/c
-!          print *,c,sum(A(j,:))/c
-       end if
-    end do
-
-  end subroutine pf_LUexp
 
 end module pf_mod_explicitQ

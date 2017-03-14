@@ -21,7 +21,6 @@ module pf_mod_implicit
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
-  integer, parameter, private :: npieces = 1
 
   type, extends(pf_sweeper_t), abstract :: pf_implicit_t
      real(pfdp), allocatable :: SdiffI(:,:)
@@ -40,7 +39,8 @@ module pf_mod_implicit
      subroutine pf_f2eval_p(this, y, t, level, f2)
        import pf_implicit_t, pf_encap_t, c_int, pfdp
        class(pf_implicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: y, f2
+       class(pf_encap_t),    intent(in   ) :: y
+       class(pf_encap_t),    intent(inout) :: f2
        real(pfdp),           intent(in   ) :: t
        integer(c_int),       intent(in   ) :: level
      end subroutine pf_f2eval_p
@@ -48,7 +48,8 @@ module pf_mod_implicit
      subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
        import pf_implicit_t, pf_encap_t, c_int, pfdp
        class(pf_implicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: y, rhs, f2
+       class(pf_encap_t),    intent(in   ) :: rhs
+       class(pf_encap_t),    intent(inout) :: y, f2
        real(pfdp),           intent(in   ) :: t, dt
        integer(c_int),       intent(in   ) :: level
      end subroutine pf_f2comp_p
@@ -68,10 +69,6 @@ contains
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
     class(pf_encap_t), allocatable :: rhs
-
-    ! type(pf_implicit_t), pointer :: imp
-
-    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
 
     call start_timer(pf, TLEVEL+lev%level-1)
 
@@ -115,9 +112,6 @@ contains
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
 
-    ! type(pf_implicit_t), pointer :: imp
-    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
-
     call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,1))
   end subroutine implicit_evaluate
 
@@ -128,11 +122,10 @@ contains
     class(pf_level_t),    intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
+    integer    :: m,nnodes
 
-    integer :: m,nnodes
-    ! type(pf_implicit_t), pointer :: imp
-    ! call c_f_pointer(lev%sweeper%sweeperctx, imp)
-
+    this%npieces = 1
+    
     nnodes = lev%nnodes
     allocate(this%SdiffI(nnodes-1,nnodes))  !  S-BE
 
@@ -159,7 +152,7 @@ contains
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
-          do p = 1, npieces
+          do p = 1, this%npieces
              call fintSDC(n)%axpy(dt*lev%s0mat(n,m), fSDC(m,p))
           end do
        end do
