@@ -34,10 +34,10 @@ contains
     pf_comm%nproc = nprocs
     allocate(pf_comm%pfs(nprocs))
 
-    pf_comm%post => pf_fake_post
-    pf_comm%recv => pf_fake_recv
-    pf_comm%send => pf_fake_send
-    pf_comm%wait => pf_fake_wait
+    pf_comm%post      => pf_fake_post
+    pf_comm%recv      => pf_fake_recv
+    pf_comm%send      => pf_fake_send
+    pf_comm%wait      => pf_fake_wait
     pf_comm%broadcast => pf_fake_broadcast
   end subroutine pf_fake_create
 
@@ -77,7 +77,7 @@ contains
   ! Post
   subroutine pf_fake_post(pf, level, tag)
     type(pf_pfasst_t), intent(in)    :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t), intent(inout) :: level
     integer,           intent(in)    :: tag
     ! this is intentionally empty
   end subroutine pf_fake_post
@@ -85,7 +85,7 @@ contains
   ! Receive
   subroutine pf_fake_recv(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t), intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
 
@@ -104,14 +104,14 @@ contains
   ! Send
   subroutine pf_fake_send(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
-    type(pf_level_t),  intent(inout) :: level
+    class(pf_level_t), intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
 
     call start_timer(pf, TSEND)
 
     if (pf%rank < pf%comm%nproc-1) then
-       call level%encap%pack(level%send, level%qend)
+       call level%qend%pack(level%send)
     end if
 
     call end_timer(pf, TSEND)
