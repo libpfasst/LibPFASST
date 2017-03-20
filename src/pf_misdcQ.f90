@@ -22,71 +22,16 @@ module pf_mod_misdcQ
   use pf_mod_utils
   implicit none
 
-  type, extends(pf_sweeper_t), abstract :: pf_misdcQ_t
+  type, extends(pf_misdc_t), abstract :: pf_misdcQ_t
      real(pfdp), allocatable :: QdiffE(:,:)
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
    contains 
-     procedure(pf_f1eval_p), deferred :: f1eval
-     procedure(pf_f2eval_p), deferred :: f2eval
-     procedure(pf_f2comp_p), deferred :: f2comp
-     procedure(pf_f3eval_p), deferred :: f3eval
-     procedure(pf_f3comp_p), deferred :: f3comp
      procedure :: sweep        => misdcQ_sweep
      procedure :: initialize   => misdcQ_initialize
-     procedure :: evaluate     => misdcQ_evaluate
      procedure :: integrate    => misdcQ_integrate
-     procedure :: residual     => misdcQ_residual
-     procedure :: evaluate_all => misdcQ_evaluate_all
   end type pf_misdcQ_t
-
-  interface 
-     subroutine pf_f1eval_p(this, y, t, level, f1)
-       import pf_misdcQ_t, pf_encap_t, c_int, pfdp
-       class(pf_misdcQ_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f1
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f1eval_p
-
-     subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_misdcQ_t, pf_encap_t, c_int, pfdp
-       class(pf_misdcQ_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   )  :: y
-       class(pf_encap_t), intent(inout)  :: f2
-       real(pfdp),        intent(in   )  :: t
-       integer(c_int),    intent(in   )  :: level
-     end subroutine pf_f2eval_p
-
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_misdcQ_t, pf_encap_t, c_int, pfdp
-       class(pf_misdcQ_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   )  :: rhs
-       class(pf_encap_t), intent(inout)  :: y, f2
-       real(pfdp),        intent(in   )  :: t, dt
-       integer(c_int),    intent(in   )  :: level
-     end subroutine pf_f2comp_p
-
-     subroutine pf_f3eval_p(this, y, t, level, f3)
-       import pf_misdcQ_t, pf_encap_t, c_int, pfdp
-       class(pf_misdcQ_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   )  :: y
-       class(pf_encap_t), intent(inout)  :: f3
-       real(pfdp),        intent(in   )  :: t
-       integer(c_int),    intent(in   )  :: level
-     end subroutine pf_f3eval_p
-
-     subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
-       import pf_misdcQ_t, pf_encap_t, c_int, pfdp
-       class(pf_misdcQ_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   )  :: rhs
-       class(pf_encap_t), intent(inout)  :: y, f3
-       real(pfdp),        intent(in   )  :: t, dt
-       integer(c_int),    intent(in   )  :: level
-     end subroutine pf_f3comp_p
-  end interface
 
 contains
 
@@ -170,21 +115,6 @@ contains
 
   end subroutine misdcQ_sweep
      
-
-  ! Evaluate function values
-  subroutine misdcQ_evaluate(this, lev, t, m)
-    use pf_mod_dtype
-    class(pf_misdcQ_t), intent(inout) :: this
-    real(pfdp),         intent(in)    :: t
-    integer,            intent(in)    :: m
-    class(pf_level_t),  intent(inout) :: lev
-
-    call this%f1eval(lev%Q(m), t, lev%level, lev%F(m,1))
-    call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
-    call this%f3eval(lev%Q(m), t, lev%level, lev%F(m,3))
-  end subroutine misdcQ_evaluate
-
-
   ! Initialize matrices
   subroutine misdcQ_initialize(this, lev)
     class(pf_misdcQ_t), intent(inout) :: this
@@ -236,20 +166,4 @@ contains
     end do    
   end subroutine misdcQ_integrate
 
-  subroutine misdcQ_residual(this, lev, dt)
-    class(pf_misdcQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: dt
-
-    call pf_generic_residual(this, lev, dt)
-  end subroutine misdcQ_residual
-  
-  subroutine misdcQ_evaluate_all(this, lev, t)
-    class(pf_misdcQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: t(:)
-
-    call pf_generic_evaluate_all(this, lev, t)
-  end subroutine misdcQ_evaluate_all
-  
 end module pf_mod_misdcQ
