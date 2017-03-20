@@ -102,8 +102,6 @@ module pf_mod_dtype
   end type pf_factory_t
 
   type, abstract :: pf_user_level_t
-     ! class(pf_factory_t), pointer :: factory
-     ! class(pf_sweeper_t), pointer :: sweeper
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
    contains
@@ -120,9 +118,6 @@ module pf_mod_dtype
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
      real(pfdp)  :: residual
-
-     ! class(pf_factory_t), pointer :: factory
-     ! class(pf_sweeper_t), pointer :: sweeper
 
      class(pf_user_level_t), allocatable :: ulevel
 
@@ -284,14 +279,12 @@ module pf_mod_dtype
      end subroutine pf_residual_p
 
      ! transfer interfaces
-     subroutine pf_transfer_p(this, levelF, levelG, qFp, qGp, t)
-       ! import pf_sweeper_t, pf_encap_t, pfdp
-       ! class(pf_sweeper_t), intent(inout) :: levelF, levelG
+     subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
        class(pf_user_level_t), intent(inout) :: this
-       class(pf_level_t), intent(inout) :: levelF, levelG
-       class(pf_encap_t),   intent(inout) :: qFp, qGp
-       real(pfdp),          intent(in)    :: t
+       class(pf_level_t), intent(inout)      :: levelF, levelG
+       class(pf_encap_t),   intent(inout)    :: qF, qG
+       real(pfdp),          intent(in)       :: t
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
