@@ -36,7 +36,7 @@ module feval
      procedure :: f1eval
      procedure :: f2eval
      procedure :: f2comp
-     final :: destroy0, destroy1
+!     final :: destroy0, destroy1
   end type ad_sweeper_t
 
 contains
@@ -241,7 +241,7 @@ contains
 
 
     integer :: nvarF, nvarG, xrat
-    type(ad_sweeper_t), pointer :: adF, adG
+    class(ad_sweeper_t), pointer :: adF, adG
     real(pfdp),         pointer :: f(:), g(:)
     complex(kind=8),    pointer :: wkF(:), wkG(:)
 

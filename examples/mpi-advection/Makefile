@@ -55,7 +55,7 @@ OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 VPATHS += src
 FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90
 
-#FFLAGS  += -I$(FFTW3)/include
+FFLAGS  += -I$(FFTW3)/include
 FFLAGS += -Wno-surprising
 LDFLAGS += -g -L$(FFTW3)/lib -lfftw3
 
