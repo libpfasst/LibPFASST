@@ -22,26 +22,23 @@ module pf_mod_hooks
   implicit none
 
   integer, parameter :: &
-       PF_PRE_BLOCK      = 1, &
-       PF_POST_BLOCK     = 2, &
-       PF_PRE_PREDICTOR  = 3, &
-       PF_POST_PREDICTOR = 4, &
-       PF_PRE_ITERATION  = 5, &
-       PF_POST_ITERATION = 6, &
-       PF_PRE_SWEEP      = 7, &
-       PF_POST_SWEEP     = 8, &
-       PF_PRE_STEP       = 9, &
-       PF_POST_STEP      = 10, &
-       PF_PRE_INTERP_ALL = 11, &
-       PF_POST_INTERP_ALL = 12, &
-       PF_PRE_INTERP_Q0   = 13, &
-       PF_POST_INTERP_Q0  = 14, &
-       PF_PRE_RESTRICT_ALL  = 15, &
-       PF_POST_RESTRICT_ALL = 16, &
-       PF_PRE_CONVERGENCE   = 17, &
-       PF_POST_CONVERGENCE  = 18, &
-       PF_MAX_HOOK          = 18
-
+       PF_PRE_PREDICTOR     = 1, &
+       PF_POST_PREDICTOR    = 2, &
+       PF_PRE_ITERATION     = 3, &
+       PF_POST_ITERATION    = 4, &
+       PF_PRE_SWEEP         = 5, &
+       PF_POST_SWEEP        = 6, &
+       PF_PRE_STEP          = 7, &
+       PF_POST_STEP         = 8, &
+       PF_PRE_INTERP_ALL    = 9, &
+       PF_POST_INTERP_ALL   = 10, &
+       PF_PRE_INTERP_Q0     = 11, &
+       PF_POST_INTERP_Q0    = 12, &
+       PF_PRE_RESTRICT_ALL  = 13, &
+       PF_POST_RESTRICT_ALL = 14, &
+       PF_PRE_CONVERGENCE   = 15, &
+       PF_POST_CONVERGENCE  = 16, &
+       PF_MAX_HOOK          = 16
 
   integer, parameter :: &
        PF_HOOK_LOG_ONE  = 1, &
@@ -49,8 +46,6 @@ module pf_mod_hooks
        PF_HOOK_LOG_LAST = PF_MAX_HOOK
 
   character(len=20), parameter :: hook_names(PF_HOOK_LOG_LAST) = (/ &
-       'pre-block          ',  &
-       'post-block         ',  &
        'pre-predictor      ',  &
        'post-predictor     ',  &
        'pre-iteration      ',  &
