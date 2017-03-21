@@ -232,70 +232,68 @@ contains
 
   end subroutine f2comp
 
-  subroutine interpolate(this, levelF, levelG, qFp, qGp, t)
+  subroutine interpolate(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
 
-    real(pfdp),      pointer :: qF(:), qG(:)
-    complex(kind=8), pointer :: wkF(:), wkG(:)
 
     integer :: nvarF, nvarG, xrat
-
     type(ad_sweeper_t), pointer :: adF, adG
+    real(pfdp),         pointer :: f(:), g(:)
+    complex(kind=8),    pointer :: wkF(:), wkG(:)
 
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
 
-    qF => array1(qFp)
-    qG => array1(qGp)
+    f => array1(qF); g => array1(qG)
 
-    nvarF = size(qF)
-    nvarG = size(qG)
+    nvarF = size(f)
+    nvarG = size(g)
     xrat  = nvarF / nvarG
 
     if (xrat == 1) then
-       qF = qG
+       f = g
        return
     endif
 
-    wkF => adF%wk
-    wkG => adG%wk
+    wkF => adF%wk; wkG => adG%wk
 
-    wkG = qG
+    wkG = g
     call fftw_execute_dft(adG%ffft, wkG, wkG)
     wkG = wkG / nvarG
 
-    wkF = 0.0d0
-    wkF(1:nvarG/2) = wkG(1:nvarG/2)
-    wkF(nvarF-nvarG/2+2:nvarF) = wkG(nvarG/2+2:nvarG)
+    adF%wk = 0.0d0
+    adF%wk(1:nvarG/2) = wkG(1:nvarG/2)
+    adF%wk(nvarF-nvarG/2+2:nvarF) = wkG(nvarG/2+2:nvarG)
 
-    call fftw_execute_dft(adF%ifft, wkF, wkF)
+    call fftw_execute_dft(adF%ifft, adF%wk, adF%wk)
 
-    qF = real(wkF)
+    f = real(adF%wk)
+
   end subroutine interpolate
 
-  subroutine restrict(this, levelF, levelG, qFp, qGp, t)
+  subroutine restrict(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
 
-    real(pfdp), pointer :: qF(:), qG(:)
+    real(pfdp), pointer :: f(:), g(:)
 
     integer :: nvarF, nvarG, xrat
 
-    qF => array1(qFp)
-    qG => array1(qGp)
+    f => array1(qF)
+    g => array1(qG)
 
-    nvarF = size(qF)
-    nvarG = size(qG)
+    nvarF = size(f)
+    nvarG = size(g)
     xrat  = nvarF / nvarG
 
-    qG = qF(::xrat)
+    g = f(::xrat)
   end subroutine restrict
 
 end module feval
