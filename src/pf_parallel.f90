@@ -177,18 +177,15 @@ contains
     real(pfdp) :: residual1
 
     residual1 = pf%levels(pf%nlevels)%residual
-!    print *,'checking resid', 'rank',pf%rank,'iter',pf%state%iter,'lev',pf%state%level,residual,residual1
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
        if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
             (abs(residual1)                          < pf%abs_res_tol) ) then
           pf%state%status = PF_STATUS_CONVERGED
        end if
     end if
-
     residual = residual1
 
     pf%state%res = residual
-
   end subroutine pf_check_tolerances
 
   !
@@ -198,14 +195,13 @@ contains
   ! (pstatus), the current processor hasn't converged yet either,
   ! regardless of the residual.
   !
-  subroutine pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
+  subroutine pf_check_convergence(pf, k, dt, residual, energy, qcycle)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
-    logical,           intent(out)   :: qexit, qcycle
+    logical,           intent(out)   :: qcycle
 
-    qexit  = .false.
     qcycle = .false.
 
     ! shortcut for fixed block mode
@@ -235,11 +231,6 @@ contains
        return
     end if
 
-    if (pf%state%step >= pf%state%nsteps) then
-       qexit = .true.
-       return
-    end if
-
     if (0 == pf%comm%nproc) then
        pf%state%status = PF_STATUS_PREDICTOR
        qcycle = .true.
@@ -262,7 +253,7 @@ contains
     integer                   :: j, k, l
     real(pfdp)                :: residual, energy
 
-    logical :: qexit, qcycle, qbroadcast
+    logical :: qcycle, qbroadcast
     logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
@@ -363,9 +354,10 @@ contains
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
+       call pf_check_convergence(pf, k, dt, residual, energy, qcycle)
 
-       if (qexit)  exit
+       if (pf%state%step >= pf%state%nsteps) exit
+
        if (qcycle) cycle
        do l = 2, pf%nlevels
           F => pf%levels(l)
