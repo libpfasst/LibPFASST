@@ -205,8 +205,6 @@ contains
     integer,           intent(in)    :: k
     logical,           intent(out)   :: qexit, qcycle
 
-    integer :: steps_to_last
-
     qexit  = .false.
     qcycle = .false.
 
@@ -238,19 +236,11 @@ contains
     end if
 
     pf%state%first  = modulo(pf%state%first, pf%comm%nproc)
-    pf%state%last   = modulo(pf%state%last, pf%comm%nproc)
 
     if (pf%state%step >= pf%state%nsteps) then
        qexit = .true.
        return
     end if
-
-    ! roll back "last" processor
-    steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-    do while (pf%state%step + steps_to_last >= pf%state%nsteps)
-       pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
-       steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-    end do
 
     if (0 == pf%comm%nproc) then
        pf%state%status = PF_STATUS_PREDICTOR
@@ -290,7 +280,6 @@ contains
     pf%state%first   = 0
     pf%state%itcnt   = 0
     pf%state%mysteps = 0
-    pf%state%last    = pf%comm%nproc - 1
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
@@ -552,7 +541,7 @@ contains
   subroutine pf_send_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%last) then
+    if (pf%rank /= pf%comm%nproc-1) then
        call pf%comm%send_status(pf, tag)
     end if
   end subroutine pf_send_status
@@ -571,7 +560,7 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TSEND + level%level - 1)
-    if (pf%rank /= pf%state%last &
+    if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
 !       print *,'sending',tag,blocking,pf%rank
        call pf%comm%send(pf, level, tag, blocking)
