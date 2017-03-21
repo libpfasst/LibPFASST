@@ -53,7 +53,7 @@ module pf_mod_dtype
 
   type, bind(c) :: pf_state_t
      real(pfdp) :: t0, dt
-     integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
+     integer(c_int) :: nsteps, cycle, step, iter, level, hook, proc
      integer(c_int) :: status       ! status (iterating, converged etc)
      integer(c_int) :: pstatus      ! previous rank's status
      integer(c_int) :: itcnt        ! iteration counter
