@@ -56,7 +56,6 @@ module pf_mod_dtype
      integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
      integer(c_int) :: status       ! status (iterating, converged etc)
      integer(c_int) :: pstatus      ! previous rank's status
-     integer(c_int) :: first        ! rank of first processor in time block
      integer(c_int) :: itcnt        ! iteration counter
      integer(c_int) :: mysteps      ! steps I did
      real(pfdp) :: res

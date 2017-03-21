@@ -220,7 +220,7 @@ contains
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
     call pf_recv_status(pf, 8000+k)
 
-    if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
+    if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
     call pf_send_status(pf, 8000+k)
@@ -234,8 +234,6 @@ contains
        qcycle = .true.
        return
     end if
-
-    pf%state%first  = modulo(pf%state%first, pf%comm%nproc)
 
     if (pf%state%step >= pf%state%nsteps) then
        qexit = .true.
@@ -277,7 +275,6 @@ contains
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
     pf%state%cycle   = -1
-    pf%state%first   = 0
     pf%state%itcnt   = 0
     pf%state%mysteps = 0
     pf%state%status  = PF_STATUS_PREDICTOR
@@ -505,7 +502,7 @@ contains
        call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
        call pf_recv(pf, F, F%level*10000+iteration, .false.)
 
-       if (pf%rank /= pf%state%first) then
+       if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
@@ -533,7 +530,7 @@ contains
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) then
+    if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) then
        call pf%comm%post(pf, level, tag)
     end if
   end subroutine pf_post
@@ -549,7 +546,7 @@ contains
   subroutine pf_recv_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%first) then
+    if (pf%rank /= 0) then
        call pf%comm%recv_status(pf, tag)
     end if
   end subroutine pf_recv_status
@@ -575,7 +572,7 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%level - 1)
-    if (pf%rank /= pf%state%first .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
+    if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
  !      print *,'recv',tag,blocking,pf%rank
        call pf%comm%recv(pf, level,tag, blocking)
  !      print *,'done recv',tag,blocking,pf%rank
