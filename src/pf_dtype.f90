@@ -47,8 +47,6 @@ module pf_mod_dtype
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
-  integer, parameter :: PF_WINDOW_BLOCK = 1
-  integer, parameter :: PF_WINDOW_RING  = 2
   integer, parameter :: PF_TAG_NMOVED   = 666
 
   integer, parameter :: PF_STATUS_ITERATING = 1
@@ -189,8 +187,6 @@ module pf_mod_dtype
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
-
-     integer :: window = PF_WINDOW_BLOCK
 
      logical :: Pipeline_G =  .false.
      logical :: PFASST_pred = .false.

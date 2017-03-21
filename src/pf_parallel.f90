@@ -213,7 +213,7 @@ contains
     qcycle = .false.
 
     ! shortcut for fixed block mode
-    if (pf%window == PF_WINDOW_BLOCK .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return
@@ -230,50 +230,13 @@ contains
     call pf_send_status(pf, 8000+k)
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
-    if (pf%window == PF_WINDOW_BLOCK) then
+    ! XXX: this ain't so pretty, perhaps we should use the
+    ! 'nmoved' thinger to break this cycle if everyone is
+    ! done...
 
-       ! XXX: this ain't so pretty, perhaps we should use the
-       ! 'nmoved' thinger to break this cycle if everyone is
-       ! done...
-
-       if (pf%state%status == PF_STATUS_CONVERGED) then
-          qcycle = .true.
-          return
-       end if
-
-    else
-
-       if (pf%state%status == PF_STATUS_ITERATING .and. pf%state%iter > pf%niters) then
-          stop "failed to converge before max iteration count"
-       end if
-
-       if (pf%state%status == PF_STATUS_CONVERGED) then
-
-          if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
-             qexit = .true.
-             return
-          end if
-
-          if (pf%rank == pf%state%last) then
-             pf%state%nmoved = pf%comm%nproc
-             call pf_send_nmoved(pf, PF_TAG_NMOVED)
-          else
-             call pf_recv_nmoved(pf, PF_TAG_NMOVED)
-          end if
-
-          pf%state%pstatus = PF_STATUS_ITERATING
-          pf%state%status  = PF_STATUS_ITERATING
-          pf%state%step    = pf%state%step + pf%comm%nproc
-          pf%state%t0      = pf%state%step * dt
-          pf%state%iter    = 1
-          residual = -1
-
-       else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
-
-          call pf_send_nmoved(pf, PF_TAG_NMOVED)
-
-       end if
-
+    if (pf%state%status == PF_STATUS_CONVERGED) then
+       qcycle = .true.
+       return
     end if
 
     pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
@@ -359,7 +322,7 @@ contains
        end if
 
        ! in block mode, jump to next block if we've reached the max iteration count
-       if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
+       if (pf%state%iter >= pf%niters) then
 
           if (.not. did_post_step_hook) then
             call call_hooks(pf, -1, PF_POST_STEP)
@@ -375,11 +338,6 @@ contains
 
           pf%state%status = PF_STATUS_PREDICTOR
           pf%state%block  = pf%state%block + 1
-          qbroadcast = .true.
-       end if
-
-       ! in ring mode, if all procs moved at once, broadcast
-       if (pf%window == PF_WINDOW_RING .and. pf%state%status == PF_STATUS_PREDICTOR) then
           qbroadcast = .true.
        end if
 

@@ -123,10 +123,6 @@ contains
     message(7) = pf%state%status
     message(8) = pf%state%nmoved
 
-    if (pf%window == PF_WINDOW_RING .and. pf%state%status == PF_STATUS_CONVERGED) then
-       message(8) = message(8) + 1
-    end if
-
     if (pf%comm%statreq /= -66) then
        call mpi_wait(pf%comm%statreq, stat, ierror)
     end if

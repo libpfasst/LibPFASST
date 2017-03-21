@@ -28,7 +28,7 @@ contains
     character(len=*),  intent(in   ), optional :: fname
 
     ! local versions of pfasst parameters
-    integer          :: niters, nlevels, qtype, window, taui0
+    integer          :: niters, nlevels, qtype, taui0
     double precision :: abs_res_tol, rel_res_tol
     logical          :: pipeline_g , pfasst_pred, echo_timings
 
@@ -41,14 +41,13 @@ contains
     character(len=512) :: outdir
 
     ! define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, window
+    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol
     namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir
 
     ! set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
     niters       = pf%niters
     qtype        = pf%qtype
-    window       = pf%window
     abs_res_tol  = pf%abs_res_tol
     rel_res_tol  = pf%rel_res_tol
     pipeline_g   = pf%pipeline_g
@@ -82,7 +81,6 @@ contains
     pf%niters       = niters
     pf%nlevels      = nlevels
     pf%qtype        = qtype
-    pf%window       = window
     pf%abs_res_tol  = abs_res_tol
     pf%rel_res_tol  = rel_res_tol
     pf%pipeline_g   = pipeline_g
@@ -131,14 +129,6 @@ contains
     write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
     write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
     write(un,*) 'taui0:     ',   pf%taui0, '! cutoff for tau correction'
-
-    if (pf%comm%nproc > 1) then
-       if (pf%window == PF_WINDOW_RING) then
-          write(un,*) 'window:     ', '      "ring"', ' ! pfasst processors advance through time in a ring'
-       else
-          write(un,*) 'window:     ', '      "block"', ' ! pfasst processors advance through time as a block'
-       end if
-    end if
 
     if (pf%Pipeline_G) then
        write(un,*) 'Predictor Pipelining is ON    '
