@@ -7,7 +7,6 @@ program fpfasst
   use transfer
   use probin
   use pf_mod_ndarray
-  use pf_mod_version
   use pf_mod_fimex
   use pf_mod_mpi, only: MPI_THREAD_MULTIPLE, MPI_COMM_WORLD
 
@@ -114,7 +113,6 @@ program fpfasst
      print *, 'dt:       ', dt
      print *, 'input:    ', trim(input)
      print *, 'output:   ', trim(pf%outdir)
-     print *, 'version:  ', pf_git_version
      print *, ''
   end if
 
