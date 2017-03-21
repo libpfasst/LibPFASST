@@ -86,7 +86,6 @@ module pf_mod_dtype
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
-     procedure(pf_encap_printme_p), deferred :: printme
      procedure(pf_encap_copy_p),    deferred :: copy
      procedure(pf_encap_norm_p),    deferred :: norm
      procedure(pf_encap_pack_p),    deferred :: pack
@@ -308,11 +307,6 @@ module pf_mod_dtype
        real(pfdp),        intent(in)           :: val
        integer,           intent(in), optional :: flags
      end subroutine pf_encap_setval_p
-
-     subroutine pf_encap_printme_p(this)
-       import pf_encap_t
-       class(pf_encap_t), intent(inout) :: this
-     end subroutine pf_encap_printme_p
 
      subroutine pf_encap_copy_p(this, src, flags)
        import pf_encap_t, pfdp
