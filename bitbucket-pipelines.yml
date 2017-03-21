@@ -7,6 +7,7 @@ pipelines:
           - apt-get -y install mpich libmpich-dev
           - apt-get -y install python-nose
           - gfortran --version
+          - export BUILD_DIR=./
           - cd $BUILD_DIR/examples/mpi-advection && make
           - cd $BUILD_DIR/tests
           - nosetests
