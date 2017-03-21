@@ -207,8 +207,6 @@ contains
 
     integer :: steps_to_last
 
-    pf%state%nmoved = 0
-
     qexit  = .false.
     qcycle = .false.
 
@@ -239,8 +237,8 @@ contains
        return
     end if
 
-    pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
-    pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
+    pf%state%first  = modulo(pf%state%first, pf%comm%nproc)
+    pf%state%last   = modulo(pf%state%last, pf%comm%nproc)
 
     if (pf%state%step >= pf%state%nsteps) then
        qexit = .true.
@@ -254,7 +252,7 @@ contains
        steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
     end do
 
-    if (pf%state%nmoved == pf%comm%nproc) then
+    if (0 == pf%comm%nproc) then
        pf%state%status = PF_STATUS_PREDICTOR
        qcycle = .true.
        return
@@ -566,18 +564,6 @@ contains
        call pf%comm%recv_status(pf, tag)
     end if
   end subroutine pf_recv_status
-
-  subroutine pf_send_nmoved(pf, tag)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-    call pf%comm%send_nmoved(pf, tag)
-  end subroutine pf_send_nmoved
-
-  subroutine pf_recv_nmoved(pf, tag)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-    call pf%comm%recv_nmoved(pf, tag)
-  end subroutine pf_recv_nmoved
 
   subroutine pf_send(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
