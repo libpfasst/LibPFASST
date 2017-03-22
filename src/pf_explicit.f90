@@ -32,6 +32,7 @@ module pf_mod_explicit
      procedure :: integrate    => explicit_integrate
      procedure :: residual     => explicit_residual
      procedure :: evaluate_all => explicit_evaluate_all
+     procedure :: destroy      => explicit_destroy
   end type pf_explicit_t
 
   interface
@@ -128,6 +129,13 @@ contains
     end do
   end subroutine explicit_initialize
 
+  ! Destroy the matrices
+  subroutine explicit_destroy(this, lev)
+    class(pf_explicit_t), intent(inout) :: this
+    class(pf_level_t), intent(inout)    :: lev
+    
+    deallocate(this%SdiffE)
+  end subroutine explicit_destroy
 
   ! Compute SDC integral
   subroutine explicit_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

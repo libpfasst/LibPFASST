@@ -74,6 +74,7 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
+     procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
   type, abstract :: pf_encap_t
@@ -91,6 +92,8 @@ module pf_mod_dtype
    contains
      procedure(pf_encap_create0_p),  deferred :: create0
      procedure(pf_encap_create1_p),  deferred :: create1
+     procedure(pf_encap_destroy0_p), deferred :: destroy0
+     procedure(pf_encap_destroy1_p), deferred :: destroy1
   end type pf_factory_t
 
   type, abstract :: pf_user_level_t
@@ -266,6 +269,12 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: dt
      end subroutine pf_residual_p
 
+     subroutine pf_destroy_p(this, lev)
+       import pf_sweeper_t, pf_level_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: this
+       class(pf_level_t),   intent(inout) :: Lev
+     end subroutine pf_destroy_p
+
      ! transfer interfaces
      subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
@@ -289,6 +298,20 @@ module pf_mod_dtype
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
        integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
      end subroutine pf_encap_create1_p
+
+     subroutine pf_encap_destroy0_p(this, x, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x
+       integer,             intent(in   )              :: level, kind, nvars, shape(:)
+     end subroutine pf_encap_destroy0_p
+
+     subroutine pf_encap_destroy1_p(this, x, n, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x(:)
+       integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
+     end subroutine pf_encap_destroy1_p
 
      subroutine pf_encap_setval_p(this, val, flags)
        import pf_encap_t, pfdp

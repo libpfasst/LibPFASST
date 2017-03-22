@@ -41,8 +41,10 @@ module pf_mod_ndarray
 
   type, extends(pf_factory_t) :: ndarray_factory
    contains
-     procedure :: create0 => ndarray_create0
-     procedure :: create1 => ndarray_create1
+     procedure :: create0  => ndarray_create0
+     procedure :: create1  => ndarray_create1
+     procedure :: destroy0 => ndarray_destroy0
+     procedure :: destroy1 => ndarray_destroy1
   end type ndarray_factory
 
   type, extends(pf_encap_t) :: ndarray
@@ -112,6 +114,36 @@ contains
        call ndarray_build(x(i), shape)
     end do
   end subroutine ndarray_create1
+
+  subroutine ndarray_destroy0(this, x, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x
+    integer,                intent(in   )              :: level, kind, nvars, shape(:)
+    
+    select type (x)
+    class is (ndarray)
+       deallocate(x%shape)
+       deallocate(x%flatarray)
+    end select
+    deallocate(x)
+  end subroutine ndarray_destroy0
+
+  subroutine ndarray_destroy1(this, x, n, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x(:)
+    integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
+    integer                                            :: i
+    
+    select type(x)
+    class is (ndarray)
+       do i = 1,n
+          deallocate(x(i)%shape)
+          deallocate(x(i)%flatarray)
+       end do
+    end select
+    deallocate(x)
+  end subroutine ndarray_destroy1
+
 
   ! Deallocate/destroy solution.
   ! subroutine ndarray_destroy(solptr)

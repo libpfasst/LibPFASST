@@ -33,6 +33,7 @@ module pf_mod_implicit
      procedure :: integrate    => implicit_integrate
      procedure :: residual     => implicit_residual
      procedure :: evaluate_all => implicit_evaluate_all
+     procedure :: destroy      => implicit_destroy
   end type pf_implicit_t
 
   interface
@@ -102,6 +103,9 @@ contains
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
+
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicit_sweep
 
@@ -137,6 +141,14 @@ contains
     end do
 
   end subroutine implicit_initialize
+
+  ! Destroy the matrices
+  subroutine implicit_destroy(this, lev)
+    class(pf_implicit_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffI)
+  end subroutine implicit_destroy
 
 
   ! Compute SDC integral

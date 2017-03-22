@@ -30,6 +30,7 @@ module pf_mod_imexQ
      procedure :: sweep      => imexQ_sweep
      procedure :: initialize => imexQ_initialize
      procedure :: integrate  => imexQ_integrate
+     procedure :: destroy    => imexQ_destroy
   end type pf_imexQ_t
 
 contains
@@ -92,6 +93,8 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine imexQ_sweep
 
@@ -126,6 +129,17 @@ contains
     this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine imexQ_initialize
+
+  subroutine imexQ_destroy(this, lev)
+    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QdiffI)
+    deallocate(this%QtilE)
+    deallocate(this%QtilI)
+  end subroutine imexQ_destroy
+
 
   ! Compute SDC integral
   subroutine imexQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

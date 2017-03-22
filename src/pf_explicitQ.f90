@@ -28,6 +28,7 @@ module pf_mod_explicitQ
      procedure :: sweep      => explicitQ_sweep
      procedure :: initialize => explicitQ_initialize
      procedure :: integrate  => explicitQ_integrate
+     procedure :: destroy    => explicitQ_destroy
   end type pf_explicitQ_t
 
 contains
@@ -111,6 +112,16 @@ contains
     this%QdiffE = lev%qmat-this%QtilE
     
   end subroutine explicitQ_initialize
+
+  ! Destroy the matrices
+  subroutine explicitQ_destroy(this, lev)
+    class(pf_explicitQ_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QtilE)
+  end subroutine explicitQ_destroy
+
 
   ! Compute SDC integral
   subroutine explicitQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

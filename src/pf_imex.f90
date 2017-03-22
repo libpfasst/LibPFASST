@@ -35,6 +35,7 @@ module pf_mod_imex
      procedure :: integrate    => imex_integrate
      procedure :: residual     => imex_residual
      procedure :: evaluate_all => imex_evaluate_all
+     procedure :: destroy      => imex_destroy
   end type pf_imex_t
 
   interface
@@ -120,8 +121,8 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    !call lev%encap%destroy(rhs)
-
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+   
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine imex_sweep
 
@@ -159,6 +160,15 @@ contains
        this%SdiffI(m,m+1) = this%SdiffI(m,m+1) - dsdc(m)
     end do
   end subroutine imex_initialize
+
+  ! Destroy the matrices
+  subroutine imex_destroy(this, lev)
+    class(pf_imex_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffE)
+    deallocate(this%SdiffI)
+  end subroutine imex_destroy
 
   ! Compute SDC integral
   subroutine imex_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

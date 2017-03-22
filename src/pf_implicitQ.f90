@@ -28,6 +28,7 @@ module pf_mod_implicitQ
      procedure :: sweep      => implicitQ_sweep
      procedure :: initialize => implicitQ_initialize
      procedure :: integrate  => implicitQ_integrate
+     procedure :: destroy    => implicitQ_destroy
   end type pf_implicitQ_t
 
 contains
@@ -86,6 +87,8 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicitQ_sweep
 
@@ -115,6 +118,17 @@ contains
     this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine implicitQ_initialize
+
+  
+  ! Destroy the matrices
+  subroutine implicitQ_destroy(this, lev)
+    class(pf_implicitQ_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffI)
+    deallocate(this%QtilI)
+  end subroutine implicitQ_destroy
+
 
   ! Compute SDC integral
   subroutine implicitQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

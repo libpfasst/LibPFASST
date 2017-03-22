@@ -150,6 +150,7 @@ contains
 
     ! done
 !    call Lev%encap%destroy(rhs)
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
 
@@ -194,6 +195,14 @@ contains
     end do
   end subroutine misdc_initialize
 
+  subroutine misdc_destroy(this, lev)
+    class(pf_misdc_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffE)
+    deallocate(this%SdiffI)
+  end subroutine misdc_destroy
+  
   ! Compute SDC integral
   subroutine misdc_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_misdc_t),  intent(inout) :: this

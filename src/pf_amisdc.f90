@@ -37,6 +37,7 @@ module pf_mod_amisdc
      procedure :: integrate    => amisdc_integrate
      procedure :: residual     => amisdc_residual
      procedure :: evaluate_all => amisdc_evaluate_all
+     procedure :: destroy      => amisdc_destroy
   end type pf_amisdc_t
 
   interface 
@@ -163,11 +164,15 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+Lev%level-1)
 
   end subroutine amisdc_sweep
      
-
   ! Evaluate function values
   subroutine amisdc_evaluate(this, lev, t, m)
     use pf_mod_dtype
@@ -180,7 +185,6 @@ contains
     call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
     call this%f3eval(lev%Q(m), t, lev%level, lev%F(m,3))
   end subroutine amisdc_evaluate
-
 
   ! Initialize matrices
   subroutine amisdc_initialize(this, lev)
@@ -205,6 +209,15 @@ contains
        this%SdiffI(m,m+1) = this%SdiffI(m,m+1) - dsdc(m)
     end do
   end subroutine amisdc_initialize
+
+  ! Destroy the matrices
+  subroutine amisdc_destroy(this, lev)
+    class(pf_amisdc_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffE)
+    deallocate(this%SdiffI)
+  end subroutine amisdc_destroy
 
   ! Compute SDC integral
   subroutine amisdc_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

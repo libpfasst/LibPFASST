@@ -128,6 +128,7 @@ contains
     ! compute max residual norm
     do m = 1, Lev%nnodes-1
        norms(m) = Lev%R(m)%norm()
+       print *, 'norm(', m, ') = ', norms(m)
     end do
 !    Lev%residual = maxval(abs(norms))
     Lev%residual = norms(Lev%nnodes-1)

@@ -111,6 +111,9 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy1(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+Lev%level-1)
 
   end subroutine misdcQ_sweep
@@ -145,6 +148,16 @@ contains
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
   end subroutine misdcQ_initialize
+
+  subroutine misdcQ_destroy(this, lev)
+    class(pf_misdcQ_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QdiffI)
+    deallocate(this%QtilE)
+    deallocate(this%QtilI)
+  end subroutine misdcQ_destroy
 
   ! Compute SDC integral
   subroutine misdcQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
