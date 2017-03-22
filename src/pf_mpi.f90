@@ -49,8 +49,6 @@ contains
     pf_comm%broadcast   => pf_mpi_broadcast
     pf_comm%recv_status => pf_mpi_recv_status
     pf_comm%send_status => pf_mpi_send_status
-    pf_comm%recv_nmoved => pf_mpi_recv_nmoved
-    pf_comm%send_nmoved => pf_mpi_send_nmoved
   end subroutine pf_mpi_create
 
   !
@@ -121,11 +119,6 @@ contains
 
     message = 666
     message(7) = pf%state%status
-    message(8) = pf%state%nmoved
-
-    if (pf%window == PF_WINDOW_RING .and. pf%state%status == PF_STATUS_CONVERGED) then
-       message(8) = message(8) + 1
-    end if
 
     if (pf%comm%statreq /= -66) then
        call mpi_wait(pf%comm%statreq, stat, ierror)
@@ -144,54 +137,15 @@ contains
     integer    :: ierror, stat(MPI_STATUS_SIZE)
     integer(4) :: message(8)
 
-    pf%state%nmoved = 0
-
     call mpi_recv(message, 8, MPI_INTEGER4, &
                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
 
     pf%state%pstatus = message(7)
-    pf%state%nmoved  = message(8)
 
     if (ierror .ne. 0) &
          print *, pf%rank, 'warning: mpi error during receive status', ierror
 
   end subroutine pf_mpi_recv_status
-
-  !
-  ! Send/receive number of moved processors.
-  !
-  subroutine pf_mpi_send_nmoved(pf, tag)
-    use pf_mod_mpi, only: MPI_STATUS_SIZE, MPI_INTEGER4
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-
-    integer    :: r, ierror, stat(MPI_STATUS_SIZE), sendreq(pf%state%nmoved)
-    integer(4) :: message(8)
-
-    message = 666
-    message(8) = pf%state%nmoved
-
-    do r = 1, min(pf%state%nmoved, pf%comm%nproc-1)
-       call mpi_isend(message, 8, MPI_INTEGER4, &
-                      modulo(pf%rank-r, pf%comm%nproc), tag, pf%comm%comm, sendreq(r), ierror)
-    end do
-    do r = 1, min(pf%state%nmoved, pf%comm%nproc-1)
-       call mpi_wait(sendreq(r), stat, ierror)
-    end do
-  end subroutine pf_mpi_send_nmoved
-
-  subroutine pf_mpi_recv_nmoved(pf, tag)
-    use pf_mod_mpi, only: MPI_INTEGER4, MPI_ANY_SOURCE, MPI_SOURCE, MPI_STATUS_SIZE
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-
-    integer    :: ierror, stat(MPI_STATUS_SIZE)
-    integer(4) :: message(8)
-
-    call mpi_probe(MPI_ANY_SOURCE, tag, pf%comm%comm, stat, ierror)
-    call mpi_recv(message, 8, MPI_INTEGER4, stat(MPI_SOURCE), tag, pf%comm%comm, stat, ierror)
-    pf%state%nmoved = message(8)
-  end subroutine pf_mpi_recv_nmoved
 
   !
   ! Send/receive solution.

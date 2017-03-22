@@ -177,18 +177,15 @@ contains
     real(pfdp) :: residual1
 
     residual1 = pf%levels(pf%nlevels)%residual
-!    print *,'checking resid', 'rank',pf%rank,'iter',pf%state%iter,'lev',pf%state%level,residual,residual1
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
        if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
             (abs(residual1)                          < pf%abs_res_tol) ) then
           pf%state%status = PF_STATUS_CONVERGED
        end if
     end if
-
     residual = residual1
 
     pf%state%res = residual
-
   end subroutine pf_check_tolerances
 
   !
@@ -198,22 +195,17 @@ contains
   ! (pstatus), the current processor hasn't converged yet either,
   ! regardless of the residual.
   !
-  subroutine pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
+  subroutine pf_check_convergence(pf, k, dt, residual, energy, qcycle)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
-    logical,           intent(out)   :: qexit, qcycle
+    logical,           intent(out)   :: qcycle
 
-    integer :: steps_to_last
-
-    pf%state%nmoved = 0
-
-    qexit  = .false.
     qcycle = .false.
 
     ! shortcut for fixed block mode
-    if (pf%window == PF_WINDOW_BLOCK .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return
@@ -224,74 +216,22 @@ contains
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
     call pf_recv_status(pf, 8000+k)
 
-    if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) &
+    if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
     call pf_send_status(pf, 8000+k)
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
-    if (pf%window == PF_WINDOW_BLOCK) then
+    ! XXX: this ain't so pretty, perhaps we should use the
+    ! 'nmoved' thinger to break this cycle if everyone is
+    ! done...
 
-       ! XXX: this ain't so pretty, perhaps we should use the
-       ! 'nmoved' thinger to break this cycle if everyone is
-       ! done...
-
-       if (pf%state%status == PF_STATUS_CONVERGED) then
-          qcycle = .true.
-          return
-       end if
-
-    else
-
-       if (pf%state%status == PF_STATUS_ITERATING .and. pf%state%iter > pf%niters) then
-          stop "failed to converge before max iteration count"
-       end if
-
-       if (pf%state%status == PF_STATUS_CONVERGED) then
-
-          if (pf%rank == pf%state%last .and. pf%rank == pf%state%first) then
-             qexit = .true.
-             return
-          end if
-
-          if (pf%rank == pf%state%last) then
-             pf%state%nmoved = pf%comm%nproc
-             call pf_send_nmoved(pf, PF_TAG_NMOVED)
-          else
-             call pf_recv_nmoved(pf, PF_TAG_NMOVED)
-          end if
-
-          pf%state%pstatus = PF_STATUS_ITERATING
-          pf%state%status  = PF_STATUS_ITERATING
-          pf%state%step    = pf%state%step + pf%comm%nproc
-          pf%state%t0      = pf%state%step * dt
-          pf%state%iter    = 1
-          residual = -1
-
-       else if (pf%state%pstatus == PF_STATUS_CONVERGED) then
-
-          call pf_send_nmoved(pf, PF_TAG_NMOVED)
-
-       end if
-
-    end if
-
-    pf%state%first  = modulo(pf%state%first + pf%state%nmoved, pf%comm%nproc)
-    pf%state%last   = modulo(pf%state%last  + pf%state%nmoved, pf%comm%nproc)
-
-    if (pf%state%step >= pf%state%nsteps) then
-       qexit = .true.
+    if (pf%state%status == PF_STATUS_CONVERGED) then
+       qcycle = .true.
        return
     end if
 
-    ! roll back "last" processor
-    steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-    do while (pf%state%step + steps_to_last >= pf%state%nsteps)
-       pf%state%last = modulo(pf%state%last - 1, pf%comm%nproc)
-       steps_to_last = modulo(pf%state%last - pf%rank, pf%comm%nproc)
-    end do
-
-    if (pf%state%nmoved == pf%comm%nproc) then
+    if (0 == pf%comm%nproc) then
        pf%state%status = PF_STATUS_PREDICTOR
        qcycle = .true.
        return
@@ -313,7 +253,7 @@ contains
     integer                   :: j, k, l
     real(pfdp)                :: residual, energy
 
-    logical :: qexit, qcycle, qbroadcast
+    logical :: qcycle, qbroadcast
     logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
@@ -322,14 +262,11 @@ contains
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%step    = pf%rank
-    pf%state%block   = 1
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
     pf%state%cycle   = -1
-    pf%state%first   = 0
     pf%state%itcnt   = 0
     pf%state%mysteps = 0
-    pf%state%last    = pf%comm%nproc - 1
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
@@ -359,7 +296,7 @@ contains
        end if
 
        ! in block mode, jump to next block if we've reached the max iteration count
-       if (pf%window == PF_WINDOW_BLOCK .and. pf%state%iter >= pf%niters) then
+       if (pf%state%iter >= pf%niters) then
 
           if (.not. did_post_step_hook) then
             call call_hooks(pf, -1, PF_POST_STEP)
@@ -374,12 +311,6 @@ contains
           if (pf%state%step >= pf%state%nsteps) exit
 
           pf%state%status = PF_STATUS_PREDICTOR
-          pf%state%block  = pf%state%block + 1
-          qbroadcast = .true.
-       end if
-
-       ! in ring mode, if all procs moved at once, broadcast
-       if (pf%window == PF_WINDOW_RING .and. pf%state%status == PF_STATUS_PREDICTOR) then
           qbroadcast = .true.
        end if
 
@@ -390,6 +321,7 @@ contains
           call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
           F%q0 = F%send
        end if
+
        ! predictor, if requested
        if (pf%state%status == PF_STATUS_PREDICTOR) &
             call pf_predictor(pf, pf%state%t0, dt)
@@ -421,9 +353,10 @@ contains
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, residual, energy, qexit, qcycle)
+       call pf_check_convergence(pf, k, dt, residual, energy, qcycle)
 
-       if (qexit)  exit
+       if (pf%state%step >= pf%state%nsteps) exit
+
        if (qcycle) cycle
        do l = 2, pf%nlevels
           F => pf%levels(l)
@@ -560,7 +493,7 @@ contains
        call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
        call pf_recv(pf, F, F%level*10000+iteration, .false.)
 
-       if (pf%rank /= pf%state%first) then
+       if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
@@ -588,7 +521,7 @@ contains
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%first .and. pf%state%pstatus == PF_STATUS_ITERATING) then
+    if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) then
        call pf%comm%post(pf, level, tag)
     end if
   end subroutine pf_post
@@ -596,7 +529,7 @@ contains
   subroutine pf_send_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%last) then
+    if (pf%rank /= pf%comm%nproc-1) then
        call pf%comm%send_status(pf, tag)
     end if
   end subroutine pf_send_status
@@ -604,22 +537,10 @@ contains
   subroutine pf_recv_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    if (pf%rank /= pf%state%first) then
+    if (pf%rank /= 0) then
        call pf%comm%recv_status(pf, tag)
     end if
   end subroutine pf_recv_status
-
-  subroutine pf_send_nmoved(pf, tag)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-    call pf%comm%send_nmoved(pf, tag)
-  end subroutine pf_send_nmoved
-
-  subroutine pf_recv_nmoved(pf, tag)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: tag
-    call pf%comm%recv_nmoved(pf, tag)
-  end subroutine pf_recv_nmoved
 
   subroutine pf_send(pf, level, tag, blocking)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -627,7 +548,7 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TSEND + level%level - 1)
-    if (pf%rank /= pf%state%last &
+    if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
 !       print *,'sending',tag,blocking,pf%rank
        call pf%comm%send(pf, level, tag, blocking)
@@ -642,7 +563,7 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%level - 1)
-    if (pf%rank /= pf%state%first .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
+    if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
  !      print *,'recv',tag,blocking,pf%rank
        call pf%comm%recv(pf, level,tag, blocking)
  !      print *,'done recv',tag,blocking,pf%rank

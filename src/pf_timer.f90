@@ -117,10 +117,10 @@ contains
     pf%runtimes(timer) = pf%runtimes(timer) + t - pf%timers(timer)
 
     if (pf%echo_timings) then
-       write(601+pf%rank, '("timer:",a16,", rank: ",i3,", block: ",i3,", step: ",i3,' &
+       write(601+pf%rank, '("timer:",a16,", rank: ",i3,", step: ",i3,' &
             // '", iter: ",i3,", cycle: ",i3,", time (rate ",i12,"Hz): ",i18,i18,i18,i18)') &
             timer_names(timer), pf%rank, &
-            pf%state%block, pf%state%step, pf%state%iter, pf%state%cycle, rate, &
+            pf%state%step, pf%state%iter, pf%state%cycle, rate, &
             t-pf%timers(timer), t-pf%timers(TTOTAL), pf%timers(timer), t
        call flush(601+pf%rank)
     end if

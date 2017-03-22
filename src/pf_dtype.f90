@@ -47,22 +47,15 @@ module pf_mod_dtype
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
-  integer, parameter :: PF_WINDOW_BLOCK = 1
-  integer, parameter :: PF_WINDOW_RING  = 2
-  integer, parameter :: PF_TAG_NMOVED   = 666
-
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
   type, bind(c) :: pf_state_t
      real(pfdp) :: t0, dt
-     integer(c_int) :: nsteps, block, cycle, step, iter, level, hook, proc
+     integer(c_int) :: nsteps, cycle, step, iter, level, hook, proc
      integer(c_int) :: status       ! status (iterating, converged etc)
      integer(c_int) :: pstatus      ! previous rank's status
-     integer(c_int) :: nmoved       ! how many processors behind me have moved
-     integer(c_int) :: first        ! rank of first processor in time block
-     integer(c_int) :: last         ! rank of last processor in time block
      integer(c_int) :: itcnt        ! iteration counter
      integer(c_int) :: mysteps      ! steps I did
      real(pfdp) :: res
@@ -171,10 +164,8 @@ module pf_mod_dtype
      procedure(pf_post_p),        pointer, nopass :: post
      procedure(pf_recv_p),        pointer, nopass :: recv
      procedure(pf_recv_status_p), pointer, nopass :: recv_status
-     procedure(pf_recv_status_p), pointer, nopass :: recv_nmoved
      procedure(pf_send_p),        pointer, nopass :: send
      procedure(pf_send_status_p), pointer, nopass :: send_status
-     procedure(pf_send_status_p), pointer, nopass :: send_nmoved
      procedure(pf_wait_p),        pointer, nopass :: wait
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
@@ -188,8 +179,6 @@ module pf_mod_dtype
 
      real(pfdp) :: abs_res_tol = 0.d0
      real(pfdp) :: rel_res_tol = 0.d0
-
-     integer :: window = PF_WINDOW_BLOCK
 
      logical :: Pipeline_G =  .false.
      logical :: PFASST_pred = .false.
