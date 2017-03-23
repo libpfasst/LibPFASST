@@ -159,6 +159,7 @@ contains
     allocate(F%nflags(nnodes))
     allocate(F%s0mat(nnodes-1,nnodes))
     allocate(F%qmat(nnodes-1,nnodes))
+    allocate(F%LUmat(nnodes-1,nnodes))
 
     if (btest(pf%qtype, 8)) then
        call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
@@ -229,6 +230,7 @@ contains
     deallocate(F%nflags)
     deallocate(F%qmat)
     deallocate(F%s0mat)
+    deallocate(F%LUmat)
 
     ! encaps
     npieces = F%ulevel%sweeper%npieces
@@ -239,7 +241,6 @@ contains
     if ((F%level < nlevels) .and. allocated(F%tauQ)) then
        call F%ulevel%factory%destroy1(F%tauQ, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     end if
-
 
     call F%ulevel%factory%destroy1(F%Q, F%nnodes, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy1(F%Fflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)

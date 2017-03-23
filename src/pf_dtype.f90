@@ -117,27 +117,28 @@ module pf_mod_dtype
      class(pf_user_level_t), allocatable :: ulevel
 
      real(pfdp), allocatable :: &
-          q0(:), &                      ! initial condition (packed)
-          send(:), &                    ! send buffer
-          recv(:), &                    ! recv buffer
-          nodes(:), &                   ! sdc nodes
-          qmat(:,:), &                  ! integration matrix (0 to node)
+          q0(:),      &                 ! initial condition (packed)
+          send(:),    &                 ! send buffer
+          recv(:),    &                 ! recv buffer
+          nodes(:),   &                 ! sdc nodes
+          qmat(:,:),  &                 ! integration matrix (0 to node)
+          LUmat(:,:), &                 ! LU factorization (replaces BE matrix in Q form)
           s0mat(:,:), &                 ! integration matrix (node to node)
-          rmat(:,:), &                  ! time restriction matrix
+          rmat(:,:),  &                 ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
      integer(c_int), allocatable :: &
           nflags(:)                     ! sdc node flags
 
      class(pf_encap_t), allocatable :: &
-          Q(:), &                       ! unknowns at sdc nodes
-          pQ(:), &                      ! unknowns at sdc nodes, previous sweep
-          R(:), &                       ! full residuals
-          I(:), &                       ! 0 to node integrals
-          S(:), &                       ! node to node integrals
-          Fflt(:), &                    ! functions values at sdc nodes (flat)
-          tau(:), &                     ! fas correction
-          tauQ(:), &                    ! fas correction in Q form
+          Q(:),     &                   ! unknowns at sdc nodes
+          pQ(:),    &                   ! unknowns at sdc nodes, previous sweep
+          R(:),     &                   ! full residuals
+          I(:),     &                   ! 0 to node integrals
+          S(:),     &                   ! node to node integrals
+          Fflt(:),  &                   ! functions values at sdc nodes (flat)
+          tau(:),   &                   ! fas correction
+          tauQ(:),  &                   ! fas correction in Q form
           pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
           qend
 

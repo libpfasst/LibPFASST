@@ -107,4 +107,49 @@ contains
 
   end subroutine pf_quadrature
 
+  subroutine myLUq(Q,Qtil,Nnodes,fillq)
+    real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
+    real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
+    integer,        intent (in)     :: Nnodes
+    integer,        intent (in)     :: fillq
+
+    ! Return the Qtil=U^T where U is the LU decomposition of Q without pivoting
+    ! if fillq is positive, then the first row of Qtil is filled to make
+    ! the matrix consistent
+
+    integer :: i,j,N
+    real(pfdp) :: c
+    real(pfdp)  :: U(Nnodes-1,Nnodes-1)
+    real(pfdp)  :: L(Nnodes-1,Nnodes-1)
+    L = 0.0_pfdp
+    U = 0.0_pfdp
+    N = Nnodes-1
+    U=transpose(Q(1:Nnodes-1,2:Nnodes))
+
+    do i = 1,N
+       if (U(i,i) /= 0.0) then
+          do j=i+1,N
+             c = U(j,i)/U(i,i)
+             U(j,i:N)=U(j,i:N)-c*U(i,i:N)
+             L(j,i)=c
+          end do
+       end if
+       L(i,i) = 1.0_pfdp
+    end do
+
+    !  Check
+    if (maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes)))) > 1.0d-12)  print *,'LU error'
+    
+    Qtil = 0.0_pfdp
+    Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
+    !  Now scale the columns of U to match the sum of A
+    if (fillq .eq. 1) then
+       do i=1,Nnodes-1
+          Qtil(i,1)=sum(Q(i,1:Nnodes))-sum(Qtil(i,2:Nnodes))
+       end do
+    end if
+
+  end subroutine myLUq
+
+
 end module pf_mod_quadrature

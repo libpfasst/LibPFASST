@@ -26,6 +26,7 @@ module pf_mod_amisdcQ
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     logical                 :: use_LUq_ = .true.
    contains 
      procedure :: sweep        => amisdcQ_sweep
      procedure :: initialize   => amisdcQ_initialize
@@ -144,8 +145,6 @@ contains
     call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
     call lev%ulevel%factory%destroy0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
-
-
     call end_timer(pf, TLEVEL+lev%level-1)
 
   end subroutine amisdcQ_sweep
@@ -170,10 +169,22 @@ contains
     this%QtilI = 0.0_pfdp
 
     dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+    ! Implicit matrix
+    if (this%use_LUq_) then 
+       ! Get the LU
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       this%QtilI = lev%LUmat
+    else 
+       do m = 1, nnodes-1
+          do n = 1,m
+             this%QtilI(m,n+1) =  dsdc(n)
+          end do
+       end do
+    end if
+    ! Explicit matrix
     do m = 1, nnodes-1
        do n = 1,m
           this%QtilE(m,n)   =  dsdc(n)
-          this%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
 

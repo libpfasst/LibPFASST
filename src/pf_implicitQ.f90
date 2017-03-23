@@ -20,10 +20,11 @@
 module pf_mod_implicitQ
   use pf_mod_implicit
   implicit none
-
+  
   type, extends(pf_implicit_t), abstract :: pf_implicitQ_t
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     logical                 :: use_LUq_ = .false.
    contains
      procedure :: sweep      => implicitQ_sweep
      procedure :: initialize => implicitQ_initialize
@@ -109,12 +110,18 @@ contains
 
     this%QtilI = 0.0_pfdp
 
-    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          this%QtilI(m,n+1) =  dsdc(n)
+    if (this%use_LUq_) then 
+       ! Get the LU
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       this%QtilI = lev%LUmat
+    else 
+       dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+       do m = 1, nnodes-1
+          do n = 1,m
+             this%QtilI(m,n+1) =  dsdc(n)
+          end do
        end do
-    end do
+    end if
 
     this%QdiffI = lev%qmat-this%QtilI
 
