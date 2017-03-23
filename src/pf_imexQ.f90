@@ -31,6 +31,7 @@ module pf_mod_imexQ
      procedure :: initialize => imexQ_initialize
      procedure :: integrate  => imexQ_integrate
      procedure :: destroy    => imexQ_destroy
+     procedure :: imexQ_destroy
   end type pf_imexQ_t
 
 contains

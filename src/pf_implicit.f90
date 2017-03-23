@@ -34,6 +34,7 @@ module pf_mod_implicit
      procedure :: residual     => implicit_residual
      procedure :: evaluate_all => implicit_evaluate_all
      procedure :: destroy      => implicit_destroy
+     procedure :: implicit_destroy
   end type pf_implicit_t
 
   interface

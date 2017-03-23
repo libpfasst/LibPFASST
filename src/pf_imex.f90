@@ -36,6 +36,7 @@ module pf_mod_imex
      procedure :: residual     => imex_residual
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy      => imex_destroy
+     procedure :: imex_destroy
   end type pf_imex_t
 
   interface

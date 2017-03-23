@@ -29,6 +29,7 @@ module pf_mod_explicitQ
      procedure :: initialize => explicitQ_initialize
      procedure :: integrate  => explicitQ_integrate
      procedure :: destroy    => explicitQ_destroy
+     procedure :: explicitQ_destroy
   end type pf_explicitQ_t
 
 contains

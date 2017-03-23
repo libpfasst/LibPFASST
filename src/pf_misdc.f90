@@ -37,6 +37,8 @@ module pf_mod_misdc
      procedure :: integrate    => misdc_integrate
      procedure :: residual     => misdc_residual
      procedure :: evaluate_all => misdc_evaluate_all
+     procedure :: destroy      => misdc_destroy
+     procedure :: misdc_destroy
   end type pf_misdc_t
 
   interface 
@@ -149,7 +151,6 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-!    call Lev%encap%destroy(rhs)
     call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+Lev%level-1)

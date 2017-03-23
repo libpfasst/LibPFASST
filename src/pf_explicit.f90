@@ -33,6 +33,7 @@ module pf_mod_explicit
      procedure :: residual     => explicit_residual
      procedure :: evaluate_all => explicit_evaluate_all
      procedure :: destroy      => explicit_destroy
+     procedure :: explicit_destroy
   end type pf_explicit_t
 
   interface

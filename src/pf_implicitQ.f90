@@ -29,6 +29,7 @@ module pf_mod_implicitQ
      procedure :: initialize => implicitQ_initialize
      procedure :: integrate  => implicitQ_integrate
      procedure :: destroy    => implicitQ_destroy
+     procedure :: implicitQ_destroy
   end type pf_implicitQ_t
 
 contains

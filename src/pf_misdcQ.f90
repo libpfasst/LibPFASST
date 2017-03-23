@@ -18,8 +18,7 @@
 !
 
 module pf_mod_misdcQ
-  use pf_mod_dtype
-  use pf_mod_utils
+  use pf_mod_misdc
   implicit none
 
   type, extends(pf_misdc_t), abstract :: pf_misdcQ_t
@@ -31,6 +30,8 @@ module pf_mod_misdcQ
      procedure :: sweep        => misdcQ_sweep
      procedure :: initialize   => misdcQ_initialize
      procedure :: integrate    => misdcQ_integrate
+     procedure :: destroy      => misdcQ_destroy
+     procedure :: misdcQ_destroy
   end type pf_misdcQ_t
 
 contains
