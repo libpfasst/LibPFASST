@@ -30,6 +30,8 @@ module pf_mod_amisdcQ
      procedure :: sweep        => amisdcQ_sweep
      procedure :: initialize   => amisdcQ_initialize
      procedure :: integrate    => amisdcQ_integrate
+     procedure :: destroy      => amisdcQ_destroy
+     procedure :: amisdcQ_destroy
   end type pf_amisdcQ_t
 
 contains
@@ -135,6 +137,15 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy1(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy1(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+
+
     call end_timer(pf, TLEVEL+lev%level-1)
 
   end subroutine amisdcQ_sweep
@@ -169,6 +180,18 @@ contains
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
   end subroutine amisdcQ_initialize
+
+  ! Destroy the matrices
+  subroutine amisdcQ_destroy(this, lev)
+    class(pf_amisdcQ_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QdiffI)
+    deallocate(this%QtilE)
+    deallocate(this%QtilI)
+  end subroutine amisdcQ_destroy
+
 
   ! Compute SDC integral
   subroutine amisdcQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

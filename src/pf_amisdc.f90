@@ -38,6 +38,7 @@ module pf_mod_amisdc
      procedure :: residual     => amisdc_residual
      procedure :: evaluate_all => amisdc_evaluate_all
      procedure :: destroy      => amisdc_destroy
+     procedure :: amisdc_destroy
   end type pf_amisdc_t
 
   interface 
