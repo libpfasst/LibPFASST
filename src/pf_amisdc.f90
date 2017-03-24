@@ -45,37 +45,37 @@ module pf_mod_amisdc
      subroutine pf_f1eval_p(this, y, t, level, f1)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f1
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f1
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f1eval_p
 
      subroutine pf_f2eval_p(this, y, t, level, f2)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f2
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f2
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f2eval_p
 
      subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: rhs
-       class(pf_encap_t), intent(inout) :: y, f2
-       real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: rhs
+       class(pf_encap_t),  intent(inout) :: y, f2
+       real(pfdp),         intent(in   ) :: t, dt
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f2comp_p
 
      subroutine pf_f3eval_p(this, y, t, level, f3)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f3
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f3
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f3eval_p
 
      subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
@@ -93,15 +93,15 @@ contains
   ! Perform on SDC sweep on level lev and set qend appropriately.
   subroutine amisdc_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
-    class(pf_amisdc_t), intent(inout)    :: this
-    type(pf_pfasst_t),    intent(inout) :: pf
-    real(pfdp),           intent(in)    :: dt, t0
-    class(pf_level_t),     intent(inout) :: lev
+    class(pf_amisdc_t), intent(inout) :: this
+    type(pf_pfasst_t),  intent(inout) :: pf
+    real(pfdp),         intent(in)    :: dt, t0
+    class(pf_level_t),  intent(inout) :: lev
 
-    integer                        :: m, n
-    real(pfdp)                     :: t
-    real(pfdp)                     :: dtsdc(1:lev%nnodes-1)
-    class(pf_encap_t), allocatable :: rhsA, rhsB, QA, QB
+    integer                           :: m, n
+    real(pfdp)                        :: t
+    real(pfdp)                        :: dtsdc(1:lev%nnodes-1)
+    class(pf_encap_t), allocatable    :: rhsA, rhsB, QA, QB
 
     call start_timer(pf, TLEVEL+lev%level-1)
     
@@ -130,11 +130,13 @@ contains
     call lev%ulevel%factory%create0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
     call lev%ulevel%factory%create0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
+    call QA%setval(0.0_pfdp)
+    call QB%setval(0.0_pfdp)
+
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
-
              
        ! First compute the explicit part of the right-hand side
        call rhsA%copy(lev%Q(m))
@@ -165,6 +167,7 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    ! Destroy the temporary variables
     call lev%ulevel%factory%destroy0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
     call lev%ulevel%factory%destroy0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
     call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)

@@ -93,18 +93,21 @@ contains
     call lev%ulevel%factory%create0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
     call lev%ulevel%factory%create0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
+    call QA%setval(0.0_pfdp)
+    call QB%setval(0.0_pfdp)
+
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
              
-       call rhsA%setval(0.0_pfdp)
+       call rhsA%copy(lev%Q(1))
        ! First compute the explicit part of the right-hand side
        do n = 1, m
           call rhsA%axpy(dt*this%QtilE(m,n), lev%F(n,1))  
        end do
        call rhsA%axpy(1.0_pfdp, lev%S(m))
-       call rhsA%axpy(1.0_pfdp, lev%Q(1))
+
        
        ! Save the right-hand side with only the explicit contribution
        call rhsB%copy(rhsA)
@@ -114,7 +117,6 @@ contains
           call rhsA%axpy(dt*this%QtilI(m,n), lev%F(n,2))  
        end do
        call rhsA%axpy(-1.0_pfdp, S2(m))  
-
        call this%f2comp(QA, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsA, lev%level, lev%F(m+1,2))
 
        ! Add the second implicit part to the right-hand side and solve for the second asynchronous update
@@ -122,7 +124,6 @@ contains
           call rhsB%axpy(dt*this%QtilI(m,n), lev%F(n,3))  
        end do
        call rhsB%axpy(-1.0_pfdp, S3(m))  
-
        call this%f3comp(QB, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsB, lev%level, lev%F(m+1,3))
 
        ! Now we average the two asynchronous updates
@@ -158,6 +159,7 @@ contains
     integer    :: m, n, nnodes
 
     this%npieces = 3
+
 
     nnodes = lev%nnodes
     allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
