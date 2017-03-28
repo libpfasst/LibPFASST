@@ -36,7 +36,7 @@ module feval
      procedure :: f1eval
      procedure :: f2eval
      procedure :: f2comp
-!     final :: destroy0, destroy1
+     procedure :: destroy
   end type ad_sweeper_t
 
 contains
@@ -92,22 +92,19 @@ contains
     end do
   end subroutine setup
 
-  subroutine destroy0(this)
-    type(ad_sweeper_t), intent(inout) :: this
+  subroutine destroy(this, lev)
+    class(ad_sweeper_t), intent(inout) :: this
+    class(pf_level_t), intent(inout)   :: lev
+
     deallocate(this%wk)
     deallocate(this%ddx)
     deallocate(this%lap)
     call fftw_destroy_plan(this%ffft)
     call fftw_destroy_plan(this%ifft)
-  end subroutine destroy0
+    
+    call this%imexQ_destroy(lev)
 
-  subroutine destroy1(this)
-    type(ad_sweeper_t), intent(inout) :: this(:)
-    integer :: i
-    do i = 1, size(this)
-       call destroy0(this(i))
-    end do
-  end subroutine destroy1
+  end subroutine destroy
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
