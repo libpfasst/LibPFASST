@@ -41,8 +41,10 @@ module pf_mod_ndarray
 
   type, extends(pf_factory_t) :: ndarray_factory
    contains
-     procedure :: create0 => ndarray_create0
-     procedure :: create1 => ndarray_create1
+     procedure :: create_single  => ndarray_create_single
+     procedure :: create_array  => ndarray_create_array
+     procedure :: destroy_single => ndarray_destroy_single
+     procedure :: destroy_array => ndarray_destroy_array
   end type ndarray_factory
 
   type, extends(pf_encap_t) :: ndarray
@@ -93,16 +95,16 @@ contains
   end subroutine ndarray_build
 
   ! Allocate/create solution (spatial data set).
-  subroutine ndarray_create0(this, x, level, kind, nvars, shape)
+  subroutine ndarray_create_single(this, x, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level, kind, nvars, shape(:)
     integer :: i
     allocate(ndarray::x)
     call ndarray_build(x, shape)
-  end subroutine ndarray_create0
+  end subroutine ndarray_create_single
 
-  subroutine ndarray_create1(this, x, n, level, kind, nvars, shape)
+  subroutine ndarray_create_array(this, x, n, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
@@ -111,7 +113,37 @@ contains
     do i = 1, n
        call ndarray_build(x(i), shape)
     end do
-  end subroutine ndarray_create1
+  end subroutine ndarray_create_array
+
+  subroutine ndarray_destroy_single(this, x, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x
+    integer,                intent(in   )              :: level, kind, nvars, shape(:)
+    
+    select type (x)
+    class is (ndarray)
+       deallocate(x%shape)
+       deallocate(x%flatarray)
+    end select
+    deallocate(x)
+  end subroutine ndarray_destroy_single
+
+  subroutine ndarray_destroy_array(this, x, n, level, kind, nvars, shape)
+    class(ndarray_factory), intent(inout)              :: this
+    class(pf_encap_t),      intent(inout), allocatable :: x(:)
+    integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
+    integer                                            :: i
+    
+    select type(x)
+    class is (ndarray)
+       do i = 1,n
+          deallocate(x(i)%shape)
+          deallocate(x(i)%flatarray)
+       end do
+    end select
+    deallocate(x)
+  end subroutine ndarray_destroy_array
+
 
   ! Deallocate/destroy solution.
   ! subroutine ndarray_destroy(solptr)

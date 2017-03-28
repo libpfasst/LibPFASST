@@ -37,6 +37,8 @@ module pf_mod_misdc
      procedure :: integrate    => misdc_integrate
      procedure :: residual     => misdc_residual
      procedure :: evaluate_all => misdc_evaluate_all
+     procedure :: destroy      => misdc_destroy
+     procedure :: misdc_destroy
   end type pf_misdc_t
 
   interface 
@@ -124,7 +126,7 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -149,7 +151,7 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-!    call Lev%encap%destroy(rhs)
+    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
 
@@ -194,6 +196,14 @@ contains
     end do
   end subroutine misdc_initialize
 
+  subroutine misdc_destroy(this, lev)
+    class(pf_misdc_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffE)
+    deallocate(this%SdiffI)
+  end subroutine misdc_destroy
+  
   ! Compute SDC integral
   subroutine misdc_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
     class(pf_misdc_t),  intent(inout) :: this

@@ -26,10 +26,13 @@ module pf_mod_imexQ
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     logical                 :: use_LUq_ = .false.
    contains
      procedure :: sweep      => imexQ_sweep
      procedure :: initialize => imexQ_initialize
      procedure :: integrate  => imexQ_integrate
+     procedure :: destroy    => imexQ_destroy
+     procedure :: imexQ_destroy
   end type pf_imexQ_t
 
 contains
@@ -68,7 +71,7 @@ contains
     call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
 
-    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -91,6 +94,8 @@ contains
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
+
+    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine imexQ_sweep
@@ -115,10 +120,23 @@ contains
     this%QtilI = 0.0_pfdp
 
     dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+
+    ! Implicit matrix
+    if (this%use_LUq_) then 
+       ! Get the LU
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       this%QtilI = lev%LUmat
+    else 
+       do m = 1, nnodes-1
+          do n = 1,m
+             this%QtilI(m,n+1) =  dsdc(n)
+          end do
+       end do
+    end if
+    ! Explicit matrix
     do m = 1, nnodes-1
        do n = 1,m
           this%QtilE(m,n)   =  dsdc(n)
-          this%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
 
@@ -126,6 +144,17 @@ contains
     this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine imexQ_initialize
+
+  subroutine imexQ_destroy(this, lev)
+    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QdiffI)
+    deallocate(this%QtilE)
+    deallocate(this%QtilI)
+  end subroutine imexQ_destroy
+
 
   ! Compute SDC integral
   subroutine imexQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

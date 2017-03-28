@@ -37,43 +37,45 @@ module pf_mod_amisdc
      procedure :: integrate    => amisdc_integrate
      procedure :: residual     => amisdc_residual
      procedure :: evaluate_all => amisdc_evaluate_all
+     procedure :: destroy      => amisdc_destroy
+     procedure :: amisdc_destroy
   end type pf_amisdc_t
 
   interface 
      subroutine pf_f1eval_p(this, y, t, level, f1)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f1
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f1
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f1eval_p
 
      subroutine pf_f2eval_p(this, y, t, level, f2)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f2
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f2
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f2eval_p
 
      subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: rhs
-       class(pf_encap_t), intent(inout) :: y, f2
-       real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: rhs
+       class(pf_encap_t),  intent(inout) :: y, f2
+       real(pfdp),         intent(in   ) :: t, dt
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f2comp_p
 
      subroutine pf_f3eval_p(this, y, t, level, f3)
        import pf_amisdc_t, pf_encap_t, c_int, pfdp
        class(pf_amisdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f3
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t),  intent(in   ) :: y
+       class(pf_encap_t),  intent(inout) :: f3
+       real(pfdp),         intent(in   ) :: t
+       integer(c_int),     intent(in   ) :: level
      end subroutine pf_f3eval_p
 
      subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
@@ -91,15 +93,15 @@ contains
   ! Perform on SDC sweep on level lev and set qend appropriately.
   subroutine amisdc_sweep(this, pf, lev, t0, dt)
     use pf_mod_timer
-    class(pf_amisdc_t), intent(inout)    :: this
-    type(pf_pfasst_t),    intent(inout) :: pf
-    real(pfdp),           intent(in)    :: dt, t0
-    class(pf_level_t),     intent(inout) :: lev
+    class(pf_amisdc_t), intent(inout) :: this
+    type(pf_pfasst_t),  intent(inout) :: pf
+    real(pfdp),         intent(in)    :: dt, t0
+    class(pf_level_t),  intent(inout) :: lev
 
-    integer                        :: m, n
-    real(pfdp)                     :: t
-    real(pfdp)                     :: dtsdc(1:lev%nnodes-1)
-    class(pf_encap_t), allocatable :: rhsA, rhsB, QA, QB
+    integer                           :: m, n
+    real(pfdp)                        :: t
+    real(pfdp)                        :: dtsdc(1:lev%nnodes-1)
+    class(pf_encap_t), allocatable    :: rhsA, rhsB, QA, QB
 
     call start_timer(pf, TLEVEL+lev%level-1)
     
@@ -107,9 +109,9 @@ contains
     do m = 1, lev%nnodes-1
        call lev%S(m)%setval(0.0_pfdp)
        do n = 1, lev%nnodes
-          call lev%S(m)%axpy(dt*this%SdiffE(m,n), lev%F(n,1))
-          call lev%S(m)%axpy(dt*lev%s0mat(m,n),   lev%F(n,2))
-          call lev%S(m)%axpy(dt*lev%s0mat(m,n),   lev%F(n,3))
+          call lev%S(m)%axpy(dt*this%SdiffE(m,n),        lev%F(n,1))
+          call lev%S(m)%axpy(dt*lev%s0mat(m,n), lev%F(n,2))
+          call lev%S(m)%axpy(dt*lev%s0mat(m,n), lev%F(n,3))
        end do
        if (allocated(lev%tau)) then
           call lev%S(m)%axpy(1.0_pfdp, lev%tau(m))
@@ -123,16 +125,18 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+    call QA%setval(0.0_pfdp)
+    call QB%setval(0.0_pfdp)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes-1
        t = t + dtsdc(m)
-
              
        ! First compute the explicit part of the right-hand side
        call rhsA%copy(lev%Q(m))
@@ -163,11 +167,16 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    ! Destroy the temporary variables
+    call lev%ulevel%factory%destroy_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+Lev%level-1)
 
   end subroutine amisdc_sweep
      
-
   ! Evaluate function values
   subroutine amisdc_evaluate(this, lev, t, m)
     use pf_mod_dtype
@@ -180,7 +189,6 @@ contains
     call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
     call this%f3eval(lev%Q(m), t, lev%level, lev%F(m,3))
   end subroutine amisdc_evaluate
-
 
   ! Initialize matrices
   subroutine amisdc_initialize(this, lev)
@@ -205,6 +213,15 @@ contains
        this%SdiffI(m,m+1) = this%SdiffI(m,m+1) - dsdc(m)
     end do
   end subroutine amisdc_initialize
+
+  ! Destroy the matrices
+  subroutine amisdc_destroy(this, lev)
+    class(pf_amisdc_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%SdiffE)
+    deallocate(this%SdiffI)
+  end subroutine amisdc_destroy
 
   ! Compute SDC integral
   subroutine amisdc_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

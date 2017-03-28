@@ -74,6 +74,7 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
+     procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
   type, abstract :: pf_encap_t
@@ -89,8 +90,10 @@ module pf_mod_dtype
 
   type, abstract :: pf_factory_t
    contains
-     procedure(pf_encap_create0_p),  deferred :: create0
-     procedure(pf_encap_create1_p),  deferred :: create1
+     procedure(pf_encap_create_single_p),  deferred :: create_single
+     procedure(pf_encap_create_array_p),   deferred :: create_array
+     procedure(pf_encap_destroy_single_p), deferred :: destroy_single
+     procedure(pf_encap_destroy_array_p),  deferred :: destroy_array
   end type pf_factory_t
 
   type, abstract :: pf_user_level_t
@@ -102,11 +105,11 @@ module pf_mod_dtype
   end type pf_user_level_t
 
   type :: pf_level_t
-     integer     :: nvars = -1          ! number of variables (dofs)
-     integer     :: nnodes = -1         ! number of sdc nodes
-     integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     integer     :: nsweeps_pred = 1    ! number of sdc sweeps to perform (predictor)
-     integer     :: level = -1          ! level number (1 is the coarsest)
+     integer     :: nvars        = -1   ! number of variables (dofs)
+     integer     :: nnodes       = -1   ! number of sdc nodes
+     integer     :: nsweeps      =  1   ! number of sdc sweeps to perform
+     integer     :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
+     integer     :: level        = -1   ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
      real(pfdp)  :: residual
@@ -114,27 +117,28 @@ module pf_mod_dtype
      class(pf_user_level_t), allocatable :: ulevel
 
      real(pfdp), allocatable :: &
-          q0(:), &                      ! initial condition (packed)
-          send(:), &                    ! send buffer
-          recv(:), &                    ! recv buffer
-          nodes(:), &                   ! sdc nodes
-          qmat(:,:), &                  ! integration matrix (0 to node)
+          q0(:),      &                 ! initial condition (packed)
+          send(:),    &                 ! send buffer
+          recv(:),    &                 ! recv buffer
+          nodes(:),   &                 ! sdc nodes
+          qmat(:,:),  &                 ! integration matrix (0 to node)
+          LUmat(:,:), &                 ! LU factorization (replaces BE matrix in Q form)
           s0mat(:,:), &                 ! integration matrix (node to node)
-          rmat(:,:), &                  ! time restriction matrix
+          rmat(:,:),  &                 ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
      integer(c_int), allocatable :: &
           nflags(:)                     ! sdc node flags
 
      class(pf_encap_t), allocatable :: &
-          Q(:), &                       ! unknowns at sdc nodes
-          pQ(:), &                      ! unknowns at sdc nodes, previous sweep
-          R(:), &                       ! full residuals
-          I(:), &                       ! 0 to node integrals
-          S(:), &                       ! node to node integrals
-          Fflt(:), &                    ! functions values at sdc nodes (flat)
-          tau(:), &                     ! fas correction
-          tauQ(:), &                    ! fas correction in Q form
+          Q(:),     &                   ! unknowns at sdc nodes
+          pQ(:),    &                   ! unknowns at sdc nodes, previous sweep
+          R(:),     &                   ! full residuals
+          I(:),     &                   ! 0 to node integrals
+          S(:),     &                   ! node to node integrals
+          Fflt(:),  &                   ! functions values at sdc nodes (flat)
+          tau(:),   &                   ! fas correction
+          tauQ(:),  &                   ! fas correction in Q form
           pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
           qend
 
@@ -266,6 +270,12 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: dt
      end subroutine pf_residual_p
 
+     subroutine pf_destroy_p(this, lev)
+       import pf_sweeper_t, pf_level_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: this
+       class(pf_level_t),   intent(inout) :: Lev
+     end subroutine pf_destroy_p
+
      ! transfer interfaces
      subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
@@ -276,19 +286,33 @@ module pf_mod_dtype
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
-     subroutine pf_encap_create0_p(this, x, level, kind, nvars, shape)
+     subroutine pf_encap_create_single_p(this, x, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
        integer,             intent(in   )              :: level, kind, nvars, shape(:)
-     end subroutine pf_encap_create0_p
+     end subroutine pf_encap_create_single_p
 
-     subroutine pf_encap_create1_p(this, x, n, level, kind, nvars, shape)
+     subroutine pf_encap_create_array_p(this, x, n, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
        integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
-     end subroutine pf_encap_create1_p
+     end subroutine pf_encap_create_array_p
+
+     subroutine pf_encap_destroy_single_p(this, x, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x
+       integer,             intent(in   )              :: level, kind, nvars, shape(:)
+     end subroutine pf_encap_destroy_single_p
+
+     subroutine pf_encap_destroy_array_p(this, x, n, level, kind, nvars, shape)
+       import pf_factory_t, pf_encap_t
+       class(pf_factory_t), intent(inout)              :: this
+       class(pf_encap_t),   intent(inout), allocatable :: x(:)
+       integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
+     end subroutine pf_encap_destroy_array_p
 
      subroutine pf_encap_setval_p(this, val, flags)
        import pf_encap_t, pfdp

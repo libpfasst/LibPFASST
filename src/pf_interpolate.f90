@@ -41,15 +41,15 @@ contains
     real(pfdp) :: tG(LevG%nnodes)
     logical :: Finterp_loc
 
-    class(pf_encap_t), allocatable :: delG(:) !delG(LevG%nnodes)   !  Coarse in time and space
-    class(pf_encap_t), allocatable :: delGF(:) !delGF(LevG%nnodes)  !  Coarse in time but fine in space
+    class(pf_encap_t), allocatable :: delG(:)    !  Coarse in time and space
+    class(pf_encap_t), allocatable :: delGF(:)   !  Coarse in time but fine in space
 
     call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
-    call LevG%ulevel%factory%create1(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create1(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create_array(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create_array(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
 
     ! set time at coarse and fine nodes
     tG = t0 + dt*LevG%nodes
@@ -132,6 +132,9 @@ contains
     !  Reset qend so that it is up to date
     call LevF%qend%copy(LevF%Q(LevF%nnodes))
 
+    call LevG%ulevel%factory%destroy_array(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%destroy_array(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
+
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
     call call_hooks(pf, LevF%level, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
@@ -149,10 +152,10 @@ contains
     call start_timer(pf, TINTERPOLATE + LevF%level - 1)
 
     ! create workspaces
-    call LevG%ulevel%factory%create0(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create0(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
-    call LevG%ulevel%factory%create0(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create0(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create_single(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create_single(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create_single(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
+    call LevF%ulevel%factory%create_single(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
 
     ! needed for amr
     call q0F%setval(0.0_pfdp)
@@ -172,6 +175,13 @@ contains
 
     call end_timer(pf, TINTERPOLATE + LevF%level - 1)
     call call_hooks(pf, LevF%level, PF_POST_INTERP_Q0)
+
+    ! destroy workspaces
+    call LevG%ulevel%factory%destroy_single(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape) 
+    call LevF%ulevel%factory%destroy_single(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape) 
+    call LevG%ulevel%factory%destroy_single(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape) 
+    call LevF%ulevel%factory%destroy_single(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape) 
+
   end subroutine interpolate_q0
 
 end module pf_mod_interpolate

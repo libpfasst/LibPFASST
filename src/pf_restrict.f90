@@ -73,7 +73,7 @@ contains
 
     if (integral) then
 
-       call LevG%ulevel%factory%create1(qFr, LevF%nnodes-1, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+       call LevG%ulevel%factory%create_array(qFr, LevF%nnodes-1, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
 
        do m = 1, LevF%nnodes-1
           ! call LevG%ulevel%factory%create(qFr(m), LevG%level, SDC_KIND_INTEGRAL, &
@@ -84,16 +84,22 @@ contains
        ! when restricting '0 to node' integral terms, skip the first
        ! entry since it is zero
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat(2:,2:), qFr)
+
+       call LevG%ulevel%factory%destroy_array(qFr, LevF%nnodes-1, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+
     else
 
-       call LevG%ulevel%factory%create1(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
+       call LevG%ulevel%factory%create_array(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
        do m = 1, LevF%nnodes
           call LevF%ulevel%restrict(LevF, LevG, qF(m), qFr(m), tF(m))
        end do
 
        call pf_apply_mat(qG, 1.0_pfdp, LevF%rmat, qFr)
+       
+       call LevG%ulevel%factory%destroy_array(qFr, LevF%nnodes, LevG%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
 
     end if
+    
   end subroutine restrict_sdc
 
 
@@ -124,9 +130,9 @@ contains
     !
     ! create workspaces
     !
-    call LevG%ulevel%factory%create1(tmpG, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
-    call LevG%ulevel%factory%create1(tmpFr, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
-    call LevG%ulevel%factory%create1(tmpF, LevF%nnodes, LevF%level, SDC_KIND_INTEGRAL, LevF%nvars, LevF%shape)
+    call LevG%ulevel%factory%create_array(tmpG, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%create_array(tmpFr, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%create_array(tmpF, LevF%nnodes, LevF%level, SDC_KIND_INTEGRAL, LevF%nvars, LevF%shape)
 
     !
     ! restrict q's and recompute f's
@@ -190,6 +196,11 @@ contains
 
     call end_timer(pf, TRESTRICT + LevF%level - 1)
     call call_hooks(pf, LevF%level, PF_POST_RESTRICT_ALL)
+
+    call LevG%ulevel%factory%destroy_array(tmpG, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%destroy_array(tmpFr, LevG%nnodes, LevG%level, SDC_KIND_INTEGRAL, LevG%nvars, LevG%shape)
+    call LevG%ulevel%factory%destroy_array(tmpF, LevF%nnodes, LevF%level, SDC_KIND_INTEGRAL, LevF%nvars, LevF%shape)
+
 
   end subroutine restrict_time_space_fas
 

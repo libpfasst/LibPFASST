@@ -105,7 +105,7 @@ contains
     class(pf_level_t), intent(inout), target :: F
 
     integer :: nvars, nnodes, npieces
-
+    integer :: i
     !
     ! do some sanity checks
     !
@@ -124,7 +124,7 @@ contains
     !                   when doing AMR)
     !
     if ((F%level < pf%nlevels) .and. (.not. allocated(F%tau))) then
-       call F%ulevel%factory%create1(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+       call F%ulevel%factory%create_array(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     else if ((F%level >= pf%nlevels) .and. (allocated(F%tau))) then
        deallocate(F%tau)
     end if
@@ -134,7 +134,7 @@ contains
     !                   when doing AMR)
     !
     if ((F%level < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
-       call F%ulevel%factory%create1(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+       call F%ulevel%factory%create_array(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     else if ((F%level >= pf%nlevels) .and. (allocated(F%tauQ))) then
        deallocate(F%tauQ)
     end if
@@ -159,6 +159,7 @@ contains
     allocate(F%nflags(nnodes))
     allocate(F%s0mat(nnodes-1,nnodes))
     allocate(F%qmat(nnodes-1,nnodes))
+    allocate(F%LUmat(nnodes-1,nnodes))
 
     if (btest(pf%qtype, 8)) then
        call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
@@ -175,20 +176,25 @@ contains
     ! encaps
     !
     npieces = F%ulevel%sweeper%npieces
-    call F%ulevel%factory%create1(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
-    call F%ulevel%factory%create1(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+
+    call F%ulevel%factory%create_array(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    do i = 1, nnodes*npieces
+       call F%Fflt(i)%setval(0.0_pfdp)
+    end do
     F%F(1:nnodes,1:npieces) => F%Fflt
-    call F%ulevel%factory%create1(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%ulevel%factory%create1(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%ulevel%factory%create1(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     if (F%level < pf%nlevels) then
        if (F%Finterp) then
-          call F%ulevel%factory%create1(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+          call F%ulevel%factory%create_array(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
           F%pF(1:nnodes,1:npieces) => F%pFflt
        end if
-       call F%ulevel%factory%create1(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
+       call F%ulevel%factory%create_array(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
-    call F%ulevel%factory%create0(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_single(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+
 
   end subroutine pf_level_setup
 
@@ -200,7 +206,7 @@ contains
 
     integer :: l
     do l = 1, pf%nlevels
-       call pf_level_destroy(pf%levels(l))
+       call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     deallocate(pf%levels)
     deallocate(pf%hooks)
@@ -208,12 +214,12 @@ contains
     deallocate(pf%state)
   end subroutine pf_pfasst_destroy
 
-
   !
   ! Deallocate PFASST level
   !
-  subroutine pf_level_destroy(F)
+  subroutine pf_level_destroy(F,nlevels)
     class(pf_level_t), intent(inout) :: F
+    integer                          :: nlevels, npieces
 
     if (.not. F%allocated) return
 
@@ -227,26 +233,34 @@ contains
     deallocate(F%nflags)
     deallocate(F%qmat)
     deallocate(F%s0mat)
+    deallocate(F%LUmat)
 
     ! encaps
-    deallocate(F%Q)
-    deallocate(F%F)
-    deallocate(F%S)
-    deallocate(F%I)
-    deallocate(F%R)
-    if (allocated(F%pQ)) then
+    npieces = F%ulevel%sweeper%npieces
+
+    if ((F%level < nlevels) .and. allocated(F%tau)) then
+       call F%ulevel%factory%destroy_array(F%tau, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    end if
+    if ((F%level < nlevels) .and. allocated(F%tauQ)) then
+       call F%ulevel%factory%destroy_array(F%tauQ, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    end if
+
+    call F%ulevel%factory%destroy_array(F%Q, F%nnodes, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%Fflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%S, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%I, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%R, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    if (F%level < nlevels) then
        if (F%Finterp) then
-          deallocate(F%pF)
+          call F%ulevel%factory%destroy_array(F%pFflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+
        end if
-       deallocate(F%pQ)
+       call F%ulevel%factory%destroy_array(F%pQ, F%nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape)
     end if
-    deallocate(F%qend)
-    if (allocated(F%tau)) then
-       deallocate(F%tau)
-    end if
-    if (allocated(F%tauQ)) then
-       deallocate(F%tauQ)
-    end if
+    call F%ulevel%factory%destroy_single(F%qend, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+
+    ! destroy the sweeper 
+    call F%ulevel%sweeper%destroy(F)
 
     ! other
     if (allocated(F%shape)) then
@@ -259,7 +273,7 @@ contains
 
     if (allocated(F%rmat)) then
        deallocate(F%rmat)
-    end if
+   end if
   end subroutine pf_level_destroy
 
 end module pf_mod_pfasst

@@ -18,8 +18,7 @@
 !
 
 module pf_mod_misdcQ
-  use pf_mod_dtype
-  use pf_mod_utils
+  use pf_mod_misdc
   implicit none
 
   type, extends(pf_misdc_t), abstract :: pf_misdcQ_t
@@ -27,10 +26,13 @@ module pf_mod_misdcQ
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     logical                 :: use_LUq_ = .true.
    contains 
      procedure :: sweep        => misdcQ_sweep
      procedure :: initialize   => misdcQ_initialize
      procedure :: integrate    => misdcQ_integrate
+     procedure :: destroy      => misdcQ_destroy
+     procedure :: misdcQ_destroy
   end type pf_misdcQ_t
 
 contains
@@ -51,7 +53,7 @@ contains
 
     call start_timer(pf, TLEVEL+lev%level-1)
     
-    call lev%ulevel%factory%create1(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
 
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -77,7 +79,7 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
@@ -111,6 +113,9 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+Lev%level-1)
 
   end subroutine misdcQ_sweep
@@ -135,16 +140,38 @@ contains
     this%QtilI = 0.0_pfdp
 
     dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+    ! Implicit matrix
+    if (this%use_LUq_) then 
+       ! Get the LU
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       this%QtilI = lev%LUmat
+    else 
+       do m = 1, nnodes-1
+          do n = 1,m
+             this%QtilI(m,n+1) =  dsdc(n)
+          end do
+       end do
+    end if
+    ! Explicit matrix
     do m = 1, nnodes-1
        do n = 1,m
           this%QtilE(m,n)   =  dsdc(n)
-          this%QtilI(m,n+1) =  dsdc(n)
        end do
     end do
 
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
   end subroutine misdcQ_initialize
+
+  subroutine misdcQ_destroy(this, lev)
+    class(pf_misdcQ_t), intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffE)
+    deallocate(this%QdiffI)
+    deallocate(this%QtilE)
+    deallocate(this%QtilI)
+  end subroutine misdcQ_destroy
 
   ! Compute SDC integral
   subroutine misdcQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)

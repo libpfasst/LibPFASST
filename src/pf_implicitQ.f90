@@ -20,14 +20,17 @@
 module pf_mod_implicitQ
   use pf_mod_implicit
   implicit none
-
+  
   type, extends(pf_implicit_t), abstract :: pf_implicitQ_t
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     logical                 :: use_LUq_ = .false.
    contains
      procedure :: sweep      => implicitQ_sweep
      procedure :: initialize => implicitQ_initialize
      procedure :: integrate  => implicitQ_integrate
+     procedure :: destroy    => implicitQ_destroy
+     procedure :: implicitQ_destroy
   end type pf_implicitQ_t
 
 contains
@@ -64,7 +67,7 @@ contains
 
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
-    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -86,6 +89,8 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
+    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
     call end_timer(pf, TLEVEL+lev%level-1)
   end subroutine implicitQ_sweep
 
@@ -105,16 +110,33 @@ contains
 
     this%QtilI = 0.0_pfdp
 
-    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
-    do m = 1, nnodes-1
-       do n = 1,m
-          this%QtilI(m,n+1) =  dsdc(n)
+    if (this%use_LUq_) then 
+       ! Get the LU
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       this%QtilI = lev%LUmat
+    else 
+       dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+       do m = 1, nnodes-1
+          do n = 1,m
+             this%QtilI(m,n+1) =  dsdc(n)
+          end do
        end do
-    end do
+    end if
 
     this%QdiffI = lev%qmat-this%QtilI
 
   end subroutine implicitQ_initialize
+
+  
+  ! Destroy the matrices
+  subroutine implicitQ_destroy(this, lev)
+    class(pf_implicitQ_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    
+    deallocate(this%QdiffI)
+    deallocate(this%QtilI)
+  end subroutine implicitQ_destroy
+
 
   ! Compute SDC integral
   subroutine implicitQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
