@@ -90,10 +90,10 @@ module pf_mod_dtype
 
   type, abstract :: pf_factory_t
    contains
-     procedure(pf_encap_create0_p),  deferred :: create0
-     procedure(pf_encap_create1_p),  deferred :: create1
-     procedure(pf_encap_destroy0_p), deferred :: destroy0
-     procedure(pf_encap_destroy1_p), deferred :: destroy1
+     procedure(pf_encap_create_single_p),  deferred :: create_single
+     procedure(pf_encap_create_array_p),   deferred :: create_array
+     procedure(pf_encap_destroy_single_p), deferred :: destroy_single
+     procedure(pf_encap_destroy_array_p),  deferred :: destroy_array
   end type pf_factory_t
 
   type, abstract :: pf_user_level_t
@@ -105,11 +105,11 @@ module pf_mod_dtype
   end type pf_user_level_t
 
   type :: pf_level_t
-     integer     :: nvars = -1          ! number of variables (dofs)
-     integer     :: nnodes = -1         ! number of sdc nodes
-     integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     integer     :: nsweeps_pred = 1    ! number of sdc sweeps to perform (predictor)
-     integer     :: level = -1          ! level number (1 is the coarsest)
+     integer     :: nvars        = -1   ! number of variables (dofs)
+     integer     :: nnodes       = -1   ! number of sdc nodes
+     integer     :: nsweeps      =  1   ! number of sdc sweeps to perform
+     integer     :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
+     integer     :: level        = -1   ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
      real(pfdp)  :: residual
@@ -286,33 +286,33 @@ module pf_mod_dtype
      end subroutine pf_transfer_p
 
      ! encapsulation interfaces
-     subroutine pf_encap_create0_p(this, x, level, kind, nvars, shape)
+     subroutine pf_encap_create_single_p(this, x, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
        integer,             intent(in   )              :: level, kind, nvars, shape(:)
-     end subroutine pf_encap_create0_p
+     end subroutine pf_encap_create_single_p
 
-     subroutine pf_encap_create1_p(this, x, n, level, kind, nvars, shape)
+     subroutine pf_encap_create_array_p(this, x, n, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
        integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
-     end subroutine pf_encap_create1_p
+     end subroutine pf_encap_create_array_p
 
-     subroutine pf_encap_destroy0_p(this, x, level, kind, nvars, shape)
+     subroutine pf_encap_destroy_single_p(this, x, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
        integer,             intent(in   )              :: level, kind, nvars, shape(:)
-     end subroutine pf_encap_destroy0_p
+     end subroutine pf_encap_destroy_single_p
 
-     subroutine pf_encap_destroy1_p(this, x, n, level, kind, nvars, shape)
+     subroutine pf_encap_destroy_array_p(this, x, n, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
        integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
-     end subroutine pf_encap_destroy1_p
+     end subroutine pf_encap_destroy_array_p
 
      subroutine pf_encap_setval_p(this, val, flags)
        import pf_encap_t, pfdp

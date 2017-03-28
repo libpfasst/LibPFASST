@@ -109,9 +109,9 @@ contains
     do m = 1, lev%nnodes-1
        call lev%S(m)%setval(0.0_pfdp)
        do n = 1, lev%nnodes
-          call lev%S(m)%axpy(dt*this%SdiffE(m,n), lev%F(n,1))
-          call lev%S(m)%axpy(dt*lev%s0mat(m,n),   lev%F(n,2))
-          call lev%S(m)%axpy(dt*lev%s0mat(m,n),   lev%F(n,3))
+          call lev%S(m)%axpy(dt*this%SdiffE(m,n),        lev%F(n,1))
+          call lev%S(m)%axpy(dt*lev%s0mat(m,n), lev%F(n,2))
+          call lev%S(m)%axpy(dt*lev%s0mat(m,n), lev%F(n,3))
        end do
        if (allocated(lev%tau)) then
           call lev%S(m)%axpy(1.0_pfdp, lev%tau(m))
@@ -125,10 +125,10 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call QA%setval(0.0_pfdp)
     call QB%setval(0.0_pfdp)
@@ -168,10 +168,10 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! Destroy the temporary variables
-    call lev%ulevel%factory%destroy0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
 

@@ -176,9 +176,9 @@ contains
     integer :: m
 
     call lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
-    !do m = 2, Lev%nnodes-1
-    !   call lev%I(M)%axpy(1.0_pfdp, lev%I(m-1))
-    !end do
+!    do m = 2, Lev%nnodes-1
+!       call lev%I(M)%axpy(1.0_pfdp, lev%I(m-1))
+!    end do
 
     ! add tau (which is 'node to node')
     if (allocated(lev%tauQ)) then
@@ -273,26 +273,20 @@ contains
     U = 0.0_pfdp
     N = Nnodes-1
     U=transpose(Q(1:Nnodes-1,2:Nnodes))
-!    do i = 1,N
-!       print *,'row i of Qbefore', i,U(i,:)
-!    end do
 
     do i = 1,N
        if (U(i,i) /= 0.0) then
           do j=i+1,N
              c = U(j,i)/U(i,i)
-!              print *,j,c,U(j,:)
-
              U(j,i:N)=U(j,i:N)-c*U(i,i:N)
              L(j,i)=c
-!             print *,j,U(j,:)
           end do
        end if
        L(i,i) = 1.0_pfdp
     end do
 
     !  Check
-!    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
+    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
 
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
@@ -302,11 +296,6 @@ contains
           Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,1:Nnodes-1))
        end do
     end if
-
-!    print *,'U from myLUq'
-!    do j=1,Nnodes-1
-!          print *, j, Qtil(j,:)
-!    end do
 
   end subroutine myLUq
 

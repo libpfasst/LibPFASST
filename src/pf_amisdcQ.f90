@@ -32,13 +32,16 @@ module pf_mod_amisdcQ
      procedure :: initialize   => amisdcQ_initialize
      procedure :: integrate    => amisdcQ_integrate
      procedure :: destroy      => amisdcQ_destroy
+     procedure :: sweep_coupled_implicit_terms
+     procedure :: sweep_decoupled_implicit_terms
      procedure :: amisdcQ_destroy
   end type pf_amisdcQ_t
 
 contains
 
-  ! Perform on SDC sweep on level lev and set qend appropriately.
-  subroutine amisdcQ_sweep(this, pf, lev, t0, dt)
+  ! Perform an SDC sweep on level lev and set qend appropriately.
+  ! In the asynchronous updates, the two implicit parts are coupled
+  subroutine sweep_coupled_implicit_terms(this, pf, lev, t0, dt)
     use pf_mod_timer
     class(pf_amisdcQ_t), intent(inout) :: this
     type(pf_pfasst_t),   intent(inout) :: pf
@@ -52,10 +55,9 @@ contains
     class(pf_encap_t), allocatable :: S2(:), S3(:)
 
     call start_timer(pf, TLEVEL+lev%level-1)
-    
-    call lev%ulevel%factory%create1(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
-    call lev%ulevel%factory%create1(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
-    
+   
+    call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
     
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -66,15 +68,10 @@ contains
 
        do n = 1, lev%nnodes
           call lev%S(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
-          call lev%S(m)%axpy(dt*lev%qmat(m,n),    lev%F(n,2))
-          call lev%S(m)%axpy(dt*lev%qmat(m,n),    lev%F(n,3))
-          if (m > n-1) then
-             call S2(m)%axpy(dt*this%QtilI(m,n),     lev%F(n,2))
-             call S3(m)%axpy(dt*this%QtilI(m,n),     lev%F(n,3))
-          else
-             call S2(m)%axpy(2.0_pfdp*dt*this%QtilI(m,n),     lev%F(n,2))
-             call S3(m)%axpy(2.0_pfdp*dt*this%QtilI(m,n),     lev%F(n,3))
-          end if 
+          call lev%S(m)%axpy(1.0_pfdp*dt*lev%qmat(m,n),    lev%F(n,2))
+          call lev%S(m)%axpy(1.0_pfdp*dt*lev%qmat(m,n),    lev%F(n,3))
+          call S2(m)%axpy(2.0_pfdp*dt*this%QtilI(m,n),     lev%F(n,2))
+          call S3(m)%axpy(2.0_pfdp*dt*this%QtilI(m,n),     lev%F(n,3))
        end do
        if (allocated(lev%tauQ)) then
           call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
@@ -88,10 +85,10 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%create0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call QA%setval(0.0_pfdp)
     call QB%setval(0.0_pfdp)
@@ -107,21 +104,20 @@ contains
           call rhsA%axpy(dt*this%QtilE(m,n), lev%F(n,1))  
        end do
        call rhsA%axpy(1.0_pfdp, lev%S(m))
-
-       
+   
        ! Save the right-hand side with only the explicit contribution
        call rhsB%copy(rhsA)
 
        ! Add the first implicit part to the right-hand side and solve for the first asynchronous update
        do n = 1, m
-          call rhsA%axpy(dt*this%QtilI(m,n), lev%F(n,2))  
+          call rhsA%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))  
        end do
        call rhsA%axpy(-1.0_pfdp, S2(m))  
        call this%f2comp(QA, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsA, lev%level, lev%F(m+1,2))
 
        ! Add the second implicit part to the right-hand side and solve for the second asynchronous update
        do n = 1, m
-          call rhsB%axpy(dt*this%QtilI(m,n), lev%F(n,3))  
+          call rhsB%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))  
        end do
        call rhsB%axpy(-1.0_pfdp, S3(m))  
        call this%f3comp(QB, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsB, lev%level, lev%F(m+1,3))
@@ -139,14 +135,137 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
-    call lev%ulevel%factory%destroy1(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
-    call lev%ulevel%factory%destroy1(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
-    call lev%ulevel%factory%destroy0(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy0(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+lev%level-1)
+
+  end subroutine sweep_coupled_implicit_terms
+
+  
+  ! Perform an SDC sweep on level lev and set qend appropriately.
+  ! In the asynchronous updates, the two implicit parts are decoupled
+
+  ! (in progress)
+  subroutine sweep_decoupled_implicit_terms(this, pf, lev, t0, dt)
+    use pf_mod_timer
+    class(pf_amisdcQ_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout) :: pf
+    real(pfdp),          intent(in)    :: dt, t0
+    class(pf_level_t),   intent(inout) :: lev
+
+    ! integer                        :: m, n
+    ! real(pfdp)                     :: t
+    ! real(pfdp)                     :: dtsdc(1:lev%nnodes-1)
+    ! class(pf_encap_t), allocatable :: rhsA, rhsB, QA, QB
+    ! class(pf_encap_t), allocatable :: S2(:), S3(:)
+
+    ! call start_timer(pf, TLEVEL+lev%level-1)
+   
+    ! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    ! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    
+    ! ! compute integrals and add fas correction
+    ! do m = 1, lev%nnodes-1
+
+    !    call lev%S(m)%setval(0.0_pfdp)
+    !    call S2(m)%setval(0.0d0)
+    !    call S3(m)%setval(0.0d0)
+
+    !    do n = 1, lev%nnodes
+    !       call lev%S(m)%axpy(dt*this%QdiffE(m,n),       lev%F(n,1))
+    !       call S2(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,2))
+    !       call S3(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,3))
+    !       call S2(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))
+    !       call S3(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))
+    !    end do
+    !    if (allocated(lev%tauQ)) then
+    !       call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
+    !    end if
+    ! end do
+
+    ! ! do the time-stepping
+    ! call lev%Q(1)%unpack(lev%q0)
+
+    ! call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    ! call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
+    ! call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
+
+    ! call lev%ulevel%factory%create_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%create_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%create_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%create_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+    ! call QA%setval(0.0_pfdp)
+    ! call QB%setval(0.0_pfdp)
+
+    ! t = t0
+    ! dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    ! do m = 1, lev%nnodes-1
+    !    t = t + dtsdc(m)
+             
+    !    call rhsA%copy(lev%Q(1))
+    !    ! First compute the explicit part of the right-hand side
+    !    do n = 1, m
+    !       call rhsA%axpy(dt*this%QtilE(m,n), lev%F(n,1))  
+    !    end do
+    !    call rhsA%axpy(1.0_pfdp, lev%S(m))
+   
+    !    ! Save the right-hand side with only the explicit contribution
+    !    call rhsB%copy(rhsA)
+
+    !    ! Add the first implicit part to the right-hand side and solve for the first asynchronous update
+    !    do n = 1, m
+    !       call rhsA%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))  
+    !    end do
+    !    call rhsA%axpy(1.0_pfdp, S2(m))  
+    !    call this%f2comp(QA, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsA, lev%level, lev%F(m+1,2))
+
+    !    ! Add the second implicit part to the right-hand side and solve for the second asynchronous update
+    !    do n = 1, m
+    !       call rhsB%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))  
+    !    end do
+    !    call rhsB%axpy(1.0_pfdp, S3(m))  
+    !    call this%f3comp(QB, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsB, lev%level, lev%F(m+1,3))
+
+    !    ! Now we average the two asynchronous updates
+    !    call lev%Q(m+1)%setval(0.0_pfdp)
+    !    call lev%Q(m+1)%axpy(0.5_pfdp, QA)
+    !    call lev%Q(m+1)%axpy(0.5_pfdp, QB)
+
+    !    ! Evaluate the three right-hand sides with the updated variables
+    !    call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
+    !    call this%f2eval(lev%Q(m+1), t, lev%level, lev%F(m+1,2))
+    !    call this%f3eval(lev%Q(m+1), t, lev%level, lev%F(m+1,3))
+    ! end do
+
+    ! call lev%qend%copy(lev%Q(lev%nnodes))
+
+    ! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    ! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%level,SDC_KIND_SOL_FEVAL,lev%nvars,lev%shape)
+    ! call lev%ulevel%factory%destroy_single(rhsA, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%destroy_single(rhsB, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%destroy_single(QA,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    ! call lev%ulevel%factory%destroy_single(QB,   lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+    ! call end_timer(pf, TLEVEL+lev%level-1)
+        
+  end subroutine sweep_decoupled_implicit_terms
+
+
+  ! Perform an SDC sweep on level lev and set qend appropriately.
+  subroutine amisdcQ_sweep(this, pf, lev, t0, dt)
+    use pf_mod_timer
+    class(pf_amisdcQ_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout) :: pf
+    real(pfdp),          intent(in)    :: dt, t0
+    class(pf_level_t),   intent(inout) :: lev
+
+    call sweep_coupled_implicit_terms(this, pf, lev, t0, dt)
 
   end subroutine amisdcQ_sweep
     
@@ -159,7 +278,6 @@ contains
     integer    :: m, n, nnodes
 
     this%npieces = 3
-
 
     nnodes = lev%nnodes
     allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE

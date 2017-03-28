@@ -126,7 +126,7 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
 
-    call lev%ulevel%factory%create0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -151,7 +151,7 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    call lev%ulevel%factory%destroy0(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+Lev%level-1)
 
