@@ -155,10 +155,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine f1eval(this, y, t, level, f1)
+  subroutine f1eval(this, y, t, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f1
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
 
@@ -166,7 +166,7 @@ contains
     complex(pfdp),   pointer :: wk(:)
 
     yvec  => array1(y)
-    f1vec => array1(f1)
+    f1vec => array1(f)
     wk    => this%wk
 
     wk = yvec
@@ -181,10 +181,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine f2eval(this, y, t, level, f2)
+  subroutine f2eval(this, y, t, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f2
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
 
@@ -192,7 +192,7 @@ contains
     complex(pfdp),   pointer :: wk(:)
 
     yvec  => array1(y)
-    f2vec => array1(f2)
+    f2vec => array1(f)
     wk => this%wk
 
     wk = yvec
@@ -207,10 +207,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine f2comp(this, y, t, dt, rhs, level, f2)
+  subroutine f2comp(this, y, t, dt, rhs, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f2
+    class(pf_encap_t),   intent(inout) :: y, f
     real(pfdp),          intent(in   ) :: t, dt
     integer,             intent(in   ) :: level
 
@@ -219,7 +219,7 @@ contains
 
     yvec  => array1(y)
     rhsvec => array1(rhs)
-    f2vec => array1(f2)
+    f2vec => array1(f)
     wk => this%wk
 
     wk = rhsvec

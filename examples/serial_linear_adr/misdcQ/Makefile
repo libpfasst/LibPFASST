@@ -39,7 +39,6 @@ FSRC = src/pfasst.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
-       src/pf_version.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
 

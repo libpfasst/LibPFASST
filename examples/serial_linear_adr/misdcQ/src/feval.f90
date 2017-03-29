@@ -88,10 +88,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine f1eval(this, y, t, level, f1)
+  subroutine f1eval(this, y, t, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f1
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
 
@@ -100,7 +100,7 @@ contains
     real(pfdp) :: val
 
     yvec  => array1(y)
-    f1vec => array1(f1)
+    f1vec => array1(f)
 
     f1vec(1) = a*yvec(1)
     
@@ -109,10 +109,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine f2eval(this, y, t, level, f2)
+  subroutine f2eval(this, y, t, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f2
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
 
@@ -123,7 +123,7 @@ contains
     d = b
 
     yvec  => array1(y)
-    f2vec => array1(f2)
+    f2vec => array1(f)
 
     f2vec = d*yvec
 
@@ -132,10 +132,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine f2comp(this, y, t, dt, rhs, level, f2)
+  subroutine f2comp(this, y, t, dt, rhs, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f2
+    class(pf_encap_t),   intent(inout) :: y, f
     real(pfdp),          intent(in   ) :: t, dt
     integer,             intent(in   ) :: level
 
@@ -147,7 +147,7 @@ contains
 
     yvec   => array1(y)
     rhsvec => array1(rhs)
-    f2vec  => array1(f2)
+    f2vec  => array1(f)
  
     yvec  = rhsvec / (1.0_pfdp - d*dt)
     f2vec = (yvec - rhsvec) / dt 
@@ -157,10 +157,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the implicit function at y, t.
-  subroutine f3eval(this, y, t, level, f3)
+  subroutine f3eval(this, y, t, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f3
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
 
@@ -171,7 +171,7 @@ contains
     d = c
 
     yvec  => array1(y)
-    f3vec => array1(f3)
+    f3vec => array1(f)
 
     f3vec = d*yvec
     
@@ -180,10 +180,10 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f3 also.
-  subroutine f3comp(this, y, t, dt, rhs, level, f3)
+  subroutine f3comp(this, y, t, dt, rhs, level, f)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f3
+    class(pf_encap_t),   intent(inout) :: y, f
     real(pfdp),          intent(in   ) :: t, dt
     integer,             intent(in   ) :: level
 
@@ -195,29 +195,29 @@ contains
 
     yvec   => array1(y)
     rhsvec => array1(rhs)
-    f3vec  => array1(f3)
+    f3vec  => array1(f)
  
     yvec  = rhsvec / (1.0_pfdp - d*dt)
     f3vec = (yvec - rhsvec) / dt 
 
   end subroutine f3comp
 
-  subroutine interpolate(this, levelF, levelG, qFp, qGp, t)
+  subroutine interpolate(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
 
     ! do nothing
 
   end subroutine interpolate
 
-  subroutine restrict(this, levelF, levelG, qFp, qGp, t)
+  subroutine restrict(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
     
     ! do nothing
