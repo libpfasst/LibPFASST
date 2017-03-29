@@ -175,5 +175,13 @@ contains
        end do
     end do
   end subroutine imexQ_integrate
+!!$  subroutine f3eval_dummy(this, y,t, level, f)
+!!$  !  Dummy routine
+!!$     class(pf_imexQ_t), intent(inout) :: this
+!!$     class(pf_encap_t),   intent(in   ) :: y
+!!$     class(pf_encap_t),   intent(inout) :: f
+!!$     real(pfdp),          intent(in   ) :: t
+!!$     integer,             intent(in   ) :: level
+!!$  end subroutine f3eval_dummy
 
 end module pf_mod_imexQ

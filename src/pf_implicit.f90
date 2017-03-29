@@ -25,8 +25,6 @@ module pf_mod_implicit
   type, extends(pf_sweeper_t), abstract :: pf_implicit_t
      real(pfdp), allocatable :: SdiffI(:,:)
    contains
-     procedure(pf_f2eval_p), deferred :: f2eval
-     procedure(pf_f2comp_p), deferred :: f2comp
      procedure :: sweep        => implicit_sweep
      procedure :: initialize   => implicit_initialize
      procedure :: evaluate     => implicit_evaluate
@@ -35,27 +33,10 @@ module pf_mod_implicit
      procedure :: evaluate_all => implicit_evaluate_all
      procedure :: destroy      => implicit_destroy
      procedure :: implicit_destroy
+     procedure :: f1eval => f1eval_dummy
+     procedure :: f3eval => f3eval_dummy
+     procedure :: f3comp => f3comp_dummy
   end type pf_implicit_t
-
-  interface
-     subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_implicit_t, pf_encap_t, c_int, pfdp
-       class(pf_implicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: y
-       class(pf_encap_t),    intent(inout) :: f2
-       real(pfdp),           intent(in   ) :: t
-       integer(c_int),       intent(in   ) :: level
-     end subroutine pf_f2eval_p
-
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_implicit_t, pf_encap_t, c_int, pfdp
-       class(pf_implicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: rhs
-       class(pf_encap_t),    intent(inout) :: y, f2
-       real(pfdp),           intent(in   ) :: t, dt
-       integer(c_int),       intent(in   ) :: level
-     end subroutine pf_f2comp_p
-  end interface
 
 contains
 
@@ -185,5 +166,32 @@ contains
     real(pfdp),           intent(in   ) :: t(:)
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine implicit_evaluate_all
+
+  subroutine f1eval_dummy(this, y,t, level, f)
+    !  Dummy routine
+    class(pf_implicit_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: y
+    class(pf_encap_t),   intent(inout) :: f
+    real(pfdp),          intent(in   ) :: t
+    integer,             intent(in   ) :: level
+  end subroutine f1eval_dummy
+  subroutine f3eval_dummy(this, y,t, level, f)
+    !  Dummy routine
+    class(pf_implicit_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: y
+    class(pf_encap_t),   intent(inout) :: f
+    real(pfdp),          intent(in   ) :: t
+    integer,             intent(in   ) :: level
+  end subroutine f3eval_dummy
+  subroutine f3comp_dummy(this, y,t,dt,rhs, level, f)
+    !  Dummy routine
+    class(pf_implicit_t), intent(inout) :: this
+    class(pf_encap_t),   intent(inout) :: y
+    real(pfdp),          intent(in   ) :: t
+    real(pfdp),          intent(in   ) :: dt
+    class(pf_encap_t),   intent(in   ) :: rhs
+    integer,             intent(in   ) :: level
+    class(pf_encap_t),   intent(inout) :: f
+  end subroutine f3comp_dummy
 
 end module pf_mod_implicit

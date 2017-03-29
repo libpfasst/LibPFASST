@@ -26,11 +26,6 @@ module pf_mod_misdc
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)
    contains 
-     procedure(pf_f1eval_p), deferred :: f1eval
-     procedure(pf_f2eval_p), deferred :: f2eval
-     procedure(pf_f2comp_p), deferred :: f2comp
-     procedure(pf_f3eval_p), deferred :: f3eval
-     procedure(pf_f3comp_p), deferred :: f3comp
      procedure :: sweep        => misdc_sweep
      procedure :: initialize   => misdc_initialize
      procedure :: evaluate     => misdc_evaluate
@@ -41,52 +36,6 @@ module pf_mod_misdc
      procedure :: misdc_destroy
   end type pf_misdc_t
 
-  interface 
-     subroutine pf_f1eval_p(this, y, t, level, f1)
-       import pf_misdc_t, pf_encap_t, c_int, pfdp
-       class(pf_misdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f1
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f1eval_p
-
-     subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_misdc_t, pf_encap_t, c_int, pfdp
-       class(pf_misdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f2
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f2eval_p
-
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_misdc_t, pf_encap_t, c_int, pfdp
-       class(pf_misdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: rhs
-       class(pf_encap_t), intent(inout) :: y, f2
-       real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f2comp_p
-
-     subroutine pf_f3eval_p(this, y, t, level, f3)
-       import pf_misdc_t, pf_encap_t, c_int, pfdp
-       class(pf_misdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f3
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f3eval_p
-
-     subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
-       import pf_misdc_t, pf_encap_t, c_int, pfdp
-       class(pf_misdc_t), intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: rhs
-       class(pf_encap_t), intent(inout) :: y, f3
-       real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f3comp_p
-  end interface
 
 contains
 

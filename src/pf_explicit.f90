@@ -25,7 +25,7 @@ module pf_mod_explicit
   type, extends(pf_sweeper_t), abstract :: pf_explicit_t
      real(pfdp), allocatable :: SdiffE(:,:)
    contains
-     procedure(pf_f1eval_p), deferred :: f1eval
+!     procedure(pf_feval_p), deferred :: f1eval
      procedure :: sweep        => explicit_sweep
      procedure :: initialize   => explicit_initialize
      procedure :: evaluate     => explicit_evaluate
@@ -36,16 +36,6 @@ module pf_mod_explicit
      procedure :: explicit_destroy
   end type pf_explicit_t
 
-  interface
-     subroutine pf_f1eval_p(this, y, t, level, f1)
-       import pf_explicit_t, pf_encap_t, c_int, pfdp
-       class(pf_explicit_t), intent(inout) :: this
-       class(pf_encap_t),    intent(in   ) :: y
-       class(pf_encap_t),    intent(inout) :: f1
-       real(pfdp),           intent(in   ) :: t
-       integer(c_int),       intent(in   ) :: level
-     end subroutine pf_f1eval_p
-  end interface
 
 contains
 

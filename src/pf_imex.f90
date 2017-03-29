@@ -26,9 +26,6 @@ module pf_mod_imex
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)
    contains
-     procedure(pf_f1eval_p), deferred :: f1eval
-     procedure(pf_f2eval_p), deferred :: f2eval
-     procedure(pf_f2comp_p), deferred :: f2comp
      procedure :: sweep        => imex_sweep
      procedure :: initialize   => imex_initialize
      procedure :: evaluate     => imex_evaluate
@@ -37,35 +34,12 @@ module pf_mod_imex
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy      => imex_destroy
      procedure :: imex_destroy
+     procedure :: f3eval => f3eval_dummy
+     procedure :: f3comp => f3comp_dummy
   end type pf_imex_t
 
   interface
-     subroutine pf_f1eval_p(this, y, t, level, f1)
-       import pf_imex_t, pf_encap_t, c_int, pfdp
-       class(pf_imex_t),  intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f1
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f1eval_p
 
-     subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_imex_t, pf_encap_t, c_int, pfdp
-       class(pf_imex_t),  intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f2
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f2eval_p
-
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_imex_t, pf_encap_t, c_int, pfdp
-       class(pf_imex_t),  intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: rhs
-       class(pf_encap_t), intent(inout) :: y, f2
-       real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f2comp_p
   end interface
 
 contains
@@ -83,7 +57,6 @@ contains
     real(pfdp)  :: t
     real(pfdp)  :: dtsdc(1:lev%nnodes-1)
     class(pf_encap_t), allocatable :: rhs
-
     call start_timer(pf, TLEVEL+lev%level-1)
 
     ! compute integrals and add fas correction
@@ -101,7 +74,8 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    !    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))    
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
 
     call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -204,5 +178,24 @@ contains
     real(pfdp),        intent(in   ) :: t(:)
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine imex_evaluate_all
+
+  subroutine f3eval_dummy(this, y,t, level, f)
+    !  Dummy routine
+    class(pf_imex_t), intent(inout) :: this
+    class(pf_encap_t),   intent(in   ) :: y
+    class(pf_encap_t),   intent(inout) :: f
+    real(pfdp),          intent(in   ) :: t
+    integer,             intent(in   ) :: level
+  end subroutine f3eval_dummy
+  subroutine f3comp_dummy(this, y,t,dt,rhs, level, f)
+    !  Dummy routine
+    class(pf_imex_t), intent(inout) :: this
+    class(pf_encap_t),   intent(inout) :: y
+    real(pfdp),          intent(in   ) :: t
+    real(pfdp),          intent(in   ) :: dt
+    class(pf_encap_t),   intent(in   ) :: rhs
+    integer,             intent(in   ) :: level
+    class(pf_encap_t),   intent(inout) :: f
+  end subroutine f3comp_dummy
 
 end module pf_mod_imex
