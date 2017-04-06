@@ -30,16 +30,16 @@ contains
   !
   ! Interpolation is done by interpolating increments.  The fine
   ! function values are re-evaluated after interpolation.
-  subroutine interpolate_time_space(pf, t0, dt, LevF, LevG, Finterp)
+  subroutine interpolate_time_space(pf, t0, dt, LevF, LevG, F_INTERP)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
     class(pf_level_t),  intent(inout) :: LevF, LevG
-    logical,           intent(in), optional :: Finterp !  if true, then do interp on f not q
+    logical,           intent(in), optional :: F_INTERP !<  Flag, if true, then do interp on f not sol
 
     integer    :: m, p
     real(pfdp) :: tF(LevF%nnodes)
     real(pfdp) :: tG(LevG%nnodes)
-    logical :: Finterp_loc
+    logical :: F_INTERP_LOC
 
     class(pf_encap_t), allocatable :: delG(:)    !  Coarse in time and space
     class(pf_encap_t), allocatable :: delGF(:)   !  Coarse in time but fine in space
@@ -71,14 +71,14 @@ contains
     ! interpolate corrections
     call pf_apply_mat(LevF%Q, 1.0_pfdp, LevF%tmat, delGF, .false.)
 
-    Finterp_loc = .FALSE.
-    if(present(Finterp)) then
-       if  (Finterp)  then
-          Finterp_loc = .TRUE.
+    F_INTERP_LOC = .FALSE.
+    if(present(F_INTERP)) then
+       if  (F_INTERP)  then
+          F_INTERP_LOC = .TRUE.
        end if
     end if
 
-    if (Finterp_loc) then
+    if (F_INTERP_LOC) then
        !!  Interpolating F
        do p = 1,size(LevG%F(1,:))
           do m = 1, LevG%nnodes
