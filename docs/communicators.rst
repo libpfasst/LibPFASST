@@ -4,14 +4,11 @@ LIBPFASST communicators
 LIBPFASST includes several (time) communicators:
 
 * MPI
-* pthreads
 * fake
 
 The MPI communicator is the most actively developed and maintained.
-The pthreads communicator exists for performance testing purposes and
-may be deprecated in the future.  The fake communicator is used for
-convergence testing (convergence tests across many 'fake' cores can be
-performed on one core).
+The fake communicator is used for convergence testing (convergence
+tests across many 'fake' cores can be performed on one core).
 
 
 The number time steps taken |N| should be an integer multiple of the
@@ -80,14 +77,6 @@ corresponding to the first and last processors in the current block.
 
 At the beginning of each PFASST iteration the MPI communicator posts
 receive requests on all PFASST levels.
-
-
-pthreads
---------
-
-The PFASST pthreads communicator works in |BLOCK| mode but currently
-only supports one time block.  Users are responsible for spawing
-pthreads and setting up multiple PFASST objects appropriately.
 
 
 fake

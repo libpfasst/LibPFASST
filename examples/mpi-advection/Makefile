@@ -5,7 +5,6 @@
 #
 
 LIBPFASST ?= ../..
-FFTW3     ?= ../../fftw3
 
 EXE = main.exe
 
@@ -41,8 +40,7 @@ FSRC = src/pfasst.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
 
-CSRC = src/pf_cpthreads.c \
-       src/pf_numpy.c
+CSRC = src/pf_numpy.c
 
 ifdef NOMPI
   FFLAGS += -DNOMPI
@@ -55,9 +53,8 @@ OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 VPATHS += src
 FSRC   += src/main.f90 src/feval.f90 src/transfer.f90 src/hooks.f90
 
-FFLAGS  += -I$(FFTW3)/include
 FFLAGS += -Wno-surprising
-LDFLAGS += -g -L$(FFTW3)/lib -lfftw3
+LDFLAGS += -g -lfftw3
 
 all: $(EXE)
 
