@@ -48,8 +48,6 @@ endif
 
 clean:
 	find . -name build | xargs rm -rf
-	find . -name include | xargs rm -rf
-	find . -name lib | xargs rm -rf
 	find . -name '*.exe' | xargs rm -f
 	rm -f fort.* *.slog2 *.edf *.trc gmon.out
 
