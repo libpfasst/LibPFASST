@@ -8,7 +8,7 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jbuild -cpp
+FFLAGS = -Ibuild -Jinclude -cpp
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
@@ -18,7 +18,6 @@ FSRC = src/pfasst.f90 \
        src/pf_dtype.f90 \
        src/pf_explicit.f90 \
        src/pf_explicitQ.f90 \
-#       src/pf_fakecomm.f90 \
        src/pf_fake.f90 \
        src/pf_hooks.f90 \
        src/pf_imex.f90 \
@@ -35,7 +34,6 @@ FSRC = src/pfasst.f90 \
        src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
-       src/pf_pthreads.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
