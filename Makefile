@@ -11,12 +11,13 @@ include $(LIBPFASST)/Makefile.defaults
 #
 
 build/libpfasst.a: $(OBJ)
-	$(AR) build/libpfasst.a $(OBJ)
+	@mkdir -p lib
+	$(AR) lib/libpfasst.a $(OBJ)
 
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-EXTESTS = examples/mpi-advection examples/mpi-ndarray examples/fake-advection
+EXTESTS = examples/mpi-advection
 
 tests: $(EXTESTS)
 	@echo

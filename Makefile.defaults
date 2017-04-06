@@ -8,7 +8,7 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jbuild -cpp
+FFLAGS = -Ibuild -Jinclude -cpp
 
 include $(wildcard $(LIBPFASST)/*.defs)
 

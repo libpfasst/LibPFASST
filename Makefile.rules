@@ -14,8 +14,9 @@ else
 	@$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 endif
 
-build/%.o: %.f90
+build/%.o build/%.mod: %.f90
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -25,6 +26,7 @@ endif
 
 build/%.o: %.c
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -34,6 +36,7 @@ endif
 
 build/%.o: %.f
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -45,6 +48,8 @@ endif
 
 clean:
 	find . -name build | xargs rm -rf
+	find . -name include | xargs rm -rf
+	find . -name lib | xargs rm -rf
 	find . -name '*.exe' | xargs rm -f
 	rm -f fort.* *.slog2 *.edf *.trc gmon.out
 
