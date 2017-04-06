@@ -40,8 +40,7 @@ FSRC = src/pfasst.f90 \
        src/sdc_poly.f90 \
        src/sdc_quadrature.f90
 
-CSRC = src/pf_cpthreads.c \
-       src/pf_numpy.c
+CSRC = src/pf_numpy.c
 
 ifdef NOMPI
   FFLAGS += -DNOMPI

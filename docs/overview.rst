@@ -40,9 +40,9 @@ LIBPFASST generally consists of the following steps:
 #. Create an ``type(pf_encap_t)`` encapsulation object.  This
    may be level dependent.
 
-#. Create an ``type(pf_comm_t)`` communicator object.  This
-   allows LIBPFASST to use MPI or pthreads parallelization
-   (independent of any spatial parallelization).
+#. Create an ``type(pf_comm_t)`` communicator object.  This allows
+   LIBPFASST to use MPI parallelization (independent of any spatial
+   parallelization).
 
 #. Create an ``type(pf_sweeper_t)`` SDC sweeper.  Builtin
    sweepers include: explicit, implicit, or imex.  Custom sweepers can
@@ -62,5 +62,3 @@ LIBPFASST generally consists of the following steps:
 #. Run.
 
 #. Tidy up.
-
-
