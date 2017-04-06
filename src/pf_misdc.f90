@@ -25,7 +25,9 @@ module pf_mod_misdc
   type, extends(pf_sweeper_t), abstract :: pf_misdc_t
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)
-   contains 
+   contains
+     procedure(pf_f_eval_p), deferred :: f_eval
+     procedure(pf_f_comp_p), deferred :: f_comp
      procedure :: sweep        => misdc_sweep
      procedure :: initialize   => misdc_initialize
      procedure :: evaluate     => misdc_evaluate
@@ -35,7 +37,28 @@ module pf_mod_misdc
      procedure :: destroy      => misdc_destroy
      procedure :: misdc_destroy
   end type pf_misdc_t
-
+  interface
+     subroutine pf_f_eval_p(this,y, t, level, f, piece)
+       import pf_misdc_t, pf_encap_t, c_int, pfdp
+       class(pf_misdc_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y
+       real(pfdp),        intent(in   ) :: t
+       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t), intent(inout) :: f
+       integer(c_int),    intent(in   ) :: piece
+     end subroutine pf_f_eval_p
+      subroutine pf_f_comp_p(this,y, t, dt, rhs, level, f, piece)
+       import pf_misdc_t, pf_encap_t, c_int, pfdp
+       class(pf_misdc_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: y
+       real(pfdp),        intent(in   ) :: t
+       real(pfdp),        intent(in   ) :: dt
+       class(pf_encap_t), intent(in   ) :: rhs
+       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t), intent(inout) :: f
+       integer(c_int),    intent(in   ) :: piece
+     end subroutine pf_f_comp_p
+  end interface
 
 contains
 
@@ -71,9 +94,10 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
-    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
-    call this%f3eval(lev%Q(1), t0, lev%level, lev%F(1,3))
+    call misdc_evaluate(this, lev, t, 1)
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1),1)
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,2),2)
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,3),3)
 
     call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
@@ -86,15 +110,15 @@ contains
        call rhs%axpy(dtsdc(m), lev%F(m,1))
        call rhs%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,2))
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,2),2)
 
        !  Now we need to do the final subtraction for the f3 piece
        call rhs%copy(Lev%Q(m+1))       
        call rhs%axpy(-1.0_pfdp*dtsdc(m), lev%F(m+1,3))
 
-       call this%f3comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,3))
-       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
-       call this%f2eval(lev%Q(m+1), t, lev%level, lev%F(m+1,2))
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,3),3)
+       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1),1)
+       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,2),2)
     end do
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
@@ -115,9 +139,9 @@ contains
     integer,           intent(in)    :: m
     class(pf_level_t),  intent(inout) :: lev
 
-    call this%f1eval(lev%Q(m), t, lev%level, lev%F(m,1))
-    call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,2))
-    call this%f3eval(lev%Q(m), t, lev%level, lev%F(m,3))
+    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1),1)
+    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,2),2)
+    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,3),3)
   end subroutine misdc_evaluate
 
 

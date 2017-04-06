@@ -33,9 +33,8 @@ module feval
      complex(pfdp), pointer :: wk(:)              ! work space
      complex(pfdp), allocatable :: ddx(:), lap(:) ! operators
    contains
-     procedure :: f1eval
-     procedure :: f2eval
-     procedure :: f2comp
+     procedure :: f_eval
+     procedure :: f_comp
 !     final :: destroy0, destroy1
   end type ad_sweeper_t
 
@@ -155,82 +154,76 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine f1eval(this, y, t, level, f)
+  subroutine f_eval(this, y, t, level, f, piece)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
     class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
-
-    real(pfdp),      pointer :: yvec(:), f1vec(:)
+    integer,             intent(in   ) :: piece
+    
+    real(pfdp),      pointer :: yvec(:), fvec(:)
     complex(pfdp),   pointer :: wk(:)
 
     yvec  => array1(y)
-    f1vec => array1(f)
+    fvec => array1(f)
     wk    => this%wk
-
     wk = yvec
 
+    
     call fftw_execute_dft(this%ffft, wk, wk)
-    wk = -v * this%ddx * wk / size(wk)
+
+    select case (piece)
+    case (1)  ! Explicit piece
+      wk = -v * this%ddx * wk / size(wk)
+    case (2)  ! Implicit piece
+      wk = nu * this%lap * wk / size(wk)
+    case DEFAULT
+      print *,'Bad case for piece in f_eval ', piece
+      call exit(0)
+    end select
+
     call fftw_execute_dft(this%ifft, wk, wk)
 
-    f1vec = real(wk)
-  end subroutine f1eval
+    fvec = real(wk)
+
+  end subroutine f_eval
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  ! Evaluate the implicit function at y, t.
-  subroutine f2eval(this, y, t, level, f)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f
-    real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
-
-    real(pfdp),      pointer :: yvec(:), f2vec(:)
-    complex(pfdp),   pointer :: wk(:)
-
-    yvec  => array1(y)
-    f2vec => array1(f)
-    wk => this%wk
-
-    wk = yvec
-    call fftw_execute_dft(this%ffft, wk, wk)
-    wk = nu * this%lap * wk / size(wk)
-    call fftw_execute_dft(this%ifft, wk, wk)
-
-    f2vec = real(wk)
-
-  end subroutine f2eval
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine f2comp(this, y, t, dt, rhs, level, f)
+  subroutine f_comp(this, y, t, dt, rhs, level, f,piece)
     class(ad_sweeper_t), intent(inout) :: this
+    class(pf_encap_t),   intent(inout) :: y
+    real(pfdp),          intent(in   ) :: t
+    real(pfdp),          intent(in   ) :: dt
     class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f
-    real(pfdp),          intent(in   ) :: t, dt
     integer,             intent(in   ) :: level
+    class(pf_encap_t),   intent(inout) :: f
+    integer,             intent(in   ) :: piece
 
-    real(pfdp),      pointer :: yvec(:), rhsvec(:), f2vec(:)
+    real(pfdp),      pointer :: yvec(:), rhsvec(:), fvec(:)
     complex(pfdp),   pointer :: wk(:)
-
-    yvec  => array1(y)
-    rhsvec => array1(rhs)
-    f2vec => array1(f)
-    wk => this%wk
-
-    wk = rhsvec
-    call fftw_execute_dft(this%ffft, wk, wk)
-    wk = wk / (1.0_pfdp - nu*dt*this%lap) / size(wk)
-    call fftw_execute_dft(this%ifft, wk, wk)
-
-    yvec  = real(wk)
-    f2vec = (yvec - rhsvec) / dt
-
-  end subroutine f2comp
+    
+    if (piece == 2) then
+      yvec  => array1(y)
+      rhsvec => array1(rhs)
+      fvec => array1(f)
+      wk => this%wk
+      
+      wk = rhsvec
+      call fftw_execute_dft(this%ffft, wk, wk)
+      wk = wk / (1.0_pfdp - nu*dt*this%lap) / size(wk)
+      call fftw_execute_dft(this%ifft, wk, wk)
+      
+      yvec  = real(wk)
+      fvec = (yvec - rhsvec) / dt
+    else
+      print *,'Bad piece in f_comp ',piece
+      call exit(0)
+    end if
+  end subroutine f_comp
 
   subroutine interpolate(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this

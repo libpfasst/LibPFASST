@@ -68,8 +68,8 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
-    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1),1)
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,2),2)
 
     call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
@@ -88,8 +88,8 @@ contains
        !  Add the starting value
        call rhs%axpy(1.0_pfdp, lev%Q(1))
 
-       call this%f2comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%level,lev%F(m+1,2))
-       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
+       call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%level,lev%F(m+1,2),2)
+       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1),1)
 
     end do
 
@@ -175,13 +175,5 @@ contains
        end do
     end do
   end subroutine imexQ_integrate
-!!$  subroutine f3eval_dummy(this, y,t, level, f)
-!!$  !  Dummy routine
-!!$     class(pf_imexQ_t), intent(inout) :: this
-!!$     class(pf_encap_t),   intent(in   ) :: y
-!!$     class(pf_encap_t),   intent(inout) :: f
-!!$     real(pfdp),          intent(in   ) :: t
-!!$     integer,             intent(in   ) :: level
-!!$  end subroutine f3eval_dummy
 
 end module pf_mod_imexQ

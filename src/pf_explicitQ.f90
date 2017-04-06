@@ -64,7 +64,7 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -78,7 +78,7 @@ contains
        do n = 1, m
           call lev%Q(m+1)%axpy(dt*this%QtilE(m,n), lev%F(n,1))
        end do
-       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
+       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
 
     end do
 

@@ -25,7 +25,7 @@ module pf_mod_explicit
   type, extends(pf_sweeper_t), abstract :: pf_explicit_t
      real(pfdp), allocatable :: SdiffE(:,:)
    contains
-!     procedure(pf_feval_p), deferred :: f1eval
+     procedure(pf_f_eval_p), deferred :: f_eval
      procedure :: sweep        => explicit_sweep
      procedure :: initialize   => explicit_initialize
      procedure :: evaluate     => explicit_evaluate
@@ -36,7 +36,16 @@ module pf_mod_explicit
      procedure :: explicit_destroy
   end type pf_explicit_t
 
-
+  interface
+    subroutine pf_f_eval_p(this,y, t, level, f)
+      import pf_explicit_t, pf_encap_t, c_int, pfdp
+      class(pf_explicit_t),  intent(inout) :: this
+      class(pf_encap_t), intent(in   ) :: y
+      real(pfdp),        intent(in   ) :: t
+      integer(c_int),    intent(in   ) :: level
+      class(pf_encap_t), intent(inout) :: f
+    end subroutine pf_f_eval_p
+  end interface
 contains
 
   ! Perform on SDC sweep on level lev and set qend appropriately.
@@ -67,7 +76,7 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -78,7 +87,7 @@ contains
        call lev%Q(m+1)%axpy(dtsdc(m), lev%F(m,1))
        call lev%Q(m+1)%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f1eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
+       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
@@ -95,7 +104,7 @@ contains
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
 
-    call this%f1eval(lev%Q(m), t, lev%level, lev%F(m,1))
+    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1))
   end subroutine explicit_evaluate
 
   ! Initialize matrix

@@ -75,11 +75,6 @@ module pf_mod_dtype
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
      procedure(pf_destroy_p),      deferred :: destroy
-     procedure(pf_feval_p),        deferred :: f1eval
-     procedure(pf_feval_p),        deferred :: f2eval
-     procedure(pf_feval_p),        deferred :: f3eval
-     procedure(pf_fcomp_p),        deferred :: f2comp
-     procedure(pf_fcomp_p),        deferred :: f3comp
   end type pf_sweeper_t
 
   type, abstract :: pf_encap_t
@@ -214,30 +209,11 @@ module pf_mod_dtype
 
   end type pf_pfasst_t
 
-  abstract  interface
-     subroutine pf_feval_p(this,y, t, level, f)
-       import pf_sweeper_t, pf_encap_t, c_int, pfdp
-       class(pf_sweeper_t),  intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y
-       class(pf_encap_t), intent(inout) :: f
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_feval_p
-     subroutine pf_fcomp_p(this, y, t, dt, rhs, level, f)
-       import pf_sweeper_t, pf_encap_t, c_int, pfdp
-       class(pf_sweeper_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: y
-       real(pfdp),        intent(in   ) :: t
-       real(pfdp),        intent(in   ) :: dt
-       class(pf_encap_t), intent(in   ) :: rhs
-       integer(c_int),    intent(in   ) :: level
-       class(pf_encap_t), intent(inout) :: f
-     end subroutine pf_fcomp_p
-
-  end interface
+!  abstract  interface
+!  end interface
 
   interface
-     ! hook interface
+    ! hook interface
      subroutine pf_hook_p(pf, level, state)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t

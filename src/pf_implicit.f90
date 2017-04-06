@@ -25,6 +25,9 @@ module pf_mod_implicit
   type, extends(pf_sweeper_t), abstract :: pf_implicit_t
      real(pfdp), allocatable :: SdiffI(:,:)
    contains
+     procedure(pf_f_eval_p), deferred :: f_eval
+     procedure(pf_f_comp_p), deferred :: f_comp
+     
      procedure :: sweep        => implicit_sweep
      procedure :: initialize   => implicit_initialize
      procedure :: evaluate     => implicit_evaluate
@@ -33,11 +36,28 @@ module pf_mod_implicit
      procedure :: evaluate_all => implicit_evaluate_all
      procedure :: destroy      => implicit_destroy
      procedure :: implicit_destroy
-     procedure :: f1eval => f1eval_dummy
-     procedure :: f3eval => f3eval_dummy
-     procedure :: f3comp => f3comp_dummy
-  end type pf_implicit_t
+   end type pf_implicit_t
 
+   interface
+     subroutine pf_f_eval_p(this,y, t, level, f)
+       import pf_implicit_t, pf_encap_t, c_int, pfdp
+       class(pf_implicit_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y
+       real(pfdp),        intent(in   ) :: t
+       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t), intent(inout) :: f
+     end subroutine pf_f_eval_p
+      subroutine pf_f_comp_p(this,y, t, dt, rhs, level, f)
+       import pf_implicit_t, pf_encap_t, c_int, pfdp
+       class(pf_implicit_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: y
+       real(pfdp),        intent(in   ) :: t
+       real(pfdp),        intent(in   ) :: dt
+       class(pf_encap_t), intent(in   ) :: rhs
+       integer(c_int),    intent(in   ) :: level
+       class(pf_encap_t), intent(inout) :: f
+     end subroutine pf_f_comp_p
+  end interface
 contains
 
   ! Perform one SDC sweep on level lev and set qend appropriately.
@@ -69,7 +89,7 @@ contains
     ! do the time-stepping
     call lev%Q(1)%unpack(lev%q0)
 
-    call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1))
 
     call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
@@ -81,7 +101,7 @@ contains
        call rhs%copy(lev%Q(m))
        call rhs%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f2comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,1))
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,1))
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
@@ -98,7 +118,7 @@ contains
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
 
-    call this%f2eval(lev%Q(m), t, lev%level, lev%F(m,1))
+    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1))
   end subroutine implicit_evaluate
 
   ! Initialize matrix
@@ -167,31 +187,5 @@ contains
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine implicit_evaluate_all
 
-  subroutine f1eval_dummy(this, y,t, level, f)
-    !  Dummy routine
-    class(pf_implicit_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f
-    real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
-  end subroutine f1eval_dummy
-  subroutine f3eval_dummy(this, y,t, level, f)
-    !  Dummy routine
-    class(pf_implicit_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f
-    real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
-  end subroutine f3eval_dummy
-  subroutine f3comp_dummy(this, y,t,dt,rhs, level, f)
-    !  Dummy routine
-    class(pf_implicit_t), intent(inout) :: this
-    class(pf_encap_t),   intent(inout) :: y
-    real(pfdp),          intent(in   ) :: t
-    real(pfdp),          intent(in   ) :: dt
-    class(pf_encap_t),   intent(in   ) :: rhs
-    integer,             intent(in   ) :: level
-    class(pf_encap_t),   intent(inout) :: f
-  end subroutine f3comp_dummy
 
 end module pf_mod_implicit
