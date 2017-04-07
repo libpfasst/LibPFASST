@@ -121,6 +121,7 @@ module pf_mod_dtype
           send(:),    &                 ! send buffer
           recv(:),    &                 ! recv buffer
           nodes(:),   &                 ! sdc nodes
+          t_sdc(:),   &                 ! time at the SDC nodes
           qmat(:,:),  &                 ! integration matrix (0 to node)
           LUmat(:,:), &                 ! LU factorization (replaces BE matrix in Q form)
           s0mat(:,:), &                 ! integration matrix (node to node)
@@ -131,7 +132,8 @@ module pf_mod_dtype
           nflags(:)                     ! sdc node flags
 
      class(pf_encap_t), allocatable :: &
-          Q(:),     &                   ! unknowns at sdc nodes
+       !          sol_array(:),     &           ! solution at sdc nodes
+          Q(:),     &           ! solution at sdc nodes
           pQ(:),    &                   ! unknowns at sdc nodes, previous sweep
           R(:),     &                   ! full residuals
           I(:),     &                   ! 0 to node integrals
@@ -161,9 +163,9 @@ module pf_mod_dtype
           sendreq(:)                    ! send requests (indexed by level)
      integer :: statreq                 ! status send request
 
-     ! pthreads
+     ! fakie, needs modernization
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
-     type(c_ptr), pointer :: pfpth(:,:) ! mutexes and conditions (indexed by rank, level)
+     type(c_ptr), pointer :: pfpth(:,:)
 
      procedure(pf_post_p),        pointer, nopass :: post
      procedure(pf_recv_p),        pointer, nopass :: recv

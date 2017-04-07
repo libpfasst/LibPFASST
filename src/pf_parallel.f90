@@ -32,103 +32,113 @@ contains
   !
   ! Predictor.
   !
-  ! Spreads the fine initial condition (F%q0) to all levels and all
-  ! nodes.  If we're running with more than one processor, performs
-  ! sweeps on the coarsest level.
   !
-  ! No time communication is performed during the predictor.
   !
-  ! The iteration count is reset to 0, and the status is reset to
-  ! ITERATING.
-  !
+  !>  This is the routine to initialize the solution on each processor
+  !>
+  !> Spreads the fine initial condition (F%q0) to all levels and all
+  !> nodes.  If we're running with more than one processor, performs
+  !> sweeps on the coarsest level.
+  !> This routine is in need of reorganizing, since we now have cases
+  !> where we already have a solution that we just want to load on levels.
+  !>
+  !> No time communication is performed during the predictor since all
+  !> procesors can do the work themselves
+  !>
+  !>  The iteration count is reset to 0, and the status is reset to
+  !>  ITERATING.
+  !> 
   subroutine pf_predictor(pf, t0, dt)
-    type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in   )         :: t0, dt
+    type(pf_pfasst_t), intent(inout), target :: pf     !< PFASST main data structure
+    real(pfdp),        intent(in   )         :: t0     !< Initial time of this processor
+    real(pfdp),        intent(in   )         :: dt     !< time step
 
-    class(pf_level_t), pointer :: F, G
-    integer                   :: j, k, l
+    class(pf_level_t), pointer :: coarse_lev_p    
+    class(pf_level_t), pointer :: fine_lev_p
+    integer                   :: j, k
+    integer                   :: level_index
     real(pfdp)                :: t0k
 
     print *,'entering predictor ',pf%rank
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
-    F => pf%levels(pf%nlevels)
-    call spreadq0(F, t0)
+    fine_lev_p => pf%levels(pf%nlevels)
+    call spreadq0(fine_lev_p, t0)
 
     if (pf%nlevels > 1) then
 
-       do l = pf%nlevels, 2, -1
-          F => pf%levels(l); G => pf%levels(l-1)
-          call pf_residual(pf, F, dt)
-          call restrict_time_space_fas(pf, t0, dt, F, G)
-          call save(G)
-          call G%Q(1)%pack(G%q0)
+       do level_index = pf%nlevels, 2, -1
+         fine_lev_p => pf%levels(level_index);
+         coarse_lev_p => pf%levels(level_index-1)
+         call pf_residual(pf, fine_lev_p, dt)
+         call restrict_time_space_fas(pf, t0, dt, level_index)
+         call save(coarse_lev_p)
+         call coarse_lev_p%Q(1)%pack(coarse_lev_p%q0)
        end do
 
-
        if (pf%comm%nproc > 1) then
-          G => pf%levels(1)
-          if (pf%Pipeline_G .and. (G%nsweeps_pred > 1)) then
+          coarse_lev_p => pf%levels(1)
+          if (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
              !  This is the weird choice.  We burn in without communication, then do extra sweeps
-             G => pf%levels(1)
+             coarse_lev_p => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%qend%pack(G%q0)
+                   call coarse_lev_p%qend%pack(coarse_lev_p%q0)
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(G, t0)
+                      call spreadq0(coarse_lev_p, t0)
                    end if
                 end if
 
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%ulevel%sweeper%sweep(pf, G, t0, dt)
-                call pf_residual(pf, G, dt)  !  why is this here?
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call call_hooks(pf, coarse_lev_p%level, PF_PRE_SWEEP)
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt)
+                call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
+                call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
              end do
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
-             do k = 1, G%nsweeps_pred-1
+             do k = 1, coarse_lev_p%nsweeps_pred-1
                 pf%state%pstatus = PF_STATUS_ITERATING
                 pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
 !                print *,'recieving  in predictor iter=',k,pf%rank
                 !  Get new initial conditions
-                call pf_recv(pf, G, G%level*20000+pf%rank+k, .true.)
+                call pf_recv(pf, coarse_lev_p, coarse_lev_p%level*20000+pf%rank+k, .true.)
 !                print *,'recieve  done iter=',k,pf%rank
                 !  Do a sweep
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                call G%ulevel%sweeper%sweep(pf, G, t0, dt )
-                call pf_residual(pf, G, dt)  !  why is this here?
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call call_hooks(pf, coarse_lev_p%level, PF_PRE_SWEEP)
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt )
+                call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
+                call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
                 !  Send forward
 !                print *,'sending   in predictor iter=',k,pf%rank
-                call pf_send(pf, G,  G%level*20000+pf%rank+1+k, .false.)
+                call pf_send(pf, coarse_lev_p,  coarse_lev_p%level*20000+pf%rank+1+k, .false.)
 !                print *,'send done  in predictor iter=',k,pf%rank
              end do
-             call pf_residual(pf, G, dt)
+             call pf_residual(pf, coarse_lev_p, dt)
           else
              ! Normal predictor burn in
-             G => pf%levels(1)
+             coarse_lev_p => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
                 t0k = t0-(pf%rank)*dt + (k-1)*dt
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call G%qend%pack(G%q0)
+                   call coarse_lev_p%qend%pack(coarse_lev_p%q0)
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(G, t0k)
+                      call spreadq0(coarse_lev_p, t0k)
                    end if
                 end if
 
-                call call_hooks(pf, G%level, PF_PRE_SWEEP)
-                do j = 1, G%nsweeps_pred
-                   call G%ulevel%sweeper%sweep(pf, G, t0k, dt)
+                call call_hooks(pf, coarse_lev_p%level, PF_PRE_SWEEP)
+                do j = 1, coarse_lev_p%nsweeps_pred
+                   call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0k, dt)
                 end do
-                call pf_residual(pf, G, dt)
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+                call pf_residual(pf, coarse_lev_p, dt)
+                call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
              end do
           end if
 
@@ -140,17 +150,17 @@ contains
 
           ! Single processor... sweep on coarse and return to fine level.
 
-          G => pf%levels(1)
+          coarse_lev_p => pf%levels(1)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
 
-             call call_hooks(pf, G%level, PF_PRE_SWEEP)
-             do j = 1, G%nsweeps_pred
-                call G%ulevel%sweeper%sweep(pf, G, t0k, dt)
-                call call_hooks(pf, G%level, PF_POST_SWEEP)
+             call call_hooks(pf, coarse_lev_p%level, PF_PRE_SWEEP)
+             do j = 1, coarse_lev_p%nsweeps_pred
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0k, dt)
+                call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
              end do
-             call pf_residual(pf, G, dt)
+             call pf_residual(pf, coarse_lev_p, dt)
 
           end do
 
@@ -249,8 +259,9 @@ contains
     class(pf_encap_t), intent(inout), optional :: qend
     integer,           intent(in   ), optional :: nsteps
 
-    class(pf_level_t), pointer :: F, G
-    integer                   :: j, k, l
+    class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
+    integer                   :: j, k
+    integer                   :: level_index
     real(pfdp)                :: residual, energy
 
     logical :: qcycle, qbroadcast
@@ -276,8 +287,8 @@ contains
     energy   = -1
     did_post_step_hook = .false.
 
-    F => pf%levels(pf%nlevels)
-    call q0%pack(F%q0)
+    fine_lev_p => pf%levels(pf%nlevels)
+    call q0%pack(fine_lev_p%q0)
 
     if (present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -315,11 +326,11 @@ contains
        end if
 
        if (k > 1 .and. qbroadcast) then
-          F => pf%levels(pf%nlevels)
+          fine_lev_p => pf%levels(pf%nlevels)
           call pf%comm%wait(pf, pf%nlevels)
-          call F%qend%pack(F%send)
-          call pf_broadcast(pf, F%send, F%nvars, pf%comm%nproc-1)
-          F%q0 = F%send
+          call fine_lev_p%qend%pack(fine_lev_p%send)
+          call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
+          fine_lev_p%q0 = fine_lev_p%send
        end if
 
        ! predictor, if requested
@@ -339,13 +350,13 @@ contains
        ! XXX: this if statement is necessary for block mode cycling...
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
-          F => pf%levels(pf%nlevels)
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          do j = 1, F%nsweeps_pred
-             call F%ulevel%sweeper%sweep(pf, F, pf%state%t0, dt)
+          fine_lev_p => pf%levels(pf%nlevels)
+          call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+          do j = 1, fine_lev_p%nsweeps_pred
+             call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, pf%state%t0, dt)
 
-             call pf_residual(pf, F, dt)
-             call call_hooks(pf, F%level, PF_POST_SWEEP)
+             call pf_residual(pf, fine_lev_p, dt)
+             call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
           end do
        end if
 
@@ -358,20 +369,20 @@ contains
        if (pf%state%step >= pf%state%nsteps) exit
 
        if (qcycle) cycle
-       do l = 2, pf%nlevels
-          F => pf%levels(l)
-          call pf_post(pf, F, F%level*10000+k)
+       do level_index = 2, pf%nlevels
+          fine_lev_p => pf%levels(level_index)
+          call pf_post(pf, fine_lev_p, fine_lev_p%level*10000+k)
        end do
 
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
-          F => pf%levels(pf%nlevels)
-          call pf_send(pf, F, F%level*10000+k, .false.)
+          fine_lev_p => pf%levels(pf%nlevels)
+          call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+k, .false.)
 
           if (pf%nlevels > 1) then
-             G => pf%levels(pf%nlevels-1)
-             call restrict_time_space_fas(pf, pf%state%t0, dt, F, G)
-             call save(G)
+             coarse_lev_p => pf%levels(pf%nlevels-1)
+             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
+             call save(coarse_lev_p)
           end if
 
        end if
@@ -386,8 +397,8 @@ contains
     call end_timer(pf, TTOTAL)
 
     if (present(qend)) then
-       F => pf%levels(pf%nlevels)
-       call qend%copy(F%qend)
+       fine_lev_p => pf%levels(pf%nlevels)
+       call qend%copy(fine_lev_p%qend)
     end if
   end subroutine pf_pfasst_run
 
@@ -398,32 +409,34 @@ contains
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
 
-    class(pf_level_t), pointer :: F, G
-    integer :: l, j
+    class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
+    integer :: j
+    integer :: level_index
 
     if (pf%nlevels <= 1) return
 !    print *,'entering post predictor ',pf%rank
 
-    do l = 2, pf%nlevels-1
-       F => pf%levels(l); G => pf%levels(l-1)
-       call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-       call F%Q(1)%pack(F%q0)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps_pred
-          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+    do level_index = 2, pf%nlevels-1
+      fine_lev_p => pf%levels(level_index);
+      coarse_lev_p => pf%levels(level_index-1)
+       call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p, coarse_lev_p%Finterp)
+       call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
+       call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       do j = 1, fine_lev_p%nsweeps_pred
+          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
+          call pf_residual(pf, fine_lev_p, dt)
+          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
        end do
 
     end do
 
-    F => pf%levels(pf%nlevels); G => pf%levels(pf%nlevels-1)
-    call interpolate_time_space(pf, t0, dt, F, G, G%Finterp)
-    call F%Q(1)%pack(F%q0)
-!    do j = 1, F%nsweeps_pred
-!          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
-!          call pf_residual(pf, F, dt)
-!          call call_hooks(pf, F%level, PF_POST_SWEEP)
+    fine_lev_p => pf%levels(pf%nlevels); coarse_lev_p => pf%levels(pf%nlevels-1)
+    call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p, coarse_lev_p%Finterp)
+    call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
+!    do j = 1, fine_lev_p%nsweeps_pred
+!          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
+!          call pf_residual(pf, fine_lev_p, dt)
+!          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
 !       end do
 !       print *,'leaving post predictor ', pf%rank
   end subroutine pf_v_cycle_post_predictor
@@ -436,80 +449,80 @@ contains
     real(pfdp),        intent(in)    :: t0, dt
     integer,           intent(in)    :: iteration
 
-    class(pf_level_t), pointer :: F, G
-    integer :: l, j
+    class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
+    integer :: j
+    integer :: level_index
 
     if (pf%nlevels == 1) then
-       F => pf%levels(1)
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
+       fine_lev_p => pf%levels(1)
+       call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .true.)
        return
     end if
 
     !
     ! down
     !
-    do l = pf%nlevels-1, 2, -1
-       F => pf%levels(l); G => pf%levels(l-1)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+    do level_index = pf%nlevels-1, 2, -1
+      fine_lev_p => pf%levels(level_index);
+      coarse_lev_p => pf%levels(level_index-1)
+       call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       do j = 1, fine_lev_p%nsweeps
+          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
+          call pf_residual(pf, fine_lev_p, dt)
+          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
        end do
-       call pf_send(pf, F, F%level*10000+iteration, .false.)
-       call restrict_time_space_fas(pf, t0, dt, F, G)
-       call save(G)
+       call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
+       call restrict_time_space_fas(pf, t0, dt, level_index)
+       call save(coarse_lev_p)
     end do
 
     !
     ! bottom
     !
-    F => pf%levels(1)
+    fine_lev_p => pf%levels(1)
     if (pf%Pipeline_G) then
-       do j = 1, F%nsweeps
-          call pf_recv(pf, F, F%level*10000+iteration+j, .true.)
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
-          call pf_send(pf, F, F%level*10000+iteration+j, .false.)
+       do j = 1, fine_lev_p%nsweeps
+          call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration+j, .true.)
+          call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
+          call pf_residual(pf, fine_lev_p, dt)
+          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
+          call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration+j, .false.)
        end do
     else
-       call pf_recv(pf, F, F%level*10000+iteration, .true.)
-       call call_hooks(pf, F%level, PF_PRE_SWEEP)
-       do j = 1, F%nsweeps
-          call F%ulevel%sweeper%sweep(pf, F, t0, dt)
+       call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .true.)
+       call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       do j = 1, fine_lev_p%nsweeps
+          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
        end do
-       call pf_residual(pf, F, dt)
-       call call_hooks(pf, F%level, PF_POST_SWEEP)
-       call pf_send(pf, F, F%level*10000+iteration, .false.)
+       call pf_residual(pf, fine_lev_p, dt)
+       call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
+       call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
     endif
     !
     ! up
     !
-    do l = 2, pf%nlevels
-       F => pf%levels(l); G => pf%levels(l-1)
+    do level_index = 2, pf%nlevels
+       fine_lev_p => pf%levels(level_index); coarse_lev_p => pf%levels(level_index-1)
 
-       call interpolate_time_space(pf, t0, dt, F, G,G%Finterp)
-       call pf_recv(pf, F, F%level*10000+iteration, .false.)
+       call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p,coarse_lev_p%Finterp)
+       call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
 
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
-          call interpolate_q0(pf,F, G)
+          call interpolate_q0(pf,fine_lev_p, coarse_lev_p)
        end if
 
-       if (F%level < pf%nlevels) then
-          call call_hooks(pf, F%level, PF_PRE_SWEEP)
-          do j = 1, F%nsweeps
-             call F%ulevel%sweeper%sweep(pf, F, t0, dt)
+       if (fine_lev_p%level < pf%nlevels) then
+          call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+          do j = 1, fine_lev_p%nsweeps
+             call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
           end do
-          call pf_residual(pf, F, dt)
-          call call_hooks(pf, F%level, PF_POST_SWEEP)
+          call pf_residual(pf, fine_lev_p, dt)
+          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
        end if
-
-
     end do
 
   end subroutine pf_v_cycle

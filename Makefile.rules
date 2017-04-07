@@ -14,8 +14,9 @@ else
 	@$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 endif
 
-build/%.o: %.f90
+build/%.o build/%.mod: %.f90
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -25,6 +26,7 @@ endif
 
 build/%.o: %.c
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -34,6 +36,7 @@ endif
 
 build/%.o: %.f
 	@mkdir -p build
+	@mkdir -p include
 ifdef MKVERBOSE
 	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
 else
@@ -77,7 +80,6 @@ build/sdc_quadrature.o: build/pf_dtype.o build/sdc_poly.o
 build/pf_quadrature.o:  build/sdc_quadrature.o
 build/pf_pfasst.o:      build/pf_utils.o build/pf_quadrature.o \
                         build/pf_hooks.o build/pf_options.o
-build/pf_pthreads.o:    build/pf_timer.o build/pf_pfasst.o
 build/pf_fakecomm.o:    build/pf_timer.o build/pf_pfasst.o
 
 ifdef NOMPI

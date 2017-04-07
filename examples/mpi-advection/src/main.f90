@@ -24,28 +24,28 @@ contains
 
     implicit none
 
-    integer, parameter :: maxlevs = 3
+    integer, parameter :: maxlevs = 2
 
     type(pf_pfasst_t)              :: pf
     type(pf_comm_t)                :: comm
     type(ndarray), allocatable     :: q0
     integer                        :: nvars(maxlevs), nnodes(maxlevs), l
     double precision               :: dt
-
+    class(ad_sweeper_t), pointer   :: ad_sweeper_ptr
 
     !
     ! initialize pfasst
     !
 
-    nvars  = [ 32, 64, 128 ]   ! number of dofs on the time/space levels
-    nnodes = [ 2, 3, 5 ]       ! number of sdc nodes on time/space levels
+    nvars  = [ 32, 64 ]   ! number of dofs on the time/space levels
+    nnodes = [ 3,5 ]       ! number of sdc nodes on time/space levels
     dt     = 0.05_pfdp
 
     call pf_mpi_create(comm, MPI_COMM_WORLD)
     call pf_pfasst_create(pf, comm, maxlevs)
 
     pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 12
+    pf%niters = 20
 
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
@@ -82,10 +82,15 @@ contains
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
     call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=4*comm%nproc)
 
+    deallocate(q0%flatarray)
+    deallocate(q0%shape)
+    deallocate(q0)
+
     !
     ! cleanup
     !
     call pf_mpi_destroy(comm)     ! XXX
+    call pf_pfasst_destroy(pf)
 
   end subroutine ad
 

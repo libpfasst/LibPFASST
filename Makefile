@@ -17,7 +17,7 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-EXTESTS = examples/mpi-advection examples/mpi-ndarray examples/fake-advection
+EXTESTS = examples/mpi-advection
 
 tests: $(EXTESTS)
 	@echo
