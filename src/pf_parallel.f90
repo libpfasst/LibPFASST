@@ -47,13 +47,13 @@ contains
   !>
   !>  The iteration count is reset to 0, and the status is reset to
   !>  ITERATING.
-  !> 
+  !>
   subroutine pf_predictor(pf, t0, dt)
     type(pf_pfasst_t), intent(inout), target :: pf     !< PFASST main data structure
     real(pfdp),        intent(in   )         :: t0     !< Initial time of this processor
     real(pfdp),        intent(in   )         :: dt     !< time step
 
-    class(pf_level_t), pointer :: coarse_lev_p    
+    class(pf_level_t), pointer :: coarse_lev_p
     class(pf_level_t), pointer :: fine_lev_p
     integer                   :: j, k
     integer                   :: level_index
@@ -430,8 +430,9 @@ contains
 
     end do
 
-    call interpolate_time_space(pf, t0, dt, pf%nlevels, coarse_lev_p%Finterp)
     fine_lev_p => pf%levels(pf%nlevels)
+    coarse_lev_p => pf%levels(pf%nlevels-1)
+    call interpolate_time_space(pf, t0, dt, pf%nlevels, coarse_lev_p%Finterp)
     call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
 
   end subroutine pf_v_cycle_post_predictor
