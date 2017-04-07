@@ -17,15 +17,4 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-EXTESTS = examples/mpi-advection
-
-tests: $(EXTESTS)
-	@echo
-	@echo '===> running nosetests'
-	@$(NOSE)
-
-$(EXTESTS):
-	@echo "===>" $@
-	$(MAKE) -C $@
-
-.PHONY: clean tests $(EXTESTS)
+.PHONY: clean
