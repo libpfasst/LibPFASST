@@ -23,11 +23,8 @@ module feval
 
   type, extends(pf_misdcQ_t) :: ad_sweeper_t
    contains
-     procedure :: f1eval
-     procedure :: f2eval
-     procedure :: f2comp
-     procedure :: f3eval
-     procedure :: f3comp
+     procedure :: f_eval
+     procedure :: f_comp
 !     final :: destroy0, destroy1
   end type ad_sweeper_t
 
@@ -88,136 +85,91 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine f1eval(this, y, t, level, f1)
+  subroutine f_eval(this, y, t, level, f,piece)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f1
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level
+    integer,             intent(in   ) :: piece
 
-    real(pfdp),      pointer :: yvec(:), f1vec(:)
+    real(pfdp),      pointer :: yvec(:), fvec(:)
 
-    real(pfdp) :: val
-
-    yvec  => array1(y)
-    f1vec => array1(f1)
-
-    f1vec(1) = a*yvec(1)
-    
-  end subroutine f1eval
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  ! Evaluate the implicit function at y, t.
-  subroutine f2eval(this, y, t, level, f2)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f2
-    real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
-
-    real(pfdp), pointer :: yvec(:), f2vec(:)
     real(pfdp)          :: d             
-    real(pfdp)          :: val
-
-    d = b
 
     yvec  => array1(y)
-    f2vec => array1(f2)
+    fvec => array1(f)
+    
+    select case (piece)
+    case(1)
+      d = a
+    case(2)
+      d = b
+    case(3)
+      d = c
+    case DEFAULT
+      print *,'Bad case for piece in f_eval ', piece
+      call exit(0)
+    end select
+    fvec = d*yvec
 
-    f2vec = d*yvec
-
-  end subroutine f2eval
+  end subroutine f_eval
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Solve for y and return f2 also.
-  subroutine f2comp(this, y, t, dt, rhs, level, f2)
+  subroutine f_comp(this, y, t, dt, rhs, level, f,piece)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f2
+    class(pf_encap_t),   intent(inout) :: y
+    class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t, dt
     integer,             intent(in   ) :: level
-
-    real(pfdp), pointer :: yvec(:), rhsvec(:), f2vec(:)
-    real(pfdp)          :: val
-    real(pfdp)          :: d             
-
-    d = b
-
-    yvec   => array1(y)
-    rhsvec => array1(rhs)
-    f2vec  => array1(f2)
- 
-    yvec  = rhsvec / (1.0_pfdp - d*dt)
-    f2vec = (yvec - rhsvec) / dt 
-
-  end subroutine f2comp
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  ! Evaluate the implicit function at y, t.
-  subroutine f3eval(this, y, t, level, f3)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: y
-    class(pf_encap_t),   intent(inout) :: f3
-    real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
-
-    real(pfdp), pointer :: yvec(:), f3vec(:)
-    real(pfdp)          :: d             
-    real(pfdp)          :: val
-
-    d = c
-
-    yvec  => array1(y)
-    f3vec => array1(f3)
-
-    f3vec = d*yvec
+    integer,             intent(in   ) :: piece
     
-  end subroutine f3eval
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  ! Solve for y and return f3 also.
-  subroutine f3comp(this, y, t, dt, rhs, level, f3)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_encap_t),   intent(in   ) :: rhs
-    class(pf_encap_t),   intent(inout) :: y, f3
-    real(pfdp),          intent(in   ) :: t, dt
-    integer,             intent(in   ) :: level
-
-    real(pfdp), pointer :: yvec(:), rhsvec(:), f3vec(:)
+    real(pfdp), pointer :: yvec(:), rhsvec(:), fvec(:)
     real(pfdp)          :: val
     real(pfdp)          :: d             
 
-    d = c
-
     yvec   => array1(y)
     rhsvec => array1(rhs)
-    f3vec  => array1(f3)
- 
+    fvec  => array1(f)
+
+    select case (piece)
+    case(2)
+      d = b
+    case(3)
+      d = c
+    case DEFAULT
+      print *,'Bad case for piece in f_comp ', piece
+      call exit(0)
+    end select
+
     yvec  = rhsvec / (1.0_pfdp - d*dt)
-    f3vec = (yvec - rhsvec) / dt 
+    fvec = (yvec - rhsvec) / dt 
 
-  end subroutine f3comp
+  end subroutine f_comp
 
-  subroutine interpolate(this, levelF, levelG, qFp, qGp, t)
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine interpolate(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
 
     ! do nothing
 
   end subroutine interpolate
 
-  subroutine restrict(this, levelF, levelG, qFp, qGp, t)
+  subroutine restrict(this, levelF, levelG, qF, qG, t)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qFp, qGp
+    class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
     
     ! do nothing

@@ -5,6 +5,7 @@
 #
 
 LIBPFASST ?= ../..
+FFTW3 ?=../../fftw3
 
 EXE = main.exe
 
@@ -27,8 +28,11 @@ VPATHS = src
 
 include $(LIBPFASST)/Makefile.rules
 
-FFLAGS += -Wno-surprising
-LDFLAGS += -g -lfftw3
+
+build/%.o: %.c
+	@mkdir -p build
+	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
+
 
 build/%.o: %.f90
 	@mkdir -p build

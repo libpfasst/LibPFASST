@@ -211,8 +211,11 @@ module pf_mod_dtype
 
   end type pf_pfasst_t
 
+!  abstract  interface
+!  end interface
+
   interface
-     ! hook interface
+    ! hook interface
      subroutine pf_hook_p(pf, level, state)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
