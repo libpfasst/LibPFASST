@@ -26,50 +26,63 @@ module pf_mod_interpolate
   implicit none
 contains
 
-  ! Interpolate (in time and space) LevG to LevF.
+  ! Interpolate (in time and space) level_index-1 to level_index
   !
   ! Interpolation is done by interpolating increments.  The fine
   ! function values are re-evaluated after interpolation.
-  subroutine interpolate_time_space(pf, t0, dt, LevF, LevG, F_INTERP)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: t0, dt
-    class(pf_level_t),  intent(inout) :: LevF, LevG
+  subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP)
+    type(pf_pfasst_t), intent(inout),target :: pf
+    real(pfdp),        intent(in)    :: t0
+    real(pfdp),        intent(in)    :: dt
+    integer,           intent(in)    :: level_index    !< defines which level to interpolate
     logical,           intent(in), optional :: F_INTERP !<  Flag, if true, then do interp on f not sol
+    !  Local variables
+    class(pf_level_t), pointer :: c_lev_ptr    
+    class(pf_level_t), pointer :: f_lev_ptr
 
     integer    :: m, p
-    real(pfdp) :: tF(LevF%nnodes)
-    real(pfdp) :: tG(LevG%nnodes)
+    real(pfdp), allocatable :: c_times(:)
+    real(pfdp), allocatable :: f_times(:)
     logical :: F_INTERP_LOC
 
     class(pf_encap_t), allocatable :: delG(:)    !  Coarse in time and space
     class(pf_encap_t), allocatable :: delGF(:)   !  Coarse in time but fine in space
 
-    call call_hooks(pf, LevF%level, PF_PRE_INTERP_ALL)
-    call start_timer(pf, TINTERPOLATE + LevF%level - 1)
+
+    f_lev_ptr => pf%levels(level_index);
+    c_lev_ptr => pf%levels(level_index-1)
+
+    call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
+    call start_timer(pf, TINTERPOLATE + level_index - 1)
 
     ! create workspaces
-    call LevG%ulevel%factory%create_array(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create_array(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
+    call c_lev_ptr%ulevel%factory%create_array(delG,  c_lev_ptr%nnodes, &
+      c_lev_ptr%level, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_array(delGF, c_lev_ptr%nnodes, &
+      f_lev_ptr%level, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
 
     ! set time at coarse and fine nodes
-    tG = t0 + dt*LevG%nodes
-    tF = t0 + dt*LevF%nodes
+    allocate(c_times(c_lev_ptr%nnodes))
+    allocate(f_times(f_lev_ptr%nnodes))
+    
+    c_times = t0 + dt*c_lev_ptr%nodes
+    f_times = t0 + dt*f_lev_ptr%nodes
 
     ! needed for amr
-    do m = 1, LevG%nnodes
+    do m = 1, c_lev_ptr%nnodes
        call delG(m)%setval(0.0_pfdp)
        call delGF(m)%setval(0.0_pfdp)
     end do
 
     !!  Interpolating q
-    do m = 1, LevG%nnodes
-       call delG(m)%copy(LevG%Q(m))
-       call delG(m)%axpy(-1.0_pfdp, LevG%pQ(m))
-       call LevF%ulevel%interpolate(LevF, LevG, delGF(m), delG(m), tG(m))
+    do m = 1, c_lev_ptr%nnodes
+       call delG(m)%copy(c_lev_ptr%Q(m))
+       call delG(m)%axpy(-1.0_pfdp, c_lev_ptr%pQ(m))
+       call f_lev_ptr%ulevel%interpolate(f_lev_ptr,c_lev_ptr, delGF(m), delG(m), c_times(m))
     end do
 
     ! interpolate corrections
-    call pf_apply_mat(LevF%Q, 1.0_pfdp, LevF%tmat, delGF, .false.)
+    call pf_apply_mat(f_lev_ptr%Q, 1.0_pfdp, f_lev_ptr%tmat, delGF, .false.)
 
     F_INTERP_LOC = .FALSE.
     if(present(F_INTERP)) then
@@ -80,82 +93,76 @@ contains
 
     if (F_INTERP_LOC) then
        !!  Interpolating F
-       do p = 1,size(LevG%F(1,:))
-          do m = 1, LevG%nnodes
+       do p = 1,size(c_lev_ptr%F(1,:))
+          do m = 1, c_lev_ptr%nnodes
              call delG(m)%setval(0.0_pfdp)
              call delGF(m)%setval(0.0_pfdp)
           end do
-          do m = 1, LevG%nnodes
-            call delG(m)%copy(LevG%F(m,p))
-            call delG(m)%axpy(-1.0_pfdp, LevG%pF(m,p))
+          do m = 1, c_lev_ptr%nnodes
+            call delG(m)%copy(c_lev_ptr%F(m,p))
+            call delG(m)%axpy(-1.0_pfdp, c_lev_ptr%pF(m,p))
 
-            call LevF%ulevel%interpolate(LevF, LevG, delGF(m), delG(m), tG(m))
+            call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, delGF(m), delG(m), c_times(m))
          end do
 
          ! interpolate corrections  in time
-          call pf_apply_mat(LevF%F(:,p), 1.0_pfdp, LevF%tmat, delGF, .false.)
+          call pf_apply_mat(f_lev_ptr%F(:,p), 1.0_pfdp, f_lev_ptr%tmat, delGF, .false.)
 
        end do !  Loop on npieces
 
        !  Do interpolation of qSDC(1) to update initial condition
        !  Not needed if we are interpolating solutions too
-       !  call LevG%encap%setval(delG(1),   0.0_pfdp)
-       !  call LevG%encap%setval(delGF(1),  0.0_pfdp)
-       !  call LevG%encap%copy(delG(1), LevG%Q(1))
-       !  call LevG%encap%axpy(delG(1), -1.0_pfdp, LevG%pQ(1))
-       ! call LevF%ulevel%interpolate(delGF(1), delG(1), LevF%level, LevF%levelctx, LevG%level, LevG%levelctx,tG(1))
+       !  call c_lev_ptr%encap%setval(delG(1),   0.0_pfdp)
+       !  call c_lev_ptr%encap%setval(delGF(1),  0.0_pfdp)
+       !  call c_lev_ptr%encap%copy(delG(1), c_lev_ptr%Q(1))
+       !  call c_lev_ptr%encap%axpy(delG(1), -1.0_pfdp, c_lev_ptr%pQ(1))
+       ! call f_lev_ptr%ulevel%interpolate(delGF(1), delG(1), f_lev_ptr%level, f_lev_ptr%levelctx, c_lev_ptr%level, c_lev_ptr%levelctx,c_times(1))
 
        ! This updates all solutions with jump in initial data
        ! interpolate corrections
-       ! do n = 1, LevF%nnodes
-       !   call LevF%encap%axpy(LevF%Q(n), LevF%tmat(n,1), delGF(1))
+       ! do n = 1, f_lev_ptr%nnodes
+       !   call f_lev_ptr%encap%axpy(f_lev_ptr%Q(n), f_lev_ptr%tmat(n,1), delGF(1))
        ! end do
 
        ! recompute solution from new F, this is the old solution plus Residual
-       !       call pf_integrate(pf,LevF, dt)
-       !       do m = 1, LevF%nnodes-1
-       !          call LevF%encap%axpy(LevF%Q(m+1), 1.0_pfdp, LevF%R(m))
+       !       call pf_integrate(pf,f_lev_ptr, dt)
+       !       do m = 1, f_lev_ptr%nnodes-1
+       !          call f_lev_ptr%encap%axpy(f_lev_ptr%Q(m+1), 1.0_pfdp, f_lev_ptr%R(m))
        !      end do
-
-       ! recompute fs (for debugging)
-       !       do m = 1, LevF%nnodes
-       !   call LevF%ulevel%sweeper%evaluate(LevF, tF(m), m)
-       !  end do
     else
        ! recompute fs
-!       do m = 1, LevF%nnodes
-!          call LevF%ulevel%sweeper%evaluate(LevF, tF(m), m)
-!       end do
-       call LevF%ulevel%sweeper%evaluate_all(LevF, tF)
+       call f_lev_ptr%ulevel%sweeper%evaluate_all(f_lev_ptr, f_times)
     end if  !  Feval
 
     !  Reset qend so that it is up to date
-    call LevF%qend%copy(LevF%Q(LevF%nnodes))
+    call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
 
-    call LevG%ulevel%factory%destroy_array(delG,  LevG%nnodes, LevG%level, SDC_KIND_CORRECTION, LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%destroy_array(delGF, LevG%nnodes, LevF%level, SDC_KIND_CORRECTION, LevF%nvars, LevF%shape)
+    call c_lev_ptr%ulevel%factory%destroy_array(delG,  c_lev_ptr%nnodes, &
+      c_lev_ptr%level, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_array(delGF, c_lev_ptr%nnodes, &
+      f_lev_ptr%level, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
 
-    call end_timer(pf, TINTERPOLATE + LevF%level - 1)
-    call call_hooks(pf, LevF%level, PF_POST_INTERP_ALL)
+    call end_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
+    call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
-  subroutine interpolate_q0(pf, LevF, LevG)
+  subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr)
     !  Use to update the fine initial condition from increment
 
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t),  intent(inout) :: LevF, LevG
+    class(pf_level_t),  intent(inout) :: f_lev_ptr, c_lev_ptr
 
     class(pf_encap_t), allocatable ::    delG, delF
     class(pf_encap_t), allocatable ::    q0F,q0G
 
-    call call_hooks(pf, LevF%level, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + LevF%level - 1)
+    call call_hooks(pf, f_lev_ptr%level, PF_PRE_INTERP_Q0)
+    call start_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
 
     ! create workspaces
-    call LevG%ulevel%factory%create_single(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create_single(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape)
-    call LevG%ulevel%factory%create_single(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape)
-    call LevF%ulevel%factory%create_single(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape)
+    call c_lev_ptr%ulevel%factory%create_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
 
     ! needed for amr
     call q0F%setval(0.0_pfdp)
@@ -163,24 +170,24 @@ contains
     call delG%setval(0.0_pfdp)
     call delF%setval(0.0_pfdp)
 
-    call q0G%unpack(LevG%q0)
-    call q0F%unpack(LevF%q0)
+    call q0G%unpack(c_lev_ptr%q0)
+    call q0F%unpack(f_lev_ptr%q0)
 
-    call LevF%ulevel%restrict(LevF, LevG, q0F, delG, pf%state%t0)
+    call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, q0F, delG, pf%state%t0)
     call delG%axpy(-1.0_pfdp, q0G)
 
-    call LevF%ulevel%interpolate(LevF, levG, delF, delG, pf%state%t0)
+    call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, delF, delG, pf%state%t0)
     call q0F%axpy(-1.0_pfdp, delF)
-    call q0F%pack(LevF%q0)
+    call q0F%pack(f_lev_ptr%q0)
 
-    call end_timer(pf, TINTERPOLATE + LevF%level - 1)
-    call call_hooks(pf, LevF%level, PF_POST_INTERP_Q0)
+    call end_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
+    call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_Q0)
 
     ! destroy workspaces
-    call LevG%ulevel%factory%destroy_single(q0G,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevG%nvars, LevG%shape) 
-    call LevF%ulevel%factory%destroy_single(q0F,  LevF%level, SDC_KIND_SOL_NO_FEVAL, LevF%nvars, LevF%shape) 
-    call LevG%ulevel%factory%destroy_single(delG, LevG%level, SDC_KIND_CORRECTION,   LevG%nvars, LevG%shape) 
-    call LevF%ulevel%factory%destroy_single(delF, LevF%level, SDC_KIND_CORRECTION,   LevF%nvars, LevF%shape) 
+    call c_lev_ptr%ulevel%factory%destroy_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape) 
+    call f_lev_ptr%ulevel%factory%destroy_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape) 
+    call c_lev_ptr%ulevel%factory%destroy_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape) 
+    call f_lev_ptr%ulevel%factory%destroy_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape) 
 
   end subroutine interpolate_q0
 

@@ -119,8 +119,9 @@ contains
   !
   subroutine restrict_time_space_fas(pf, t0, dt, level_index)
     type(pf_pfasst_t), intent(inout),target :: pf
-    real(pfdp),        intent(in)    :: t0, dt
-    integer,           intent(in)    :: level_index    !< defines which level to restrict
+    real(pfdp),        intent(in)    :: t0            !<  time at beginning of step
+    real(pfdp),        intent(in)    :: dt
+    integer,           intent(in)    :: level_index   !< defines which level to restrict
 
     !  Local variables
     class(pf_level_t), pointer :: c_lev_ptr    
@@ -128,43 +129,39 @@ contains
 
     integer    :: m
 
-    real(pfdp), allocatable :: tG(:)
-    real(pfdp), allocatable :: tF(:)
+    real(pfdp), allocatable :: c_times(:)
+    real(pfdp), allocatable :: f_times(:)
     class(pf_encap_t), allocatable :: &
-      tmpG(:), &    ! coarse integral of coarse function values
-      tmpF(:), &    ! fine integral of fine function values
-      tmpFr(:)      ! coarse integral of restricted fine function values
+      c_tmp_array(:), &    ! coarse integral of coarse function values
+      f_int_array(:), &    ! fine integral of fine function values
+      f_int_arrayr(:)      ! coarse integral of restricted fine function values
     
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-    call call_hooks(pf, f_lev_ptr%level, PF_PRE_RESTRICT_ALL)
-    call start_timer(pf, TRESTRICT + f_lev_ptr%level - 1)
-
+    call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
+    call start_timer(pf, TRESTRICT + level_index - 1)
     !
     ! create workspaces
     !
-    call c_lev_ptr%ulevel%factory%create_array(tmpG, c_lev_ptr%nnodes, c_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%create_array(tmpFr, c_lev_ptr%nnodes, c_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%create_array(tmpF, f_lev_ptr%nnodes, f_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
-    allocate(tG(c_lev_ptr%nnodes))
-    allocate(tF(f_lev_ptr%nnodes))
+    call c_lev_ptr%ulevel%factory%create_array(c_tmp_array, c_lev_ptr%nnodes, &
+      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_array(f_int_arrayr, c_lev_ptr%nnodes, &
+      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_array(f_int_array, f_lev_ptr%nnodes, &
+      f_lev_ptr%level, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    allocate(c_times(c_lev_ptr%nnodes))
+    allocate(f_times(f_lev_ptr%nnodes))
     !
     ! restrict q's and recompute f's
     !
-    tG = t0 + dt*c_lev_ptr%nodes
-    tF = t0 + dt*f_lev_ptr%nodes
+    c_times = t0 + dt*c_lev_ptr%nodes
+    f_times = t0 + dt*f_lev_ptr%nodes
 
-    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,tF)
+    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,f_times)
 
-!    do m = 1, c_lev_ptr%nnodes
-!       call c_lev_ptr%ulevel%sweeper%evaluate(c_lev_ptr, tG(m), m)
-!    end do
-     call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, tG)
-
+    !  Recompute the functions
+     call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times)
 
     !
     ! fas correction
@@ -175,15 +172,12 @@ contains
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
-       call c_lev_ptr%ulevel%sweeper%integrate(c_lev_ptr, c_lev_ptr%Q, c_lev_ptr%F, dt, tmpG)
-!!$       !MMQ       do m = 2, c_lev_ptr%nnodes-1
-!!$       !   call c_lev_ptr%encap%axpy(tmpG(m), 1.0_pfdp, tmpG(m-1))
-!!$       !end do
-!!$
+      call c_lev_ptr%ulevel%sweeper%integrate(c_lev_ptr, c_lev_ptr%Q, &
+        c_lev_ptr%F, dt, c_tmp_array)
        ! compute '0 to node' integral on the fine level
-       call f_lev_ptr%ulevel%sweeper%integrate(f_lev_ptr, f_lev_ptr%Q, f_lev_ptr%F, dt, f_lev_ptr%I)
+      call f_lev_ptr%ulevel%sweeper%integrate(f_lev_ptr, f_lev_ptr%Q, &
+        f_lev_ptr%F, dt, f_lev_ptr%I)
        !  put tau in
-       !MMQ do m = 2, f_lev_ptr%nnodes-1
        if (allocated(f_lev_ptr%tauQ)) then
           do m = 1, f_lev_ptr%nnodes-1
              call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m))
@@ -191,39 +185,38 @@ contains
        end if
 
        ! restrict '0 to node' integral on the fine level (which was
-       ! computed during the last call to pf_residual)
-       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, tmpFr, .true.,tF)
+       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times)
 
        ! compute 'node to node' tau correction
-       call c_lev_ptr%tau(1)%axpy(1.0_pfdp, tmpFr(1))
-       call c_lev_ptr%tau(1)%axpy(-1.0_pfdp, tmpG(1))
+       call c_lev_ptr%tau(1)%axpy(1.0_pfdp, f_int_arrayr(1))
+       call c_lev_ptr%tau(1)%axpy(-1.0_pfdp, c_tmp_array(1))
 
        do m = 2, c_lev_ptr%nnodes-1
-          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, tmpFr(m))
-          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, tmpFr(m-1))
+          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, f_int_arrayr(m))
+          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, f_int_arrayr(m-1))
 
-          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, tmpG(m))
-          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, tmpG(m-1))
+          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, c_tmp_array(m))
+          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, c_tmp_array(m-1))
        end do
       ! compute '0 to node' tau correction
        do m = 1, c_lev_ptr%nnodes-1
-          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, tmpFr(m))
-          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, tmpG(m))
+          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m))
+          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m))
        end do
     end if
 
-    call end_timer(pf, TRESTRICT + f_lev_ptr%level - 1)
-    call call_hooks(pf, f_lev_ptr%level, PF_POST_RESTRICT_ALL)
+    call end_timer(pf, TRESTRICT + level_index - 1)
+    call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
-    call c_lev_ptr%ulevel%factory%destroy_array(tmpG, c_lev_ptr%nnodes, c_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%destroy_array(tmpFr, c_lev_ptr%nnodes, c_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_array(tmpF, f_lev_ptr%nnodes, f_lev_ptr%level, &
-      SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_array(c_tmp_array, c_lev_ptr%nnodes, &
+      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_array(f_int_arrayr, c_lev_ptr%nnodes, &
+      c_lev_ptr%level,  SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_array(f_int_array, f_lev_ptr%nnodes, &
+      f_lev_ptr%level, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
 
-    deallocate(tG)
-    deallocate(tF)
+    deallocate(c_times)
+    deallocate(f_times)
   end subroutine restrict_time_space_fas
 
 end module pf_mod_restrict

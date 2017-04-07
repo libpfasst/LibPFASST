@@ -419,7 +419,7 @@ contains
     do level_index = 2, pf%nlevels-1
       fine_lev_p => pf%levels(level_index);
       coarse_lev_p => pf%levels(level_index-1)
-       call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p, coarse_lev_p%Finterp)
+       call interpolate_time_space(pf, t0, dt, level_index, coarse_lev_p%Finterp)
        call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
        call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
        do j = 1, fine_lev_p%nsweeps_pred
@@ -430,15 +430,10 @@ contains
 
     end do
 
-    fine_lev_p => pf%levels(pf%nlevels); coarse_lev_p => pf%levels(pf%nlevels-1)
-    call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p, coarse_lev_p%Finterp)
+    call interpolate_time_space(pf, t0, dt, pf%nlevels, coarse_lev_p%Finterp)
+    fine_lev_p => pf%levels(pf%nlevels)
     call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
-!    do j = 1, fine_lev_p%nsweeps_pred
-!          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-!          call pf_residual(pf, fine_lev_p, dt)
-!          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
-!       end do
-!       print *,'leaving post predictor ', pf%rank
+
   end subroutine pf_v_cycle_post_predictor
 
   !
@@ -465,13 +460,13 @@ contains
     do level_index = pf%nlevels-1, 2, -1
       fine_lev_p => pf%levels(level_index);
       coarse_lev_p => pf%levels(level_index-1)
-       call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
        do j = 1, fine_lev_p%nsweeps
           call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
           call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
+          call call_hooks(pf, level_index, PF_POST_SWEEP)
        end do
-       call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
+       call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, level_index)
        call save(coarse_lev_p)
     end do
@@ -479,34 +474,35 @@ contains
     !
     ! bottom
     !
-    fine_lev_p => pf%levels(1)
+    level_index=1
+    fine_lev_p => pf%levels(level_index)
     if (pf%Pipeline_G) then
        do j = 1, fine_lev_p%nsweeps
           call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration+j, .true.)
-          call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+          call call_hooks(pf, level_index, PF_PRE_SWEEP)
           call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
           call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
+          call call_hooks(pf, level_index, PF_POST_SWEEP)
           call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration+j, .false.)
        end do
     else
        call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .true.)
-       call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
        do j = 1, fine_lev_p%nsweeps
           call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
        end do
        call pf_residual(pf, fine_lev_p, dt)
-       call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
-       call pf_send(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
+       call call_hooks(pf, 1, PF_POST_SWEEP)
+       call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
     endif
     !
     ! up
     !
     do level_index = 2, pf%nlevels
-       fine_lev_p => pf%levels(level_index); coarse_lev_p => pf%levels(level_index-1)
-
-       call interpolate_time_space(pf, t0, dt, fine_lev_p, coarse_lev_p,coarse_lev_p%Finterp)
-       call pf_recv(pf, fine_lev_p, fine_lev_p%level*10000+iteration, .false.)
+      fine_lev_p => pf%levels(level_index);
+      coarse_lev_p => pf%levels(level_index-1)
+      call interpolate_time_space(pf, t0, dt, level_index,coarse_lev_p%Finterp)
+      call pf_recv(pf, fine_lev_p, level_index*10000+iteration, .false.)
 
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
@@ -515,13 +511,13 @@ contains
           call interpolate_q0(pf,fine_lev_p, coarse_lev_p)
        end if
 
-       if (fine_lev_p%level < pf%nlevels) then
-          call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
+       if (level_index < pf%nlevels) then
+          call call_hooks(pf, level_index, PF_PRE_SWEEP)
           do j = 1, fine_lev_p%nsweeps
              call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
           end do
           call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, fine_lev_p%level, PF_POST_SWEEP)
+          call call_hooks(pf, level_index, PF_POST_SWEEP)
        end if
     end do
 
