@@ -93,7 +93,7 @@ contains
 
     if (F_INTERP_LOC) then
        !!  Interpolating F
-       do p = 1,size(c_lev_ptr%F(1,:))
+      do p = 1,size(c_lev_ptr%F(1,:))
           do m = 1, c_lev_ptr%nnodes
              call delG(m)%setval(0.0_pfdp)
              call delGF(m)%setval(0.0_pfdp)
@@ -170,15 +170,16 @@ contains
     call delG%setval(0.0_pfdp)
     call delF%setval(0.0_pfdp)
 
-    call q0G%unpack(c_lev_ptr%q0)
-    call q0F%unpack(f_lev_ptr%q0)
+    call q0G%copy(c_lev_ptr%q0)
+    call q0F%copy(f_lev_ptr%q0)
 
     call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, q0F, delG, pf%state%t0)
     call delG%axpy(-1.0_pfdp, q0G)
 
     call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, delF, delG, pf%state%t0)
     call q0F%axpy(-1.0_pfdp, delF)
-    call q0F%pack(f_lev_ptr%q0)
+    !    call q0F%pack(f_lev_ptr%q0)
+     call f_lev_ptr%q0%copy(q0F)
 
     call end_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
     call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_Q0)

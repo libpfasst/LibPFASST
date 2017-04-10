@@ -62,14 +62,14 @@ contains
 
     integer :: m, p
 
-    call Lev%Q(1)%unpack(lev%q0)
+    call Lev%Q(1)%copy(lev%q0)
 
     call Lev%ulevel%sweeper%evaluate(lev, t0, 1)
 
     do m = 2, lev%nnodes
        call Lev%Q(m)%copy(Lev%Q(1))
        do p = 1, lev%ulevel%sweeper%npieces
-          call Lev%F(m,p)%copy(Lev%F(1,p))
+         call Lev%F(m,p)%copy(Lev%F(1,p))
        end do
     end do
   end subroutine spreadq0
@@ -84,14 +84,14 @@ contains
     integer :: m, p
 
     if (Lev%Finterp) then
-       if (allocated(Lev%pFflt)) then
+      if (allocated(Lev%pFflt)) then
           do m = 1, Lev%nnodes
              do p = 1,size(Lev%F(1,:))
                 call Lev%pF(m,p)%copy(Lev%F(m,p))
              end do
              call Lev%pQ(m)%copy(Lev%Q(m))
           end do
-       end if
+      end if
     else
        if (allocated(Lev%pQ)) then
           do m = 1, Lev%nnodes

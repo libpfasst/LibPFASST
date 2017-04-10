@@ -117,7 +117,6 @@ module pf_mod_dtype
      class(pf_user_level_t), allocatable :: ulevel
 
      real(pfdp), allocatable :: &
-          q0(:),      &                 ! initial condition (packed)
           send(:),    &                 ! send buffer
           recv(:),    &                 ! recv buffer
           nodes(:),   &                 ! sdc nodes
@@ -142,6 +141,7 @@ module pf_mod_dtype
           tau(:),   &                   ! fas correction
           tauQ(:),  &                   ! fas correction in Q form
           pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
+          q0,       &                   ! initial condition 
           qend
 
      class(pf_encap_t), pointer :: &

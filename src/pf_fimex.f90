@@ -101,7 +101,7 @@ contains
     end do
 
     ! do the time-stepping
-    call Lev%Q(1)%unpack(Lev%q0)
+    call Lev%Q(1)%copy(Lev%q0)
 
     call fimex%f1eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,1))
     call fimex%f2eval(Lev%Q(1), t0, Lev%level, Lev%levelctx, Lev%F(1,2))

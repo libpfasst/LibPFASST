@@ -59,7 +59,6 @@ contains
     integer                   :: level_index
     real(pfdp)                :: t0k
 
-    print *,'entering predictor ',pf%rank
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
@@ -74,7 +73,7 @@ contains
          call pf_residual(pf, fine_lev_p, dt)
          call restrict_time_space_fas(pf, t0, dt, level_index)
          call save(coarse_lev_p)
-         call coarse_lev_p%Q(1)%pack(coarse_lev_p%q0)
+         call coarse_lev_p%q0%copy(coarse_lev_p%Q(1))
        end do
 
        if (pf%comm%nproc > 1) then
@@ -87,7 +86,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call coarse_lev_p%qend%pack(coarse_lev_p%q0)
+                   call coarse_lev_p%q0%copy(coarse_lev_p%qend)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(coarse_lev_p, t0)
                    end if
@@ -103,19 +102,18 @@ contains
                 pf%state%pstatus = PF_STATUS_ITERATING
                 pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
-!                print *,'recieving  in predictor iter=',k,pf%rank
+
                 !  Get new initial conditions
                 call pf_recv(pf, coarse_lev_p, coarse_lev_p%level*20000+pf%rank+k, .true.)
-!                print *,'recieve  done iter=',k,pf%rank
+
                 !  Do a sweep
                 call call_hooks(pf, coarse_lev_p%level, PF_PRE_SWEEP)
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt )
                 call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
                 call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
                 !  Send forward
-!                print *,'sending   in predictor iter=',k,pf%rank
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%level*20000+pf%rank+1+k, .false.)
-!                print *,'send done  in predictor iter=',k,pf%rank
+
              end do
              call pf_residual(pf, coarse_lev_p, dt)
           else
@@ -127,7 +125,7 @@ contains
 
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
-                   call coarse_lev_p%qend%pack(coarse_lev_p%q0)
+                   call coarse_lev_p%q0%copy(coarse_lev_p%qend)
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(coarse_lev_p, t0k)
                    end if
@@ -142,7 +140,6 @@ contains
              end do
           end if
 
-!          print *,'done with predictor sweeps ',pf%rank
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
@@ -170,14 +167,14 @@ contains
        end if
 
     end if
-!    print *,'finishing predictor ',pf%rank
+
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
-!    print *,'leaving predictor ',pf%rank
+
   end subroutine pf_predictor
 
   subroutine pf_check_tolerances(pf, residual, energy)
@@ -288,7 +285,7 @@ contains
     did_post_step_hook = .false.
 
     fine_lev_p => pf%levels(pf%nlevels)
-    call q0%pack(fine_lev_p%q0)
+    call fine_lev_p%q0%copy(q0)
 
     if (present(nsteps)) then
        pf%state%nsteps = nsteps
@@ -330,7 +327,7 @@ contains
           call pf%comm%wait(pf, pf%nlevels)
           call fine_lev_p%qend%pack(fine_lev_p%send)
           call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
-          fine_lev_p%q0 = fine_lev_p%send
+          call fine_lev_p%q0%unpack(fine_lev_p%send)
        end if
 
        ! predictor, if requested
@@ -414,13 +411,13 @@ contains
     integer :: level_index
 
     if (pf%nlevels <= 1) return
-!    print *,'entering post predictor ',pf%rank
 
     do level_index = 2, pf%nlevels-1
       fine_lev_p => pf%levels(level_index);
       coarse_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, coarse_lev_p%Finterp)
-       call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
+       !       call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
+       call fine_lev_p%q0%copy(fine_lev_p%Q(1))
        call call_hooks(pf, fine_lev_p%level, PF_PRE_SWEEP)
        do j = 1, fine_lev_p%nsweeps_pred
           call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
@@ -429,10 +426,10 @@ contains
        end do
 
     end do
-
+    coarse_lev_p => pf%levels(pf%nlevels-1)
     call interpolate_time_space(pf, t0, dt, pf%nlevels, coarse_lev_p%Finterp)
     fine_lev_p => pf%levels(pf%nlevels)
-    call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
+    call fine_lev_p%q0%copy(fine_lev_p%Q(1))
 
   end subroutine pf_v_cycle_post_predictor
 
@@ -559,9 +556,7 @@ contains
     call start_timer(pf, TSEND + level%level - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
-!       print *,'sending',tag,blocking,pf%rank
        call pf%comm%send(pf, level, tag, blocking)
-!       print *,'done sending',tag,blocking,pf%rank
     end if
     call end_timer(pf, TSEND + level%level - 1)
   end subroutine pf_send
@@ -573,9 +568,9 @@ contains
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%level - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
- !      print *,'recv',tag,blocking,pf%rank
+
        call pf%comm%recv(pf, level,tag, blocking)
- !      print *,'done recv',tag,blocking,pf%rank
+
     end if
     call end_timer(pf, TRECEIVE + level%level - 1)
   end subroutine pf_recv

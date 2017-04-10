@@ -79,7 +79,7 @@ contains
     end do
 
     ! do the time-stepping
-    call lev%Q(1)%unpack(lev%q0)
+    call lev%Q(1)%copy(lev%q0)
 
     call this%f1eval(lev%Q(1), t0, lev%level, lev%F(1,1))
     call this%f2eval(lev%Q(1), t0, lev%level, lev%F(1,2))

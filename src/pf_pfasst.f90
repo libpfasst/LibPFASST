@@ -146,9 +146,8 @@ contains
     F%allocated = .true.
 
     !
-    ! allocate flat buffers (q0, send, and recv)
+    ! allocate flat buffers (send, and recv)
     !
-    allocate(F%q0(nvars))
     allocate(F%send(nvars))
     allocate(F%recv(nvars))
 
@@ -186,14 +185,17 @@ contains
     call F%ulevel%factory%create_array(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
+    print *,'Finter in factory',F%Finterp, F%level
     if (F%level < pf%nlevels) then
-       if (F%Finterp) then
+        print *,'Finter in factory',F%Finterp, F%level
+      if (F%Finterp) then
           call F%ulevel%factory%create_array(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
           F%pF(1:nnodes,1:npieces) => F%pFflt
        end if
        call F%ulevel%factory%create_array(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
     call F%ulevel%factory%create_single(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_single(F%q0, F%level, SDC_KIND_FEVAL, nvars, F%shape)
 
 
   end subroutine pf_level_setup
@@ -224,7 +226,6 @@ contains
     if (.not. F%allocated) return
 
     ! flat buffers
-    deallocate(F%q0)
     deallocate(F%send)
     deallocate(F%recv)
 
@@ -253,11 +254,11 @@ contains
     if (F%level < nlevels) then
        if (F%Finterp) then
           call F%ulevel%factory%destroy_array(F%pFflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
-
        end if
        call F%ulevel%factory%destroy_array(F%pQ, F%nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape)
     end if
     call F%ulevel%factory%destroy_single(F%qend, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_single(F%q0, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
 
     ! destroy the sweeper 
     call F%ulevel%sweeper%destroy(F)

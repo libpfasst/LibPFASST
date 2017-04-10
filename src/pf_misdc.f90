@@ -92,7 +92,7 @@ contains
     end do
 
     ! do the time-stepping
-    call lev%Q(1)%unpack(lev%q0)
+    call lev%Q(1)%copy(lev%q0)
 
     call misdc_evaluate(this, lev, t, 1)
     call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1),1)

@@ -191,7 +191,7 @@ contains
     if (ierror .ne. 0) &
          print *, pf%rank, 'warning: mpi error during receive', ierror
 
-    level%q0 = level%recv
+    call level%q0%unpack(level%recv)
   end subroutine pf_mpi_recv
 
   !
