@@ -1,11 +1,9 @@
 #
-# Makefile for mpi-advection example.  This Makefile builds LIBPFASST
-# inplace (instead of using the static library form of LIBPFASST) as
-# well as the application specific code in the src directory.
+# Makefile for mpi-advection example.
 #
 
 LIBPFASST ?= ../..
-FFTW3 ?=../../fftw3
+FFTW3     ?= /usr
 
 EXE = main.exe
 
@@ -13,21 +11,18 @@ include $(LIBPFASST)/Makefile.defaults
 FSRC = feval.f90 \
        hooks.f90 \
        main.f90 \
-       transfer.f90  
+       transfer.f90
 
-OBJ  = $(addprefix build/,$(FSRC:.f90=.o))
-#CSRC =  pf_numpy.c
-#OBJ  += $(addprefix build/,$(CSRC:.c=.o))
+OBJ = $(addprefix build/,$(FSRC:.f90=.o))
 
-FFLAGS  += -I$(LIBPFASST)/include  -I$(FFTW3)/include -fbounds-check 
-LDFLAGS +=  -L$(FFTW3)/lib  -L$(LIBPFASST)/lib -lpfasst -lfftw3
+FFLAGS  += -g -I$(LIBPFASST)/include -I$(FFTW3)/include -fbounds-check
+LDFLAGS += -g -L$(LIBPFASST)/lib -L$(FFTW3)/lib -lpfasst -lfftw3
 
 all: $(EXE)
 
-VPATHS = src 
+VPATHS = src
 
 include $(LIBPFASST)/Makefile.rules
-
 
 build/%.o: %.c
 	@mkdir -p build
@@ -44,7 +39,7 @@ build/%.o: %.f90
 # dependencies
 #
 
-build/feval.o: 
-build/hooks.o: build/feval.o 
-build/main.o:  build/hooks.o build/feval.o 
-build/transfer.o:  build/feval.o  
+build/feval.o:
+build/hooks.o: build/feval.o
+build/main.o:  build/hooks.o build/feval.o
+build/transfer.o:  build/feval.o

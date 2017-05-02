@@ -35,21 +35,19 @@ contains
     real(pfdp),        intent(in)    :: t0
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: level_index    !< defines which level to interpolate
-    logical,           intent(in), optional :: F_INTERP !<  Flag, if true, then do interp on f not sol
+    logical,           intent(in)    :: F_INTERP !<  Flag, if true, then do interp on f not sol
     !  Local variables
-    class(pf_level_t), pointer :: c_lev_ptr    
+    class(pf_level_t), pointer :: c_lev_ptr
     class(pf_level_t), pointer :: f_lev_ptr
 
     integer    :: m, p
     real(pfdp), allocatable :: c_times(:)
     real(pfdp), allocatable :: f_times(:)
-    logical :: F_INTERP_LOC
 
     class(pf_encap_t), allocatable :: delG(:)    !  Coarse in time and space
     class(pf_encap_t), allocatable :: delGF(:)   !  Coarse in time but fine in space
 
-
-    f_lev_ptr => pf%levels(level_index);
+    f_lev_ptr => pf%levels(level_index)
     c_lev_ptr => pf%levels(level_index-1)
 
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
@@ -64,7 +62,7 @@ contains
     ! set time at coarse and fine nodes
     allocate(c_times(c_lev_ptr%nnodes))
     allocate(f_times(f_lev_ptr%nnodes))
-    
+
     c_times = t0 + dt*c_lev_ptr%nodes
     f_times = t0 + dt*f_lev_ptr%nodes
 
@@ -84,14 +82,7 @@ contains
     ! interpolate corrections
     call pf_apply_mat(f_lev_ptr%Q, 1.0_pfdp, f_lev_ptr%tmat, delGF, .false.)
 
-    F_INTERP_LOC = .FALSE.
-    if(present(F_INTERP)) then
-       if  (F_INTERP)  then
-          F_INTERP_LOC = .TRUE.
-       end if
-    end if
-
-    if (F_INTERP_LOC) then
+    if (F_INTERP) then
        !!  Interpolating F
       do p = 1,size(c_lev_ptr%F(1,:))
           do m = 1, c_lev_ptr%nnodes
@@ -185,10 +176,10 @@ contains
     call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_Q0)
 
     ! destroy workspaces
-    call c_lev_ptr%ulevel%factory%destroy_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape) 
-    call f_lev_ptr%ulevel%factory%destroy_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape) 
-    call c_lev_ptr%ulevel%factory%destroy_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape) 
-    call f_lev_ptr%ulevel%factory%destroy_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape) 
+    call c_lev_ptr%ulevel%factory%destroy_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
 
   end subroutine interpolate_q0
 
