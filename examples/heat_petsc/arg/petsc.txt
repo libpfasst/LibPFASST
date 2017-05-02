@@ -1,0 +1,4 @@
+#-snes_converged_reason
+-snes_type newtonls
+#-ksp_converged_reason
+-ksp_type gmres
