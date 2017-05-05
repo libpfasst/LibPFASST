@@ -92,7 +92,6 @@ contains
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
     real(pfdp), allocatable :: coefs(:)
-    complex(pfdp) :: z0=(0.0,0.0), z1=(1.0,0.0), zm1=(-1.0,0.0)
     class(pf_encap_t), allocatable :: time_ev_op(:), time_ev_op_dagger(:)
 
     call start_timer(pf, TLEVEL+lev%level-1)
@@ -104,8 +103,8 @@ contains
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes
-      t=t+dtsdc(m)
       call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1))
+      t=t+dtsdc(m)
    end do
 
     ! computes the integral of F over the different sdc nodes, stores them on lev%S
@@ -187,9 +186,9 @@ contains
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
           ! this loop over pieces might actually end up being the order of expansion
-          do p = 1, this%npieces
-             call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,p))
-          end do
+          ! do p = 1, this%npieces
+            call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
+          ! end do
        end do
     end do
   end subroutine magpicard_integrate
