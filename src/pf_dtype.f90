@@ -1,22 +1,22 @@
-!
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
-! This file is part of LIBPFASST.
-!
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-
+!>
+!> Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
+!>
+!> This file is part of LIBPFASST.
+!>
+!> LIBPFASST is free software: you can redistribute it and/or modify it
+!> under the terms of the GNU General Public License as published by
+!> the Free Software Foundation, either version 3 of the License, or
+!> (at your option) any later version.
+!>
+!> LIBPFASST is distributed in the hope that it will be useful, but
+!> WITHOUT ANY WARRANTY; without even the implied warranty of
+!> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!> General Public License for more details.
+!>
+!> You should have received a copy of the GNU General Public License
+!> along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
+!>
+!>  Module defining the main data types in PFASST
 module pf_mod_dtype
   use iso_c_binding
   implicit none
@@ -31,7 +31,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
   integer, parameter :: PF_MAX_HOOKS = 32
-
+  ! Quadrature node types
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
   integer, parameter :: SDC_GAUSS_RADAU     = 2
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
@@ -41,30 +41,41 @@ module pf_mod_dtype
   integer, parameter :: SDC_COMPOSITE_NODES = 2**9
   integer, parameter :: SDC_NO_LEFT         = 2**10
 
+  ! Types of encaps node types
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
   integer, parameter :: SDC_KIND_FEVAL        = 3
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
+  ! States of operatrion
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
   type, bind(c) :: pf_state_t
-     real(pfdp) :: t0, dt
-     integer(c_int) :: nsteps, cycle, step, iter, level, hook, proc
-     integer(c_int) :: status       ! status (iterating, converged etc)
-     integer(c_int) :: pstatus      ! previous rank's status
-     integer(c_int) :: itcnt        ! iteration counter
-     integer(c_int) :: mysteps      ! steps I did
-     real(pfdp) :: res
+    real(pfdp) :: t0  !<  Time at beginning of this time step
+    real(pfdp) :: dt  !<  Time step size
+    integer(c_int) :: nsteps   !< total number of time steps
+    integer(c_int) :: cycle    !< deprecated?
+    integer(c_int) :: iter     !< current iteration number
+    integer(c_int) :: step     !< step number assigned to processor
+    integer(c_int) :: level    !< which level is currently being operated on
+    integer(c_int) :: hook     !< which hook
+    integer(c_int) :: proc     !< which processor
+    integer(c_int) :: sweep    !< sweep number
+    integer(c_int) :: status   !< status (iterating, converged etc)
+    integer(c_int) :: pstatus  !< previous rank's status
+    integer(c_int) :: itcnt    !< iteration counter
+    integer(c_int) :: mysteps  !< steps I did
+    real(pfdp) :: res
   end type pf_state_t
 
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
+  !<  Defines the base sweeper type
   type, abstract :: pf_sweeper_t
      integer     :: npieces
    contains
@@ -77,6 +88,7 @@ module pf_mod_dtype
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
+  !<  Defines the base data type 
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
@@ -88,6 +100,7 @@ module pf_mod_dtype
      procedure(pf_encap_eprint_p),  deferred :: eprint
   end type pf_encap_t
 
+  !<  Generic type for creation and desstruction of objects
   type, abstract :: pf_factory_t
    contains
      procedure(pf_encap_create_single_p),  deferred :: create_single
@@ -96,6 +109,7 @@ module pf_mod_dtype
      procedure(pf_encap_destroy_array_p),  deferred :: destroy_array
   end type pf_factory_t
 
+  !<  The user level which is inherited  to include problem dependent stuff
   type, abstract :: pf_user_level_t
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
@@ -104,6 +118,7 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
+  !<  Data type of a PFASST level
   type :: pf_level_t
      integer     :: nvars        = -1   ! number of variables (dofs)
      integer     :: nnodes       = -1   ! number of sdc nodes
@@ -153,6 +168,7 @@ module pf_mod_dtype
      logical :: allocated = .false.
   end type pf_level_t
 
+  !<  Data type to define the communicator
   type :: pf_comm_t
      integer :: nproc = -1              ! total number of processors
 
@@ -176,30 +192,30 @@ module pf_mod_dtype
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
+  !<  The main data type which includes all else
   type :: pf_pfasst_t
 
-     integer :: nlevels = -1            ! number of pfasst levels
-     integer :: niters  = 5             ! number of iterations
-     integer :: rank    = -1            ! rank of current processor
-     integer :: qtype   = SDC_GAUSS_LOBATTO
+     integer :: nlevels = -1            !< number of pfasst levels
+     integer :: niters  = 5             !< number of PFASST iterations to do
+     integer :: rank    = -1            !< rank of current processor
+     integer :: qtype   = SDC_GAUSS_LOBATTO  !< type of nodes
 
-     real(pfdp) :: abs_res_tol = 0.d0
-     real(pfdp) :: rel_res_tol = 0.d0
+     real(pfdp) :: abs_res_tol = 0.d0   !<  absolute convergence tolerance
+     real(pfdp) :: rel_res_tol = 0.d0   !<  relative convergence tolerance
 
-     logical :: Pipeline_G =  .false.
-     logical :: PFASST_pred = .false.
+     logical :: Pipeline_G =  .false.   !<  decides if coarsest level sweeps are pipelined
+     logical :: PFASST_pred = .false.   !<  decides if the PFASST type predictor is used
 
-     integer     :: taui0 = -999999     ! Cutoff for tau inclusion
+     integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
      ! pf objects
-     type(pf_state_t), allocatable :: state
-     type(pf_level_t), allocatable :: levels(:)
-!     class(pf_level_t), allocatable :: levels(:)
-     type(pf_comm_t),  pointer :: comm
+     type(pf_state_t), allocatable :: state   !<  Describes where in the algorithm proc is
+     type(pf_level_t), allocatable :: levels(:) !< Holds the levels
+     type(pf_comm_t),  pointer :: comm    !< Points to communicator
 
      ! hooks
-     type(pf_hook_t), allocatable :: hooks(:,:,:)
-     integer,         allocatable :: nhooks(:,:)
+     type(pf_hook_t), allocatable :: hooks(:,:,:)  !<  Holds the hooks
+     integer,         allocatable :: nhooks(:,:)   !<  Holds the number hooks
 
      ! timing
      logical    :: echo_timings  = .false.
@@ -216,14 +232,14 @@ module pf_mod_dtype
 
   interface
     ! hook interface
-     subroutine pf_hook_p(pf, level, state)
+    subroutine pf_hook_p(pf, level, state)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
      end subroutine pf_hook_p
-
+     
      ! sweeper interfaces
      subroutine pf_sweep_p(this, pf, lev, t0, dt)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp

@@ -29,6 +29,60 @@ module pf_mod_parallel
   implicit none
 contains
 
+  !>  This is the main interface to pfasst.
+  !>  It examines the parameters and decides which subroutine to call
+  !>  to execute the code correctly
+  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+    type(pf_pfasst_t), intent(inout), target   :: pf   !<  The complete PFASST structure
+    class(pf_encap_t), intent(in   )           :: q0   !<  The initial condition
+    real(pfdp),        intent(in   )           :: dt   !<  The time step for each processor
+    real(pfdp),        intent(in   )           :: tend !<  The final time of run
+    integer,           intent(in   ), optional :: nsteps  !<  The number of time steps
+    class(pf_encap_t), intent(inout), optional :: qend    !<  The computed solution at tend
+
+    !  Local variables
+    integer :: nproc  !<  Total number of processors
+    integer :: nsteps_loc  !<  local number of time steps
+
+    ! make a local copy of nproc
+    nproc = pf%comm%nproc
+
+    !  Set the number of time steps to do
+    if (present(nsteps)) then
+       nsteps_loc = nsteps
+    else
+      nsteps_loc = ceiling(1.0*tend/dt)
+    end if
+
+    !  Do  sanity check on steps
+    if (abs(dble(nsteps)-tend/dt) > dt/100) then
+      stop "ERROR: Invalid nsteps ten (pf_parallel.f90)."
+    else
+      pf%state%nsteps = nsteps_loc
+    endif
+    !  Do sanity checks on Nproc
+    if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
+
+    !  Right now, we just call the old routine
+    if (present(qend)) then
+      call pf_pfasst_run_old(pf, q0, dt, tend, nsteps_loc, qend)
+    else
+      call pf_pfasst_run_old(pf, q0, dt, tend, nsteps_loc)
+    end if
+    !  What we would like to do is check for
+    !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
+    !      Predictor is either spreadQ or nothing
+    !      Then we just call a loop on sweeps
+    !      Communication is copy
+    !  2.  nlevels > 1  and nprocs ==1 -> Serial MLSDC
+    !      Predictor is needed to populate levels (or nothing)
+    !      Then we just call a loop on MLSDC sweeps
+    !      Communication is copy
+    !  3.  nlevels == 1  and nprocs > 1 -> Pipelined SDC
+    !      Predictor is just like PFASST, but on finest (only) level (or nothing)
+    !      Predictor is just like PFASST, but on finest (only) level (or nothing)
+    !  4.  nlevels > 1  and nprocs > 1 -> PFASST
+  end subroutine pf_pfasst_run
   !
   ! Predictor.
   !
@@ -66,15 +120,15 @@ contains
     call spreadq0(fine_lev_p, t0)
 
     if (pf%nlevels > 1) then
-
-       do level_index = pf%nlevels, 2, -1
-         fine_lev_p => pf%levels(level_index);
-         coarse_lev_p => pf%levels(level_index-1)
-         call pf_residual(pf, fine_lev_p, dt)
-         call restrict_time_space_fas(pf, t0, dt, level_index)
-         call save(coarse_lev_p)
-         call coarse_lev_p%q0%copy(coarse_lev_p%Q(1))
-       end do
+      
+      do level_index = pf%nlevels, 2, -1
+        fine_lev_p => pf%levels(level_index);
+        coarse_lev_p => pf%levels(level_index-1)
+        call pf_residual(pf, fine_lev_p, dt)
+        call restrict_time_space_fas(pf, t0, dt, level_index)
+        call save(coarse_lev_p)
+        call coarse_lev_p%q0%copy(coarse_lev_p%Q(1))
+      end do  !  level_index = pf%nlevels, 2, -1
 
        if (pf%comm%nproc > 1) then
           coarse_lev_p => pf%levels(1)
@@ -96,7 +150,7 @@ contains
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt)
                 call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
                 call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
-             end do
+             end do  ! k = 1, pf%rank + 1
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
              do k = 1, coarse_lev_p%nsweeps_pred-1
                 pf%state%pstatus = PF_STATUS_ITERATING
@@ -114,9 +168,9 @@ contains
                 !  Send forward
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%level*20000+pf%rank+1+k, .false.)
 
-             end do
+             end do ! k = 1, coarse_lev_p%nsweeps_pred-1
              call pf_residual(pf, coarse_lev_p, dt)
-          else
+          else  ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
              ! Normal predictor burn in
              coarse_lev_p => pf%levels(1)
              do k = 1, pf%rank + 1
@@ -138,12 +192,12 @@ contains
                 call pf_residual(pf, coarse_lev_p, dt)
                 call call_hooks(pf, coarse_lev_p%level, PF_POST_SWEEP)
              end do
-          end if
+          end if ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
 
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
-       else
+       else ! (pf%nlevels > 1) then
 
           ! Single processor... sweep on coarse and return to fine level.
 
@@ -166,7 +220,7 @@ contains
 
        end if
 
-    end if
+    end if  ! (pf%nlevels > 1) then
 
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
@@ -249,12 +303,12 @@ contains
   !
   ! Run in parallel using PFASST.
   !
-  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_pfasst_run_old(pf, q0, dt, tend, nsteps, qend)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(in   )           :: dt, tend
+    integer,           intent(in   )           :: nsteps
     class(pf_encap_t), intent(inout), optional :: qend
-    integer,           intent(in   ), optional :: nsteps
 
     class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
     integer                   :: j, k
@@ -279,7 +333,6 @@ contains
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
 
-
     residual = -1
     energy   = -1
     did_post_step_hook = .false.
@@ -287,15 +340,8 @@ contains
     fine_lev_p => pf%levels(pf%nlevels)
     call fine_lev_p%q0%copy(q0)
 
-    if (present(nsteps)) then
-       pf%state%nsteps = nsteps
-    else
-       pf%state%nsteps = ceiling(1.0*tend/dt)
-    end if
-    do k = 1, 666666666
-
-       qbroadcast = .false.
-
+    do k = 1, 666666666   !  Loop over blocks of time steps
+       !  Check to see if we should do one more hook 
        if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
          call call_hooks(pf, -1, PF_POST_STEP)
          did_post_step_hook = .true.
@@ -304,6 +350,7 @@ contains
        end if
 
        ! in block mode, jump to next block if we've reached the max iteration count
+       qbroadcast = .false.
        if (pf%state%iter >= pf%niters) then
 
           if (.not. did_post_step_hook) then
@@ -319,18 +366,19 @@ contains
           if (pf%state%step >= pf%state%nsteps) exit
 
           pf%state%status = PF_STATUS_PREDICTOR
-          qbroadcast = .true.
+          qbroadcast = .true.   
        end if
 
+       !  Do this when starting a new block, broadcast new initial conditions to all procs
        if (k > 1 .and. qbroadcast) then
           fine_lev_p => pf%levels(pf%nlevels)
-          call pf%comm%wait(pf, pf%nlevels)
-          call fine_lev_p%qend%pack(fine_lev_p%send)
+          call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+          call fine_lev_p%qend%pack(fine_lev_p%send)    !<  Pack away your last solution
           call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
-          call fine_lev_p%q0%unpack(fine_lev_p%send)
+          call fine_lev_p%q0%unpack(fine_lev_p%send)    !<  Everyone resets their q0
        end if
 
-       ! predictor, if requested
+       ! predictor, if requested or we are starting new bloc
        if (pf%state%status == PF_STATUS_PREDICTOR) &
             call pf_predictor(pf, pf%state%t0, dt)
 
@@ -388,16 +436,17 @@ contains
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
 
-    end do
+    end do  !  Loop over blocks of time steps
 
     pf%state%iter = -1
     call end_timer(pf, TTOTAL)
 
+    !  Grab the last solution for return (if wanted)
     if (present(qend)) then
        fine_lev_p => pf%levels(pf%nlevels)
        call qend%copy(fine_lev_p%qend)
     end if
-  end subroutine pf_pfasst_run
+  end subroutine pf_pfasst_run_old
 
   !
   ! After predictor, return to fine level.

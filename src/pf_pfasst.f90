@@ -53,6 +53,7 @@ contains
     end if
 
     pf%comm => comm
+    pf%comm => comm
 
     allocate(pf%levels(pf%nlevels))
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
@@ -65,12 +66,12 @@ contains
   end subroutine pf_pfasst_create
 
   !
-  ! Setup PFASST object
+  !< Setup both the PFASST object and the comm object
   !
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
     type(pf_pfasst_t), intent(inout), target :: pf
-
+    
     class(pf_level_t), pointer :: F, G
     integer                   :: l
 
