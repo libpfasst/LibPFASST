@@ -42,32 +42,37 @@ contains
 
     !  Local variables
     integer :: nproc  !<  Total number of processors
-    integer :: nsteps_loc  !<  local number of time steps
+    integer :: nsteps_loc  !<  local number of time steps    
+    real(pfdp) :: tend_loc !<  The final time of run
 
     ! make a local copy of nproc
     nproc = pf%comm%nproc
 
     !  Set the number of time steps to do
     if (present(nsteps)) then
-       nsteps_loc = nsteps
+      nsteps_loc = nsteps
+      tend_loc=dble(nsteps_loc*dt)
     else
       nsteps_loc = ceiling(1.0*tend/dt)
+      !  Do  sanity check on steps
+      if (abs(dble(nsteps_loc)-tend/dt) > dt/100.0) then
+        print *,'dt=',dt
+        print *,'nsteps=',nsteps_loc
+        print *,'tend=',tend
+        stop "ERROR: Invalid nsteps (pf_parallel.f90)."
+      end if
     end if
 
-    !  Do  sanity check on steps
-    if (abs(dble(nsteps)-tend/dt) > dt/100) then
-      stop "ERROR: Invalid nsteps ten (pf_parallel.f90)."
-    else
-      pf%state%nsteps = nsteps_loc
-    endif
+    pf%state%nsteps = nsteps_loc
+
     !  Do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
     !  Right now, we just call the old routine
     if (present(qend)) then
-      call pf_pfasst_run_old(pf, q0, dt, tend, nsteps_loc, qend)
+      call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
     else
-      call pf_pfasst_run_old(pf, q0, dt, tend, nsteps_loc)
+      call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
     end if
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
