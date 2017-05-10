@@ -59,7 +59,7 @@ contains
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
-        stop "ERROR: Invalid nsteps (pf_parallel.f90)."
+        call end_now('Invalid nsteps')
       end if
     end if
 

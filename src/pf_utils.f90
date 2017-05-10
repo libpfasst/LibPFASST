@@ -16,7 +16,6 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
@@ -298,5 +297,16 @@ contains
     end if
 
   end subroutine myLUq
+
+
+  !>  Simple wrapper to print out an error message with line and file number
+  subroutine end_now(msg)
+    character(*) msg
+
+    print *, 'ERROR:',msg,' at line:',__LINE__, ' in file:',__FILE__
+    stop
+  end subroutine end_now
+
+
 
 end module pf_mod_utils
