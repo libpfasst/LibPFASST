@@ -53,7 +53,6 @@ module pf_mod_ndarray
      real(pfdp), allocatable :: flatarray(:)
    contains
      procedure :: setval => ndarray_setval
-     procedure :: printme => ndarray_printme
      procedure :: copy => ndarray_copy
      procedure :: norm => ndarray_norm
      procedure :: pack => ndarray_pack
@@ -217,10 +216,6 @@ contains
   subroutine ndarray_eprint(this)
     class(ndarray), intent(inout) :: this
   end subroutine ndarray_eprint
-
-  subroutine ndarray_printme(this)
-    class(ndarray), intent(inout) :: this
-  end subroutine ndarray_printme
 
   ! ! Helpers
   ! function dims(solptr) result(r)
