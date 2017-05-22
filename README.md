@@ -46,7 +46,6 @@ library should be in the 'build' directory.
 
 
 # EXAMPLES
-========
 
 Once LIBPFASST is compiled, you can build the examples individually.
 The 'mpi-advection' and 'pth-advection' examples require FFTW3.  If
