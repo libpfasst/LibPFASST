@@ -223,6 +223,7 @@ module pf_mod_dtype
      integer(8) :: runtimes(100) = 0
 
      ! misc
+     logical :: debug = .false.
      character(512) :: outdir
 
   end type pf_pfasst_t

@@ -30,7 +30,7 @@ contains
     ! local versions of pfasst parameters
     integer          :: niters, nlevels, qtype, taui0
     double precision :: abs_res_tol, rel_res_tol
-    logical          :: pipeline_g , pfasst_pred, echo_timings
+    logical          :: pipeline_g , pfasst_pred, echo_timings, debug
 
     ! stuff for reading the command line
     integer, parameter :: un = 9
@@ -41,7 +41,7 @@ contains
     character(len=512) :: outdir
 
     ! define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol
+    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, debug
     namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir
 
     ! set local variables to pf_pfasst defaults
@@ -55,6 +55,7 @@ contains
     echo_timings = pf%echo_timings
     taui0        = pf%taui0
     outdir       = pf%outdir
+    debug        = pf%debug
 
     ! open the file fname and read the pfasst namelist
     if (present(fname))  then
@@ -88,6 +89,7 @@ contains
     pf%echo_timings = echo_timings
     pf%taui0        = taui0
     pf%outdir       = outdir
+    pf%debug        = debug
 
     if (pf%nlevels < 1) then
        write(*,*) 'Bad specification for nlevels=', pf%nlevels
@@ -140,6 +142,7 @@ contains
     else
        write(un,*) 'Serial Predictor style  '
     end if
+    if (pf%debug) write(un,*) 'Debug mode is on '
 
     write(un,*) ''
 
