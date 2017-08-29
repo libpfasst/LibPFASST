@@ -472,7 +472,6 @@ contains
 
     class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
     integer                   :: j, k
-    integer                   :: level_index
     real(pfdp)                :: residual, energy
     integer                   ::  nblocks !<  The number of blocks of steps to do
     integer                   ::  nproc   !<  The number of processors being used
@@ -494,7 +493,6 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
-
     did_post_step_hook = .false.
     if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
     
@@ -556,10 +554,10 @@ contains
           
           !< perform some sweeps
           do j = 1, lev_p%nsweeps
-             call call_hooks(pf, level_index, PF_PRE_SWEEP)
+             call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
              call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
              call pf_residual(pf, lev_p, dt)
-             call call_hooks(pf, level_index, PF_POST_SWEEP)
+             call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
           end do
           
           !<  Check to see if everybody is converged
