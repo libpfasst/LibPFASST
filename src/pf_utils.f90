@@ -61,14 +61,14 @@ contains
 
     integer :: m, p
 
-    call Lev%Q(1)%copy(lev%q0)
+    call lev%Q(1)%copy(lev%q0)
 
-    call Lev%ulevel%sweeper%evaluate(lev, t0, 1)
+    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
 
     do m = 2, lev%nnodes
-       call Lev%Q(m)%copy(Lev%Q(1))
+       call lev%Q(m)%copy(lev%Q(1))
        do p = 1, lev%ulevel%sweeper%npieces
-         call Lev%F(m,p)%copy(Lev%F(1,p))
+         call lev%F(m,p)%copy(lev%F(1,p))
        end do
     end do
   end subroutine spreadq0
@@ -77,24 +77,24 @@ contains
   !
   ! Save current Q and F.
   !
-  subroutine save(Lev)
-    class(pf_level_t), intent(inout) :: Lev
+  subroutine save(lev)
+    class(pf_level_t), intent(inout) :: lev
 
     integer :: m, p
 
-    if (Lev%Finterp) then
-      if (allocated(Lev%pFflt)) then
-          do m = 1, Lev%nnodes
-             do p = 1,size(Lev%F(1,:))
-                call Lev%pF(m,p)%copy(Lev%F(m,p))
+    if (lev%Finterp) then
+      if (allocated(lev%pFflt)) then
+          do m = 1, lev%nnodes
+             do p = 1,size(lev%F(1,:))
+                call lev%pF(m,p)%copy(lev%F(m,p))
              end do
-             call Lev%pQ(m)%copy(Lev%Q(m))
+             call lev%pQ(m)%copy(lev%Q(m))
           end do
       end if
     else
-       if (allocated(Lev%pQ)) then
-          do m = 1, Lev%nnodes
-             call Lev%pQ(m)%copy(Lev%Q(m))
+       if (allocated(lev%pQ)) then
+          do m = 1, lev%nnodes
+             call lev%pQ(m)%copy(lev%Q(m))
           end do
        end if
     end if
@@ -108,12 +108,12 @@ contains
   ! node' integral and store it in I.  This is used later when doing
   ! restriction (see restrict_time_space_fas).
   !
-  subroutine pf_residual(pf, Lev, dt)
+  subroutine pf_residual(pf, lev, dt)
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: dt
 
-    real(pfdp) :: norms(Lev%nnodes-1)
+    real(pfdp) :: norms(lev%nnodes-1)
     integer :: m
 
 !    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
@@ -122,15 +122,15 @@ contains
 
     call start_timer(pf, TRESIDUAL)
 
-    call Lev%ulevel%sweeper%residual(Lev, dt)
+    call lev%ulevel%sweeper%residual(lev, dt)
 
     ! compute max residual norm
-    do m = 1, Lev%nnodes-1
-       norms(m) = Lev%R(m)%norm()
+    do m = 1, lev%nnodes-1
+       norms(m) = lev%R(m)%norm()
 !       print *, 'norm(', m, ') = ', norms(m)
     end do
-!    Lev%residual = maxval(abs(norms))
-    Lev%residual = norms(Lev%nnodes-1)
+!    lev%residual = maxval(abs(norms))
+    lev%residual = norms(lev%nnodes-1)
 
     call end_timer(pf, TRESIDUAL)
 
@@ -167,15 +167,15 @@ contains
   !
   ! Generic residual
   !
-  subroutine pf_generic_residual(this, Lev, dt)
+  subroutine pf_generic_residual(this, lev, dt)
     class(pf_sweeper_t), intent(in)  :: this
-    class(pf_level_t),  intent(inout) :: Lev
+    class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: dt
 
     integer :: m
 
-    call lev%ulevel%sweeper%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I)
-!    do m = 2, Lev%nnodes-1
+    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
+!    do m = 2, lev%nnodes-1
 !       call lev%I(M)%axpy(1.0_pfdp, lev%I(m-1))
 !    end do
 

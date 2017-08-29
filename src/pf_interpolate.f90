@@ -55,9 +55,9 @@ contains
 
     ! create workspaces
     call c_lev_ptr%ulevel%factory%create_array(delG,  c_lev_ptr%nnodes, &
-      c_lev_ptr%level, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%create_array(delGF, c_lev_ptr%nnodes, &
-      f_lev_ptr%level, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
+      f_lev_ptr%index, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
 
     ! set time at coarse and fine nodes
     allocate(c_times(c_lev_ptr%nnodes))
@@ -107,7 +107,7 @@ contains
        !  call c_lev_ptr%encap%setval(delGF(1),  0.0_pfdp)
        !  call c_lev_ptr%encap%copy(delG(1), c_lev_ptr%Q(1))
        !  call c_lev_ptr%encap%axpy(delG(1), -1.0_pfdp, c_lev_ptr%pQ(1))
-       ! call f_lev_ptr%ulevel%interpolate(delGF(1), delG(1), f_lev_ptr%level, f_lev_ptr%levelctx, c_lev_ptr%level, c_lev_ptr%levelctx,c_times(1))
+       ! call f_lev_ptr%ulevel%interpolate(delGF(1), delG(1), f_lev_ptr%index, f_lev_ptr%indexctx, c_lev_ptr%index, c_lev_ptr%indexctx,c_times(1))
 
        ! This updates all solutions with jump in initial data
        ! interpolate corrections
@@ -129,12 +129,12 @@ contains
     call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
 
     call c_lev_ptr%ulevel%factory%destroy_array(delG,  c_lev_ptr%nnodes, &
-      c_lev_ptr%level, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%destroy_array(delGF, c_lev_ptr%nnodes, &
-      f_lev_ptr%level, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
+      f_lev_ptr%index, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
 
-    call end_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
-    call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_ALL)
+    call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
+    call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
   subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr)
@@ -146,14 +146,14 @@ contains
     class(pf_encap_t), allocatable ::    delG, delF
     class(pf_encap_t), allocatable ::    q0F,q0G
 
-    call call_hooks(pf, f_lev_ptr%level, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
+    call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
+    call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
 
     ! create workspaces
-    call c_lev_ptr%ulevel%factory%create_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%create_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_single(q0G,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_single(q0F,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_single(delG, c_lev_ptr%index, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_single(delF, f_lev_ptr%index, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
 
     ! needed for amr
     call q0F%setval(0.0_pfdp)
@@ -172,14 +172,14 @@ contains
     !    call q0F%pack(f_lev_ptr%q0)
      call f_lev_ptr%q0%copy(q0F)
 
-    call end_timer(pf, TINTERPOLATE + f_lev_ptr%level - 1)
-    call call_hooks(pf, f_lev_ptr%level, PF_POST_INTERP_Q0)
+    call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
+    call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_Q0)
 
     ! destroy workspaces
-    call c_lev_ptr%ulevel%factory%destroy_single(q0G,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(q0F,  f_lev_ptr%level, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%destroy_single(delG, c_lev_ptr%level, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(delF, f_lev_ptr%level, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_single(q0G,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_single(q0F,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_single(delG, c_lev_ptr%index, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_single(delF, f_lev_ptr%index, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
 
   end subroutine interpolate_q0
 

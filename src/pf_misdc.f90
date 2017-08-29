@@ -76,7 +76,7 @@ contains
     class(pf_encap_t), allocatable :: S3(:)
     class(pf_encap_t), allocatable :: rhs
 
-    call start_timer(pf, TLEVEL+lev%level-1)
+    call start_timer(pf, TLEVEL+lev%index-1)
     
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -95,11 +95,11 @@ contains
     call lev%Q(1)%copy(lev%q0)
 
     call misdc_evaluate(this, lev, t, 1)
-    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1),1)
-    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,2),2)
-    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,3),3)
+    call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1),1)
+    call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
+    call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,3),3)
 
-    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -110,23 +110,23 @@ contains
        call rhs%axpy(dtsdc(m), lev%F(m,1))
        call rhs%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,2),2)
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%index, lev%F(m+1,2),2)
 
        !  Now we need to do the final subtraction for the f3 piece
        call rhs%copy(Lev%Q(m+1))       
        call rhs%axpy(-1.0_pfdp*dtsdc(m), lev%F(m+1,3))
 
-       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,3),3)
-       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1),1)
-       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,2),2)
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%index, lev%F(m+1,3),3)
+       call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1),1)
+       call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2),2)
     end do
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
-    call end_timer(pf, TLEVEL+Lev%level-1)
+    call end_timer(pf, TLEVEL+lev%index-1)
 
   end subroutine misdc_sweep
      
@@ -139,9 +139,9 @@ contains
     integer,           intent(in)    :: m
     class(pf_level_t),  intent(inout) :: lev
 
-    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1),1)
-    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,2),2)
-    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,3),3)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,3),3)
   end subroutine misdc_evaluate
 
 

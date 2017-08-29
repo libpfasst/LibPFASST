@@ -10,7 +10,7 @@ contains
     type(pf_state_t),  intent(in   ) :: state
 
     print '("PF:: trank: ",i4,", step: ",i6,", iter: ",i3,", level: ",i2," location: ",a)', &
-         pf%rank, state%step, state%iter, level%level, hook_names(state%hook)
+         pf%rank, state%step, state%iter, level%index, hook_names(state%hook)
   end subroutine pf_logger_hook
 
   subroutine pf_logger_attach(pf)

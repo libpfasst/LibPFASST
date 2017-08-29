@@ -60,7 +60,7 @@ contains
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
 
-    call start_timer(pf, TLEVEL+lev%level-1)
+    call start_timer(pf, TLEVEL+lev%index-1)
 
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -76,7 +76,7 @@ contains
     ! do the time-stepping
     call lev%Q(1)%copy(lev%q0)
 
-    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -87,13 +87,13 @@ contains
        call lev%Q(m+1)%axpy(dtsdc(m), lev%F(m,1))
        call lev%Q(m+1)%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f_eval(lev%Q(m+1), t, lev%level, lev%F(m+1,1))
+       call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1))
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    call end_timer(pf, TLEVEL+lev%level-1)
+    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine explicit_sweep
 
   ! Evaluate function values
@@ -104,7 +104,7 @@ contains
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
 
-    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1))
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine explicit_evaluate
 
   ! Initialize matrix

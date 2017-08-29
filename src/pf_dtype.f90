@@ -124,7 +124,7 @@ module pf_mod_dtype
      integer     :: nnodes       = -1   ! number of sdc nodes
      integer     :: nsweeps      =  1   ! number of sdc sweeps to perform
      integer     :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
-     integer     :: level        = -1   ! level number (1 is the coarsest)
+     integer     :: index        = -1   ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
      real(pfdp)  :: residual

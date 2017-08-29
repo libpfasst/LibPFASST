@@ -71,7 +71,7 @@ contains
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
     type(pf_pfasst_t), intent(inout), target :: pf
-    
+
     class(pf_level_t), pointer :: F, G
     integer                   :: l
 
@@ -80,7 +80,7 @@ contains
     end if
 
     do l = 1, pf%nlevels
-       pf%levels(l)%level = l
+       pf%levels(l)%index = l
        call pf_level_setup(pf, pf%levels(l))
     end do
 
@@ -124,9 +124,9 @@ contains
     ! (re)allocate tau (may to need create/destroy tau dynamically
     !                   when doing AMR)
     !
-    if ((F%level < pf%nlevels) .and. (.not. allocated(F%tau))) then
-       call F%ulevel%factory%create_array(F%tau, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    else if ((F%level >= pf%nlevels) .and. (allocated(F%tau))) then
+    if ((F%index < pf%nlevels) .and. (.not. allocated(F%tau))) then
+       call F%ulevel%factory%create_array(F%tau, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
+    else if ((F%index >= pf%nlevels) .and. (allocated(F%tau))) then
        deallocate(F%tau)
     end if
 
@@ -134,9 +134,9 @@ contains
     ! (re)allocate tauQ (may to need create/destroy tau dynamically
     !                   when doing AMR)
     !
-    if ((F%level < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
-       call F%ulevel%factory%create_array(F%tauQ, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    else if ((F%level >= pf%nlevels) .and. (allocated(F%tauQ))) then
+    if ((F%index < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
+       call F%ulevel%factory%create_array(F%tauQ, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
+    else if ((F%index >= pf%nlevels) .and. (allocated(F%tauQ))) then
        deallocate(F%tauQ)
     end if
 
@@ -177,26 +177,26 @@ contains
     !
     npieces = F%ulevel%sweeper%npieces
 
-    call F%ulevel%factory%create_array(F%Q, nnodes, F%level, SDC_KIND_SOL_FEVAL, nvars, F%shape)
-    call F%ulevel%factory%create_array(F%Fflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%Q, nnodes, F%index, SDC_KIND_SOL_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%Fflt, nnodes*npieces, F%index, SDC_KIND_FEVAL, nvars, F%shape)
     do i = 1, nnodes*npieces
        call F%Fflt(i)%setval(0.0_pfdp)
     end do
     F%F(1:nnodes,1:npieces) => F%Fflt
-    call F%ulevel%factory%create_array(F%S, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%ulevel%factory%create_array(F%I, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    call F%ulevel%factory%create_array(F%R, nnodes-1, F%level, SDC_KIND_INTEGRAL, nvars, F%shape)
-    print *,'Finter in factory',F%Finterp, F%level
-    if (F%level < pf%nlevels) then
-        print *,'Finter in factory',F%Finterp, F%level
+    call F%ulevel%factory%create_array(F%S, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%I, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
+    call F%ulevel%factory%create_array(F%R, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
+    print *,'Finter in factory',F%Finterp, F%index
+    if (F%index < pf%nlevels) then
+        print *,'Finter in factory',F%Finterp, F%index
       if (F%Finterp) then
-          call F%ulevel%factory%create_array(F%pFflt, nnodes*npieces, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+          call F%ulevel%factory%create_array(F%pFflt, nnodes*npieces, F%index, SDC_KIND_FEVAL, nvars, F%shape)
           F%pF(1:nnodes,1:npieces) => F%pFflt
        end if
-       call F%ulevel%factory%create_array(F%pQ, nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
+       call F%ulevel%factory%create_array(F%pQ, nnodes, F%index, SDC_KIND_SOL_NO_FEVAL, nvars, F%shape)
     end if
-    call F%ulevel%factory%create_single(F%qend, F%level, SDC_KIND_FEVAL, nvars, F%shape)
-    call F%ulevel%factory%create_single(F%q0, F%level, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_single(F%qend, F%index, SDC_KIND_FEVAL, nvars, F%shape)
+    call F%ulevel%factory%create_single(F%q0, F%index, SDC_KIND_FEVAL, nvars, F%shape)
 
 
   end subroutine pf_level_setup
@@ -240,26 +240,26 @@ contains
     ! encaps
     npieces = F%ulevel%sweeper%npieces
 
-    if ((F%level < nlevels) .and. allocated(F%tau)) then
-       call F%ulevel%factory%destroy_array(F%tau, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    if ((F%index < nlevels) .and. allocated(F%tau)) then
+       call F%ulevel%factory%destroy_array(F%tau, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     end if
-    if ((F%level < nlevels) .and. allocated(F%tauQ)) then
-       call F%ulevel%factory%destroy_array(F%tauQ, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    if ((F%index < nlevels) .and. allocated(F%tauQ)) then
+       call F%ulevel%factory%destroy_array(F%tauQ, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     end if
 
-    call F%ulevel%factory%destroy_array(F%Q, F%nnodes, F%level, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%Fflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%S, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%I, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%R, F%nnodes-1, F%level, SDC_KIND_INTEGRAL, F%nvars, F%shape)
-    if (F%level < nlevels) then
+    call F%ulevel%factory%destroy_array(F%Q, F%nnodes, F%index, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%Fflt, F%nnodes*npieces, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%S, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%I, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_array(F%R, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
+    if (F%index < nlevels) then
        if (F%Finterp) then
-          call F%ulevel%factory%destroy_array(F%pFflt, F%nnodes*npieces, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+          call F%ulevel%factory%destroy_array(F%pFflt, F%nnodes*npieces, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
        end if
-       call F%ulevel%factory%destroy_array(F%pQ, F%nnodes, F%level, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape)
+       call F%ulevel%factory%destroy_array(F%pQ, F%nnodes, F%index, SDC_KIND_SOL_NO_FEVAL, F%nvars, F%shape)
     end if
-    call F%ulevel%factory%destroy_single(F%qend, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_single(F%q0, F%level, SDC_KIND_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_single(F%qend, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
+    call F%ulevel%factory%destroy_single(F%q0, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
 
     ! destroy the sweeper 
     call F%ulevel%sweeper%destroy(F)

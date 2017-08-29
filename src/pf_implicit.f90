@@ -73,7 +73,7 @@ contains
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
     class(pf_encap_t), allocatable :: rhs
 
-    call start_timer(pf, TLEVEL+lev%level-1)
+    call start_timer(pf, TLEVEL+lev%index-1)
 
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -89,9 +89,9 @@ contains
     ! do the time-stepping
     call lev%Q(1)%copy(lev%q0)
 
-    call this%f_eval(lev%Q(1), t0, lev%level, lev%F(1,1))
+    call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
 
-    call lev%ulevel%factory%create_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -101,14 +101,14 @@ contains
        call rhs%copy(lev%Q(m))
        call rhs%axpy(1.0_pfdp, lev%S(m))
 
-       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%level, lev%F(m+1,1))
+       call this%f_comp(lev%Q(m+1), t, dtsdc(m), rhs, lev%index, lev%F(m+1,1))
     end do
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
-    call lev%ulevel%factory%destroy_single(rhs, lev%level, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
-    call end_timer(pf, TLEVEL+lev%level-1)
+    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine implicit_sweep
 
   ! Evaluate function values
@@ -118,7 +118,7 @@ contains
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
 
-    call this%f_eval(lev%Q(m), t, lev%level, lev%F(m,1))
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine implicit_evaluate
 
   ! Initialize matrix
@@ -131,7 +131,7 @@ contains
     integer    :: m,nnodes
 
     this%npieces = 1
-    
+
     nnodes = lev%nnodes
     allocate(this%SdiffI(nnodes-1,nnodes))  !  S-BE
 

@@ -77,7 +77,7 @@ contains
     f_nnodes = f_lev_ptr%nnodes
     if (IS_INTEGRAL) then
 
-      call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%level, SDC_KIND_INTEGRAL, &
+      call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, SDC_KIND_INTEGRAL, &
         c_lev_ptr%nvars, c_lev_ptr%shape)
 
        do m = 1, f_nnodes-1
@@ -88,12 +88,12 @@ contains
        ! entry since it is zero
        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c)
 
-       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%level, &
+       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, &
          SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
 
     else
 
-      call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_ptr%level, &
+      call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, &
              SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
        do m = 1, f_nnodes
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m))
@@ -101,7 +101,7 @@ contains
 
        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c)
        
-       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes, c_lev_ptr%level, &
+       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, &
          SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
 
     end if
@@ -145,11 +145,11 @@ contains
     ! create workspaces
     !
     call c_lev_ptr%ulevel%factory%create_array(c_tmp_array, c_lev_ptr%nnodes, &
-      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
     call c_lev_ptr%ulevel%factory%create_array(f_int_arrayr, c_lev_ptr%nnodes, &
-      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
     call c_lev_ptr%ulevel%factory%create_array(f_int_array, f_lev_ptr%nnodes, &
-      f_lev_ptr%level, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+      f_lev_ptr%index, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
     allocate(c_times(c_lev_ptr%nnodes))
     allocate(f_times(f_lev_ptr%nnodes))
     !
@@ -209,11 +209,11 @@ contains
     call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
     call c_lev_ptr%ulevel%factory%destroy_array(c_tmp_array, c_lev_ptr%nnodes, &
-      c_lev_ptr%level, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index, SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
     call c_lev_ptr%ulevel%factory%destroy_array(f_int_arrayr, c_lev_ptr%nnodes, &
-      c_lev_ptr%level,  SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index,  SDC_KIND_INTEGRAL, c_lev_ptr%nvars, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%destroy_array(f_int_array, f_lev_ptr%nnodes, &
-      f_lev_ptr%level, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
+      f_lev_ptr%index, SDC_KIND_INTEGRAL, f_lev_ptr%nvars, f_lev_ptr%shape)
 
     deallocate(c_times)
     deallocate(f_times)

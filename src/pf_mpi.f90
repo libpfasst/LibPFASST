@@ -97,7 +97,7 @@ contains
     integer :: ierror
 
     call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
-                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq(level%level), ierror)
+                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
   end subroutine pf_mpi_post
 
   !
@@ -165,10 +165,10 @@ contains
        call mpi_send(level%send, level%nvars, MPI_REAL8, &
                      modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
     else
-       call mpi_wait(pf%comm%sendreq(level%level), stat, ierror)
+       call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
        call level%qend%pack(level%send)
        call mpi_isend(level%send, level%nvars, MPI_REAL8, &
-                      modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%sendreq(level%level), ierror)
+                      modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send
 
@@ -185,7 +185,7 @@ contains
        call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
                      modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
     else
-       call mpi_wait(pf%comm%recvreq(level%level), stat, ierror)
+       call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)
     end if
 
     if (ierror .ne. 0) &
