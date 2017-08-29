@@ -68,11 +68,20 @@ contains
     !  Do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
-    !  Right now, we just call the old routine
-    if (present(qend)) then
-      call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
-    else
-      call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+    ! Try to figure out what routine to call
+    if (pf%nlevels .eq. 1) then
+       if (present(qend)) then
+          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
+       else
+          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
+       end if
+    else 
+       !  Right now, we just call the old routine
+       if (present(qend)) then
+          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+       else
+          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+       end if
     end if
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -85,13 +94,10 @@ contains
     !      Communication is copy
     !  3.  nlevels == 1  and nprocs > 1 -> Pipelined SDC
     !      Predictor is just like PFASST, but on finest (only) level (or nothing)
-    !      Predictor is just like PFASST, but on finest (only) level (or nothing)
     !  4.  nlevels > 1  and nprocs > 1 -> PFASST
   end subroutine pf_pfasst_run
   !
   ! Predictor.
-  !
-  !
   !
   !>  This is the routine to initialize the solution on each processor
   !>
@@ -254,13 +260,13 @@ contains
     pf%state%res = residual
   end subroutine pf_check_tolerances
 
-  !
-  ! Test residuals to determine if the current processor has converged.
-  !
-  ! Note that if the previous processor hasn't converged yet
-  ! (pstatus), the current processor hasn't converged yet either,
-  ! regardless of the residual.
-  !
+  !>
+  !> Test residuals to determine if the current processor has converged.
+  !>
+  !> Note that if the previous processor hasn't converged yet
+  !> (pstatus), the current processor hasn't converged yet either,
+  !> regardless of the residual.
+  !>
   subroutine pf_check_convergence(pf, k, dt, residual, energy, qcycle)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
@@ -441,7 +447,7 @@ contains
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)
 
-    end do  !  Loop over blocks of time steps
+    end do  !   Loop on k over blocks of time steps
 
     pf%state%iter = -1
     call end_timer(pf, TTOTAL)
@@ -452,6 +458,133 @@ contains
        call qend%copy(fine_lev_p%qend)
     end if
   end subroutine pf_pfasst_run_old
+
+  !
+  !> Run single level SDC in pipeline fashion
+  !
+  subroutine pf_pipeline_run(pf, q0, dt, tend, nsteps, qend)
+    type(pf_pfasst_t), intent(inout), target   :: pf
+    class(pf_encap_t), intent(in   )           :: q0
+    real(pfdp),        intent(in   )           :: dt, tend
+    integer,           intent(in   )           :: nsteps
+    class(pf_encap_t), intent(inout), optional :: qend
+
+    class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
+    integer                   :: j, k
+    integer                   :: level_index
+    real(pfdp)                :: residual, energy
+    integer                   ::  nblocks !<  The number of blocks of steps to do
+    integer                   ::  nproc   !<  The number of processors being used
+
+    logical :: all_converged   !<  True when all processors in current block are converged to residual
+    logical :: qbroadcast
+    logical :: did_post_step_hook
+
+    call start_timer(pf, TTOTAL)
+
+    pf%state%dt      = dt
+    pf%state%proc    = pf%rank+1
+    pf%state%step    = pf%rank
+    pf%state%t0      = pf%state%step * dt
+    pf%state%iter    = -1
+    pf%state%cycle   = -1
+    pf%state%itcnt   = 0
+    pf%state%mysteps = 0
+    pf%state%status  = PF_STATUS_PREDICTOR
+    pf%state%pstatus = PF_STATUS_PREDICTOR
+    pf%comm%statreq  = -66
+
+    residual = -1
+    energy   = -1
+    did_post_step_hook = .false.
+    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
+    
+    lev_p => pf%levels(pf%nlevels)
+    call lev_p%q0%copy(q0)
+
+    nproc = pf%comm%nproc
+    nblocks = nsteps/nproc
+    do k = 1, nblocks   !  Loop over blocks of time steps
+       
+       ! Each block will consist of
+       !  1.  predictor
+       !  2.  A loop until max iterations, or tolerances met
+       !      2a.  Recieve
+       !      2b.  Do SDC sweep(s)
+       !      2c.  Send
+       !  3.  Move solution to next block
+       
+       ! in block mode, jump to next block if we've reached the max iteration count
+
+       !>  When starting a new block, broadcast new initial conditions to all procs
+       !>  For initial block, this is done when initial conditions are set
+       if (k > 1) then
+          call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+          call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
+          call pf_broadcast(pf, lev_p%send, lev_p%nvars, pf%comm%nproc-1)
+          call lev_p%q0%unpack(lev_p%send)    !<  Everyone resets their q0
+
+          !>  Update the step and t0 variables for new block
+          pf%state%step = pf%state%step + pf%comm%nproc
+          pf%state%t0   = pf%state%step * dt
+          
+          pf%state%status = PF_STATUS_PREDICTOR
+       end if
+
+       ! Call the predictor
+       if (pf%state%status == PF_STATUS_PREDICTOR) then
+          call pf_predictor(pf, pf%state%t0, dt)
+       end if
+
+       !>  Start the loops over SDC sweeps
+       pf%state%iter = 0
+       do while (pf%state%iter <= pf%niters .and. .not. all_converged) 
+          pf%state%iter  = pf%state%iter + 1
+
+          call start_timer(pf, TITERATION)
+          call call_hooks(pf, -1, PF_PRE_ITERATION)
+          
+          !<  Get new initial condition unless this is the first step or this processor is done
+          if (pf%state%iter > 1 .and. (pf%state%status /= PF_STATUS_CONVERGED)) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+k-1, .true.)
+          end if
+          
+          !< perform some sweeps
+          do j = 1, lev_p%nsweeps
+             call call_hooks(pf, level_index, PF_PRE_SWEEP)
+             call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
+             call pf_residual(pf, lev_p, dt)
+             call call_hooks(pf, level_index, PF_POST_SWEEP)
+          end do
+          
+          !<  Check to see if everybody is converged
+          call pf_check_convergence(pf, k, dt, residual, energy, all_converged)
+          
+          call call_hooks(pf, -1, PF_POST_ITERATION)
+          call end_timer(pf, TITERATION)
+          
+          
+          !<  Unless this processor is done, send fine level solution forward
+          if (pf%state%status /= PF_STATUS_CONVERGED) then
+             call pf_send(pf, lev_p, lev_p%index*10000+k, .false.)
+          end if
+          
+       end do  !  Loop over the iteration in this bloc
+       
+       !  This block is over, so do some 
+       call call_hooks(pf, -1, PF_POST_STEP)
+       pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
+       pf%state%mysteps = pf%state%mysteps + 1
+    end do  !   Loop on k over blocks of time steps
+
+    pf%state%iter = -1
+    call end_timer(pf, TTOTAL)
+
+    !  Grab the last solution for return (if wanted)
+    if (present(qend)) then
+       call qend%copy(lev_p%qend)
+    end if
+  end subroutine pf_pipeline_run
 
   !
   ! After predictor, return to fine level.
