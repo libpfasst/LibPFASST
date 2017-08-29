@@ -38,7 +38,7 @@ contains
     r => array1(level%R(level%nnodes-1))
 
     print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
-         state%step+1, state%iter, level%level, maxval(abs(r))
+         state%step+1, state%iter, level%index, maxval(abs(r))
 
 
 !!$    r => array1(level%Q(1))
