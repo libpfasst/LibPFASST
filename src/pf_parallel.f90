@@ -504,7 +504,7 @@ contains
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
     do k = 1, nblocks   !  Loop over blocks of time steps
-       print *,'Doing block k=',k
+
        ! Each block will consist of
        !  1.  predictor
        !  2.  A loop until max iterations, or tolerances met
@@ -541,8 +541,10 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
+       all_converged = .FALSE.
        do while (pf%state%iter <= pf%niters .and. .not. all_converged) 
           pf%state%iter  = pf%state%iter + 1
+          print *,'Doing block k=',k,'  sweep= ',pf%state%iter
 
           call start_timer(pf, TITERATION)
           call call_hooks(pf, -1, PF_PRE_ITERATION)
