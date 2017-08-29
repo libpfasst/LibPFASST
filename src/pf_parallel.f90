@@ -70,6 +70,7 @@ contains
 
     ! Try to figure out what routine to call
     if (pf%nlevels .eq. 1) then
+       print *,'Calling pipelined SDC with 1 level'
        if (present(qend)) then
           call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
        else
@@ -494,8 +495,6 @@ contains
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
 
-    residual = -1
-    energy   = -1
     did_post_step_hook = .false.
     if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
     
@@ -505,7 +504,7 @@ contains
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
     do k = 1, nblocks   !  Loop over blocks of time steps
-       
+       print *,'Doing block k=',k
        ! Each block will consist of
        !  1.  predictor
        !  2.  A loop until max iterations, or tolerances met
@@ -515,6 +514,8 @@ contains
        !  3.  Move solution to next block
        
        ! in block mode, jump to next block if we've reached the max iteration count
+
+
 
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
@@ -529,6 +530,8 @@ contains
           pf%state%t0   = pf%state%step * dt
           
           pf%state%status = PF_STATUS_PREDICTOR
+          residual = -1
+          energy   = -1
        end if
 
        ! Call the predictor
