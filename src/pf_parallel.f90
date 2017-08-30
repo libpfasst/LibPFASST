@@ -131,16 +131,17 @@ contains
     fine_lev_p => pf%levels(pf%nlevels)
     call spreadq0(fine_lev_p, t0)
 
+    !>  If we are doing a single level, then we only spreadq0 and return
     if (pf%nlevels > 1) then
       
-      do level_index = pf%nlevels, 2, -1
-        fine_lev_p => pf%levels(level_index);
-        coarse_lev_p => pf%levels(level_index-1)
-        call pf_residual(pf, fine_lev_p, dt)
-        call restrict_time_space_fas(pf, t0, dt, level_index)
-        call save(coarse_lev_p)
-        call coarse_lev_p%q0%copy(coarse_lev_p%Q(1))
-      end do  !  level_index = pf%nlevels, 2, -1
+       do level_index = pf%nlevels, 2, -1
+          fine_lev_p => pf%levels(level_index);
+          coarse_lev_p => pf%levels(level_index-1)
+          call pf_residual(pf, fine_lev_p, dt)
+          call restrict_time_space_fas(pf, t0, dt, level_index)
+          call save(coarse_lev_p)
+          call coarse_lev_p%q0%copy(coarse_lev_p%Q(1))
+       end do  !  level_index = pf%nlevels, 2, -1
 
        if (pf%comm%nproc > 1) then
           coarse_lev_p => pf%levels(1)
@@ -149,7 +150,7 @@ contains
              coarse_lev_p => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
-
+                
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
                    call coarse_lev_p%q0%copy(coarse_lev_p%qend)
@@ -157,7 +158,7 @@ contains
                       call spreadq0(coarse_lev_p, t0)
                    end if
                 end if
-
+                
                 call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt)
                 call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
@@ -168,10 +169,10 @@ contains
                 pf%state%pstatus = PF_STATUS_ITERATING
                 pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
-
+                
                 !  Get new initial conditions
                 call pf_recv(pf, coarse_lev_p, coarse_lev_p%index*20000+pf%rank+k, .true.)
-
+                
                 !  Do a sweep
                 call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt )
@@ -179,7 +180,7 @@ contains
                 call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
                 !  Send forward
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%index*20000+pf%rank+1+k, .false.)
-
+                
              end do ! k = 1, coarse_lev_p%nsweeps_pred-1
              call pf_residual(pf, coarse_lev_p, dt)
           else  ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
@@ -209,7 +210,7 @@ contains
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
-       else ! (pf%nlevels > 1) then
+       else ! (pf%nprocs == 1) then
 
           ! Single processor... sweep on coarse and return to fine level.
 
@@ -477,8 +478,6 @@ contains
     integer                   ::  nproc   !<  The number of processors being used
 
     logical :: all_converged   !<  True when all processors in current block are converged to residual
-    logical :: qbroadcast
-    logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
 
@@ -493,7 +492,7 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
-    did_post_step_hook = .false.
+
     if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
     
     lev_p => pf%levels(pf%nlevels)
