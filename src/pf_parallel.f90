@@ -541,7 +541,7 @@ contains
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
        all_converged = .FALSE.
-       pf%state%status /= PF_STATUS_ITERATING
+       pf%state%status = PF_STATUS_ITERATING
        do while (pf%state%iter < pf%niters .and. .not. all_converged) 
           pf%state%iter  = pf%state%iter + 1
           print *,'Doing block k=',k,'  sweep= ',pf%state%iter
