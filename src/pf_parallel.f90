@@ -434,7 +434,7 @@ contains
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
-          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
+          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k*100+pf%state%iter, .false.)
 
           if (pf%nlevels > 1) then
              coarse_lev_p => pf%levels(pf%nlevels-1)
@@ -540,7 +540,7 @@ contains
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
        all_converged = .FALSE.
-       do while (pf%state%iter <= pf%niters .and. .not. all_converged) 
+       do while (pf%state%iter < pf%niters .and. .not. all_converged) 
           pf%state%iter  = pf%state%iter + 1
           print *,'Doing block k=',k,'  sweep= ',pf%state%iter
 
@@ -549,7 +549,7 @@ contains
           
           !<  Get new initial condition unless this is the first step or this processor is done
           if (pf%state%iter > 1 .and. (pf%state%status /= PF_STATUS_CONVERGED)) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+k-1, .true.)
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
           
           !< perform some sweeps
@@ -566,10 +566,9 @@ contains
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
           
-          
           !<  Unless this processor is done, send fine level solution forward
           if (pf%state%status /= PF_STATUS_CONVERGED) then
-             call pf_send(pf, lev_p, lev_p%index*10000+k, .false.)
+             call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
           end if
           
        end do  !  Loop over the iteration in this bloc
