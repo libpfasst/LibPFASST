@@ -435,7 +435,7 @@ contains
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
-          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k*100+pf%state%iter, .false.)
+          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
 
           if (pf%nlevels > 1) then
              coarse_lev_p => pf%levels(pf%nlevels-1)
