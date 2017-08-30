@@ -510,17 +510,18 @@ contains
        !      2c.  Send
        !  3.  Move solution to next block
        
-       ! in block mode, jump to next block if we've reached the max iteration count
-
-
 
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
        if (k > 1) then
           call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
-          call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
-          call pf_broadcast(pf, lev_p%send, lev_p%nvars, pf%comm%nproc-1)
-          call lev_p%q0%unpack(lev_p%send)    !<  Everyone resets their q0
+          if (nproc > 1)  then
+             call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
+             call pf_broadcast(pf, lev_p%send, lev_p%nvars, pf%comm%nproc-1)
+             call lev_p%q0%unpack(lev_p%send)    !<  Everyone resets their q0
+          else
+             call lev_p%q0%copy(lev_p%qend)    !<  Just stick qend in q0
+          end if
 
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
@@ -531,7 +532,8 @@ contains
           energy   = -1
        end if
 
-       ! Call the predictor
+       !> Call the predictor
+       !> Currently the predictor will do nothing but spread q0 to all the nodes
        if (pf%state%status == PF_STATUS_PREDICTOR) then
           call pf_predictor(pf, pf%state%t0, dt)
        end if
@@ -578,7 +580,6 @@ contains
        pf%state%mysteps = pf%state%mysteps + 1
     end do  !   Loop on k over blocks of time steps
 
-    pf%state%iter = -1
     call end_timer(pf, TTOTAL)
 
     !  Grab the last solution for return (if wanted)
