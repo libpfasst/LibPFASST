@@ -223,10 +223,8 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                 print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
                     self.tasks, self.nodes, self.magnus, self.dt)
 
-            output = check_output([
-                'srun', '-n', str(self.tasks), self.exe,
-                self.base_dir + '/' + self.filename
-            ])
+            output = check_output([ 'mpirun', '-np', str(self.tasks), self.exe, \
+                self.base_dir + '/' + self.filename])
 
             trajectory = self._get_traj_from_output(output)
 
