@@ -3,15 +3,62 @@ import glob
 import re
 from collections import namedtuple
 from pprint import pprint
-from os import remove, getcwd, chdir, makedirs, devnull
-from subprocess import call, check_output
+from os import remove
+from subprocess import check_output
 from scipy.io import FortranFile
-import numpy as np
 import pandas as pd
+import numpy as np
 
 State = namedtuple(
     'State', ['time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'])
 Timing = namedtuple('Timing', ['task', 'step', 'iter', 'level', 'time'])
+
+def create_pf_params():
+    parser = argparse.ArgumentParser(
+        description='From nml file for PFASST, generate exact/ref solutions')
+    parser.add_argument('--pfasst_input', type=str, default=None)
+    parser.add_argument('--tfinal', type=float, default=1.0)
+    parser.add_argument('--dt', type=float, default=0.1)
+    parser.add_argument('--nsteps', type=float, default=16)
+    parser.add_argument('--levels', type=int, default=1)
+    parser.add_argument('--iters', type=int, default=5)
+    parser.add_argument('--sweeps', type=int, nargs='*', default=[3])
+    parser.add_argument('--nodes', type=int, nargs='*', default=[2])
+    parser.add_argument('--magnus', type=int, nargs='*', default=[1])
+    parser.add_argument(
+        '--nprob', type=int, default=4, help='Default problem: toda')
+    parser.add_argument(
+        '--tasks', type=int, default=1, help='Number of MPI tasks')
+    parser.add_argument('--basis', type=str, default='')
+    parser.add_argument('--molecule', type=str, default='')
+    parser.add_argument('--exact_dir', type=str, default='')
+    parser.add_argument('--base_dir', type=str, default='output')
+    parser.add_argument('-v', '--verbose', type=bool, default=False)
+
+    args = parser.parse_args()
+    return args
+
+
+def create_nb_pf_params():
+    params = {
+        'pfasst_input': None,
+        'levels': 1,
+        'sweeps': [3],
+        'tfinal': 1.0,
+        'iters': 5,
+        'dt': 0.1,
+        'nsteps': 16,
+        'nodes': [2],
+        'magnus': [1],
+        'nprob': 4,
+        'tasks': 1,
+        'basis': '',
+        'molecule': '',
+        'exact_dir': '',
+        'base_dir': 'output',
+        'verbose': False
+    }
+    return params
 
 
 class PFASST:
@@ -27,6 +74,8 @@ class PFASST:
         self.tasks = self.params['tasks']
         self.tfinal = self.params['tfinal']
         self.sweeps = self.params['sweeps']
+        self.base_dir = self.params['base_dir']
+        self.output = ''
         if type(self.sweeps) is int:
             self.sweeps = [self.sweeps]
         self.magnus = self.params['magnus']
@@ -35,19 +84,17 @@ class PFASST:
         self.nodes = self.params['nodes']
         if type(self.nodes) is int:
             self.nodes = [self.nodes]
-        self.nprob = self.params['nprob']
-        self.basis = self.params['basis']
-        self.molecule = self.params['molecule']
-        self.exact_dir = self.params['exact_dir']
-        self.base_dir = self.params['base_dir']
         if self.params['nsteps']:
             self.nsteps = self.params['nsteps']
             self.dt = self.tfinal / self.nsteps
         elif self.params['dt']:
             self.dt = self.params['dt']
             self.nsteps = self.tfinal * self.dt
-        self.residuals = []
-        self.output = ''
+
+        self.nprob = self.params['nprob']
+        self.basis = self.params['basis']
+        self.molecule = self.params['molecule']
+        self.exact_dir = self.params['exact_dir']
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\t\
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\
@@ -183,6 +230,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             'pkl': self.pkl
         }
 
+        self.params = params
         return params
 
     def write_to_file(self):
@@ -192,13 +240,13 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             f.write(self.pfinp)
 
     def print_params(self):
-        params = {}
-        params['tfinal'] = self.tfinal
-        params['nsteps'] = self.nsteps
-        params['dt'] = self.dt
-        params['nodes'] = self.nodes
-        params['magnus'] = self.magnus
-
+        params = {
+            'tfinal': self.tfinal,
+            'nsteps': self.nsteps,
+            'dt': self.dt,
+            'nodes': self.nodes,
+            'magnus': self.magnus
+        }
         pprint(params, width=1)
 
     def run(self):
@@ -296,184 +344,23 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 
         return traj
 
+    def get_final_solution(self, trajectory):
+        solution = trajectory[(trajectory['rank'] == self.tasks - 1) & \
+                            (trajectory['iter'] == self.iters) & \
+                            (trajectory['time'] == self.tfinal) & \
+                            (trajectory['level'] == self.levels) & \
+                            (trajectory['step'] == self.nsteps)]['solution'].values
 
-class NWC:
-
-    def __init__(self, home, params):
-        print 'Setting up NWC'
-        self.home = home
-        self.params = params
-        self.nwc = self.home + '/nwc.sh'
-        self.exact_dir = params['exact_dir']
-        self.cwd = getcwd() + '/'
-        self.base_string = 'echo\nscratch_dir ./scratch\npermanent_dir ./perm\n\n'\
-                'start calc\n\ngeometry "system" units angstroms nocenter noautoz noautosym\n {}\nend\n\n' \
-                'set geometry "system" \n\nbasis\n * library {}\nend\n\n' \
-                'dft\n xc HFexch\n end\n\ntask dft energy\n\n' \
-                'rt_tddft\n  checklvl 2\n  tmax {}\n  dt {}\n  ' \
-                'field "kick"\ntype delta\npolarization x\nmax 75.0\nend\n\n' \
-                'excite "system" with "kick"\nend\ntask dft rt_tddft\n\n'
-
-        try:
-            just_made_input = self._create_nwc_inp()
-        except:
-            raise Exception('unable to create input file')
-
-        if just_made_input:
-            try:
-                success = self._run_nwc()
-            except:
-                raise Exception('unsuccessful NWC run, check input!')
-        else:
-            print 'exact dirs already exist'
-
-        self.xtrans, self.ytrans = self._parse_transforms()
-        self.initial = self._get_nwc_dmat('initial_condition')
-        self.final = self._get_nwc_dmat('final_solution')
-
-        self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/x_transform.ints', self.xtrans)
-        self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/y_transform.ints', self.ytrans)
-        self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/initial_condition.b', self.initial)
-        self._write_mo_and_ao_sizes(self.exact_dir, self.xtrans.shape)
-
-    def _create_nwc_inp(self):
-        geometry = '\n'.join(self.params['molecule'].split(';'))
-        nwc_inp = self.base_string.format(geometry, self.params['basis'],
-                                          self.params['tfinal'],
-                                          self.params['tfinal'] / 2048.)
-
-        try:
-            makedirs(self.exact_dir)
-            makedirs(self.exact_dir + '/perm')
-            makedirs(self.exact_dir + '/scratch')
-        except OSError:
-            return False
-        else:
-            with open(self.exact_dir + '/nw.inp', 'w') as f:
-                f.write(nwc_inp)
-
-        return True
-
-    def _run_nwc(self):
-        FNULL = open(devnull, 'w')
-        chdir(self.exact_dir)
-        print '---- running nwc ----'
-        call([self.nwc, 'nw'], stdout=FNULL)
-        chdir(self.cwd)
-        FNULL.close()
-
-        return True
-
-    def _parse_transforms(self):
-        with open(self.exact_dir + 'nw.out', 'r') as f:
-            content = f.readlines()
-
-        dims = {}
-        vals = {}
-        count = 0
-        started = False
-        for i in content:
-            if 'transform start' in i:
-                started = True
-                continue
-
-            if started:
-                if r'transform matrix' in i:
-                    l = []
-                    count += 1
-                    key = re.search(r'\%\s.+\s\%', i).group(0)[2:-2]
-                elif 'global' in i:
-                    dim = re.findall(r'[0-9]+\:[0-9]+', i)
-                    for j in dim:
-                        indices = re.findall('[0-9]+', j)
-                        low = int(indices[0])
-                        high = int(indices[1])
-                        dims[key] = high - low + 1
-                elif r'%%%%' in i:
-                    vals[key] = l
-                    l = []
-                    if count == 2:
-                        break
-                elif i == '\n':
-                    pass
-                else:
-                    l.append(i)
-
-        for k, v in vals.iteritems():
-            vals[k] = self._get_complex_matrix_vals(dims[k], v)
-
-        return vals.values()
-
-    def _get_complex_matrix_vals(self, dim, raw_matrix_text):
-        """get complex values from matrix"""
-        matrix = np.zeros((dim, dim), dtype=np.complex128)
-        real = np.zeros((dim, dim), dtype=np.float64)
-        imag = np.zeros((dim, dim), dtype=np.float64)
-        for i in raw_matrix_text:
-            if r'.' not in i and r'---' not in i:  #column label
-                cols = [int(j) for j in re.findall('[0-9]+', i)]
-            elif r'---' not in i:
-                row = int(re.search('[0-9]+', i).group(0))
-                elems = [j.split(', ') for j in \
-                        re.findall(r'\-*[0-9]*\.[0-9]+\,\s*\-*[0-9]*\.[0-9]*', i)]
-
-                for j, e in enumerate(elems):
-                    real[row - 1, cols[j] - 1] = float(e[0])
-                    imag[row - 1, cols[j] - 1] = float(e[1])
-            else:
-                pass
-
-        matrix.real = real
-        matrix.imag = imag
-
-        return matrix
-
-    def _get_nwc_dmat(self, fname):
-        with open(self.exact_dir + fname, 'r') as f:
-            content = f.readlines()
-
-        l = []
-        dims = []
-        for i in content:
-            if 'global' in i:
-                dim = re.findall(r'[0-9]+\:[0-9]+', i)
-                for j in dim:
-                    indices = re.findall('[0-9]+', j)
-                    low = int(indices[0])
-                    high = int(indices[1])
-                    dims.append(high - low + 1)
-            elif i == '\n' or '=========' in i or r'<rt_tddft>' in i:
-                pass
-            else:
-                l.append(i)
-
-        dmat = self._get_complex_matrix_vals(dims[0], l)
-
-        return dmat
-
-    def _write_mo_and_ao_sizes(self, dirname, mo_ao_shape):
-        with open(dirname + '/size_mo', 'w') as f:
-            f.write(str(mo_ao_shape[0]))
-
-        with open(dirname + '/size_ao', 'w') as f:
-            f.write(str(mo_ao_shape[1]))
-
-    def _write_zndarray_to_fortranfile(self, fname, zndarray):
-        f = FortranFile(fname, 'w')
-        f.write_record(zndarray)
-        f.close()
+        return solution
 
 
-class Experiments:
+class Experiment(pd.DataFrame):
     """A variety of different pfasst-related experiments to be performed
     on a PFASST object
     """
 
-    def __init__(self, plot=False):
-        self.plot = plot
+    def __init__(self, columns=['dt', 'nsteps', 'final_solution', 'error', 'trajectory']):
+        pd.DataFrame.__init__(self, columns=columns)
 
     def nodes_exp(self, pf):
         nodes = [2, 3]
@@ -490,123 +377,60 @@ class Experiments:
         return True
 
     def short_convergence_exp(self, pf, steps=[4, 7]):
-        nsteps = [2**i for i in steps]
-        solns = {}
-        trajs = {}
-        dts = []
-
-        for step in nsteps:
-            pf.nsteps = step
-            pf.dt = pf.tfinal / pf.nsteps
-            dts.append(pf.dt)
-
-            trajectory = pf.run()
-            trajs[pf.dt] = trajectory
-            solns[pf.dt] = get_final_solution(pf, trajectory)
+        experiment = Experiment()
 
         ref_traj = pf.compute_reference()
-        ref_solution = get_final_solution(pf, ref_traj)
+        ref_solution = pf.get_final_solution(ref_traj)
 
-        errors = [compute_error(solns[dt], ref_solution) for dt in dts]
+        nsteps = [2**i for i in steps]
+        for i, step in enumerate(nsteps):
+            pf.nsteps = step
+            pf.dt = pf.tfinal / pf.nsteps
+            trajectory = pf.run()
+            final_solution = pf.get_final_solution(trajectory)
+            error = self.compute_error(final_solution, ref_solution)
 
-        return solns, dts, errors, trajs
+            experiment.loc[i] = pf.dt, pf.nsteps, final_solution, error, trajectory
+
+        experiment.astype({'dt': np.float_,
+                           'nsteps': np.int_,
+                           'error': np.float_})
+
+        return experiment
 
     def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
-        nsteps = [2**i for i in steps]
-        solns = {}
-        trajs = {}
-        dts = []
+        experiment = Experiment()
 
         ref_traj = pf.compute_reference()
-        ref_solution = get_final_solution(pf, ref_traj)
+        ref_solution = pf.get_final_solution(ref_traj)
 
-        for step in nsteps:
+        nsteps = [2**i for i in steps]
+        for i, step in enumerate(nsteps):
             pf.nsteps = step
             pf.dt = pf.tfinal / pf.nsteps
-            dts.append(pf.dt)
-
             trajectory = pf.run()
-            trajs[pf.dt] = trajectory
-            solns[pf.dt] = get_final_solution(pf, trajectory)
+            final_solution = pf.get_final_solution(trajectory)
+            error = self.compute_error(final_solution, ref_solution)
 
-        errors = [compute_error(solns[dt], ref_solution) for dt in dts]
+            experiment.loc[i] = pf.dt, pf.nsteps, final_solution, error, trajectory
 
-        slope, _ = get_linear_fit_loglog(dts, errors)
+        experiment.astype({'dt': np.float_,
+                           'nsteps': np.int_,
+                           'error': np.float_})
+        return experiment
 
-        return solns, dts, errors, trajs
+    @staticmethod
+    def get_linear_fit_loglog(x, y):
+        slope, intercept = np.polyfit(np.log10(x.values),
+                                      np.log10(y.values), 1)
 
+        return slope, intercept
 
-def get_final_solution(pf, trajectory):
-    solution = trajectory[(trajectory['rank'] == pf.tasks - 1) & (trajectory[
-        'iter'] == pf.iters) & (trajectory['time'] == pf.tfinal) & (trajectory[
-            'level'] == pf.levels) & (trajectory['step'] == pf.nsteps)][
-                'solution'].values
+    @staticmethod
+    def compute_error(soln, ref_soln):
+        error = np.linalg.norm(abs(soln - ref_soln))  # / np.linalg.norm(ref_soln)
 
-    return solution
+        return error.max()
 
-
-def create_pf_params():
-    parser = argparse.ArgumentParser(
-        description='From nml file for PFASST, generate exact/ref solutions')
-    parser.add_argument('--pfasst_input', type=str, default=None)
-    parser.add_argument('--tfinal', type=float, default=1.0)
-    parser.add_argument('--dt', type=float, default=0.1)
-    parser.add_argument('--nsteps', type=float, default=16)
-    parser.add_argument('--levels', type=int, default=1)
-    parser.add_argument('--iters', type=int, default=5)
-    parser.add_argument('--sweeps', type=int, nargs='*', default=[3])
-    parser.add_argument('--nodes', type=int, nargs='*', default=[2])
-    parser.add_argument('--magnus', type=int, nargs='*', default=[1])
-    parser.add_argument(
-        '--nprob', type=int, default=4, help='Default problem: toda')
-    parser.add_argument(
-        '--tasks', type=int, default=1, help='Number of MPI tasks')
-    parser.add_argument('--basis', type=str, default='')
-    parser.add_argument('--molecule', type=str, default='')
-    parser.add_argument('--exact_dir', type=str, default='')
-    parser.add_argument('--base_dir', type=str, default='output')
-    parser.add_argument('-v', '--verbose', type=bool, default=False)
-
-    args = parser.parse_args()
-    return args
-
-
-def create_nb_pf_params():
-    params = {
-        'pfasst_input': None,
-        'levels': 1,
-        'sweeps': [3],
-        'tfinal': 1.0,
-        'iters': 5,
-        'dt': 0.1,
-        'nsteps': 16,
-        'nodes': [2],
-        'magnus': [1],
-        'nprob': 4,
-        'tasks': 1,
-        'basis': '',
-        'molecule': '',
-        'exact_dir': '',
-        'base_dir': 'output',
-        'verbose': False
-    }
-    return params
-
-
-def get_linear_fit_loglog(timesteps, errors):
-    slope, intercept = np.polyfit(np.log10(timesteps), np.log10(errors), 1)
-
-    return slope, intercept
-
-
-def plot_errors(timesteps, errors):
-    """ logE v logdt """
-
-    plt.scatter(timesteps, errors)
-    plt.show()
-
-
-def compute_error(soln, ref_soln):
-    error = np.linalg.norm(soln - ref_soln)  # / np.linalg.norm(ref_soln)
-
-    return error.max()
+    def plot_convergence(self, x, y, **kwargs):
+        self.plot(x, y, **kwargs)
