@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 from pprint import pprint
 from os import remove
-from subprocess import check_output
+from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
 import pandas as pd
 import numpy as np
@@ -66,6 +66,10 @@ class PFASST:
     def __init__(self, home, **kwargs):
         self.params = kwargs
         self.home = home
+        if 'nersc' in self.params:
+            self.NERSC = self.params['nersc']
+        else:
+            self.NERSC = None
         self.exe = self.home + 'main.exe'
         self.levels = self.params['levels']
         self.iters = self.params['iters']
@@ -249,6 +253,14 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         }
         pprint(params, width=1)
 
+    def _build_nersc_command(self):
+        command = ['srun', '-n', str(self.tasks)]
+        for option in self.NERSC:
+            command.extend(option)
+        command.extend([self.exe, self.base_dir + '/' + self.filename])
+
+        return command
+
     def run(self):
         if type(self.nodes) is int:
             self.nodes = [self.nodes]
@@ -264,27 +276,33 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         try:
             trajectory = self._get_traj_from_pkl(pkl)
         except:
-            if self.verbose:
-                nodes = ' '.join(map(str, nodes))
-                magnus = ' '.join(map(str, magnus))
+            try:
+                if self.verbose:
+                    nodes = ' '.join(map(str, nodes))
+                    magnus = ' '.join(map(str, magnus))
 
-                print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
-                    self.tasks, self.nodes, self.magnus, self.dt)
+                    print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
+                        self.tasks, self.nodes, self.magnus, self.dt)
 
-            output = check_output([ 'mpirun', '-np', str(self.tasks), self.exe, \
-                self.base_dir + '/' + self.filename])
+                if self.NERSC:
+                    command = self._build_nersc_command()
+                else:
+                    command = ['mpirun', '-np', str(self.tasks), self.exe, \
+                               self.base_dir + '/' + self.filename]
+                output = check_output(command, stderr=STDOUT)
+            except CalledProcessError as exc:
+                print("Status : FAIL", exc.returncode, exc.output)
+            else: 
+                trajectory = self._get_traj_from_output(output)
 
-            trajectory = self._get_traj_from_output(output)
-
-            self._save_pickle(trajectory, pkl)
-            self._cleanup()
+                self._save_pickle(trajectory, pkl)
+                self._cleanup()
 
         return trajectory
 
     @staticmethod
-    def _save_pickle(traj, pkl_file):
-        with open(pkl_file, 'wb') as pkl:
-            traj.to_pickle(pkl)
+    def _save_pickle(traj, pkl_path):
+        traj.to_pickle(pkl_path)
 
     def _cleanup(self):
         for file in glob.iglob(self.base_dir + '/*_soln'):
