@@ -220,6 +220,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             'pfasst_input': self.input_file,
             'tfinal': self.tfinal,
             'iters': self.iters,
+            'levels': self.levels,
             'sweeps': self.sweeps,
             'magnus': self.magnus,
             'nodes': self.nodes,
@@ -270,19 +271,20 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             self.sweeps = [self.sweeps]
         self._create_pf_string()
         self.write_to_file()
-        pkl = self.pkl.format(self.nprob, self.tfinal, self.dt, self.levels,
-                              self.nodes[0], self.magnus[0], self.tasks)
+        self._save_params()
+        pkl_path = self.pkl.format(self.nprob, self.tfinal, self.dt, self.levels,
+                                   self.nodes[0], self.magnus[0], self.tasks)
 
         try:
-            trajectory = self._get_traj_from_pkl(pkl)
+            trajectory = Trajectory(self.params, pkl_path=pkl_path)
         except:
             try:
                 if self.verbose:
-                    nodes = ' '.join(map(str, nodes))
-                    magnus = ' '.join(map(str, magnus))
+                    nodes = ' '.join(map(str, self.nodes))
+                    magnus = ' '.join(map(str, self.magnus))
 
                     print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
-                        self.tasks, self.nodes, self.magnus, self.dt)
+                        self.tasks, nodes, magnus, self.dt)
 
                 if self.NERSC:
                     command = self._build_nersc_command()
@@ -292,39 +294,25 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                 output = check_output(command, stderr=STDOUT)
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
-            else: 
+            else:
                 trajectory = self._get_traj_from_output(output)
 
-                self._save_pickle(trajectory, pkl)
+                trajectory.save(pkl_path)
                 self._cleanup()
 
         return trajectory
-
-    @staticmethod
-    def _save_pickle(traj, pkl_path):
-        traj.to_pickle(pkl_path)
 
     def _cleanup(self):
         for file in glob.iglob(self.base_dir + '/*_soln'):
             remove(file)
 
-    def _get_traj_from_pkl(self, pkl):
-        try:
-            with open(pkl, 'rb') as p:
-                traj = pd.read_pickle(p)
-        except:
-            raise
-        else:
-            print 'recovering results from pickle!'
-            return traj
-
     def _get_traj_from_output(self, output):
-        trajectory = []
+        data = pd.DataFrame(columns=State._fields)
         prog = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
         )
 
-        for line in output.split('\n'):
+        for i, line in enumerate(output.split('\n')):
             match = prog.search(line)
             if match:
                 time = float(match.group(1))
@@ -335,14 +323,14 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                                    "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
                                        time, rank, step, iteration, level)
                 solution = self._get_solution(path_to_solution)
-                trajectory.append(
-                    State(time, rank, step, iteration, level, residual_value,
-                          solution))
+                data.loc[i] = time, rank, step, iteration, \
+                              level, residual_value, solution
 
-        df = pd.DataFrame(trajectory, columns=State._fields)
-        return df
+        trajectory = Trajectory(self.params, data=data)
+        return trajectory
 
-    def _get_solution(self, path_to_solution):
+    @staticmethod
+    def _get_solution(path_to_solution):
         f = FortranFile(path_to_solution)
         solution = f.read_record(np.complex_)
         f.close()
@@ -362,80 +350,104 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 
         return traj
 
-    def get_final_solution(self, trajectory):
-        solution = trajectory[(trajectory['rank'] == self.tasks - 1) & \
-                            (trajectory['iter'] == self.iters) & \
-                            (trajectory['time'] == self.tfinal) & \
-                            (trajectory['level'] == self.levels) & \
-                            (trajectory['step'] == self.nsteps)]['solution'].values
+
+class Trajectory(pd.DataFrame):
+    def __init__(self, pf_params, data=None, pkl_path=None):
+        columns = ['dt', 'nsteps', 'nodes', 'magnus', 'iterations',
+                   'tfinal', 'final_solution', 'data']
+
+        super(Trajectory, self).__init__(columns=columns)
+        self.pf_params = pf_params
+        if pkl_path is not None:
+            self.load(pkl_path)
+        elif data is not None:
+            self._create_trajectory(data)
+
+    def _create_trajectory(self, data):
+        final_solution = self._get_final_solution(data)
+
+        self.loc[0] = self.pf_params['dt'], self.pf_params['nsteps'], \
+                      self.pf_params['nodes'], self.pf_params['magnus'], \
+                      self.pf_params['iters'], self.pf_params['tfinal'], \
+                      final_solution, data
+        return
+
+    def _get_final_solution(self, data):
+        solution = data[(data['rank'] == self.pf_params['tasks'] - 1) & \
+                        (data['iter'] == self.pf_params['iters']) & \
+                        (data['time'] == self.pf_params['tfinal']) & \
+                        (data['level'] == self.pf_params['levels']) & \
+                        (data['step'] == self.pf_params['nsteps'])]['solution'].values
 
         return solution
 
+    def get_final_block(self, idx=0):
+        data = self.loc[idx]['data']
+        last_steps = self.loc[idx]['nsteps'] - self.pf_params['tasks']
 
-class Experiment(pd.DataFrame):
+        final_block = data[(data['step'] > last_steps)]
+        return final_block
+
+    def save(self, pkl_path):
+        self.to_pickle(pkl_path)
+
+    def load(self, pkl_path):
+        try:
+            with open(pkl_path, 'rb') as p:
+                traj = pd.read_pickle(p)
+        except:
+            raise
+        else:
+            print 'recovering results from pickle!'
+            self.loc[0] = traj.loc[0]
+            return
+
+    def plot_convergence(self, x, y, **kwargs):
+        self.plot(x, y, **kwargs)
+
+
+class Experiment():
     """A variety of different pfasst-related experiments to be performed
     on a PFASST object
     """
 
-    def __init__(self, columns=['dt', 'nsteps', 'final_solution', 'error', 'trajectory']):
-        pd.DataFrame.__init__(self, columns=columns)
+    def __init__(self):
+        pass
 
-    def nodes_exp(self, pf):
-        nodes = [2, 3]
-        magnus = [1, 2]
+    def nodes_exp(self, pf, nodes=[2, 3], magnus=[1, 2]):
         solns = {}
         dts = []
 
         for i, node in enumerate(nodes):
             pf.nodes = node
             pf.magnus = magnus[i]
-            slope = self.short_convergence_exp(pf)
+            slope = self.convergence_exp(pf, steps=[4, 7])
             print slope
 
         return True
 
-    def short_convergence_exp(self, pf, steps=[4, 7]):
-        experiment = Experiment()
-
-        ref_traj = pf.compute_reference()
-        ref_solution = pf.get_final_solution(ref_traj)
-
-        nsteps = [2**i for i in steps]
-        for i, step in enumerate(nsteps):
-            pf.nsteps = step
-            pf.dt = pf.tfinal / pf.nsteps
-            trajectory = pf.run()
-            final_solution = pf.get_final_solution(trajectory)
-            error = self.compute_error(final_solution, ref_solution)
-
-            experiment.loc[i] = pf.dt, pf.nsteps, final_solution, error, trajectory
-
-        experiment.astype({'dt': np.float_,
-                           'nsteps': np.int_,
-                           'error': np.float_})
-
-        return experiment
-
     def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
-        experiment = Experiment()
+        params = pf._save_params()
+        results = Trajectory(params)
 
         ref_traj = pf.compute_reference()
-        ref_solution = pf.get_final_solution(ref_traj)
 
+        errors = []
         nsteps = [2**i for i in steps]
         for i, step in enumerate(nsteps):
             pf.nsteps = step
             pf.dt = pf.tfinal / pf.nsteps
             trajectory = pf.run()
-            final_solution = pf.get_final_solution(trajectory)
-            error = self.compute_error(final_solution, ref_solution)
+            results.loc[i] = trajectory.loc[0]
+            errors.append(self.compute_error(results.loc[i]['final_solution'],
+                                            ref_traj.loc[0]['final_solution']))
 
-            experiment.loc[i] = pf.dt, pf.nsteps, final_solution, error, trajectory
+        results['error'] = errors
+        results.astype({'dt': np.float_,
+                        'nsteps': np.int_,
+                        'error': np.float_})
 
-        experiment.astype({'dt': np.float_,
-                           'nsteps': np.int_,
-                           'error': np.float_})
-        return experiment
+        return results
 
     @staticmethod
     def get_linear_fit_loglog(x, y):
@@ -449,6 +461,3 @@ class Experiment(pd.DataFrame):
         error = np.linalg.norm(abs(soln - ref_soln))  # / np.linalg.norm(ref_soln)
 
         return error.max()
-
-    def plot_convergence(self, x, y, **kwargs):
-        self.plot(x, y, **kwargs)
