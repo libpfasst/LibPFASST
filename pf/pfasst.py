@@ -8,10 +8,12 @@ from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 State = namedtuple(
     'State', ['time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'])
 Timing = namedtuple('Timing', ['task', 'step', 'iter', 'level', 'time'])
+
 
 def create_pf_params():
     parser = argparse.ArgumentParser(
@@ -272,8 +274,9 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         self._create_pf_string()
         self.write_to_file()
         self._save_params()
-        pkl_path = self.pkl.format(self.nprob, self.tfinal, self.dt, self.levels,
-                                   self.nodes[0], self.magnus[0], self.tasks)
+        pkl_path = self.pkl.format(self.nprob, self.tfinal, self.dt,
+                                   self.levels, self.nodes[0], self.magnus[0],
+                                   self.tasks)
 
         try:
             trajectory = Trajectory(self.params, pkl_path=pkl_path)
@@ -352,9 +355,12 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 
 
 class Trajectory(pd.DataFrame):
+
     def __init__(self, pf_params, data=None, pkl_path=None):
-        columns = ['dt', 'nsteps', 'nodes', 'magnus', 'iterations',
-                   'tfinal', 'final_solution', 'data']
+        columns = [
+            'dt', 'nsteps', 'nodes', 'magnus', 'iterations', 'tfinal',
+            'final_solution', 'data'
+        ]
 
         super(Trajectory, self).__init__(columns=columns)
         self.pf_params = pf_params
@@ -405,6 +411,44 @@ class Trajectory(pd.DataFrame):
     def plot_convergence(self, x, y, **kwargs):
         self.plot(x, y, **kwargs)
 
+    def plot_residual_vs_iteration_for_each_cpu(self, data=None):
+        fig, ax = plt.subplots()
+        ax.set_title('Residuals of last {} steps'.format(self.pf_params['tasks']))
+        ax.set_xlabel('Iteration Number')
+        ax.set_ylabel('Log$_{10}$ Residual)')
+
+        if data is None:
+            data = self.get_final_block()
+
+        for cpu in range(self.pf_params['tasks']):
+            data[(data['rank'] == cpu) & (data['level'] == 1)].plot(
+                'iter',
+                'residual',
+                logy=True,
+                label='cpu{}'.format(cpu),
+                marker='o',
+                ax=ax)
+        ax.legend()
+
+    def plot_residual_vs_cpu_for_each_iteration(self, data=None):
+        fig, ax = plt.subplots()
+        ax.set_title('Residuals of last {} steps'.format(self.pf_params['tasks']))
+        ax.set_xlabel('CPU Number')
+        ax.set_ylabel('Log$_{10}$ Residual)')
+
+        if data is None:
+            data = self.get_final_block()
+        for iteration in range(self.pf_params['iters']):
+            data[(data['iter'] == iteration + 1) &
+                 (data['level'] == 1)].sort_values('rank').plot(
+                    'rank',
+                    'residual',
+                    logy=True,
+                    label='iter{}'.format(iteration + 1),
+                    marker='o',
+                    ax=ax)
+        ax.legend()
+
 
 class Experiment():
     """A variety of different pfasst-related experiments to be performed
@@ -439,25 +483,24 @@ class Experiment():
             pf.dt = pf.tfinal / pf.nsteps
             trajectory = pf.run()
             results.loc[i] = trajectory.loc[0]
-            errors.append(self.compute_error(results.loc[i]['final_solution'],
-                                            ref_traj.loc[0]['final_solution']))
+            errors.append(
+                self.compute_error(results.loc[i]['final_solution'],
+                                   ref_traj.loc[0]['final_solution']))
 
         results['error'] = errors
-        results.astype({'dt': np.float_,
-                        'nsteps': np.int_,
-                        'error': np.float_})
+        results.astype({'dt': np.float_, 'nsteps': np.int_, 'error': np.float_})
 
         return results
 
     @staticmethod
     def get_linear_fit_loglog(x, y):
-        slope, intercept = np.polyfit(np.log10(x.values),
-                                      np.log10(y.values), 1)
+        slope, intercept = np.polyfit(np.log10(x.values), np.log10(y.values), 1)
 
         return slope, intercept
 
     @staticmethod
     def compute_error(soln, ref_soln):
-        error = np.linalg.norm(abs(soln - ref_soln))  # / np.linalg.norm(ref_soln)
+        error = np.linalg.norm(
+            abs(soln - ref_soln))  # / np.linalg.norm(ref_soln)
 
         return error.max()
