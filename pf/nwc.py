@@ -7,13 +7,12 @@ import numpy as np
 
 class NWC(PFASST):
 
-    def __init__(self, home, **kwargs):
-
-        PFASST.__init__(self, home, **kwargs)
+    def __init__(self, home, params=None, **kwargs):
+        if params is None:
+            params = Params()
+        PFASST.__init__(self, home, params, **kwargs)
         print 'Setting up NWC'
-        self.params = kwargs
         self.nwc = self.home + '/nwc.sh'
-        self.exact_dir = self.params['exact_dir']
         self.cwd = getcwd() + '/'
         self.nwc_base_string = 'echo\nscratch_dir ./scratch\npermanent_dir ./perm\n\n'\
                 'start calc\n\ngeometry "system" units angstroms nocenter noautoz noautosym\n {}\nend\n\n' \
@@ -41,34 +40,34 @@ class NWC(PFASST):
         self.final = self._get_nwc_dmat('final_solution')
 
         self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/x_transform.ints', self.xtrans)
+            self.p.exact_dir + '/x_transform.ints', self.xtrans)
         self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/y_transform.ints', self.ytrans)
+            self.p.exact_dir + '/y_transform.ints', self.ytrans)
         self._write_zndarray_to_fortranfile(
-            self.exact_dir + '/initial_condition.b', self.initial)
-        self._write_mo_and_ao_sizes(self.exact_dir, self.xtrans.shape)
+            self.p.exact_dir + '/initial_condition.b', self.initial)
+        self._write_mo_and_ao_sizes(self.p.exact_dir, self.xtrans.shape)
 
     def _create_nwc_inp(self):
-        geometry = '\n'.join(self.params['molecule'].split(';'))
-        nwc_inp = self.nwc_base_string.format(geometry, self.params['basis'],
-                                          self.params['tfinal'],
-                                          self.params['tfinal'] / 2048.)
+        geometry = '\n'.join(self.p.molecule.split(';'))
+        nwc_inp = self.nwc_base_string.format(geometry, self.p.basis,
+                                          self.p.tfinal,
+                                          self.p.tfinal / 2048.)
 
         try:
-            makedirs(self.exact_dir)
-            makedirs(self.exact_dir + '/perm')
-            makedirs(self.exact_dir + '/scratch')
+            makedirs(self.p.exact_dir)
+            makedirs(self.p.exact_dir + '/perm')
+            makedirs(self.p.exact_dir + '/scratch')
         except OSError:
             return False
         else:
-            with open(self.exact_dir + '/nw.inp', 'w') as f:
+            with open(self.p.exact_dir + '/nw.inp', 'w') as f:
                 f.write(nwc_inp)
 
         return True
 
     def _run_nwc(self):
         FNULL = open(devnull, 'w')
-        chdir(self.exact_dir)
+        chdir(self.p.exact_dir)
         print '---- running nwc ----'
         call([self.nwc, 'nw'], stdout=FNULL)
         chdir(self.cwd)
@@ -77,7 +76,7 @@ class NWC(PFASST):
         return True
 
     def _parse_transforms(self):
-        with open(self.exact_dir + 'nw.out', 'r') as f:
+        with open(self.p.exact_dir + 'nw.out', 'r') as f:
             content = f.readlines()
 
         dims = {}
@@ -141,7 +140,7 @@ class NWC(PFASST):
         return matrix
 
     def _get_nwc_dmat(self, fname):
-        with open(self.exact_dir + fname, 'r') as f:
+        with open(self.p.exact_dir + fname, 'r') as f:
             content = f.readlines()
 
         l = []

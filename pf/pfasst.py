@@ -1,3 +1,15 @@
+"""Wrapper classes for running pfasst.exe executables
+
+Classes
+======
+PFASST : contains all setup/run information for a PFASST calculation
+Experiment : mostly empty class with methods that take PFASST as input and
+perform a given 'experiment'
+Params : stores all PFASST parameters, mostly implemented to reduce number of
+PFASST class attributes
+Results : pd.DataFrame child that implements pfasst-related plots, and results
+storing
+"""
 import argparse
 import glob
 import re
@@ -6,101 +18,131 @@ from pprint import pprint
 from os import remove
 from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
+import attr
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-State = namedtuple(
-    'State', ['time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'])
+Trajectory = namedtuple(
+    'Trajectory',
+    ['time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'])
 Timing = namedtuple('Timing', ['task', 'step', 'iter', 'level', 'time'])
 
 
-def create_pf_params():
-    parser = argparse.ArgumentParser(
-        description='From nml file for PFASST, generate exact/ref solutions')
-    parser.add_argument('--pfasst_input', type=str, default=None)
-    parser.add_argument('--tfinal', type=float, default=1.0)
-    parser.add_argument('--dt', type=float, default=0.1)
-    parser.add_argument('--nsteps', type=float, default=16)
-    parser.add_argument('--levels', type=int, default=1)
-    parser.add_argument('--iters', type=int, default=5)
-    parser.add_argument('--sweeps', type=int, nargs='*', default=[3])
-    parser.add_argument('--nodes', type=int, nargs='*', default=[2])
-    parser.add_argument('--magnus', type=int, nargs='*', default=[1])
-    parser.add_argument(
-        '--nprob', type=int, default=4, help='Default problem: toda')
-    parser.add_argument(
-        '--tasks', type=int, default=1, help='Number of MPI tasks')
-    parser.add_argument('--basis', type=str, default='')
-    parser.add_argument('--molecule', type=str, default='')
-    parser.add_argument('--exact_dir', type=str, default='')
-    parser.add_argument('--base_dir', type=str, default='output')
-    parser.add_argument('-v', '--verbose', type=bool, default=False)
+@attr.s(slots=True)
+class Params(object):
+    """Class containing all parameters necessary for running an NWC/PFASST
+    calculation.
 
-    args = parser.parse_args()
-    return args
+    This is the main class that is ultimately passed around from all three of
+    the other classes found in this file. Its structure/usability is very
+    important, it's still in the works. Class-level assignment via attr is used
+    in order to make access attribute style rather than dictionary.
 
+    Sets defaults first, then, if `nb` is set to False (i.e for use in a
+    shell), it'll then invoke an ArgumentParser to get command-line options,
+    including the possibility to read in a file. These read-in-from-cli options
+    are used to overwrite default parameter values.
+    """
+    #pylint: disable=too-many-instance-attributes
+    nb = attr.ib(default=True, repr=False)
+    filename = attr.ib(default=None)
+    levels = attr.ib(default=1)
+    tfinal = attr.ib(default=1.0)
+    iterations = attr.ib(default=10)
+    nsteps = attr.ib(default=16)
+    nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
+    magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
+    sweeps = attr.ib(default=[3], validator=attr.validators.instance_of(list))
+    nprob = attr.ib(default=4)
+    tasks = attr.ib(default=1)
+    basis = attr.ib(default='')
+    molecule = attr.ib(default='')
+    exact_dir = attr.ib(default='')
+    base_dir = attr.ib(default='output', repr=False)
+    verbose = attr.ib(default=False, repr=False)
+    nersc = attr.ib(default=False)
+    dt = attr.ib(default=None)
+    plist = attr.ib(repr=False)
+    @plist.default
+    def get_options_from_cli(self):
+        if not self.nb:
+            parser = argparse.ArgumentParser(
+                description='From nml file for PFASST, generate exact/ref solutions')
+            parser.add_argument('--filename', type=str)
+            parser.add_argument('--tfinal', type=float)
+            parser.add_argument('--nsteps', type=int)
+            parser.add_argument('--levels', type=int)
+            parser.add_argument('--iterations', type=int)
+            parser.add_argument('--sweeps', type=int, nargs='*')
+            parser.add_argument('--nodes', type=int, nargs='*')
+            parser.add_argument('--magnus', type=int, nargs='*')
+            parser.add_argument('--nprob', type=int, help='Default problem: toda')
+            parser.add_argument('--tasks', type=int, help='Number of MPI tasks')
+            parser.add_argument('--basis', type=str)
+            parser.add_argument('--molecule', type=str)
+            parser.add_argument('--exact_dir', type=str)
+            parser.add_argument('--base_dir', type=str)
+            parser.add_argument('-v', '--verbose', type=bool)
+            args = parser.parse_args()
+            self.overwrite_with(args)
+            return args.__dict__
 
-def create_nb_pf_params():
-    params = {
-        'pfasst_input': None,
-        'levels': 1,
-        'sweeps': [3],
-        'tfinal': 1.0,
-        'iters': 5,
-        'dt': 0.1,
-        'nsteps': 16,
-        'nodes': [2],
-        'magnus': [1],
-        'nprob': 4,
-        'tasks': 1,
-        'basis': '',
-        'molecule': '',
-        'exact_dir': '',
-        'base_dir': 'output',
-        'verbose': False
-    }
-    return params
+        return None
 
+    def overwrite_with(self, args):
+        for k, v in args.__dict__.iteritems():
+            if v is not None:
+                setattr(self, k, v)
 
-class PFASST:
-
-    def __init__(self, home, **kwargs):
-        self.params = kwargs
-        self.home = home
-        if 'nersc' in self.params:
-            self.NERSC = self.params['nersc']
-        else:
-            self.NERSC = None
-        self.exe = self.home + 'main.exe'
-        self.levels = self.params['levels']
-        self.iters = self.params['iters']
-        self.verbose = self.params['verbose']
-        self.input_file = self.params['pfasst_input']
-        self.tasks = self.params['tasks']
-        self.tfinal = self.params['tfinal']
-        self.sweeps = self.params['sweeps']
-        self.base_dir = self.params['base_dir']
-        self.output = ''
-        if type(self.sweeps) is int:
-            self.sweeps = [self.sweeps]
-        self.magnus = self.params['magnus']
-        if type(self.magnus) is int:
-            self.magnus = [self.magnus]
-        self.nodes = self.params['nodes']
-        if type(self.nodes) is int:
-            self.nodes = [self.nodes]
-        if self.params['nsteps']:
-            self.nsteps = self.params['nsteps']
+    def __attrs_post_init__(self):
+        if self.dt is None:
             self.dt = self.tfinal / self.nsteps
-        elif self.params['dt']:
-            self.dt = self.params['dt']
-            self.nsteps = self.tfinal * self.dt
+        else:
+            self.nsteps = self.tfinal / self.dt
 
-        self.nprob = self.params['nprob']
-        self.basis = self.params['basis']
-        self.molecule = self.params['molecule']
-        self.exact_dir = self.params['exact_dir']
+    def asdict(self):
+        return attr.asdict(self)
+
+
+class PFASST(object):
+    """A wrapper class for compiled libpfasst programs.
+    1. Get all the parameters in place
+    2. (Optional) Change parameters (for experiments)
+    3. Run
+       a. Create the pfasst input file contents as str
+       b. Write this string to file
+       c. Check for saved pickle, if yes -> load, and return Results
+       d. (If necessary) Run calculation via check_output
+       e. (If necessary) Get and save Results from Output
+
+    Parameters
+    ==========
+    params : A Params class object is  either passed in, or a default created. Contains all
+    necessary parameters for running a PFASST calculation.
+    home : a (str) path to the project's root e.g. '/home/bkrull/apps/pfasst/dev' is used to
+    path to binary
+
+    Example
+    ======
+    >>> from pf.pfasst import PFASST
+    >>> pf = PFASST('/home/bkrull/pfasst/')
+    >>> pf.p.nsteps = 32
+    >>> pf.p.tfinal = 5.0
+    >>> results = pf.run()
+    """
+
+    def __init__(self, home, params=None, **kwargs):
+        self.home = home
+        if params is None:
+            self.p = Params()
+        else:
+            self.p = params
+
+        self.exe = self.home + 'main.exe'
+
+        for k, v in kwargs.iteritems():
+            settatr(self.p, k, v)
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\t\
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\
@@ -108,46 +150,40 @@ abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pr
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 \n\tnprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n/\n"
 
-        if self.input_file:
-            with open(self.input_file, 'r') as f:
+        if self.p.filename:
+            with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
                 content = f.read()
             self._override_default_params(content)
 
-        if self.nprob == 1:
-            self.filename = 'rabi.nml'
-        elif self.nprob == 2:
-            self.filename = 'tdrabi.nml'
-        elif self.nprob == 3:
-            mol_name = re.findall(r'([A-Z]+)', self.molecule, re.IGNORECASE)
-            self.filename = ''.join(mol_name) + '_' + self.basis + '.nml'
+        if self.p.nprob == 1:
+            self.p.filename = 'rabi.nml'
+        elif self.p.nprob == 2:
+            self.p.filename = 'tdrabi.nml'
+        elif self.p.nprob == 3:
+            mol_name = re.findall(r'([A-Z]+)', self.p.molecule, re.IGNORECASE)
+            self.p.filename = ''.join(mol_name) + '_' + self.p.basis + '.nml'
         else:
-            self.filename = 'toda.nml'
+            self.p.filename = 'toda.nml'
 
-        if not self.base_dir:
-            self.base_dir = 'output'
-
-        self.pkl = self.base_dir + '/nprob_{}-tfinal_{}-dt_{}-levels_{}-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
-        self.params = self._save_params()
+        self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-levels_{}'+ \
+                   '-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
-        if type(self.magnus) is int:
-            self.magnus = [self.magnus]
-        if type(self.nodes) is int:
-            self.nodes = [self.nodes]
-        if type(self.sweeps) is int:
-            self.sweeps = [self.sweeps]
-        nodes = ' '.join(map(str, self.nodes))
-        magnus = ' '.join(map(str, self.magnus))
-        sweeps = ' '.join(map(str, self.sweeps))
+        self.p.magnus = self._make_sure_is_list(self.p.magnus)
+        self.p.nodes = self._make_sure_is_list(self.p.nodes)
+        self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
+        nodes = ' '.join(map(str, self.p.nodes))
+        magnus = ' '.join(map(str, self.p.magnus))
+        sweeps = ' '.join(map(str, self.p.sweeps))
 
-        pfinp = self.base_string.format(self.levels, self.iters,\
-                                        nodes, sweeps, magnus, self.tfinal, \
-                                        self.nsteps, self.nprob, \
-                                        "\'"+self.basis+"\'", \
-                                        "\'"+self.molecule+"\'", \
-                                        "\'"+self.exact_dir+"\'")
+        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations,\
+                                                nodes, sweeps, magnus, self.p.tfinal, \
+                                                self.p.nsteps, self.p.nprob, \
+                                                "\'"+self.p.basis+"\'", \
+                                                "\'"+self.p.molecule+"\'", \
+                                                "\'"+self.p.exact_dir+"\'")
 
-        return pfinp
+        return self.pfstring
 
     def _override_default_params(self, content):
         try:
@@ -155,162 +191,139 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         except AttributeError:
             pass
         else:
-            self.magnus = map(int, match.group(1).split())
+            self.p.magnus = map(int, match.group(1).split())
 
         try:
             match = re.search(r'nsweeps = (.+)', content)
         except AttributeError:
             pass
         else:
-            self.sweeps = map(int, match.group(1).split())
+            self.p.sweeps = map(int, match.group(1).split())
 
         try:
             match = re.search(r'nnodes = (.+)', content)
         except AttributeError:
             pass
         else:
-            self.nodes = map(int, match.group(1).split())
+            self.p.nodes = map(int, match.group(1).split())
 
         try:
-            self.levels = int(re.search(r'nlevels\ =\ (.+)', content).group(1))
+            self.p.levels = int(re.search(r'nlevels\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
-            self.iters = int(re.search(r'niters\ =\ (.+)', content).group(1))
+            self.p.iterations = int(re.search(r'niters\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
-            self.tfinal = float(re.search(r'Tfin\ =\ (.+)', content).group(1))
+            self.p.tfinal = float(re.search(r'Tfin\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
-            self.nsteps = int(re.search(r'nsteps\ =\ (.+)', content).group(1))
+            self.p.nsteps = int(re.search(r'nsteps\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
-            self.dt = self.tfinal / self.nsteps
+            self.p.dt = self.p.tfinal / self.p.nsteps
         except AttributeError:
             pass
         try:
-            self.nprob = int(re.search(r'nprob\ =\ ([0-9])', content).group(1))
+            self.p.nprob = int(re.search(r'nprob\ =\ ([0-9])', content).group(1))
         except AttributeError:
             pass
 
-        if self.nprob == 3:
+        if self.p.nprob == 3:
             try:
-                self.basis = re.search(r'basis\ =\ \'(.+)\'', content).group(1)
+                self.p.basis = re.search(r'basis\ =\ \'(.+)\'', content).group(1)
             except AttributeError:
                 pass
             try:
-                self.molecule = re.search(r'molecule\ =\ \'(.+)\'',
+                self.p.molecule = re.search(r'molecule\ =\ \'(.+)\'',
                                           content).group(1)
             except AttributeError:
                 pass
             try:
-                self.exact_dir = re.search(r'exact\_dir\ =\ \'(.+)\'',
+                self.p.exact_dir = re.search(r'exact\_dir\ =\ \'(.+)\'',
                                            content).group(1)
             except AttributeError:
                 pass
         else:
-            self.basis = ''
-            self.molecule = ''
-            self.exact_dir = ''
-
-    def _save_params(self):
-        params = {
-            'tasks': self.tasks,
-            'pfasst_input': self.input_file,
-            'tfinal': self.tfinal,
-            'iters': self.iters,
-            'levels': self.levels,
-            'sweeps': self.sweeps,
-            'magnus': self.magnus,
-            'nodes': self.nodes,
-            'nprob': self.nprob,
-            'basis': self.basis,
-            'molecule': self.molecule,
-            'exact_dir': self.exact_dir,
-            'base_dir': self.base_dir,
-            'nsteps': self.nsteps,
-            'dt': self.dt,
-            'verbose': self.verbose,
-            'pkl': self.pkl
-        }
-
-        self.params = params
-        return params
+            self.p.basis = ''
+            self.p.molecule = ''
+            self.p.exact_dir = ''
 
     def write_to_file(self):
-        self.pfinp = self._create_pf_string()
+        self.pfstring = self._create_pf_string()
 
-        with open(self.base_dir + '/' + self.filename, 'w') as f:
-            f.write(self.pfinp)
+        with open(self.p.base_dir + '/' + self.p.filename, 'w') as f:
+            f.write(self.pfstring)
 
     def print_params(self):
         params = {
-            'tfinal': self.tfinal,
-            'nsteps': self.nsteps,
-            'dt': self.dt,
-            'nodes': self.nodes,
-            'magnus': self.magnus
+            'tfinal': self.p.tfinal,
+            'nsteps': self.p.nsteps,
+            'dt': self.p.dt,
+            'nodes': self.p.nodes,
+            'magnus': self.p.magnus
         }
         pprint(params, width=1)
 
-    def _build_nersc_command(self):
-        command = ['srun', '-n', str(self.tasks)]
-        for option in self.NERSC:
-            command.extend(option)
-        command.extend([self.exe, self.base_dir + '/' + self.filename])
-
-        return command
-
     def run(self):
-        if type(self.nodes) is int:
-            self.nodes = [self.nodes]
-        if type(self.magnus) is int:
-            self.magnus = [self.magnus]
-        if type(self.sweeps) is int:
-            self.sweeps = [self.sweeps]
-        self._create_pf_string()
-        self.write_to_file()
-        self._save_params()
-        pkl_path = self.pkl.format(self.nprob, self.tfinal, self.dt,
-                                   self.levels, self.nodes[0], self.magnus[0],
-                                   self.tasks)
+        pkl_path = self._pre_run_setup()
 
         try:
-            trajectory = Trajectory(self.params, pkl_path=pkl_path)
+            results = Results(self.p, pkl_path=pkl_path)
         except:
             try:
-                if self.verbose:
-                    nodes = ' '.join(map(str, self.nodes))
-                    magnus = ' '.join(map(str, self.magnus))
+                if self.p.verbose:
+                    nodes = ' '.join(map(str, self.p.nodes))
+                    magnus = ' '.join(map(str, self.p.magnus))
 
                     print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
-                        self.tasks, nodes, magnus, self.dt)
+                        self.p.tasks, nodes, magnus, self.p.dt)
 
-                if self.NERSC:
-                    command = self._build_nersc_command()
-                else:
-                    command = ['mpirun', '-np', str(self.tasks), self.exe, \
-                               self.base_dir + '/' + self.filename]
+                command = self._build_command()
                 output = check_output(command, stderr=STDOUT)
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
             else:
-                trajectory = self._get_traj_from_output(output)
+                results = self._get_results_from_output(output)
 
-                trajectory.save(pkl_path)
+                results.save(pkl_path)
                 self._cleanup()
 
-        return trajectory
+        return results
+
+    def _build_command(self):
+        if self.p.nersc:
+            command = ['srun', '-n', str(self.p.tasks)]
+            for option in self.p.nersc:
+                command.extend(option)
+            command.extend([self.exe, self.p.base_dir + '/' + self.p.filename])
+        else:
+            command = ['mpirun', '-np', str(self.p.tasks), self.exe, \
+                        self.p.base_dir + '/' + self.p.filename]
+
+        return command
+
+    def _pre_run_setup(self):
+        self.p.magnus = self._make_sure_is_list(self.p.magnus)
+        self.p.nodes = self._make_sure_is_list(self.p.nodes)
+        self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
+        self._create_pf_string()
+        self.write_to_file()
+        pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
+                                   self.p.levels, self.p.nodes[0], self.p.magnus[0],
+                                   self.p.tasks)
+
+        return pkl_path
 
     def _cleanup(self):
-        for file in glob.iglob(self.base_dir + '/*_soln'):
+        for file in glob.iglob(self.p.base_dir + '/*_soln'):
             remove(file)
 
-    def _get_traj_from_output(self, output):
-        data = pd.DataFrame(columns=State._fields)
+    def _get_results_from_output(self, output):
+        trajectory = pd.DataFrame(columns=Trajectory._fields)
         prog = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
         )
@@ -322,15 +335,15 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                 rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
                 residual_value = float(match.group(6))
 
-                path_to_solution = self.base_dir+'/'+\
+                path_to_solution = self.p.base_dir+'/'+\
                                    "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
                                        time, rank, step, iteration, level)
                 solution = self._get_solution(path_to_solution)
-                data.loc[i] = time, rank, step, iteration, \
+                trajectory.loc[i] = time, rank, step, iteration, \
                               level, residual_value, solution
 
-        trajectory = Trajectory(self.params, data=data)
-        return trajectory
+        results = Results(self.p, trajectory=trajectory)
+        return results
 
     @staticmethod
     def _get_solution(path_to_solution):
@@ -344,54 +357,71 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         return solution
 
     def compute_reference(self):
-        self.nsteps = 2**10
-        self.magnus = 2
+        self.p.nsteps = 2**10
+        self.p.magnus = 2
 
-        self.dt = self.tfinal / self.nsteps
-
+        self.p.dt = self.p.tfinal / self.p.nsteps
         traj = self.run()
 
         return traj
 
+    @staticmethod
+    def _make_sure_is_list(thing):
+        if type(thing) is not list:
+            return [thing]
+        else:
+            return thing
 
-class Trajectory(pd.DataFrame):
 
-    def __init__(self, pf_params, data=None, pkl_path=None):
+class Results(pd.DataFrame):
+    """DataFrame derived container for holding all results. Implements
+    auxiliary manipulations of df entries generally necessary for analyses
+    related to PFASST calculations. Also implements plot functions that are
+    derived from DataFrame.plots
+
+    Parameters
+    ==========
+    params : holds all the PFASST class parameters as a Params object
+    trajectory : run data from a PFASST.run() evaluation, default None
+    pkl_path : path to a pickle file to recover data
+    """
+
+    def __init__(self, params, trajectory=None, pkl_path=None):
         columns = [
             'dt', 'nsteps', 'nodes', 'magnus', 'iterations', 'tfinal',
-            'final_solution', 'data'
+            'final_solution', 'trajectory'
         ]
 
-        super(Trajectory, self).__init__(columns=columns)
-        self.pf_params = pf_params
+        super(Results, self).__init__(columns=columns)
+        self.p = params
         if pkl_path is not None:
             self.load(pkl_path)
-        elif data is not None:
-            self._create_trajectory(data)
+        elif trajectory is not None:
+            self._create_trajectory(trajectory)
 
-    def _create_trajectory(self, data):
-        final_solution = self._get_final_solution(data)
+    def _create_trajectory(self, trajectory):
+        final_solution = self._get_final_solution(trajectory)
 
-        self.loc[0] = self.pf_params['dt'], self.pf_params['nsteps'], \
-                      self.pf_params['nodes'], self.pf_params['magnus'], \
-                      self.pf_params['iters'], self.pf_params['tfinal'], \
-                      final_solution, data
+        self.loc[0] = self.p.dt, self.p.nsteps, \
+                      self.p.nodes, self.p.magnus, \
+                      self.p.iterations, self.p.tfinal, \
+                      final_solution, trajectory
         return
 
-    def _get_final_solution(self, data):
-        solution = data[(data['rank'] == self.pf_params['tasks'] - 1) & \
-                        (data['iter'] == self.pf_params['iters']) & \
-                        (data['time'] == self.pf_params['tfinal']) & \
-                        (data['level'] == self.pf_params['levels']) & \
-                        (data['step'] == self.pf_params['nsteps'])]['solution'].values
+    def _get_final_solution(self, trajectory):
+        solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
+                        (trajectory['iter'] == self.p.iterations) & \
+                        (trajectory['time'] == self.p.tfinal) & \
+                        (trajectory['level'] == self.p.levels) & \
+                        (trajectory['step'] == self.p.nsteps)]['solution'].values
 
         return solution
 
     def get_final_block(self, idx=0):
-        data = self.loc[idx]['data']
-        last_steps = self.loc[idx]['nsteps'] - self.pf_params['tasks']
+        traj = self.loc[idx]['trajectory']
+        last_steps = self.loc[idx]['nsteps'] - self.p.tasks
 
-        final_block = data[(data['step'] > last_steps)]
+        final_block = traj[(traj['step'] > last_steps)]
         return final_block
 
     def save(self, pkl_path):
@@ -411,36 +441,37 @@ class Trajectory(pd.DataFrame):
     def plot_convergence(self, x, y, **kwargs):
         self.plot(x, y, **kwargs)
 
-    def plot_residual_vs_iteration_for_each_cpu(self, data=None):
+    def plot_residual_vs_iteration_for_each_cpu(self, trajectory=None):
         fig, ax = plt.subplots()
-        ax.set_title('Residuals of last {} steps'.format(self.pf_params['tasks']))
+        ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('Iteration Number')
         ax.set_ylabel('Log$_{10}$ Residual)')
 
-        if data is None:
-            data = self.get_final_block()
+        if trajectory is None:
+            trajectory = self.get_final_block()
 
-        for cpu in range(self.pf_params['tasks']):
-            data[(data['rank'] == cpu) & (data['level'] == 1)].plot(
-                'iter',
-                'residual',
-                logy=True,
-                label='cpu{}'.format(cpu),
-                marker='o',
-                ax=ax)
+        for cpu in range(self.p.tasks):
+            trajectory[(trajectory['rank'] == cpu) & (trajectory[
+                'level'] == 1)].plot(
+                    'iter',
+                    'residual',
+                    logy=True,
+                    label='cpu{}'.format(cpu),
+                    marker='o',
+                    ax=ax)
         ax.legend()
 
-    def plot_residual_vs_cpu_for_each_iteration(self, data=None):
+    def plot_residual_vs_cpu_for_each_iteration(self, trajectory=None):
         fig, ax = plt.subplots()
-        ax.set_title('Residuals of last {} steps'.format(self.pf_params['tasks']))
+        ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('CPU Number')
         ax.set_ylabel('Log$_{10}$ Residual)')
 
-        if data is None:
-            data = self.get_final_block()
-        for iteration in range(self.pf_params['iters']):
-            data[(data['iter'] == iteration + 1) &
-                 (data['level'] == 1)].sort_values('rank').plot(
+        if trajectory is None:
+            trajectory = self.get_final_block()
+        for iteration in range(self.p.iterations):
+            trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
+                'level'] == 1)].sort_values('rank').plot(
                     'rank',
                     'residual',
                     logy=True,
@@ -450,7 +481,7 @@ class Trajectory(pd.DataFrame):
         ax.legend()
 
 
-class Experiment():
+class Experiment(object):
     """A variety of different pfasst-related experiments to be performed
     on a PFASST object
     """
@@ -471,16 +502,15 @@ class Experiment():
         return True
 
     def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
-        params = pf._save_params()
-        results = Trajectory(params)
+        results = Results(pf.p)
 
         ref_traj = pf.compute_reference()
 
         errors = []
         nsteps = [2**i for i in steps]
         for i, step in enumerate(nsteps):
-            pf.nsteps = step
-            pf.dt = pf.tfinal / pf.nsteps
+            pf.p.nsteps = step
+            pf.p.dt = pf.p.tfinal / pf.p.nsteps
             trajectory = pf.run()
             results.loc[i] = trajectory.loc[0]
             errors.append(
@@ -489,6 +519,9 @@ class Experiment():
 
         results['error'] = errors
         results.astype({'dt': np.float_, 'nsteps': np.int_, 'error': np.float_})
+
+        slope, _ = self.get_linear_fit_loglog(results.dt, results.error)
+        print 'slope = {}'.format(slope)
 
         return results
 
