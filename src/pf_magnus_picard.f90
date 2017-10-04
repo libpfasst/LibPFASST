@@ -3,6 +3,7 @@
 !
 ! This file is part of LIBPFASST.
 !
+
 ! LIBPFASST is free software: you can redistribute it and/or modify it
 ! under the terms of the GNU Lesser General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
@@ -26,6 +27,8 @@ module pf_mod_magnus_picard
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
      logical                 :: use_LUq_ = .false.
+     class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
+     real(pfdp), allocatable :: commutator_colloc_coefs(:,:)
    contains
      procedure :: sweep      => magpicard_sweep
      procedure :: initialize => magpicard_initialize
@@ -33,12 +36,12 @@ module pf_mod_magnus_picard
      procedure :: integrate  => magpicard_integrate
      procedure :: residual   => magpicard_residual
      procedure :: evaluate_all => magpicard_evaluate_all
-     procedure :: magpicard_destroy
      procedure(pf_f_eval_p), deferred :: f_eval
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
      procedure(pf_destroy_magpicard_p), deferred :: destroy
+     procedure :: magpicard_destroy
   end type pf_magpicard_t
 
   interface
@@ -50,19 +53,19 @@ module pf_mod_magnus_picard
        integer(c_int),    intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
-     subroutine pf_compute_omega_p(this, omega, f1, f2, coef, level)
+     subroutine pf_compute_omega_p(this, omega, integrals, f, coef)
        import pf_magpicard_t, pf_encap_t, c_int, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: omega
-       class(pf_encap_t), intent(inout) :: f1, f2
-       real(pfdp), intent(in) :: coef
-       integer, intent(in) :: level
+       class(pf_encap_t), intent(inout) :: omega, integrals
+       class(pf_encap_t), intent(inout) :: f(:)
+       real(pfdp), intent(in) :: coef(:)
      end subroutine pf_compute_omega_p
-     subroutine pf_compute_time_ev_ops_p(this, omega, u)
+     subroutine pf_compute_time_ev_ops_p(this, omega, u, level)
        import pf_magpicard_t, pf_encap_t, c_int, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: u
+       integer, intent(in) :: level
      end subroutine pf_compute_time_ev_ops_p
      subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, u)
        import pf_magpicard_t, pf_encap_t, c_int, pfdp
@@ -91,14 +94,8 @@ contains
     integer    :: m, n, p
     real(pfdp) :: t
     real(pfdp) :: dtsdc(1:lev%nnodes-1)
-    real(pfdp), allocatable :: coefs(:)
-    class(pf_encap_t), allocatable :: time_ev_op(:)
 
     call start_timer(pf, TLEVEL+lev%index-1)
-
-    allocate(coefs(lev%nnodes))
-    call lev%ulevel%factory%create_array(time_ev_op, &
-         lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     do m = 1, lev%nnodes-1
        call lev%R(m)%copy(lev%Q(m+1))
@@ -108,26 +105,38 @@ contains
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     do m = 1, lev%nnodes
-      coefs(m) = (t-t0)**2 / 12.0_pfdp
-      call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-      t=t+dtsdc(m)
+       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+       t=t+dtsdc(m)
     end do
 
     call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
 
+    if (lev%nnodes-1 == 2) then
+        this%commutator_colloc_coefs(1,:) = (/0.022916666666667, &
+                                              -0.002083333333333, &
+                                              0.002083333333333/)
+
+        this%commutator_colloc_coefs(2,:) = (/0.066666666666667, &
+                                              0.016666666666667, &
+                                              0.066666666666667/)
+     else
+        this%commutator_colloc_coefs(:,:) = 0.0_pfdp
+     endif
+
     do m = 1, lev%nnodes-1
-       do p = 1, this%npieces
-          call this%compute_omega(lev%S(m), lev%F(1,p), lev%F(m+1,p), coefs(m+1), lev%index)
-          call this%compute_time_ev_ops(lev%S(m), time_ev_op(m))
-          call this%propagate_solution(lev%Q(1), lev%Q(m+1), time_ev_op(m))
-       enddo
+       call start_timer(pf, TAUX)
+       call this%compute_omega(this%omega(m), lev%S(m), lev%F(:,1), &
+                               this%commutator_colloc_coefs(m,:))
+       call end_timer(pf, TAUX)
+       call start_timer(pf, TAUX+1)
+       call this%compute_time_ev_ops(this%omega(m), this%time_ev_op(m), lev%index)
+       call end_timer(pf, TAUX+1)
+       call start_timer(pf, TAUX+2)
+       call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
+       call end_timer(pf, TAUX+2)
     end do
 
-    ! Put the last node value into qend
     call lev%qend%copy(lev%Q(lev%nnodes))
-
-    call lev%ulevel%factory%destroy_array(time_ev_op, &
-         lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine magpicard_sweep
@@ -139,12 +148,17 @@ contains
     real(pfdp) :: dsdc(lev%nnodes-1)
     integer :: m,n,nnodes
 
-    this%npieces = 1
     nnodes = lev%nnodes
+    allocate(this%commutator_colloc_coefs(nnodes-1, nnodes))
     allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
     allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
-
     this%QtilI = 0.0_pfdp
+
+    call lev%ulevel%factory%create_array(this%omega, &
+          nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+    call lev%ulevel%factory%create_array(this%time_ev_op, &
+         nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     if(this%use_LUq_) then
         call myLUq(lev%qmat, this%QtilI, Nnodes, 1)
@@ -154,14 +168,13 @@ contains
             do n = 1,m
                 this%QtilI(m,n+1) =  dsdc(n)
             end do
+            call this%omega(m)%setval(0.0_pfdp)
+            call this%time_ev_op(m)%setval(0.0_pfdp)
         end do
     end if
 
+    this%commutator_colloc_coefs(:,:) = 0.0_pfdp
     this%QdiffI = lev%qmat-this%QtilI
-
-!    print *,'QtilI',imp%QtilI
-!    print *,'QdiffI',imp%QdiffI
-!    print *,'Qmat',Lev%qmat
 
   end subroutine magpicard_initialize
 
@@ -218,10 +231,19 @@ contains
   end subroutine magpicard_residual
 
   ! Destroy the matrices
-  subroutine magpicard_destroy(this)
+  subroutine magpicard_destroy(this, lev)
       class(pf_magpicard_t),  intent(inout) :: this
+      class(pf_level_t),    intent(inout) :: lev
+      integer :: i, j
 
       deallocate(this%QdiffI)
       deallocate(this%QtilI)
+      deallocate(this%commutator_colloc_coefs)
+
+      call lev%ulevel%factory%destroy_array(this%omega, &
+           lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+      call lev%ulevel%factory%destroy_array(this%time_ev_op, &
+           lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
   end subroutine magpicard_destroy
 end module pf_mod_magnus_picard

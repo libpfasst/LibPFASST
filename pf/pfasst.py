@@ -13,20 +13,15 @@ storing
 import argparse
 import glob
 import re
-from collections import namedtuple
 from pprint import pprint
 from os import remove
 from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
+from pf.io import read_all_timings
 import attr
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
-Trajectory = namedtuple(
-    'Trajectory',
-    ['time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'])
-Timing = namedtuple('Timing', ['task', 'step', 'iter', 'level', 'time'])
 
 
 @attr.s(slots=True)
@@ -64,11 +59,13 @@ class Params(object):
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
     plist = attr.ib(repr=False)
+
     @plist.default
     def get_options_from_cli(self):
         if not self.nb:
             parser = argparse.ArgumentParser(
-                description='From nml file for PFASST, generate exact/ref solutions')
+                description='From nml file for PFASST, generate exact/ref solutions'
+            )
             parser.add_argument('--filename', type=str)
             parser.add_argument('--tfinal', type=float)
             parser.add_argument('--nsteps', type=int)
@@ -77,7 +74,8 @@ class Params(object):
             parser.add_argument('--sweeps', type=int, nargs='*')
             parser.add_argument('--nodes', type=int, nargs='*')
             parser.add_argument('--magnus', type=int, nargs='*')
-            parser.add_argument('--nprob', type=int, help='Default problem: toda')
+            parser.add_argument(
+                '--nprob', type=int, help='Default problem: toda')
             parser.add_argument('--tasks', type=int, help='Number of MPI tasks')
             parser.add_argument('--basis', type=str)
             parser.add_argument('--molecule', type=str)
@@ -144,7 +142,7 @@ class PFASST(object):
         for k, v in kwargs.iteritems():
             settatr(self.p, k, v)
 
-        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\t\
+        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = .true.\n\t\
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = 1\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
@@ -208,11 +206,13 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             self.p.nodes = map(int, match.group(1).split())
 
         try:
-            self.p.levels = int(re.search(r'nlevels\ =\ (.+)', content).group(1))
+            self.p.levels = int(
+                re.search(r'nlevels\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
-            self.p.iterations = int(re.search(r'niters\ =\ (.+)', content).group(1))
+            self.p.iterations = int(
+                re.search(r'niters\ =\ (.+)', content).group(1))
         except AttributeError:
             pass
         try:
@@ -228,23 +228,25 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         except AttributeError:
             pass
         try:
-            self.p.nprob = int(re.search(r'nprob\ =\ ([0-9])', content).group(1))
+            self.p.nprob = int(
+                re.search(r'nprob\ =\ ([0-9])', content).group(1))
         except AttributeError:
             pass
 
         if self.p.nprob == 3:
             try:
-                self.p.basis = re.search(r'basis\ =\ \'(.+)\'', content).group(1)
+                self.p.basis = re.search(r'basis\ =\ \'(.+)\'',
+                                         content).group(1)
             except AttributeError:
                 pass
             try:
                 self.p.molecule = re.search(r'molecule\ =\ \'(.+)\'',
-                                          content).group(1)
+                                            content).group(1)
             except AttributeError:
                 pass
             try:
                 self.p.exact_dir = re.search(r'exact\_dir\ =\ \'(.+)\'',
-                                           content).group(1)
+                                             content).group(1)
             except AttributeError:
                 pass
         else:
@@ -268,32 +270,6 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         }
         pprint(params, width=1)
 
-    def run(self):
-        pkl_path = self._pre_run_setup()
-
-        try:
-            results = Results(self.p, pkl_path=pkl_path)
-        except:
-            try:
-                if self.p.verbose:
-                    nodes = ' '.join(map(str, self.p.nodes))
-                    magnus = ' '.join(map(str, self.p.magnus))
-
-                    print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
-                        self.p.tasks, nodes, magnus, self.p.dt)
-
-                command = self._build_command()
-                output = check_output(command, stderr=STDOUT)
-            except CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
-            else:
-                results = self._get_results_from_output(output)
-
-                results.save(pkl_path)
-                self._cleanup()
-
-        return results
-
     def _build_command(self):
         if self.p.nersc:
             command = ['srun', '-n', str(self.p.tasks)]
@@ -313,8 +289,8 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
-                                   self.p.levels, self.p.nodes[0], self.p.magnus[0],
-                                   self.p.tasks)
+                                   self.p.levels, self.p.nodes[0],
+                                   self.p.magnus[0], self.p.tasks)
 
         return pkl_path
 
@@ -322,14 +298,49 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         for file in glob.iglob(self.p.base_dir + '/*_soln'):
             remove(file)
 
-    def _get_results_from_output(self, output):
-        trajectory = pd.DataFrame(columns=Trajectory._fields)
-        prog = re.compile(
+        # for file in glob.iglob('fort.*'):
+        #     remove(file)
+
+    def run(self):
+        pkl_path = self._pre_run_setup()
+
+        try:
+            trajectory = pd.read_pickle(pkl_path)
+        except:
+            try:
+                if self.p.verbose:
+                    nodes = ' '.join(map(str, self.p.nodes))
+                    magnus = ' '.join(map(str, self.p.magnus))
+
+                    print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
+                        self.p.tasks, nodes, magnus, self.p.dt)
+
+                command = self._build_command()
+                output = check_output(command, stderr=STDOUT)
+            except CalledProcessError as exc:
+                print("Status : FAIL", exc.returncode, exc.output)
+            else:
+                trajectory = self._get_trajectory_from_output(output)
+                print 'here!'
+                trajectory.to_pickle(pkl_path)
+                self._cleanup()
+
+        results = Results(self.p, trajectory=trajectory)
+
+        return results
+
+    def _get_trajectory_from_output(self, output):
+        columns = [
+            'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution']
+#            'feval', 'omega', 'exp', 'solution'
+#        ]
+        trajectory = pd.DataFrame(columns=columns)
+        prog_state = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
         )
 
         for i, line in enumerate(output.split('\n')):
-            match = prog.search(line)
+            match = prog_state.search(line)
             if match:
                 time = float(match.group(1))
                 rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
@@ -342,8 +353,21 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                 trajectory.loc[i] = time, rank, step, iteration, \
                               level, residual_value, solution
 
-        results = Results(self.p, trajectory=trajectory)
-        return results
+        #timings = read_all_timings(self.p.base_dir)
+        #trajectory = self._merge_timings_into(trajectory, timings)
+
+        return trajectory
+
+    def _merge_timings_into(trajectory, timings):
+        df_timings = pd.DataFrame(columns=timings[0]._fields)
+
+        for i, step in enumerate(timings):
+            df_timings.loc[i] = step
+
+        df_timings.drop(['block', 'cycle', 'start', 'end'], inplace=True)
+        # remaining columns: timer, rank, step, iteration, delta
+
+        return trajectory
 
     @staticmethod
     def _get_solution(path_to_solution):
@@ -397,9 +421,9 @@ class Results(pd.DataFrame):
         if pkl_path is not None:
             self.load(pkl_path)
         elif trajectory is not None:
-            self._create_trajectory(trajectory)
+            self._create_result_row(trajectory)
 
-    def _create_trajectory(self, trajectory):
+    def _create_result_row(self, trajectory):
         final_solution = self._get_final_solution(trajectory)
 
         self.loc[0] = self.p.dt, self.p.nsteps, \
