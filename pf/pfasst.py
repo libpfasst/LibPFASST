@@ -106,6 +106,16 @@ class Params(object):
     def asdict(self):
         return attr.asdict(self)
 
+    def print_params(self):
+        params = {
+            'tfinal': self.tfinal,
+            'nsteps': self.nsteps,
+            'dt': self.dt,
+            'nodes': self.nodes,
+            'magnus': self.magnus
+        }
+        pprint(params, width=1)
+
 
 class PFASST(object):
     """A wrapper class for compiled libpfasst programs.
@@ -124,6 +134,12 @@ class PFASST(object):
     necessary parameters for running a PFASST calculation.
     home : a (str) path to the project's root e.g. '/home/bkrull/apps/pfasst/dev' is used to
     path to binary
+
+    Exposed Methods
+    ===============
+    write_pfstring_to_file : writes the input file for executable in base_dir
+    run                    : with params set as desired, invokes exe and returns trajectory
+    compute_reference      : does a very very very small dt run
 
     Example
     ======
@@ -259,20 +275,11 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             self.p.exact_dir = ''
 
     def write_to_file(self):
+        """creates the input file on disk in the base_dir for the exe to run"""
         self.pfstring = self._create_pf_string()
 
         with open(self.p.base_dir + '/' + self.p.filename, 'w') as f:
             f.write(self.pfstring)
-
-    def print_params(self):
-        params = {
-            'tfinal': self.p.tfinal,
-            'nsteps': self.p.nsteps,
-            'dt': self.p.dt,
-            'nodes': self.p.nodes,
-            'magnus': self.p.magnus
-        }
-        pprint(params, width=1)
 
     def _build_command(self):
         if self.p.nersc:
@@ -445,6 +452,7 @@ class Results(pd.DataFrame):
         return
 
     def get_final_solution(self, trajectory):
+        """gets the final solution for the finest level from a trajectory"""
         solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
                         (trajectory['iter'] == self.p.iterations) & \
                         (trajectory['time'] == self.p.tfinal) & \
@@ -454,6 +462,7 @@ class Results(pd.DataFrame):
         return solution
 
     def get_final_block(self, idx=0):
+        """returns a the final block of the results class"""
         traj = self.loc[idx]['trajectory']
         last_steps = self.loc[idx]['nsteps'] - self.p.tasks
 
@@ -475,9 +484,16 @@ class Results(pd.DataFrame):
             return
 
     def plot_convergence(self, x, y, **kwargs):
+        """really nothing more than a wrapper to the df.plot function. maybe
+        time to deprecate it.
+        """
         self.plot(x, y, **kwargs)
 
     def plot_residual_vs_iteration_for_each_cpu(self, trajectory=None):
+        """plots residual vs iteration for each cpu (nicely named function),
+        optional input: a potentially longer trajectory. if no trajectory is
+        supplied then it defaults to grabbing the final block of steps.
+        """
         fig, ax = plt.subplots()
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('Iteration Number')
@@ -498,6 +514,10 @@ class Results(pd.DataFrame):
         ax.legend()
 
     def plot_residual_vs_cpu_for_each_iteration(self, trajectory=None):
+        """plots residual vs cpu for each iteration (nicely named function),
+        optional input: a potentially longer trajectory. if no trajectory is
+        supplied then it defaults to grabbing the final block of steps.
+        """
         fig, ax = plt.subplots()
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('CPU Number')
@@ -526,6 +546,9 @@ class Experiment(object):
         pass
 
     def nodes_exp(self, pf, nodes=[2, 3], magnus=[1, 2]):
+        """an experiment for testing the convergence of different number of sdc
+        nodes. wraps around the convergence experiment.
+        """
         solns = {}
         dts = []
 
@@ -538,6 +561,11 @@ class Experiment(object):
         return True
 
     def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
+        """convergence experiment for testing residual vs nsteps. has default
+        number of steps, but can be overridden for larger tests. returns a Results
+        class object where each row in the object corresponds to the parameters
+        of the calculation and the trajectory from the calculation.
+        """
         results = Results(pf.p)
 
         ref_traj = pf.compute_reference()
