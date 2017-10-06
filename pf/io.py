@@ -1,20 +1,21 @@
-
 import glob
 import re
 import os
 from collections import namedtuple
 
+Timing = namedtuple('Timing', [
+    'timer', 'rank', 'step', 'level', 'iter', 'delta', 'start', 'end'
+])
 
-Timing = namedtuple('Timing', ['timer', 'rank', 'block', 'step', 'iter', 'cycle',
-                               'delta', 'start', 'end'])
+Solution = namedtuple('Solution', ['step', 'iter', 'level', 'fname'])
 
-Solution = namedtuple('Solution', [ 'step', 'iter', 'level', 'fname' ])
-
+timers_of_interest = ['exp', 'feval', 'omega']
 
 def read_timings(fname):
 
-    prog = re.compile("timer:(.*), rank:(.*), block:(.*), step:(.*), iter:(.*), cycle:(.*), "
-                      + "time .rate(.*)Hz.:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)")
+    prog = re.compile(
+        "timer:(.*), rank:(.*), step:(.*), level:(.*), iter:(.*), cycle:(.*), "
+        + "time .rate(.*)Hz.:\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)")
 
     with open(fname, 'r') as f:
         output = f.read()
@@ -24,21 +25,24 @@ def read_timings(fname):
         match = prog.search(line)
         if match:
             timer = str(match.group(1)).strip()
-            rate  = float(match.group(7))
+            rate = float(match.group(7))
 
-            if True:
-                # something funky is happening with the block tag in
-                # libpfasst, just skip it for now...
-                rank, step, iteration, cycle = map(int, match.group(2, 4, 5, 6))
-                block = 1
-            else:
-                rank, block, step, iteration, cycle = map(int, match.group(2, 3, 4, 5, 6))
+            if timer not in timers_of_interest:
+                continue
 
-            delta, start, end = map(lambda x: float(x)/rate, match.group(8, 10, 11))
+            rank, step, iteration = map(int, match.group(2, 3, 5))
+            try:
+                level = map(int, match.group(4))
+            except ValueError:
+                pass # currently unable to print level correctly in exe
+                level = 99
 
-            timing = Timing(timer, rank, block, step, iteration, cycle, delta, start, end)
+            delta, start, end = map(lambda x: float(x) / rate,
+                                    match.group(8, 9, 10))
+
+            timing = Timing(timer, rank, step+1, level, iteration,
+                            delta, start, end)
             timings.append(timing)
-
 
     return timings
 
@@ -51,42 +55,42 @@ def read_all_timings(dname):
     return timings
 
 
-
 def read_avail(dname):
-  """Read output directory *dname* and return list of available
+    """Read output directory *dname* and return list of available
   solutions.
 
   Note that this does not read the solutions.
   """
 
-  prog = re.compile('(s(\d+)i(\d+)l(\d+)).npy')
+    prog = re.compile('(s(\d+)i(\d+)l(\d+)).npy')
 
-  solutions = []
-  for fname in os.listdir(dname):
-    m = prog.search(fname)
-    if m:
-      step, iteration, level = map(int, m.groups()[1:])
-      solutions.append(Solution(step, iteration, level,
-                                os.path.join(dname, m.group(0))))
+    solutions = []
+    for fname in os.listdir(dname):
+        m = prog.search(fname)
+        if m:
+            step, iteration, level = map(int, m.groups()[1:])
+            solutions.append(
+                Solution(step, iteration, level,
+                         os.path.join(dname, m.group(0))))
 
-  return solutions
+    return solutions
 
 
 def read_final(dname):
-  """Read output directory *dname* and return list of final solutions.
+    """Read output directory *dname* and return list of final solutions.
 
   Note that this does not read the solutions.
   """
 
-  avail = read_avail(dname)
+    avail = read_avail(dname)
 
-  solutions = []
-  for step in set([ x.step for x in avail ]):
-    tmp = [ x for x in avail if x.step == step ]
-    max_iter  = max([ x.iter for x in tmp ])
-    max_level = max([ x.level for x in tmp ])
+    solutions = []
+    for step in set([x.step for x in avail]):
+        tmp = [x for x in avail if x.step == step]
+        max_iter = max([x.iter for x in tmp])
+        max_level = max([x.level for x in tmp])
 
-    solutions.extend([ x for x in tmp if x.iter == max_iter and x.level == max_level ])
+        solutions.extend(
+            [x for x in tmp if x.iter == max_iter and x.level == max_level])
 
-  return sorted(solutions)
-
+    return sorted(solutions)

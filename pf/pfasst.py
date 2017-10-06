@@ -2,13 +2,16 @@
 
 Classes
 ======
-PFASST : contains all setup/run information for a PFASST calculation
+PFASST     : contains all setup/run information for a PFASST calculation
+             PFASST.run() returns a trajectory (a dataframe of all states of calculation)
 Experiment : mostly empty class with methods that take PFASST as input and
-perform a given 'experiment'
-Params : stores all PFASST parameters, mostly implemented to reduce number of
-PFASST class attributes
-Results : pd.DataFrame child that implements pfasst-related plots, and results
-storing
+             perform a given 'experiment'
+             Experiments return a Results object, a dataframe-derived class that has
+             additional plot functionality
+Params     : stores all PFASST parameters, mostly implemented to reduce number of
+             PFASST class attributes
+Results    : pd.DataFrame child that implements pfasst-related plots, and results
+             storing
 """
 import argparse
 import glob
@@ -17,7 +20,7 @@ from pprint import pprint
 from os import remove
 from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
-from pf.io import read_all_timings
+from pf.io import read_all_timings, Timing
 import attr
 import pandas as pd
 import numpy as np
@@ -112,7 +115,7 @@ class PFASST(object):
        b. Write this string to file
        c. Check for saved pickle, if yes -> load, and return Results
        d. (If necessary) Run calculation via check_output
-       e. (If necessary) Get and save Results from Output
+       e. (If necessary) Get and save trajectory with timings from Output
 
     Parameters
     ==========
@@ -301,7 +304,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         # for file in glob.iglob('fort.*'):
         #     remove(file)
 
-    def run(self):
+    def run(self, ref=False):
         pkl_path = self._pre_run_setup()
 
         try:
@@ -320,26 +323,22 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
             else:
-                trajectory = self._get_trajectory_from_output(output)
-                print 'here!'
+                trajectory = self._get_trajectory_from_output(output, ref=ref)
                 trajectory.to_pickle(pkl_path)
                 self._cleanup()
 
-        results = Results(self.p, trajectory=trajectory)
+        return trajectory
 
-        return results
-
-    def _get_trajectory_from_output(self, output):
+    def _get_trajectory_from_output(self, output, ref=False):
         columns = [
             'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution']
-#            'feval', 'omega', 'exp', 'solution'
-#        ]
         trajectory = pd.DataFrame(columns=columns)
         prog_state = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
         )
 
-        for i, line in enumerate(output.split('\n')):
+        idx = 0
+        for line in output.split('\n'):
             match = prog_state.search(line)
             if match:
                 time = float(match.group(1))
@@ -350,23 +349,35 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                                    "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
                                        time, rank, step, iteration, level)
                 solution = self._get_solution(path_to_solution)
-                trajectory.loc[i] = time, rank, step, iteration, \
+                trajectory.loc[idx] = time, rank, step, iteration, \
                               level, residual_value, solution
+                idx += 1
 
-        #timings = read_all_timings(self.p.base_dir)
-        #trajectory = self._merge_timings_into(trajectory, timings)
+
+        if not ref:
+            timings = read_all_timings(dname='.')
+            self._merge_timings_into(trajectory, timings)
+
+        trajectory.sort_values(['step', 'level', 'iter'], inplace=True)
 
         return trajectory
 
-    def _merge_timings_into(trajectory, timings):
-        df_timings = pd.DataFrame(columns=timings[0]._fields)
+    def _merge_timings_into(self, trajectory, timings):
+        timers_of_interest = ['exp', 'feval', 'omega']
+        df_timing = pd.DataFrame(columns=Timing._fields)
 
-        for i, step in enumerate(timings):
-            df_timings.loc[i] = step
+        for i, time in enumerate(timings):
+            if time.iter > 0:
+                df_timing.loc[i] = time
 
-        df_timings.drop(['block', 'cycle', 'start', 'end'], inplace=True)
-        # remaining columns: timer, rank, step, iteration, delta
+        df_timing.drop(['start', 'end'], axis=1, inplace=True)
+        pivoted = df_timing.pivot_table(index=['rank', 'step', 'iter'],
+                                        columns='timer', values='delta', aggfunc=np.sum)
 
+        for rank in trajectory['rank'].unique():
+            for timer in timers_of_interest:
+                    trajectory.loc[((trajectory['rank'] == rank) &
+                                    (trajectory['level'] == 1)), timer] = pivoted[timer].values
         return trajectory
 
     @staticmethod
@@ -385,7 +396,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         self.p.magnus = 2
 
         self.p.dt = self.p.tfinal / self.p.nsteps
-        traj = self.run()
+        traj = self.run(ref=True)
 
         return traj
 
@@ -423,16 +434,16 @@ class Results(pd.DataFrame):
         elif trajectory is not None:
             self._create_result_row(trajectory)
 
-    def _create_result_row(self, trajectory):
-        final_solution = self._get_final_solution(trajectory)
+    def _create_result_row(self, idx, trajectory):
+        final_solution = self.get_final_solution(trajectory)
 
-        self.loc[0] = self.p.dt, self.p.nsteps, \
+        self.loc[idx] = self.p.dt, self.p.nsteps, \
                       self.p.nodes, self.p.magnus, \
                       self.p.iterations, self.p.tfinal, \
                       final_solution, trajectory
         return
 
-    def _get_final_solution(self, trajectory):
+    def get_final_solution(self, trajectory):
         solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
                         (trajectory['iter'] == self.p.iterations) & \
                         (trajectory['time'] == self.p.tfinal) & \
@@ -529,6 +540,7 @@ class Experiment(object):
         results = Results(pf.p)
 
         ref_traj = pf.compute_reference()
+        ref_soln = results.get_final_solution(ref_traj)
 
         errors = []
         nsteps = [2**i for i in steps]
@@ -536,10 +548,10 @@ class Experiment(object):
             pf.p.nsteps = step
             pf.p.dt = pf.p.tfinal / pf.p.nsteps
             trajectory = pf.run()
-            results.loc[i] = trajectory.loc[0]
+            results._create_result_row(i, trajectory)
+
             errors.append(
-                self.compute_error(results.loc[i]['final_solution'],
-                                   ref_traj.loc[0]['final_solution']))
+                self.compute_error(results.loc[i]['final_solution'], ref_soln))
 
         results['error'] = errors
         results.astype({'dt': np.float_, 'nsteps': np.int_, 'error': np.float_})
