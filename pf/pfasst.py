@@ -61,6 +61,7 @@ class Params(object):
     verbose = attr.ib(default=False, repr=False)
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
+    timings = attr.ib(default=False)
     plist = attr.ib(repr=False)
 
     @plist.default
@@ -301,8 +302,8 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         for file in glob.iglob(self.p.base_dir + '/*_soln'):
             remove(file)
 
-        # for file in glob.iglob('fort.*'):
-        #     remove(file)
+        for file in glob.iglob('fort.*'):
+            remove(file)
 
     def run(self, ref=False):
         pkl_path = self._pre_run_setup()
@@ -354,7 +355,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
                 idx += 1
 
 
-        if not ref:
+        if not ref and self.p.timings:
             timings = read_all_timings(dname='.')
             self._merge_timings_into(trajectory, timings)
 
@@ -376,7 +377,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 
         for rank in trajectory['rank'].unique():
             for timer in timers_of_interest:
-                    trajectory.loc[((trajectory['rank'] == rank) &
+                    trajectory.loc[((trajectory['rank'] == rank-1) &
                                     (trajectory['level'] == 1)), timer] = pivoted[timer].values
         return trajectory
 
