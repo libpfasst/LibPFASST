@@ -11,6 +11,7 @@ Solution = namedtuple('Solution', ['step', 'iter', 'level', 'fname'])
 
 timers_of_interest = ['exp', 'feval', 'omega']
 
+
 def read_timings(fname):
 
     prog = re.compile(
@@ -20,12 +21,12 @@ def read_timings(fname):
     with open(fname, 'r') as f:
         output = f.read()
 
-    timings = []
-    for line in output.split('\n'):
-        match = prog.search(line)
-        if match:
-            timer = str(match.group(1)).strip()
-            rate = float(match.group(7))
+        timings = []
+        for line in output.split('\n'):
+            match = prog.search(line)
+            if match:
+                timer = str(match.group(1)).strip()
+                rate = float(match.group(7))
 
             if timer not in timers_of_interest:
                 continue
@@ -34,14 +35,14 @@ def read_timings(fname):
             try:
                 level = map(int, match.group(4))
             except ValueError:
-                pass # currently unable to print level correctly in exe
+                pass  # currently unable to print level correctly in exe
                 level = 99
 
             delta, start, end = map(lambda x: float(x) / rate,
                                     match.group(8, 9, 10))
 
-            timing = Timing(timer, rank, step+1, level, iteration,
-                            delta, start, end)
+            timing = Timing(timer, rank, step + 1, level, iteration, delta,
+                            start, end)
             timings.append(timing)
 
     return timings
