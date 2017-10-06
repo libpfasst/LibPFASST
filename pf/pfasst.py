@@ -17,7 +17,7 @@ import argparse
 import glob
 import re
 from pprint import pprint
-from os import remove
+from os import remove, mkdir
 from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
 from pf.io import read_all_timings, Timing
@@ -182,6 +182,11 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
             self.p.filename = ''.join(mol_name) + '_' + self.p.basis + '.nml'
         else:
             self.p.filename = 'toda.nml'
+
+        try:
+            mkdir(self.p.base_dir)
+        except OSError:
+            pass
 
         self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-levels_{}'+ \
                    '-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
