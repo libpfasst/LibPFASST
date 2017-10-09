@@ -111,14 +111,9 @@ contains
 
     call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
 
-    if (lev%nnodes-1 == 2) then
-        this%commutator_colloc_coefs(1,:) = (/0.022916666666667, &
-                                              -0.002083333333333, &
-                                              0.002083333333333/)
-
-        this%commutator_colloc_coefs(2,:) = (/0.066666666666667, &
-                                              0.016666666666667, &
-                                              0.066666666666667/)
+    if (lev%nnodes == 3) then
+        this%commutator_colloc_coefs(1,:) = (/-11/480., 1/480., -1/480./)
+        this%commutator_colloc_coefs(2,:) = (/-1/15., -1/60., -1/15./)
      else
         this%commutator_colloc_coefs(:,:) = 0.0_pfdp
      endif
@@ -126,11 +121,13 @@ contains
     do m = 1, lev%nnodes-1
        call start_timer(pf, TAUX)
        call this%compute_omega(this%omega(m), lev%S(m), lev%F(:,1), &
-                               this%commutator_colloc_coefs(m,:))
+            dt**2 * this%commutator_colloc_coefs(m,:))
        call end_timer(pf, TAUX)
+
        call start_timer(pf, TAUX+1)
        call this%compute_time_ev_ops(this%omega(m), this%time_ev_op(m), lev%index)
        call end_timer(pf, TAUX+1)
+
        call start_timer(pf, TAUX+2)
        call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
        call end_timer(pf, TAUX+2)

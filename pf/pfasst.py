@@ -573,8 +573,16 @@ class Experiment(object):
         """
         results = Results(pf.p)
 
+        nsteps = pf.p.nsteps
+        nodes = pf.p.nodes
+        magnus = pf.p.magnus
+
         ref_traj = pf.compute_reference()
         ref_soln = results.get_final_solution(ref_traj)
+
+        pf.p.nsteps = nsteps
+        pf.p.nodes = nodes
+        pf.p.magnus = magnus
 
         errors = []
         nsteps = [2**i for i in steps]
