@@ -52,6 +52,7 @@ class Params(object):
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
     sweeps = attr.ib(default=[3], validator=attr.validators.instance_of(list))
+    exptol = attr.ib(default=['1.d-15'], validator=attr.validators.instance_of(list))
     nprob = attr.ib(default=4)
     tasks = attr.ib(default=1)
     basis = attr.ib(default='')
@@ -162,10 +163,10 @@ class PFASST(object):
         for k, v in kwargs.iteritems():
             settatr(self.p, k, v)
 
-        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = .true.\n\t\
-abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\
+        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = .false.\n\t\
+abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = 1\n\tnsweeps = {}\n\t\
-magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
+magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
 \n\tnprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n/\n"
 
         if self.p.filename:
@@ -195,13 +196,15 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
         self.p.magnus = self._make_sure_is_list(self.p.magnus)
         self.p.nodes = self._make_sure_is_list(self.p.nodes)
         self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
+        self.p.exptol = self._make_sure_is_list(self.p.exptol)
         nodes = ' '.join(map(str, self.p.nodes))
         magnus = ' '.join(map(str, self.p.magnus))
         sweeps = ' '.join(map(str, self.p.sweeps))
+        exptol = ' '.join(self.p.exptol)
 
         self.pfstring = self.base_string.format(self.p.levels, self.p.iterations,\
                                                 nodes, sweeps, magnus, self.p.tfinal, \
-                                                self.p.nsteps, self.p.nprob, \
+                                                self.p.nsteps, exptol, self.p.nprob, \
                                                 "\'"+self.p.basis+"\'", \
                                                 "\'"+self.p.molecule+"\'", \
                                                 "\'"+self.p.exact_dir+"\'")
@@ -406,9 +409,10 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\
 
     def compute_reference(self):
         self.p.nsteps = 2**10
+        self.p.nodes = 3
         self.p.magnus = 2
-
         self.p.dt = self.p.tfinal / self.p.nsteps
+
         traj = self.run(ref=True)
 
         return traj
@@ -554,16 +558,15 @@ class Experiment(object):
         """an experiment for testing the convergence of different number of sdc
         nodes. wraps around the convergence experiment.
         """
-        solns = {}
-        dts = []
+        results = []
 
         for i, node in enumerate(nodes):
             pf.nodes = node
             pf.magnus = magnus[i]
-            slope = self.convergence_exp(pf, steps=[4, 7])
-            print slope
+            r = self.convergence_exp(pf, steps=[4, 7])
+            results.append(r)
 
-        return True
+        return results
 
     def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
         """convergence experiment for testing residual vs nsteps. has default

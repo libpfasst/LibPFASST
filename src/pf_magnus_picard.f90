@@ -93,7 +93,6 @@ contains
 
     integer    :: m, n, p
     real(pfdp) :: t, dtsdc(lev%nnodes-1)
-    class(pf_encap_t), allocatable :: time_ev_op(:), omega(:)
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -112,16 +111,14 @@ contains
     call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
 
     if (lev%nnodes == 3) then
-        this%commutator_colloc_coefs(1,:) = dt**2 * (/-11/480., 1/480., -1/480./)
-        this%commutator_colloc_coefs(2,:) = dt**2 * (/-1/15., -1/60., -1/15./)
-
-        ! this%commutator_colloc_coefs(1,1) = dt**2 /48.0
-        ! this%commutator_colloc_coefs(2,2) = dt**2 / 12.0
+        this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
+        this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
     endif
 
     do m = 1, lev%nnodes-1
+       print*, 'node = ', m
        call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%S(m), lev%F(:,:), &
+       call this%compute_omega(this%omega(m), lev%S(m), lev%F, &
              this%commutator_colloc_coefs(m,:))
        call end_timer(pf, TAUX)
 
@@ -134,6 +131,7 @@ contains
        call end_timer(pf, TAUX+2)
     end do
 
+    ! if (pf%state%step > 1 ) stop
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     call end_timer(pf, TLEVEL+lev%index-1)
@@ -152,10 +150,10 @@ contains
     this%commutator_colloc_coefs(:,:) = 0.0_pfdp
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+         lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
-          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+         lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     do m = 1, nnodes-1
         call this%omega(m)%setval(0.0_pfdp)
@@ -225,10 +223,10 @@ contains
       ! deallocate(this%QtilI)
       deallocate(this%commutator_colloc_coefs)
 
-      call lev%ulevel%factory%destroy_array(this%omega, &
-           lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-      call lev%ulevel%factory%destroy_array(this%time_ev_op, &
-           lev%nnodes-1, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+      call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
+           lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+      call lev%ulevel%factory%destroy_array(this%time_ev_op, lev%nnodes-1, &
+           lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
   end subroutine magpicard_destroy
 end module pf_mod_magnus_picard
