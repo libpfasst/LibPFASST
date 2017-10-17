@@ -409,7 +409,8 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
 
     def compute_reference(self):
         self.p.tasks = 1
-        self.p.nsteps = 2**8
+        self.p.levels = 1
+        self.p.nsteps = 2**10
         self.p.nodes = 3
         self.p.magnus = 2
         self.p.dt = self.p.tfinal / self.p.nsteps
@@ -464,7 +465,7 @@ class Results(pd.DataFrame):
     def get_final_solution(self, trajectory):
         """gets the final solution for the finest level from a trajectory"""
         solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
-                        (trajectory['iter'] == self.p.iterations) & \
+                              (trajectory['iter'] == self.p.iterations) & \
                         (trajectory['time'] == self.p.tfinal) & \
                         (trajectory['level'] == self.p.levels) & \
                         (trajectory['step'] == self.p.nsteps)]['solution'].values
@@ -584,6 +585,7 @@ class Experiment(object):
         nodes = pf.p.nodes
         magnus = pf.p.magnus
         tasks = pf.p.tasks
+        levels = pf.p.levels
 
         ref_traj = pf.compute_reference()
         ref_soln = results.get_final_solution(ref_traj)
@@ -592,6 +594,7 @@ class Experiment(object):
         pf.p.nodes = nodes
         pf.p.magnus = magnus
         pf.p.tasks = tasks
+        pf.p.levels = levels
 
         errors = []
         nsteps = [2**i for i in steps]
