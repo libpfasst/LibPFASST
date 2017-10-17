@@ -406,11 +406,14 @@ contains
        call call_hooks(pf, -1, PF_PRE_ITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
+
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
           call call_hooks(pf, fine_lev_p%index, PF_PRE_SWEEP)
-          do j = 1, fine_lev_p%nsweeps_pred
+
+          do j = 1, fine_lev_p%nsweeps
+
              call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, pf%state%t0, dt)
 
              call pf_residual(pf, fine_lev_p, dt)
