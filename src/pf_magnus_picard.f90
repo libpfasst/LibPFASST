@@ -116,7 +116,6 @@ contains
     endif
 
     do m = 1, lev%nnodes-1
-       print*, 'node = ', m
        call start_timer(pf, TAUX)
        call this%compute_omega(this%omega(m), lev%S(m), lev%F, &
              this%commutator_colloc_coefs(m,:))
