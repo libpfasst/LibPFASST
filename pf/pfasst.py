@@ -408,7 +408,8 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
         return solution
 
     def compute_reference(self):
-        self.p.nsteps = 2**10
+        self.p.tasks = 1
+        self.p.nsteps = 2**8
         self.p.nodes = 3
         self.p.magnus = 2
         self.p.dt = self.p.tfinal / self.p.nsteps
@@ -498,7 +499,7 @@ class Results(pd.DataFrame):
         """
         self.plot(x, y, **kwargs)
 
-    def plot_residual_vs_iteration_for_each_cpu(self, trajectory=None):
+    def plot_residual_vs_iteration_for_each_cpu(self, trajectory=None, legend=True):
         """plots residual vs iteration for each cpu (nicely named function),
         optional input: a potentially longer trajectory. if no trajectory is
         supplied then it defaults to grabbing the final block of steps.
@@ -520,9 +521,10 @@ class Results(pd.DataFrame):
                     label='cpu{}'.format(cpu),
                     marker='o',
                     ax=ax)
-        ax.legend()
+        if legend:
+            ax.legend()
 
-    def plot_residual_vs_cpu_for_each_iteration(self, trajectory=None):
+    def plot_residual_vs_cpu_for_each_iteration(self, trajectory=None, legend=True):
         """plots residual vs cpu for each iteration (nicely named function),
         optional input: a potentially longer trajectory. if no trajectory is
         supplied then it defaults to grabbing the final block of steps.
@@ -534,6 +536,7 @@ class Results(pd.DataFrame):
 
         if trajectory is None:
             trajectory = self.get_final_block()
+
         for iteration in range(self.p.iterations):
             trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
                 'level'] == 1)].sort_values('rank').plot(
@@ -543,7 +546,8 @@ class Results(pd.DataFrame):
                     label='iter{}'.format(iteration + 1),
                     marker='o',
                     ax=ax)
-        ax.legend()
+        if legend:
+            ax.legend()
 
 
 class Experiment(object):
@@ -568,7 +572,7 @@ class Experiment(object):
 
         return results
 
-    def convergence_exp(self, pf, steps=[4, 5, 6, 7]):
+    def convergence_exp(self, pf, steps=[3, 4, 5, 6]):
         """convergence experiment for testing residual vs nsteps. has default
         number of steps, but can be overridden for larger tests. returns a Results
         class object where each row in the object corresponds to the parameters
@@ -579,6 +583,7 @@ class Experiment(object):
         nsteps = pf.p.nsteps
         nodes = pf.p.nodes
         magnus = pf.p.magnus
+        tasks = pf.p.tasks
 
         ref_traj = pf.compute_reference()
         ref_soln = results.get_final_solution(ref_traj)
@@ -586,6 +591,7 @@ class Experiment(object):
         pf.p.nsteps = nsteps
         pf.p.nodes = nodes
         pf.p.magnus = magnus
+        pf.p.tasks = tasks
 
         errors = []
         nsteps = [2**i for i in steps]
