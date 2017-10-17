@@ -514,7 +514,7 @@ class Results(pd.DataFrame):
 
         for cpu in range(self.p.tasks):
             trajectory[(trajectory['rank'] == cpu) & (trajectory[
-                'level'] == 1)].plot(
+                'level'] == self.p.levels)].plot(
                     'iter',
                     'residual',
                     logy=True,
@@ -539,7 +539,7 @@ class Results(pd.DataFrame):
 
         for iteration in range(self.p.iterations):
             trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
-                'level'] == 1)].sort_values('rank').plot(
+                'level'] == self.p.levels)].sort_values('rank').plot(
                     'rank',
                     'residual',
                     logy=True,
