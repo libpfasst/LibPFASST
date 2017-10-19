@@ -526,8 +526,8 @@ class Results(pd.DataFrame):
 
     def get_final_block(self, idx=0):
         """returns a the final block of the results class"""
-        traj = self.loc[idx]['trajectory']
-        last_steps = self.loc[idx]['nsteps'] - self.p.tasks
+        traj = self.loc[idx, 'trajectory']
+        last_steps = self.loc[idx, 'nsteps'] - self.p.tasks
 
         final_block = traj[(traj['step'] > last_steps)]
         return final_block
@@ -563,22 +563,29 @@ class Results(pd.DataFrame):
         fig, ax = plt.subplots()
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('Iteration Number')
-        ax.set_ylabel('Log$_{10}$ Residual)')
+        ax.set_ylabel('Residual')
+        ax.set_ylim(bottom=1e-20)
 
         if idx is None and trajectory is None:
             trajectory = self.get_final_block(idx=0)
         elif idx:
             trajectory = self.get_final_block(idx=idx)
+        else:
+            trajectory = self.get_final_block(idx=0)
 
         for cpu in range(self.p.tasks):
-            trajectory[(trajectory['rank'] == cpu) & (trajectory[
-                'level'] == self.p.levels)].plot(
-                    'iter',
-                    'residual',
-                    logy=True,
-                    label='cpu{}'.format(cpu),
-                    marker='o',
-                    ax=ax)
+            try:
+                trajectory[(trajectory['rank'] == cpu) & (trajectory[
+                    'level'] == self.p.levels) & (trajectory['residual'] > 1e-20
+                                                )].plot(
+                                                    'iter',
+                                                    'residual',
+                                                    logy=True,
+                                                    label='cpu{}'.format(cpu),
+                                                    marker='o',
+                                                    ax=ax)
+            except:
+                pass
 
         if not legend:
             ax.legend_.remove()
@@ -594,22 +601,29 @@ class Results(pd.DataFrame):
         fig, ax = plt.subplots()
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('CPU Number')
-        ax.set_ylabel('Log$_{10}$ Residual)')
+        ax.set_ylabel('Residual')
+        ax.set_ylim(bottom=1e-20)
 
         if idx is None and trajectory is None:
             trajectory = self.get_final_block(idx=0)
         elif idx:
             trajectory = self.get_final_block(idx=idx)
+        else:
+            trajectory = self.get_final_block(idx=0)
 
         for iteration in range(self.p.iterations):
-            trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
-                'level'] == self.p.levels)].sort_values('rank').plot(
-                    'rank',
-                    'residual',
-                    logy=True,
-                    label='iter{}'.format(iteration + 1),
-                    marker='o',
-                    ax=ax)
+            try:
+                trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
+                    'level'] == self.p.levels) & (trajectory[
+                        'residual'] > 1e-20)].plot(
+                            'rank',
+                            'residual',
+                            logy=True,
+                            label='iter{}'.format(iteration + 1),
+                            marker='o',
+                            ax=ax)
+            except:
+                pass
 
         if not legend:
             ax.legend_.remove()
