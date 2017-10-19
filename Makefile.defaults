@@ -8,7 +8,7 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jinclude -cpp
+FFLAGS = -Ibuild -Jinclude -cpp -fopenmp
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
@@ -50,3 +50,4 @@ else
 endif
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+$(PY py/script.py)
