@@ -115,6 +115,8 @@ contains
         this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
     endif
 
+    !$omp parallel
+    !$omp do
     do m = 1, lev%nnodes-1
        call start_timer(pf, TAUX)
        call this%compute_omega(this%omega(m), lev%S(m), lev%F, &
@@ -129,6 +131,8 @@ contains
        call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
        call end_timer(pf, TAUX+2)
     end do
+    !$omp end do
+    !$omp end parallel
 
     ! if (pf%state%step > 1 ) stop
     call lev%qend%copy(lev%Q(lev%nnodes))

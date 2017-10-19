@@ -52,7 +52,10 @@ class Params(object):
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
     sweeps = attr.ib(default=[3], validator=attr.validators.instance_of(list))
-    exptol = attr.ib(default=['1.d-15'], validator=attr.validators.instance_of(list))
+    sweeps_pred = attr.ib(default=[1],
+                          validator=attr.validators.instance_of(list))
+    exptol = attr.ib(default=['1.d-15'],
+                     validator=attr.validators.instance_of(list))
     nprob = attr.ib(default=4)
     tasks = attr.ib(default=1)
     basis = attr.ib(default='')
@@ -63,6 +66,7 @@ class Params(object):
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
     timings = attr.ib(default=False)
+    solutions = attr.ib(default=True)
     plist = attr.ib(repr=False)
 
     @plist.default
@@ -163,11 +167,11 @@ class PFASST(object):
         for k, v in kwargs.iteritems():
             settatr(self.p, k, v)
 
-        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = .false.\n\t\
+        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = {}\n\t\
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
-&PARAMS\n\tnnodes = {}\n\tnsweeps_pred = 1\n\tnsweeps = {}\n\t\
+&PARAMS\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
-\n\tnprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n/\n"
+\n\tnprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n/\n"
 
         if self.p.filename:
             with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
@@ -193,21 +197,28 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
                    '-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
-        self.p.magnus = self._make_sure_is_list(self.p.magnus)
-        self.p.nodes = self._make_sure_is_list(self.p.nodes)
-        self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
-        self.p.exptol = self._make_sure_is_list(self.p.exptol)
         nodes = ' '.join(map(str, self.p.nodes))
         magnus = ' '.join(map(str, self.p.magnus))
         sweeps = ' '.join(map(str, self.p.sweeps))
+        sweeps_pred = ' '.join(map(str, self.p.sweeps_pred))
         exptol = ' '.join(self.p.exptol)
 
-        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations,\
-                                                nodes, sweeps, magnus, self.p.tfinal, \
+        if self.p.solutions == True:
+            solns = '.true.'
+        else:
+            solns = '.false.'
+
+        if self.p.timings == True:
+            timings = '.true.'
+        else:
+            timings = '.false.'
+
+        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings,\
+                                                nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
                                                 self.p.nsteps, exptol, self.p.nprob, \
                                                 "\'"+self.p.basis+"\'", \
                                                 "\'"+self.p.molecule+"\'", \
-                                                "\'"+self.p.exact_dir+"\'")
+                                                "\'"+self.p.exact_dir+"\'", solns)
 
         return self.pfstring
 
@@ -320,11 +331,14 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
         for file in glob.iglob('fort.*'):
             remove(file)
 
+        remove('final_solution')
+
     def run(self, ref=False):
         pkl_path = self._pre_run_setup()
 
         try:
             trajectory = pd.read_pickle(pkl_path)
+            total_times = {}
         except:
             try:
                 if self.p.verbose:
@@ -339,44 +353,64 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
             else:
-                trajectory = self._get_trajectory_from_output(output, ref=ref)
+                trajectory, total_times = self._get_trajectory_from_output(
+                    output, ref=ref)
                 trajectory.to_pickle(pkl_path)
                 self._cleanup()
 
-        return trajectory
+        return trajectory, total_times
 
     def _get_trajectory_from_output(self, output, ref=False):
-        columns = [
-            'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution']
-        trajectory = pd.DataFrame(columns=columns)
+        trajectory = pd.DataFrame(columns=[
+            'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'
+        ])
         prog_state = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
         )
+        time_state = re.compile(
+            r'processor\ +(.*) returned from pfasst CPU time:\ +(.*) seconds')
 
         idx = 0
+        total_times = {}
         for line in output.split('\n'):
             match = prog_state.search(line)
+            time_match = time_state.search(line)
             if match:
                 time = float(match.group(1))
                 rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
                 residual_value = float(match.group(6))
 
-                path_to_solution = self.p.base_dir+'/'+\
-                                   "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
-                                       time, rank, step, iteration, level)
-                solution = self._get_solution(path_to_solution)
+                if self.p.solutions:
+                    path_to_solution = self.p.base_dir+'/'+\
+                                    "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
+                                        time, rank, step, iteration, level)
+                    solution = self._get_solution(path_to_solution)
+                else:
+                    solution = None
                 trajectory.loc[idx] = time, rank, step, iteration, \
                               level, residual_value, solution
                 idx += 1
+                continue
 
+            if time_match:
+                rank = int(time_match.group(1))
+                cpu_time = float(time_match.group(2))
+                total_times[rank] = cpu_time
 
-        if not ref and self.p.timings:
+        if self.p.timings:
             timings = read_all_timings(dname='.')
             self._merge_timings_into(trajectory, timings)
 
         trajectory.sort_values(['step', 'level', 'iter'], inplace=True)
+        trajectory.reset_index(inplace=True)
+        if not self.p.solutions:
+            trajectory.solution = trajectory.solution.astype('object')
 
-        return trajectory
+        sol = self._get_solution('final_solution')
+        last_row = len(trajectory) - 1
+        trajectory.set_value(last_row, 'solution', sol)
+
+        return trajectory, total_times
 
     def _merge_timings_into(self, trajectory, timings):
         timers_of_interest = ['exp', 'feval', 'omega']
@@ -387,13 +421,16 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
                 df_timing.loc[i] = time
 
         df_timing.drop(['start', 'end'], axis=1, inplace=True)
-        pivoted = df_timing.pivot_table(index=['rank', 'step', 'iter'],
-                                        columns='timer', values='delta', aggfunc=np.sum)
+        pivoted = df_timing.pivot_table(
+            index=['rank', 'step', 'iter'],
+            columns='timer',
+            values='delta',
+            aggfunc=np.sum)
 
         for rank in trajectory['rank'].unique():
             for timer in timers_of_interest:
-                    trajectory.loc[((trajectory['rank'] == rank-1) &
-                                    (trajectory['level'] == 1)), timer] = pivoted[timer].values
+                trajectory.loc[(trajectory['level'] == 1), timer] = pivoted[
+                    timer].values
         return trajectory
 
     @staticmethod
@@ -408,16 +445,31 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
         return solution
 
     def compute_reference(self):
+
+        params = attr.asdict(self.p)
+
         self.p.tasks = 1
         self.p.levels = 1
         self.p.nsteps = 2**10
         self.p.nodes = 3
         self.p.magnus = 2
+        self.p.timings = False
+        self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
 
-        traj = self.run(ref=True)
+        traj, _ = self.run()
+        last_row = len(traj) - 1
+        final_solution = traj.loc[last_row, 'solution']
 
-        return traj
+        self.p.nsteps = params['nsteps']
+        self.p.nodes = params['nodes']
+        self.p.magnus = params['magnus']
+        self.p.tasks = params['tasks']
+        self.p.levels = params['levels']
+        self.p.solutions = params['solutions']
+        self.p.timings = params['timings']
+
+        return final_solution, traj
 
     @staticmethod
     def _make_sure_is_list(thing):
@@ -443,7 +495,7 @@ class Results(pd.DataFrame):
     def __init__(self, params, trajectory=None, pkl_path=None):
         columns = [
             'dt', 'nsteps', 'nodes', 'magnus', 'iterations', 'tfinal',
-            'final_solution', 'trajectory'
+            'final_solution', 'total_times', 'trajectory'
         ]
 
         super(Results, self).__init__(columns=columns)
@@ -453,24 +505,24 @@ class Results(pd.DataFrame):
         elif trajectory is not None:
             self._create_result_row(trajectory)
 
-    def _create_result_row(self, idx, trajectory):
+    def _create_result_row(self, idx, trajectory, total_times):
         final_solution = self.get_final_solution(trajectory)
 
         self.loc[idx] = self.p.dt, self.p.nsteps, \
                       self.p.nodes, self.p.magnus, \
                       self.p.iterations, self.p.tfinal, \
-                      final_solution, trajectory
+                      final_solution, total_times, trajectory
         return
 
     def get_final_solution(self, trajectory):
         """gets the final solution for the finest level from a trajectory"""
         solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
                               (trajectory['iter'] == self.p.iterations) & \
-                        (trajectory['time'] == self.p.tfinal) & \
-                        (trajectory['level'] == self.p.levels) & \
-                        (trajectory['step'] == self.p.nsteps)]['solution'].values
+                              (trajectory['time'] == self.p.tfinal) & \
+                              (trajectory['level'] == self.p.levels) & \
+                              (trajectory['step'] == self.p.nsteps)]['solution'].values
 
-        return solution
+        return solution[0]
 
     def get_final_block(self, idx=0):
         """returns a the final block of the results class"""
@@ -500,7 +552,10 @@ class Results(pd.DataFrame):
         """
         self.plot(x, y, **kwargs)
 
-    def plot_residual_vs_iteration_for_each_cpu(self, trajectory=None, legend=True):
+    def plot_residual_vs_iteration_for_each_cpu(self,
+                                                idx=0,
+                                                trajectory=None,
+                                                legend=True):
         """plots residual vs iteration for each cpu (nicely named function),
         optional input: a potentially longer trajectory. if no trajectory is
         supplied then it defaults to grabbing the final block of steps.
@@ -510,8 +565,10 @@ class Results(pd.DataFrame):
         ax.set_xlabel('Iteration Number')
         ax.set_ylabel('Log$_{10}$ Residual)')
 
-        if trajectory is None:
-            trajectory = self.get_final_block()
+        if idx is None and trajectory is None:
+            trajectory = self.get_final_block(idx=0)
+        elif idx:
+            trajectory = self.get_final_block(idx=idx)
 
         for cpu in range(self.p.tasks):
             trajectory[(trajectory['rank'] == cpu) & (trajectory[
@@ -522,10 +579,14 @@ class Results(pd.DataFrame):
                     label='cpu{}'.format(cpu),
                     marker='o',
                     ax=ax)
-        if legend:
-            ax.legend()
 
-    def plot_residual_vs_cpu_for_each_iteration(self, trajectory=None, legend=True):
+        if not legend:
+            ax.legend_.remove()
+
+    def plot_residual_vs_cpu_for_each_iteration(self,
+                                                idx=None,
+                                                trajectory=None,
+                                                legend=True):
         """plots residual vs cpu for each iteration (nicely named function),
         optional input: a potentially longer trajectory. if no trajectory is
         supplied then it defaults to grabbing the final block of steps.
@@ -535,8 +596,10 @@ class Results(pd.DataFrame):
         ax.set_xlabel('CPU Number')
         ax.set_ylabel('Log$_{10}$ Residual)')
 
-        if trajectory is None:
-            trajectory = self.get_final_block()
+        if idx is None and trajectory is None:
+            trajectory = self.get_final_block(idx=0)
+        elif idx:
+            trajectory = self.get_final_block(idx=idx)
 
         for iteration in range(self.p.iterations):
             trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
@@ -547,8 +610,9 @@ class Results(pd.DataFrame):
                     label='iter{}'.format(iteration + 1),
                     marker='o',
                     ax=ax)
-        if legend:
-            ax.legend()
+
+        if not legend:
+            ax.legend_.remove()
 
 
 class Experiment(object):
@@ -581,28 +645,15 @@ class Experiment(object):
         """
         results = Results(pf.p)
 
-        nsteps = pf.p.nsteps
-        nodes = pf.p.nodes
-        magnus = pf.p.magnus
-        tasks = pf.p.tasks
-        levels = pf.p.levels
-
-        ref_traj = pf.compute_reference()
-        ref_soln = results.get_final_solution(ref_traj)
-
-        pf.p.nsteps = nsteps
-        pf.p.nodes = nodes
-        pf.p.magnus = magnus
-        pf.p.tasks = tasks
-        pf.p.levels = levels
+        ref_soln, ref_traj = pf.compute_reference()
 
         errors = []
         nsteps = [2**i for i in steps]
         for i, step in enumerate(nsteps):
             pf.p.nsteps = step
             pf.p.dt = pf.p.tfinal / pf.p.nsteps
-            trajectory = pf.run()
-            results._create_result_row(i, trajectory)
+            trajectory, total_times = pf.run()
+            results._create_result_row(i, trajectory, total_times)
 
             errors.append(
                 self.compute_error(results.loc[i]['final_solution'], ref_soln))

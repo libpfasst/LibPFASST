@@ -28,22 +28,22 @@ def read_timings(fname):
                 timer = str(match.group(1)).strip()
                 rate = float(match.group(7))
 
-            if timer not in timers_of_interest:
-                continue
+                if timer not in timers_of_interest:
+                    continue
 
-            rank, step, iteration = map(int, match.group(2, 3, 5))
-            try:
-                level = map(int, match.group(4))
-            except ValueError:
-                pass  # currently unable to print level correctly in exe
-                level = 99
+                rank, step, iteration = map(int, match.group(2, 3, 5))
+                try:
+                    level = map(int, match.group(4))
+                except ValueError:
+                    pass  # currently unable to print level correctly in exe
+                    level = 0
 
-            delta, start, end = map(lambda x: float(x) / rate,
-                                    match.group(8, 9, 10))
+                delta, start, end = map(lambda x: float(x) / rate,
+                                        match.group(8, 9, 10))
 
-            timing = Timing(timer, rank, step + 1, level, iteration, delta,
-                            start, end)
-            timings.append(timing)
+                timing = Timing(timer, rank, step + 1, level, iteration, delta,
+                                start, end)
+                timings.append(timing)
 
     return timings
 
