@@ -67,6 +67,7 @@ class Params(object):
     dt = attr.ib(default=None)
     timings = attr.ib(default=False)
     solutions = attr.ib(default=True)
+    particles = attr.ib(default=5)
     plist = attr.ib(repr=False)
 
     @plist.default
@@ -170,8 +171,8 @@ class PFASST(object):
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = {}\n\t\
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
-magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
-\n\tnprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n/\n"
+magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
+nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n/\n"
 
         if self.p.filename:
             with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
@@ -193,8 +194,9 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
         except OSError:
             pass
 
-        self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-levels_{}'+ \
-                   '-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
+        self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
+                   'particles_{}-exact_dir_{}-'+ \
+                   'levels_{}-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
         nodes = ' '.join(map(str, self.p.nodes))
@@ -215,7 +217,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
 
         self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings,\
                                                 nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
-                                                self.p.nsteps, exptol, self.p.nprob, \
+                                                self.p.nsteps, exptol, self.p.particles, self.p.nprob, \
                                                 "\'"+self.p.basis+"\'", \
                                                 "\'"+self.p.molecule+"\'", \
                                                 "\'"+self.p.exact_dir+"\'", solns)
@@ -319,6 +321,7 @@ magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
+                                   self.p.particles, self.p.exact_dir,
                                    self.p.levels, self.p.nodes[0],
                                    self.p.magnus[0], self.p.tasks)
 
