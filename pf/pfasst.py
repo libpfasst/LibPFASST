@@ -590,6 +590,8 @@ class Results(pd.DataFrame):
         if not legend:
             ax.legend_.remove()
 
+        return fig, ax
+
     def plot_residual_vs_cpu_for_each_iteration(self,
                                                 idx=None,
                                                 trajectory=None,
@@ -628,6 +630,7 @@ class Results(pd.DataFrame):
         if not legend:
             ax.legend_.remove()
 
+        return fig, ax
 
 class Experiment(object):
     """A variety of different pfasst-related experiments to be performed
