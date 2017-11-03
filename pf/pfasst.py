@@ -68,6 +68,7 @@ class Params(object):
     timings = attr.ib(default=False)
     solutions = attr.ib(default=True)
     particles = attr.ib(default=5)
+    periodic = attr.ib(default=False)
     plist = attr.ib(repr=False)
 
     @plist.default
@@ -172,7 +173,7 @@ class PFASST(object):
 abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n/\n"
+nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
 
         if self.p.filename:
             with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
@@ -215,12 +216,17 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         else:
             timings = '.false.'
 
+        if self.p.periodic == True:
+            periodic = '.true.'
+        else:
+            periodic = '.false.'
+
         self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings,\
-                                                nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
-                                                self.p.nsteps, exptol, self.p.particles, self.p.nprob, \
-                                                "\'"+self.p.basis+"\'", \
-                                                "\'"+self.p.molecule+"\'", \
-                                                "\'"+self.p.exact_dir+"\'", solns)
+                                            nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
+                                            self.p.nsteps, exptol, self.p.particles, self.p.nprob, \
+                                            "\'"+self.p.basis+"\'", \
+                                            "\'"+self.p.molecule+"\'", \
+                                                "\'"+self.p.exact_dir+"\'", solns, periodic)
 
         return self.pfstring
 

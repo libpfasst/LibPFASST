@@ -96,6 +96,7 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
+    !$omp parallel
     do m = 1, lev%nnodes-1
        call lev%R(m)%copy(lev%Q(m+1))
     end do
@@ -115,7 +116,6 @@ contains
         this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
     endif
 
-    !$omp parallel
     !$omp do
     do m = 1, lev%nnodes-1
        call start_timer(pf, TAUX)
@@ -132,12 +132,12 @@ contains
        call end_timer(pf, TAUX+2)
     end do
     !$omp end do
-    !$omp end parallel
 
-    ! if (pf%state%step > 1 ) stop
+    !$omp end parallel
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     call end_timer(pf, TLEVEL+lev%index-1)
+
   end subroutine magpicard_sweep
 
   subroutine magpicard_initialize(this, lev)

@@ -24,7 +24,7 @@ module pf_mod_imk
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
-    class(pf_encap_t), allocatable :: omega(:), time_ev_op(:), dexpinvs(:)
+    class(pf_encap_t), allocatable :: omega(:), dexpinvs(:)
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -32,37 +32,37 @@ module pf_mod_imk
     procedure :: integrate    => imk_integrate
     procedure :: residual     => imk_residual
     procedure :: evaluate_all => imk_evaluate_all
-    procedure :: destroy      => imk_destroy
+    procedure :: imk_destroy
     procedure(pf_f_eval_p), deferred :: f_eval
-    procedure(pf_f_comp_p), deferred :: f_comp
+    ! procedure(pf_f_comp_p), deferred :: f_comp
     procedure(pf_dexpinv_p), deferred :: dexpinv
     procedure(pf_propagate_p), deferred :: propagate
-  end type pf_imk_t
+ end type pf_imk_t
 
   interface
-     subroutine pf_f_eval_p(this,y, t, level, f)
-       import pf_imk_t, pf_encap_t, c_int, pfdp
-       class(pf_imk_t),   intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y, f
-       real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f_eval_p
-     subroutine pf_f_comp_p(this,y, t, dt, level, f)
+     subroutine pf_f_eval_p(this, y, t, level, f)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t),   intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y, f
-       real(pfdp),        intent(in   ) :: t, dt
+       real(pfdp),        intent(in   ) :: t
        integer(c_int),    intent(in   ) :: level
-     end subroutine pf_f_comp_p
-     subroutine pf_dexpinv_p(this, omega, a)
+     end subroutine pf_f_eval_p
+     ! subroutine pf_f_comp_p(this,y, t, dt, level, f)
+     !   import pf_imk_t, pf_encap_t, c_int, pfdp
+     !   class(pf_imk_t),   intent(inout) :: this
+     !   class(pf_encap_t), intent(inout) :: y, f
+     !   real(pfdp),        intent(in   ) :: t, dt
+     !   integer(c_int),    intent(in   ) :: level
+     ! end subroutine pf_f_comp_p
+     subroutine pf_dexpinv_p(this, omega, a, x)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t), intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: omega, a
+       class(pf_encap_t), intent(inout) :: omega, a, x
      end subroutine pf_dexpinv_p
-     subroutine pf_propagate_p(this, q, time_ev_op, q0)
+     subroutine pf_propagate_p(this, q, omega, q0)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t), intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: q, time_ev_op, q0
+       class(pf_encap_t), intent(inout) :: q, q0, omega
      end subroutine pf_propagate_p
   end interface
 
@@ -79,28 +79,26 @@ contains
     integer :: m
     real(pfdp) :: t, dtsdc(lev%nnodes-1)
 
-    call start_timer(pf, TLEVEL+lev%index-1)
-
-    do m = 1, lev%nnodes-1
-       call lev%R(m)%copy(lev%Q(m+1))
-    end do
-
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
-    do m = 1, lev%nnodes
-       call lev%Q(m)%copy(lev%q0)
 
+    call start_timer(pf, TLEVEL+lev%index-1)
+
+    call lev%Q(m)%copy(lev%q0)
+    do m = 1, lev%nnodes-1
+       call lev%R(m)%copy(lev%Q(m+1))
+       call lev%Q(m+1)%copy(lev%q0)
+    end do
+
+    do m = 1, lev%nnodes-1
        ! compute new Q from previous omegas
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-       this%dexpinvs(m) = dexpinv(omega, lev%F(m,1))
+       call this%propagate(lev%Q(1), this%omega(m), lev%Q(m+1))
+       call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m,1))
+       call this%dexpinv(this%omega(m), lev%F(m,1), this%dexpinvs(m))
        t=t+dtsdc(m)
     end do
 
-    call imk_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
-
-    do m = 1, lev%nnodes
-       call this%propagate()
-    end do
+    ! call imk_integrate(this, lev, this%omega, this%dexpinvs, dt, lev%S)
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
@@ -115,10 +113,8 @@ contains
     integer :: m, nnodes
 
     nnodes = lev%nnodes
-    call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-         lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
-    call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
+    call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call lev%ulevel%factory%create_array(this%dexpinvs, nnodes-1, &
@@ -126,7 +122,7 @@ contains
 
     do m = 1, nnodes-1
        call this%omega(m)%setval(0.0_pfdp)
-       call this%time_ev_op(m)%setval(0.0_pfdp)
+       call this%dexpinvs(m)%setval(0.0_pfdp)
     end do
 
   end subroutine imk_initialize
@@ -143,35 +139,11 @@ contains
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
-          !do p = 1, this%npieces
           call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
-          !end do
        end do
     end do
+
   end subroutine imk_integrate
-
-  function dexpinv(omega, a) result(x)
-    integer, intent(in) :: dim
-    complex(pfdp), intent(in) :: omega(dim,dim), a(dim,dim)
-
-    integer :: i, nterms
-    real(pfdp) :: bernoulli(10), coef
-    complex(pfdp), allocatable :: x(:,:), commutator(:,:)
-
-    bernoulli = (/-0.5, 0.16666666666666, 0.0, -0.033333333333, 0.0, &
-         0.023809523809523808, 0.0, -0.03333333333333, 0.0, 0.075757575757575/)
-
-    allocate(x, commutator, source=a)
-
-    nterms = size(bernoulli)
-    coef = 1.0
-    do i = 1, nterms
-       commutator = matmul(a, commutator)
-       coef = coef/i
-       x = x + bernoulli(i) * coef * commutator
-    end do
-
-  end function dexpinv
 
   subroutine imk_evaluate(this, lev, t, m)
     use pf_mod_dtype
@@ -210,8 +182,7 @@ contains
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-      call lev%ulevel%factory%destroy_array(this%time_ev_op, lev%nnodes-1, &
-           lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
       call lev%ulevel%factory%destroy_array(this%dexpinvs, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
