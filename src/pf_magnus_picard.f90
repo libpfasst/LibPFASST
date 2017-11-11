@@ -94,27 +94,31 @@ contains
     integer    :: m, n, p
     real(pfdp) :: t, dtsdc(lev%nnodes-1)
 
+    if (lev%nnodes == 3) then
+       this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
+       this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
+    endif
+
     call start_timer(pf, TLEVEL+lev%index-1)
+
+    call lev%Q(1)%copy(lev%q0)
 
     !$omp parallel
     do m = 1, lev%nnodes-1
        call lev%R(m)%copy(lev%Q(m+1))
     end do
-    call lev%Q(1)%copy(lev%q0)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+    !$omp do
     do m = 1, lev%nnodes
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        t=t+dtsdc(m)
     end do
+    !$omp end do
 
+    !$omp barrier
     call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
-
-    if (lev%nnodes == 3) then
-        this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
-        this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
-    endif
 
     !$omp do
     do m = 1, lev%nnodes-1
@@ -130,9 +134,11 @@ contains
        call start_timer(pf, TAUX+2)
        call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
        call end_timer(pf, TAUX+2)
+
     end do
     !$omp end do
 
+    !$omp barrier
     !$omp end parallel
     call lev%qend%copy(lev%Q(lev%nnodes))
 
