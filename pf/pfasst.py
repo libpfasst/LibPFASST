@@ -170,7 +170,7 @@ class PFASST(object):
             settatr(self.p, k, v)
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = {}\n\t\
-abs_res_tol = 0.d-12\n\trel_res_tol = 0.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
+abs_res_tol = 1.d-12\n\trel_res_tol = 1.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
 nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
@@ -311,8 +311,6 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
     def _build_command(self):
         if self.p.nersc:
             command = ['srun', '-n', str(self.p.tasks)]
-            for option in self.p.nersc:
-                command.extend(option)
             command.extend([self.exe, self.p.base_dir + '/' + self.p.filename])
         else:
             command = ['mpirun', '-np', str(self.p.tasks), self.exe, \
@@ -514,24 +512,19 @@ class Results(pd.DataFrame):
         elif trajectory is not None:
             self._create_result_row(trajectory)
 
-    def _create_result_row(self, idx, trajectory, total_times):
-        final_solution = self.get_final_solution(trajectory)
+    def _create_result_row(self, idx, traj, total_times):
+        final_solution = traj.loc[len(traj)-1, 'solution']
+        iters = 0
+        for step in traj.step.unique():
+            iters += traj[traj.step == step].iter.max()
+
+        iters = iters / len(traj.step.unique())
 
         self.loc[idx] = self.p.dt, self.p.nsteps, \
                       self.p.nodes, self.p.magnus, \
-                      self.p.iterations, self.p.tfinal, \
-                      final_solution, total_times, trajectory
+                      iters, self.p.tfinal, \
+                      final_solution, total_times, traj
         return
-
-    def get_final_solution(self, trajectory):
-        """gets the final solution for the finest level from a trajectory"""
-        solution = trajectory[(trajectory['rank'] == self.p.tasks - 1) & \
-                              (trajectory['iter'] == self.p.iterations) & \
-                              (trajectory['time'] == self.p.tfinal) & \
-                              (trajectory['level'] == self.p.levels) & \
-                              (trajectory['step'] == self.p.nsteps)]['solution'].values
-
-        return solution[0]
 
     def get_final_block(self, idx=0):
         """returns a the final block of the results class"""
@@ -640,6 +633,7 @@ class Results(pd.DataFrame):
             ax.legend_.remove()
 
         return fig, ax
+
 
 class Experiment(object):
     """A variety of different pfasst-related experiments to be performed
