@@ -196,7 +196,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             pass
 
         self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
-                   'particles_{}-exact_dir_{}-'+ \
+                   'particles_{}-periodic_{}-exact_dir_{}-'+ \
                    'levels_{}-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
@@ -325,7 +325,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
-                                   self.p.particles, self.p.exact_dir,
+                                   self.p.particles, self.p.periodic, self.p.exact_dir,
                                    self.p.levels, self.p.nodes[0],
                                    self.p.magnus[0], self.p.tasks)
 
@@ -356,6 +356,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                         self.p.tasks, nodes, magnus, self.p.dt)
 
                 command = self._build_command()
+
                 output = check_output(command, stderr=STDOUT)
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
@@ -388,9 +389,14 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                 residual_value = float(match.group(6))
 
                 if self.p.solutions:
-                    path_to_solution = self.p.base_dir+'/'+\
-                                    "time_{:05.3f}-rank_{:03d}-step_{:04d}-iter_{:02d}-level_{:01d}_soln".format(
-                                        time, rank, step, iteration, level)
+                    if time >= 10.0:
+                        path_to_solution = self.p.base_dir+'/'+\
+                                        "time_{:07.4f}-rank_{:03d}-step_{:04d}-iter_{:03d}-level_{:01d}_soln".format(
+                                            time, rank, step, iteration, level)
+                    else:
+                        path_to_solution = self.p.base_dir+'/'+\
+                                        "time_{:06.4f}-rank_{:03d}-step_{:04d}-iter_{:03d}-level_{:01d}_soln".format(
+                                            time, rank, step, iteration, level)
                     solution = self._get_solution(path_to_solution)
                 else:
                     solution = None
