@@ -51,7 +51,7 @@ class Params(object):
     nsteps = attr.ib(default=16)
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
-    sweeps = attr.ib(default=[3], validator=attr.validators.instance_of(list))
+    sweeps = attr.ib(default=[1], validator=attr.validators.instance_of(list))
     sweeps_pred = attr.ib(default=[1],
                           validator=attr.validators.instance_of(list))
     exptol = attr.ib(default=['1.d-15'],
@@ -391,11 +391,11 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                 if self.p.solutions:
                     if time >= 10.0:
                         path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:07.4f}-rank_{:03d}-step_{:04d}-iter_{:03d}-level_{:01d}_soln".format(
+                                        "time_{:07.4f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
                                             time, rank, step, iteration, level)
                     else:
                         path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:06.4f}-rank_{:03d}-step_{:04d}-iter_{:03d}-level_{:01d}_soln".format(
+                                        "time_{:06.4f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
                                             time, rank, step, iteration, level)
                     solution = self._get_solution(path_to_solution)
                 else:
@@ -463,7 +463,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         self.p.tasks = 1
         self.p.levels = 1
-        self.p.nsteps = 2**10
+        self.p.nsteps = 2**12
         self.p.nodes = 3
         self.p.magnus = 2
         self.p.timings = False
@@ -491,6 +491,50 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         else:
             return thing
 
+
+    @staticmethod
+    def back_transform(l, nparticles):
+        nparts = l.shape[0]
+        alpha = np.zeros(nparts)
+        q = np.zeros(nparts)
+
+        for i in range(nparts-1):
+            alpha[i] = l[i, i+1]
+
+        alpha[nparts-1] = l[0, nparts-1]
+
+        q[0] = 0
+
+        for j in range(nparts-1):
+            q[j+1] = -2.0*np.log(2.0*alpha[j]) + q[j]
+
+        q = q - q[np.floor(nparticles/2)]
+        return q
+
+    def plot_toda(self, traj):
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4));
+
+        solutions = []
+        for step in traj.step.unique():
+            max_iter = traj[traj.step == step].iter.max()
+            sol = traj.loc[((traj.step == step) &
+                            (traj.iter == max_iter)), 'solution']
+            solutions.append(sol.values[0])
+
+        solutions = np.asarray(solutions)
+
+        q_traj = np.zeros((self.p.nsteps, self.p.particles))
+        for j in range(self.p.nsteps):
+            q_traj[j, :] = self.back_transform(solutions[j, :, :], nparticles=self.p.particles)
+
+        for i in range(self.p.particles):
+            ax1.plot(np.linspace(0, self.p.tfinal, num=self.p.nsteps), q_traj[:, i])
+            ax2.plot(np.linspace(0, self.p.tfinal, num=self.p.nsteps), 2.0*solutions[:, i, i])
+
+        ax1.set_title('Position');
+        ax2.set_title('Momentum');
+
+        return fig, (ax1, ax2)
 
 class Results(pd.DataFrame):
     """DataFrame derived container for holding all results. Implements
@@ -704,3 +748,5 @@ class Experiment(object):
             abs(soln - ref_soln))  # / np.linalg.norm(ref_soln)
 
         return error.max()
+
+
