@@ -91,37 +91,37 @@ contains
     real(pfdp), intent(in) :: dt, t0
     class(pf_level_t), intent(inout) :: lev
 
-    integer    :: m, n, p
-    real(pfdp) :: t, dtsdc(lev%nnodes-1)
+    integer    :: m, nnodes
+    real(pfdp) :: t, dtsdc(lev%nnodes)
 
-    if (lev%nnodes == 3) then
+    nnodes = lev%nnodes
+    dtsdc = 0.0_pfdp
+    if (nnodes == 3) then
        this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
        this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
     endif
 
-    call start_timer(pf, TLEVEL+lev%index-1)
-
     call lev%Q(1)%copy(lev%q0)
 
-    !$omp parallel
-    do m = 1, lev%nnodes-1
+    do m = 1, nnodes-1
        call lev%R(m)%copy(lev%Q(m+1))
     end do
 
     t = t0
-    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
-    !$omp do
-    do m = 1, lev%nnodes
+    dtsdc = dt * (lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1))
+
+    call start_timer(pf, TLEVEL+lev%index-1)
+
+    do m = 1, nnodes
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        t=t+dtsdc(m)
     end do
-    !$omp end do
 
-    !$omp barrier
     call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
 
-    !$omp do
-    do m = 1, lev%nnodes-1
+    !$omp parallel
+    !$omp do private(m)
+    do m = 1, nnodes-1
        call start_timer(pf, TAUX)
        call this%compute_omega(this%omega(m), lev%S(m), lev%F, &
              this%commutator_colloc_coefs(m,:))
@@ -134,15 +134,13 @@ contains
        call start_timer(pf, TAUX+2)
        call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
        call end_timer(pf, TAUX+2)
-
     end do
     !$omp end do
-
-    !$omp barrier
     !$omp end parallel
-    call lev%qend%copy(lev%Q(lev%nnodes))
 
     call end_timer(pf, TLEVEL+lev%index-1)
+
+    call lev%qend%copy(lev%Q(nnodes))
 
   end subroutine magpicard_sweep
 
@@ -150,7 +148,7 @@ contains
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: m,n,nnodes
+    integer :: m, nnodes
 
     this%npieces = 1
     nnodes = lev%nnodes
@@ -226,7 +224,6 @@ contains
   subroutine magpicard_destroy(this, lev)
       class(pf_magpicard_t),  intent(inout) :: this
       class(pf_level_t),    intent(inout) :: lev
-      integer :: i, j
 
       !deallocate(this%QdiffI)
       ! deallocate(this%QtilI)

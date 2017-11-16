@@ -495,9 +495,10 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
+    residual = -1
 
     if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
-    
+
     lev_p => pf%levels(pf%nlevels)
     call lev_p%q0%copy(q0)
 
@@ -512,7 +513,7 @@ contains
        !      2b.  Do SDC sweep(s)
        !      2c.  Send
        !  3.  Move solution to next block
-       
+
 
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
@@ -529,7 +530,7 @@ contains
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
-          
+
           pf%state%status = PF_STATUS_PREDICTOR
           residual = -1
           energy   = -1
@@ -547,7 +548,7 @@ contains
        pf%state%status = PF_STATUS_ITERATING
        do while (pf%state%iter < pf%niters .and. .not. all_converged) 
           pf%state%iter  = pf%state%iter + 1
-          print *,'Doing block k=',k,'  sweep= ',pf%state%iter
+          ! print *,'Doing block k=',k,'  sweep= ',pf%state%iter
 
           call start_timer(pf, TITERATION)
           call call_hooks(pf, -1, PF_PRE_ITERATION)
