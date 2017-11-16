@@ -495,8 +495,8 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
     @staticmethod
     def back_transform(l, nparticles):
         nparts = l.shape[0]
-        alpha = np.zeros(nparts)
-        q = np.zeros(nparts)
+        alpha = np.zeros(nparts, dtype=np.complex_)
+        q = np.zeros(nparts, dtype=np.complex_)
 
         for i in range(nparts-1):
             alpha[i] = l[i, i+1]
@@ -508,12 +508,10 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         for j in range(nparts-1):
             q[j+1] = -2.0*np.log(2.0*alpha[j]) + q[j]
 
-        q = q - q[np.floor(nparticles/2)]
+        q = q - q[np.int(nparticles/2)]
         return q
 
-    def plot_toda(self, traj):
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4));
-
+    def get_toda_solutions(self, traj):
         solutions = []
         for step in traj.step.unique():
             max_iter = traj[traj.step == step].iter.max()
@@ -523,18 +521,32 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         solutions = np.asarray(solutions)
 
-        q_traj = np.zeros((self.p.nsteps, self.p.particles))
+        q_traj = np.zeros((self.p.nsteps, self.p.particles), dtype=np.complex_)
+        p_traj = np.zeros((self.p.nsteps, self.p.particles), dtype=np.complex_)
         for j in range(self.p.nsteps):
             q_traj[j, :] = self.back_transform(solutions[j, :, :], nparticles=self.p.particles)
+            p_traj[j, :] = 2.0*np.diag(solutions[j])
 
-        for i in range(self.p.particles):
+        return q_traj, p_traj
+
+    def plot_toda(self, traj, maxparticles=None):
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+        q_traj, p_traj = self.get_toda_solutions(traj)
+        if maxparticles:
+            particles = maxparticles
+        else:
+            particles = self.p.particles
+
+        for i in range(particles):
             ax1.plot(np.linspace(0, self.p.tfinal, num=self.p.nsteps), q_traj[:, i])
-            ax2.plot(np.linspace(0, self.p.tfinal, num=self.p.nsteps), 2.0*solutions[:, i, i])
+            ax2.plot(np.linspace(0, self.p.tfinal, num=self.p.nsteps), p_traj[:, i])
 
-        ax1.set_title('Position');
-        ax2.set_title('Momentum');
+        ax1.set_title('Position')
+        ax2.set_title('Momentum')
 
         return fig, (ax1, ax2)
+
 
 class Results(pd.DataFrame):
     """DataFrame derived container for holding all results. Implements
