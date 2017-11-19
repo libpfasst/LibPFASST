@@ -76,12 +76,21 @@ contains
        else
           call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
        end if
-    else 
-       !  Right now, we just call the old routine
-       if (present(qend)) then
-          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+    else
+       if (pf%Vcycle) then
+          !  Right now, we just call the old routine
+          if (present(qend)) then
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+          else
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+          end if
        else
-          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+          print *,'Calling pipelined SDC with multiple levels'
+          if (present(qend)) then
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
+          else
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
+          end if
        end if
     end if
     !  What we would like to do is check for
@@ -497,9 +506,10 @@ contains
     pf%comm%statreq  = -66
     residual = -1
 
-    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
+!    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
 
-    lev_p => pf%levels(pf%nlevels)
+    !  pointer to fine level on which we will iterate
+    lev_p => pf%levels(pf%nlevels)    
     call lev_p%q0%copy(q0)
 
     nproc = pf%comm%nproc
