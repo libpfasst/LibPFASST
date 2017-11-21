@@ -69,6 +69,7 @@ class Params(object):
     solutions = attr.ib(default=True)
     particles = attr.ib(default=5)
     periodic = attr.ib(default=False)
+    vcycle = attr.ib(default=False)
     plist = attr.ib(repr=False)
 
     @plist.default
@@ -170,7 +171,7 @@ class PFASST(object):
             settatr(self.p, k, v)
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = {}\n\t\
-abs_res_tol = 1.d-12\n\trel_res_tol = 1.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n/\n\n\
+abs_res_tol = 1.d-12\n\trel_res_tol = 1.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
 &PARAMS\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
 nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
@@ -221,12 +222,17 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         else:
             periodic = '.false.'
 
-        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings,\
+        if self.p.vcycle == True:
+            vcycle = '.true.'
+        else:
+            vcycle = '.false.'
+
+        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings, vcycle,\
                                             nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
                                             self.p.nsteps, exptol, self.p.particles, self.p.nprob, \
                                             "\'"+self.p.basis+"\'", \
                                             "\'"+self.p.molecule+"\'", \
-                                                "\'"+self.p.exact_dir+"\'", solns, periodic)
+                                            "\'"+self.p.exact_dir+"\'", solns, periodic)
 
         return self.pfstring
 
