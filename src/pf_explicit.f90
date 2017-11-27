@@ -38,11 +38,11 @@ module pf_mod_explicit
 
   interface
     subroutine pf_f_eval_p(this,y, t, level, f)
-      import pf_explicit_t, pf_encap_t, c_int, pfdp
+      import pf_explicit_t, pf_encap_t, pfdp
       class(pf_explicit_t),  intent(inout) :: this
       class(pf_encap_t), intent(in   ) :: y
       real(pfdp),        intent(in   ) :: t
-      integer(c_int),    intent(in   ) :: level
+      integer,    intent(in   ) :: level
       class(pf_encap_t), intent(inout) :: f
     end subroutine pf_f_eval_p
   end interface

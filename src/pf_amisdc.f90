@@ -43,48 +43,48 @@ module pf_mod_amisdc
 
   interface 
      subroutine pf_f1eval_p(this, y, t, level, f1)
-       import pf_amisdc_t, pf_encap_t, c_int, pfdp
+       import pf_amisdc_t, pf_encap_t, pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f1
        real(pfdp),         intent(in   ) :: t
-       integer(c_int),     intent(in   ) :: level
+       integer,     intent(in   ) :: level
      end subroutine pf_f1eval_p
 
      subroutine pf_f2eval_p(this, y, t, level, f2)
-       import pf_amisdc_t, pf_encap_t, c_int, pfdp
+       import pf_amisdc_t, pf_encap_t, pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f2
        real(pfdp),         intent(in   ) :: t
-       integer(c_int),     intent(in   ) :: level
+       integer,     intent(in   ) :: level
      end subroutine pf_f2eval_p
 
      subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
-       import pf_amisdc_t, pf_encap_t, c_int, pfdp
+       import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: rhs
        class(pf_encap_t),  intent(inout) :: y, f2
        real(pfdp),         intent(in   ) :: t, dt
-       integer(c_int),     intent(in   ) :: level
+       integer,     intent(in   ) :: level
      end subroutine pf_f2comp_p
 
      subroutine pf_f3eval_p(this, y, t, level, f3)
-       import pf_amisdc_t, pf_encap_t, c_int, pfdp
+       import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f3
        real(pfdp),         intent(in   ) :: t
-       integer(c_int),     intent(in   ) :: level
+       integer,     intent(in   ) :: level
      end subroutine pf_f3eval_p
 
      subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
-       import pf_amisdc_t, pf_encap_t, c_int, pfdp
+       import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: rhs
        class(pf_encap_t), intent(inout) :: y, f3
        real(pfdp),        intent(in   ) :: t, dt
-       integer(c_int),    intent(in   ) :: level
+       integer,    intent(in   ) :: level
      end subroutine pf_f3comp_p
   end interface
 

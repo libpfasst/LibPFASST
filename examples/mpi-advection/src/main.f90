@@ -24,7 +24,7 @@ contains
 
     implicit none
 
-    integer, parameter :: maxlevs = 2
+    integer, parameter :: maxlevs = 1
 
     type(pf_pfasst_t)              :: pf
     type(pf_comm_t)                :: comm
@@ -37,16 +37,18 @@ contains
     ! initialize pfasst
     !
 
-    nvars  = [ 32, 64 ]   ! number of dofs on the time/space levels
-    nnodes = [ 3,5 ]       ! number of sdc nodes on time/space levels
+    nvars  = [ 32 ]   ! number of dofs on the time/space levels
+    nnodes = [ 5 ]       ! number of sdc nodes on time/space levels
+!    nvars  = [ 32, 64 ]   ! number of dofs on the time/space levels
+!    nnodes = [ 3,5 ]       ! number of sdc nodes on time/space levels
     dt     = 0.05_pfdp
 
     call pf_mpi_create(comm, MPI_COMM_WORLD)
     call pf_pfasst_create(pf, comm, maxlevs)
 
     pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 20
-
+    pf%niters = 10
+    pf%abs_res_tol=0.0D-6
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
 

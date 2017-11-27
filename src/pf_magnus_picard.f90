@@ -43,15 +43,15 @@ module pf_mod_magnus_picard
 
   interface
      subroutine pf_f_eval_p(this, y, t, level, f)
-       import pf_magpicard_t, pf_encap_t, c_int, pfdp
+       import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y
        real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       integer,    intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
      subroutine pf_compute_omega_p(this, omega, f1, f2, coef, level)
-       import pf_magpicard_t, pf_encap_t, c_int, pfdp
+       import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: f1, f2
@@ -59,13 +59,13 @@ module pf_mod_magnus_picard
        integer, intent(in) :: level
      end subroutine pf_compute_omega_p
      subroutine pf_compute_time_ev_ops_p(this, omega, u)
-       import pf_magpicard_t, pf_encap_t, c_int, pfdp
+       import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: u
      end subroutine pf_compute_time_ev_ops_p
      subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, u)
-       import pf_magpicard_t, pf_encap_t, c_int, pfdp
+       import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: sol_t0
        class(pf_encap_t), intent(inout) :: u

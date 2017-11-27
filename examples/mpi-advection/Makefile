@@ -3,7 +3,7 @@
 #
 
 LIBPFASST ?= ../..
-FFTW3     ?= /usr
+FFTW3     ?= ../../fftw3
 
 EXE = main.exe
 

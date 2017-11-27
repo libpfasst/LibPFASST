@@ -244,12 +244,30 @@ contains
 
   end subroutine pf_predictor
 
-  subroutine pf_check_tolerances(pf, residual, energy)
+  !>
+  !> Test residuals to determine if the current processor has converged.
+  !>
+  !> Note that if the previous processor hasn't converged yet
+  !> (pstatus), the current processor hasn't converged yet either,
+  !> regardless of the residual.
+  !>
+  subroutine pf_check_convergence(pf, k, dt, residual, energy, is_converged)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
+    real(pfdp),        intent(in)    :: dt
+    integer,           intent(in)    :: k
+    logical,           intent(out)   :: is_converged   !<  True if this processor is done
+    real(pfdp)     :: residual1
+    is_converged = .false.
 
-    real(pfdp) :: residual1
+    ! shortcut for fixed block mode
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+       pf%state%pstatus = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
+       return
+    end if
 
+    ! Check to see if tolerances are met
     residual1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
        if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
@@ -259,41 +277,18 @@ contains
     end if
     residual = residual1
 
-    pf%state%res = residual
-  end subroutine pf_check_tolerances
-
-  !>
-  !> Test residuals to determine if the current processor has converged.
-  !>
-  !> Note that if the previous processor hasn't converged yet
-  !> (pstatus), the current processor hasn't converged yet either,
-  !> regardless of the residual.
-  !>
-  subroutine pf_check_convergence(pf, k, dt, residual, energy, qcycle)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(inout) :: residual, energy
-    real(pfdp),        intent(in)    :: dt
-    integer,           intent(in)    :: k
-    logical,           intent(out)   :: qcycle
-
-    qcycle = .false.
-
-    ! shortcut for fixed block mode
-    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
-       pf%state%pstatus = PF_STATUS_ITERATING
-       pf%state%status  = PF_STATUS_ITERATING
-       return
-    end if
-
-    call pf_check_tolerances(pf, residual, energy)
 
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
+    print *,pf%rank,':  ','calling recv_status, k=',k
     call pf_recv_status(pf, 8000+k)
+    print *,pf%rank,':  ','done recv_status, k=',k
 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
+    print *,pf%rank,':  ','calling send_status, k=',k
     call pf_send_status(pf, 8000+k)
+    print *,pf%rank,':  ','done send_status, k=',k
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
     ! XXX: this ain't so pretty, perhaps we should use the
@@ -301,13 +296,7 @@ contains
     ! done...
 
     if (pf%state%status == PF_STATUS_CONVERGED) then
-       qcycle = .true.
-       return
-    end if
-
-    if (0 == pf%comm%nproc) then
-       pf%state%status = PF_STATUS_PREDICTOR
-       qcycle = .true.
+       is_converged = .true.
        return
     end if
 
@@ -328,7 +317,7 @@ contains
     integer                   :: level_index
     real(pfdp)                :: residual, energy
 
-    logical :: qcycle, qbroadcast
+    logical :: is_converged, qbroadcast
     logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
@@ -422,11 +411,11 @@ contains
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, residual, energy, qcycle)
+       call pf_check_convergence(pf, k, dt, residual, energy, is_converged)
 
        if (pf%state%step >= pf%state%nsteps) exit
 
-       if (qcycle) cycle
+       if (is_converged) cycle
        do level_index = 2, pf%nlevels
           fine_lev_p => pf%levels(level_index)
           call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
@@ -501,7 +490,7 @@ contains
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
     do k = 1, nblocks   !  Loop over blocks of time steps
-
+       print *,'Starting  step=',pf%state%step,'  block k=',k      
        ! Each block will consist of
        !  1.  predictor
        !  2.  A loop until max iterations, or tolerances met
@@ -514,7 +503,9 @@ contains
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
        if (k > 1) then
+          print *,pf%rank,':  ','Waiting in  step=',pf%state%step,'  block k=',k      
           call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+          print *,pf%rank,':  ','Done waiting in  step=',pf%state%step,'  block k=',k      
           if (nproc > 1)  then
              call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
              call pf_broadcast(pf, lev_p%send, lev_p%nvars, pf%comm%nproc-1)
@@ -541,21 +532,26 @@ contains
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
        all_converged = .FALSE.
-       pf%state%status /= PF_STATUS_ITERATING
+       pf%state%status = PF_STATUS_ITERATING
+
        do while (pf%state%iter < pf%niters .and. .not. all_converged) 
           pf%state%iter  = pf%state%iter + 1
-          print *,'Doing block k=',k,'  sweep= ',pf%state%iter
+          print *,pf%rank,':  ','Doing  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
 
           call start_timer(pf, TITERATION)
           call call_hooks(pf, -1, PF_PRE_ITERATION)
           
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (pf%state%iter > 1 .and. (pf%state%status /= PF_STATUS_CONVERGED)) then
+          !          if (pf%state%iter > 1 .and. (pf%state%status /= PF_STATUS_CONVERGED)) then
+          if (pf%state%iter > 1) then          
+             print *,pf%rank,':  ','calling recv  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
              call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
+             print *,pf%rank,':  ','done with recv  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
           end if
           
           !< perform some sweeps
           do j = 1, lev_p%nsweeps
+             print *,pf%rank,':  ','doing  sweep j=',j
              call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
              call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
              call pf_residual(pf, lev_p, dt)
@@ -563,14 +559,19 @@ contains
           end do
           
           !<  Check to see if everybody is converged
+          print *,pf%rank,':  ','checking convergence on iter=', pf%state%iter 
           call pf_check_convergence(pf, k, dt, residual, energy, all_converged)
-          
+          print *,pf%rank,':  ','done checking convergence on iter=',pf%state%iter 
+          if (all_converged) print *,pf%rank,':  ','****************all done*****************',pf%state%iter 
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
           
           !<  Unless this processor is done, send fine level solution forward
-          if (pf%state%status /= PF_STATUS_CONVERGED) then
+          if (pf%state%iter < pf%niters .and. .not. all_converged) then
+             !          if (pf%state%status /= PF_STATUS_CONVERGED) then
+             print *,pf%rank,':  ','sending',lev_p%index*10000+100*k+pf%state%iter
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
+             print *,pf%rank,':  ','done sending',lev_p%index*10000+100*k+pf%state%iter
           end if
           
        end do  !  Loop over the iteration in this bloc
@@ -749,7 +750,9 @@ contains
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
+       print *,'waiting to send tag=',tag
        call pf%comm%send(pf, level, tag, blocking)
+       print *,'done with send tag=',tag
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
@@ -761,9 +764,9 @@ contains
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-
+       print *,'waiting to recv tag=',tag
        call pf%comm%recv(pf, level,tag, blocking)
-
+       print *,'done  to recv tag=',tag
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv

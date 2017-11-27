@@ -50,7 +50,7 @@ contains
   ! Evaluate polynomial.
   !
   real(qp) function poly_eval(p, n, x) result(v) bind(c)
-    integer(c_int), intent(in), value :: n
+    integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n), x
 
     integer :: j
@@ -62,7 +62,7 @@ contains
   end function
 
   complex(qp) function poly_eval_complex(p, n, x) result(v)
-    integer(c_int), intent(in), value :: n
+    integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n)
     complex(qp),    intent(in)        :: x
 
@@ -79,7 +79,7 @@ contains
   ! Differentiate polynomial (in place)
   !
   subroutine poly_diff(p, n) bind(c)
-    integer(c_int), intent(in),   value :: n
+    integer, intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
 
     integer  :: j
@@ -99,7 +99,7 @@ contains
   ! Integrate polynomial (in place)
   !
   subroutine poly_int(p, n) bind(c)
-    integer(c_int), intent(in),   value :: n
+    integer, intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
 
     integer  :: j
@@ -120,7 +120,7 @@ contains
   ! formula.
   !
   subroutine poly_legendre(p, n) bind(c)
-    integer(c_int), intent(in), value :: n
+    integer, intent(in), value :: n
     real(qp),       intent(out)       :: p(0:n)
 
     real(qp), dimension(0:n) :: p0, p1, p2
@@ -162,7 +162,7 @@ contains
   ! The roots are assumed to be real.
   !
   subroutine poly_roots(roots, p0, n) bind(c)
-    integer(c_int),  intent(in), value   :: n
+    integer,  intent(in), value   :: n
     real(qp),        intent(out)  :: roots(n)
     real(qp),        intent(in)   :: p0(0:n)
 

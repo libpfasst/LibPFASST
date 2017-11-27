@@ -28,10 +28,10 @@ module pf_mod_fimex
 
   interface
      subroutine pf_force_p(y, t, level, levelctx, f)
-       import c_ptr, c_int, pfdp
+       import c_ptr, pfdp
        type(c_ptr),    intent(in), value :: y, f, levelctx
        real(pfdp),     intent(in)        :: t
-       integer(c_int), intent(in)        :: level
+       integer, intent(in)        :: level
      end subroutine pf_force_p
   end interface
 

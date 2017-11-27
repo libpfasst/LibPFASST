@@ -56,19 +56,18 @@ module pf_mod_dtype
   type, bind(c) :: pf_state_t
     real(pfdp) :: t0  !<  Time at beginning of this time step
     real(pfdp) :: dt  !<  Time step size
-    integer(c_int) :: nsteps   !< total number of time steps
-    integer(c_int) :: cycle    !< deprecated?
-    integer(c_int) :: iter     !< current iteration number
-    integer(c_int) :: step     !< step number assigned to processor
-    integer(c_int) :: level    !< which level is currently being operated on
-    integer(c_int) :: hook     !< which hook
-    integer(c_int) :: proc     !< which processor
-    integer(c_int) :: sweep    !< sweep number
-    integer(c_int) :: status   !< status (iterating, converged etc)
-    integer(c_int) :: pstatus  !< previous rank's status
-    integer(c_int) :: itcnt    !< iteration counter
-    integer(c_int) :: mysteps  !< steps I did
-    real(pfdp) :: res
+    integer :: nsteps   !< total number of time steps
+    integer :: cycle    !< deprecated?
+    integer :: iter     !< current iteration number
+    integer :: step     !< current time step number assigned to processor
+    integer :: level    !< which level is currently being operated on
+    integer :: hook     !< which hook
+    integer :: proc     !< which processor
+    integer :: sweep    !< sweep number
+    integer :: status   !< status (iterating, converged etc)
+    integer :: pstatus  !< previous rank's status
+    integer :: itcnt    !< iteration counter
+    integer :: mysteps  !< steps I did
   end type pf_state_t
 
   type :: pf_hook_t
@@ -120,14 +119,16 @@ module pf_mod_dtype
 
   !<  Data type of a PFASST level
   type :: pf_level_t
-     integer     :: nvars        = -1   ! number of variables (dofs)
-     integer     :: nnodes       = -1   ! number of sdc nodes
-     integer     :: nsweeps      =  1   ! number of sdc sweeps to perform
-     integer     :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
-     integer     :: index        = -1   ! level number (1 is the coarsest)
+     integer  :: nvars        = -1   ! number of variables (dofs)
+     integer  :: nnodes       = -1   ! number of sdc nodes
+     integer  :: nsweeps      =  1   ! number of sdc sweeps to perform
+     integer  :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
+     integer  :: index        = -1   ! level number (1 is the coarsest)
      logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
-     real(pfdp)  :: residual
+     real(pfdp)  :: residual            ! holds the user defined residual
+     real(pfdp)  :: residual0           ! residual at beginning of PFASST call
+                                        ! used for relative residual tolerance calculation
 
      class(pf_user_level_t), allocatable :: ulevel
 
@@ -142,7 +143,7 @@ module pf_mod_dtype
           rmat(:,:),  &                 ! time restriction matrix
           tmat(:,:)                     ! time interpolation matrix
 
-     integer(c_int), allocatable :: &
+     integer, allocatable :: &
           nflags(:)                     ! sdc node flags
 
      class(pf_encap_t), allocatable :: &
@@ -215,12 +216,12 @@ module pf_mod_dtype
 
      ! hooks
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !<  Holds the hooks
-     integer,         allocatable :: nhooks(:,:)   !<  Holds the number hooks
+     integer,  allocatable :: nhooks(:,:)   !<  Holds the number hooks
 
      ! timing
      logical    :: echo_timings  = .false.
-     integer(8) :: timers(100)   = 0
-     integer(8) :: runtimes(100) = 0
+     integer :: timers(100)   = 0
+     integer :: runtimes(100) = 0
 
      ! misc
      logical :: debug = .false.
@@ -255,7 +256,7 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: lev
        real(pfdp),          intent(in)    :: t
-       integer,             intent(in)    :: m
+       integer,      intent(in)    :: m
      end subroutine pf_evaluate_p
 
      subroutine pf_evaluate_all_p(this, lev, t)
@@ -312,42 +313,42 @@ module pf_mod_dtype
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,             intent(in   )              :: level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: level, kind, nvars, shape(:)
      end subroutine pf_encap_create_single_p
 
      subroutine pf_encap_create_array_p(this, x, n, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: n, level, kind, nvars, shape(:)
      end subroutine pf_encap_create_array_p
 
      subroutine pf_encap_destroy_single_p(this, x, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,             intent(in   )              :: level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: level, kind, nvars, shape(:)
      end subroutine pf_encap_destroy_single_p
 
      subroutine pf_encap_destroy_array_p(this, x, n, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,             intent(in   )              :: n, level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: n, level, kind, nvars, shape(:)
      end subroutine pf_encap_destroy_array_p
 
      subroutine pf_encap_setval_p(this, val, flags)
        import pf_encap_t, pfdp
        class(pf_encap_t), intent(inout)        :: this
        real(pfdp),        intent(in)           :: val
-       integer,           intent(in), optional :: flags
+       integer,    intent(in), optional :: flags
      end subroutine pf_encap_setval_p
 
      subroutine pf_encap_copy_p(this, src, flags)
        import pf_encap_t, pfdp
        class(pf_encap_t), intent(inout)           :: this
        class(pf_encap_t), intent(in   )           :: src
-       integer,           intent(in   ), optional :: flags
+       integer,    intent(in   ), optional :: flags
      end subroutine pf_encap_copy_p
 
      function pf_encap_norm_p(this) result (norm)
@@ -373,7 +374,7 @@ module pf_mod_dtype
        class(pf_encap_t), intent(inout)  :: this
        class(pf_encap_t), intent(in   )  :: x
        real(pfdp),  intent(in)           :: a
-       integer,     intent(in), optional :: flags
+       integer, intent(in), optional :: flags
      end subroutine pf_encap_axpy_p
 
      subroutine pf_encap_eprint_p(this)
@@ -386,47 +387,47 @@ module pf_mod_dtype
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf
        class(pf_level_t), intent(inout) :: level
-       integer,           intent(in)    :: tag
+       integer,    intent(in)    :: tag
      end subroutine pf_post_p
 
      subroutine pf_recv_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
-       integer,           intent(in)    :: tag
+       integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_recv_p
 
      subroutine pf_recv_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
-       integer,           intent(in)    :: tag
+       integer,    intent(in)    :: tag
      end subroutine pf_recv_status_p
 
      subroutine pf_send_p(pf, level, tag, blocking)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
-       integer,           intent(in)    :: tag
+       integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
      end subroutine pf_send_p
 
      subroutine pf_send_status_p(pf, tag)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
-       integer,           intent(in)    :: tag
+       integer,    intent(in)    :: tag
      end subroutine pf_send_status_p
 
      subroutine pf_wait_p(pf, level)
        import pf_pfasst_t
        type(pf_pfasst_t), intent(in) :: pf
-       integer,           intent(in) :: level
+       integer,    intent(in) :: level
      end subroutine pf_wait_p
 
      subroutine pf_broadcast_p(pf, y, nvar, root)
        import pf_pfasst_t, pfdp
        type(pf_pfasst_t), intent(inout) :: pf
-       integer,           intent(in)    :: nvar, root
+       integer,    intent(in)    :: nvar, root
        real(pfdp)  ,      intent(in)    :: y(nvar)
      end subroutine pf_broadcast_p
 

@@ -31,7 +31,7 @@ contains
 
     real(c_long_double) :: qnodes0(nnodes0), qnodes(nnodes), dt
     real(pfdp)          :: qmat0(nnodes0-1,nnodes0), smat0(nnodes0-1,nnodes0)
-    integer(c_int)      :: flags0(nnodes0)
+    integer             :: flags0(nnodes0)
 
     integer :: qtype, i, r, refine
     logical :: composite, proper, no_left

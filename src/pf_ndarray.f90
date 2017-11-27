@@ -66,14 +66,14 @@ module pf_mod_ndarray
      subroutine ndarray_mkdir(dname, dlen) bind(c)
        use iso_c_binding
        character(c_char), intent(in   )        :: dname
-       integer(c_int),    intent(in   ), value :: dlen
+       integer,    intent(in   ), value :: dlen
      end subroutine ndarray_mkdir
 
      subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
        use iso_c_binding
        character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer(c_int),    intent(in   ), value :: dim, nvars
-       integer(c_int),    intent(in   )        :: shape(dim)
+       integer,    intent(in   ), value :: dim, nvars
+       integer,    intent(in   )        :: shape(dim)
        real(c_double),    intent(in   )        :: array(nvars)
      end subroutine ndarray_dump_numpy
   end interface

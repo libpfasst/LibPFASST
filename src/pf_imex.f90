@@ -40,24 +40,24 @@ module pf_mod_imex
 
   interface
      subroutine pf_f_eval_p(this,y, t, level, f, piece)
-       import pf_imex_t, pf_encap_t, c_int, pfdp
+       import pf_imex_t, pf_encap_t, pfdp
        class(pf_imex_t),  intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: y
        real(pfdp),        intent(in   ) :: t
-       integer(c_int),    intent(in   ) :: level
+       integer,    intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
-       integer(c_int),    intent(in   ) :: piece
+       integer,    intent(in   ) :: piece
      end subroutine pf_f_eval_p
       subroutine pf_f_comp_p(this,y, t, dt, rhs, level, f, piece)
-       import pf_imex_t, pf_encap_t, c_int, pfdp
+       import pf_imex_t, pf_encap_t, pfdp
        class(pf_imex_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y
        real(pfdp),        intent(in   ) :: t
        real(pfdp),        intent(in   ) :: dt
        class(pf_encap_t), intent(in   ) :: rhs
-       integer(c_int),    intent(in   ) :: level
+       integer,    intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
-       integer(c_int),    intent(in   ) :: piece
+       integer,    intent(in   ) :: piece
      end subroutine pf_f_comp_p
   end interface
 
