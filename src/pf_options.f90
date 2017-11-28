@@ -30,7 +30,7 @@ contains
     ! local versions of pfasst parameters
     integer          :: niters, nlevels, qtype, taui0
     double precision :: abs_res_tol, rel_res_tol
-    logical          :: pipeline_g , pfasst_pred, echo_timings, debug
+    logical          :: pipeline_g , pfasst_pred, echo_timings, debug, Vcycle
 
     ! stuff for reading the command line
     integer, parameter :: un = 9
@@ -42,7 +42,7 @@ contains
 
     ! define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, debug
-    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir
+    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir, Vcycle
 
     ! set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
@@ -56,6 +56,7 @@ contains
     taui0        = pf%taui0
     outdir       = pf%outdir
     debug        = pf%debug
+    Vcycle       = pf%Vcycle
 
     ! open the file fname and read the pfasst namelist
     if (present(fname))  then
@@ -90,6 +91,7 @@ contains
     pf%taui0        = taui0
     pf%outdir       = outdir
     pf%debug        = debug
+    pf%Vcycle       = Vcycle
 
     if (pf%nlevels < 1) then
        write(*,*) 'Bad specification for nlevels=', pf%nlevels

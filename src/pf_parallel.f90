@@ -4,6 +4,7 @@
 ! This file is part of LIBPFASST.
 !
 ! LIBPFASST is free software: you can redistribute it and/or modify it
+
 ! under the terms of the GNU General Public License as published by
 ! the Free Software Foundation, either version 3 of the License, or
 ! (at your option) any later version.
@@ -76,12 +77,21 @@ contains
        else
           call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
        end if
-    else 
-       !  Right now, we just call the old routine
-       if (present(qend)) then
-          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+    else
+       if (pf%Vcycle) then
+          !  Right now, we just call the old routine
+          if (present(qend)) then
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+          else
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+          end if
        else
-          call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+          print *,'Calling pipelined SDC with multiple levels'
+          if (present(qend)) then
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
+          else
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
+          end if
        end if
     end if
     !  What we would like to do is check for
@@ -133,7 +143,6 @@ contains
 
     !>  If we are doing a single level, then we only spreadq0 and return
     if (pf%nlevels > 1) then
-      
        do level_index = pf%nlevels, 2, -1
           fine_lev_p => pf%levels(level_index);
           coarse_lev_p => pf%levels(level_index-1)
@@ -150,7 +159,7 @@ contains
              coarse_lev_p => pf%levels(1)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
-                
+
                 ! Get new initial value (skip on first iteration)
                 if (k > 1) then
                    call coarse_lev_p%q0%copy(coarse_lev_p%qend)
@@ -158,7 +167,7 @@ contains
                       call spreadq0(coarse_lev_p, t0)
                    end if
                 end if
-                
+
                 call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt)
                 call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
@@ -169,10 +178,10 @@ contains
                 pf%state%pstatus = PF_STATUS_ITERATING
                 pf%state%status = PF_STATUS_ITERATING
                 pf%state%iter =-(pf%rank + 1) -k
-                
+
                 !  Get new initial conditions
                 call pf_recv(pf, coarse_lev_p, coarse_lev_p%index*20000+pf%rank+k, .true.)
-                
+
                 !  Do a sweep
                 call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt )
@@ -180,7 +189,7 @@ contains
                 call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
                 !  Send forward
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%index*20000+pf%rank+1+k, .false.)
-                
+
              end do ! k = 1, coarse_lev_p%nsweeps_pred-1
              call pf_residual(pf, coarse_lev_p, dt)
           else  ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
@@ -277,18 +286,13 @@ contains
     end if
     residual = residual1
 
-
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
-    print *,pf%rank,':  ','calling recv_status, k=',k
     call pf_recv_status(pf, 8000+k)
-    print *,pf%rank,':  ','done recv_status, k=',k
 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
          pf%state%status = PF_STATUS_ITERATING
 
-    print *,pf%rank,':  ','calling send_status, k=',k
     call pf_send_status(pf, 8000+k)
-    print *,pf%rank,':  ','done send_status, k=',k
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
     ! XXX: this ain't so pretty, perhaps we should use the
@@ -296,6 +300,12 @@ contains
     ! done...
 
     if (pf%state%status == PF_STATUS_CONVERGED) then
+       is_converged = .true.
+       return
+    end if
+
+    if (0 == pf%comm%nproc) then
+       pf%state%status = PF_STATUS_PREDICTOR
        is_converged = .true.
        return
     end if
@@ -325,6 +335,7 @@ contains
 
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
+    
     pf%state%step    = pf%rank
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
@@ -368,7 +379,7 @@ contains
           if (pf%state%step >= pf%state%nsteps) exit
 
           pf%state%status = PF_STATUS_PREDICTOR
-          qbroadcast = .true.   
+          qbroadcast = .true.
        end if
 
        !  Do this when starting a new block, broadcast new initial conditions to all procs
@@ -395,11 +406,14 @@ contains
        call call_hooks(pf, -1, PF_PRE_ITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
+
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
           call call_hooks(pf, fine_lev_p%index, PF_PRE_SWEEP)
-          do j = 1, fine_lev_p%nsweeps_pred
+
+          do j = 1, fine_lev_p%nsweeps
+
              call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, pf%state%t0, dt)
 
              call pf_residual(pf, fine_lev_p, dt)
@@ -481,9 +495,11 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
+    residual = -1
 
-    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
-    
+!    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
+
+    !  pointer to fine level on which we will iterate
     lev_p => pf%levels(pf%nlevels)
     call lev_p%q0%copy(q0)
 
@@ -498,14 +514,11 @@ contains
        !      2b.  Do SDC sweep(s)
        !      2c.  Send
        !  3.  Move solution to next block
-       
+
 
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
        if (k > 1) then
-          print *,pf%rank,':  ','Waiting in  step=',pf%state%step,'  block k=',k      
-          call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
-          print *,pf%rank,':  ','Done waiting in  step=',pf%state%step,'  block k=',k      
           if (nproc > 1)  then
              call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
              call pf_broadcast(pf, lev_p%send, lev_p%nvars, pf%comm%nproc-1)
@@ -517,7 +530,7 @@ contains
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
-          
+
           pf%state%status = PF_STATUS_PREDICTOR
           residual = -1
           energy   = -1
@@ -533,50 +546,43 @@ contains
        pf%state%iter = 0
        all_converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-
-       do while (pf%state%iter < pf%niters .and. .not. all_converged) 
+       do while (pf%state%iter < pf%niters .and. .not. all_converged)
           pf%state%iter  = pf%state%iter + 1
-          print *,pf%rank,':  ','Doing  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
 
           call start_timer(pf, TITERATION)
+
           call call_hooks(pf, -1, PF_PRE_ITERATION)
-          
+
           !<  Get new initial condition unless this is the first step or this processor is done
-          !          if (pf%state%iter > 1 .and. (pf%state%status /= PF_STATUS_CONVERGED)) then
-          if (pf%state%iter > 1) then          
-             print *,pf%rank,':  ','calling recv  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
-             print *,pf%rank,':  ','done with recv  step=',pf%state%step,'  block k=',k,'  sweep= ',pf%state%iter
+          if (pf%state%iter > 1 .and. pf%state%status /= PF_STATUS_CONVERGED) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
           end if
-          
+
           !< perform some sweeps
           do j = 1, lev_p%nsweeps
-             print *,pf%rank,':  ','doing  sweep j=',j
              call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
              call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
              call pf_residual(pf, lev_p, dt)
              call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
           end do
-          
+
           !<  Check to see if everybody is converged
-          print *,pf%rank,':  ','checking convergence on iter=', pf%state%iter 
           call pf_check_convergence(pf, k, dt, residual, energy, all_converged)
-          print *,pf%rank,':  ','done checking convergence on iter=',pf%state%iter 
-          if (all_converged) print *,pf%rank,':  ','****************all done*****************',pf%state%iter 
+
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
-          
+
           !<  Unless this processor is done, send fine level solution forward
           if (pf%state%iter < pf%niters .and. .not. all_converged) then
-             !          if (pf%state%status /= PF_STATUS_CONVERGED) then
-             print *,pf%rank,':  ','sending',lev_p%index*10000+100*k+pf%state%iter
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
-             print *,pf%rank,':  ','done sending',lev_p%index*10000+100*k+pf%state%iter
           end if
-          
+
        end do  !  Loop over the iteration in this bloc
-       
-       !  This block is over, so do some 
+
+       print*, 'waiting', pf%rank
+       call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+
+       !  This block is over, so do some
        call call_hooks(pf, -1, PF_POST_STEP)
        pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
        pf%state%mysteps = pf%state%mysteps + 1

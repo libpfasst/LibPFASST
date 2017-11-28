@@ -206,6 +206,7 @@ module pf_mod_dtype
 
      logical :: Pipeline_G =  .false.   !<  decides if coarsest level sweeps are pipelined
      logical :: PFASST_pred = .false.   !<  decides if the PFASST type predictor is used
+     logical :: Vcycle = .true.         !<  decides if Vcycles are done
 
      integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
