@@ -9,5 +9,6 @@ pipelines:
           - export BUILD_DIR=$PWD
           - cd $BUILD_DIR && make
           - cd $BUILD_DIR/examples/mpi-advection && make
-          - cd $BUILD_DIR/tests
+          - cd $BUILD_DIR
+          - pip install -e .
           - nosetests

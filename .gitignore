@@ -15,6 +15,11 @@ fort.*
 *.npy
 
 build/
+include/
 staging/
 src/pf_version.f90
 /.project
+
+tests/toda/output
+tests/toda/build
+tests/toda/include

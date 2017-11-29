@@ -70,40 +70,6 @@ class Params(object):
     particles = attr.ib(default=5)
     periodic = attr.ib(default=False)
     vcycle = attr.ib(default=False)
-    plist = attr.ib(repr=False)
-
-    @plist.default
-    def get_options_from_cli(self):
-        if not self.nb:
-            parser = argparse.ArgumentParser(
-                description='From nml file for PFASST, generate exact/ref solutions'
-            )
-            parser.add_argument('--filename', type=str)
-            parser.add_argument('--tfinal', type=float)
-            parser.add_argument('--nsteps', type=int)
-            parser.add_argument('--levels', type=int)
-            parser.add_argument('--iterations', type=int)
-            parser.add_argument('--sweeps', type=int, nargs='*')
-            parser.add_argument('--nodes', type=int, nargs='*')
-            parser.add_argument('--magnus', type=int, nargs='*')
-            parser.add_argument(
-                '--nprob', type=int, help='Default problem: toda')
-            parser.add_argument('--tasks', type=int, help='Number of MPI tasks')
-            parser.add_argument('--basis', type=str)
-            parser.add_argument('--molecule', type=str)
-            parser.add_argument('--exact_dir', type=str)
-            parser.add_argument('--base_dir', type=str)
-            parser.add_argument('-v', '--verbose', type=bool)
-            args = parser.parse_args()
-            self.overwrite_with(args)
-            return args.__dict__
-
-        return None
-
-    def overwrite_with(self, args):
-        for k, v in args.__dict__.iteritems():
-            if v is not None:
-                setattr(self, k, v)
 
     def __attrs_post_init__(self):
         if self.dt is None:
@@ -140,7 +106,7 @@ class PFASST(object):
     ==========
     params : A Params class object is  either passed in, or a default created. Contains all
     necessary parameters for running a PFASST calculation.
-    home : a (str) path to the project's root e.g. '/home/bkrull/apps/pfasst/dev' is used to
+    exe : a (str) path to the project's root e.g. '/exe/bkrull/apps/pfasst/dev' is used to
     path to binary
 
     Exposed Methods
@@ -152,20 +118,18 @@ class PFASST(object):
     Example
     ======
     >>> from pf.pfasst import PFASST
-    >>> pf = PFASST('/home/bkrull/pfasst/')
+    >>> pf = PFASST('/exe/bkrull/pfasst/')
     >>> pf.p.nsteps = 32
     >>> pf.p.tfinal = 5.0
     >>> results = pf.run()
     """
 
-    def __init__(self, home, params=None, **kwargs):
-        self.home = home
+    def __init__(self, exe, params=None, **kwargs):
+        self.exe = exe
         if params is None:
             self.p = Params()
         else:
             self.p = params
-
-        self.exe = self.home + 'main.exe'
 
         for k, v in kwargs.iteritems():
             settatr(self.p, k, v)
