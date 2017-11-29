@@ -400,10 +400,9 @@ contains
        !
 
        pf%state%iter  = pf%state%iter + 1
-       pf%state%cycle = 1
+       pf%state%cycle = 1  !  probably meaningless
 
        call start_timer(pf, TITERATION)
-       call call_hooks(pf, -1, PF_PRE_ITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
 
@@ -429,29 +428,29 @@ contains
 
        if (pf%state%step >= pf%state%nsteps) exit
 
-       if (is_converged) cycle
-       do level_index = 2, pf%nlevels
-          fine_lev_p => pf%levels(level_index)
-          call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
-       end do
-
-       if (pf%state%status /= PF_STATUS_CONVERGED) then
-
-          fine_lev_p => pf%levels(pf%nlevels)
-          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
-
-          if (pf%nlevels > 1) then
-             coarse_lev_p => pf%levels(pf%nlevels-1)
-             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
-             call save(coarse_lev_p)
+       if (.not. is_converged) then
+          do level_index = 2, pf%nlevels
+             fine_lev_p => pf%levels(level_index)
+             call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
+          end do
+          
+          if (pf%state%status /= PF_STATUS_CONVERGED) then
+             
+             fine_lev_p => pf%levels(pf%nlevels)
+             call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
+             
+             if (pf%nlevels > 1) then
+                coarse_lev_p => pf%levels(pf%nlevels-1)
+                call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
+                call save(coarse_lev_p)
+             end if
+             
           end if
-
+          
+          call pf_v_cycle(pf, k, pf%state%t0, dt)
+          call call_hooks(pf, -1, PF_POST_ITERATION)
+          call end_timer(pf, TITERATION)
        end if
-
-       call pf_v_cycle(pf, k, pf%state%t0, dt)
-       call call_hooks(pf, -1, PF_POST_ITERATION)
-       call end_timer(pf, TITERATION)
-
     end do  !   Loop on k over blocks of time steps
 
     pf%state%iter = -1
@@ -480,7 +479,8 @@ contains
     integer                   ::  nblocks !<  The number of blocks of steps to do
     integer                   ::  nproc   !<  The number of processors being used
 
-    logical :: all_converged   !<  True when all processors in current block are converged to residual
+    logical :: im_converged   !<  True when this processor is converged to residual
+    logical :: all_converged  !<  True when all processors in current block are converged to residual
 
     call start_timer(pf, TTOTAL)
 
@@ -544,9 +544,10 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       all_converged = .FALSE.
+       im_converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-       do while (pf%state%iter < pf%niters .and. .not. all_converged)
+!       do while (pf%state%iter < pf%niters .and. .not. im_converged)
+       do while (pf%state%iter < pf%niters)
           pf%state%iter  = pf%state%iter + 1
 
           call start_timer(pf, TITERATION)
@@ -554,32 +555,35 @@ contains
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (pf%state%iter > 1 .and. pf%state%status /= PF_STATUS_CONVERGED) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
+          if (pf%state%iter > 1 .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
 
           !< perform some sweeps
-          do j = 1, lev_p%nsweeps
-             call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
-             call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
-             call pf_residual(pf, lev_p, dt)
-             call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
-          end do
+          if (.not. im_converged) then
+             do j = 1, lev_p%nsweeps
+                call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
+                call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
+                call pf_residual(pf, lev_p, dt)
+                call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
+             end do
+          end if
 
           !<  Check to see if everybody is converged
-          call pf_check_convergence(pf, k, dt, residual, energy, all_converged)
+          call pf_check_convergence(pf, k, dt, residual, energy, im_converged)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
 
           !<  Unless this processor is done, send fine level solution forward
-          if (pf%state%iter < pf%niters .and. .not. all_converged) then
+          if (.not. im_converged) then
+
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
           end if
 
        end do  !  Loop over the iteration in this bloc
 
-       print*, 'waiting', pf%rank
+
        call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
 
        !  This block is over, so do some
@@ -641,7 +645,8 @@ contains
     class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
     integer :: j
     integer :: level_index
-
+    
+    !  For a single level, just get new initial conditions and return
     if (pf%nlevels == 1) then
        fine_lev_p => pf%levels(1)
        call pf_recv(pf, fine_lev_p, fine_lev_p%index*10000+iteration, .true.)
@@ -649,7 +654,7 @@ contains
     end if
 
     !
-    ! down
+    ! down (fine to coarse)
     !
     do level_index = pf%nlevels-1, 2, -1
       fine_lev_p => pf%levels(level_index);
@@ -666,7 +671,7 @@ contains
     end do
 
     !
-    ! bottom
+    ! bottom  (coarsest level)
     !
     level_index=1
     fine_lev_p => pf%levels(level_index)
@@ -690,7 +695,7 @@ contains
        call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
     endif
     !
-    ! up
+    ! up  (coarse to fine)
     !
     do level_index = 2, pf%nlevels
       fine_lev_p => pf%levels(level_index);
@@ -756,9 +761,9 @@ contains
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
-       print *,'waiting to send tag=',tag
+       print *,'waiting to send tag=',tag,' rank=',pf%rank
        call pf%comm%send(pf, level, tag, blocking)
-       print *,'done with send tag=',tag
+       print *,'done with send tag=',tag,' rank=',pf%rank
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
@@ -770,9 +775,9 @@ contains
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-       print *,'waiting to recv tag=',tag
+       print *,'waiting to recv tag=',tag,' rank=',pf%rank
        call pf%comm%recv(pf, level,tag, blocking)
-       print *,'done  to recv tag=',tag
+       print *,'done  to recv tag=',tag,' rank=',pf%rank
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
