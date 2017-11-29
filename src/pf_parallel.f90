@@ -401,7 +401,6 @@ contains
        !
 
        pf%state%iter  = pf%state%iter + 1
-       pf%state%cycle = 1  !  probably meaningless
 
        call start_timer(pf, TITERATION)
 
@@ -481,8 +480,7 @@ contains
     integer                   ::  nproc   !<  The number of processors being used
     integer                   ::  ierror  !<  Warning flag for communication routines
 
-    logical :: im_converged   !<  True when this processor is converged to residual
-    logical :: all_converged  !<  True when all processors in current block are converged to residual
+    logical :: is_converged   !<  True when this processor is converged to residual
 
     call start_timer(pf, TTOTAL)
 
@@ -546,9 +544,9 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       im_converged = .FALSE.
+       is_converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-!       do while (pf%state%iter < pf%niters .and. .not. im_converged)
+!       do while (pf%state%iter < pf%niters .and. .not. is_converged)
        do while (pf%state%iter < pf%niters)
           pf%state%iter  = pf%state%iter + 1
 
@@ -562,7 +560,7 @@ contains
           end if
 
           !< perform some sweeps
-          if (.not. im_converged) then
+          if (.not. is_converged) then
              do j = 1, lev_p%nsweeps
                 call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
                 call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
@@ -572,13 +570,13 @@ contains
           end if
 
           !<  Check to see if everybody is converged
-          call pf_check_convergence(pf, k, dt, residual, energy, im_converged)
+          call pf_check_convergence(pf, k, dt, residual, energy, is_converged)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
 
           !<  Unless this processor is done, send fine level solution forward
-          if (.not. im_converged) then
+          if (.not. is_converged) then
 
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
           end if
