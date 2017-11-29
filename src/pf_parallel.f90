@@ -326,6 +326,7 @@ contains
     integer                   :: j, k
     integer                   :: level_index
     real(pfdp)                :: residual, energy
+    integer                   ::  ierror  !<  Warning flag for communication routines
 
     logical :: is_converged, qbroadcast
     logical :: did_post_step_hook
@@ -385,7 +386,7 @@ contains
        !  Do this when starting a new block, broadcast new initial conditions to all procs
        if (k > 1 .and. qbroadcast) then
           fine_lev_p => pf%levels(pf%nlevels)
-          call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+          call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
           call fine_lev_p%qend%pack(fine_lev_p%send)    !<  Pack away your last solution
           call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
           call fine_lev_p%q0%unpack(fine_lev_p%send)    !<  Everyone resets their q0
@@ -478,6 +479,7 @@ contains
     real(pfdp)                :: residual, energy
     integer                   ::  nblocks !<  The number of blocks of steps to do
     integer                   ::  nproc   !<  The number of processors being used
+    integer                   ::  ierror  !<  Warning flag for communication routines
 
     logical :: im_converged   !<  True when this processor is converged to residual
     logical :: all_converged  !<  True when all processors in current block are converged to residual
@@ -584,7 +586,7 @@ contains
        end do  !  Loop over the iteration in this bloc
 
 
-       call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+       call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
 
        !  This block is over, so do some
        call call_hooks(pf, -1, PF_POST_STEP)
@@ -732,24 +734,37 @@ contains
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
+    integer ::  ierror 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) then
-       call pf%comm%post(pf, level, tag)
+       call pf%comm%post(pf, level, tag,ierror)
     end if
   end subroutine pf_post
 
   subroutine pf_send_status(pf, tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
+    integer ::  istatus
+    integer ::  ierror 
+
+    istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
-       call pf%comm%send_status(pf, tag)
+       call pf%comm%send_status(pf, tag,istatus,ierror)
     end if
   end subroutine pf_send_status
 
   subroutine pf_recv_status(pf, tag)
+    !  Receive the convergence status from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
+    integer ::  ierror ,istatus
     if (pf%rank /= 0) then
-       call pf%comm%recv_status(pf, tag)
+       call pf%comm%recv_status(pf, tag,istatus,ierror)
+       if (ierror .eq. 0) then
+          pf%state%pstatus = istatus
+       else
+          print *, pf%rank, 'warning: error during recv_status', ierror
+          stop
+       endif
     end if
   end subroutine pf_recv_status
 
@@ -758,10 +773,11 @@ contains
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
+    integer ::  ierror 
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
-       call pf%comm%send(pf, level, tag, blocking)
+       call pf%comm%send(pf, level, tag, blocking,ierror)
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
@@ -771,9 +787,17 @@ contains
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
+    integer ::  ierror 
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-       call pf%comm%recv(pf, level,tag, blocking)
+       call pf%comm%recv(pf, level,tag, blocking,ierror)
+       !  Unpack the sent data into the intial condition
+       if (ierror .eq. 0) then
+          call level%q0%unpack(level%recv)
+       else
+          print *, pf%rank, 'warning: mpi error during receive', ierror
+          stop
+       endif
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
@@ -782,8 +806,9 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
+    integer :: ierror
     call start_timer(pf, TBROADCAST)
-    call pf%comm%broadcast(pf, y, nvar, root)
+    call pf%comm%broadcast(pf, y, nvar, root,ierror)
     call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
 

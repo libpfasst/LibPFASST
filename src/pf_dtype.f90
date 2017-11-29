@@ -384,52 +384,61 @@ module pf_mod_dtype
      end subroutine pf_encap_eprint_p
 
      ! communicator interfaces
-     subroutine pf_post_p(pf, level, tag)
+     subroutine pf_post_p(pf, level, tag,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf
        class(pf_level_t), intent(inout) :: level
        integer,    intent(in)    :: tag
+       integer,    intent(inout)       :: ierror
      end subroutine pf_post_p
 
-     subroutine pf_recv_p(pf, level, tag, blocking)
+     subroutine pf_recv_p(pf, level, tag, blocking,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
        integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
+       integer,    intent(inout)       :: ierror
      end subroutine pf_recv_p
 
-     subroutine pf_recv_status_p(pf, tag)
+     subroutine pf_recv_status_p(pf, tag,istatus,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,    intent(in)    :: tag
+       integer,    intent(inout)       :: istatus
+       integer,    intent(inout)       :: ierror
      end subroutine pf_recv_status_p
 
-     subroutine pf_send_p(pf, level, tag, blocking)
+     subroutine pf_send_p(pf, level, tag, blocking,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
        integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
+       integer,    intent(inout)       :: ierror
      end subroutine pf_send_p
 
-     subroutine pf_send_status_p(pf, tag)
+     subroutine pf_send_status_p(pf, tag,istatus,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,    intent(in)    :: tag
+       integer,    intent(in)       :: istatus
+       integer,    intent(inout)       :: ierror
      end subroutine pf_send_status_p
 
-     subroutine pf_wait_p(pf, level)
+     subroutine pf_wait_p(pf, level,ierror)
        import pf_pfasst_t
        type(pf_pfasst_t), intent(in) :: pf
        integer,    intent(in) :: level
+       integer,    intent(inout)       :: ierror
      end subroutine pf_wait_p
 
-     subroutine pf_broadcast_p(pf, y, nvar, root)
+     subroutine pf_broadcast_p(pf, y, nvar, root,ierror)
        import pf_pfasst_t, pfdp
        type(pf_pfasst_t), intent(inout) :: pf
        integer,    intent(in)    :: nvar, root
        real(pfdp)  ,      intent(in)    :: y(nvar)
+       integer,    intent(inout)       :: ierror
      end subroutine pf_broadcast_p
 
   end interface

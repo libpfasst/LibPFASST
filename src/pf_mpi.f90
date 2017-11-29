@@ -57,13 +57,12 @@ contains
   ! This should be called soon after adding levels to the PFASST
   ! controller **pf**.
   !
-  subroutine pf_mpi_setup(pf_comm, pf)
+  subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
 
     type(pf_comm_t),   intent(inout) :: pf_comm
     type(pf_pfasst_t), intent(inout) :: pf
-
-    integer :: ierror
+    integer,           intent(inout) :: ierror
 
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
 
@@ -87,14 +86,14 @@ contains
   !
   ! Post receive requests.
   !
-  subroutine pf_mpi_post(pf, level, tag)
+  subroutine pf_mpi_post(pf, level, tag,ierror)
     use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(in   ) :: pf
     class(pf_level_t), intent(inout) :: level
     integer,           intent(in   ) :: tag
+    integer,           intent(inout) :: ierror
 
-    integer :: ierror
 
     call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
                    modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
@@ -103,13 +102,14 @@ contains
   !
   ! Send/receive status information.
   !
-  subroutine pf_mpi_send_status(pf, tag)
+  subroutine pf_mpi_send_status(pf, tag,istatus,ierror)
     use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-
-    integer    :: ierror, stat(MPI_STATUS_SIZE)
+    integer,           intent(in) :: istatus
+    integer,           intent(inout) :: ierror
+    integer    ::  stat(MPI_STATUS_SIZE)
     integer(4) :: message(8)
 
     ! on orga there is some weird issue with send/recv status: the
@@ -118,7 +118,7 @@ contains
     ! last two slots.
 
     message = 666
-    message(7) = pf%state%status
+    message(7) = istatus
 
     if (pf%comm%statreq /= -66) then
        call mpi_wait(pf%comm%statreq, stat, ierror)
@@ -129,37 +129,39 @@ contains
 
   end subroutine pf_mpi_send_status
 
-  subroutine pf_mpi_recv_status(pf, tag)
+  subroutine pf_mpi_recv_status(pf, tag,istatus,ierror)
     use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-
-    integer    :: ierror, stat(MPI_STATUS_SIZE)
+    integer,           intent(inout) :: istatus
+    integer,           intent(inout) :: ierror
+    integer    ::  stat(MPI_STATUS_SIZE)
     integer(4) :: message(8)
 
     call mpi_recv(message, 8, MPI_INTEGER4, &
                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
+    istatus = message(7)
+    !  Moving this one level up
+    ! pf%state%pstatus = message(7)
 
-    pf%state%pstatus = message(7)
-
-    if (ierror .ne. 0) &
-         print *, pf%rank, 'warning: mpi error during receive status', ierror
+    !   if (ierror .ne. 0) &
+     !    print *, pf%rank, 'warning: mpi error during receive status', ierror
 
   end subroutine pf_mpi_recv_status
 
   !
   ! Send/receive solution.
   !
-  subroutine pf_mpi_send(pf, level, tag, blocking)
+  subroutine pf_mpi_send(pf, level, tag, blocking,ierror)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t), intent(inout) :: level
     integer,           intent(in   ) :: tag
     logical,           intent(in   ) :: blocking
-
-    integer :: ierror, stat(MPI_STATUS_SIZE)
+    integer,           intent(inout) :: ierror
+    integer ::  stat(MPI_STATUS_SIZE)
 
     if (blocking) then
        call level%qend%pack(level%send)
@@ -173,14 +175,14 @@ contains
     end if
   end subroutine pf_mpi_send
 
-  subroutine pf_mpi_recv(pf, level, tag, blocking)
+  subroutine pf_mpi_recv(pf, level, tag, blocking,ierror)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t), intent(inout) :: level
     integer,           intent(in   ) :: tag
     logical,           intent(in   ) :: blocking
-
-    integer :: ierror, stat(MPI_STATUS_SIZE)
+    integer,           intent(inout) :: ierror
+    integer ::  stat(MPI_STATUS_SIZE)
 
     if (blocking) then
        call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
@@ -189,29 +191,30 @@ contains
        call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)
     end if
 
-    if (ierror .ne. 0) &
-         print *, pf%rank, 'warning: mpi error during receive', ierror
-
-    call level%q0%unpack(level%recv)
+    ! Moving this one level up
+    ! if (ierror .ne. 0) then  &
+    !     print *, pf%rank, 'warning: mpi error during receive', ierror
+    !    call level%q0%unpack(level%recv)
   end subroutine pf_mpi_recv
 
   !
   ! Misc
   !
-  subroutine pf_mpi_wait(pf, level)
+  subroutine pf_mpi_wait(pf, level, ierror)
     use pf_mod_mpi, only: MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(in) :: pf
     integer,           intent(in) :: level
-    integer :: ierror, stat(MPI_STATUS_SIZE)
+    integer,           intent(inout) :: ierror
+    integer ::  stat(MPI_STATUS_SIZE)
     call mpi_wait(pf%comm%sendreq(level), stat, ierror)
   end subroutine pf_mpi_wait
 
-  subroutine pf_mpi_broadcast(pf, y, nvar, root)
+  subroutine pf_mpi_broadcast(pf, y, nvar, root,ierror)
     use pf_mod_mpi, only: MPI_REAL8
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
-    integer :: ierror
+    integer,           intent(inout) :: ierror
     call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)
   end subroutine pf_mpi_broadcast
 
