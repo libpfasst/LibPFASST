@@ -3,6 +3,7 @@
 import subprocess
 import collections
 import re
+from pf.pfasst import PFASST, Experiment, Params
 
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'step', 'iter', 'error' ])
 
@@ -47,11 +48,8 @@ def check_last_error(exe, tol):
   assert lasterr < tol
 
 
-def test_mpi_advection_n4():
-  check_last_error('mpiexec -n 4 ../examples/mpi-advection/main.exe', 5e-8)
-
-def test_mpi_advection_n8():
-  check_last_error('mpiexec -n 8 ../examples/mpi-advection/main.exe', 5e-8)
-
-if __name__ == '__main__':
-  test_mpi_advection_n4()
+#def test_mpi_advection_n4():
+#  check_last_error('mpiexec -n 4 ../examples/mpi-advection/main.exe', 5e-8)
+#
+#def test_mpi_advection_n8():
+#  check_last_error('mpiexec -n 8 ../examples/mpi-advection/main.exe', 5e-8)
