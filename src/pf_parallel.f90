@@ -326,6 +326,7 @@ contains
     integer                   :: j, k
     integer                   :: level_index
     real(pfdp)                :: residual, energy
+    integer                   ::  ierror  !<  Warning flag for communication routines
 
     logical :: is_converged, qbroadcast
     logical :: did_post_step_hook
@@ -385,7 +386,7 @@ contains
        !  Do this when starting a new block, broadcast new initial conditions to all procs
        if (k > 1 .and. qbroadcast) then
           fine_lev_p => pf%levels(pf%nlevels)
-          call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+          call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
           call fine_lev_p%qend%pack(fine_lev_p%send)    !<  Pack away your last solution
           call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
           call fine_lev_p%q0%unpack(fine_lev_p%send)    !<  Everyone resets their q0
@@ -400,10 +401,9 @@ contains
        !
 
        pf%state%iter  = pf%state%iter + 1
-       pf%state%cycle = 1
+       pf%state%cycle = 1  !  probably meaningless
 
        call start_timer(pf, TITERATION)
-       call call_hooks(pf, -1, PF_PRE_ITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
 
@@ -429,29 +429,29 @@ contains
 
        if (pf%state%step >= pf%state%nsteps) exit
 
-       if (is_converged) cycle
-       do level_index = 2, pf%nlevels
-          fine_lev_p => pf%levels(level_index)
-          call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
-       end do
-
-       if (pf%state%status /= PF_STATUS_CONVERGED) then
-
-          fine_lev_p => pf%levels(pf%nlevels)
-          call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
-
-          if (pf%nlevels > 1) then
-             coarse_lev_p => pf%levels(pf%nlevels-1)
-             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
-             call save(coarse_lev_p)
+       if (.not. is_converged) then
+          do level_index = 2, pf%nlevels
+             fine_lev_p => pf%levels(level_index)
+             call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
+          end do
+          
+          if (pf%state%status /= PF_STATUS_CONVERGED) then
+             
+             fine_lev_p => pf%levels(pf%nlevels)
+             call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false.)
+             
+             if (pf%nlevels > 1) then
+                coarse_lev_p => pf%levels(pf%nlevels-1)
+                call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
+                call save(coarse_lev_p)
+             end if
+             
           end if
-
+          
+          call pf_v_cycle(pf, k, pf%state%t0, dt)
+          call call_hooks(pf, -1, PF_POST_ITERATION)
+          call end_timer(pf, TITERATION)
        end if
-
-       call pf_v_cycle(pf, k, pf%state%t0, dt)
-       call call_hooks(pf, -1, PF_POST_ITERATION)
-       call end_timer(pf, TITERATION)
-
     end do  !   Loop on k over blocks of time steps
 
     pf%state%iter = -1
@@ -479,8 +479,10 @@ contains
     real(pfdp)                :: residual, energy
     integer                   ::  nblocks !<  The number of blocks of steps to do
     integer                   ::  nproc   !<  The number of processors being used
+    integer                   ::  ierror  !<  Warning flag for communication routines
 
-    logical :: all_converged   !<  True when all processors in current block are converged to residual
+    logical :: im_converged   !<  True when this processor is converged to residual
+    logical :: all_converged  !<  True when all processors in current block are converged to residual
 
     call start_timer(pf, TTOTAL)
 
@@ -506,7 +508,7 @@ contains
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
     do k = 1, nblocks   !  Loop over blocks of time steps
-       print *,'Starting  step=',pf%state%step,'  block k=',k      
+       ! print *,'Starting  step=',pf%state%step,'  block k=',k      
        ! Each block will consist of
        !  1.  predictor
        !  2.  A loop until max iterations, or tolerances met
@@ -544,9 +546,10 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       all_converged = .FALSE.
+       im_converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-       do while (pf%state%iter < pf%niters .and. .not. all_converged)
+!       do while (pf%state%iter < pf%niters .and. .not. im_converged)
+       do while (pf%state%iter < pf%niters)
           pf%state%iter  = pf%state%iter + 1
 
           call start_timer(pf, TITERATION)
@@ -554,33 +557,36 @@ contains
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (pf%state%iter > 1 .and. pf%state%status /= PF_STATUS_CONVERGED) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
+          if (pf%state%iter > 1 .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
 
           !< perform some sweeps
-          do j = 1, lev_p%nsweeps
-             call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
-             call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
-             call pf_residual(pf, lev_p, dt)
-             call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
-          end do
+          if (.not. im_converged) then
+             do j = 1, lev_p%nsweeps
+                call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
+                call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
+                call pf_residual(pf, lev_p, dt)
+                call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
+             end do
+          end if
 
           !<  Check to see if everybody is converged
-          call pf_check_convergence(pf, k, dt, residual, energy, all_converged)
+          call pf_check_convergence(pf, k, dt, residual, energy, im_converged)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
           call end_timer(pf, TITERATION)
 
           !<  Unless this processor is done, send fine level solution forward
-          if (pf%state%iter < pf%niters .and. .not. all_converged) then
+          if (.not. im_converged) then
+
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
           end if
 
        end do  !  Loop over the iteration in this bloc
 
-       print*, 'waiting', pf%rank
-       call pf%comm%wait(pf, pf%nlevels)             !<  make sure everyone is done
+
+       call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
 
        !  This block is over, so do some
        call call_hooks(pf, -1, PF_POST_STEP)
@@ -641,7 +647,8 @@ contains
     class(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
     integer :: j
     integer :: level_index
-
+    
+    !  For a single level, just get new initial conditions and return
     if (pf%nlevels == 1) then
        fine_lev_p => pf%levels(1)
        call pf_recv(pf, fine_lev_p, fine_lev_p%index*10000+iteration, .true.)
@@ -649,7 +656,7 @@ contains
     end if
 
     !
-    ! down
+    ! down (fine to coarse)
     !
     do level_index = pf%nlevels-1, 2, -1
       fine_lev_p => pf%levels(level_index);
@@ -666,7 +673,7 @@ contains
     end do
 
     !
-    ! bottom
+    ! bottom  (coarsest level)
     !
     level_index=1
     fine_lev_p => pf%levels(level_index)
@@ -690,7 +697,7 @@ contains
        call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
     endif
     !
-    ! up
+    ! up  (coarse to fine)
     !
     do level_index = 2, pf%nlevels
       fine_lev_p => pf%levels(level_index);
@@ -724,65 +731,105 @@ contains
   ! Communication helpers
   !
   subroutine pf_post(pf, level, tag)
+    !>  Post a receive request for a new initial condition to be received after doing some work
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
+    integer ::  ierror 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) then
-       call pf%comm%post(pf, level, tag)
+       call pf%comm%post(pf, level, tag,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during post', ierror
+          stop "pf_parallel:pf_post"
+       endif
     end if
   end subroutine pf_post
 
   subroutine pf_send_status(pf, tag)
+    !>  Send this processor's convergence status to the next processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
+    integer ::  istatus
+    integer ::  ierror 
+
+    istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
-       call pf%comm%send_status(pf, tag)
+       call pf%comm%send_status(pf, tag,istatus,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during send_status', ierror
+          stop "pf_parallel:pf_send_status"
+       endif
     end if
   end subroutine pf_send_status
 
   subroutine pf_recv_status(pf, tag)
+    !  Receive the convergence status from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
+    integer ::  ierror ,istatus
     if (pf%rank /= 0) then
-       call pf%comm%recv_status(pf, tag)
+       call pf%comm%recv_status(pf, tag,istatus,ierror)
+       if (ierror .eq. 0) then
+          pf%state%pstatus = istatus
+       else
+          print *, pf%rank, 'warning: error during recv_status', ierror
+          stop "pf_parallel:pf_recv_status"
+       endif
     end if
   end subroutine pf_recv_status
 
   subroutine pf_send(pf, level, tag, blocking)
+    !  Send the solution to the next processors
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
+    integer ::  ierror 
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
-       print *,'waiting to send tag=',tag
-       call pf%comm%send(pf, level, tag, blocking)
-       print *,'done with send tag=',tag
+       call pf%comm%send(pf, level, tag, blocking,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during send', ierror
+          stop "pf_parallel:pf_send"
+       endif
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
 
   subroutine pf_recv(pf, level, tag, blocking)
+    !>  Recieve the solution from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
+    integer ::  ierror 
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-       print *,'waiting to recv tag=',tag
-       call pf%comm%recv(pf, level,tag, blocking)
-       print *,'done  to recv tag=',tag
+       call pf%comm%recv(pf, level,tag, blocking,ierror)
+       !  Unpack the sent data into the intial condition
+       if (ierror .eq. 0) then
+          call level%q0%unpack(level%recv)
+       else
+          print *, pf%rank, 'warning: mpi error during receive', ierror
+          stop "pf_parallel:pf_recv"
+       endif
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
 
   subroutine pf_broadcast(pf, y, nvar, root)
+    !>  Broadcast the initial condition to all processors
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
+    integer :: ierror
     call start_timer(pf, TBROADCAST)
-    call pf%comm%broadcast(pf, y, nvar, root)
+    call pf%comm%broadcast(pf, y, nvar, root,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning:  error during broadcast', ierror
+          stop "pf_parallel:pf_broadcast"
+       endif
     call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
 

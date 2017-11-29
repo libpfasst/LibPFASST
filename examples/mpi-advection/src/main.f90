@@ -5,14 +5,14 @@
 program main
   use pf_mod_mpi!, only: mpi_init, mpi_finalize
   use feval, only: fftw_cleanup
-  integer :: err
+  integer ::  ierror
 
-  call mpi_init(err)
-  if (err /= 0) &
+  call mpi_init(ierror)
+  if (ierror /= 0) &
        stop "ERROR: Can't initialize MPI."
   call ad()
   call fftw_cleanup()
-  call mpi_finalize(err)
+  call mpi_finalize(ierror)
 
 contains
 
@@ -37,7 +37,7 @@ contains
     ! initialize pfasst
     !
 
-    nvars  = [ 32 ]   ! number of dofs on the time/space levels
+    nvars  = [ 64 ]   ! number of dofs on the time/space levels
     nnodes = [ 5 ]       ! number of sdc nodes on time/space levels
 !    nvars  = [ 32, 64 ]   ! number of dofs on the time/space levels
 !    nnodes = [ 3,5 ]       ! number of sdc nodes on time/space levels
@@ -47,8 +47,10 @@ contains
     call pf_pfasst_create(pf, comm, maxlevs)
 
     pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 10
-    pf%abs_res_tol=0.0D-6
+    pf%niters = 40
+    pf%abs_res_tol=1.0D-12    
+    pf%rel_res_tol=1.0D-12
+
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
 
@@ -70,7 +72,7 @@ contains
        pf%levels(1)%nsweeps_pred = 2
     end if
 
-    call pf_mpi_setup(comm, pf) ! XXX: move this into pf_pfasst_setup
+    call pf_mpi_setup(comm, pf,ierror) ! XXX: move this into pf_pfasst_setup
     call pf_pfasst_setup(pf)
 
     !
@@ -80,9 +82,9 @@ contains
     call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
     call initial(q0)
 
-    call pf_add_hook(pf, pf%nlevels, PF_POST_ITERATION, echo_error)
+    call pf_add_hook(pf, pf%nlevels, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=4*comm%nproc)
+    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=2*comm%nproc)
 
     deallocate(q0%flatarray)
     deallocate(q0%shape)
