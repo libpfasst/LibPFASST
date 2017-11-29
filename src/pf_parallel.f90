@@ -731,16 +731,22 @@ contains
   ! Communication helpers
   !
   subroutine pf_post(pf, level, tag)
+    !>  Post a receive request for a new initial condition to be received after doing some work
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     integer ::  ierror 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) then
        call pf%comm%post(pf, level, tag,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during post', ierror
+          stop "pf_parallel:pf_post"
+       endif
     end if
   end subroutine pf_post
 
   subroutine pf_send_status(pf, tag)
+    !>  Send this processor's convergence status to the next processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  istatus
@@ -749,6 +755,10 @@ contains
     istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
        call pf%comm%send_status(pf, tag,istatus,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during send_status', ierror
+          stop "pf_parallel:pf_send_status"
+       endif
     end if
   end subroutine pf_send_status
 
@@ -763,12 +773,13 @@ contains
           pf%state%pstatus = istatus
        else
           print *, pf%rank, 'warning: error during recv_status', ierror
-          stop
+          stop "pf_parallel:pf_recv_status"
        endif
     end if
   end subroutine pf_recv_status
 
   subroutine pf_send(pf, level, tag, blocking)
+    !  Send the solution to the next processors
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
@@ -778,11 +789,16 @@ contains
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
        call pf%comm%send(pf, level, tag, blocking,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning: error during send', ierror
+          stop "pf_parallel:pf_send"
+       endif
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
 
   subroutine pf_recv(pf, level, tag, blocking)
+    !>  Recieve the solution from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
@@ -796,19 +812,24 @@ contains
           call level%q0%unpack(level%recv)
        else
           print *, pf%rank, 'warning: mpi error during receive', ierror
-          stop
+          stop "pf_parallel:pf_recv"
        endif
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
 
   subroutine pf_broadcast(pf, y, nvar, root)
+    !>  Broadcast the initial condition to all processors
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
     integer :: ierror
     call start_timer(pf, TBROADCAST)
     call pf%comm%broadcast(pf, y, nvar, root,ierror)
+       if (ierror /= 0) then
+          print *, pf%rank, 'warning:  error during broadcast', ierror
+          stop "pf_parallel:pf_broadcast"
+       endif
     call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
 
