@@ -10,5 +10,5 @@ pipelines:
           - cd $BUILD_DIR && make
           - cd $BUILD_DIR/tests/toda && make
           - cd $BUILD_DIR
-          - pip install scipy numpy pandas matplotib attrs
+          - pip install scipy numpy pandas matplotlib attrs
           - nosetests
