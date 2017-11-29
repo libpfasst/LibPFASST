@@ -37,8 +37,8 @@ contains
     ! initialize pfasst
     !
 
-    nvars  = [ 32 ]   ! number of dofs on the time/space levels
-    nnodes = [ 5 ]       ! number of sdc nodes on time/space levels
+    nvars  = [ 64 ]   ! number of dofs on the time/space levels
+    nnodes = [ 9 ]       ! number of sdc nodes on time/space levels
 !    nvars  = [ 32, 64 ]   ! number of dofs on the time/space levels
 !    nnodes = [ 3,5 ]       ! number of sdc nodes on time/space levels
     dt     = 0.05_pfdp
@@ -47,8 +47,10 @@ contains
     call pf_pfasst_create(pf, comm, maxlevs)
 
     pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 10
-    pf%abs_res_tol=0.0D-6
+    pf%niters = 40
+    pf%abs_res_tol=1.0D-12    
+    pf%rel_res_tol=1.0D-12
+
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
 
@@ -80,9 +82,9 @@ contains
     call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
     call initial(q0)
 
-    call pf_add_hook(pf, pf%nlevels, PF_POST_ITERATION, echo_error)
+    call pf_add_hook(pf, pf%nlevels, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=4*comm%nproc)
+    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=2*comm%nproc)
 
     deallocate(q0%flatarray)
     deallocate(q0%shape)

@@ -123,10 +123,10 @@ contains
     if (pf%comm%statreq /= -66) then
        call mpi_wait(pf%comm%statreq, stat, ierror)
     end if
-    print *,pf%rank, 'getting ready for status_send, tag=',tag
+
     call mpi_issend(message, 8, MPI_INTEGER4, &
                     modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%statreq, ierror)
-    print *,pf%rank, 'done with status_send, tag=',tag
+
   end subroutine pf_mpi_send_status
 
   subroutine pf_mpi_recv_status(pf, tag)
@@ -137,10 +137,10 @@ contains
 
     integer    :: ierror, stat(MPI_STATUS_SIZE)
     integer(4) :: message(8)
-    print *,pf%rank, 'getting ready for status_recv, tag=',tag
+
     call mpi_recv(message, 8, MPI_INTEGER4, &
                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
-    print *,pf%rank, 'done with status_recv, tag=',tag
+
     pf%state%pstatus = message(7)
 
     if (ierror .ne. 0) &

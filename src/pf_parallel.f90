@@ -506,7 +506,7 @@ contains
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
     do k = 1, nblocks   !  Loop over blocks of time steps
-       print *,'Starting  step=',pf%state%step,'  block k=',k      
+       ! print *,'Starting  step=',pf%state%step,'  block k=',k      
        ! Each block will consist of
        !  1.  predictor
        !  2.  A loop until max iterations, or tolerances met
@@ -761,9 +761,7 @@ contains
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
-       print *,'waiting to send tag=',tag,' rank=',pf%rank
        call pf%comm%send(pf, level, tag, blocking)
-       print *,'done with send tag=',tag,' rank=',pf%rank
     end if
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
@@ -775,9 +773,7 @@ contains
     logical,           intent(in)    :: blocking
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
-       print *,'waiting to recv tag=',tag,' rank=',pf%rank
        call pf%comm%recv(pf, level,tag, blocking)
-       print *,'done  to recv tag=',tag,' rank=',pf%rank
     end if
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
