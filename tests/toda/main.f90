@@ -57,7 +57,7 @@ contains
       end do
 
       print *,'Initializing mpi and pfasst...'
-      call pf_mpi_setup(comm, pf)
+      call pf_mpi_setup(comm, pf, err)
       call pf_pfasst_setup(pf)
 
       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
