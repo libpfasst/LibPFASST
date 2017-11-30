@@ -6,6 +6,6 @@ pipelines:
           - export BUILD_DIR=$PWD
           - cd $BUILD_DIR && make
           - cd $BUILD_DIR/tests/toda && make
-            #- cd $BUILD_DIR/tests/advection-diffusion && make
+          - cd $BUILD_DIR/tests/advection-diffusion && make
           - cd $BUILD_DIR
           - nosetests
