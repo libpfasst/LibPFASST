@@ -15,9 +15,11 @@ fort.*
 *.npy
 
 build/
+include/
 staging/
 src/pf_version.f90
 /.project
 
 tests/*/build
 tests/*/include
+tests/*/output

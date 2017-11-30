@@ -1,13 +1,11 @@
+image: brandonkrull/libpfasst
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - apt-get update
-          - apt-get -y install gfortran libfftw3-dev
-          - apt-get -y install mpich libmpich-dev
-          - apt-get -y install python-nose
           - export BUILD_DIR=$PWD
           - cd $BUILD_DIR && make
-          - cd $BUILD_DIR/examples/mpi-advection && make
-          - cd $BUILD_DIR/tests
+          - cd $BUILD_DIR/tests/toda && make
+            #- cd $BUILD_DIR/tests/advection-diffusion && make
+          - cd $BUILD_DIR
           - nosetests
