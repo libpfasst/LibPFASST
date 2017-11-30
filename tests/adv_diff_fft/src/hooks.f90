@@ -37,30 +37,8 @@ contains
 
     r => array1(level%R(level%nnodes-1))
 
-    print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
-         state%step+1, state%iter, level%index, maxval(abs(r))
-
-
-!!$    r => array1(level%Q(1))
-!!$    print *,'Q1',r
-!!$    r => array1(level%Q(level%nnodes))
-!!$    print *,'Qend',r
-!!$    r => array1(level%F(1,1))
-!!$    print *,'F1',r
-!!$    r => array1(level%F(level%nnodes,1))
-!!$    print *,'F1end',r
-!!$    r => array1(level%S(level%nnodes-1))
-!!$    print *,'S',r
-!!$
-!!$    np = size(level%F(level%nnodes,:))
-!!$    print *,'npieces',np
-!!$    if (np > 1) then
-!!$       r => array1(level%F(1,2))
-!!$       print *,'F21',r
-!!$       r => array1(level%F(level%nnodes,2))
-!!$       print *,'F2end',r
-!!$    end if
+    print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i3.3," level: ",i1.1," resid: ",es18.10e4)', &
+         state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r))
   end subroutine echo_residual
-
 
 end module hooks

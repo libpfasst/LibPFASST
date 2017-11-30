@@ -16,8 +16,8 @@ FSRC = feval.f90 \
 
 OBJ = $(addprefix build/,$(FSRC:.f90=.o))
 
-FFLAGS  += -g -I$(LIBPFASST)/include -I$(FFTW3)/include -fbounds-check
-LDFLAGS += -g -L$(LIBPFASST)/lib -L$(FFTW3)/lib -lpfasst -lfftw3
+FFLAGS  += -g -I$(LIBPFASST)/include 
+LDFLAGS += -g -L$(LIBPFASST)/lib -lpfasst 
 
 all: $(EXE)
 

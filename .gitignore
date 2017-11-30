@@ -14,6 +14,7 @@ fort.*
 *.pkl
 *.npy
 
+lib/
 build/
 include/
 staging/
@@ -23,3 +24,4 @@ src/pf_version.f90
 tests/*/build
 tests/*/include
 tests/*/output
+tests/output
