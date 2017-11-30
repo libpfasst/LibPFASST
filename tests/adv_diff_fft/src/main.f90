@@ -21,16 +21,15 @@ contains
     use feval
     use hooks
     use pf_mod_mpi
-
+    use probin      !< should be library module for reading/parsing problem parameters
     implicit none
 
-    integer, parameter :: maxlevs = 3
 
     type(pf_pfasst_t)              :: pf
     type(pf_comm_t)                :: comm
     type(ndarray), allocatable     :: q0
-    integer                        :: nvars(maxlevs), nnodes(maxlevs), l
-    double precision               :: dt
+    integer                        ::  l   !  Loop variable
+    character(256) :: probin_fname       !<  file name for input
     class(ad_sweeper_t), pointer   :: ad_sweeper_ptr
 
     !
@@ -40,23 +39,31 @@ contains
 !    nvars  = [ 128 ]   ! number of dofs on the time/space levels
 !    nnodes = [ 5 ]       ! number of sdc nodes on time/space levels
 
-    nvars  = [ 32, 64,  128]   ! number of dofs on the time/space levels
-    nnodes = [ 3,5,9 ]       ! number of sdc nodes on time/space levels
-    dt     = 0.05_pfdp
+!    nvars  = [ 32, 64,  128]   ! number of dofs on the time/space levels
+!    nnodes = [ 3,5,9 ]       ! number of sdc nodes on time/space levels
+!    dt     = 0.05_pfdp
+
+      probin_fname = "probin.nml"
+      if (command_argument_count() >= 1) &
+         call get_command_argument(1, value=probin_fname)
+      call probin_init(probin_fname)
+      print *, nvars
+      print *, nnodes
+      print *, nsteps,Tfin,dt
 
     call pf_mpi_create(comm, MPI_COMM_WORLD)
-    call pf_pfasst_create(pf, comm, maxlevs)
+    call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-    pf%qtype  = SDC_GAUSS_LOBATTO
-    pf%niters = 20
-    pf%abs_res_tol=1.0D-15    
-    pf%rel_res_tol=1.0D-12
+!    pf%qtype  = SDC_GAUSS_LOBATTO
+!    pf%niters = 20
+!    pf%abs_res_tol=1.0D-15    
+!    pf%rel_res_tol=1.0D-12
 
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = 1
 
-       pf%levels(l)%nvars  = nvars(maxlevs-pf%nlevels+l)
-       pf%levels(l)%nnodes = nnodes(maxlevs-pf%nlevels+l)
+       pf%levels(l)%nvars  = nvars(l)
+       pf%levels(l)%nnodes = nnodes(l)
 
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
@@ -69,8 +76,8 @@ contains
     end do
 
     if (pf%nlevels > 1) then
-       pf%levels(1)%nsweeps = 2 
-       pf%levels(1)%nsweeps_pred = 2
+       pf%levels(1)%nsweeps = 1 
+       pf%levels(1)%nsweeps_pred = 1
     end if
 
     call pf_mpi_setup(comm, pf,ierror) ! XXX: move this into pf_pfasst_setup
@@ -85,7 +92,7 @@ contains
 
     call pf_add_hook(pf, pf%nlevels, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-    call pf_pfasst_run(pf, q0, dt, tend=0.d0, nsteps=2*comm%nproc)
+    call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps)
 
     deallocate(q0%flatarray)
     deallocate(q0%shape)
