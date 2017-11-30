@@ -70,6 +70,7 @@ class Params(object):
     particles = attr.ib(default=5)
     periodic = attr.ib(default=False)
     vcycle = attr.ib(default=False)
+    tolerance = attr.ib(default=0.0)
 
     def __attrs_post_init__(self):
         if self.dt is None:
@@ -135,7 +136,7 @@ class PFASST(object):
             settatr(self.p, k, v)
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = 1\n\techo_timings = {}\n\t\
-abs_res_tol = 1.d-12\n\trel_res_tol = 1.d-12\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
+abs_res_tol = {}\n\trel_res_tol = {}\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
 &PARAMS\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
 nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
@@ -192,12 +193,12 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             vcycle = '.false.'
 
         basedir = '"{}"'.format(self.p.base_dir)
-        self.pfstring = self.base_string.format(self.p.levels, self.p.iterations, timings, vcycle,\
-                                                basedir, nodes, sweeps_pred, sweeps, magnus, self.p.tfinal, \
-                                                self.p.nsteps, exptol, self.p.particles, self.p.nprob, \
-                                                "\'"+self.p.basis+"\'", \
-                                                "\'"+self.p.molecule+"\'", \
-                                                "\'"+self.p.exact_dir+"\'", solns, periodic)
+        self.pfstring = self.base_string.format(
+            self.p.levels, self.p.iterations, timings, self.p.tolerance, self.p.tolerance,
+            vcycle, basedir, nodes, sweeps_pred, sweeps, magnus, self.p.tfinal,
+            self.p.nsteps, exptol, self.p.particles, self.p.nprob,
+            "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
+            "\'"+self.p.exact_dir+"\'", solns, periodic)
 
         return self.pfstring
 

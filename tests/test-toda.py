@@ -14,8 +14,8 @@ except:
 
 
 params = Params(nodes=[3], magnus=[2], tasks=1, periodic=True, \
-                nsteps=128, tfinal=1.0, particles=11, iterations=200, \
-                nb=False, base_dir=base_dir, solutions=True)
+                nsteps=128, tfinal=1.0, particles=11, iterations=15, \
+                nb=False, base_dir=base_dir, solutions=False)
 
 toda = PFASST(exe, params) 
 results = toda.run()[0]
@@ -23,8 +23,8 @@ final_solution = results.loc[len(results)-1, 'solution']
 periodic_ref = final_solution
 
 params = Params(nodes=[3], magnus=[2], tasks=1, periodic=False, \
-                nsteps=128, tfinal=1.0, particles=11, iterations=200, \
-                nb=False, base_dir=base_dir, solutions=True)
+                nsteps=128, tfinal=1.0, particles=11, iterations=15, \
+                nb=False, base_dir=base_dir, solutions=False)
 
 toda = PFASST(exe, params) 
 results = toda.run()[0]
@@ -41,13 +41,15 @@ def test_generator():
             for magnus in [[2], [1]]:
                 if nodes[0] == 2 and magnus[0] == 2: continue
                 for tasks in [1]:
-                    yield toda, nodes, magnus, tasks, periodic
+                    for tol in [0.0, 1e-15]:
+                        yield toda, nodes, magnus, tasks, periodic, tol
 
 @with_setup(teardown=cleanup)
-def toda(nodes, magnus, tasks, periodic):
-    params = Params(nodes=nodes, magnus=magnus, periodic=periodic, tasks=tasks, \
-                    nsteps=32, tfinal=1.0, particles=11, iterations=200, \
-                    nb=False, base_dir=base_dir, solutions=True)
+def toda(nodes, magnus, tasks, periodic, tol):
+    params = Params(nodes=nodes, magnus=magnus, periodic=periodic, 
+                    tasks=tasks, tolerance=tol,
+                    nsteps=128, tfinal=1.0, particles=11, iterations=30, 
+                    nb=False, base_dir=base_dir, solutions=False)
 
     toda = PFASST(exe, params) 
     results = toda.run()[0]
@@ -58,4 +60,7 @@ def toda(nodes, magnus, tasks, periodic):
     else:
         ref = nonperiodic_ref
 
-    assert np.amax(final_solution - ref) < 1e-3
+    print 'max number of iterations: {}'.format(results.iter.max())
+    print 'mean residual: {}'.format(results.residual.mean())
+    print 'max difference: {}'.format(np.amax(final_solution - ref))
+    assert np.amax(final_solution - ref) < 1e-5
