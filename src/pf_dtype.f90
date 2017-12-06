@@ -154,7 +154,7 @@ module pf_mod_dtype
           I(:),     &                   ! 0 to node integrals
           S(:),     &                   ! node to node integrals
           Fflt(:),  &                   ! functions values at sdc nodes (flat)
-          tau(:),   &                   ! fas correction
+!          tau(:),   &                   ! fas correction
           tauQ(:),  &                   ! fas correction in Q form
           pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
           q0,       &                   ! initial condition 
