@@ -97,19 +97,19 @@ contains
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
-          call lev%S(m)%setval(0.0_pfdp)
+          call lev%I(m)%setval(0.0_pfdp)
           if (this%explicit) then
              do n = 1, lev%nnodes
-                call lev%S(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
+                call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
              end do
           end if
           if (this%implicit) then
              do n = 1, lev%nnodes
-                call lev%S(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
+                call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
              end do
           end if
           if (allocated(lev%tauQ)) then
-          call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
        !  Recompute the first function value
@@ -134,7 +134,7 @@ contains
                   call rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
           end do
           !  Add the tau term
-          call rhs%axpy(1.0_pfdp, lev%S(m))
+          call rhs%axpy(1.0_pfdp, lev%I(m))
           !  Add the starting value
           call rhs%axpy(1.0_pfdp, lev%Q(1))
           if (this%implicit) then

@@ -173,7 +173,6 @@ contains
        call F%Fflt(i)%setval(0.0_pfdp)
     end do
     F%F(1:nnodes,1:npieces) => F%Fflt
-    call F%ulevel%factory%create_array(F%S, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%I, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%R, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     print *,'Finter in factory',F%Finterp, F%index
@@ -236,7 +235,6 @@ contains
 
     call F%ulevel%factory%destroy_array(F%Q, F%nnodes, F%index, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%Fflt, F%nnodes*npieces, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%S, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%I, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%R, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     if (F%index < nlevels) then
