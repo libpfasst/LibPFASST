@@ -83,17 +83,23 @@ module pf_mod_magnus_picard
 contains
 
   ! Perform one SDC sweep on level Lev and set qend appropriately.
-  subroutine magpicard_sweep(this, pf, lev, t0, dt)
+  subroutine magpicard_sweep(this, pf, level_index, t0, dt,nsweeps)
     use pf_mod_timer
+    use pf_mod_hooks
 
     class(pf_magpicard_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_pfasst_t), intent(inout),target :: pf
     real(pfdp), intent(in) :: dt, t0
-    class(pf_level_t), intent(inout) :: lev
+    integer,             intent(in)    :: level_index
+    integer,             intent(in)    :: nsweeps
 
-    integer    :: m, nnodes
-    real(pfdp) :: t, dtsdc(lev%nnodes)
+    class(pf_level_t), pointer :: lev
+    integer    :: m, nnodes,k
 
+    real(pfdp) :: t 
+    real(pfdp)  :: dtsdc(1:pf%levels(level_index)%nnodes-1)
+
+    lev => pf%levels(level_index)
     nnodes = lev%nnodes
     dtsdc = 0.0_pfdp
     if (nnodes == 3) then
@@ -101,8 +107,10 @@ contains
        this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
     endif
 
+    call call_hooks(pf, level_index, PF_PRE_SWEEP)    
     call lev%Q(1)%copy(lev%q0)
 
+    ! Copy values into residual
     do m = 1, nnodes-1
        call lev%R(m)%copy(lev%Q(m+1))
     end do
@@ -114,16 +122,17 @@ contains
 
     do m = 1, nnodes
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-       t=t+dtsdc(m)
+!MM    t=t+dtsdc(m)
+       t=t0+dt*lev%nodes(m)
     end do
 
-    call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%S)
+    call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
     !$omp parallel
     !$omp do private(m)
     do m = 1, nnodes-1
        call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%S(m), lev%F, &
+       call this%compute_omega(this%omega(m), lev%I(m), lev%F, &
              this%commutator_colloc_coefs(m,:))
        call end_timer(pf, TAUX)
 
@@ -137,11 +146,11 @@ contains
     end do
     !$omp end do
     !$omp end parallel
-
+    call pf_residual(pf, lev, dt)
     call end_timer(pf, TLEVEL+lev%index-1)
 
     call lev%qend%copy(lev%Q(nnodes))
-
+    call call_hooks(pf, level_index, PF_POST_SWEEP)
   end subroutine magpicard_sweep
 
   subroutine magpicard_initialize(this, lev)
