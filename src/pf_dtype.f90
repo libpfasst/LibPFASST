@@ -138,6 +138,8 @@ module pf_mod_dtype
           nodes(:),   &                 ! sdc nodes
           t_sdc(:),   &                 ! time at the SDC nodes
           qmat(:,:),  &                 ! integration matrix (0 to node)
+          qmatFE(:,:),  &               ! Forward Euler integration matrix (0 to node)
+          qmatBE(:,:),  &               ! Backward Euler matrix (0 to node)
           LUmat(:,:), &                 ! LU factorization (replaces BE matrix in Q form)
           s0mat(:,:), &                 ! integration matrix (node to node)
           rmat(:,:),  &                 ! time restriction matrix

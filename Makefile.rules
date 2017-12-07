@@ -62,11 +62,12 @@ build/pf_hooks.o:       build/pf_timer.o
 build/pf_hooks.o:       build/pf_timer.o
 uild/pf_mpi.o:          build/pf_timer.o
 build/pf_logger.o:      build/pf_hooks.o
-build/pf_imexQ.o:       build/pf_dtype.o build/pf_timer.o  build/pf_utils.o
+build/pf_imexQ.o:       build/pf_dtype.o build/pf_timer.o  build/pf_utils.o build/pf_hooks.o
 build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o build/pf_hooks.o
 build/pf_interpolate.o: build/pf_restrict.o build/pf_hooks.o
-build/pf_magnus_picard.o:  build/pf_dtype.o build/pf_hooks.o build/pf_utils.o
-build/pf_imk.o:         build/pf_dtype.o build/pf_hooks.o build/pf_utils.o
+build/pf_magnus_picard.o:  build/pf_dtype.o build/pf_hooks.o build/pf_utils.o build/pf_hooks.o
+build/pf_misdcQ.o:      build/pf_dtype.o build/pf_timer.o pf_utils.o build/pf_hooks.o
+build/pf_imk.o:         build/pf_dtype.o build/pf_timer.o build/pf_hooks.o build/pf_utils.o
 build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o
 build/pf_fake.o:        build/pf_parallel.o build/pf_fakecomm.o
 build/sdc_quadrature.o: build/pf_dtype.o build/sdc_poly.o
@@ -87,6 +88,5 @@ endif
 
 
 #build/pf_misdc.o:       build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
-#build/pf_misdcQ.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
 #build/pf_amisdc.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
 #build/pf_amisdcQ.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o

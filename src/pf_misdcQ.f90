@@ -26,8 +26,11 @@ module pf_mod_misdcQ
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     real(pfdp), allocatable :: dtsdc(:)
      logical                 :: use_LUq_ = .true.
    contains 
+     procedure(pf_f_eval_p), deferred :: f_eval
+     procedure(pf_f_comp_p), deferred :: f_comp
      procedure :: sweep        => misdcQ_sweep
      procedure :: initialize   => misdcQ_initialize
      procedure :: integrate    => misdcQ_integrate
@@ -38,18 +41,17 @@ module pf_mod_misdcQ
 contains
 
   ! Perform on SDC sweep on level lev and set qend appropriately.
-  subroutine misdcQ_sweep(this, pf, lev, t0, dt)
+  subroutine misdcQ_sweep(this, pf, level_index, t0, dt, nsweeps)
     use pf_mod_timer
     class(pf_misdcQ_t),   intent(inout) :: this
     type(pf_pfasst_t),    intent(inout) :: pf
     real(pfdp),           intent(in)    :: dt, t0
-    class(pf_level_t),     intent(inout) :: lev
 
     integer                        :: m, n
     real(pfdp)                     :: t
-    real(pfdp)                     :: dtsdc(1:lev%nnodes-1)
     class(pf_encap_t), allocatable :: S3(:)
     class(pf_encap_t), allocatable :: rhs
+    class(pf_level_t), pointer,  intent(inout) :: lev
 
     call start_timer(pf, TLEVEL+lev%index-1)
     
@@ -82,9 +84,8 @@ contains
     call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     t = t0
-    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
     do m = 1, lev%nnodes-1
-       t = t + dtsdc(m)
+       t = t + this%dt*dtsdc(m)
 
        call rhs%setval(0.0_pfdp)
        do n = 1, m
@@ -135,27 +136,23 @@ contains
     allocate(this%QdiffI(nnodes-1,nnodes)) ! S-BE 
     allocate(this%QtilE(nnodes-1,nnodes)) ! S-FE
     allocate(this%QtilI(nnodes-1,nnodes)) ! S-BE
-
+    allocate(this%dtsdc)
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
 
-    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     ! Implicit matrix
     if (this%use_LUq_) then 
        ! Get the LU
-       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,0)
        this%QtilI = lev%LUmat
     else 
-       do m = 1, nnodes-1
-          do n = 1,m
-             this%QtilI(m,n+1) =  dsdc(n)
-          end do
-       end do
+       this%QtilI = lev%qmatBE
     end if
     ! Explicit matrix
     do m = 1, nnodes-1
        do n = 1,m
-          this%QtilE(m,n)   =  dsdc(n)
+          this%QtilE=lev%qmatBE
        end do
     end do
 
@@ -171,6 +168,7 @@ contains
     deallocate(this%QdiffI)
     deallocate(this%QtilE)
     deallocate(this%QtilI)
+    deallocate(this%dtsdc)
   end subroutine misdcQ_destroy
 
   ! Compute SDC integral

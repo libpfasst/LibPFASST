@@ -25,6 +25,11 @@ module pf_mod_imk
 
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
     class(pf_encap_t), allocatable :: omega(:), dexpinvs(:)
+    real(pfdp), allocatable :: Qdiff(:,:)
+    real(pfdp), allocatable :: Qtil(:,:)
+    real(pfdp), allocatable :: dtsdc(:)
+    logical                 :: use_LUq = .false.
+
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -81,12 +86,11 @@ contains
 
     integer :: m,k
     real(pfdp) :: t
-    real(pfdp)  :: dtsdc(1:pf%levels(level_index)%nnodes-1)
     class(pf_level_t), pointer :: lev
 
     lev => pf%levels(level_index)
     t = t0
-    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+
 
     call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1,nsweeps
@@ -102,7 +106,7 @@ contains
           call this%propagate(lev%Q(1), this%omega(m), lev%Q(m+1))
           call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m,1))
           call this%dexpinv(this%omega(m), lev%F(m,1), this%dexpinvs(m))
-          t=t+dtsdc(m)
+          t=t+dt*this%dtsdc(m)
        end do
        call pf_residual(pf, lev, dt)   
        call lev%qend%copy(lev%Q(lev%nnodes))
@@ -117,9 +121,24 @@ contains
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: m, nnodes
+    integer :: n,m, nnodes
+
+    allocate(this%Qdiff(nnodes-1,nnodes))  
+    allocate(this%Qtil(nnodes-1,nnodes))  
+    allocate(this%dtsdc(nnodes-1))  
 
     nnodes = lev%nnodes
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+
+    !  Explicit matrix
+    do m = 1, nnodes-1
+       do n = 1,m
+          this%Qtil(m,n)   =  this%dtsdc(n)
+       end do
+    end do
+
+    this%Qdiff = lev%qmat-this%Qtil
+
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -186,6 +205,9 @@ contains
       class(pf_level_t), intent(inout) :: lev
 
       ! deallocate(this%commutator_colloc_coefs)
+      deallocate(this%Qdiff)
+      deallocate(this%Qtil)
+      deallocate(this%dtsdc)
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
