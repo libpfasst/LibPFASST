@@ -537,40 +537,28 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       is_converged = .FALSE.
+       converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-!       do while (pf%state%iter < pf%niters .and. .not. is_converged)
-       do while (pf%state%iter < pf%niters)
-          pf%state%iter  = pf%state%iter + 1
 
-          call start_timer(pf, TITERATION)
-
+       call start_timer(pf, TITERATION)
+       do j = 1, pf%niters
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
+          pf%state%iter = j
+
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (pf%state%iter > 1 .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+          if (j > 1 .and. pf%state%status .ne. PF_STATUS_CONVERGED) then
              call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
 
-          !< perform some sweeps
-          if (.not. is_converged) then
-             call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt,lev_p%nsweeps)
-          end if
-
-          !<  Check to see if everybody is converged
-          call pf_check_convergence(pf, k, dt, residual, energy, is_converged)
+          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt,lev_p%nsweeps)
+          call pf_check_convergence(pf, k, dt, residual, energy, converged)
+          call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
-          call end_timer(pf, TITERATION)
-
-          !<  Unless this processor is done, send fine level solution forward
-          if (.not. is_converged) then
-
-             call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
-          end if
-
+          if (converged) exit
        end do  !  Loop over the iteration in this bloc
-
+       call end_timer(pf, TITERATION)
 
        call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
 
@@ -714,7 +702,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  istatus
-    integer ::  ierror 
+    integer ::  ierror
 
     istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
@@ -730,8 +718,8 @@ contains
     !  Receive the convergence status from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    integer ::  ierror ,istatus
-    if (pf%rank /= 0) then
+    integer ::  ierror, istatus
+    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
        call pf%comm%recv_status(pf, tag,istatus,ierror)
        if (ierror .eq. 0) then
           pf%state%pstatus = istatus
@@ -748,7 +736,7 @@ contains
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
-    integer ::  ierror 
+    integer ::  ierror
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
