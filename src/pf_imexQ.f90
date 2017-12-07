@@ -92,7 +92,7 @@ contains
     call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call start_timer(pf, TLEVEL+lev%index-1)
-    print *,'sweeping',this%explicit,this%implicit
+    ! print *,'sweeping',this%explicit,this%implicit
     do k = 1,nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
        ! compute integrals and add fas correction
