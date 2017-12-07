@@ -112,14 +112,10 @@ contains
        call lev%R(m)%copy(lev%Q(m+1))
     end do
 
-    t = t0
-    dtsdc = dt * (lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1))
-
     call start_timer(pf, TLEVEL+lev%index-1)
 
     do m = 1, nnodes
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-!MM    t=t+dtsdc(m)
        t=t0+dt*lev%nodes(m)
     end do
 
@@ -143,6 +139,7 @@ contains
     end do
     !$omp end do
     !$omp end parallel
+
     call pf_residual(pf, lev, dt)
     call end_timer(pf, TLEVEL+lev%index-1)
 
