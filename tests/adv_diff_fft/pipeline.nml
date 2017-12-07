@@ -21,7 +21,7 @@
      PFASST_pred = .true.
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
-     Vcycle=.true.
+     Vcycle=.false.
 /
 
 !  Now define the local variables you need
@@ -37,5 +37,5 @@
     Tfin = 0.1
     nsteps = 64
 
-
+    imex_stat=2   ! (0 explicit, 1 implicit, 2 imex)
 /
