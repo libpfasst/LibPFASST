@@ -60,7 +60,8 @@ contains
 !    pf%rel_res_tol=1.0D-12
 
     do l = 1, pf%nlevels
-       pf%levels(l)%nsweeps = 1
+       pf%levels(l)%nsweeps = nsweeps(l)
+       pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
 
        pf%levels(l)%nvars  = nvars(l)
        pf%levels(l)%nnodes = nnodes(l)
@@ -90,7 +91,7 @@ contains
     call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
     call initial(q0)
 
-    call pf_add_hook(pf, pf%nlevels, PF_POST_SWEEP, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps)
 

@@ -26,6 +26,8 @@ module probin
   integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   logical, save :: Finterp
+  logical, save :: use_LUq
+  integer, save :: imex_stat
 
   character(len=32), save :: pfasst_nml
 
@@ -36,7 +38,7 @@ module probin
   integer :: ios,iostat
   namelist /params/ Finterp, nnodes, nvars,nprob, nsteps, dt, Tfin
   namelist /params/  pfasst_nml, nsweeps, nsweeps_pred
-  namelist /params/  v, nu, t00, sigma, kfreq
+  namelist /params/  v, nu, t00, sigma, kfreq, use_LUq,imex_stat
 
 contains
 
@@ -62,6 +64,9 @@ contains
     t00      = 0.25_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
+
+    use_LUq=.TRUE.
+    imex_stat=2    !  Default is full IMEX
     
     !
     ! read

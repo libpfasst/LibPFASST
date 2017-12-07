@@ -40,7 +40,7 @@ build/%.o: %.f90
 # dependencies
 #
 
-build/feval.o:
+build/feval.o:build/probin.o
 build/probin.o:
 build/hooks.o: build/feval.o
 build/main.o:  build/hooks.o build/feval.o build/probin.o

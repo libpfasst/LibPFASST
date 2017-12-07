@@ -152,9 +152,9 @@ module pf_mod_dtype
           pQ(:),    &                   ! unknowns at sdc nodes, previous sweep
           R(:),     &                   ! full residuals
           I(:),     &                   ! 0 to node integrals
-          S(:),     &                   ! node to node integrals
+!          S(:),     &                   ! node to node integrals
           Fflt(:),  &                   ! functions values at sdc nodes (flat)
-          tau(:),   &                   ! fas correction
+!          tau(:),   &                   ! fas correction
           tauQ(:),  &                   ! fas correction in Q form
           pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
           q0,       &                   ! initial condition 
@@ -244,12 +244,13 @@ module pf_mod_dtype
      end subroutine pf_hook_p
      
      ! sweeper interfaces
-     subroutine pf_sweep_p(this, pf, lev, t0, dt)
+     subroutine pf_sweep_p(this, pf, level_index, t0, dt,nsweeps)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_pfasst_t),   intent(inout) :: pf
+       type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: dt, t0
-       class(pf_level_t),   intent(inout) :: Lev
+       integer,             intent(in)    :: level_index
+       integer,             intent(in)    :: nsweeps
      end subroutine pf_sweep_p
 
      subroutine pf_evaluate_p(this, lev, t, m)

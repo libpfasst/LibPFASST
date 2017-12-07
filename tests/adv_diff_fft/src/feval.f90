@@ -7,7 +7,6 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imex
   use pf_mod_imexQ
   implicit none
 !  include 'fftw3.f03'
@@ -15,8 +14,6 @@ module feval
   real(pfdp), parameter :: &
        Lx     = 1.0_pfdp, &    ! domain size
        kfreq  = 8.0_pfdp, &    ! Frequency of initial conditions
-       v      = 1.0_pfdp, &    ! advection velocity
-       nu     = 0.02_pfdp, &   ! viscosity
        t00    = 0.15_pfdp      ! initial time for exact solution starting from delta function (Gaussian)
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
@@ -57,6 +54,7 @@ contains
   end function as_ad_sweeper
 
   subroutine setup(sweeper, nvars)
+    use probin, only: use_LUq, imex_stat 
     class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: nvars
 
@@ -67,18 +65,24 @@ contains
 
     this => as_ad_sweeper(sweeper)
 
-    ! create in-place, complex fft plans
-    
-!    wk = fftw_alloc_complex(int(nvars, c_size_t))
-!    call c_f_pointer(wk, this%wk, [nvars])
-!    this%ffft = fftw_plan_dft_1d(nvars, &
-!         this%wk, this%wk, FFTW_FORWARD, FFTW_ESTIMATE)
-!    this%ifft = fftw_plan_dft_1d(nvars, &
-!         this%wk, this%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
 
+    if (imex_stat .eq. 0 ) then
+       this%explicit=.TRUE.
+       this%implicit=.FALSE.
+    elseif (imex_stat .eq. 1 ) then
+       this%implicit=.TRUE.
+       this%explicit=.FALSE.
+    else
+       this%implicit=.TRUE.
+       this%explicit=.TRUE.
+    end if
+              
+    this%use_LUq =use_LUq
     this%nvars = nvars 
     this%lenwrk = 2*nvars 
-    this%lensav = 2*nvars + int(log(real(nvars,kind=8))/log(2.0d+00))+4  
+    this%lensav = 2*nvars + int(log(real(nvars,kind=8))/log(2.0d+00))+4
+
+    ! create complex fft plans
     allocate(this%workhat(nvars))   !  complex transform
     allocate(this%work(this%lenwrk))
     allocate(this%wsave(this%lensav))
@@ -87,7 +91,7 @@ contains
        stop "error  initializing fft"
     end if
 
-    ! create operators
+    ! create spectral operators
     allocate(this%ddx(nvars))
     allocate(this%lap(nvars))
     do i = 1, nvars
@@ -134,6 +138,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine exact(t, yex)
+    use probin, only: nu, v
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
@@ -153,7 +158,7 @@ contains
        ! decide how many images so that contribution is neglible
        tol  = 1e-16
        !nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
-       nbox = 2
+       nbox = 0
 
        do ii = -nbox, nbox
           do i = 1, nvars
@@ -170,6 +175,7 @@ contains
 
   ! Evaluate the explicit function at y, t.
   subroutine f_eval(this, y, t, level, f, piece)
+    use probin, only:  imex_stat ,nu, v
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
     class(pf_encap_t),   intent(inout) :: f
@@ -184,7 +190,6 @@ contains
     fvec => array1(f)
 
     this%workhat = yvec
-    !call fftw_execute_dft(this%ffft, wk, wk)
 
     call cfft1f (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
     if (ierror .ne. 0) then
@@ -193,11 +198,29 @@ contains
 
     select case (piece)
     case (1)  ! Explicit piece
-!      this%workhat = -v * this%ddx *  this%workhat/ real(this%nvars,kind=8)
-      this%workhat = -v * this%ddx *  this%workhat
+       select case (imex_stat)
+       case (0)  ! Fully Explicit        
+          this%workhat = (-v * this%ddx + nu * this%lap) *  this%workhat
+       case (1)  ! Fully Implicit
+          print *,'Should not be in this case in feval'
+       case (2)  ! IMEX
+          this%workhat = -v * this%ddx *  this%workhat
+       case DEFAULT
+          print *,'Bad case for imex_stat in f_eval ', imex_stat
+          call exit(0)
+       end select
     case (2)  ! Implicit piece
-!      this%workhat = nu * this%lap *  this%workhat/ real(this%nvars,kind=8)
-      this%workhat = nu * this%lap *  this%workhat
+       select case (imex_stat)
+       case (0)  ! Fully Explicit        
+          print *,'Should not be in this case in feval'
+       case (1)  ! Fully Implicit
+          this%workhat = (-v * this%ddx + nu * this%lap) *  this%workhat
+       case (2)  ! IMEX
+          this%workhat = (nu * this%lap) *  this%workhat
+       case DEFAULT
+          print *,'Bad case for imex_stat in f_eval ', imex_stat
+          call exit(0)
+       end select
     case DEFAULT
       print *,'Bad case for piece in f_eval ', piece
       call exit(0)
@@ -217,6 +240,7 @@ contains
 
   ! Solve for y and return f2 also.
   subroutine f_comp(this, y, t, dt, rhs, level, f,piece)
+    use probin, only:  imex_stat ,nu,v
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(inout) :: y
     real(pfdp),          intent(in   ) :: t
@@ -230,25 +254,22 @@ contains
     integer ::  ierror
     
     if (piece == 2) then
-      yvec  => array1(y)
-      rhsvec => array1(rhs)
-      fvec => array1(f)
-      this%workhat = rhsvec
-      
-      call cfft1f (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1f in f_comp"
-    end if
-
-!      call fftw_execute_dft(this%ffft, wk, wk)
-!      this%workhat =  this%workhat/ (1.0_pfdp - nu*dt*this%lap) / real(this%nvars, kind=8)
-      this%workhat =  this%workhat/ (1.0_pfdp - nu*dt*this%lap) 
-!      call fftw_execute_dft(this%ifft, wk, wk)
-      call cfft1b (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1b in f_comp"
-    end if
-
+       yvec  => array1(y)
+       rhsvec => array1(rhs)
+       fvec => array1(f)
+       this%workhat = rhsvec
+       
+       call cfft1f (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
+       if (ierror .ne. 0) &
+          stop "error  calling cfft1f in f_comp"
+       if (imex_stat .eq. 2) then
+          this%workhat =  this%workhat/ (1.0_pfdp - nu*dt*this%lap)
+       else  ! fully implicit
+          this%workhat =  this%workhat/ (1.0_pfdp - dt*(-v * this%ddx +nu*this%lap))
+       end if
+       call cfft1b (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
+       if (ierror .ne. 0) &
+                      stop "error  calling cfft1f in f_comp"
       yvec  = real(this%workhat)
       fvec = (yvec - rhsvec) / dt
     else
@@ -268,7 +289,7 @@ contains
     integer :: nvarF, nvarG, xrat
     class(ad_sweeper_t), pointer :: adF, adG
     real(pfdp),         pointer :: f(:), g(:)
-!    complex(kind=8),    pointer :: wkF(:), wkG(:)
+
     integer ::  ierror
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)

@@ -156,7 +156,8 @@ contains
           coarse_lev_p => pf%levels(1)
           if (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
              !  This is the weird choice.  We burn in without communication, then do extra sweeps
-             coarse_lev_p => pf%levels(1)
+             level_index=1
+             coarse_lev_p => pf%levels(level_index)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
 
@@ -168,10 +169,7 @@ contains
                    end if
                 end if
 
-                call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
-                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt)
-                call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
-                call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1)
              end do  ! k = 1, pf%rank + 1
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
              do k = 1, coarse_lev_p%nsweeps_pred-1
@@ -183,10 +181,7 @@ contains
                 call pf_recv(pf, coarse_lev_p, coarse_lev_p%index*20000+pf%rank+k, .true.)
 
                 !  Do a sweep
-                call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
-                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0, dt )
-                call pf_residual(pf, coarse_lev_p, dt)  !  why is this here?
-                call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1 )
                 !  Send forward
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%index*20000+pf%rank+1+k, .false.)
 
@@ -194,7 +189,8 @@ contains
              call pf_residual(pf, coarse_lev_p, dt)
           else  ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
              ! Normal predictor burn in
-             coarse_lev_p => pf%levels(1)
+             level_index=1
+             coarse_lev_p => pf%levels(level_index)
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
                 t0k = t0-(pf%rank)*dt + (k-1)*dt
@@ -207,12 +203,7 @@ contains
                    end if
                 end if
 
-                call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
-                do j = 1, coarse_lev_p%nsweeps_pred
-                   call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0k, dt)
-                end do
-                call pf_residual(pf, coarse_lev_p, dt)
-                call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
+                call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,coarse_lev_p%nsweeps_pred)
              end do
           end if ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
 
@@ -222,25 +213,35 @@ contains
        else ! (pf%nprocs == 1) then
 
           ! Single processor... sweep on coarse and return to fine level.
-
-          coarse_lev_p => pf%levels(1)
+          level_index = 1
+          coarse_lev_p => pf%levels(level_index)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt
-
-             call call_hooks(pf, coarse_lev_p%index, PF_PRE_SWEEP)
-             do j = 1, coarse_lev_p%nsweeps_pred
-                call coarse_lev_p%ulevel%sweeper%sweep(pf, coarse_lev_p, t0k, dt)
-                call call_hooks(pf, coarse_lev_p%index, PF_POST_SWEEP)
-             end do
-             call pf_residual(pf, coarse_lev_p, dt)
-
+             call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,coarse_lev_p%nsweeps_pred)
           end do
 
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
        end if
+
+    else ! nlevels == 1
+
+       level_index = 1
+       coarse_lev_p => pf%levels(level_index)
+       do k = 1, pf%rank+1
+          pf%state%iter = -k
+          t0k = t0 - (pf%rank)*dt + (k-1)*dt
+          if (k > 1) then
+             call coarse_lev_p%q0%copy(coarse_lev_p%qend)
+             call spreadq0(coarse_lev_p, t0k)
+          end if
+
+          call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, coarse_lev_p%nsweeps_pred)
+       enddo
+
+       ! print*, 'rank ', pf%rank, ' just did ', k-1, ' iterations in the predictor'
 
     end if  ! (pf%nlevels > 1) then
 
@@ -260,14 +261,14 @@ contains
   !> (pstatus), the current processor hasn't converged yet either,
   !> regardless of the residual.
   !>
-  subroutine pf_check_convergence(pf, k, dt, residual, energy, is_converged)
+  subroutine pf_check_convergence(pf, k, dt, residual, energy, converged)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: k
-    logical,           intent(out)   :: is_converged   !<  True if this processor is done
+    logical,           intent(out)   :: converged   !<  True if this processor is done
     real(pfdp)     :: residual1
-    is_converged = .false.
+    converged = .false.
 
     ! shortcut for fixed block mode
     if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
@@ -300,13 +301,13 @@ contains
     ! done...
 
     if (pf%state%status == PF_STATUS_CONVERGED) then
-       is_converged = .true.
+       converged = .true.
        return
     end if
 
     if (0 == pf%comm%nproc) then
        pf%state%status = PF_STATUS_PREDICTOR
-       is_converged = .true.
+       converged = .true.
        return
     end if
 
@@ -328,7 +329,7 @@ contains
     real(pfdp)                :: residual, energy
     integer                   ::  ierror  !<  Warning flag for communication routines
 
-    logical :: is_converged, qbroadcast
+    logical :: converged, qbroadcast
     logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
@@ -409,26 +410,18 @@ contains
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
-          call call_hooks(pf, fine_lev_p%index, PF_PRE_SWEEP)
-
-          do j = 1, fine_lev_p%nsweeps
-
-             call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, pf%state%t0, dt)
-
-             call pf_residual(pf, fine_lev_p, dt)
-             call call_hooks(pf, fine_lev_p%index, PF_POST_SWEEP)
-          end do
+          call fine_lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, fine_lev_p%nsweeps)
        end if
 
        !
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, residual, energy, is_converged)
+       call pf_check_convergence(pf, k, dt, residual, energy, converged)
 
        if (pf%state%step >= pf%state%nsteps) exit
 
-       if (.not. is_converged) then
+       if (.not. converged) then
           do level_index = 2, pf%nlevels
              fine_lev_p => pf%levels(level_index)
              call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k)
@@ -480,7 +473,7 @@ contains
     integer                   ::  nproc   !<  The number of processors being used
     integer                   ::  ierror  !<  Warning flag for communication routines
 
-    logical :: is_converged   !<  True when this processor is converged to residual
+    logical :: converged   !<  True when this processor is converged to residual
 
     call start_timer(pf, TTOTAL)
 
@@ -544,45 +537,28 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       is_converged = .FALSE.
+       converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
-!       do while (pf%state%iter < pf%niters .and. .not. is_converged)
-       do while (pf%state%iter < pf%niters)
-          pf%state%iter  = pf%state%iter + 1
 
-          call start_timer(pf, TITERATION)
-
+       call start_timer(pf, TITERATION)
+       do j = 1, pf%niters
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
+          pf%state%iter = j
+
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (pf%state%iter > 1 .and. pf%state%pstatus /= PF_STATUS_CONVERGED) then
+          if (j > 1 .and. pf%state%status .ne. PF_STATUS_CONVERGED) then
              call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
 
-          !< perform some sweeps
-          if (.not. is_converged) then
-             do j = 1, lev_p%nsweeps
-                call call_hooks(pf, lev_p%index, PF_PRE_SWEEP)
-                call lev_p%ulevel%sweeper%sweep(pf, lev_p, pf%state%t0, dt)
-                call pf_residual(pf, lev_p, dt)
-                call call_hooks(pf, lev_p%index, PF_POST_SWEEP)
-             end do
-          end if
-
-          !<  Check to see if everybody is converged
-          call pf_check_convergence(pf, k, dt, residual, energy, is_converged)
+          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt,lev_p%nsweeps)
+          call pf_check_convergence(pf, k, dt, residual, energy, converged)
+          call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
-          call end_timer(pf, TITERATION)
-
-          !<  Unless this processor is done, send fine level solution forward
-          if (.not. is_converged) then
-
-             call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
-          end if
-
+          if (converged) exit
        end do  !  Loop over the iteration in this bloc
-
+       call end_timer(pf, TITERATION)
 
        call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
 
@@ -619,12 +595,7 @@ contains
        call interpolate_time_space(pf, t0, dt, level_index, coarse_lev_p%Finterp)
        !       call fine_lev_p%Q(1)%pack(fine_lev_p%q0)
        call fine_lev_p%q0%copy(fine_lev_p%Q(1))
-       call call_hooks(pf, fine_lev_p%index, PF_PRE_SWEEP)
-       do j = 1, fine_lev_p%nsweeps_pred
-          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-          call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, fine_lev_p%index, PF_POST_SWEEP)
-       end do
+       call fine_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, fine_lev_p%nsweeps_pred)
 
     end do
     coarse_lev_p => pf%levels(pf%nlevels-1)
@@ -659,15 +630,10 @@ contains
     do level_index = pf%nlevels-1, 2, -1
       fine_lev_p => pf%levels(level_index);
       coarse_lev_p => pf%levels(level_index-1)
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       do j = 1, fine_lev_p%nsweeps
-          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-          call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, level_index, PF_POST_SWEEP)
-       end do
-       call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
-       call restrict_time_space_fas(pf, t0, dt, level_index)
-       call save(coarse_lev_p)
+      call fine_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, fine_lev_p%nsweeps)
+      call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
+      call restrict_time_space_fas(pf, t0, dt, level_index)
+      call save(coarse_lev_p)
     end do
 
     !
@@ -678,20 +644,12 @@ contains
     if (pf%Pipeline_G) then
        do j = 1, fine_lev_p%nsweeps
           call pf_recv(pf, fine_lev_p, fine_lev_p%index*10000+iteration+j, .true.)
-          call call_hooks(pf, level_index, PF_PRE_SWEEP)
-          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-          call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, level_index, PF_POST_SWEEP)
+          call fine_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1)
           call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+iteration+j, .false.)
        end do
     else
        call pf_recv(pf, fine_lev_p, fine_lev_p%index*10000+iteration, .true.)
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       do j = 1, fine_lev_p%nsweeps
-          call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-       end do
-       call pf_residual(pf, fine_lev_p, dt)
-       call call_hooks(pf, 1, PF_POST_SWEEP)
+       call fine_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, fine_lev_p%nsweeps)
        call pf_send(pf, fine_lev_p, level_index*10000+iteration, .false.)
     endif
     !
@@ -715,11 +673,7 @@ contains
           ! compute residual
           ! do while residual > tol and j < nswps
           ! assuming residual computed at end of sweep 
-          do j = 1, fine_lev_p%nsweeps
-             call fine_lev_p%ulevel%sweeper%sweep(pf, fine_lev_p, t0, dt)
-          end do
-          call pf_residual(pf, fine_lev_p, dt)
-          call call_hooks(pf, level_index, PF_POST_SWEEP)
+          call fine_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, fine_lev_p%nsweeps)
        end if
     end do
 
@@ -748,7 +702,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  istatus
-    integer ::  ierror 
+    integer ::  ierror
 
     istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
@@ -764,8 +718,8 @@ contains
     !  Receive the convergence status from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
-    integer ::  ierror ,istatus
-    if (pf%rank /= 0) then
+    integer ::  ierror, istatus
+    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
        call pf%comm%recv_status(pf, tag,istatus,ierror)
        if (ierror .eq. 0) then
           pf%state%pstatus = istatus
@@ -782,7 +736,7 @@ contains
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
-    integer ::  ierror 
+    integer ::  ierror
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then

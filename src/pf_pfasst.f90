@@ -98,7 +98,7 @@ contains
   ! Setup (allocate) PFASST level
   !
   ! If the level is already setup, calling this again will allocate
-  ! (or deallocate) tau appropriately.
+  ! (or deallocate) tauQ appropriately.
   !
   subroutine pf_level_setup(pf, F)
     use pf_mod_quadrature
@@ -121,17 +121,7 @@ contains
     F%residual = -1.0_pfdp
 
     !
-    ! (re)allocate tau (may to need create/destroy tau dynamically
-    !                   when doing AMR)
-    !
-    if ((F%index < pf%nlevels) .and. (.not. allocated(F%tau))) then
-       call F%ulevel%factory%create_array(F%tau, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
-    else if ((F%index >= pf%nlevels) .and. (allocated(F%tau))) then
-       deallocate(F%tau)
-    end if
-
-    !
-    ! (re)allocate tauQ (may to need create/destroy tau dynamically
+    ! (re)allocate tauQ (may to need create/destroy tauQ dynamically
     !                   when doing AMR)
     !
     if ((F%index < pf%nlevels) .and. (.not. allocated(F%tauQ))) then
@@ -183,7 +173,6 @@ contains
        call F%Fflt(i)%setval(0.0_pfdp)
     end do
     F%F(1:nnodes,1:npieces) => F%Fflt
-    call F%ulevel%factory%create_array(F%S, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%I, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     call F%ulevel%factory%create_array(F%R, nnodes-1, F%index, SDC_KIND_INTEGRAL, nvars, F%shape)
     print *,'Finter in factory',F%Finterp, F%index
@@ -240,16 +229,12 @@ contains
     ! encaps
     npieces = F%ulevel%sweeper%npieces
 
-    if ((F%index < nlevels) .and. allocated(F%tau)) then
-       call F%ulevel%factory%destroy_array(F%tau, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
-    end if
     if ((F%index < nlevels) .and. allocated(F%tauQ)) then
        call F%ulevel%factory%destroy_array(F%tauQ, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     end if
 
     call F%ulevel%factory%destroy_array(F%Q, F%nnodes, F%index, SDC_KIND_SOL_FEVAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%Fflt, F%nnodes*npieces, F%index, SDC_KIND_FEVAL, F%nvars, F%shape)
-    call F%ulevel%factory%destroy_array(F%S, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%I, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     call F%ulevel%factory%destroy_array(F%R, F%nnodes-1, F%index, SDC_KIND_INTEGRAL, F%nvars, F%shape)
     if (F%index < nlevels) then

@@ -167,7 +167,6 @@ contains
     ! fas correction
     !
     do m = 1, c_lev_ptr%nnodes-1
-       call c_lev_ptr%tau(m)%setval(0.0_pfdp)
        call c_lev_ptr%tauQ(m)%setval(0.0_pfdp)
     end do
     if (pf%state%iter >= pf%taui0)  then
@@ -187,17 +186,6 @@ contains
        ! restrict '0 to node' integral on the fine level (which was
        call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times)
 
-       ! compute 'node to node' tau correction
-       call c_lev_ptr%tau(1)%axpy(1.0_pfdp, f_int_arrayr(1))
-       call c_lev_ptr%tau(1)%axpy(-1.0_pfdp, c_tmp_array(1))
-
-       do m = 2, c_lev_ptr%nnodes-1
-          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, f_int_arrayr(m))
-          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, f_int_arrayr(m-1))
-
-          call c_lev_ptr%tau(m)%axpy(-1.0_pfdp, c_tmp_array(m))
-          call c_lev_ptr%tau(m)%axpy(1.0_pfdp, c_tmp_array(m-1))
-       end do
       ! compute '0 to node' tau correction
        do m = 1, c_lev_ptr%nnodes-1
           call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m))

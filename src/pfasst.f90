@@ -26,8 +26,6 @@ module pfasst
 #ifndef NOMPI
   use pf_mod_comm_mpi
 #endif
-  use pf_mod_implicit
-  use pf_mod_explicit
-  use pf_mod_imex
+  use pf_mod_imexQ
   use pf_mod_options
 end module pfasst
