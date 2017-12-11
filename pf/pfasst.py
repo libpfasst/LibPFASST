@@ -163,7 +163,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             pass
 
         self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
-                   'particles_{}-periodic_{}-exact_dir_{}-'+ \
+                   'particles_{}-periodic_{}-exact_dir_{}-qtype-{}-'+ \
                    'levels_{}-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
@@ -303,7 +303,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
-                                   self.p.particles, self.p.periodic, self.p.exact_dir,
+                                   self.p.particles, self.p.periodic, self.p.exact_dir, self.p.qtype,
                                    self.p.levels, self.p.nodes[0],
                                    self.p.magnus[0], self.p.tasks)
 
@@ -367,13 +367,21 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                 residual_value = float(match.group(6))
 
                 if self.p.solutions:
-                    if time >= 10.0:
+                    if time >= 1000.0:
                         path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:07.4f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                        "time_{:09.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                            time, rank, step, iteration, level)
+                    elif time >= 100.0:
+                        path_to_solution = self.p.base_dir+'/'+\
+                                        "time_{:08.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                            time, rank, step, iteration, level)
+                    elif time >= 10.0:
+                        path_to_solution = self.p.base_dir+'/'+\
+                                        "time_{:07.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
                                             time, rank, step, iteration, level)
                     else:
                         path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:06.4f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                        "time_{:06.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
                                             time, rank, step, iteration, level)
                     solution = self._get_solution(path_to_solution)
                 else:
