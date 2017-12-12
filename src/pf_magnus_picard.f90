@@ -91,17 +91,23 @@ contains
     integer,             intent(in)    :: nsweeps
 
     class(pf_level_t), pointer :: lev
-    integer    :: m, nnodes,k
+    integer    :: m, nnodes, k
 
-    real(pfdp) :: t 
-    real(pfdp)  :: dtsdc(1:pf%levels(level_index)%nnodes-1)
+    real(pfdp) :: t
 
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
-    dtsdc = 0.0_pfdp
+    k = 1 ! k is used as bottom index of quantities
+    ! if (pf%qtype == 5) then
+    !    nnodes = nnodes - 2
+    !    k = 2
+    ! endif
+
     if (nnodes == 3) then
-       this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
-       this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
+       this%commutator_colloc_coefs(1,1:3) = dt**2 * (/11/480., -1/480., 1/480./)
+       this%commutator_colloc_coefs(1,4) = 0.0
+       this%commutator_colloc_coefs(2,1:3) = dt**2 * (/1/15., 1/60., 1/15./)
+       this%commutator_colloc_coefs(2,4) = dt**4 * 1/60.
     endif
 
     call call_hooks(pf, level_index, PF_PRE_SWEEP)
@@ -114,7 +120,9 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
+    t = t0
     do m = 1, nnodes
+       print*, 't = ', t
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        t=t0+dt*lev%nodes(m)
     end do
@@ -140,6 +148,12 @@ contains
     !$omp end do
     !$omp end parallel
 
+    if (pf%qtype == 5) then
+       call this%compute_omega(this%omega(1), lev%I(nnodes-1), lev%F, this%commutator_colloc_coefs(2,:))
+       call this%compute_time_ev_ops(this%time_ev_op(1), this%omega(1), lev%index)
+       call this%propagate_solution(lev%Q(1), lev%Q(nnodes), this%time_ev_op(1))
+    endif
+
     call pf_residual(pf, lev, dt)
     call end_timer(pf, TLEVEL+lev%index-1)
 
@@ -155,7 +169,7 @@ contains
 
     this%npieces = 1
     nnodes = lev%nnodes
-    allocate(this%commutator_colloc_coefs(nnodes-1, nnodes))
+    allocate(this%commutator_colloc_coefs(nnodes-1, nnodes+1))
 
     this%commutator_colloc_coefs(:,:) = 0.0_pfdp
 
@@ -186,9 +200,7 @@ contains
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
-          !do p = 1, this%npieces
-             call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
-          !end do
+          call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
        end do
     end do
   end subroutine magpicard_integrate

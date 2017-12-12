@@ -87,7 +87,6 @@ contains
        ! nodes.
 
        refine = (nnodes0 - 1) / (nnodes - 1)
-
        call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)
 
        qnodes = qnodes0(::refine)
@@ -99,6 +98,21 @@ contains
        call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
 
     end if
+
+    do i = 1, nnodes-1
+       do r = 1, nnodes
+          print '("qmat(", i1.1, ",", i1.1, ") = ", f10.8)', i, r, qmat(i, r)
+       enddo
+    enddo
+    do i = 1, nnodes-1
+       do r = 1, nnodes
+          print '("smat(", i1.1, ",", i1.1, ") = ", f10.8)', i, r, smat(i, r)
+       enddo
+    enddo
+    print*, 'qnodes = ', qnodes
+    print*, 'nflags = ', nflags
+    print*, 'nnodes = ', nnodes
+    ! stop
 
 
     if (all(nodes == 0.0d0)) then
