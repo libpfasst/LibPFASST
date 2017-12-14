@@ -99,7 +99,7 @@ contains
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
 
-    call get_colloc_coefs(pf%qtype, nnodes, dt, this%commutator_coefs)
+    call get_commutator_coefs(pf%qtype, nnodes, dt, this%commutator_coefs)
 
     call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
@@ -232,7 +232,7 @@ contains
 
   end subroutine magpicard_destroy
 
-  subroutine get_colloc_coefs(qtype, nnodes, dt, coefs)
+  subroutine get_commutator_coefs(qtype, nnodes, dt, coefs)
     integer, intent(in) :: qtype, nnodes
     real(pfdp), intent(in) :: dt
     real(pfdp), intent(inout) :: coefs(:,:,:)
@@ -275,5 +275,5 @@ contains
     else
       stop 'oh no! unsupported qtype'
     endif
-  end subroutine get_colloc_coefs
+  end subroutine get_commutator_coefs
 end module pf_mod_magnus_picard
