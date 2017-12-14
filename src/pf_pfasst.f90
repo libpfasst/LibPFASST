@@ -53,7 +53,6 @@ contains
     end if
 
     pf%comm => comm
-    pf%comm => comm
 
     allocate(pf%levels(pf%nlevels))
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))

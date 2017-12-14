@@ -24,7 +24,8 @@ module pf_mod_magnus_picard
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
-     integer :: magnus_order
+     integer :: magnus_order, qtype
+     real(pfdp) :: dt
      real(pfdp), allocatable :: commutator_coefs(:,:,:)
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
    contains
@@ -99,8 +100,6 @@ contains
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
 
-    call get_commutator_coefs(pf%qtype, nnodes, dt, this%commutator_coefs)
-
     call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
 
@@ -155,6 +154,7 @@ contains
     allocate(this%commutator_coefs(coefs, magnus_order, nnodes-1))
 
     this%commutator_coefs(:,:,:) = 0.0_pfdp
+    call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -244,13 +244,13 @@ contains
         endif
     else if (qtype == 5) then
       if (nnodes >= 3) then
-          coefs(1:3, 1, 1) = 1.d-3 * dt**2 * &
+          coefs(1:3, 1, 1) = -1.d-3 * dt**2 * &
               (/-0.708256232441739, 0.201427439334681, -0.002608155816283/)
-          coefs(1:3, 1, 2) = dt**2 * &
+          coefs(1:3, 1, 2) = -dt**2 * &
               (/-0.035291589565775, 0.004482619613666, -0.000569367343553/)
-          coefs(1:3, 1, 3) = dt**2 * &
+          coefs(1:3, 1, 3) = -dt**2 * &
               (/-0.078891497044705, -0.018131905893999, -0.035152700676886/)
-          coefs(1:3, 1, 4) = dt**2 * &
+          coefs(1:3, 1, 4) = -dt**2 * &
               (/-0.071721913818656, -0.035860956909328, -0.071721913818656/)
 
           coefs(:, 2, 1) = dt**3 * &
