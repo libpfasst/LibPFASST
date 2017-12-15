@@ -52,12 +52,13 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
-     subroutine pf_compute_omega_p(this, omega, integrals, f, coefs)
+     subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: omega, integrals
-       class(pf_encap_t), intent(inout) :: f(:,:)
-       real(pfdp), intent(in) :: coefs(:,:)
+       class(pf_encap_t), intent(inout) :: omega
+       class(pf_encap_t), intent(inout) :: f(:,:), integrals(:)
+       real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
+       integer, intent(in) :: this_node
      end subroutine pf_compute_omega_p
      subroutine pf_compute_time_ev_ops_p(this, time_ev_op, omega, level)
        import pf_magpicard_t, pf_encap_t, pfdp
@@ -122,7 +123,8 @@ contains
     !$omp do private(m)
     do m = 1, nnodes-1
        call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%I(m), lev%F, this%commutator_coefs(:,:,m))
+       call this%compute_omega(this%omega(m), lev%I, lev%F, &
+            lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
        call end_timer(pf, TAUX)
 
        call start_timer(pf, TAUX+1)
@@ -244,31 +246,29 @@ contains
         endif
     else if (qtype == 5) then
       if (nnodes >= 3) then
-          coefs(1:3, 1, 1) = -1.d-3 * dt**2 * &
-              (/-0.708256232441739, 0.201427439334681, -0.002608155816283/)
-          coefs(1:3, 1, 2) = -dt**2 * &
-              (/-0.035291589565775, 0.004482619613666, -0.000569367343553/)
-          coefs(1:3, 1, 3) = -dt**2 * &
-              (/-0.078891497044705, -0.018131905893999, -0.035152700676886/)
-          coefs(1:3, 1, 4) = -dt**2 * &
-              (/-0.071721913818656, -0.035860956909328, -0.071721913818656/)
+          coefs(1:3, 1, 1) = 1.d-3 * (/-0.708256232441739, 0.201427439334681, -0.002608155816283/)
+          coefs(1:3, 1, 2) = (/-0.035291589565775, 0.004482619613666, -0.000569367343553/)
+          coefs(1:3, 1, 3) = (/-0.078891497044705, -0.018131905893999, -0.035152700676886/)
+          coefs(1:3, 1, 4) = (/-0.071721913818656, -0.035860956909328, -0.071721913818656/)
+          coefs(:,1,:) = -dt**2 * coefs(:,1,:)
 
-          coefs(:, 2, 1) = dt**3 * &
+          coefs(:, 2, 1) = &
                (/1.466782892818107d-6, -2.546845448743404d-6, 7.18855795894042d-7, &
                 -3.065370250683271d-7, 6.962336322868984d-7, -1.96845581200288d-7,  &
                 -2.262216360714434d-8, -2.72797194008496d-9, 8.54843541920492d-10/)
-          coefs(:, 2, 2) = dt**3 * &
+          coefs(:, 2, 2) = &
                (/0.001040114336531742d0, -0.001714330280871491d0, 0.0001980882752518163d0, &
                 -0.00006910549596945875d0, 0.0002905401601450182d0, -0.00003465884693947625d0, &
                  0.0000924518848932026d0, 0.0000125950571649574d0, -2.4709074423913880d-6/)
-          coefs(:, 2, 3) = dt**3 * &
+          coefs(:, 2, 3) = &
                (/0.004148295975360902, -0.006387421893168941, -0.003594231910817328, &
                  0.000997378110327084, 0.0001241530237557625, -0.0003805975423160699, &
                  0.003718384934573079, 0.001693514295056844, -0.001060408584538103/)
-          coefs(:, 2, 4) = dt**3 * &
+          coefs(:, 2, 4) = &
                (/0.003453850676072909, -0.005584950029394391, -0.007128159905937654, &
                  0.001653439153439147, 0.0, -0.001653439153439143, &
                  0.007128159905937675, 0.005584950029394475, -0.003453850676072897/)
+          coefs(:,2,:) = dt**3 * coefs(:,2,:)
 
           coefs(1, 3, 4) = dt**4 / 60.
       endif
