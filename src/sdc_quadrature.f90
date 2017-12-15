@@ -61,20 +61,15 @@ contains
 
        degree = nnodes-2
        allocate(roots(degree))
-       allocate(coeffs(degree+2))
+       allocate(coeffs(degree+1))
 
        call poly_legendre(coeffs, degree)
        call poly_roots(roots, coeffs, degree)
-
-       print*, 'roots = ', roots
-       print*, 'coefs = ', coeffs
-
 
        qnodes(1) = 0.0_qp
        qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
        qnodes(nnodes) = 1.0_qp
 
-       print*, 'qnodes = ', qnodes
        deallocate(coeffs)
        deallocate(roots)
 

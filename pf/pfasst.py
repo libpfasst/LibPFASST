@@ -449,7 +449,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         self.p.tasks = 1
         self.p.levels = 1
-        self.p.nsteps = 2**12
+        self.p.nsteps = 2**14
         self.p.nodes = 3
         self.p.magnus = 2
         self.p.timings = False
