@@ -34,8 +34,9 @@ module sweeper
   end type magpicard_context
 
   type, extends(pf_magpicard_t) :: magpicard_sweeper_t
-     integer :: dim, exp_iterations, magnus_order
+     integer :: dim, exp_iterations
      logical :: debug
+     complex(pfdp), allocatable :: commutator(:,:)
    contains
      procedure :: f_eval => compute_B
      procedure :: compute_omega
@@ -60,10 +61,10 @@ contains
 
   end function cast_as_magpicard_sweeper
 
-  subroutine initialize_magpicard_sweeper(this, level, debug, shape, nvars)
-    use probin, only: nprob, basis, molecule, magnus_order, nparticles
+  subroutine initialize_magpicard_sweeper(this, level, qtype, debug, shape, nvars)
+    use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
     class(pf_sweeper_t), intent(inout) :: this
-    integer, intent(in) :: level
+    integer, intent(in) :: level, qtype
     logical, intent(in) :: debug
     integer, intent(inout) :: shape(:)
     integer, intent(inout) :: nvars
@@ -73,10 +74,16 @@ contains
     ! print*, 'Creating context for basis ', basis(level)
     magpicard => cast_as_magpicard_sweeper(this)
 
+    magpicard%qtype = qtype
+    magpicard%dt = dt
     magpicard%magnus_order = magnus_order(level)
     magpicard%exp_iterations = 0
     magpicard%debug = debug
     magpicard%dim = nparticles
+
+    allocate(magpicard%commutator(nparticles, nparticles))
+
+    magpicard%commutator = z0
 
     ! inouts necessary for the base class structure
     shape(:) = magpicard%dim
@@ -207,73 +214,190 @@ contains
  !! \f[\Omega_1(t+dt,t) = -i\int_{t}^{t+dt} F(\tau)d\tau\f]
  !! this can be computed using any number of approximate numerical methods
  !! Trapezoid/midpoint rule for low-order accuracy, Simpson's for higher-order
- subroutine compute_omega(this, omega, integrals, f, coef)
+ subroutine compute_omega(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
    class(magpicard_sweeper_t), intent(inout) :: this
-   class(pf_encap_t), intent(inout) :: omega, integrals, f(:,:)
-   real(pfdp), intent(in) :: coef(:) !< commutator coefficients
+   class(pf_encap_t), intent(inout) :: omega, integrals(:), f(:,:)
+   real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
+   integer, intent(in) :: this_node
 
-   class(zndarray), pointer :: omega_p, ints, f1, f2, f3
-   complex(pfdp), allocatable :: commutator(:,:)
+   class(zndarray), pointer :: omega_p, ints
    integer :: dim
 
+   dim = this%dim
    omega_p => cast_as_zndarray(omega)
-   ints => cast_as_zndarray(integrals)
+   ints => cast_as_zndarray(integrals(this_node))
 
    omega_p%array = ints%array
+   if (this%magnus_order > 1) then
+      call add_single_commutator_terms(omega_p%array, f, coefs(:,1), dim, this%commutator)
 
-   dim = this%dim
+      if (this%magnus_order > 2) then
+         call add_double_commutator_terms(omega_p%array, f, coefs(:,2), dim, this%commutator)
+         call add_triple_commutator_terms(omega_p%array, f, nodes, this_node, qmat, dt, &
+              coefs(1,3), dim, this%commutator)
+      endif
+   endif
 
-   allocate(commutator(dim, dim))
 
-   commutator(:,:) = z0
+   nullify(omega_p, ints)
+ end subroutine compute_omega
 
-   if (this%magnus_order >= 2) then
+ subroutine add_single_commutator_terms(omega, f, coefs, dim, commutator)
+   class(pf_encap_t), intent(inout) :: f(:,:)
+   complex(pfdp), intent(inout) :: omega(dim, dim), commutator(dim,dim)
+   real(pfdp), intent(in) :: coefs(:)
+   integer, intent(in) :: dim
+
+   class(zndarray), pointer :: f1, f2, f3
+   complex(pfdp), allocatable :: tmp(:,:)
+   integer :: i, nnodes
+
+   ! print*, 'omega before single term = ', (real(omega(i,i+2), pfdp), i=1,dim-5)
+   allocate(tmp(dim,dim))
+   tmp = z0
+   nnodes = size(f)
+   if (nnodes > 3) then !hopefully this only corresponds to 3gauss nodes aka 5 total nodes
+      f1 => cast_as_zndarray(f(2,1))
+      f2 => cast_as_zndarray(f(3,1))
+      f3 => cast_as_zndarray(f(4,1))
+   else
       f1 => cast_as_zndarray(f(1,1))
       f2 => cast_as_zndarray(f(2,1))
       f3 => cast_as_zndarray(f(3,1))
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f1%array, dim, &
-           f2%array, dim, &
-           z0, commutator, dim)
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f2%array, dim, &
-           f1%array, dim, &
-           zm1, commutator, dim)
-
-      omega_p%array = omega_p%array +  coef(1) * commutator
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f1%array, dim, &
-           f3%array, dim, &
-           z0, commutator, dim)
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f3%array, dim, &
-           f1%array, dim, &
-           zm1, commutator, dim)
-
-      omega_p%array = omega_p%array +  coef(2) * commutator
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f2%array, dim, &
-           f3%array, dim, &
-           z0, commutator, dim)
-
-      call zgemm('n', 'n', dim, dim, dim, &
-           z1, f3%array, dim, &
-           f2%array, dim, &
-           zm1, commutator, dim)
-
-      omega_p%array = omega_p%array +  coef(3) * commutator
-
-      nullify(f1, f2, f3)
    endif
 
-   deallocate(commutator)
-   nullify(omega_p, ints)
- end subroutine compute_omega
+   call compute_commutator(f1%array, f2%array, dim, commutator)
+   tmp = tmp + coefs(1) * commutator
+
+   call compute_commutator(f1%array, f3%array, dim, commutator)
+   tmp = tmp + coefs(2) * commutator
+
+   call compute_commutator(f2%array, f3%array, dim, commutator)
+   tmp = tmp + coefs(3) * commutator
+   omega = omega + tmp
+
+   ! print*, 'single commutator term = ', (real(tmp(i,i+2), pfdp), i=1,dim-5)
+   ! print*, 'omega after single term = ', (real(omega(i,i+2), pfdp), i=1,dim-5)
+   print*, 'coefs = ', coefs
+   deallocate(tmp)
+   nullify(f1, f2, f3)
+ end subroutine add_single_commutator_terms
+
+ subroutine add_double_commutator_terms(omega, f, coef, dim, commutator)
+   class(pf_encap_t), intent(inout) :: f(:,:)
+   complex(pfdp), intent(inout) :: omega(dim,dim), commutator(dim,dim)
+   real(pfdp), intent(in) :: coef(:)
+   integer, intent(in) :: dim
+
+   class(zndarray), pointer :: f1, f2, f3
+   complex(pfdp), allocatable :: tmp(:,:,:), tmp_comm(:,:)
+   integer :: i, nnodes
+
+   allocate(tmp(4,dim,dim), tmp_comm(dim,dim))
+
+   tmp = z0
+   tmp_comm = z0
+   nnodes = size(f)
+
+   do i = 1, 3
+      f1 => cast_as_zndarray(f(i+1,1))
+      tmp(1,:,:) = tmp(1,:,:) + coef(i)   * f1%array
+      tmp(2,:,:) = tmp(2,:,:) + coef(i+3) * f1%array
+      tmp(3,:,:) = tmp(3,:,:) + coef(i+6) * f1%array
+   end do
+
+   f1 => cast_as_zndarray(f(2,1))
+   f2 => cast_as_zndarray(f(3,1))
+   f3 => cast_as_zndarray(f(4,1))
+   call compute_commutator(f1%array, f2%array, dim, tmp_comm)
+   call compute_commutator(tmp(1,:,:), tmp_comm, dim, commutator)
+   tmp(4,:,:) = tmp(4,:,:) + commutator
+
+   call compute_commutator(f1%array, f3%array, dim, tmp_comm)
+   call compute_commutator(tmp(2,:,:), tmp_comm, dim, commutator)
+   tmp(4,:,:) = tmp(4,:,:) + commutator
+
+   call compute_commutator(f2%array, f3%array, dim, tmp_comm)
+   call compute_commutator(tmp(3,:,:), tmp_comm, dim, commutator)
+   tmp(4,:,:) = tmp(4,:,:) + commutator
+
+   omega = omega + tmp(4,:,:)
+
+   print*, 'double commutator term = ', (real(tmp(4,i,i+1)), i=1,dim-5)
+   print*, 'omega after double term = ', (real(omega(i,i+1)), i=1,dim-5)
+   ! print*, 'double commutator term = ', real(tmp(4,:,:))
+   ! print*, 'omega after adding double terms', omega(1:3,11)
+   deallocate(tmp, tmp_comm)
+   nullify(f1, f2, f3)
+ end subroutine add_double_commutator_terms
+
+ subroutine add_triple_commutator_terms(omega, f, nodes, this_node, qmat, dt, coef, dim, commutator)
+   class(pf_encap_t), intent(inout) :: f(:,:)
+   complex(pfdp), intent(inout) :: omega(dim,dim), commutator(dim,dim)
+   real(pfdp), intent(in) :: coef, nodes(:), qmat(:,:), dt
+   integer, intent(in) :: dim, this_node
+
+   class(zndarray), pointer :: f1
+   complex(pfdp), allocatable :: tmp(:,:), a(:,:,:)
+   real(pfdp) :: time_scaler
+   integer :: i, j, nnodes
+
+   allocate(tmp(dim,dim), a(3,dim,dim))
+   tmp = z0
+   a = z0
+
+   nnodes = size(nodes)
+
+   do j = 2, nnodes-1
+       f1 => cast_as_zndarray(f(j,1))
+       time_scaler = (nodes(j)-0.5_pfdp)
+       tmp = dt * qmat(this_node,j) * f1%array
+       a(1,:,:) = a(1,:,:) + tmp
+       a(2,:,:) = a(2,:,:) + tmp * time_scaler
+       a(3,:,:) = a(3,:,:) + tmp * time_scaler**2
+   enddo
+
+   print*, 'triple a0 = ', (real(a(1,i,i+1)), i=1,dim-5)
+   print*, 'triple a1 = ', (real(a(2,i,i+1)), i=1,dim-5)
+
+   tmp = a(2,:,:)
+   call compute_commutator(a(1,:,:), tmp, dim, commutator)
+   a(3,:,:) = commutator
+   call compute_commutator(a(1,:,:), a(3,:,:), dim, commutator)
+   a(3,:,:) = commutator
+   call compute_commutator(a(1,:,:), a(3,:,:), dim, commutator)
+   ! do i = 1, 3
+   !    call compute_commutator(a(1,:,:), tmp, dim, commutator)
+   !    tmp = commutator
+   ! end do
+
+   omega = omega + commutator / 60.d0
+
+   ! print*, 'triple commutator coef = ', coef
+   ! print*, 'triple commutator term = ', (real(commutator(i,i+2)), i=1,dim-5)
+   ! print*, 'omega after triple term = ', (real(omega(i,i+2)), i=1,dim-5)
+   ! print*, 'triple commutator term = ', (coef(1)*commutator(i,i+1), i=1,nnodes-1)
+   ! print*, 'triple commutator term = ', real(tmp(4,:,:))
+   ! print*, 'omega after adding triple terms', omega(1:3,11)
+   deallocate(tmp, a)
+   nullify(f1)
+ end subroutine add_triple_commutator_terms
+
+ subroutine compute_commutator(a, b, dim, commutator)
+   complex(pfdp), intent(in) :: a(dim,dim), b(dim,dim)
+   integer, intent(in) :: dim
+   complex(pfdp), intent(inout) :: commutator(dim,dim)
+
+   call zgemm('n', 'n', dim, dim, dim, &
+        z1, b, dim, &
+        a, dim, &
+        z0, commutator, dim)
+
+   call zgemm('n', 'n', dim, dim, dim, &
+        z1, a, dim, &
+        b, dim, &
+        zm1, commutator, dim)
+ end subroutine compute_commutator
 
  !> Compute matrix exponential
  !! u = exp{omega}
