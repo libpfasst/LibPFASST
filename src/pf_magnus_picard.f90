@@ -83,7 +83,7 @@ module pf_mod_magnus_picard
 contains
 
   ! Perform one SDC sweep on level Lev and set qend appropriately.
-  subroutine magpicard_sweep(this, pf, level_index, t0, dt,nsweeps)
+  subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -112,32 +112,33 @@ contains
     call start_timer(pf, TLEVEL+lev%index-1)
 
     t = t0
-    do m = 1, nnodes
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-       t=t0+dt*lev%nodes(m)
-    end do
+    do k = 1, nsweeps
+        do m = 1, nnodes
+          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+          t=t0+dt*lev%nodes(m)
+        end do
 
-    call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
+        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
-    !$omp parallel
-    !$omp do private(m)
-    do m = 1, nnodes-1
-       print*, 'node number ', m
-       call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%I, lev%F, &
-            lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
-       call end_timer(pf, TAUX)
+        !$omp parallel
+        !$omp do private(m)
+        do m = 1, nnodes-1
+          call start_timer(pf, TAUX)
+          call this%compute_omega(this%omega(m), lev%I, lev%F, &
+                lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
+          call end_timer(pf, TAUX)
 
-       call start_timer(pf, TAUX+1)
-       call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
-       call end_timer(pf, TAUX+1)
+          call start_timer(pf, TAUX+1)
+          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
+          call end_timer(pf, TAUX+1)
 
-       call start_timer(pf, TAUX+2)
-       call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
-       call end_timer(pf, TAUX+2)
-    end do
-    !$omp end do
-    !$omp end parallel
+          call start_timer(pf, TAUX+2)
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
+          call end_timer(pf, TAUX+2)
+        end do
+        !$omp end do
+        !$omp end parallel
+    enddo
 
     call pf_residual(pf, lev, dt)
     call end_timer(pf, TLEVEL+lev%index-1)
