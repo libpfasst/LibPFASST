@@ -278,7 +278,7 @@ contains
 
    ! print*, 'single commutator term = ', (real(tmp(i,i+2), pfdp), i=1,dim-5)
    ! print*, 'omega after single term = ', (real(omega(i,i+2), pfdp), i=1,dim-5)
-   print*, 'coefs = ', coefs
+   ! print*, 'coefs = ', coefs
    deallocate(tmp)
    nullify(f1, f2, f3)
  end subroutine add_single_commutator_terms
@@ -323,8 +323,8 @@ contains
 
    omega = omega + tmp(4,:,:)
 
-   print*, 'double commutator term = ', (real(tmp(4,i,i+1)), i=1,dim-5)
-   print*, 'omega after double term = ', (real(omega(i,i+1)), i=1,dim-5)
+   ! print*, 'double commutator term = ', (real(tmp(4,i,i+1)), i=1,dim-5)
+   ! print*, 'omega after double term = ', (real(omega(i,i+1)), i=1,dim-5)
    ! print*, 'double commutator term = ', real(tmp(4,:,:))
    ! print*, 'omega after adding double terms', omega(1:3,11)
    deallocate(tmp, tmp_comm)
@@ -357,8 +357,8 @@ contains
        a(3,:,:) = a(3,:,:) + tmp * time_scaler**2
    enddo
 
-   print*, 'triple a0 = ', (real(a(1,i,i+1)), i=1,dim-5)
-   print*, 'triple a1 = ', (real(a(2,i,i+1)), i=1,dim-5)
+   ! print*, 'triple a0 = ', (real(a(1,i,i+1)), i=1,dim-5)
+   ! print*, 'triple a1 = ', (real(a(2,i,i+1)), i=1,dim-5)
 
    tmp = a(2,:,:)
    call compute_commutator(a(1,:,:), tmp, dim, commutator)
