@@ -47,7 +47,7 @@ contains
     r => cast_as_zndarray(level%R(1))
     q => cast_as_zndarray(level%Q(1))
 
-    print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i3.3," level: ",i1.1," resid: ",es18.10e4)', &
+    print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%array))
   end subroutine echo_residual
 

@@ -64,7 +64,7 @@ contains
       call pf_mpi_setup(comm, pf, err)
       call pf_pfasst_setup(pf)
 
-      call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
 
       call zndarray_build(dmat_t0, pf%levels(pf%nlevels)%shape(1))
