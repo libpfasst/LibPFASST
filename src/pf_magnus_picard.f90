@@ -26,6 +26,7 @@ module pf_mod_magnus_picard
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
      !real(pfdp), allocatable :: QdiffI(:,:)
      !real(pfdp), allocatable :: QtilI(:,:)
+     real(pfdp), allocatable :: dtsdc(:)
      real(pfdp), allocatable :: commutator_colloc_coefs(:,:)
      !logical                 :: use_LUq_ = .false.
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
@@ -97,11 +98,9 @@ contains
     integer    :: m, nnodes,k
 
     real(pfdp) :: t 
-    real(pfdp)  :: dtsdc(1:pf%levels(level_index)%nnodes-1)
 
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
-    dtsdc = 0.0_pfdp
     if (nnodes == 3) then
        this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
        this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
@@ -110,47 +109,50 @@ contains
     call call_hooks(pf, level_index, PF_PRE_SWEEP)    
     call lev%Q(1)%copy(lev%q0)
 
-    ! Copy values into residual
-    do m = 1, nnodes-1
-       call lev%R(m)%copy(lev%Q(m+1))
-    end do
-
-    t = t0
-    dtsdc = dt * (lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1))
-
     call start_timer(pf, TLEVEL+lev%index-1)
+    do k = 1,nsweeps
+       ! Copy values into residual
+       do m = 1, nnodes-1
+          call lev%R(m)%copy(lev%Q(m+1))
+       end do
+       
+       if (k .eq. 1) then
+          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
+       end if
 
-    do m = 1, nnodes
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-!MM    t=t+dtsdc(m)
-       t=t0+dt*lev%nodes(m)
+       t = t0
+       do m = 2, nnodes
+          t=t+ dt*this%dtsdc(m-1)
+          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+       end do
+
+       call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
+
+       !$omp parallel
+       !$omp do private(m)
+       do m = 1, nnodes-1
+          call start_timer(pf, TAUX)
+          call this%compute_omega(this%omega(m), lev%I(m), lev%F, &
+               this%commutator_colloc_coefs(m,:))
+          call end_timer(pf, TAUX)
+          
+          call start_timer(pf, TAUX+1)
+          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
+          call end_timer(pf, TAUX+1)
+          
+          call start_timer(pf, TAUX+2)
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
+          call end_timer(pf, TAUX+2)
+       end do
+       !$omp end do
+       !$omp end parallel
+       call pf_residual(pf, lev, dt)
+       call lev%qend%copy(lev%Q(nnodes))
+       call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do
 
-    call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
-
-    !$omp parallel
-    !$omp do private(m)
-    do m = 1, nnodes-1
-       call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%I(m), lev%F, &
-             this%commutator_colloc_coefs(m,:))
-       call end_timer(pf, TAUX)
-
-       call start_timer(pf, TAUX+1)
-       call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
-       call end_timer(pf, TAUX+1)
-
-       call start_timer(pf, TAUX+2)
-       call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
-       call end_timer(pf, TAUX+2)
-    end do
-    !$omp end do
-    !$omp end parallel
-    call pf_residual(pf, lev, dt)
     call end_timer(pf, TLEVEL+lev%index-1)
 
-    call lev%qend%copy(lev%Q(nnodes))
-    call call_hooks(pf, level_index, PF_POST_SWEEP)
   end subroutine magpicard_sweep
 
   subroutine magpicard_initialize(this, lev)
@@ -161,8 +163,10 @@ contains
 
     this%npieces = 1
     nnodes = lev%nnodes
+    allocate(this%dtsdc(nnodes-1))
     allocate(this%commutator_colloc_coefs(nnodes-1, nnodes))
 
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)   !  SDC time step size (unscaled)
     this%commutator_colloc_coefs(:,:) = 0.0_pfdp
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
@@ -237,6 +241,7 @@ contains
       !deallocate(this%QdiffI)
       ! deallocate(this%QtilI)
       deallocate(this%commutator_colloc_coefs)
+      deallocate(this%dtsdc)
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)

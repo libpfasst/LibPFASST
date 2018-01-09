@@ -92,7 +92,7 @@ contains
     call initial(q0)
 
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
-    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps)
 
     deallocate(q0%flatarray)

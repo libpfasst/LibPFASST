@@ -19,9 +19,11 @@ FSRC = src/pfasst.f90 \
        src/pf_hooks.f90 \
        src/pf_imexQ.f90 \
        src/pf_rkstepper.f90 \
+       src/pf_imk.f90 \
        src/pf_interpolate.f90 \
        src/pf_logger.f90 \
        src/pf_magnus_picard.f90 \
+       src/pf_misdcQ.f90 \
        src/pf_ndarray.f90 \
        src/pf_options.f90 \
        src/pf_parallel.f90 \
@@ -45,8 +47,8 @@ OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 $(PY py/script.py)
 
 #       src/pf_misdc.f90 \
-#       src/pf_misdcQ.f90 \
+
 #       src/pf_amisdc.f90 \
 #       src/pf_amisdcQ.f90 \
 
-#       src/pf_imk.f90 \
+

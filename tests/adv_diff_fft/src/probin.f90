@@ -58,7 +58,7 @@ contains
 
     v       = 1.0_pfdp
     Lx      = 1._pfdp
-    nu      = 0.02_pfdp
+    nu      = 0.1_pfdp
     sigma   = 0.004_pfdp
     kfreq   = 1
     t00      = 0.25_pfdp

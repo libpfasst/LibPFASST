@@ -25,6 +25,11 @@ module pf_mod_imk
 
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
     class(pf_encap_t), allocatable :: omega(:), dexpinvs(:)
+    real(pfdp), allocatable :: Qdiff(:,:)
+    real(pfdp), allocatable :: Qtil(:,:)
+    real(pfdp), allocatable :: dtsdc(:)
+    logical                 :: use_LUq = .false.
+
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -68,51 +73,72 @@ module pf_mod_imk
 
 contains
 
-  subroutine imk_sweep(this, pf, lev, t0, dt)
+  subroutine imk_sweep(this, pf, level_index, t0, dt,nsweeps)
     use pf_mod_timer
+    use pf_mod_hooks
 
     class(pf_imk_t),   intent(inout) :: this
-    type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: lev
-    real(pfdp),        intent(in   ) :: dt, t0
+    type(pf_pfasst_t), intent(inout),target :: pf
+    integer,             intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: dt
+    real(pfdp),        intent(in   ) :: t0
+    integer,             intent(in)    :: nsweeps
 
-    integer :: m
-    real(pfdp) :: t, dtsdc(lev%nnodes-1)
+    integer :: m,k
+    real(pfdp) :: t
+    class(pf_level_t), pointer :: lev
 
+    lev => pf%levels(level_index)
     t = t0
-    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
+
 
     call start_timer(pf, TLEVEL+lev%index-1)
-
-    call lev%Q(m)%copy(lev%q0)
-    do m = 1, lev%nnodes-1
-       call lev%R(m)%copy(lev%Q(m+1))
-       call lev%Q(m+1)%copy(lev%q0)
+    do k = 1,nsweeps
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+       call lev%Q(m)%copy(lev%q0)
+       do m = 1, lev%nnodes-1
+          call lev%R(m)%copy(lev%Q(m+1))
+          call lev%Q(m+1)%copy(lev%q0)
+       end do
+       
+       do m = 1, lev%nnodes-1
+          ! compute new Q from previous omegas
+          call this%propagate(lev%Q(1), this%omega(m), lev%Q(m+1))
+          call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m,1))
+          call this%dexpinv(this%omega(m), lev%F(m,1), this%dexpinvs(m))
+          t=t+dt*this%dtsdc(m)
+       end do
+       call pf_residual(pf, lev, dt)   
+       call lev%qend%copy(lev%Q(lev%nnodes))
+       call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do
-
-    do m = 1, lev%nnodes-1
-       ! compute new Q from previous omegas
-       call this%propagate(lev%Q(1), this%omega(m), lev%Q(m+1))
-       call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m,1))
-       call this%dexpinv(this%omega(m), lev%F(m,1), this%dexpinvs(m))
-       t=t+dtsdc(m)
-    end do
-
+    
     ! call imk_integrate(this, lev, this%omega, this%dexpinvs, dt, lev%S)
-
-    call lev%qend%copy(lev%Q(lev%nnodes))
-
     call end_timer(pf, TLEVEL+lev%index-1)
-
   end subroutine imk_sweep
 
   subroutine imk_initialize(this, lev)
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: m, nnodes
+    integer :: n,m, nnodes
+
+    allocate(this%Qdiff(nnodes-1,nnodes))  
+    allocate(this%Qtil(nnodes-1,nnodes))  
+    allocate(this%dtsdc(nnodes-1))  
 
     nnodes = lev%nnodes
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+
+    !  Explicit matrix
+    do m = 1, nnodes-1
+       do n = 1,m
+          this%Qtil(m,n)   =  this%dtsdc(n)
+       end do
+    end do
+
+    this%Qdiff = lev%qmat-this%Qtil
+
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -179,6 +205,9 @@ contains
       class(pf_level_t), intent(inout) :: lev
 
       ! deallocate(this%commutator_colloc_coefs)
+      deallocate(this%Qdiff)
+      deallocate(this%Qtil)
+      deallocate(this%dtsdc)
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)

@@ -23,17 +23,18 @@ module pf_mod_quadrature
   implicit none
 contains
 
-  subroutine pf_quadrature(qtype_in, nnodes, nnodes0, nodes, nflags, smat, qmat)
+  subroutine pf_quadrature(qtype_in, nnodes, nnodes0, nodes, nflags, smat, qmat,qmatFE,qmatBE)
     integer,    intent(in)  :: qtype_in, nnodes, nnodes0
     real(pfdp), intent(out) :: nodes(nnodes)
     real(pfdp), intent(out) :: smat(nnodes-1,nnodes), qmat(nnodes-1,nnodes)
+    real(pfdp), intent(out) :: qmatFE(nnodes-1,nnodes), qmatBE(nnodes-1,nnodes)
     integer,    intent(out) :: nflags(nnodes)
 
     real(c_long_double) :: qnodes0(nnodes0), qnodes(nnodes), dt
     real(pfdp)          :: qmat0(nnodes0-1,nnodes0), smat0(nnodes0-1,nnodes0)
     integer             :: flags0(nnodes0)
 
-    integer :: qtype, i, r, refine
+    integer :: qtype, i, r, refine,m,n
     logical :: composite, proper, no_left
 
     proper    = btest(qtype_in, 8)
@@ -99,6 +100,21 @@ contains
        call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
 
     end if
+
+    !  Make forward and backward Euler matrices
+    qmatFE=0.0_pfdp
+    qmatBE=0.0_pfdp
+    do m = 1, nnodes-1
+       do n = 1,m
+          qmatBE(m,n+1) =  qnodes(n+1)-qnodes(n)
+       end do
+    end do
+    ! Explicit matrix
+    do m = 1, nnodes-1
+       do n = 1,m
+          qmatFE(m,n)   =  qnodes(n+1)-qnodes(n)
+       end do
+    end do
 
 
     if (all(nodes == 0.0d0)) then
