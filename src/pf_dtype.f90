@@ -28,6 +28,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
   real(pfdp), parameter :: TWO   = 2.0_pfdp
+  real(pfdp), parameter :: THREE  = 3.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
   integer, parameter :: PF_MAX_HOOKS = 32
@@ -86,6 +87,15 @@ module pf_mod_dtype
      procedure(pf_residual_p),     deferred :: residual
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
+
+  !<  Defines the base stepper type
+  type, abstract :: pf_stepper_t
+     integer     :: npieces
+   contains
+     procedure(pf_stepN_p),        deferred :: do_N_steps
+     procedure(pf_initialize_stepper_p),   deferred :: initialize
+     procedure(pf_destroy_stepper_p),      deferred :: destroy
+  end type pf_stepper_t
 
   !<  Defines the base data type 
   type, abstract :: pf_encap_t
@@ -274,10 +284,10 @@ module pf_mod_dtype
        class(pf_level_t),   intent(inout) :: lev
      end subroutine pf_initialize_p
 
-     subroutine pf_sweepdestroy_p(this)
+     subroutine pf_destroy_sweeper_p(this)
        import pf_sweeper_t
        class(pf_sweeper_t), intent(inout) :: this
-     end subroutine pf_sweepdestroy_p
+     end subroutine pf_destroy_sweeper_p
 
      subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC)
        import pf_sweeper_t, pf_level_t, pf_encap_t, pfdp
@@ -300,6 +310,28 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
      end subroutine pf_destroy_p
+
+     !  Stepper interfaces
+     subroutine pf_stepN_p(this, pf, level_index, t0, big_dt,nsteps)
+       import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp
+       class(pf_stepper_t), intent(inout) :: this
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       real(pfdp),          intent(in)    :: big_dt, t0
+       integer,             intent(in)    :: level_index
+       integer,             intent(in)    :: nsteps
+     end subroutine pf_stepN_p
+
+     subroutine pf_initialize_stepper_p(this, lev)
+       import pf_stepper_t, pf_level_t
+       class(pf_stepper_t), intent(inout) :: this
+       class(pf_level_t),   intent(inout) :: lev
+     end subroutine pf_initialize_stepper_p
+
+     subroutine pf_destroy_stepper_p(this, lev)
+       import pf_stepper_t, pf_level_t, pfdp
+       class(pf_stepper_t), intent(inout) :: this
+       class(pf_level_t),   intent(inout) :: Lev
+     end subroutine pf_destroy_stepper_p
 
      ! transfer interfaces
      subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
