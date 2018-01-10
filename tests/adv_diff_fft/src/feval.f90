@@ -174,13 +174,13 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Evaluate the explicit function at y, t.
-  subroutine f_eval(this, y, t, level, f, piece)
+  subroutine f_eval(this, y, t, level_index, f, piece)
     use probin, only:  imex_stat ,nu, v
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
     class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
-    integer,             intent(in   ) :: level
+    integer,             intent(in   ) :: level_index
     integer,             intent(in   ) :: piece
     
     real(pfdp),      pointer :: yvec(:), fvec(:)
@@ -239,14 +239,14 @@ contains
 
 
   ! Solve for y and return f2 also.
-  subroutine f_comp(this, y, t, dt, rhs, level, f,piece)
+  subroutine f_comp(this, y, t, dtq, rhs, level_index, f,piece)
     use probin, only:  imex_stat ,nu,v
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(inout) :: y
     real(pfdp),          intent(in   ) :: t
-    real(pfdp),          intent(in   ) :: dt
+    real(pfdp),          intent(in   ) :: dtq
     class(pf_encap_t),   intent(in   ) :: rhs
-    integer,             intent(in   ) :: level
+    integer,             intent(in   ) :: level_index
     class(pf_encap_t),   intent(inout) :: f
     integer,             intent(in   ) :: piece
 
@@ -263,15 +263,15 @@ contains
        if (ierror .ne. 0) &
           stop "error  calling cfft1f in f_comp"
        if (imex_stat .eq. 2) then
-          this%workhat =  this%workhat/ (1.0_pfdp - nu*dt*this%lap)
+          this%workhat =  this%workhat/ (1.0_pfdp - nu*dtq*this%lap)
        else  ! fully implicit
-          this%workhat =  this%workhat/ (1.0_pfdp - dt*(-v * this%ddx +nu*this%lap))
+          this%workhat =  this%workhat/ (1.0_pfdp - dtq*(-v * this%ddx +nu*this%lap))
        end if
        call cfft1b (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
        if (ierror .ne. 0) &
                       stop "error  calling cfft1f in f_comp"
       yvec  = real(this%workhat)
-      fvec = (yvec - rhsvec) / dt
+      fvec = (yvec - rhsvec) / dtq
     else
       print *,'Bad piece in f_comp ',piece
       call exit(0)
