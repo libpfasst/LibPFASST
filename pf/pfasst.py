@@ -562,15 +562,16 @@ class Results(pd.DataFrame):
 
     def _create_result_row(self, idx, traj, total_times):
         final_solution = traj.loc[len(traj)-1, 'solution']
-        iters = 0
-        for step in traj.step.unique():
-            iters += traj[traj.step == step].iter.max()
+        iterations = 0
 
-        iters = iters / len(traj.step.unique())
+        for step in traj.step.unique():
+            iterations += traj[traj['step'] == step].iter.max()
+
+        iterations = iterations / len(traj.step.unique()+1)
 
         self.loc[idx] = self.p.dt, self.p.nsteps, \
                       self.p.nodes, self.p.magnus, \
-                      iters, self.p.tfinal, \
+                      iterations, self.p.tfinal, \
                       final_solution, total_times, traj
         return
 
@@ -579,7 +580,8 @@ class Results(pd.DataFrame):
         traj = self.loc[idx, 'trajectory']
         last_steps = self.loc[idx, 'nsteps'] - self.p.tasks
 
-        final_block = traj[(traj['step'] > last_steps)]
+        # final_block = traj[(traj['step'] > last_steps)]
+        final_block = traj[(traj['step'] > last_steps) & (traj['iter'] > 0)]
         return final_block
 
     def save(self, pkl_path):
@@ -614,7 +616,7 @@ class Results(pd.DataFrame):
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('Iteration Number')
         ax.set_ylabel('Residual')
-        ax.set_ylim(bottom=1e-20)
+        # ax.set_ylim(bottom=1e-20)
 
         if idx is None and trajectory is None:
             trajectory = self.get_final_block(idx=0)
@@ -626,8 +628,7 @@ class Results(pd.DataFrame):
         for cpu in range(self.p.tasks):
             try:
                 trajectory[(trajectory['rank'] == cpu) & (trajectory[
-                    'level'] == self.p.levels) & (trajectory['residual'] > 1e-20
-                                                )].plot(
+                    'level'] == self.p.levels)].plot(
                                                     'iter',
                                                     'residual',
                                                     logy=True,
@@ -654,7 +655,7 @@ class Results(pd.DataFrame):
         ax.set_title('Residuals of last {} steps'.format(self.p.tasks))
         ax.set_xlabel('CPU Number')
         ax.set_ylabel('Residual')
-        ax.set_ylim(bottom=1e-20)
+        # ax.set_ylim(bottom=1e-20)
 
         if idx is None and trajectory is None:
             trajectory = self.get_final_block(idx=0)
@@ -666,8 +667,7 @@ class Results(pd.DataFrame):
         for iteration in range(self.p.iterations):
             try:
                 trajectory[(trajectory['iter'] == iteration + 1) & (trajectory[
-                    'level'] == self.p.levels) & (trajectory[
-                        'residual'] > 1e-20)].plot(
+                    'level'] == self.p.levels)].plot(
                             'rank',
                             'residual',
                             logy=True,
