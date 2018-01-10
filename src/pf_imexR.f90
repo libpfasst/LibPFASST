@@ -24,13 +24,13 @@
 !>     explicit:  Make false if there is no explicit piece
 !>     implicit:  Make false if there is no implicit piece
 !>     use_LUqt:  Make false if backward Euler sweepers should be used instead of the 'LU trick'
-module pf_mod_imexQ
+module pf_mod_imexR
   use pf_mod_dtype
   use pf_mod_utils
 
   implicit none
 
-  type, extends(pf_sweeper_t), abstract :: pf_imexQ_t
+  type, extends(pf_sweeper_t), abstract :: pf_imexR_t
      real(pfdp), allocatable :: QtilE(:,:)   !>  Approximate explcit quadrature rule
      real(pfdp), allocatable :: QtilI(:,:)   !>  Approximate implcit quadrature rule
      real(pfdp), allocatable :: dtsdc(:)     !>  SDC step sizes
@@ -41,26 +41,28 @@ module pf_mod_imexQ
      logical                 :: implicit = .true. !>  Is there an implicit piece
      logical                 :: use_LUq = .true.  !>  Use the LU trick
 
+     class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
+
    contains
      procedure(pf_f_eval_p), deferred :: f_eval   !>  RHS function evaluations
      procedure(pf_f_comp_p), deferred :: f_comp   !>  Implicit solver
      !>  Set the generic functions
-     procedure :: sweep      => imexQ_sweep
-     procedure :: initialize => imexQ_initialize
-     procedure :: evaluate   => imexQ_evaluate
-     procedure :: integrate  => imexQ_integrate
-     procedure :: residual   => imexQ_residual
-     procedure :: evaluate_all => imexQ_evaluate_all
-     procedure :: destroy   => imexQ_destroy
-     procedure :: imexQ_destroy
-  end type pf_imexQ_t
+     procedure :: sweep      => imexR_sweep
+     procedure :: initialize => imexR_initialize
+     procedure :: evaluate   => imexR_evaluate
+     procedure :: integrate  => imexR_integrate
+     procedure :: residual   => imexR_residual
+     procedure :: evaluate_all => imexR_evaluate_all
+     procedure :: destroy   => imexR_destroy
+     procedure :: imexR_destroy
+  end type pf_imexR_t
 
   interface
      !>  This is the interface for the routine to compute the RHS function values
      subroutine pf_f_eval_p(this,y, t, level_index, f, piece)
        !>  Evaluae f_piece(y), where piece is one or two 
-       import pf_imexQ_t, pf_encap_t, pfdp
-       class(pf_imexQ_t),  intent(inout) :: this
+       import pf_imexR_t, pf_encap_t, pfdp
+       class(pf_imexR_t),  intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: y        !>  Argument for evaluation
        real(pfdp),        intent(in   ) :: t        !>  Time at evaluation
        integer,    intent(in   ) :: level_index     !>  Level index
@@ -69,8 +71,8 @@ module pf_mod_imexQ
      end subroutine pf_f_eval_p
      subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece)
        !>  Solve the equation y - dtq*f_2(y) =rhs
-       import pf_imexQ_t, pf_encap_t, pfdp
-       class(pf_imexQ_t),  intent(inout) :: this
+       import pf_imexR_t, pf_encap_t, pfdp
+       class(pf_imexR_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y      !>  Solution of implicit solve 
        real(pfdp),        intent(in   ) :: t      !>  Time of solve
        real(pfdp),        intent(in   ) :: dtq    !>  dt*quadrature weight
@@ -84,11 +86,11 @@ module pf_mod_imexQ
 contains
 
   !> Perform nsweep SDC sweep on level Lev and set qend appropriately.
-  subroutine imexQ_sweep(this, pf, level_index, t0, dt,nsweeps)
+  subroutine imexR_sweep(this, pf, level_index, t0, dt,nsweeps)
     use pf_mod_timer
     use pf_mod_hooks
 
-    class(pf_imexQ_t), intent(inout) :: this
+    class(pf_imexR_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout),target :: pf  !>  PFASST structure
     real(pfdp),        intent(in   ) :: t0         !>  Time at beginning of time step
         real(pfdp),        intent(in   ) :: dt     !>  time step size
@@ -99,13 +101,8 @@ contains
 
     integer     :: m, n,k   !>  Loop variables
     real(pfdp)  :: t        !>  Time at nodes
-    class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
-
     
     lev => pf%levels(level_index)   !>  Assign level pointer
-
-    !>  Make space for rhs
-    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -144,24 +141,24 @@ contains
           t = t + dt*this%dtsdc(m)
 
           !>  Accumulate rhs
-          call rhs%setval(0.0_pfdp)
+          call this%rhs%setval(0.0_pfdp)
           do n = 1, m
              if (this%explicit) &
-                  call rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1))
+                  call this%rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1))
              if (this%implicit) &
-                  call rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
+                  call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
           end do
           !  Add the tau term
-          call rhs%axpy(1.0_pfdp, lev%I(m))
+          call this%rhs%axpy(1.0_pfdp, lev%I(m))
 
           !  Add the starting value
-          call rhs%axpy(1.0_pfdp, lev%Q(1))
+          call this%rhs%axpy(1.0_pfdp, lev%Q(1))
 
           !  Solve for the implicit piece
           if (this%implicit) then
-             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%index,lev%F(m+1,2),2)
+             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index,lev%F(m+1,2),2)
           else
-             call lev%Q(m+1)%copy(rhs)
+             call lev%Q(m+1)%copy(this%rhs)
           end if
           !  Compute explicit function on new value
           if (this%explicit) &
@@ -175,14 +172,12 @@ contains
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !>  End loop on sweeps
 
-    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-
     call end_timer(pf, TLEVEL+lev%index-1)
-  end subroutine imexQ_sweep
+  end subroutine imexR_sweep
 
   !> Initialize matrices and space for sweeper
-  subroutine imexQ_initialize(this, lev)
-    class(pf_imexQ_t), intent(inout) :: this
+  subroutine imexR_initialize(this, lev)
+    class(pf_imexR_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
     integer    :: m,n, nnodes
@@ -218,11 +213,15 @@ contains
 
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
-  end subroutine imexQ_initialize
 
-  subroutine imexQ_destroy(this, lev)
+    !>  Make space for rhs
+    call lev%ulevel%factory%create_single(this%rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+  end subroutine imexR_initialize
+
+  subroutine imexR_destroy(this, lev)
     !>  deallocate
-    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     
     deallocate(this%QdiffE)
@@ -230,13 +229,16 @@ contains
     deallocate(this%QtilE)
     deallocate(this%QtilI)
     deallocate(this%dtsdc)
-  end subroutine imexQ_destroy
 
+    call lev%ulevel%factory%destroy_single(this%rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+
+  end subroutine imexR_destroy
 
 
   !> Compute  Picard integral of function values
-  subroutine imexQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
-    class(pf_imexQ_t), intent(inout) :: this
+  subroutine imexR_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+    class(pf_imexR_t), intent(inout) :: this
     class(pf_level_t), intent(in   ) :: lev
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
@@ -253,20 +255,20 @@ contains
                call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,2))
        end do
     end do
-  end subroutine imexQ_integrate
+  end subroutine imexR_integrate
 
-  subroutine imexQ_residual(this, lev, dt)
+  subroutine imexR_residual(this, lev, dt)
     !> Compute  Residual
-    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: dt
     call pf_generic_residual(this, lev, dt)
-  end subroutine imexQ_residual
+  end subroutine imexR_residual
   
-  subroutine imexQ_evaluate(this, lev, t, m)
+  subroutine imexR_evaluate(this, lev, t, m)
     !> Evaluate function value at node m
 
-    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_imexR_t),  intent(inout) :: this
     real(pfdp),        intent(in   ) :: t
     integer,           intent(in   ) :: m
     class(pf_level_t), intent(inout) :: lev
@@ -274,14 +276,14 @@ contains
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
     if (this%implicit) &
          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
-  end subroutine imexQ_evaluate
+  end subroutine imexR_evaluate
 
-  subroutine imexQ_evaluate_all(this, lev, t)
+  subroutine imexR_evaluate_all(this, lev, t)
     !> Evaluate all function values
-    class(pf_imexQ_t),  intent(inout) :: this
+    class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t(:)
     call pf_generic_evaluate_all(this, lev, t)
-  end subroutine imexQ_evaluate_all
+  end subroutine imexR_evaluate_all
 
-end module pf_mod_imexQ
+end module pf_mod_imexR

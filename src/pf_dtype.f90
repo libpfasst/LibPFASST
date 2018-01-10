@@ -1,22 +1,23 @@
-!>
-!> Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!>
-!> This file is part of LIBPFASST.
-!>
-!> LIBPFASST is free software: you can redistribute it and/or modify it
-!> under the terms of the GNU General Public License as published by
-!> the Free Software Foundation, either version 3 of the License, or
-!> (at your option) any later version.
-!>
-!> LIBPFASST is distributed in the hope that it will be useful, but
-!> WITHOUT ANY WARRANTY; without even the implied warranty of
-!> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-!> General Public License for more details.
-!>
-!> You should have received a copy of the GNU General Public License
-!> along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!>
-!>  Module defining the main data types in PFASST
+!
+! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
+!
+! This file is part of LIBPFASST.
+!
+! LIBPFASST is free software: you can redistribute it and/or modify it
+! under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! LIBPFASST is distributed in the hope that it will be useful, but
+! WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+! General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
+!
+!>  This module defines the main parameters, data types, and intefaces 
+!
 module pf_mod_dtype
   use iso_c_binding
   implicit none
@@ -32,7 +33,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
   integer, parameter :: PF_MAX_HOOKS = 32
-  ! Quadrature node types
+  !> Quadrature node types
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
   integer, parameter :: SDC_GAUSS_RADAU     = 2
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
@@ -42,14 +43,14 @@ module pf_mod_dtype
   integer, parameter :: SDC_COMPOSITE_NODES = 2**9
   integer, parameter :: SDC_NO_LEFT         = 2**10
 
-  ! Types of encaps node types
+  !> Types of encaps node types
   integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
   integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
   integer, parameter :: SDC_KIND_FEVAL        = 3
   integer, parameter :: SDC_KIND_INTEGRAL     = 4
   integer, parameter :: SDC_KIND_CORRECTION   = 5
 
-  ! States of operatrion
+  !> States of operatrion
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
@@ -127,65 +128,65 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
-  !<  Data type of a PFASST level
+  !>  Data type of a PFASST level
   type :: pf_level_t
-     integer  :: nvars        = -1   ! number of variables (dofs)
-     integer  :: nnodes       = -1   ! number of sdc nodes
-     integer  :: nsweeps      =  1   ! number of sdc sweeps to perform
-     integer  :: nsweeps_pred =  1   ! number of sdc sweeps to perform (predictor)
-     integer  :: index        = -1   ! level number (1 is the coarsest)
-     logical     :: Finterp = .false.   ! interpolate functions instead of solutions
+     integer  :: index        = -1   !< level number (1 is the coarsest)
+     integer  :: nvars        = -1   !< number of variables (dofs)
+     integer  :: nnodes       = -1   !< number of sdc nodes
+     integer  :: nsweeps      =  1   !< number of sdc sweeps to perform
+     integer  :: nsweeps_pred =  1   !< number of sdc sweeps to perform (predictor)
+     logical     :: Finterp = .false.   !< interpolate functions instead of solutions
 
-     real(pfdp)  :: residual            ! holds the user defined residual
-     real(pfdp)  :: residual0           ! residual at beginning of PFASST call
+     real(pfdp)  :: residual            !< holds the user defined residual
+     real(pfdp)  :: residual0           !< residual at beginning of PFASST call
                                         ! used for relative residual tolerance calculation
 
-     class(pf_user_level_t), allocatable :: ulevel
+     class(pf_user_level_t), allocatable :: ulevel  !<  user customized level info
 
+     !>  Simple data storage at each level
      real(pfdp), allocatable :: &
-          send(:),    &                 ! send buffer
-          recv(:),    &                 ! recv buffer
-          nodes(:),   &                 ! sdc nodes
-          t_sdc(:),   &                 ! time at the SDC nodes
-          qmat(:,:),  &                 ! integration matrix (0 to node)
-          qmatFE(:,:),  &               ! Forward Euler integration matrix (0 to node)
-          qmatBE(:,:),  &               ! Backward Euler matrix (0 to node)
-          LUmat(:,:), &                 ! LU factorization (replaces BE matrix in Q form)
-          s0mat(:,:), &                 ! integration matrix (node to node)
-          rmat(:,:),  &                 ! time restriction matrix
-          tmat(:,:)                     ! time interpolation matrix
+          send(:),    &                 !< send buffer
+          recv(:),    &                 !< recv buffer
+          nodes(:),   &                 !< list of SDC nodes
+          t_sdc(:),   &                 !< time at the SDC nodes
+          qmat(:,:),  &                 !< spectral integration matrix (0 to node)
+          qmatFE(:,:),  &               !< Forward Euler integration matrix (0 to node)
+          qmatBE(:,:),  &               !< Backward Euler matrix (0 to node)
+          LUmat(:,:), &                 !< LU factorization (replaces BE matrix in Q form)
+          s0mat(:,:), &                 !< integration matrix (node to node)
+          rmat(:,:),  &                 !< time restriction matrix
+          tmat(:,:)                     !< time interpolation matrix
 
      integer, allocatable :: &
-          nflags(:)                     ! sdc node flags
+          nflags(:)                     !< sdc node flags
 
+     !>  Solution variable storage
      class(pf_encap_t), allocatable :: &
-       !          sol_array(:),     &           ! solution at sdc nodes
-          Q(:),     &           ! solution at sdc nodes
-          pQ(:),    &                   ! unknowns at sdc nodes, previous sweep
-          R(:),     &                   ! full residuals
-          I(:),     &                   ! 0 to node integrals
-!          S(:),     &                   ! node to node integrals
-          Fflt(:),  &                   ! functions values at sdc nodes (flat)
-!          tau(:),   &                   ! fas correction
-          tauQ(:),  &                   ! fas correction in Q form
-          pFflt(:), &                   ! functions at sdc nodes, previous sweep (flat)
-          q0,       &                   ! initial condition 
-          qend
+          Q(:),     &           !< solution at sdc nodes
+          pQ(:),    &           !< unknowns at sdc nodes, previous sweep
+          R(:),     &           !< full residuals
+          I(:),     &           !< 0 to node integrals
+          Fflt(:),  &           !< functions values at sdc nodes (flat)
+          tauQ(:),  &           !< fas correction in Q form
+          pFflt(:), &           !< functions at sdc nodes, previous sweep (flat)
+          q0,       &           !< initial condition 
+          qend                  !< solution at end time
 
+     !>  Function  storage
      class(pf_encap_t), pointer :: &
-          F(:,:), &                     ! functions values at sdc nodes
-          pF(:,:)                       ! functions at sdc nodes, previous sweep
+          F(:,:), &                     !< functions values at sdc nodes
+          pF(:,:)                       !< functions at sdc nodes, previous sweep
 
-     integer, allocatable :: shape(:)   ! user shape
+
+     integer, allocatable :: shape(:)   !< user defined shape array
 
      logical :: allocated = .false.
   end type pf_level_t
 
-  !<  Data type to define the communicator
+  !>  Data type to define the communicator
   type :: pf_comm_t
      integer :: nproc = -1              ! total number of processors
 
-     ! mpi
      integer :: comm = -1               ! communicator
      integer, pointer :: &
           recvreq(:), &                 ! receive requests (indexed by level)
@@ -196,6 +197,7 @@ module pf_mod_dtype
      type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
      type(c_ptr), pointer :: pfpth(:,:)
 
+     !> Procedure interfaces
      procedure(pf_post_p),        pointer, nopass :: post
      procedure(pf_recv_p),        pointer, nopass :: recv
      procedure(pf_recv_status_p), pointer, nopass :: recv_status
@@ -205,9 +207,9 @@ module pf_mod_dtype
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
-  !<  The main data type which includes all else
+  !>  The main data type which includes pretty much everything
   type :: pf_pfasst_t
-
+     !>  Parameters
      integer :: nlevels = -1            !< number of pfasst levels
      integer :: niters  = 5             !< number of PFASST iterations to do
      integer :: rank    = -1            !< rank of current processor
@@ -222,31 +224,28 @@ module pf_mod_dtype
 
      integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
-     ! pf objects
+     !> pf objects
      type(pf_state_t), allocatable :: state   !<  Describes where in the algorithm proc is
      type(pf_level_t), allocatable :: levels(:) !< Holds the levels
      type(pf_comm_t),  pointer :: comm    !< Points to communicator
 
-     ! hooks
+     !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !<  Holds the hooks
      integer,  allocatable :: nhooks(:,:)   !<  Holds the number hooks
 
-     ! timing
+     !> timing variables
      logical    :: echo_timings  = .false.
      integer :: timers(100)   = 0
      integer :: runtimes(100) = 0
 
-     ! misc
+     !> misc
      logical :: debug = .false.
      character(512) :: outdir
 
   end type pf_pfasst_t
 
-!  abstract  interface
-!  end interface
-
   interface
-    ! hook interface
+    !> hooks interface
     subroutine pf_hook_p(pf, level, state)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
@@ -255,12 +254,13 @@ module pf_mod_dtype
        type(pf_state_t),  intent(in)    :: state
      end subroutine pf_hook_p
      
-     ! sweeper interfaces
+     !> SDC sweeper interfaces
      subroutine pf_sweep_p(this, pf, level_index, t0, dt,nsweeps)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
-       real(pfdp),          intent(in)    :: dt, t0
+       real(pfdp),          intent(in)    :: dt
+       real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsweeps
      end subroutine pf_sweep_p
@@ -296,7 +296,7 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(in)    :: lev
        class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
-       real(pfdp),          intent(in)    :: dt
+       real(pfdp),          intent(in)    :: dt !<  Time step size
        class(pf_encap_t),   intent(inout) :: fintSDC(:)
      end subroutine pf_integrate_p
 
@@ -304,7 +304,7 @@ module pf_mod_dtype
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
-       real(pfdp),          intent(in)    :: dt
+       real(pfdp),          intent(in)    :: dt !<  Time step size
      end subroutine pf_residual_p
 
      subroutine pf_destroy_p(this, lev)
@@ -313,12 +313,13 @@ module pf_mod_dtype
        class(pf_level_t),   intent(inout) :: Lev
      end subroutine pf_destroy_p
 
-     !  Stepper interfaces
+     !>  time stepper interfaces
      subroutine pf_stepN_p(this, pf, level_index, t0, big_dt,nsteps)
        import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
-       real(pfdp),          intent(in)    :: big_dt, t0
+       real(pfdp),          intent(in)    :: big_dt !<  Time step size
+       real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps
      end subroutine pf_stepN_p
@@ -335,7 +336,7 @@ module pf_mod_dtype
        class(pf_level_t),   intent(inout) :: Lev
      end subroutine pf_destroy_stepper_p
 
-     ! transfer interfaces
+     !> transfer interfaces used for restriction and interpolation
      subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
        class(pf_user_level_t), intent(inout) :: this
@@ -344,7 +345,7 @@ module pf_mod_dtype
        real(pfdp),          intent(in)       :: t
      end subroutine pf_transfer_p
 
-     ! encapsulation interfaces
+     !> encapsulation interfaces
      subroutine pf_encap_create_single_p(this, x, level, kind, nvars, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
@@ -418,7 +419,7 @@ module pf_mod_dtype
        class(pf_encap_t), intent(inout) :: this
      end subroutine pf_encap_eprint_p
 
-     ! communicator interfaces
+     !> communicator interfaces
      subroutine pf_post_p(pf, level, tag,ierror)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf

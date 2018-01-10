@@ -17,13 +17,13 @@
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 !>  This is the derived sweeper class for doing IMEX sweeps for an equation of the form
-!>            y' = f_1(y) + f_2(y)
-!>  The f_1 piece is treated explicitly and f_2 implicitly
-!>  Afer this sweeper is initialized (usually in main), the locgical flags can be changed if desired
-!>  The user need to supply the feval and fcomp routines for a given example   
-!>     explicit:  Make false if there is no explicit piece
-!>     implicit:  Make false if there is no implicit piece
-!>     use_LUqt:  Make false if backward Euler sweepers should be used instead of the 'LU trick'
+!!            y' = f_1(y) + f_2(y)
+!!  The f_1 piece is treated explicitly and f_2 implicitly
+!!  Afer this sweeper is initialized (usually in main), the locgical flags can be changed if desired
+!!  The user need to supply the feval and fcomp routines for a given example   
+!!     explicit:  Make false if there is no explicit piece
+!!     implicit:  Make false if there is no implicit piece
+!!     use_LUqt:  Make false if backward Euler sweepers should be used instead of the 'LU trick'
 module pf_mod_imexQ
   use pf_mod_dtype
   use pf_mod_utils
@@ -40,6 +40,8 @@ module pf_mod_imexQ
      logical                 :: explicit = .true. !>  Is there an explicit piece
      logical                 :: implicit = .true. !>  Is there an implicit piece
      logical                 :: use_LUq = .true.  !>  Use the LU trick
+
+     class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
 
    contains
      procedure(pf_f_eval_p), deferred :: f_eval   !>  RHS function evaluations
@@ -84,12 +86,13 @@ module pf_mod_imexQ
 contains
 
   !> Perform nsweep SDC sweep on level Lev and set qend appropriately.
+  !!
   subroutine imexQ_sweep(this, pf, level_index, t0, dt,nsweeps)
     use pf_mod_timer
     use pf_mod_hooks
 
     class(pf_imexQ_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf  !>  PFASST structure
+    type(pf_pfasst_t), intent(inout),target :: pf  !<  PFASST structure
     real(pfdp),        intent(in   ) :: t0         !>  Time at beginning of time step
         real(pfdp),        intent(in   ) :: dt     !>  time step size
     integer,             intent(in)    :: level_index  !>  which level this is
@@ -97,15 +100,10 @@ contains
 
     class(pf_level_t), pointer :: lev    !>  points to current level
 
-    integer     :: m, n,k   !>  Loop variables
-    real(pfdp)  :: t        !>  Time at nodes
-    class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
-
+    integer     :: m, n,k   !<  Loop variables
+    real(pfdp)  :: t        !<  Time at nodes
     
-    lev => pf%levels(level_index)   !>  Assign level pointer
-
-    !>  Make space for rhs
-    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    lev => pf%levels(level_index)   !<  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -140,42 +138,40 @@ contains
        
        t = t0
        ! do the sub-stepping in sweep
-       do m = 1, lev%nnodes-1
+       do m = 1, lev%nnodes-1  !>  Loop over substeps
           t = t + dt*this%dtsdc(m)
 
           !>  Accumulate rhs
-          call rhs%setval(0.0_pfdp)
+          call this%rhs%setval(0.0_pfdp)
           do n = 1, m
              if (this%explicit) &
-                  call rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1))
+                  call this%rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1))
              if (this%implicit) &
-                  call rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
+                  call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
           end do
-          !  Add the tau term
-          call rhs%axpy(1.0_pfdp, lev%I(m))
+          !>  Add the tau term
+          call this%rhs%axpy(1.0_pfdp, lev%I(m))
 
-          !  Add the starting value
-          call rhs%axpy(1.0_pfdp, lev%Q(1))
+          !>  Add the starting value
+          call this%rhs%axpy(1.0_pfdp, lev%Q(1))
 
-          !  Solve for the implicit piece
+          !>  Solve for the implicit piece
           if (this%implicit) then
-             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%index,lev%F(m+1,2),2)
+             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index,lev%F(m+1,2),2)
           else
-             call lev%Q(m+1)%copy(rhs)
+             call lev%Q(m+1)%copy(this%rhs)
           end if
-          !  Compute explicit function on new value
+          !>  Compute explicit function on new value
           if (this%explicit) &
                call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1),1)
 
           
-       end do
+       end do  !>  End substep loop
        call pf_residual(pf, lev, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
-    end do  !>  End loop on sweeps
-
-    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    end do  !  End loop on sweeps
 
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imexQ_sweep
@@ -183,7 +179,7 @@ contains
   !> Initialize matrices and space for sweeper
   subroutine imexQ_initialize(this, lev)
     class(pf_imexQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    class(pf_level_t), intent(inout) :: lev   
 
     integer    :: m,n, nnodes
 
@@ -218,6 +214,10 @@ contains
 
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
+
+    !>  Make space for rhs
+    call lev%ulevel%factory%create_single(this%rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
   end subroutine imexQ_initialize
 
   subroutine imexQ_destroy(this, lev)
@@ -230,8 +230,11 @@ contains
     deallocate(this%QtilE)
     deallocate(this%QtilI)
     deallocate(this%dtsdc)
-  end subroutine imexQ_destroy
 
+    call lev%ulevel%factory%destroy_single(this%rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+
+
+  end subroutine imexQ_destroy
 
 
   !> Compute  Picard integral of function values
