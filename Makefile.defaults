@@ -8,7 +8,7 @@ AR = ar rcs
 PY = python
 NOSE = nosetests
 
-FFLAGS = -Ibuild -Jinclude -cpp -fopenmp
+FFLAGS = -Ibuild -Jinclude -cpp
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
@@ -40,6 +40,10 @@ ifdef NOMPI
   FFLAGS += -DNOMPI
 else
   FSRC += src/pf_mpi.f90
+endif
+
+ifdef OMP
+  FFLAGS += -fopenmp
 endif
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))

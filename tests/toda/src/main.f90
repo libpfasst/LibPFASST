@@ -48,10 +48,14 @@ contains
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, l, &
+          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, l, pf%qtype, &
                pf%debug, pf%levels(l)%shape, pf%levels(l)%nvars)
 
-          pf%levels(l)%nnodes = nnodes(l)
+          if (pf%qtype == 5) then
+            pf%levels(l)%nnodes = nnodes(l)+2
+          else
+            pf%levels(l)%nnodes = nnodes(l)
+          endif
           pf%levels(l)%nsweeps = nsweeps(l)
           pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
       end do
@@ -60,7 +64,7 @@ contains
       call pf_mpi_setup(comm, pf, err)
       call pf_pfasst_setup(pf)
 
-      call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
 
       call zndarray_build(dmat_t0, pf%levels(pf%nlevels)%shape(1))

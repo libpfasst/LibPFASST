@@ -88,7 +88,6 @@ contains
        ! nodes.
 
        refine = (nnodes0 - 1) / (nnodes - 1)
-
        call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)
 
        qnodes = qnodes0(::refine)
@@ -100,6 +99,7 @@ contains
        call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
 
     end if
+
 
     !  Make forward and backward Euler matrices
     qmatFE=0.0_pfdp

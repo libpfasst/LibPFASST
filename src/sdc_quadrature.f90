@@ -59,16 +59,16 @@ contains
 
     case (SDC_GAUSS_LEGENDRE)
 
-       degree = nnodes - 2
+       degree = nnodes-2
        allocate(roots(degree))
        allocate(coeffs(degree+1))
 
        call poly_legendre(coeffs, degree)
        call poly_roots(roots, coeffs, degree)
 
-       qnodes(1)          = 0.0_qp
+       qnodes(1) = 0.0_qp
        qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
-       qnodes(nnodes)     = 1.0_qp
+       qnodes(nnodes) = 1.0_qp
 
        deallocate(coeffs)
        deallocate(roots)
@@ -87,6 +87,9 @@ contains
        call poly_diff(coeffs, degree)
        call poly_roots(roots, coeffs(:degree), degree-1)
 
+       print*, 'roots = ', roots
+       print*, 'coefs = ', coeffs
+
        qnodes(1)          = 0.0_qp
        qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
        qnodes(nnodes)     = 1.0_qp
@@ -103,7 +106,7 @@ contains
        degree = nnodes - 1
        allocate(roots(degree))
        allocate(coeffs(degree+1))
-       allocate(coeffs2(degree))
+
 
        call poly_legendre(coeffs, degree)
        call poly_legendre(coeffs2, degree-1)
@@ -154,13 +157,12 @@ contains
 
 
   !
-  ! Compute SDC Q and S matrices given source and destination nodes.
+
   !
   subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc) bind(c)
     integer(c_int),      intent(in), value  :: ndst, nsrc
     real(c_long_double), intent(in)  :: dst(ndst), src(nsrc)
     real(pfdp),      intent(out) :: qmat(ndst-1, nsrc), smat(ndst-1, nsrc)
-!pf    real(c_double),      intent(out) :: qmat(ndst-1, nsrc), smat(ndst-1, nsrc)
     integer(c_int),      intent(in)  :: flags(nsrc)
 
     integer  :: i, j, m

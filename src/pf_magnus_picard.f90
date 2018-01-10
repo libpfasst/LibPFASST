@@ -24,11 +24,11 @@ module pf_mod_magnus_picard
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
-     !real(pfdp), allocatable :: QdiffI(:,:)
-     !real(pfdp), allocatable :: QtilI(:,:)
      real(pfdp), allocatable :: dtsdc(:)
-     real(pfdp), allocatable :: commutator_colloc_coefs(:,:)
-     !logical                 :: use_LUq_ = .false.
+     integer :: magnus_order, qtype
+     real(pfdp) :: dt
+     real(pfdp), allocatable :: commutator_coefs(:,:,:)
+
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
    contains
      procedure :: sweep      => magpicard_sweep
@@ -54,12 +54,13 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
-     subroutine pf_compute_omega_p(this, omega, integrals, f, coef)
+     subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: omega, integrals
-       class(pf_encap_t), intent(inout) :: f(:,:)
-       real(pfdp), intent(in) :: coef(:)
+       class(pf_encap_t), intent(inout) :: omega
+       class(pf_encap_t), intent(inout) :: f(:,:), integrals(:)
+       real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
+       integer, intent(in) :: this_node
      end subroutine pf_compute_omega_p
      subroutine pf_compute_time_ev_ops_p(this, time_ev_op, omega, level)
        import pf_magpicard_t, pf_encap_t, pfdp
@@ -95,18 +96,15 @@ contains
     integer,             intent(in)    :: nsweeps
 
     class(pf_level_t), pointer :: lev
-    integer    :: m, nnodes,k
+    integer    :: m, nnodes, k
 
-    real(pfdp) :: t 
+    real(pfdp) :: t
 
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
-    if (nnodes == 3) then
-       this%commutator_colloc_coefs(1,:) = dt**2 * (/11/480., -1/480., 1/480./)
-       this%commutator_colloc_coefs(2,:) = dt**2 * (/1/15., 1/60., 1/15./)
-    endif
 
-    call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+
+    call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
 
     call start_timer(pf, TLEVEL+lev%index-1)
@@ -119,21 +117,22 @@ contains
        if (k .eq. 1) then
           call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
        end if
-
+       
        t = t0
        do m = 2, nnodes
           t=t+ dt*this%dtsdc(m-1)
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
-
+       
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
        !$omp parallel
        !$omp do private(m)
        do m = 1, nnodes-1
+          print*, 'node number ', m
           call start_timer(pf, TAUX)
-          call this%compute_omega(this%omega(m), lev%I(m), lev%F, &
-               this%commutator_colloc_coefs(m,:))
+          call this%compute_omega(this%omega(m), lev%I, lev%F, &
+               lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
           call end_timer(pf, TAUX)
           
           call start_timer(pf, TAUX+1)
@@ -146,11 +145,12 @@ contains
        end do
        !$omp end do
        !$omp end parallel
-       call pf_residual(pf, lev, dt)
-       call lev%qend%copy(lev%Q(nnodes))
-       call call_hooks(pf, level_index, PF_POST_SWEEP)
-    end do
 
+       call pf_residual(pf, lev, dt)
+       call call_hooks(pf, level_index, PF_POST_SWEEP)
+
+    end do  ! Loop over sweeps
+    call lev%qend%copy(lev%Q(nnodes))
     call end_timer(pf, TLEVEL+lev%index-1)
 
   end subroutine magpicard_sweep
@@ -159,15 +159,19 @@ contains
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: m, nnodes
+    integer :: m, nnodes, magnus_order=3, coefs=9
 
     this%npieces = 1
     nnodes = lev%nnodes
-    allocate(this%dtsdc(nnodes-1))
-    allocate(this%commutator_colloc_coefs(nnodes-1, nnodes))
 
+    allocate(this%dtsdc(nnodes-1))
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)   !  SDC time step size (unscaled)
-    this%commutator_colloc_coefs(:,:) = 0.0_pfdp
+
+    allocate(this%commutator_coefs(coefs, magnus_order, nnodes-1))
+
+    this%commutator_coefs(:,:,:) = 0.0_pfdp
+    call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
+
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -196,9 +200,7 @@ contains
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
-          !do p = 1, this%npieces
-             call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
-          !end do
+          call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
        end do
     end do
   end subroutine magpicard_integrate
@@ -226,11 +228,11 @@ contains
     class(pf_level_t),    intent(inout) :: lev
     real(pfdp),           intent(in   ) :: dt
     integer :: m
-    ! call pf_generic_residual(this, lev, dt)
 
     do m = 1, lev%nnodes-1
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
+
   end subroutine magpicard_residual
 
   ! Destroy the matrices
@@ -238,10 +240,9 @@ contains
       class(pf_magpicard_t),  intent(inout) :: this
       class(pf_level_t),    intent(inout) :: lev
 
-      !deallocate(this%QdiffI)
-      ! deallocate(this%QtilI)
-      deallocate(this%commutator_colloc_coefs)
       deallocate(this%dtsdc)
+      deallocate(this%commutator_coefs)
+
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -249,4 +250,47 @@ contains
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
   end subroutine magpicard_destroy
+
+  subroutine get_commutator_coefs(qtype, nnodes, dt, coefs)
+    integer, intent(in) :: qtype, nnodes
+    real(pfdp), intent(in) :: dt
+    real(pfdp), intent(inout) :: coefs(:,:,:)
+
+    if (qtype == 1) then
+        if (nnodes > 2) then
+            coefs(1:3, 1, 1) = dt**2 * [real(8)::11/480., -1/480., 1/480.]
+            coefs(1:3, 1, 2) = dt**2 * [real(8)::1/15., 1/60., 1/15.]
+        endif
+    else if (qtype == 5) then
+      if (nnodes >= 3) then
+          coefs(1:3, 1, 1) = 1.d-3 * [real(8)::-0.708256232441739d0, 0.201427439334681d0, -0.002608155816283d0]
+          coefs(1:3, 1, 2) = [real(8)::-0.035291589565775d0, 0.004482619613666d0, -0.000569367343553d0]
+          coefs(1:3, 1, 3) = [real(8)::-0.078891497044705d0, -0.018131905893999d0, -0.035152700676886d0]
+          coefs(1:3, 1, 4) = [real(8)::-0.071721913818656d0, -0.035860956909328d0, -0.071721913818656d0]
+          coefs(:,1,:) = dt**2 * coefs(:,1,:)
+
+          coefs(:, 2, 1) = &
+               [real(8)::1.466782892818107d-6, -2.546845448743404d-6, 7.18855795894042d-7, &
+                -3.065370250683271d-7, 6.962336322868984d-7, -1.96845581200288d-7,  &
+                -2.262216360714434d-8, -2.72797194008496d-9, 8.54843541920492d-10]
+          coefs(:, 2, 2) = &
+               [real(8) ::0.001040114336531742d0, -0.001714330280871491d0, 0.0001980882752518163d0, &
+                -0.00006910549596945875d0, 0.0002905401601450182d0, -0.00003465884693947625d0, &
+                 0.0000924518848932026d0, 0.0000125950571649574d0, -2.4709074423913880d-6]
+          coefs(:, 2, 3) = &
+               [real(8)::0.004148295975360902d0, -0.006387421893168941d0, -0.003594231910817328d0, &
+                 0.000997378110327084d0, 0.0001241530237557625d0, -0.0003805975423160699d0, &
+                 0.003718384934573079d0, 0.001693514295056844d0, -0.001060408584538103d0]
+          coefs(:, 2, 4) = &
+               [real(8)::0.003453850676072909d0, -0.005584950029394391d0, -0.007128159905937654d0, &
+                 0.001653439153439147d0, 0.0d0, -0.001653439153439143d0, &
+                 0.007128159905937675d0, 0.005584950029394475d0, -0.003453850676072897d0]
+          coefs(:,2,:) = dt**3 * coefs(:,2,:)
+
+          coefs(1, 3, 4) = dt**4 / 60.d0
+      endif
+    else
+      stop 'oh no! unsupported qtype'
+    endif
+  end subroutine get_commutator_coefs
 end module pf_mod_magnus_picard
