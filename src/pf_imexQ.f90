@@ -28,6 +28,7 @@ module pf_mod_imexQ
      real(pfdp), allocatable :: QdiffI(:,:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: QtilI(:,:)
+     real(pfdp), allocatable :: dtsdc(:)
      logical                 :: use_LUq = .false.
      logical                 :: explicit = .true.
      logical                 :: implicit = .true.
@@ -84,15 +85,13 @@ contains
 
     integer     :: m, n,k
     real(pfdp)  :: t
-    real(pfdp)  :: dtsdc(1:pf%levels(level_index)%nnodes-1)
     class(pf_encap_t), allocatable :: rhs
 
     lev => pf%levels(level_index)
-    dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
     call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
 
     call start_timer(pf, TLEVEL+lev%index-1)
-    ! print *,'sweeping',this%explicit,this%implicit
+
     do k = 1,nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
        ! compute integrals and add fas correction
@@ -124,7 +123,7 @@ contains
        t = t0
        ! do the time-stepping
        do m = 1, lev%nnodes-1
-          t = t + dtsdc(m)
+          t = t + dt*this%dtsdc(m)
           
           call rhs%setval(0.0_pfdp)
           do n = 1, m
@@ -135,8 +134,11 @@ contains
           end do
           !  Add the tau term
           call rhs%axpy(1.0_pfdp, lev%I(m))
+
           !  Add the starting value
           call rhs%axpy(1.0_pfdp, lev%Q(1))
+
+          !  Solve for the implicit piece
           if (this%implicit) then
              call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), rhs, lev%index,lev%F(m+1,2),2)
           else
@@ -163,44 +165,49 @@ contains
     class(pf_imexQ_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    real(pfdp) :: dsdc(lev%nnodes-1)
     integer    :: m,n, nnodes
 
     this%npieces = 2
 
     nnodes = lev%nnodes
-    allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
-    allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%QdiffE(nnodes-1,nnodes))  
+    allocate(this%QdiffI(nnodes-1,nnodes))  
+    allocate(this%QtilE(nnodes-1,nnodes))  
+    allocate(this%QtilI(nnodes-1,nnodes))  
+    allocate(this%dtsdc(nnodes-1))  
 
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
 
-    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
 
     ! Implicit matrix
     if (this%use_LUq) then 
        ! Get the LU
-       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,1)
+       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,0)
        this%QtilI = lev%LUmat
+       print *,'LU',lev%LUmat
+       print *,'BE',lev%qmatBE
+
     else 
-       do m = 1, nnodes-1
-          do n = 1,m
-             this%QtilI(m,n+1) =  dsdc(n)
-          end do
-       end do
+       this%QtilI =  lev%qmatBE
+
+!       do m = 1, nnodes-1
+!          do n = 1,m
+!             this%QtilI(m,n+1) =  this%dtsdc(n)
+!          end do
+!       end do
     end if
     ! Explicit matrix
-    do m = 1, nnodes-1
-       do n = 1,m
-          this%QtilE(m,n)   =  dsdc(n)
-       end do
-    end do
+    this%QtilE =  lev%qmatFE
+!    do m = 1, nnodes-1
+!       do n = 1,m
+!          this%QtilE(m,n)   =  this%dtsdc(n)
+!       end do
+!    end do
 
     this%QdiffE = lev%qmat-this%QtilE
     this%QdiffI = lev%qmat-this%QtilI
-
   end subroutine imexQ_initialize
 
   subroutine imexQ_destroy(this, lev)
@@ -211,6 +218,7 @@ contains
     deallocate(this%QdiffI)
     deallocate(this%QtilE)
     deallocate(this%QtilI)
+    deallocate(this%dtsdc)
   end subroutine imexQ_destroy
 
 

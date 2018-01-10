@@ -149,14 +149,16 @@ contains
     allocate(F%nflags(nnodes))
     allocate(F%s0mat(nnodes-1,nnodes))
     allocate(F%qmat(nnodes-1,nnodes))
+    allocate(F%qmatFE(nnodes-1,nnodes))
+    allocate(F%qmatBE(nnodes-1,nnodes))
     allocate(F%LUmat(nnodes-1,nnodes))
 
     if (btest(pf%qtype, 8)) then
        call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
-            F%nodes, F%nflags, F%s0mat, F%qmat)
+            F%nodes, F%nflags, F%s0mat, F%qmat,F%qmatFE,F%qmatBE)
     else
        call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            F%nodes, F%nflags, F%s0mat, F%qmat)
+            F%nodes, F%nflags, F%s0mat, F%qmat,F%qmatFE,F%qmatBE)
     end if
 
     call F%ulevel%sweeper%initialize(F)
@@ -223,6 +225,8 @@ contains
     deallocate(F%nodes)
     deallocate(F%nflags)
     deallocate(F%qmat)
+    deallocate(F%qmatFE)
+    deallocate(F%qmatBE)
     deallocate(F%s0mat)
     deallocate(F%LUmat)
 

@@ -24,9 +24,11 @@ module pf_mod_magnus_picard
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
+     real(pfdp), allocatable :: dtsdc(:)
      integer :: magnus_order, qtype
      real(pfdp) :: dt
      real(pfdp), allocatable :: commutator_coefs(:,:,:)
+
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
    contains
      procedure :: sweep      => magpicard_sweep
@@ -101,49 +103,56 @@ contains
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
 
+
     call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
 
-    ! Copy values into residual
-    do m = 1, nnodes-1
-       call lev%R(m)%copy(lev%Q(m+1))
-    end do
-
     call start_timer(pf, TLEVEL+lev%index-1)
+    do k = 1,nsweeps
+       ! Copy values into residual
+       do m = 1, nnodes-1
+          call lev%R(m)%copy(lev%Q(m+1))
+       end do
+       
+       if (k .eq. 1) then
+          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
+       end if
+       
+       t = t0
+       do m = 2, nnodes
+          t=t+ dt*this%dtsdc(m-1)
+          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+       end do
+       
+       call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
-    t = t0
-    do m = 1, nnodes
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
-       t=t0+dt*lev%nodes(m)
-    end do
+       !$omp parallel
+       !$omp do private(m)
+       do m = 1, nnodes-1
+          print*, 'node number ', m
+          call start_timer(pf, TAUX)
+          call this%compute_omega(this%omega(m), lev%I, lev%F, &
+               lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
+          call end_timer(pf, TAUX)
+          
+          call start_timer(pf, TAUX+1)
+          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
+          call end_timer(pf, TAUX+1)
+          
+          call start_timer(pf, TAUX+2)
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
+          call end_timer(pf, TAUX+2)
+       end do
+       !$omp end do
+       !$omp end parallel
 
-    call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
+       call pf_residual(pf, lev, dt)
+       call call_hooks(pf, level_index, PF_POST_SWEEP)
 
-    !$omp parallel
-    !$omp do private(m)
-    do m = 1, nnodes-1
-       print*, 'node number ', m
-       call start_timer(pf, TAUX)
-       call this%compute_omega(this%omega(m), lev%I, lev%F, &
-            lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
-       call end_timer(pf, TAUX)
-
-       call start_timer(pf, TAUX+1)
-       call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
-       call end_timer(pf, TAUX+1)
-
-       call start_timer(pf, TAUX+2)
-       call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
-       call end_timer(pf, TAUX+2)
-    end do
-    !$omp end do
-    !$omp end parallel
-
-    call pf_residual(pf, lev, dt)
+    end do  ! Loop over sweeps
+    call lev%qend%copy(lev%Q(nnodes))
     call end_timer(pf, TLEVEL+lev%index-1)
 
-    call lev%qend%copy(lev%Q(nnodes))
-    call call_hooks(pf, level_index, PF_POST_SWEEP)
   end subroutine magpicard_sweep
 
   subroutine magpicard_initialize(this, lev)
@@ -154,10 +163,15 @@ contains
 
     this%npieces = 1
     nnodes = lev%nnodes
+
+    allocate(this%dtsdc(nnodes-1))
+    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)   !  SDC time step size (unscaled)
+
     allocate(this%commutator_coefs(coefs, magnus_order, nnodes-1))
 
     this%commutator_coefs(:,:,:) = 0.0_pfdp
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
+
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -226,7 +240,9 @@ contains
       class(pf_magpicard_t),  intent(inout) :: this
       class(pf_level_t),    intent(inout) :: lev
 
+      deallocate(this%dtsdc)
       deallocate(this%commutator_coefs)
+
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
