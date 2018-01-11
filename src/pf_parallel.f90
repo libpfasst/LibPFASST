@@ -235,7 +235,9 @@ contains
           t0k = t0 - (pf%rank)*dt + (k-1)*dt
           if (k > 1) then
              call coarse_lev_p%q0%copy(coarse_lev_p%qend)
-             call spreadq0(coarse_lev_p, t0k)
+             if (.not. pf%PFASST_pred) then
+                call spreadq0(coarse_lev_p, t0k)
+             end if
           end if
 
           call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, coarse_lev_p%nsweeps_pred)
