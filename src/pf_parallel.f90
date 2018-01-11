@@ -547,12 +547,13 @@ contains
           pf%state%iter = j
 
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (j > 1 .and. pf%state%status .ne. PF_STATUS_CONVERGED) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
-          end if
+          ! if (j > 1 .and. pf%state%status .ne. PF_STATUS_CONVERGED) then
+          ! if (pf%state%status .ne. PF_STATUS_CONVERGED) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
+          ! end if
 
           call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt,lev_p%nsweeps)
-          call pf_check_convergence(pf, k, dt, residual, energy, converged)
+          ! call pf_check_convergence(pf, k, dt, residual, energy, converged)
           call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)

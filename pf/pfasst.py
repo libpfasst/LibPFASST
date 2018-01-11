@@ -360,11 +360,11 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         total_times = {}
         for line in output.split('\n'):
             match = prog_state.search(line)
-            time_match = time_state.search(line)
             if match:
                 time = float(match.group(1))
                 rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
                 residual_value = float(match.group(6))
+                if iteration < 0: continue
 
                 if self.p.solutions:
                     if time >= 1000.0:
@@ -386,11 +386,12 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                     solution = self._get_solution(path_to_solution)
                 else:
                     solution = None
+
                 trajectory.loc[idx] = time, rank, step, iteration, \
                               level, residual_value, solution
                 idx += 1
-                continue
 
+            time_match = time_state.search(line)
             if time_match:
                 rank = int(time_match.group(1))
                 cpu_time = float(time_match.group(2))
