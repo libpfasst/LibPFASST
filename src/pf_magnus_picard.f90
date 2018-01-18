@@ -116,6 +116,7 @@ contains
        if (k .eq. 1) then
           call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
        end if
+       
 
        t = t0
        do m = 2, nnodes
@@ -128,7 +129,6 @@ contains
        !$omp parallel
        !$omp do private(m)
        do m = 1, nnodes-1
-          print*, 'node number ', m
           call start_timer(pf, TAUX)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
                lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
