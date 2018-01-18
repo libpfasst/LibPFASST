@@ -549,27 +549,30 @@ contains
           pf%state%iter = j
 
           !<  Get new initial condition unless this is the first step or this processor is done
-          ! if (j > 1 .and. pf%state%status .ne. PF_STATUS_CONVERGED) then
-          ! if (pf%state%status .ne. PF_STATUS_CONVERGED) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
-          ! end if
+          if (j > 1 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
+             call pf_recv_status(pf, 8000+k)
+          end if
 
-          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt,lev_p%nsweeps)
-          ! call pf_check_convergence(pf, k, dt, residual, energy, converged)
-          call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
+          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
+          call pf_check_convergence_pipeline(pf, residual, converged)
+
+          if (pf%state%status .ne. PF_STATUS_CONVERGED) then
+             call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
+             if (converged) then
+                pf%state%status = PF_STATUS_CONVERGED
+             endif
+             call pf_send_status(pf, 8000+k)
+          endif
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
-          if (converged) exit
+
+          if (pf%state%status == PF_STATUS_CONVERGED) exit
        end do  !  Loop over the iteration in this bloc
+
        call end_timer(pf, TITERATION)
 
-       call pf%comm%wait(pf, pf%nlevels,ierror)             !<  make sure everyone is done
-
-       !  This block is over, so do some
-       call call_hooks(pf, -1, PF_POST_STEP)
-       pf%state%itcnt = pf%state%itcnt + pf%state%iter-1
-       pf%state%mysteps = pf%state%mysteps + 1
-    end do  !   Loop on k over blocks of time steps
+    end do
 
     call end_timer(pf, TTOTAL)
 
@@ -578,6 +581,46 @@ contains
        call qend%copy(lev_p%qend)
     end if
   end subroutine pf_pipeline_run
+
+  !>
+  !> Test residuals to determine if the current processor has converged.
+  !>
+  !> Note that if the previous processor hasn't converged yet
+  !> (pstatus), the current processor hasn't converged yet either,
+  !> regardless of the residual.
+  !>
+  subroutine pf_check_convergence_pipeline(pf, residual, converged)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(inout) :: residual
+    logical,           intent(out)   :: converged   !<  True if this processor is done
+    real(pfdp)     :: residual1
+    ! converged = .false.
+
+    call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
+
+    ! shortcut for fixed block mode
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+       pf%state%pstatus = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
+       return
+    end if
+
+    ! Check to see if tolerances are met
+    residual1 = pf%levels(pf%nlevels)%residual
+    if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
+       if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
+            (abs(residual1)                          < pf%abs_res_tol) ) then
+          converged = .true.
+       end if
+    end if
+    residual = residual1
+
+    ! if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
+    !      pf%state%status = PF_STATUS_ITERATING
+
+    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
+
+  end subroutine pf_check_convergence_pipeline
 
   !
   ! After predictor, return to fine level.
