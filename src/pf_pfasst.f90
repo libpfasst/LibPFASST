@@ -114,7 +114,6 @@ contains
     if (F%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
     if (F%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
 
-    print*, 'nnodes = ', F%nnodes
     nvars  = F%nvars
     nnodes = F%nnodes
 
