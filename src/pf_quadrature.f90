@@ -35,7 +35,7 @@ module pf_mod_quadrature
 
 contains
 
-  !>  Create quadratuere matrices
+  !>  Subroutine to create quadrature matrices
   subroutine pf_quadrature(qtype_in, nnodes, nnodes0, nodes, nflags, smat, qmat,qmatFE,qmatBE)
     integer,    intent(in)  :: qtype_in, nnodes, nnodes0
     real(pfdp), intent(out) :: nodes(nnodes)
@@ -136,7 +136,7 @@ contains
 
   end subroutine pf_quadrature
 
-  !>  Function to decides if the restriction of the nodes is pointwise, e.g. coarse nodes are every other fine node
+  !>  Function to decide if the restriction of the nodes is pointwise, e.g. coarse nodes are every other fine node
   logical function not_proper(flags, node)
     integer(c_int), intent(in) :: flags(:)
     integer,        intent(in) :: node
@@ -318,7 +318,7 @@ contains
   !!   p = [ a_0, a_1, ..., a_n ].
   !!
   
-  !> Function to evaluate real polynomial.
+  !> Function to evaluate real polynomial
   real(qp) function poly_eval(p, n, x) result(v) bind(c)
     integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n), x
@@ -331,7 +331,7 @@ contains
     end do
   end function
 
-  !> Evaluate compolex polynomial.
+  !> Function to evaluate complex polynomial
   complex(qp) function poly_eval_complex(p, n, x) result(v)
     integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n)
@@ -365,7 +365,7 @@ contains
   end subroutine poly_diff
 
 
-  !> Integrate polynomial (in place)
+  !> Subroutine to integrate polynomial (in place)
   subroutine poly_int(p, n) bind(c)
     integer, intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)

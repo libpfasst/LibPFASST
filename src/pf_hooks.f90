@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-!>  This module enables the calling of user defined routines from various places in the pfasst algorithm
+!>  Module for the calling of user defined routines from various places in the pfasst algorithm
 module pf_mod_hooks
   use pf_mod_dtype
   implicit none

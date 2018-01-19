@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-!>  This is the derived sweeper class for doing IMEX sweeps for an equation of the form
+!>  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
 !!            y' = f_1(y) + f_2(y)
 !!  The f_1 piece is treated explicitly and f_2 implicitly
 !!  Afer this sweeper is initialized (usually in main), the locgical flags can be changed if desired

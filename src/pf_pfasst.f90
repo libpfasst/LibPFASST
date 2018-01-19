@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-!>  This module contains the routines to create, setup, and destroy the main data structure in PFASST
+!>  Module containing the routines to create, setup, and destroy the main data structure in PFASST
 !!  See pf_dtype.f90 for the type definition
 module pf_mod_pfasst
   use pf_mod_dtype
