@@ -16,64 +16,13 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-! M
+!> Module with random subroutines that don't seem to fit in other modules
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
   implicit none
 contains
 
-  !
-  ! Build time interpolation matrix.
-  !
-
-  !
-  ! Spread initial condition.
-  !
-  subroutine spreadq0(lev, t0)
-    class(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: t0
-
-    integer :: m, p
-
-    call lev%Q(1)%copy(lev%q0)
-
-    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
-
-    do m = 2, lev%nnodes
-       call lev%Q(m)%copy(lev%Q(1))
-       do p = 1, lev%ulevel%sweeper%npieces
-         call lev%F(m,p)%copy(lev%F(1,p))
-       end do
-    end do
-  end subroutine spreadq0
-
-
-  !
-  ! Save current Q and F.
-  !
-  subroutine save(lev)
-    class(pf_level_t), intent(inout) :: lev
-
-    integer :: m, p
-
-    if (lev%Finterp) then
-      if (allocated(lev%pFflt)) then
-          do m = 1, lev%nnodes
-             do p = 1,size(lev%F(1,:))
-                call lev%pF(m,p)%copy(lev%F(m,p))
-             end do
-             call lev%pQ(m)%copy(lev%Q(m))
-          end do
-      end if
-    else
-       if (allocated(lev%pQ)) then
-          do m = 1, lev%nnodes
-             call lev%pQ(m)%copy(lev%Q(m))
-          end do
-       end if
-    end if
-  end subroutine save
 
 
   !
@@ -110,34 +59,6 @@ contains
     call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
-
-
-  !
-  ! Apply an interpolation matrix (tmat or rmat) to src.
-  !
-  subroutine pf_apply_mat(dst, a, mat, src, zero)
-    class(pf_encap_t), intent(inout) :: dst(:)
-    real(pfdp),        intent(in)    :: a, mat(:, :)
-    class(pf_encap_t), intent(in)    :: src(:)
-    logical,           intent(in), optional :: zero
-
-    logical :: lzero
-    integer :: n, m, i, j
-
-    lzero = .true.; if (present(zero)) lzero = zero
-
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
-
-    ! XXX: test for nan's in matrices...
-
-    do i = 1, n
-       if (lzero) call dst(i)%setval(0.0_pfdp)
-       do j = 1, m
-          call dst(i)%axpy(a * mat(i, j), src(j))
-       end do
-    end do
-  end subroutine pf_apply_mat
 
   !
   ! Generic residual

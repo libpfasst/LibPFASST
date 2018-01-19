@@ -788,4 +788,30 @@ contains
     call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
 
+
+
+  !> Save current solution and function value so that future corrections can be computed
+  subroutine save(lev)
+    class(pf_level_t), intent(inout) :: lev  !<  Level to save on
+    
+    integer :: m, p
+    
+    if (lev%Finterp) then
+       if (allocated(lev%pFflt)) then
+          do m = 1, lev%nnodes
+             do p = 1,size(lev%F(1,:))
+                call lev%pF(m,p)%copy(lev%F(m,p))
+             end do
+             call lev%pQ(m)%copy(lev%Q(m))
+          end do
+       end if
+    else
+       if (allocated(lev%pQ)) then
+          do m = 1, lev%nnodes
+             call lev%pQ(m)%copy(lev%Q(m))
+          end do
+       end if
+    end if
+  end subroutine save
+  
 end module pf_mod_parallel

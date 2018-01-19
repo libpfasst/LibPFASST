@@ -57,8 +57,6 @@ contains
 
 
 
-
-  !
   !> Restrict (in time and space) fine level to coarse and set coarse level FAS correction.
   !>
   !> The coarse function values are re-evaluated after restriction.
@@ -160,7 +158,7 @@ contains
     !> Restrict (in time and space) f_sol_array  to c_sol_array
   !! Depending on the flag INTEGRAL, we may be restricting solutions, or integrals of F
   subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_array, IS_INTEGRAL,f_time)
-    use pf_mod_utils, only: pf_apply_mat
+
 
     class(pf_level_t),  intent(inout) :: f_lev_ptr   !<   pointer to fine level
     class(pf_level_t),  intent(inout) :: c_lev_ptr   !<   pointer to coarse level
@@ -199,8 +197,7 @@ contains
        !  spatial restriction
        do m = 1, f_nnodes
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m))
-       end do
-       ! temporal restriction
+       end do! temporal restriction
        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c)
     end if
 
@@ -214,5 +211,32 @@ contains
     end if
 
   end subroutine restrict_sdc
+
+  
+  
+  !> Apply an matrix (tmat or rmat) to src to get dst.
+  subroutine pf_apply_mat(dst, a, mat, src, zero)
+    class(pf_encap_t), intent(inout) :: dst(:)
+    real(pfdp),        intent(in)    :: a, mat(:, :)
+    class(pf_encap_t), intent(in)    :: src(:)
+    logical,           intent(in), optional :: zero
+    
+    logical :: lzero
+    integer :: n, m, i, j
+
+    lzero = .true.; if (present(zero)) lzero = zero
+
+    n = size(mat, dim=1)
+    m = size(mat, dim=2)
+
+    ! XXX: test for nan's in matrices...
+
+    do i = 1, n
+       if (lzero) call dst(i)%setval(0.0_pfdp)
+       do j = 1, m
+          call dst(i)%axpy(a * mat(i, j), src(j))
+       end do
+    end do
+  end subroutine pf_apply_mat
 
 end module pf_mod_restrict

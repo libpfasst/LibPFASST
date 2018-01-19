@@ -442,5 +442,23 @@ contains
     end do
   end subroutine pf_time_interpolation_matrix
 
+  ! Subroutine to spread initial condition for predictors.
+  subroutine spreadq0(lev, t0)
+    class(pf_level_t), intent(inout) :: lev  !<  Level on which to spread
+    real(pfdp),       intent(in)    :: t0    !<  time at beginning of interval
+
+    integer :: m, p
+
+    call lev%Q(1)%copy(lev%q0)
+
+    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
+
+    do m = 2, lev%nnodes
+       call lev%Q(m)%copy(lev%Q(1))
+       do p = 1, lev%ulevel%sweeper%npieces
+         call lev%F(m,p)%copy(lev%F(1,p))
+       end do
+    end do
+  end subroutine spreadq0
 
 end module pf_mod_pfasst
