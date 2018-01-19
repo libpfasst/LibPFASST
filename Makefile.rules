@@ -49,7 +49,8 @@ endif
 clean:
 	find . -name build | xargs rm -rf
 	find . -name '*.exe' | xargs rm -f
-	rm -f fort.* *.slog2 *.edf *.trc gmon.out
+	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
+	\rm include/*.mod
 
 #
 # LIBPFASST dependencies
@@ -87,3 +88,26 @@ endif
 #build/pf_misdc.o:       build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
 #build/pf_amisdc.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
 #build/pf_amisdcQ.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
