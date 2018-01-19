@@ -27,6 +27,7 @@ module pf_mod_parallel
   use pf_mod_utils
   use pf_mod_timer
   use pf_mod_hooks
+  use pf_mod_pfasst
   implicit none
 contains
 
