@@ -25,7 +25,6 @@ FSRC = src/pfasst.f90 \
        src/pf_logger.f90 \
        src/pf_magnus_picard.f90 \
        src/pf_ndarray.f90 \
-       src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
        src/pf_quadrature.f90 \

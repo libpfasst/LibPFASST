@@ -74,16 +74,16 @@ build/pf_fake.o:        build/pf_parallel.o build/pf_fakecomm.o
 build/sdc_quadrature.o: build/pf_dtype.o build/sdc_poly.o
 build/pf_quadrature.o:  build/sdc_quadrature.o
 build/pf_pfasst.o:      build/pf_utils.o build/pf_quadrature.o \
-                        build/pf_hooks.o build/pf_options.o
+                        build/pf_hooks.o 
 build/pf_fakecomm.o:    build/pf_timer.o build/pf_pfasst.o
 
 ifdef NOMPI
 build/pfasst.o:         build/pf_parallel.o build/pf_pfasst.o  build/pf_imexQ.o build/pf_imexR.o build/pf_rkstepper.o \
-                        build/pf_options.o build/pf_logger.o \
+                        build/pf_logger.o \
                         build/pf_ndarray.o build/pf_numpy.o
 else
 build/pfasst.o:         build/pf_parallel.o build/pf_pfasst.o build/pf_mpi.o build/pf_imexQ.o build/pf_imexR.o build/pf_rkstepper.o \
-                        build/pf_options.o build/pf_logger.o \
+                        build/pf_logger.o \
                         build/pf_ndarray.o build/pf_numpy.o
 endif
 
