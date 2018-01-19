@@ -60,7 +60,7 @@ contains
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
-        call end_now('Invalid nsteps')
+        stop "Invalid nsteps"
       end if
     end if
 

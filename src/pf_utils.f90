@@ -16,6 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
+! M
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
@@ -25,32 +26,6 @@ contains
   !
   ! Build time interpolation matrix.
   !
-  subroutine pf_time_interpolation_matrix(nodesF, nnodesF, nodesG, nnodesG, tmat)
-    integer,    intent(in)  :: nnodesF, nnodesG
-    real(pfdp), intent(in)  :: nodesF(0:nnodesF-1), nodesG(0:nnodesG-1)
-    real(pfdp), intent(out) :: tmat(0:nnodesF-1,0:nnodesG-1)
-
-    integer    :: i, j, k
-    real(pfdp) :: xi, num, den
-
-    do i = 0, nnodesF-1
-       xi = nodesF(i)
-
-       do j = 0, nnodesG-1
-          den = 1.0_pfdp
-          num = 1.0_pfdp
-
-          do k = 0, nnodesG-1
-             if (k == j) cycle
-             den = den * (nodesG(j) - nodesG(k))
-             num = num * (xi        - nodesG(k))
-          end do
-
-          tmat(i, j) = num/den
-       end do
-    end do
-  end subroutine pf_time_interpolation_matrix
-
 
   !
   ! Spread initial condition.
@@ -209,51 +184,6 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
-  subroutine pf_myLUexp(A,L,U,Nnodes,scaleLU)
-    real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
-    real(pfdp),      intent(inout)  :: L(Nnodes,Nnodes)
-    real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
-    integer,        intent (in)     :: Nnodes
-    integer,        intent (in)     :: scaleLU
-    ! Return the LU decomposition of an explicit integration matrix
-    !   without pivoting
-    integer :: i,j
-    real(pfdp) :: c
-    L = 0.0_pfdp
-    U = 0.0_pfdp
-
-    do i = 1,Nnodes-1
-       L(i,i) = 1.0_pfdp
-    end do
-    U=transpose(A)
-    do i = 1,Nnodes-1
-       if (U(i,i+1) /= 0.0) then
-          do j=i+1,Nnodes
-             c = U(j,i+1)/U(i,i+1)
-             U(j,i:Nnodes)=U(j,i:Nnodes)-c*U(i,i:Nnodes)
-             L(j,:)=L(j,:)-c*L(i,:)
-          end do
-       end if
-    end do
-
-    U=transpose(U)
-    !  Now scale the columns of U to match the sum of A
-    if (scaleLU .eq. 1) then
-       do j=1,Nnodes
-          c = sum(U(j,:))
-          if (c /=  0.0) then
-             U(j,:)=U(j,:)*sum(A(j,:))/c
-          end if
-       end do
-    end if
-
-    print *,'U from LU decomp'
-    do j=1,Nnodes
-          print *, j, U(j,:)
-    end do
-
-  end subroutine pf_myLUexp
-
   subroutine myLUq(Q,Qtil,Nnodes,fillq)
     real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
     real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
@@ -297,16 +227,6 @@ contains
     end if
 
   end subroutine myLUq
-
-
-  !>  Simple wrapper to print out an error message with line and file number
-  subroutine end_now(msg)
-    character(*) msg
-
-    print *, 'ERROR:',msg,' at line:',__LINE__, ' in file:',__FILE__
-    stop
-  end subroutine end_now
-
 
 
 end module pf_mod_utils
