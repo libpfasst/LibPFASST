@@ -18,11 +18,8 @@
 !
 
 !
-! Routines to compute various double precision SDC nodes and matrices.
-!
-! Computations are performed in quad precision.
-!
-
+!> Routines to compute various double precision SDC nodes and matrices.
+!! Computations are performed in quad precision.
 module sdc_mod_quadrature
   use iso_c_binding
   use sdc_mod_poly
@@ -38,14 +35,13 @@ contains
   end function not_proper
 
 
-  !
-  ! Compute high precision quadrature nodes.
-  !
+
+  !> Compute high precision quadrature nodes.
   subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) bind(c)
-    integer(c_int),       intent(in), value  :: nnodes
-    integer(c_int),       intent(in), value  :: qtype
-    real(c_long_double),  intent(out)        :: qnodes(nnodes)
-    integer(c_int),       intent(out)        :: flags(nnodes)
+    integer(c_int),       intent(in), value  :: nnodes          !<  Number of nodes
+    integer(c_int),       intent(in), value  :: qtype           !<  Type of nodes (see pf_dtype)
+    real(c_long_double),  intent(out)        :: qnodes(nnodes)  !<  The computed quadrature nodes
+    integer(c_int),       intent(out)        :: flags(nnodes)   !<
 
     integer :: j, degree
     real(qp), allocatable :: roots(:)
@@ -156,14 +152,16 @@ contains
   end subroutine sdc_qnodes
 
 
-  !
 
-  !
+  !>  Subroutine to compute the quadrature matrices 
   subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc) bind(c)
-    integer(c_int),      intent(in), value  :: ndst, nsrc
-    real(c_long_double), intent(in)  :: dst(ndst), src(nsrc)
-    real(pfdp),      intent(out) :: qmat(ndst-1, nsrc), smat(ndst-1, nsrc)
-    integer(c_int),      intent(in)  :: flags(nsrc)
+    integer(c_int),      intent(in), value  :: ndst   !<  Number of destination points
+    integer(c_int),      intent(in), value  :: nsrc   !<  Number of source points
+    real(c_long_double), intent(in)  :: dst(ndst)     !<  Destination points
+    real(c_long_double), intent(in)  :: src(nsrc)     !<  Source points
+    real(pfdp),      intent(out) :: qmat(ndst-1, nsrc)  !<  O to dst quadrature weights
+    real(pfdp),      intent(out) :: smat(ndst-1, nsrc)  !< dst(m) to dst(m+1) quadrature weights
+    integer(c_int),      intent(in)  :: flags(nsrc)     
 
     integer  :: i, j, m
     real(qp) :: q, s, den, p(0:nsrc)

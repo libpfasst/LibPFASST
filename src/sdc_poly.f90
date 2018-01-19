@@ -18,17 +18,16 @@
 !
 
 !
-! Polynomial manipulation routines.
-!
-! A polynomial p
-!
-!   p(x) = a_n x^n + ... + a_2 x^2 + a_1 x + a_0
-!
-! is stored as a Fortran array p(0:n) according to
-!
-!   p = [ a_0, a_1, ..., a_n ].
-!
-
+!> Module of  polynomial manipulation routines.
+!!
+!! A polynomial p
+!!
+!!   p(x) = a_n x^n + ... + a_2 x^2 + a_1 x + a_0
+!!
+!! is stored as a Fortran array p(0:n) according to
+!!
+!!   p = [ a_0, a_1, ..., a_n ].
+!!
 module sdc_mod_poly
   use iso_c_binding
   implicit none
@@ -46,9 +45,8 @@ module sdc_mod_poly
 
 contains
 
-  !
-  ! Evaluate polynomial.
-  !
+
+  !> Evaluate real polynomial.
   real(qp) function poly_eval(p, n, x) result(v) bind(c)
     integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n), x
@@ -61,6 +59,7 @@ contains
     end do
   end function
 
+  !> Evaluate compolex polynomial.
   complex(qp) function poly_eval_complex(p, n, x) result(v)
     integer, intent(in), value :: n
     real(qp),       intent(in)        :: p(0:n)
@@ -75,9 +74,8 @@ contains
   end function
 
 
-  !
-  ! Differentiate polynomial (in place)
-  !
+
+  !> Differentiate polynomial (in place)
   subroutine poly_diff(p, n) bind(c)
     integer, intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
@@ -95,9 +93,7 @@ contains
   end subroutine poly_diff
 
 
-  !
-  ! Integrate polynomial (in place)
-  !
+  !> Integrate polynomial (in place)
   subroutine poly_int(p, n) bind(c)
     integer, intent(in),   value :: n
     real(qp),       intent(inout) :: p(0:n)
@@ -115,10 +111,7 @@ contains
   end subroutine poly_int
 
 
-  !
-  ! Compute Legendre polynomial coefficients using Bonnet's recursion
-  ! formula.
-  !
+  !> Compute Legendre polynomial coefficients using Bonnet's recursion formula.
   subroutine poly_legendre(p, n) bind(c)
     integer, intent(in), value :: n
     real(qp),       intent(out)       :: p(0:n)
@@ -157,10 +150,8 @@ contains
 
 
   !
-  ! Compute polynomial roots using the Durand-Kerner algorithm.
-  !
-  ! The roots are assumed to be real.
-  !
+  !> Compute polynomial roots using the Durand-Kerner algorithm.
+  !> The roots are assumed to be real.
   subroutine poly_roots(roots, p0, n) bind(c)
     integer,  intent(in), value   :: n
     real(qp),        intent(out)  :: roots(n)
@@ -209,11 +200,9 @@ contains
   end subroutine poly_roots
 
 
-  !
-  ! Sort (inplace) using the quick sort algorithm.
-  !
-  ! Adapted from http://www.fortran.com/qsort_c.f95.
-  !
+
+  !> Sort (inplace) using the quick sort algorithm.
+  !> Adapted from http://www.fortran.com/qsort_c.f95.
   recursive subroutine qsort(a)
     real(qp), intent(inout) :: a(:)
     integer :: iq

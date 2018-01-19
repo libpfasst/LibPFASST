@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-
+! Module to create quadrature matrices
 module pf_mod_quadrature
   use pf_mod_dtype
   use sdc_mod_quadrature
