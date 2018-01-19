@@ -1,3 +1,4 @@
+!>  Module to produce logging entries
 module pf_mod_logger
   use pf_mod_dtype
   use pf_mod_hooks
