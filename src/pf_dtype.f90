@@ -17,7 +17,7 @@
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 !>  This module defines the main parameters, data types, and intefaces 
-!
+!!
 module pf_mod_dtype
   use iso_c_binding
   implicit none
@@ -244,8 +244,9 @@ module pf_mod_dtype
 
   end type pf_pfasst_t
 
+  !> Interfaces for subroutines
   interface
-    !> hooks interface
+    !> hooks subroutines
     subroutine pf_hook_p(pf, level, state)
        use iso_c_binding
        import pf_pfasst_t, pf_level_t, pf_state_t
@@ -254,7 +255,7 @@ module pf_mod_dtype
        type(pf_state_t),  intent(in)    :: state
      end subroutine pf_hook_p
      
-     !> SDC sweeper interfaces
+     !> SDC sweeper subroutines
      subroutine pf_sweep_p(this, pf, level_index, t0, dt,nsweeps)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
