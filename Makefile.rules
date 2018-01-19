@@ -70,8 +70,7 @@ build/pf_magnus_picard.o:  build/pf_dtype.o build/pf_hooks.o build/pf_utils.o bu
 build/pf_imk.o:         build/pf_dtype.o build/pf_timer.o build/pf_hooks.o build/pf_utils.o
 build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o
 build/pf_fake.o:        build/pf_parallel.o build/pf_fakecomm.o
-build/sdc_quadrature.o: build/pf_dtype.o build/sdc_poly.o
-build/pf_quadrature.o:  build/sdc_quadrature.o
+build/pf_quadrature.o:  build/pf_dtype.o
 build/pf_pfasst.o:      build/pf_utils.o build/pf_quadrature.o \
                         build/pf_hooks.o 
 build/pf_fakecomm.o:    build/pf_timer.o build/pf_pfasst.o
