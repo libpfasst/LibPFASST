@@ -20,12 +20,10 @@
 module pfasst
   use pf_mod_dtype
   use pf_mod_hooks
-  use pf_mod_logger
   use pf_mod_parallel
   use pf_mod_pfasst
 #ifndef NOMPI
   use pf_mod_comm_mpi
 #endif
   use pf_mod_imexQ
-  use pf_mod_options
 end module pfasst

@@ -28,7 +28,7 @@ contains
   subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
     use pf_mod_hooks, only: PF_MAX_HOOK
 
-    use pf_mod_options
+
     type(pf_pfasst_t), intent(inout)           :: pf        !< Main pfasst object
     type(pf_comm_t),   intent(inout), target   :: comm      !< Communicator
     integer,           intent(in   ), optional :: nlevels   !< number of pfasst levels
