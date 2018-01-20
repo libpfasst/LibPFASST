@@ -33,12 +33,13 @@
 ! extract pointers to the encapsulated array from a C pointer without
 ! performing any copies.
 !
-
+!>  Module to encapsulate an N-dimensional array
 module pf_mod_ndarray
   use iso_c_binding
   use pf_mod_dtype
   implicit none
 
+  !>  Type to create and destroy the arrays
   type, extends(pf_factory_t) :: ndarray_factory
    contains
      procedure :: create_single  => ndarray_create_single
@@ -47,6 +48,7 @@ module pf_mod_ndarray
      procedure :: destroy_array => ndarray_destroy_array
   end type ndarray_factory
 
+  !>  Type to extend the abstract encap and set procedure pointers
   type, extends(pf_encap_t) :: ndarray
      integer             :: dim
      integer,    allocatable :: shape(:)
@@ -61,14 +63,15 @@ module pf_mod_ndarray
      procedure :: eprint => ndarray_eprint
   end type ndarray
 
-  ! interfaces to routines in pf_numpy.c
+  !> Interfaces to output routines in pf_numpy.c
   interface
+     !>  Subroutine to make a directory for output
      subroutine ndarray_mkdir(dname, dlen) bind(c)
        use iso_c_binding
        character(c_char), intent(in   )        :: dname
        integer,    intent(in   ), value :: dlen
      end subroutine ndarray_mkdir
-
+     !>  Subroutine to write an the array to a file
      subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
        use iso_c_binding
        character(c_char), intent(in   )        :: dname, fname, endian(5)
@@ -79,7 +82,7 @@ module pf_mod_ndarray
   end interface
 
 contains
-
+  !>  Subroutine to allocate the array and set the size parameters
   subroutine ndarray_build(q, shape)
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: shape(:)
@@ -93,7 +96,7 @@ contains
     end select
   end subroutine ndarray_build
 
-  ! Allocate/create solution (spatial data set).
+  !> Subroutine to  create a single array
   subroutine ndarray_create_single(this, x, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
@@ -103,6 +106,7 @@ contains
     call ndarray_build(x, shape)
   end subroutine ndarray_create_single
 
+  !> Subroutine to create an array of arrays
   subroutine ndarray_create_array(this, x, n, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
@@ -114,6 +118,7 @@ contains
     end do
   end subroutine ndarray_create_array
 
+  !> Subroutine to destroy an single array
   subroutine ndarray_destroy_single(this, x, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
@@ -127,6 +132,7 @@ contains
     deallocate(x)
   end subroutine ndarray_destroy_single
 
+  !> Subroutine to destroy an array of arrays
   subroutine ndarray_destroy_array(this, x, n, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
@@ -144,19 +150,10 @@ contains
   end subroutine ndarray_destroy_array
 
 
-  ! Deallocate/destroy solution.
-  ! subroutine ndarray_destroy(solptr)
-  !   type(c_ptr), intent(in   ), value :: solptr
-
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
-
-  !   deallocate(sol%flatarray)
-  !   deallocate(sol%shape)
-  !   deallocate(sol)
-  ! end subroutine ndarray_destroy
-
-  ! Set solution value.
+  !>  The following are the base subroutines that all encapsulations must provide
+  !!
+  
+  !> Subroutine to set array to a scalare  value.
   subroutine ndarray_setval(this, val, flags)
     class(ndarray), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
@@ -164,7 +161,7 @@ contains
     this%flatarray = val
   end subroutine ndarray_setval
 
-  ! Copy solution value.
+  !> Subroutine to copy an array
   subroutine ndarray_copy(this, src, flags)
     class(ndarray),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: src
@@ -177,28 +174,28 @@ contains
     end select
   end subroutine ndarray_copy
 
-  ! Pack solution q into a flat array.
+  !> Subroutine to pack an array into a flat array for sending
   subroutine ndarray_pack(this, z)
     class(ndarray), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     z = this%flatarray
   end subroutine ndarray_pack
 
-  ! Unpack solution from a flat array.
+  !> Subroutine to unpack a flatarray after receiving
   subroutine ndarray_unpack(this, z)
     class(ndarray), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     this%flatarray = z
   end subroutine ndarray_unpack
 
-  ! Compute norm of solution
+  !> Subroutine to define the norm of the array (here the max norm)
   function ndarray_norm(this) result (norm)
     class(ndarray), intent(in   ) :: this
     real(pfdp) :: norm
     norm = maxval(abs(this%flatarray))
   end function ndarray_norm
 
-  ! Compute y = a x + y where a is a scalar and x and y are solutions.
+  !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
   subroutine ndarray_axpy(this, a, x, flags)
     class(ndarray),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: x
@@ -213,8 +210,11 @@ contains
     end select
   end subroutine ndarray_axpy
 
+  !>  Subroutine to print the array to the screen (mainly for debugging purposes)
   subroutine ndarray_eprint(this)
     class(ndarray), intent(inout) :: this
+    !  Just print the first few values
+    print *, this%flatarray(1:10)
   end subroutine ndarray_eprint
 
   ! ! Helpers

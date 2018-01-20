@@ -39,8 +39,8 @@ contains
       call pf_mpi_create(comm, MPI_COMM_WORLD)
       call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-!---- Create all the things -------------------------------------------------------
 
+      !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
           allocate(pf%levels(l)%shape(1))
 
@@ -61,7 +61,6 @@ contains
       end do
 
       print *,'Initializing mpi and pfasst...'
-      call pf_mpi_setup(comm, pf, err)
       call pf_pfasst_setup(pf)
 
       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
@@ -93,9 +92,6 @@ contains
 
       print *,'destroying pf'
       call pf_pfasst_destroy(pf)
-
-      print *,'destroying MPI'
-      call pf_mpi_destroy(comm)
 
     end subroutine rttddft
 

@@ -20,6 +20,7 @@
 !!  See pf_dtype.f90 for the type definition
 module pf_mod_pfasst
   use pf_mod_dtype
+  use pf_mod_comm_mpi
   implicit none
 contains
 
@@ -77,6 +78,12 @@ contains
 
     class(pf_level_t), pointer :: lev_fine, lev_coarse  !<  Pointers to level structures for brevity
     integer                   :: l                      !<  Level loop index
+    integer                   :: ierror                 !<  error flag
+
+    !>  Set up the mpi communicator
+    call pf_mpi_setup(pf%comm, pf,ierror) ! XXX: move this into pf_pfasst_setup
+    if (ierror /=0 )        stop "ERROR: mpi_setup failed"
+
 
     if (pf%rank < 0) then
        stop 'Invalid PF rank: did you call setup correctly?'
@@ -88,7 +95,7 @@ contains
        call pf_level_setup(pf, pf%levels(l))
     end do
 
-    !l  Loop over levels setting interpolation and restriction matrices (in time)
+    !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
        allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes))
@@ -202,6 +209,8 @@ contains
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
     deallocate(pf%state)
+    call pf_mpi_destroy(pf%comm)   
+
   end subroutine pf_pfasst_destroy
 
 

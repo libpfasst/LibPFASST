@@ -16,11 +16,11 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-
+!> Module for setting timers
 module pf_mod_timer
   use pf_mod_dtype
   implicit none
-
+  !  List of timers 
   integer, parameter :: &
        TTOTAL       = 1,  &
        TPREDICTOR   = 2,  &
@@ -103,7 +103,7 @@ module pf_mod_timer
        'feval       '/)
 
 contains
-
+  !>  Subroutine to start a timer
   subroutine start_timer(pf, timer)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: timer
@@ -111,6 +111,7 @@ contains
     call system_clock(pf%timers(timer))
   end subroutine start_timer
 
+  !>  Subroutine to stop a timer
   subroutine end_timer(pf, timer)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: timer
