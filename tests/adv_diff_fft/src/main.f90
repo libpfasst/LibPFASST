@@ -33,7 +33,8 @@ contains
     !>  Local variables
     type(pf_pfasst_t)              :: pf       !<  the main pfasst structure
     type(pf_comm_t)                :: comm     !<  the communicator (here is is mpi)
-    type(ndarray), allocatable     :: q0       !<  the initial condition
+    type(ndarray)                  :: q0       !<  the initial condition
+    type(ndarray)                  :: qend     !<  the solution at the final time
     character(256)                 :: probin_fname       !<  file name for input parameters
     class(ad_sweeper_t), pointer   :: ad_sweeper_ptr     !<  pointer to SDC sweeper 
 
@@ -76,23 +77,26 @@ contains
     !>  Set up some parameters
     call pf_pfasst_setup(pf)
 
-    !> compute initial condition
-    allocate(q0)
+
+    !> allocate starting and end solutions
     call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
+    call ndarray_build(qend, [ pf%levels(pf%nlevels)%nvars ])    
+
+    !> compute initial condition
     call initial(q0)
 
     !> add some hooks
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
 
-    !> add some hooks
-    call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps)
+    !> do the time stepping
+    call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)
+
 
     !>  deallocate initial condition
-    deallocate(q0%flatarray)
-    deallocate(q0%shape)
-    deallocate(q0)
-
+    call ndarray_destroy(q0)
+    call ndarray_destroy(qend)
+    
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)
 

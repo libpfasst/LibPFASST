@@ -118,6 +118,20 @@ contains
     end do
   end subroutine ndarray_create_array
 
+  !>  Subroutine to destroy array
+  subroutine ndarray_destroy(encap)
+    class(pf_encap_t), intent(inout) :: encap
+    type(ndarray), pointer :: ndarray_obj
+
+    ndarray_obj => cast_as_ndarray(encap)
+
+    deallocate(ndarray_obj%shape)
+    deallocate(ndarray_obj%flatarray)
+
+    nullify(ndarray_obj)
+
+  end subroutine ndarray_destroy
+
   !> Subroutine to destroy an single array
   subroutine ndarray_destroy_single(this, x, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
@@ -132,6 +146,7 @@ contains
     deallocate(x)
   end subroutine ndarray_destroy_single
 
+  
   !> Subroutine to destroy an array of arrays
   subroutine ndarray_destroy_array(this, x, n, level, kind, nvars, shape)
     class(ndarray_factory), intent(inout)              :: this
@@ -227,6 +242,16 @@ contains
 
   !   r = sol%dim
   ! end function dims
+
+  function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
+    class(pf_encap_t), intent(in), target :: encap_polymorph
+    type(ndarray), pointer :: ndarray_obj
+    
+    select type(encap_polymorph)
+    type is (ndarray)
+       ndarray_obj => encap_polymorph
+    end select
+  end function cast_as_ndarray
 
   function array1(x) result(r)
     class(pf_encap_t), intent(in) :: x
