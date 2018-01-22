@@ -28,7 +28,7 @@ module pf_mod_magnus_picard
      integer :: magnus_order, qtype
      real(pfdp) :: dt
      real(pfdp), allocatable :: commutator_coefs(:,:,:)
-
+     complex(pfdp), allocatable :: commutators(:,:,:)
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
    contains
      procedure :: sweep      => magpicard_sweep
@@ -38,6 +38,7 @@ module pf_mod_magnus_picard
      procedure :: residual   => magpicard_residual
      procedure :: evaluate_all => magpicard_evaluate_all
      procedure(pf_f_eval_p), deferred :: f_eval
+     procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
@@ -54,6 +55,12 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
+     subroutine pf_compute_single_commutators_p(this, f, commutators)
+       import pf_magpicard_t, pf_encap_t, pfdp
+       class(pf_magpicard_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: f(:,:)
+       complex(pfdp), intent(inout) :: commutators(:,:,:)
+     end subroutine pf_compute_single_commutators_p
      subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
@@ -124,10 +131,10 @@ contains
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
 
+       call this%compute_single_commutators(lev%F, this%commutators)
+
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
-       !$omp parallel
-       !$omp do private(m)
        do m = 1, nnodes-1
           call start_timer(pf, TAUX)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
@@ -142,13 +149,12 @@ contains
           call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
           call end_timer(pf, TAUX+2)
        end do
-       !$omp end do
-       !$omp end parallel
 
        call pf_residual(pf, lev, dt)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
+
     call lev%qend%copy(lev%Q(nnodes))
     call end_timer(pf, TLEVEL+lev%index-1)
 
@@ -158,7 +164,7 @@ contains
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: m, nnodes, magnus_order=3, coefs=9
+    integer :: m, nnodes
 
     this%npieces = 1
     nnodes = lev%nnodes
@@ -166,11 +172,7 @@ contains
     allocate(this%dtsdc(nnodes-1))
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)   !  SDC time step size (unscaled)
 
-    allocate(this%commutator_coefs(coefs, magnus_order, nnodes-1))
-
-    this%commutator_coefs(:,:,:) = 0.0_pfdp
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
-
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
          lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
@@ -239,9 +241,7 @@ contains
       class(pf_magpicard_t),  intent(inout) :: this
       class(pf_level_t),    intent(inout) :: lev
 
-      deallocate(this%dtsdc)
-      deallocate(this%commutator_coefs)
-
+      deallocate(this%dtsdc, this%commutator_coefs, this%commutators)
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
            lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)

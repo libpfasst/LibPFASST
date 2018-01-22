@@ -47,7 +47,7 @@ contains
     r => cast_as_zndarray(level%R(1))
     q => cast_as_zndarray(level%Q(1))
 
-    print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
+    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%array))
   end subroutine echo_residual
 
@@ -62,7 +62,7 @@ contains
     character(len=256) :: time, filename
 
     qend => cast_as_zndarray(level%qend)
-    write(time, '(f7.4)') state%t0+state%dt
+    write(time, '(f10.5)') state%t0+state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
          pf%rank, state%step+1, state%iter, level%index
     open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
