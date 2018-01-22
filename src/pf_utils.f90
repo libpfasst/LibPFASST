@@ -16,89 +16,13 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
+!> Module with random subroutines that don't seem to fit in other modules
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
   implicit none
 contains
 
-  !
-  ! Build time interpolation matrix.
-  !
-  subroutine pf_time_interpolation_matrix(nodesF, nnodesF, nodesG, nnodesG, tmat)
-    integer,    intent(in)  :: nnodesF, nnodesG
-    real(pfdp), intent(in)  :: nodesF(0:nnodesF-1), nodesG(0:nnodesG-1)
-    real(pfdp), intent(out) :: tmat(0:nnodesF-1,0:nnodesG-1)
-
-    integer    :: i, j, k
-    real(pfdp) :: xi, num, den
-
-    do i = 0, nnodesF-1
-       xi = nodesF(i)
-
-       do j = 0, nnodesG-1
-          den = 1.0_pfdp
-          num = 1.0_pfdp
-
-          do k = 0, nnodesG-1
-             if (k == j) cycle
-             den = den * (nodesG(j) - nodesG(k))
-             num = num * (xi        - nodesG(k))
-          end do
-
-          tmat(i, j) = num/den
-       end do
-    end do
-  end subroutine pf_time_interpolation_matrix
-
-
-  !
-  ! Spread initial condition.
-  !
-  subroutine spreadq0(lev, t0)
-    class(pf_level_t), intent(inout) :: lev
-    real(pfdp),       intent(in)    :: t0
-
-    integer :: m, p
-
-    call lev%Q(1)%copy(lev%q0)
-
-    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
-
-    do m = 2, lev%nnodes
-       call lev%Q(m)%copy(lev%Q(1))
-       do p = 1, lev%ulevel%sweeper%npieces
-         call lev%F(m,p)%copy(lev%F(1,p))
-       end do
-    end do
-  end subroutine spreadq0
-
-
-  !
-  ! Save current Q and F.
-  !
-  subroutine save(lev)
-    class(pf_level_t), intent(inout) :: lev
-
-    integer :: m, p
-
-    if (lev%Finterp) then
-      if (allocated(lev%pFflt)) then
-          do m = 1, lev%nnodes
-             do p = 1,size(lev%F(1,:))
-                call lev%pF(m,p)%copy(lev%F(m,p))
-             end do
-             call lev%pQ(m)%copy(lev%Q(m))
-          end do
-      end if
-    else
-       if (allocated(lev%pQ)) then
-          do m = 1, lev%nnodes
-             call lev%pQ(m)%copy(lev%Q(m))
-          end do
-       end if
-    end if
-  end subroutine save
 
 
   !
@@ -135,34 +59,6 @@ contains
     call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
-
-
-  !
-  ! Apply an interpolation matrix (tmat or rmat) to src.
-  !
-  subroutine pf_apply_mat(dst, a, mat, src, zero)
-    class(pf_encap_t), intent(inout) :: dst(:)
-    real(pfdp),        intent(in)    :: a, mat(:, :)
-    class(pf_encap_t), intent(in)    :: src(:)
-    logical,           intent(in), optional :: zero
-
-    logical :: lzero
-    integer :: n, m, i, j
-
-    lzero = .true.; if (present(zero)) lzero = zero
-
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
-
-    ! XXX: test for nan's in matrices...
-
-    do i = 1, n
-       if (lzero) call dst(i)%setval(0.0_pfdp)
-       do j = 1, m
-          call dst(i)%axpy(a * mat(i, j), src(j))
-       end do
-    end do
-  end subroutine pf_apply_mat
 
   !
   ! Generic residual
@@ -209,51 +105,6 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
-  subroutine pf_myLUexp(A,L,U,Nnodes,scaleLU)
-    real(pfdp),       intent(in)    :: A(Nnodes,Nnodes)
-    real(pfdp),      intent(inout)  :: L(Nnodes,Nnodes)
-    real(pfdp),     intent(inout)   :: U(Nnodes,Nnodes)
-    integer,        intent (in)     :: Nnodes
-    integer,        intent (in)     :: scaleLU
-    ! Return the LU decomposition of an explicit integration matrix
-    !   without pivoting
-    integer :: i,j
-    real(pfdp) :: c
-    L = 0.0_pfdp
-    U = 0.0_pfdp
-
-    do i = 1,Nnodes-1
-       L(i,i) = 1.0_pfdp
-    end do
-    U=transpose(A)
-    do i = 1,Nnodes-1
-       if (U(i,i+1) /= 0.0) then
-          do j=i+1,Nnodes
-             c = U(j,i+1)/U(i,i+1)
-             U(j,i:Nnodes)=U(j,i:Nnodes)-c*U(i,i:Nnodes)
-             L(j,:)=L(j,:)-c*L(i,:)
-          end do
-       end if
-    end do
-
-    U=transpose(U)
-    !  Now scale the columns of U to match the sum of A
-    if (scaleLU .eq. 1) then
-       do j=1,Nnodes
-          c = sum(U(j,:))
-          if (c /=  0.0) then
-             U(j,:)=U(j,:)*sum(A(j,:))/c
-          end if
-       end do
-    end if
-
-    print *,'U from LU decomp'
-    do j=1,Nnodes
-          print *, j, U(j,:)
-    end do
-
-  end subroutine pf_myLUexp
-
   subroutine myLUq(Q,Qtil,Nnodes,fillq)
     real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
     real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
@@ -297,16 +148,6 @@ contains
     end if
 
   end subroutine myLUq
-
-
-  !>  Simple wrapper to print out an error message with line and file number
-  subroutine end_now(msg)
-    character(*) msg
-
-    print *, 'ERROR:',msg,' at line:',__LINE__, ' in file:',__FILE__
-    stop
-  end subroutine end_now
-
 
 
 end module pf_mod_utils

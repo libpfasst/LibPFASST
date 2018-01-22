@@ -22,18 +22,14 @@ FSRC = src/pfasst.f90 \
        src/pf_rkstepper.f90 \
        src/pf_imk.f90 \
        src/pf_interpolate.f90 \
-       src/pf_logger.f90 \
        src/pf_magnus_picard.f90 \
        src/pf_ndarray.f90 \
-       src/pf_options.f90 \
        src/pf_parallel.f90 \
        src/pf_pfasst.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
        src/pf_timer.f90 \
-       src/pf_utils.f90 \
-       src/sdc_poly.f90 \
-       src/sdc_quadrature.f90
+       src/pf_utils.f90 
 
 CSRC = src/pf_numpy.c
 

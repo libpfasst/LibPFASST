@@ -16,16 +16,15 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-!>  This module is only a collection of "use" statements to simplify including the common main modules in writing applications that use libpfasst
+!>  Module containing a collection of "use" statements to simplify
+!!  including the common main modules in writing applications that use libpfasst
 module pfasst
   use pf_mod_dtype
   use pf_mod_hooks
-  use pf_mod_logger
   use pf_mod_parallel
   use pf_mod_pfasst
 #ifndef NOMPI
   use pf_mod_comm_mpi
 #endif
   use pf_mod_imexQ
-  use pf_mod_options
 end module pfasst
