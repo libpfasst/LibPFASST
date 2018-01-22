@@ -38,6 +38,7 @@ module pf_mod_magnus_picard
      procedure :: residual   => magpicard_residual
      procedure :: evaluate_all => magpicard_evaluate_all
      procedure(pf_f_eval_p), deferred :: f_eval
+     procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
@@ -54,6 +55,12 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
+     subroutine pf_compute_single_commutators_p(this, f, commutators)
+       import pf_magpicard_t, pf_encap_t, pfdp
+       class(pf_magpicard_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: f(:,:)
+       complex(pfdp), intent(inout) :: commutators(:,:,:)
+     end subroutine pf_compute_single_commutators_p
      subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
@@ -122,6 +129,8 @@ contains
           t=t+ dt*this%dtsdc(m-1)
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
+
+       call this%compute_single_commutators(lev%F, this%commutators)
 
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 

@@ -35,6 +35,7 @@ module sweeper
      integer :: indices(3,2)
    contains
      procedure :: f_eval => compute_B
+     procedure :: compute_single_commutators
      procedure :: compute_omega
      procedure :: compute_time_ev_ops
      procedure :: propagate_solution
@@ -135,6 +136,35 @@ contains
 
   end subroutine compute_B
 
+  subroutine compute_single_commutators(this, f, commutators)
+    class(magpicard_sweeper_t), intent(inout) :: this
+    class(pf_encap_t), intent(inout) :: f(:,:)
+    complex(pfdp), intent(inout) :: commutators(:,:,:)
+
+    class(zndarray), pointer :: f1, f2
+    integer :: i, j, k, nnodes, node_offset, dim
+
+    node_offset = 0
+    nnodes = size(f)
+    if (nnodes > 3) node_offset = 1
+    dim = size(commutators(:,1,1))
+
+    !$omp parallel
+    !$omp do private(i, j, k, f1, f2)
+    do i = 1, 3
+       j = this%indices(i, 1) + node_offset
+       k = this%indices(i, 2) + node_offset
+       f1 => cast_as_zndarray(f(j,1))
+       f2 => cast_as_zndarray(f(k,1))
+       call compute_commutator(f1%array, f2%array, dim, commutators(:,:,i))
+    enddo
+    !$omp end do
+    !$omp end parallel
+
+    nullify(f1, f2)
+  end subroutine compute_single_commutators
+
+
  !> Compute the matrix $\Omega$ to be exponentiated from AO-Fock matrix
  !! \Omega = \sum_i omega_i
  !! omega coming in already has omega_1 on it (from magpicard_integrate (lev%S(m)))
@@ -180,22 +210,9 @@ contains
    class(zndarray), pointer :: f1, f2
    integer :: i, j, k, nnodes, node_offset
 
-   node_offset = 0
-   nnodes = size(f)
-   if (nnodes > 3) node_offset = 1
-
-   !$omp parallel
-   !$omp do reduction(+:omega) private(i, j, k, f1, f2)
    do i = 1, 3
-      j = this%indices(i, 1) + node_offset
-      k = this%indices(i, 2) + node_offset
-      f1 => cast_as_zndarray(f(j,1))
-      f2 => cast_as_zndarray(f(k,1))
-      call compute_commutator(f1%array, f2%array, dim, commutators(:,:,i))
       omega = omega + coefs(i) * commutators(:,:,i)
-   enddo
-   !$omp end do
-   !$omp end parallel
+   end do
 
    nullify(f1, f2)
  end subroutine add_single_commutator_terms
@@ -293,20 +310,20 @@ contains
    nullify(f1)
  end subroutine add_triple_commutator_terms
 
- subroutine compute_commutator(a, b, dim, commutator)
+ subroutine compute_commutator(a, b, dim, output)
    complex(pfdp), intent(in) :: a(dim,dim), b(dim,dim)
    integer, intent(in) :: dim
-   complex(pfdp), intent(inout) :: commutator(dim,dim)
+   complex(pfdp), intent(inout) :: output(dim,dim)
 
    call zgemm('n', 'n', dim, dim, dim, &
         z1, b, dim, &
         a, dim, &
-        z0, commutator, dim)
+        z0, output, dim) ! output is zeroed here
 
    call zgemm('n', 'n', dim, dim, dim, &
         z1, a, dim, &
         b, dim, &
-        zm1, commutator, dim)
+        zm1, output, dim)
  end subroutine compute_commutator
 
  !> Compute matrix exponential
