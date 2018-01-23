@@ -218,9 +218,11 @@ module pf_mod_dtype
      real(pfdp) :: abs_res_tol = 0.d0   !<  absolute convergence tolerance
      real(pfdp) :: rel_res_tol = 0.d0   !<  relative convergence tolerance
 
+     !>  run options  (should be set before pfasst_run is called)
      logical :: Pipeline_G =  .false.   !<  decides if coarsest level sweeps are pipelined
      logical :: PFASST_pred = .false.   !<  decides if the PFASST type predictor is used
      logical :: Vcycle = .true.         !<  decides if Vcycles are done
+     logical :: do_predictor = .true.   !<  decides if the predictor is done
 
      integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 

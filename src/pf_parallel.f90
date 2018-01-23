@@ -18,22 +18,23 @@
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-! Parallel PFASST routines.
+!> Module of parallel PFASST routines.
 
 module pf_mod_parallel
-  use pf_mod_dtype
   use pf_mod_interpolate
   use pf_mod_restrict
   use pf_mod_utils
   use pf_mod_timer
+  use pf_mod_dtype
   use pf_mod_hooks
   use pf_mod_pfasst
+
   implicit none
 contains
 
   !>  This is the main interface to pfasst.
-  !>  It examines the parameters and decides which subroutine to call
-  !>  to execute the code correctly
+  !!  It examines the parameters and decides which subroutine to call
+  !!  to execute the code correctly
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
     type(pf_pfasst_t), intent(inout), target   :: pf   !<  The complete PFASST structure
     class(pf_encap_t), intent(in   )           :: q0   !<  The initial condition
@@ -50,7 +51,9 @@ contains
     ! make a local copy of nproc
     nproc = pf%comm%nproc
 
-    !  Set the number of time steps to do
+    !>  Set the number of time steps to do
+    !!  The user can either pass in the number of time steps or
+    !!  pass in the time step size and length of run
     if (present(nsteps)) then
       nsteps_loc = nsteps
       tend_loc=dble(nsteps_loc*dt)
@@ -64,13 +67,12 @@ contains
         stop "Invalid nsteps"
       end if
     end if
-
     pf%state%nsteps = nsteps_loc
 
-    !  Do sanity checks on Nproc
+    !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
-    ! Try to figure out what routine to call
+    ! figure out what routine to call
     if (pf%nlevels .eq. 1) then
        print *,'Calling pipelined SDC with 1 level'
        if (present(qend)) then
@@ -111,30 +113,26 @@ contains
   !
   ! Predictor.
   !
-  !>  This is the routine to initialize the solution on each processor
-  !>
-  !> Spreads the fine initial condition (F%q0) to all levels and all
-  !> nodes.  If we're running with more than one processor, performs
-  !> sweeps on the coarsest level.
-  !> This routine is in need of reorganizing, since we now have cases
-  !> where we already have a solution that we just want to load on levels.
-  !>
-  !> No time communication is performed during the predictor since all
-  !> procesors can do the work themselves
-  !>
-  !>  The iteration count is reset to 0, and the status is reset to
-  !>  ITERATING.
-  !>
+  !>  Subroutine  to initialize the solution on each processor
+  !! Spreads the fine initial condition (F%q0) to all levels and all
+  !! nodes.  If we're running with more than one processor, performs
+  !! sweeps on the coarsest level.
+  !!
+  !! No time communication is performed during the predictor since all
+  !! procesors can do the work themselves
+  !!
+  !!  The iteration count is reset to 0, and the status is reset to
+  !!  ITERATING.
   subroutine pf_predictor(pf, t0, dt)
     type(pf_pfasst_t), intent(inout), target :: pf     !< PFASST main data structure
     real(pfdp),        intent(in   )         :: t0     !< Initial time of this processor
     real(pfdp),        intent(in   )         :: dt     !< time step
 
     class(pf_level_t), pointer :: coarse_lev_p
-    class(pf_level_t), pointer :: fine_lev_p
-    integer                   :: j, k
-    integer                   :: level_index
-    real(pfdp)                :: t0k
+    class(pf_level_t), pointer :: fine_lev_p     !<
+    integer                   :: j, k            !<  Loop indices
+    integer                   :: level_index     !<  Local variable for looping over levels
+    real(pfdp)                :: t0k             !<  Initial time at time step k
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
@@ -159,17 +157,20 @@ contains
              !  This is the weird choice.  We burn in without communication, then do extra sweeps
              level_index=1
              coarse_lev_p => pf%levels(level_index)
+             !  Burn in the processors without communciation
              do k = 1, pf%rank + 1
                 pf%state%iter = -k
 
-                ! Get new initial value (skip on first iteration)
+                ! Reset initial value (skip on first iteration)
+                ! This is equivalent to getting value from previous processor
                 if (k > 1) then
                    call coarse_lev_p%q0%copy(coarse_lev_p%qend)
+                   ! spread new coarse value if we are not doing PFASST_pred
                    if (.not. pf%PFASST_pred) then
                       call spreadq0(coarse_lev_p, t0)
                    end if
                 end if
-
+                !  Do a sweep
                 call coarse_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1)
              end do  ! k = 1, pf%rank + 1
              ! Now we have mimicked the burn in and we must do pipe-lined sweeps
@@ -187,7 +188,6 @@ contains
                 call pf_send(pf, coarse_lev_p,  coarse_lev_p%index*20000+pf%rank+1+k, .false.)
 
              end do ! k = 1, coarse_lev_p%nsweeps_pred-1
-             call pf_residual(pf, coarse_lev_p, dt)
           else  ! (pf%Pipeline_G .and. (coarse_lev_p%nsweeps_pred > 1)) then
              ! Normal predictor burn in
              level_index=1
@@ -211,8 +211,7 @@ contains
           ! Return to fine level...
           call pf_v_cycle_post_predictor(pf, t0, dt)
 
-       else ! (pf%nprocs == 1) then
-
+       else 
           ! Single processor... sweep on coarse and return to fine level.
           level_index = 1
           coarse_lev_p => pf%levels(level_index)
@@ -403,13 +402,11 @@ contains
        !
        ! perform fine sweeps
        !
-
        pf%state%iter  = pf%state%iter + 1
 
        call start_timer(pf, TITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
-
        if (pf%state%status /= PF_STATUS_CONVERGED) then
 
           fine_lev_p => pf%levels(pf%nlevels)
@@ -727,10 +724,11 @@ contains
   end subroutine pf_v_cycle
 
   !
-  ! Communication helpers
+  !> Communication helpers
   !
+  !>  Subroutine to post a receive request for a new initial condition to be received after doing some work
   subroutine pf_post(pf, level, tag)
-    !>  Post a receive request for a new initial condition to be received after doing some work
+
     type(pf_pfasst_t), intent(in)    :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
@@ -744,8 +742,8 @@ contains
     end if
   end subroutine pf_post
 
+  !>  Subroutine to send this processor's convergence status to the next processor
   subroutine pf_send_status(pf, tag)
-    !>  Send this processor's convergence status to the next processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  istatus
@@ -761,8 +759,8 @@ contains
     end if
   end subroutine pf_send_status
 
+  !>  Subroutine to receive the convergence status from the previous processor
   subroutine pf_recv_status(pf, tag)
-    !  Receive the convergence status from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  ierror, istatus
@@ -777,8 +775,8 @@ contains
     end if
   end subroutine pf_recv_status
 
+  !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking)
-    !  Send the solution to the next processors
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
@@ -796,8 +794,8 @@ contains
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
 
+  !>  Subroutine to recieve the solution from the previous processor
   subroutine pf_recv(pf, level, tag, blocking)
-    !>  Recieve the solution from the previous processor
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
@@ -817,8 +815,8 @@ contains
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
 
+  !>  Subroutine to broadcast the initial condition to all processors
   subroutine pf_broadcast(pf, y, nvar, root)
-    !>  Broadcast the initial condition to all processors
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
@@ -831,7 +829,6 @@ contains
        endif
     call end_timer(pf, TBROADCAST)
   end subroutine pf_broadcast
-
 
 
   !> Save current solution and function value so that future corrections can be computed
