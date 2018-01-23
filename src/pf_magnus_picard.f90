@@ -38,7 +38,7 @@ module pf_mod_magnus_picard
      procedure :: residual   => magpicard_residual
      procedure :: evaluate_all => magpicard_evaluate_all
      procedure(pf_f_eval_p), deferred :: f_eval
-     procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
+     ! procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
@@ -55,12 +55,11 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
-     subroutine pf_compute_single_commutators_p(this, f, commutators)
-       import pf_magpicard_t, pf_encap_t, pfdp
-       class(pf_magpicard_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: f(:,:)
-       complex(pfdp), intent(inout) :: commutators(:,:,:)
-     end subroutine pf_compute_single_commutators_p
+     ! subroutine pf_compute_single_commutators_p(this, f)
+     !   import pf_magpicard_t, pf_encap_t, pfdp
+     !   class(pf_magpicard_t),  intent(inout) :: this
+     !   class(pf_encap_t), intent(inout) :: f(:,:)
+     ! end subroutine pf_compute_single_commutators_p
      subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
@@ -123,7 +122,6 @@ contains
        if (k .eq. 1) then
           call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
        end if
-       
 
        t = t0
        do m = 2, nnodes
@@ -131,7 +129,11 @@ contains
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
 
-       call this%compute_single_commutators(lev%F, this%commutators)
+       ! if (this%magnus_order > 1) then
+       !    call start_timer(pf, TAUX+2)
+       !    call this%compute_single_commutators(lev%F)
+       !    call end_timer(pf, TAUX+2)
+       ! endif
 
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
@@ -145,9 +147,7 @@ contains
           call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
           call end_timer(pf, TAUX+1)
 
-          call start_timer(pf, TAUX+2)
           call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
-          call end_timer(pf, TAUX+2)
        end do
 
        call pf_residual(pf, lev, dt)

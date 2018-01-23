@@ -136,10 +136,9 @@ contains
 
   end subroutine compute_B
 
-  subroutine compute_single_commutators(this, f, commutators)
+  subroutine compute_single_commutators(this, f)
     class(magpicard_sweeper_t), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: f(:,:)
-    complex(pfdp), intent(inout) :: commutators(:,:,:)
 
     class(zndarray), pointer :: f1, f2
     integer :: i, j, k, nnodes, node_offset, dim
@@ -147,7 +146,7 @@ contains
     node_offset = 0
     nnodes = size(f)
     if (nnodes > 3) node_offset = 1
-    dim = size(commutators(:,1,1))
+    dim = this%dim
 
     !$omp parallel
     !$omp do private(i, j, k, f1, f2)
@@ -156,7 +155,7 @@ contains
        k = this%indices(i, 2) + node_offset
        f1 => cast_as_zndarray(f(j,1))
        f2 => cast_as_zndarray(f(k,1))
-       call compute_commutator(f1%array, f2%array, dim, commutators(:,:,i))
+       call compute_commutator(f1%array, f2%array, dim, this%commutators(:,:,i))
     enddo
     !$omp end do
     !$omp end parallel
@@ -188,11 +187,12 @@ contains
    omega_p%array = ints%array
 
    if (this%magnus_order > 1) then
-      call add_single_commutator_terms(this, omega_p%array, f, coefs(:,1), dim, this%commutators)
+      call compute_single_commutators(this, f)
+      call add_single_commutator_terms(this, omega_p%array, f, coefs(:,1), dim)
    endif
 
    if (this%magnus_order > 2) then
-      call add_double_commutator_terms(this, omega_p%array, f, coefs(:,2), dim, this%commutators)
+      call add_double_commutator_terms(this, omega_p%array, f, coefs(:,2), dim)
       call add_triple_commutator_terms(omega_p%array, f, nodes, this_node, qmat, dt, &
            coefs(1,3), dim, this%commutators)
    endif
@@ -200,10 +200,10 @@ contains
    nullify(omega_p, ints)
  end subroutine compute_omega
 
- subroutine add_single_commutator_terms(this, omega, f, coefs, dim, commutators)
+ subroutine add_single_commutator_terms(this, omega, f, coefs, dim)
    class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: f(:,:)
-   complex(pfdp), intent(inout) :: commutators(:,:,:), omega(dim,dim)
+   complex(pfdp), intent(inout) :: omega(dim,dim)
    integer, intent(in) :: dim
    real(pfdp), intent(in) :: coefs(:)
 
@@ -211,16 +211,16 @@ contains
    integer :: i, j, k, nnodes, node_offset
 
    do i = 1, 3
-      omega = omega + coefs(i) * commutators(:,:,i)
+      omega = omega + coefs(i) * this%commutators(:,:,i)
    end do
 
    nullify(f1, f2)
  end subroutine add_single_commutator_terms
 
- subroutine add_double_commutator_terms(this, omega, f, coefs, dim, commutators)
+ subroutine add_double_commutator_terms(this, omega, f, coefs, dim)
    class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: f(:,:)
-   complex(pfdp), intent(inout) :: commutators(:,:,:), omega(dim,dim)
+   complex(pfdp), intent(inout) :: omega(dim,dim)
    real(pfdp), intent(in) :: coefs(:)
    integer, intent(in) :: dim
 
@@ -249,8 +249,8 @@ contains
       f1 => cast_as_zndarray(f(j,1))
       f2 => cast_as_zndarray(f(k,1))
 
-      call compute_commutator(tmp(:,:,i), commutators(:,:,i), dim, commutators(:,:,i+3))
-      omega = omega + commutators(:,:,i+3)
+      call compute_commutator(tmp(:,:,i), this%commutators(:,:,i), dim, this%commutators(:,:,i+3))
+      omega = omega + this%commutators(:,:,i+3)
    end do
    !$omp end do
    !$omp end parallel
