@@ -256,9 +256,13 @@ contains
     real(pfdp), intent(inout) :: coefs(:,:,:)
 
     if (qtype == 1) then
+       ! we're talking Lobatto nodes, where nnodes=3 includes, t0, t_1/2, tn
+       ! need some way to differentiate whether you want full collocation or not
         if (nnodes > 2) then
-            coefs(1:3, 1, 1) = dt**2 * [real(8)::11/480., -1/480., 1/480.]
-            coefs(1:3, 1, 2) = dt**2 * [real(8)::1/15., 1/60., 1/15.]
+            ! coefs(1:3, 1, 1) = dt**2 * [real(8)::11/480., -1/480., 1/480.]
+            ! coefs(1:3, 1, 2) = dt**2 * [real(8)::1/15., 1/60., 1/15.]
+            coefs(1, 1, 1) = -1/48.d0 * dt**2
+            coefs(2, 1, 2) = -1/12.d0 * dt**2
         endif
     else if (qtype == 5) then
       if (nnodes >= 3) then

@@ -193,9 +193,6 @@ contains
        call poly_diff(coeffs, degree)
        call poly_roots(roots, coeffs(:degree), degree-1)
 
-       print*, 'roots = ', roots
-       print*, 'coefs = ', coeffs
-
        qnodes(1)          = 0.0_qp
        qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
        qnodes(nnodes)     = 1.0_qp

@@ -191,7 +191,7 @@ contains
       call add_single_commutator_terms(this, omega_p%array, f, coefs(:,1), dim)
    endif
 
-   if (this%magnus_order > 2) then
+   if (this%magnus_order > 2 .and. this%qtype == 5) then
       call add_double_commutator_terms(this, omega_p%array, f, coefs(:,2), dim)
       call add_triple_commutator_terms(omega_p%array, f, nodes, this_node, qmat, dt, &
            coefs(1,3), dim, this%commutators)

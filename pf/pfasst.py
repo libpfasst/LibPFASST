@@ -448,6 +448,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         params = attr.asdict(self.p)
 
+        self.p.qtype = 'gauss'
         self.p.tasks = 1
         self.p.levels = 1
         self.p.nsteps = 2**13
@@ -468,6 +469,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.levels = params['levels']
         self.p.solutions = params['solutions']
         self.p.timings = params['timings']
+        self.p.qtype = params['qtype']
 
         return final_solution, traj
 
