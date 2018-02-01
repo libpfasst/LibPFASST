@@ -14,7 +14,7 @@ Parareal algorithm (see below).
 MLSDC
 -----
 
-XXX
+During a PFASST iteration, each processor
 
 
 Parareal
