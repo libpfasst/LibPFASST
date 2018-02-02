@@ -234,6 +234,7 @@ contains
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
 
+    lev%residual = lev%R(lev%nnodes-1)%norm()
   end subroutine magpicard_residual
 
   ! Destroy the matrices

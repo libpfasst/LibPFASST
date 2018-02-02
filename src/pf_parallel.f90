@@ -468,10 +468,10 @@ contains
 
     class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
     integer                   :: j, k
-    real(pfdp)                :: residual, energy
-    integer                   ::  nblocks !<  The number of blocks of steps to do
-    integer                   ::  nproc   !<  The number of processors being used
-    integer                   ::  ierror  !<  Warning flag for communication routines
+    real(pfdp)                :: residual
+    integer                   :: nblocks !<  The number of blocks of steps to do
+    integer                   :: nproc   !<  The number of processors being used
+    integer                   :: ierror  !<  Warning flag for communication routines
 
     logical :: converged   !<  True when this processor is converged to residual
 
@@ -488,7 +488,7 @@ contains
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
-    residual = -1
+    residual = 1
 
 !    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
 
@@ -525,8 +525,7 @@ contains
           pf%state%t0   = pf%state%step * dt
 
           pf%state%status = PF_STATUS_PREDICTOR
-          residual = -1
-          energy   = -1
+          residual = 1
        end if
 
        !> Call the predictor
@@ -548,12 +547,12 @@ contains
 
           !<  Get new initial condition unless this is the first step or this processor is done
           if (j > 1 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
              call pf_recv_status(pf, 8000+k)
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
           end if
 
           call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
-          call pf_check_convergence_pipeline(pf, residual, converged)
+          call pf_check_convergence_pipeline(pf, lev_p%residual, converged)
 
           if (pf%state%status .ne. PF_STATUS_CONVERGED) then
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
@@ -604,17 +603,11 @@ contains
     end if
 
     ! Check to see if tolerances are met
-    residual1 = pf%levels(pf%nlevels)%residual
     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
-       if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
-            (abs(residual1)                          < pf%abs_res_tol) ) then
-          converged = .true.
-       end if
+       if (abs(residual) < pf%abs_res_tol) converged = .true.
+       ! print*, pf%rank, 'r =', residual
+       ! print*, pf%rank, 'converged = ', converged
     end if
-    residual = residual1
-
-    ! if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
-    !      pf%state%status = PF_STATUS_ITERATING
 
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
