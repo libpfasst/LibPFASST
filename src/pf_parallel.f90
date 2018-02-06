@@ -546,9 +546,9 @@ contains
           pf%state%iter = j
 
           !<  Get new initial condition unless this is the first step or this processor is done
-          if (j > 1 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
+          if (pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
              call pf_recv_status(pf, 8000+k)
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter-1, .true.)
+             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
           end if
 
           call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
@@ -744,6 +744,7 @@ contains
 
     istatus = pf%state%status
     if (pf%rank /= pf%comm%nproc-1) then
+       ! print*, pf%rank,  'is sending status'
        call pf%comm%send_status(pf, tag,istatus,ierror)
        if (ierror /= 0) then
           print *, pf%rank, 'warning: error during send_status', ierror
@@ -758,7 +759,9 @@ contains
     integer,           intent(in)    :: tag
     integer ::  ierror, istatus
     if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
+       ! print*, pf%rank,  'is receiving status'
        call pf%comm%recv_status(pf, tag,istatus,ierror)
+       ! print*, pf%rank,  'has received status'
        if (ierror .eq. 0) then
           pf%state%pstatus = istatus
        else
@@ -778,6 +781,7 @@ contains
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%rank /= pf%comm%nproc-1 &
          .and. pf%state%status == PF_STATUS_ITERATING) then
+       ! print*, pf%rank,  'is sending soln'
        call pf%comm%send(pf, level, tag, blocking,ierror)
        if (ierror /= 0) then
           print *, pf%rank, 'warning: error during send', ierror
@@ -793,10 +797,12 @@ contains
     class(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
-    integer ::  ierror 
+    integer ::  ierror
     call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%rank /= 0 .and.  pf%state%pstatus == PF_STATUS_ITERATING) then
+       ! print*, pf%rank,  'is receiving soln'
        call pf%comm%recv(pf, level,tag, blocking,ierror)
+       ! print*, pf%rank,  'has received soln'
        !  Unpack the sent data into the intial condition
        if (ierror .eq. 0) then
           call level%q0%unpack(level%recv)
