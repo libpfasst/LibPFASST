@@ -25,3 +25,6 @@ tests/*/build
 tests/*/include
 tests/*/output
 tests/output
+/tests/toda/.ipynb_checkpoints/testbed-checkpoint.ipynb
+latex
+html
