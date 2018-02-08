@@ -87,7 +87,7 @@ contains
          magpicard%commutator_coefs(9, 3, 4))
 
     magpicard%commutator_coefs = 0.0_pfdp
-    magpicard%commutators = z0
+    magpicard%commutators(:,:,:) = z0
     magpicard%commutator = z0
 
     magpicard%indices(1,1) = 1
@@ -143,26 +143,21 @@ contains
     class(zndarray), pointer :: f1, f2
     integer :: i, j, k, nnodes, node_offset, dim
 
-    node_offset = 0
-    nnodes = size(f)
-    if (nnodes > 3) node_offset = 1
     dim = this%dim
 
-    !$omp parallel
-    !$omp do private(i, j, k, f1, f2)
+    !$omp parallel do private(i, j, k, f1, f2)
     do i = 1, 3
-       j = this%indices(i, 1) + node_offset
-       k = this%indices(i, 2) + node_offset
+       j = this%indices(i, 1)
+       k = this%indices(i, 2)
        f1 => cast_as_zndarray(f(j,1))
        f2 => cast_as_zndarray(f(k,1))
        call compute_commutator(f1%array, f2%array, dim, this%commutators(:,:,i))
     enddo
-    !$omp end do
-    !$omp end parallel
+    !$omp end parallel do
 
+    !$omp barrier
     nullify(f1, f2)
   end subroutine compute_single_commutators
-
 
  !> Compute the matrix $\Omega$ to be exponentiated from AO-Fock matrix
  !! \Omega = \sum_i omega_i
@@ -187,8 +182,7 @@ contains
    omega_p%array = ints%array
 
    if (this%magnus_order > 1) then
-      call compute_single_commutators(this, f)
-      call add_single_commutator_terms(this, omega_p%array, f, coefs(:,1), dim)
+      call add_single_commutator_terms(this, omega_p%array, coefs(:,1), dim)
    endif
 
    if (this%magnus_order > 2 .and. this%qtype == 5) then
@@ -200,21 +194,22 @@ contains
    nullify(omega_p, ints)
  end subroutine compute_omega
 
- subroutine add_single_commutator_terms(this, omega, f, coefs, dim)
+ subroutine add_single_commutator_terms(this, omega, coefs, dim)
    class(magpicard_sweeper_t), intent(inout) :: this
-   class(pf_encap_t), intent(inout) :: f(:,:)
    complex(pfdp), intent(inout) :: omega(dim,dim)
    integer, intent(in) :: dim
    real(pfdp), intent(in) :: coefs(:)
 
-   class(zndarray), pointer :: f1, f2
    integer :: i, j, k, nnodes, node_offset
+   complex(pfdp) :: tmp(dim,dim)
 
+   !$omp parallel do reduction(+:omega) private(i, tmp)
    do i = 1, 3
-      omega = omega + coefs(i) * this%commutators(:,:,i)
+      tmp = coefs(i) * this%commutators(:,:,i)
+      omega = omega + tmp
    end do
+   !$omp end parallel do
 
-   nullify(f1, f2)
  end subroutine add_single_commutator_terms
 
  subroutine add_double_commutator_terms(this, omega, f, coefs, dim)
@@ -234,26 +229,23 @@ contains
    tmp = z0
 
    do i = 1, 3
-      j = i + node_offset
-      f1 => cast_as_zndarray(f(j,1))
+      f1 => cast_as_zndarray(f(i,1))
       tmp(:,:,1) = tmp(:,:,1) + coefs(i)   * f1%array
       tmp(:,:,2) = tmp(:,:,2) + coefs(i+3) * f1%array
       tmp(:,:,3) = tmp(:,:,3) + coefs(i+6) * f1%array
    end do
 
-   !$omp parallel
-   !$omp do reduction(+:omega) private(i, j, k, f1, f2)
+   !$omp parallel do reduction(+:omega) private(i, j, k, f1, f2)
    do i = 1, 3
-      j = this%indices(i, 1) + node_offset
-      k = this%indices(i, 2) + node_offset
+      j = this%indices(i, 1) !+ node_offset
+      k = this%indices(i, 2) !+ node_offset
       f1 => cast_as_zndarray(f(j,1))
       f2 => cast_as_zndarray(f(k,1))
 
       call compute_commutator(tmp(:,:,i), this%commutators(:,:,i), dim, this%commutators(:,:,i+3))
       omega = omega + this%commutators(:,:,i+3)
    end do
-   !$omp end do
-   !$omp end parallel
+   !$omp end parallel do
 
    ! print*, 'double commutator term = ', (real(tmp(4,i,i+1)), i=1,dim-5)
    ! print*, 'omega after double term = ', (real(omega(i,i+1)), i=1,dim-5)
@@ -339,19 +331,25 @@ contains
    class(zndarray), pointer :: time_ev_op_p
 
    integer :: dim
+   complex(pfdp), allocatable :: tmp(:,:), tmp2(:,:)
 
    omega_p => cast_as_zndarray(omega)
    time_ev_op_p => cast_as_zndarray(time_ev_op)
 
    dim = omega_p%dim
+   allocate(tmp(dim,dim), tmp2(dim,dim))
    if(this%debug) then
       print*, '----------Inside compute_time_ev_ops----------'
       print*, 'dim omega= ', omega_p%dim
-      ! print*, 'shape omega = ', shape(omega_p%array)
+      print*, 'shape omega = ', shape(omega_p%array)
       print*, 'omega = ', omega_p%array
    end if
 
-   call c8mat_expm1(dim, omega_p%array, time_ev_op_p%array)
+   ! tmp = cmplx(0.0, 0.0, pfdp)
+   time_ev_op_p%array = compute_matrix_exp(omega_p%array, dim, exptol(level))
+
+   ! call c8mat_expm1(dim, omega_p%array, time_ev_op_p%array)
+   ! time_ev_op_p%array = tmp
 
    if (time_ev_op_p%norm()*0.0 /= 0.0) then
       print*, omega_p%array
@@ -359,6 +357,7 @@ contains
       stop
    endif
 
+   deallocate(tmp)
    nullify(omega_p, time_ev_op_p)
  end subroutine compute_time_ev_ops
 
@@ -400,6 +399,80 @@ contains
    deallocate(tmp)
    nullify(sol_t0_p, sol_tn_p, u_p)
  end subroutine propagate_solution
+
+function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
+   ! sum and square method
+   integer, intent(in) :: dim
+   complex(pfdp), intent(in) :: matrix_in(dim, dim)
+   real(pfdp), intent(in) :: tol
+   complex(pfdp) :: matexp(dim, dim)
+
+   integer, parameter :: MAX_TERMS = 3
+   integer, parameter :: maxk = 1000
+   integer, parameter :: max_mscale = 16
+
+   complex(pfdp) :: zinvk, zscale, matrix(dim,dim), prev(dim, dim), next(dim, dim)
+   real(pfdp) :: invk, ratio, norm, scale_val
+   integer :: i, ik, im, nterms, mscale
+   logical :: converged
+
+   matexp = z0
+   norm = compute_inf_norm(matrix, dim)
+   ratio = log(2.5_pfdp*norm) / log(2.0_pfdp)
+   mscale = max(int(ratio), 0)
+
+   ! print*, 'norm=', norm, 'ratio=', ratio, 'mscale=', mscale
+
+   scale_val = 1.0_pfdp/(2.0_pfdp**mscale)
+   zscale = cmplx(scale_val)
+
+   matrix = zscale * matrix_in
+   call initialize_as_identity(prev)
+   call initialize_as_identity(matexp)
+
+   ik = 1
+   nterms = 0
+   next = z0
+   converged = .false.
+
+   do while (.not. converged)
+      zinvk = z1 / cmplx(ik)
+      call zgemm('n', 'n', dim, dim, dim, &
+           zinvk, prev, dim, &
+           matrix, dim, &
+           z0, next, dim)
+      matexp = matexp + next
+
+      norm = compute_inf_norm(next, dim)
+      if(norm < tol) nterms = nterms + 1
+      if(nterms >= MAX_TERMS) converged = .true.
+
+      prev = next
+
+      ik = ik + 1
+   end do
+
+   next = matexp
+
+   do im = 1, mscale
+      prev = z0
+      if (maxval(abs(matexp))*0.0 /= 0.0) then
+         do ik = 1, 92
+            print*, 'ik=', ik
+            print*, next
+            next = matmul(next, next)
+            if (maxval(abs(next))*0.0 /= 0.0) stop
+         end do
+      endif
+
+      call zgemm('n', 'n', dim, dim, dim, &
+           z1, matexp, dim, &
+           matexp, dim, &
+           z0, prev, dim)
+
+      matexp = prev
+   enddo
+ end function compute_matrix_exp
 
  function compute_inf_norm(matrix, n) result(norm)
    integer, intent(in) :: n

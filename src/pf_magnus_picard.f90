@@ -1,6 +1,7 @@
 !
 ! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
 !
+
 ! This file is part of LIBPFASST.
 !
 
@@ -38,7 +39,7 @@ module pf_mod_magnus_picard
      procedure :: residual   => magpicard_residual
      procedure :: evaluate_all => magpicard_evaluate_all
      procedure(pf_f_eval_p), deferred :: f_eval
-     ! procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
+     procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
@@ -55,11 +56,11 @@ module pf_mod_magnus_picard
        integer,           intent(in   ) :: level
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
-     ! subroutine pf_compute_single_commutators_p(this, f)
-     !   import pf_magpicard_t, pf_encap_t, pfdp
-     !   class(pf_magpicard_t),  intent(inout) :: this
-     !   class(pf_encap_t), intent(inout) :: f(:,:)
-     ! end subroutine pf_compute_single_commutators_p
+     subroutine pf_compute_single_commutators_p(this, f)
+       import pf_magpicard_t, pf_encap_t, pfdp
+       class(pf_magpicard_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: f(:,:)
+     end subroutine pf_compute_single_commutators_p
      subroutine pf_compute_omega_p(this, omega, integrals, f, nodes, qmat, dt, this_node, coefs)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
@@ -113,7 +114,7 @@ contains
     call lev%Q(1)%copy(lev%q0)
 
     call start_timer(pf, TLEVEL+lev%index-1)
-    do k = 1,nsweeps
+    do k = 1, nsweeps
        ! Copy values into residual
        do m = 1, nnodes-1
           call lev%R(m)%copy(lev%Q(m+1))
@@ -124,31 +125,40 @@ contains
        end if
 
        t = t0
+       !$omp parallel do private(m, t)
        do m = 2, nnodes
-          t=t+ dt*this%dtsdc(m-1)
+          t = t + dt*this%dtsdc(m-1)
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
+       !$omp end parallel do
 
-       ! if (this%magnus_order > 1) then
-       !    call start_timer(pf, TAUX+2)
-       !    call this%compute_single_commutators(lev%F)
-       !    call end_timer(pf, TAUX+2)
-       ! endif
+       !$omp barrier
 
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
-       do m = 1, nnodes-1
+       if (this%magnus_order > 1) then
           call start_timer(pf, TAUX)
+          call this%compute_single_commutators(lev%F)
+          call end_timer(pf, TAUX)
+       endif
+
+       !! this loop not OMP'd because the deferred procs are OMP'd
+       do m = 1, nnodes-1
+          call start_timer(pf, TAUX+1)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
                lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
-          call end_timer(pf, TAUX)
-
-          call start_timer(pf, TAUX+1)
-          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
           call end_timer(pf, TAUX+1)
+       end do
+
+       !$omp parallel do private(m)
+       do m = 1, nnodes-1
+          call start_timer(pf, TAUX+2)
+          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
+          call end_timer(pf, TAUX+2)
 
           call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
        end do
+       !$omp end parallel do
 
        call pf_residual(pf, lev, dt)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
