@@ -145,10 +145,15 @@ contains
 
     dim = this%dim
 
+    node_offset = 0
+    nnodes = size(f)
+    if (nnodes > 3) node_offset = 1
+    dim = this%dim
+
     !$omp parallel do private(i, j, k, f1, f2)
     do i = 1, 3
-       j = this%indices(i, 1)
-       k = this%indices(i, 2)
+       j = this%indices(i, 1) + node_offset
+       k = this%indices(i, 2) + node_offset
        f1 => cast_as_zndarray(f(j,1))
        f2 => cast_as_zndarray(f(k,1))
        call compute_commutator(f1%array, f2%array, dim, this%commutators(:,:,i))
@@ -187,8 +192,8 @@ contains
 
    if (this%magnus_order > 2 .and. this%qtype == 5) then
       call add_double_commutator_terms(this, omega_p%array, f, coefs(:,2), dim)
-      call add_triple_commutator_terms(omega_p%array, f, nodes, this_node, qmat, dt, &
-           coefs(1,3), dim, this%commutators)
+      call add_triple_commutator_terms(this, omega_p%array, f, nodes, this_node,&
+           qmat, dt, coefs(1,3), dim)
    endif
 
    nullify(omega_p, ints)
@@ -229,7 +234,8 @@ contains
    tmp = z0
 
    do i = 1, 3
-      f1 => cast_as_zndarray(f(i,1))
+      j = i + node_offset
+      f1 => cast_as_zndarray(f(j,1))
       tmp(:,:,1) = tmp(:,:,1) + coefs(i)   * f1%array
       tmp(:,:,2) = tmp(:,:,2) + coefs(i+3) * f1%array
       tmp(:,:,3) = tmp(:,:,3) + coefs(i+6) * f1%array
@@ -237,8 +243,8 @@ contains
 
    !$omp parallel do reduction(+:omega) private(i, j, k, f1, f2)
    do i = 1, 3
-      j = this%indices(i, 1) !+ node_offset
-      k = this%indices(i, 2) !+ node_offset
+      j = this%indices(i, 1) + node_offset
+      k = this%indices(i, 2) + node_offset
       f1 => cast_as_zndarray(f(j,1))
       f2 => cast_as_zndarray(f(k,1))
 
@@ -247,16 +253,13 @@ contains
    end do
    !$omp end parallel do
 
-   ! print*, 'double commutator term = ', (real(tmp(4,i,i+1)), i=1,dim-5)
-   ! print*, 'omega after double term = ', (real(omega(i,i+1)), i=1,dim-5)
-   ! print*, 'double commutator term = ', real(tmp(4,:,:))
-   ! print*, 'omega after adding double terms', omega(1:3,11)
    nullify(f1, f2)
  end subroutine add_double_commutator_terms
 
- subroutine add_triple_commutator_terms(omega, f, nodes, this_node, qmat, dt, coef, dim, commutator)
+ subroutine add_triple_commutator_terms(this, omega, f, nodes, this_node, qmat, dt, coef, dim)
+   class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: f(:,:)
-   complex(pfdp), intent(inout) :: omega(dim,dim), commutator(dim,dim)
+   complex(pfdp), intent(inout) :: omega(dim,dim)
    real(pfdp), intent(in) :: coef, nodes(:), qmat(:,:), dt
    integer, intent(in) :: dim, this_node
 
@@ -265,39 +268,31 @@ contains
    real(pfdp) :: time_scaler
    integer :: i, j, nnodes
 
+   nnodes = size(nodes)
+   this%commutator = z0
+
    allocate(tmp(dim,dim), a(dim,dim,3))
    tmp = z0
    a = z0
 
-   nnodes = size(nodes)
-
-   do j = 2, nnodes-1
-       f1 => cast_as_zndarray(f(j,1))
-       time_scaler = (nodes(j)-0.5_pfdp)
-       tmp = dt * qmat(this_node,j) * f1%array
+   do i = 2, nnodes-1
+       f1 => cast_as_zndarray(f(i,1))
+       time_scaler = (nodes(i)-0.5_pfdp)
+       tmp = dt * qmat(this_node, i) * f1%array
        a(:,:,1) = a(:,:,1) + tmp
        a(:,:,2) = a(:,:,2) + tmp * time_scaler
        a(:,:,3) = a(:,:,3) + tmp * time_scaler**2
    enddo
 
-   ! print*, 'triple a0 = ', (real(a(1,i,i+1)), i=1,dim-5)
-   ! print*, 'triple a1 = ', (real(a(2,i,i+1)), i=1,dim-5)
-
    tmp = a(:,:,2)
-   call compute_commutator(a(:,:,1), tmp, dim, commutator)
-   a(:,:,3) = commutator
-   call compute_commutator(a(:,:,1), a(:,:,3), dim, commutator)
-   a(:,:,3) = commutator
-   call compute_commutator(a(:,:,1), a(:,:,3), dim, commutator)
+   call compute_commutator(a(:,:,1), tmp, dim, this%commutator)
+   a(:,:,3) = this%commutator
+   call compute_commutator(a(:,:,1), a(:,:,3), dim, this%commutator)
+   a(:,:,3) = this%commutator
+   call compute_commutator(a(:,:,1), a(:,:,3), dim, this%commutator)
 
-   omega = omega + commutator / 60.d0
+   omega = omega + this%commutator / 60.d0
 
-   ! print*, 'triple commutator coef = ', coef
-   ! print*, 'triple commutator term = ', (real(commutator(i,i+2)), i=1,dim-5)
-   ! print*, 'omega after triple term = ', (real(omega(i,i+2)), i=1,dim-5)
-   ! print*, 'triple commutator term = ', (coef(1)*commutator(i,i+1), i=1,nnodes-1)
-   ! print*, 'triple commutator term = ', real(tmp(4,:,:))
-   ! print*, 'omega after adding triple terms', omega(1:3,11)
    deallocate(tmp, a)
    nullify(f1)
  end subroutine add_triple_commutator_terms

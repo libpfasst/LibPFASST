@@ -266,6 +266,10 @@ contains
     real(pfdp), intent(in) :: dt
     real(pfdp), intent(inout) :: coefs(:,:,:)
 
+    ! coefs has the structure coefs(coefs, magnus_order, node)
+    ! for a given node, pass subroutines the coefs for a magnus order, then
+    ! loop over coefs
+
     if (qtype == 1) then
        ! we're talking Lobatto nodes, where nnodes=3 includes, t0, t_1/2, tn
        ! need some way to differentiate whether you want full collocation or not
