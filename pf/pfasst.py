@@ -26,6 +26,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+try:
+    termtype = get_ipython().__class__.__name__
+except:
+    from tqdm import tqdm as tqdm
+else:
+    if 'ZMQ' in termtype:
+        from tqdm import tqdm_notebook as tqdm
+    else:
+        from tqdm import tqdm as tqdm
 
 @attr.s(slots=True)
 class Params(object):
@@ -340,13 +349,13 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                 print("Status : FAIL", exc.returncode, exc.output)
             else:
                 trajectory, total_times = self._get_trajectory_from_output(
-                    output, ref=ref)
+                    output, self.p.nsteps, ref=ref)
                 trajectory.to_pickle(pkl_path)
                 self._cleanup()
 
         return trajectory, total_times
 
-    def _get_trajectory_from_output(self, output, ref=False):
+    def _get_trajectory_from_output(self, output, nsteps, ref=False):
         trajectory = pd.DataFrame(columns=[
             'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'
         ])
@@ -358,44 +367,47 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         idx = 0
         total_times = {}
-        for line in output.split('\n'):
-            match = prog_state.search(line)
-            if match:
-                time = float(match.group(1))
-                rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
-                residual_value = float(match.group(6))
-                if iteration < 0: continue
+        if not ref:
+            for line in tqdm(output.split('\n'), leave=False,
+                             desc='parsing nsteps{}'.format(nsteps)):
+                match = prog_state.search(line)
+                if match:
+                    time = float(match.group(1))
+                    rank, step, iteration, level = map(int, match.group(2, 3, 4, 5))
+                    residual_value = float(match.group(6))
+                    if iteration < 0: continue
 
-                if self.p.solutions:
-                    if time >= 1000.0:
-                        path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:09.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
-                                            time, rank, step, iteration, level)
-                    elif time >= 100.0:
-                        path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:08.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
-                                            time, rank, step, iteration, level)
-                    elif time >= 10.0:
-                        path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:07.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
-                                            time, rank, step, iteration, level)
+                    if self.p.solutions:
+                        if time >= 1000.0:
+                            path_to_solution = self.p.base_dir+'/'+\
+                                            "time_{:09.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                                time, rank, step, iteration, level)
+                        elif time >= 100.0:
+                            path_to_solution = self.p.base_dir+'/'+\
+                                            "time_{:08.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                                time, rank, step, iteration, level)
+                        elif time >= 10.0:
+                            path_to_solution = self.p.base_dir+'/'+\
+                                            "time_{:07.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                                time, rank, step, iteration, level)
+                        else:
+                            path_to_solution = self.p.base_dir+'/'+\
+                                            "time_{:06.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
+                                                time, rank, step, iteration, level)
+                        solution = self._get_solution(path_to_solution)
                     else:
-                        path_to_solution = self.p.base_dir+'/'+\
-                                        "time_{:06.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
-                                            time, rank, step, iteration, level)
-                    solution = self._get_solution(path_to_solution)
-                else:
-                    solution = None
+                        solution = None
 
-                trajectory.loc[idx] = time, rank, step, iteration, \
-                              level, residual_value, solution
-                idx += 1
+                    trajectory.loc[idx] = time, rank, step, iteration, \
+                                level, residual_value, solution
+                    idx += 1
 
-            time_match = time_state.search(line)
-            if time_match:
-                rank = int(time_match.group(1))
-                cpu_time = float(time_match.group(2))
-                total_times[rank] = cpu_time
+                time_match = time_state.search(line)
+                if time_match:
+                    rank = int(time_match.group(1))
+                    cpu_time = float(time_match.group(2))
+                    total_times[rank] = cpu_time
+
 
         if self.p.timings:
             timings = read_all_timings(dname='.')
@@ -408,6 +420,8 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         sol = self._get_solution('final_solution')
         last_row = len(trajectory) - 1
+        if ref:
+            last_row = 0
         trajectory.set_value(last_row, 'solution', sol)
 
         return trajectory, total_times
@@ -451,14 +465,14 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.qtype = 'gauss'
         self.p.tasks = 1
         self.p.levels = 1
-        self.p.nsteps = 2**15
+        self.p.nsteps = 2**18
         self.p.nodes = 3
         self.p.magnus = 3
         self.p.timings = False
         self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
 
-        traj, _ = self.run()
+        traj, _ = self.run(ref=True)
         last_row = len(traj) - 1
         final_solution = traj.loc[last_row, 'solution']
 
@@ -720,7 +734,8 @@ class Experiment(object):
 
         errors = []
         nsteps = [2**i for i in steps]
-        for i, step in enumerate(nsteps):
+        for i, step in tqdm(enumerate(nsteps), total=len(nsteps),
+                            desc='magnus{}, nodes{}'.format(pf.p.magnus, pf.p.nodes)):
             pf.p.nsteps = step
             pf.p.dt = pf.p.tfinal / pf.p.nsteps
             trajectory, total_times = pf.run()
