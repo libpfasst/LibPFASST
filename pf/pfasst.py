@@ -16,15 +16,15 @@ Results    : pd.DataFrame child that implements pfasst-related plots, and result
 import argparse
 import glob
 import re
+import attr
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from pprint import pprint
 from os import remove, mkdir
 from subprocess import check_output, STDOUT, CalledProcessError
 from scipy.io import FortranFile
 from pf.io import read_all_timings, Timing
-import attr
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 try:
     termtype = get_ipython().__class__.__name__
@@ -465,7 +465,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.qtype = 'gauss'
         self.p.tasks = 1
         self.p.levels = 1
-        self.p.nsteps = 2**18
+        self.p.nsteps = 2**15
         self.p.nodes = 3
         self.p.magnus = 3
         self.p.timings = False
@@ -547,6 +547,9 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         ax1.set_title('Position')
         ax2.set_title('Momentum')
+
+        ax1.set_xlabel('Time')
+        ax2.set_xlabel('Time')
 
         return fig, (ax1, ax2)
 
