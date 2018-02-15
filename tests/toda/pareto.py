@@ -33,7 +33,6 @@ labels = ['Leg-6', 'Leg-4-3', 'Leg-2']
 if __name__ == '__main__':
 
     exe = '/global/homes/b/bkrull/apps/pfasst-nwchem/libpfasst/tests/toda/main.exe'
-    # exe = '/home/bkrull/devel/pfasst-nwchem/libpfasst/tests/toda/main.exe'
     print exe
     toda = PFASST(exe, params)
     exp = Experiment()
@@ -48,7 +47,7 @@ if __name__ == '__main__':
         label = labels[i]
 
         print "Starting order {} loop".format(order)
-        for j in range(2):
+        for j in range(6):
             times = []
             tasks = 2**j
             print "\t Starting MPI{}".format(tasks)
@@ -82,4 +81,6 @@ if __name__ == '__main__':
     ax.set_xscale('log')
     ax.set_yscale('log')
 
-    fig.savefig('/home/bkrull/Dropbox/lbl/pareto.png', dpi=300)
+    fig.savefig('pareto.png', dpi=300)
+    with sns.set_context('poster'):
+        fig.savefig('pareto-poster.png', dpi=300)
