@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import pickle
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pf.pfasst import PFASST, Experiment, Params
@@ -11,8 +12,9 @@ sns.set_style('whitegrid',
 sns.set_context('paper')
 colors = sns.color_palette()
 
+tfinal = 5.0
 params = Params(
-    tfinal=5.0,
+    tfinal=tfinal,
     tasks=1,
     sweeps_pred=[2],
     sweeps=[1],
@@ -37,7 +39,17 @@ if __name__ == '__main__':
     toda = PFASST(exe, params)
     exp = Experiment()
 
-    fig, ax = plt.subplots()
+    try:
+        with open('times{}.pkl'.format(tfinal)) as pkl:
+            method_times = pickle.load(pkl)
+        TIMES_RECOVERED = True
+        print 'Timings were recovered'
+    except IOError:
+        method_times = []
+        TIMES_RECOVERED = False
+        print 'Timings were not recovered'
+
+    fig, ax = plt.subplots(dpi=200)
 
     print 'Starting loops'
 
@@ -47,6 +59,7 @@ if __name__ == '__main__':
         label = labels[i]
 
         print "Starting order {} loop".format(order)
+        mpi_times = []
         for j in range(6):
             times = []
             tasks = 2**j
@@ -56,8 +69,11 @@ if __name__ == '__main__':
 
             r = exp.convergence_exp(toda, steps=nsteps)
 
-            for time in r.total_times:
-                times.append(sum(time.values()) / tasks)
+            if TIMES_RECOVERED:
+                times = method_times[i][j]
+            else:
+                for time in r.total_times:
+                    times.append(sum(time.values()) / tasks)
 
             fc = c if tasks == 1 else 'none'
             m = markers[j]
@@ -74,6 +90,12 @@ if __name__ == '__main__':
                 markerfacecolor=fc,
                 label=label)
 
+            mpi_times.append(times)
+        method_times.append(mpi_times)
+
+    with open('times{}.pkl'.format(tfinal), 'w') as pkl:
+        pickle.dump(method_times, pkl)
+
     ax.grid(True)
     ax.legend()
     ax.set_xlabel('Time to solution')
@@ -81,6 +103,4 @@ if __name__ == '__main__':
     ax.set_xscale('log')
     ax.set_yscale('log')
 
-    fig.savefig('pareto.png', dpi=300)
-    with sns.set_context('poster'):
-        fig.savefig('pareto-poster.png', dpi=300)
+    fig.savefig('pareto.png')
