@@ -600,6 +600,7 @@ contains
           pf%state%status  = PF_STATUS_PREDICTOR
           pf%state%pstatus = PF_STATUS_PREDICTOR
           pf%comm%statreq  = -66
+          residual = 1
        end if
 
        !> Call the predictor
@@ -613,7 +614,6 @@ contains
        converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
        pf%state%pstatus = PF_STATUS_ITERATING
-!       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
 
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
