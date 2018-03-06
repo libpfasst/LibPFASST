@@ -83,10 +83,8 @@ contains
     nvars = magpicard%dim * magpicard%dim * 2
 
     allocate(magpicard%commutator(nparticles, nparticles), &
-         magpicard%commutators(magpicard%dim, magpicard%dim, 9), &
-         magpicard%commutator_coefs(9, 3, 4))
+         magpicard%commutators(magpicard%dim, magpicard%dim, 9))
 
-    magpicard%commutator_coefs = 0.0_pfdp
     magpicard%commutators(:,:,:) = z0
     magpicard%commutator = z0
 
@@ -145,10 +143,11 @@ contains
 
     dim = this%dim
 
-    node_offset = 0
-    nnodes = size(f)
-    if (nnodes > 3) node_offset = 1
-    dim = this%dim
+    if (this%qtype == 1) then
+       node_offset = 0
+    else
+       node_offset = 1
+    endif
 
     !$omp parallel do private(i, j, k, f1, f2)
     do i = 1, 3
@@ -205,7 +204,7 @@ contains
    integer, intent(in) :: dim
    real(pfdp), intent(in) :: coefs(:)
 
-   integer :: i, j, k, nnodes, node_offset
+   integer :: i
    complex(pfdp) :: tmp(dim,dim)
 
    !$omp parallel do reduction(+:omega) private(i, tmp)

@@ -600,7 +600,6 @@ contains
           pf%state%status  = PF_STATUS_PREDICTOR
           pf%state%pstatus = PF_STATUS_PREDICTOR
           pf%comm%statreq  = -66
-          residual = 1
        end if
 
        !> Call the predictor
