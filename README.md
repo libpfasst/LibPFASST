@@ -5,12 +5,26 @@ Approximation Scheme in Space and Time (PFASST) algorithm.  It is
 written in Fortran (mostly F90, with some F03), but can be interfaced
 with C and C++ fairly easily.
 
-Please see the documentation in 'docs' and examples in 'examples' for
-usage information.
+# NOTICE ON NEW RELEASE
 
-An online version of the documentation is available at
+You might notice that the code here has undergone substantial recent changes.
+We are currently in the process of updating the documentation and examples to reflect the changes.
+Please stay tuned.
+
+You can see the old documentation in the 'docs' directory and,
+an online version of the documentation is available at
 
   https://libpfasst.readthedocs.org/en/latest/
+
+There is (new) Doxygen info at
+
+https://pfasst.bitbucket.io/Doxygen/html/index.html
+
+<!---
+and examples in 'examples' for
+usage information.
+--->
+
 
 
 # COMPILERS
