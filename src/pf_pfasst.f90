@@ -94,6 +94,7 @@ contains
     do l = 1, pf%nlevels
        pf%levels(l)%index = l
        call pf_level_setup(pf, pf%levels(l))
+       call pf%levels(l)%results%initialize(pf%state%nsteps, pf%niters, pf%comm%nproc)
     end do
 
     !>  Loop over levels setting interpolation and restriction matrices (in time)
@@ -202,6 +203,7 @@ contains
 
     !>  destroy all levels
     do l = 1, pf%nlevels
+       call pf%levels(l)%results%destroy()
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays

@@ -48,6 +48,7 @@ contains
     !  Local variables
     integer :: nproc  !<  Total number of processors
     integer :: nsteps_loc  !<  local number of time steps    
+    integer :: l
     real(pfdp) :: tend_loc !<  The final time of run
 
     ! make a local copy of nproc
@@ -102,9 +103,9 @@ contains
        end if
     end if
 
-!    if (pf%save_results) then
-!       call pf%results%dump()
-!    endif
+   if (pf%save_results) then
+      call pf%results%dump()
+   endif
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -613,6 +614,8 @@ contains
        converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
        pf%state%pstatus = PF_STATUS_ITERATING
+
+       lev_p%results%times(pf%state%step, pf%rank) = pf%state%t0
 
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters

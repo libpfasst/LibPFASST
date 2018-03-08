@@ -147,6 +147,7 @@ module pf_mod_dtype
      real(pfdp)  :: residual0           !< residual at beginning of PFASST call
                                         ! used for relative residual tolerance calculation
 
+     type(pf_results_t) :: results
      class(pf_user_level_t), allocatable :: ulevel  !<  user customized level info
 
      !>  Simple data storage at each level
