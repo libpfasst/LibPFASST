@@ -116,7 +116,8 @@ contains
        t = t0
        !$omp parallel do private(m, t)
        do m = 1, nnodes
-          t = t + dt*this%dtsdc(m-1)
+!          t = t + dt*this%dtsdc(m)
+           t=t0+dt*lev%nodes(m)
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
        !$omp end parallel do

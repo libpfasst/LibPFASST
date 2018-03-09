@@ -43,6 +43,10 @@ contains
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
           allocate(pf%levels(l)%shape(1))
+          pf%levels(l)%nsweeps = nsweeps(l)
+          pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
+          pf%levels(l)%shape(1) = nparticles
+          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
 
           allocate(magpicard_context::pf%levels(l)%ulevel)
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
@@ -57,10 +61,6 @@ contains
             pf%levels(l)%nnodes = nnodes(l)
           endif
 
-          pf%levels(l)%nsweeps = nsweeps(l)
-          pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
-          pf%levels(l)%shape(1) = nparticles
-          pf%levels(l)%nvars = nparticles * nparticles * 2
       end do
 
       print *,'Initializing mpi and pfasst...'
@@ -69,15 +69,17 @@ contains
       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
 
-      call zndarray_build(dmat_t0, pf%levels(pf%nlevels)%shape(1))
-      call zndarray_build(dmat_tfinal, pf%levels(pf%nlevels)%shape(1))
-      call initial(dmat_t0)
+      call zndarray_build(dmat_t0, nparticles)
+      call initial(dmat_t0)  
+      call zndarray_build(dmat_tfinal,nparticles)
+
 
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       start = MPI_Wtime()
       print*, 'Running pfasst...'
       call pf_pfasst_run(pf, dmat_t0, dt, 0.0_pfdp, nsteps, dmat_tfinal)
+
 
       finish = MPI_Wtime()
       print '("processor ", i2, " returned from pfasst CPU time: ", f16.10, " seconds")', &
@@ -93,7 +95,6 @@ contains
       call zndarray_destroy(dmat_t0)
       call zndarray_destroy(dmat_tfinal)
 
-      print *,'destroying pf'
       call pf_pfasst_destroy(pf)
 
     end subroutine rttddft

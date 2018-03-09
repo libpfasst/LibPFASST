@@ -96,7 +96,7 @@ contains
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1),1)    
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
 
-    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -114,7 +114,7 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
    
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imex_sweep

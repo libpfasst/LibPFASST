@@ -148,7 +148,6 @@ contains
       c_lev_ptr%index,  c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%destroy_array(f_int_array, f_lev_ptr%nnodes, &
       f_lev_ptr%index,   f_lev_ptr%shape)
-
     deallocate(c_times)
     deallocate(f_times)
   end subroutine restrict_time_space_fas

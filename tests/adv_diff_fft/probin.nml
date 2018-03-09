@@ -32,7 +32,7 @@
     nsweeps_pred= 1 
     nsweeps= 1 
 
-    nvars =  64
+    nx =  64
 
     Tfin = 0.1
     nsteps = 64

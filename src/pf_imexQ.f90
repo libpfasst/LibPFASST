@@ -243,7 +243,6 @@ contains
 
     call lev%ulevel%factory%destroy_single(this%rhs, lev%index,  lev%shape)
 
-
   end subroutine imexQ_destroy
 
 

@@ -137,7 +137,7 @@ contains
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level, shape(:)
-    
+
     select type (x)
     class is (ndarray)
        deallocate(x%shape)
@@ -146,14 +146,14 @@ contains
     deallocate(x)
   end subroutine ndarray_destroy_single
 
-  
+
   !> Subroutine to destroy an array of arrays
   subroutine ndarray_destroy_array(this, x, n, level,  shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
-    
+
     select type(x)
     class is (ndarray)
        do i = 1,n

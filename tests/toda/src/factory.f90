@@ -60,7 +60,7 @@ module factory
     allocate(zndarray_obj%array(dim, dim))
 
     zndarray_obj%dim = dim
-    zndarray_obj%array(:,:) = (0.0, 0.0)
+    zndarray_obj%array(:,:) = cmplx(0.0, 0.0,pfdp)
 
     nullify(zndarray_obj)
   end subroutine zndarray_build
@@ -69,19 +69,19 @@ module factory
     class(pf_encap_t), intent(inout) :: encap
     type(zndarray), pointer :: zndarray_obj
 
+
     zndarray_obj => cast_as_zndarray(encap)
 
     deallocate(zndarray_obj%array)
-
     nullify(zndarray_obj)
 
   end subroutine zndarray_destroy
 
   !> Wrapper routine for allocation of a single zndarray type array
-  subroutine zndarray_create_single(this, x, level, kind, nvars, shape)
+  subroutine zndarray_create_single(this, x, level, kind, shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
-    integer, intent(in) :: level, kind, nvars, shape(:)
+    integer, intent(in) :: level, kind, shape(:)
 
     allocate(zndarray::x)
     call zndarray_build(x, shape(1))
@@ -89,10 +89,10 @@ module factory
   end subroutine zndarray_create_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_create_array(this, x, n, level, kind, nvars, shape)
+  subroutine zndarray_create_array(this, x, n, level, kind,  shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x(:)
-    integer, intent(in) :: n, level, kind, nvars, shape(:)
+    integer, intent(in) :: n, level, kind,  shape(:)
     integer :: i
 
     allocate(zndarray::x(n))
@@ -102,10 +102,10 @@ module factory
 
   end subroutine zndarray_create_array
 
-  subroutine zndarray_destroy_single(this, x, level, kind, nvars, shape)
+  subroutine zndarray_destroy_single(this, x, level, kind,  shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: x
-    integer, intent(in) :: level, kind, nvars, shape(:)
+    integer, intent(in) :: level, kind,  shape(:)
     class(zndarray), pointer :: zndarray_obj
 
     zndarray_obj => cast_as_zndarray(x)
@@ -114,10 +114,10 @@ module factory
   end subroutine zndarray_destroy_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_destroy_array(this, x, n, level, kind, nvars, shape)
+  subroutine zndarray_destroy_array(this, x, n, level, kind,  shape)
     class(zndarray_factory), intent(inout):: this
     class(pf_encap_t), intent(inout), pointer :: x(:)
-    integer, intent(in) :: n, level, kind, nvars, shape(:)
+    integer, intent(in) :: n, level, kind,  shape(:)
     class(zndarray), pointer :: zndarray_obj
     integer :: i
 
@@ -126,7 +126,7 @@ module factory
       deallocate(zndarray_obj%array)
     end do
 
-    deallocate(x)
+!    deallocate(x)
   end subroutine zndarray_destroy_array
 
 

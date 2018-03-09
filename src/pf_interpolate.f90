@@ -154,7 +154,6 @@ contains
     !> destroy local workspace
     call c_lev_ptr%ulevel%factory%destroy_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%destroy_single(f_delta, f_lev_ptr%index,  f_lev_ptr%shape)
-
   end subroutine interpolate_q0
 
 end module pf_mod_interpolate

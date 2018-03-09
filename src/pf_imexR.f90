@@ -190,7 +190,6 @@ contains
 
     ! Explicit matrix
     this%QtilE =  lev%qmatFE
-
   end subroutine imexR_initialize
 
   !>  Subroutine to deallocate sweeper

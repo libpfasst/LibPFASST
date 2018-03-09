@@ -642,7 +642,7 @@ contains
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
-          pf%results%residuals(pf%state%iter, pf%state%step, lev_p%index) = lev_p%residual
+          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
 
           if (pf%state%status == PF_STATUS_CONVERGED) exit
        end do  !  Loop over the iteration in this bloc
