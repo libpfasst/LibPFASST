@@ -48,16 +48,19 @@ contains
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, l, pf%qtype, &
-               pf%debug, pf%levels(l)%shape, pf%levels(l)%nvars)
+          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, &
+               l, pf%qtype, pf%debug)
 
           if (pf%qtype == 5) then
             pf%levels(l)%nnodes = nnodes(l)+2
           else
             pf%levels(l)%nnodes = nnodes(l)
           endif
+
           pf%levels(l)%nsweeps = nsweeps(l)
           pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
+          pf%levels(l)%shape(1) = nparticles
+          pf%levels(l)%nvars = nparticles * nparticles * 2
       end do
 
       print *,'Initializing mpi and pfasst...'

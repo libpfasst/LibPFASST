@@ -68,7 +68,7 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
-!    pf%save_results = .true.
+    pf%save_results = .true.
   end subroutine pf_pfasst_create
 
 
@@ -94,7 +94,6 @@ contains
     do l = 1, pf%nlevels
        pf%levels(l)%index = l
        call pf_level_setup(pf, pf%levels(l))
-       call pf%levels(l)%results%initialize(pf%state%nsteps, pf%niters, pf%comm%nproc)
     end do
 
     !>  Loop over levels setting interpolation and restriction matrices (in time)
@@ -203,19 +202,17 @@ contains
 
     !>  destroy all levels
     do l = 1, pf%nlevels
-       call pf%levels(l)%results%destroy()
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
-!    call pf%results%destroy()
+    call pf%results%destroy()
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
     deallocate(pf%state)
-    call pf_mpi_destroy(pf%comm)   
+    call pf_mpi_destroy(pf%comm)
 
   end subroutine pf_pfasst_destroy
-
 
 
   !> Deallocate PFASST level
@@ -223,7 +220,7 @@ contains
     class(pf_level_t), intent(inout) :: lev      !<  level to destroy
     integer                          :: nlevels  !<  number of pfasst levels
 
-    
+
     integer                          :: npieces  !<  local copy of number of function pieces
 
     if (.not. lev%allocated) return

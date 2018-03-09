@@ -37,7 +37,7 @@ module sweeper
      procedure :: f_eval => compute_B
      procedure :: compute_single_commutators
      procedure :: compute_omega
-     procedure :: compute_time_ev_ops
+     ! procedure :: compute_time_ev_ops
      procedure :: propagate_solution
      procedure :: destroy => destroy_magpicard_sweeper
   end type magpicard_sweeper_t
@@ -58,13 +58,11 @@ contains
 
   end function cast_as_magpicard_sweeper
 
-  subroutine initialize_magpicard_sweeper(this, level, qtype, debug, shape, nvars)
+  subroutine initialize_magpicard_sweeper(this, level, qtype, debug)
     use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
     class(pf_sweeper_t), intent(inout) :: this
     integer, intent(in) :: level, qtype
     logical, intent(in) :: debug
-    integer, intent(inout) :: shape(:)
-    integer, intent(inout) :: nvars
 
     class(magpicard_sweeper_t), pointer :: magpicard !< context data containing integrals, etc
     integer :: coefs=9
@@ -79,8 +77,6 @@ contains
     magpicard%dim = nparticles
 
     ! inouts necessary for the base class structure
-    shape(:) = magpicard%dim
-    nvars = magpicard%dim * magpicard%dim * 2
 
     allocate(magpicard%commutator(nparticles, nparticles), &
          magpicard%commutators(magpicard%dim, magpicard%dim, 9))
@@ -315,83 +311,87 @@ contains
  !> Compute matrix exponential
  !! u = exp{omega}
  !! u_dagger = exp{-omega}
- subroutine compute_time_ev_ops(this, time_ev_op, omega, level)
-   use probin, only: exptol
-   class(magpicard_sweeper_t), intent(inout) :: this
-   class(pf_encap_t), intent(inout) :: time_ev_op, omega
-   integer, intent(in) :: level
+ ! subroutine compute_time_ev_ops(this, time_ev_op, omega, level)
+ !   use probin, only: exptol
+ !   class(magpicard_sweeper_t), intent(inout) :: this
+ !   class(pf_encap_t), intent(inout) :: time_ev_op, omega
+ !   integer, intent(in) :: level
 
-   class(zndarray), pointer :: omega_p
-   class(zndarray), pointer :: time_ev_op_p
+ !   class(zndarray), pointer :: omega_p
+ !   class(zndarray), pointer :: time_ev_op_p
 
-   integer :: dim
-   complex(pfdp), allocatable :: tmp(:,:), tmp2(:,:)
+ !   integer :: dim
+ !   complex(pfdp), allocatable :: tmp(:,:), tmp2(:,:)
 
-   omega_p => cast_as_zndarray(omega)
-   time_ev_op_p => cast_as_zndarray(time_ev_op)
+ !   omega_p => cast_as_zndarray(omega)
+ !   time_ev_op_p => cast_as_zndarray(time_ev_op)
 
-   dim = omega_p%dim
-   allocate(tmp(dim,dim), tmp2(dim,dim))
-   if(this%debug) then
-      print*, '----------Inside compute_time_ev_ops----------'
-      print*, 'dim omega= ', omega_p%dim
-      print*, 'shape omega = ', shape(omega_p%array)
-      print*, 'omega = ', omega_p%array
-   end if
+ !   dim = omega_p%dim
+ !   allocate(tmp(dim,dim), tmp2(dim,dim))
+ !   if(this%debug) then
+ !      print*, '----------Inside compute_time_ev_ops----------'
+ !      print*, 'dim omega= ', omega_p%dim
+ !      print*, 'shape omega = ', shape(omega_p%array)
+ !      print*, 'omega = ', omega_p%array
+ !   end if
 
-   ! tmp = cmplx(0.0, 0.0, pfdp)
-   time_ev_op_p%array = compute_matrix_exp(omega_p%array, dim, exptol(level))
+ !   ! tmp = cmplx(0.0, 0.0, pfdp)
+ !   time_ev_op_p%array = compute_matrix_exp(omega_p%array, dim, exptol(level))
 
-   ! call c8mat_expm1(dim, omega_p%array, time_ev_op_p%array)
-   ! time_ev_op_p%array = tmp
+ !   ! call c8mat_expm1(dim, omega_p%array, time_ev_op_p%array)
+ !   ! time_ev_op_p%array = tmp
 
-   if (time_ev_op_p%norm()*0.0 /= 0.0) then
-      print*, omega_p%array
-      print*, time_ev_op_p%array
-      stop
-   endif
+ !   if (time_ev_op_p%norm()*0.0 /= 0.0) then
+ !      print*, omega_p%array
+ !      print*, time_ev_op_p%array
+ !      stop
+ !   endif
 
-   deallocate(tmp)
-   nullify(omega_p, time_ev_op_p)
- end subroutine compute_time_ev_ops
+ !   deallocate(tmp)
+ !   nullify(omega_p, time_ev_op_p)
+ ! end subroutine compute_time_ev_ops
 
  !> Computes the P_t = U*P_t0*U^dagger
- subroutine propagate_solution(this, sol_t0, sol_tn, u)
-   use probin, only: nprob
+ subroutine propagate_solution(this, sol_t0, sol_tn, omega, level)
+   use probin, only: nprob, exptol
    class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: sol_t0
    class(pf_encap_t), intent(inout) :: sol_tn
-   class(pf_encap_t), intent(inout) :: u !< Time-evolution operator
+   class(pf_encap_t), intent(inout) :: omega !< Time-evolution operator
+   integer, intent(in) :: level
    integer :: dim !< size of dimensions of P, U
-   class(zndarray), pointer :: sol_t0_p, sol_tn_p, u_p
-   complex(pfdp), allocatable :: tmp(:,:)
+   class(zndarray), pointer :: sol_t0_p, sol_tn_p, omega_p
+   complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
 
    sol_t0_p => cast_as_zndarray(sol_t0)
    sol_tn_p => cast_as_zndarray(sol_tn)
-   u_p => cast_as_zndarray(u)
+   omega_p => cast_as_zndarray(omega)
 
    dim = sol_t0_p%dim
-   allocate(tmp(dim, dim))
+   allocate(tmp(dim, dim), time_ev_op(dim, dim))
+
+   time_ev_op = cmplx(0.0, 0.0, pfdp)
+   time_ev_op = compute_matrix_exp(omega_p%array, dim, exptol(level))
 
    if (nprob < 10) then
       call zgemm('n', 'n', dim, dim, dim, &
-           z1, u_p%array, dim, &
+           z1, time_ev_op, dim, &
            sol_t0_p%array, dim, &
            z0, tmp, dim)
 
       call zgemm('n', 'c', dim, dim, dim, &
            z1, tmp, dim, &
-           u_p%array, dim, &
+           time_ev_op, dim, &
            z0, sol_tn_p%array, dim)
    else
       call zgemm('n', 'n', dim, dim, dim, &
-           z1, u_p%array, dim, &
+           z1, time_ev_op, dim, &
            sol_t0_p%array, dim, &
            z0, sol_tn_p%array, dim)
    endif
 
-   deallocate(tmp)
-   nullify(sol_t0_p, sol_tn_p, u_p)
+   deallocate(tmp, time_ev_op)
+   nullify(sol_t0_p, sol_tn_p, omega_p)
  end subroutine propagate_solution
 
 function compute_matrix_exp(matrix_in, dim, tol) result(matexp)

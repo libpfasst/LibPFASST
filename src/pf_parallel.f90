@@ -48,7 +48,6 @@ contains
     !  Local variables
     integer :: nproc  !<  Total number of processors
     integer :: nsteps_loc  !<  local number of time steps    
-    integer :: l
     real(pfdp) :: tend_loc !<  The final time of run
 
     ! make a local copy of nproc
@@ -75,7 +74,7 @@ contains
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
-!    call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels)
+    call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels)
 
     ! figure out what routine to call
     if (pf%nlevels .eq. 1) then
@@ -103,9 +102,9 @@ contains
        end if
     end if
 
-   if (pf%save_results) then
-      call pf%results%dump()
-   endif
+    if (pf%save_results) then
+       call pf%results%dump()
+    endif
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -615,7 +614,7 @@ contains
        pf%state%status = PF_STATUS_ITERATING
        pf%state%pstatus = PF_STATUS_ITERATING
 
-       lev_p%results%times(pf%state%step, pf%rank) = pf%state%t0
+       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
 
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
@@ -643,7 +642,7 @@ contains
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
-!          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
+          pf%results%residuals(pf%state%iter, pf%state%step, lev_p%index) = lev_p%residual
 
           if (pf%state%status == PF_STATUS_CONVERGED) exit
        end do  !  Loop over the iteration in this bloc
