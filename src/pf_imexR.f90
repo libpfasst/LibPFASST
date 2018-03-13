@@ -90,7 +90,6 @@ contains
     class(pf_level_t), pointer :: lev    !<  points to current level
 
     integer     :: m, n,k   !<  Loop variables
-    
     lev => pf%levels(level_index)   !<  Assign level pointer
     this%tsdc = t0+dt*lev%nodes
 
@@ -196,7 +195,7 @@ contains
   subroutine imexR_destroy(this, lev)
     class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev   !<  Current level
-    
+
     deallocate(this%QtilE)
     deallocate(this%QtilI)
     deallocate(this%dtsdc)
@@ -241,7 +240,6 @@ contains
     real(pfdp),        intent(in   ) :: t0
     call pf_generic_spreadq0(this, lev, t0)
   end subroutine imexR_spreadq0
-
 
   !> Subroutine to evaluate function value at node m
   subroutine imexR_evaluate(this, lev, t, m)

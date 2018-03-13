@@ -231,10 +231,9 @@ contains
 
   !>  Subroutine to deallocate sweeper
   subroutine imexQ_destroy(this, lev)
-
     class(pf_imexQ_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev   !<  Current level
-    
+
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
     deallocate(this%QtilE)
@@ -285,7 +284,6 @@ contains
 
   !> Subroutine to evaluate function value at node m
   subroutine imexQ_evaluate(this, lev, t, m)
-  
     class(pf_imexQ_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev  !<  Current level
     real(pfdp),        intent(in   ) :: t    !<  Time at which to evaluate
