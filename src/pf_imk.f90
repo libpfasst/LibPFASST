@@ -38,13 +38,14 @@ module pf_mod_imk
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
+     class(pf_encap_t), allocatable :: Y(:)
      class(pf_encap_t), allocatable :: A(:)
-     real(pfdp), allocatable :: QtilE(:,:)
+     class(pf_encap_t), allocatable :: mexp(:)
+     real(pfdp), allocatable :: Qtil(:,:)
      real(pfdp), allocatable :: dtsdc(:)
-     real(pfdp), allocatable :: tsdc(:)
-     real(pfdp) :: bernoullis(20)
-     integer ::  qtype, nterms
-     logical ::  Lax_pair, use_SDC, debug
+     logical ::  Lax_pair
+     logical ::  use_SDC
+
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -60,7 +61,7 @@ module pf_mod_imk
  end type pf_imk_t
 
  interface
-    !>  Subroutine f_eval computes A(y,t)
+    !>  Subroutine f_eval computes f=A(y,t)
      subroutine pf_f_eval_p(this, y, t, level, f)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t),   intent(inout) :: this
@@ -68,8 +69,7 @@ module pf_mod_imk
        real(pfdp),        intent(in   ) :: t
        integer(c_int),    intent(in   ) :: level
      end subroutine pf_f_eval_p
-    !>  Subroutine dexpinv computes Om'=F=dexpinv_Om(A)
-     subroutine pf_dexpinv_p(this, a, omega, f)
+     subroutine pf_dexpinv_p(this, omega, a, x)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t), intent(inout) :: this
        class(pf_encap_t), intent(inout) :: a
@@ -102,11 +102,11 @@ contains
     real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
     integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
 
-    integer :: n,m,k                      !< Loop counters
-    class(pf_level_t), pointer :: lev     !<  points to current level
+    integer :: m,k
+    real(pfdp) :: t
+    class(pf_level_t), pointer :: lev  !<  points to current level
 
-    lev => pf%levels(level_index) !  Assign level pointer
-    this%tsdc = t0+dt*lev%nodes   !  Set times at nodes
+    lev => pf%levels(level_index) !<  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -191,6 +191,21 @@ contains
 
     do m = 1, nnodes
        call this%A(m)%setval(0.0_pfdp)
+
+    !>  Make space for temporary variables
+    call lev%ulevel%factory%create_array(this%Y, nnodes, &
+         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+
+    call lev%ulevel%factory%create_array(this%A, nnodes, &
+         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+
+    call lev%ulevel%factory%create_array(this%mdexp, nnodes-1, &
+         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+
+    do m = 1, nnodes
+       call this%Y(m)%setval(0.0_pfdp)
+       call this%A(m)%setval(0.0_pfdp)
+       call this%exp(m)%setval(0.0_pfdp)
     end do
 
   end subroutine imk_initialize
@@ -324,8 +339,15 @@ contains
       deallocate(this%dtsdc)
       deallocate(this%tsdc)
 
+      call lev%ulevel%factory%destroy_array(this%Y, lev%nnodes, &
+           lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+
       call lev%ulevel%factory%destroy_array(this%A, lev%nnodes, &
-           lev%index,   lev%shape)
+           lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+
+      call lev%ulevel%factory%destroy_array(this%mexp, lev%nnodes, &
+           lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
+
   end subroutine imk_destroy
 
 end module pf_mod_imk
