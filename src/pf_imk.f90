@@ -45,7 +45,7 @@ module pf_mod_imk
      real(pfdp), allocatable :: dtsdc(:)
      logical ::  Lax_pair
      logical ::  use_SDC
-
+     integer ::  nterms
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -61,7 +61,7 @@ module pf_mod_imk
  end type pf_imk_t
 
  interface
-    !>  Subroutine f_eval computes f=A(y,t)
+    !>  Subroutine f_eval computes A(y,t)
      subroutine pf_f_eval_p(this, y, t, level, f)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t),   intent(inout) :: this
@@ -69,6 +69,7 @@ module pf_mod_imk
        real(pfdp),        intent(in   ) :: t
        integer(c_int),    intent(in   ) :: level
      end subroutine pf_f_eval_p
+    !>  Subroutine dexpinv computes Om'=dexpinv_Om(A)
      subroutine pf_dexpinv_p(this, omega, a, x)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t), intent(inout) :: this
