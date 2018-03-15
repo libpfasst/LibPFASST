@@ -41,8 +41,9 @@ module pf_mod_imk
      class(pf_encap_t), allocatable :: Y(:)
      class(pf_encap_t), allocatable :: A(:)
      class(pf_encap_t), allocatable :: mexp(:)
-     real(pfdp), allocatable :: Qtil(:,:)
+     real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: dtsdc(:)
+     real(pfdp), allocatable :: tsdc(:)
      logical ::  Lax_pair
      logical ::  use_SDC
      integer ::  nterms
@@ -69,13 +70,20 @@ module pf_mod_imk
        real(pfdp),        intent(in   ) :: t
        integer(c_int),    intent(in   ) :: level
      end subroutine pf_f_eval_p
-    !>  Subroutine dexpinv computes Om'=dexpinv_Om(A)
-     subroutine pf_dexpinv_p(this, omega, a, x)
+    !>  Subroutine dexpinv computes Om'=F=dexpinv_Om(A)
+     subroutine pf_dexpinv_p(this, A, Om, nterms, F)
        import pf_imk_t, pf_encap_t, c_int, pfdp
        class(pf_imk_t), intent(inout) :: this
+<<<<<<< HEAD
        class(pf_encap_t), intent(inout) :: a
        class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: f       !<  The resultign-level
+=======
+       class(pf_encap_t), intent(inout) :: A   
+       class(pf_encap_t), intent(inout) :: Om
+       integer(c_int),    intent(in   ) :: nterms  !< number of terms in expansion
+       class(pf_encap_t), intent(inout) :: F       !<  The result 
+>>>>>>> imk sweeper no compiles
      end subroutine pf_dexpinv_p
     !>  Subroutine propagate   computes y_m=expm(Om_m)y_0(expm(Om_m))-1 or (expm(Om_m))y_0 or
      subroutine pf_propagate_p(this, q0, q)
@@ -103,11 +111,11 @@ contains
     real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
     integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
 
-    integer :: m,k
-    real(pfdp) :: t
-    class(pf_level_t), pointer :: lev  !<  points to current level
+    integer :: n,m,k                      !< Loop counters
+    class(pf_level_t), pointer :: lev     !<  points to current level
 
-    lev => pf%levels(level_index) !<  Assign level pointer
+    lev => pf%levels(level_index) !  Assign level pointer
+    this%tsdc = t0+dt*lev%nodes   !  Set times at nodes
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -116,6 +124,7 @@ contains
 
     do k = 1,nsweeps
 
+<<<<<<< HEAD
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! Store all function values  (dexpinv)
@@ -153,6 +162,46 @@ contains
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do
 
+=======
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+       
+       ! Store all function values  (dexpinv)
+       call imk_save(lev)
+       
+       !  If first sweep, compute first function value should is just A(t_0,y_0)
+       if (k .eq. 1) then
+          call this%Y(1)%copy(lev%q0)
+          call imk_evaluate(this,lev, t0, 1)
+       end if
+
+       ! Assign the old function value the difference in function values
+       m = 1
+       call lev%pF(m,1)%axpy(-1.0_pfdp,lev%F(m,1))
+
+       ! do the substepping
+       do m = 1, lev%nnodes-1
+
+          !>  Accumulate rhs in Residual 
+          do n = 1, m
+             call lev%R(m)%axpy(-dt*this%QtilE(m,n), lev%pF(n,1))
+          end do
+
+          !  Add the starting old sol term
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(m+1))
+
+          call lev%Q(m+1)%copy(lev%R(m))
+
+          !  Evaluate the new rhs  (will also do Y)
+          call imk_evaluate(this,lev, this%tsdc(m+1), m+1)
+       end do
+
+       call pf_residual(pf, lev, dt)   
+       call lev%qend%copy(this%Y(lev%nnodes))  !<  for diagnostics
+       call call_hooks(pf, level_index, PF_POST_SWEEP)
+    end do
+
+
+>>>>>>> imk sweeper no compiles
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imk_sweep
 
@@ -163,10 +212,17 @@ contains
     integer :: n,m, nnodes
 
     this%npieces = 1
+<<<<<<< HEAD
 
     allocate(this%QtilE(nnodes-1,nnodes))
     allocate(this%dtsdc(nnodes-1))
     allocate(this%tsdc(nnodes))
+=======
+    
+    allocate(this%QtilE(nnodes-1,nnodes))  
+    allocate(this%dtsdc(nnodes-1))  
+    allocate(this%tsdc(nnodes))  
+>>>>>>> imk sweeper no compiles
 
     nnodes = lev%nnodes
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
@@ -195,18 +251,18 @@ contains
 
     !>  Make space for temporary variables
     call lev%ulevel%factory%create_array(this%Y, nnodes, &
-         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+         lev%index,   lev%shape)
 
     call lev%ulevel%factory%create_array(this%A, nnodes, &
-         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+         lev%index,   lev%shape)
 
-    call lev%ulevel%factory%create_array(this%mdexp, nnodes-1, &
-         lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    call lev%ulevel%factory%create_array(this%mexp, nnodes-1, &
+         lev%index,   lev%shape)
 
     do m = 1, nnodes
        call this%Y(m)%setval(0.0_pfdp)
        call this%A(m)%setval(0.0_pfdp)
-       call this%exp(m)%setval(0.0_pfdp)
+       call this%mexp(m)%setval(0.0_pfdp)
     end do
 
   end subroutine imk_initialize
@@ -237,6 +293,7 @@ contains
     class(pf_level_t), intent(inout) :: lev
 
     !  Propagate to get y=exp(Om)
+<<<<<<< HEAD
     !prop needs e^{Q (omega)} and apply to Y
     if (this%debug) then
     print*, 'level', lev%index, 'in evaluate ', m, '------------------'
@@ -265,6 +322,20 @@ contains
     if (this%debug) print*, 'depxinv'
     if (this%debug) call lev%F(m,1)%eprint()
     if (this%debug) print*, 'end evaluate ------------'
+=======
+    if (m > 1) &
+         call this%propagate(this%Y(1), lev%Q(m), this%Y(m))
+
+    !  Compute A(y,t)
+    call this%f_eval(this%Y(m), t, lev%index, this%A(m))
+
+    !  Compute the series expansion for dexpinv
+    if (m > 1)  then
+       call this%dexpinv(this%A(m),  lev%Q(m),this%nterms, lev%F(m,1))
+    else
+       call lev%Q(1)%copy(this%A(1))
+    endif
+>>>>>>> imk sweeper no compiles
   end subroutine imk_evaluate
 
   subroutine imk_evaluate_all(this, lev, t)
@@ -341,13 +412,13 @@ contains
       deallocate(this%tsdc)
 
       call lev%ulevel%factory%destroy_array(this%Y, lev%nnodes, &
-           lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+           lev%index,   lev%shape)
 
       call lev%ulevel%factory%destroy_array(this%A, lev%nnodes, &
-           lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+           lev%index,   lev%shape)
 
       call lev%ulevel%factory%destroy_array(this%mexp, lev%nnodes, &
-           lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
+           lev%index,  lev%shape)
 
   end subroutine imk_destroy
 
