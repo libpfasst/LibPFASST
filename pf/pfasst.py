@@ -60,6 +60,7 @@ class Params(object):
     nsteps = attr.ib(default=16)
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
+    nterms = attr.ib(default=[5], validator=attr.validators.instance_of(list))
     sweeps = attr.ib(default=[1], validator=attr.validators.instance_of(list))
     sweeps_pred = attr.ib(default=[1],
                           validator=attr.validators.instance_of(list))
@@ -81,6 +82,7 @@ class Params(object):
     vcycle = attr.ib(default=False)
     tolerance = attr.ib(default=0.0)
     qtype = attr.ib(default='lobatto')
+    inttype = attr.ib(default='mag')
 
     def __attrs_post_init__(self):
         if self.dt is None:
@@ -97,7 +99,8 @@ class Params(object):
             'nsteps': self.nsteps,
             'dt': self.dt,
             'nodes': self.nodes,
-            'magnus': self.magnus
+            'magnus': self.magnus,
+            'nterms': self.nterms
         }
         pprint(params, width=1)
 
@@ -148,7 +151,7 @@ class PFASST(object):
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
 abs_res_tol = {}\n\trel_res_tol = {}\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
 &PARAMS\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
-magnus_order = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
+{} = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
 nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
 
         if self.p.filename:
@@ -178,6 +181,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
     def _create_pf_string(self):
         nodes = ' '.join(map(str, self.p.nodes))
         magnus = ' '.join(map(str, self.p.magnus))
+        nterms = ' '.join(map(str, self.p.nterms))
         sweeps = ' '.join(map(str, self.p.sweeps))
         sweeps_pred = ' '.join(map(str, self.p.sweeps_pred))
         exptol = ' '.join(self.p.exptol)
@@ -207,10 +211,17 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         else:
             qtype = 1
 
+        if self.p.inttype == 'mag':
+            inttype = 'magnus_order'
+            val = magnus
+        else:
+            inttype = 'nterms'
+            val = nterms
+
         basedir = '"{}"'.format(self.p.base_dir)
         self.pfstring = self.base_string.format(
             self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
-            vcycle, basedir, nodes, sweeps_pred, sweeps, magnus, self.p.tfinal,
+            vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
             self.p.nsteps, exptol, self.p.particles, self.p.nprob,
             "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
             "\'"+self.p.exact_dir+"\'", solns, periodic)
