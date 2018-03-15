@@ -233,18 +233,8 @@ contains
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
-    if (this%debug) then
-    print*, 'level', lev%index, 'in evaluate ', m, '------------------'
-    endif
-    if (m > 1) then
-       if (this%debug) print*, 'propagating'
-       call this%propagate(lev%q0, lev%Q(m))
-    else
-       if (this%debug) print*, 'copying'
-       call lev%Q(1)%copy(lev%q0, flags=1)
-    end if
-    if (this%debug) print*, 'Q'
-    if (this%debug) call lev%Q(m)%eprint()
+    if (m > 1) &
+         call this%propagate(this%Y(1), this%Y(m),lev%Q(m))
 
     !  Compute A(y,t)
     call this%f_eval(lev%Q(m), t, lev%index, this%A(m))

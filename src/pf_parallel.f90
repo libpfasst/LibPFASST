@@ -158,7 +158,7 @@ contains
     real(pfdp),        intent(in   )         :: dt     !< time step
     integer,           intent(in   )         :: flags(:)  !<  User defined flags
 
-    
+
     class(pf_level_t), pointer :: c_lev_p     !<  Coasrse level pointer
     class(pf_level_t), pointer :: f_lev_p     !<  Fine level pointer
     integer                   :: j, k            !<  Loop indices
@@ -196,7 +196,7 @@ contains
        if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
           !  Get new initial conditions
           call pf_recv(pf, c_lev_p, 30000+pf%rank+k, .true.)
-          
+
           !  Do a RK_step
           call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1 )
           !  Send forward
@@ -697,8 +697,6 @@ contains
 
   end subroutine pf_check_convergence_pipeline
 
-  !
-  !>  Execute a V-cycle, starting and ending from the middle level.
   subroutine pf_v_cycle(pf, iteration, t0, dt)
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
