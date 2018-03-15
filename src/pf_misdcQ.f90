@@ -55,7 +55,7 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
     
-    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
+    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)
 
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -81,7 +81,7 @@ contains
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,3),3)
 
-    call lev%ulevel%factory%create_single(rhs, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index,   lev%shape)
 
     t = t0
     do m = 1, lev%nnodes-1
@@ -114,8 +114,8 @@ contains
                          
     call lev%qend%copy(lev%Q(lev%nnodes))
 
-    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    call lev%ulevel%factory%destroy_single(rhs, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%index,  lev%shape)
 
     call end_timer(pf, TLEVEL+lev%index-1)
 

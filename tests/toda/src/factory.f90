@@ -78,10 +78,10 @@ module factory
   end subroutine zndarray_destroy
 
   !> Wrapper routine for allocation of a single zndarray type array
-  subroutine zndarray_create_single(this, x, level, kind, shape)
+  subroutine zndarray_create_single(this, x, level,  shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
-    integer, intent(in) :: level, kind, shape(:)
+    integer, intent(in) :: level, shape(:)
 
     allocate(zndarray::x)
     call zndarray_build(x, shape(1))
@@ -89,10 +89,10 @@ module factory
   end subroutine zndarray_create_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_create_array(this, x, n, level, kind,  shape)
+  subroutine zndarray_create_array(this, x, n, level,  shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x(:)
-    integer, intent(in) :: n, level, kind,  shape(:)
+    integer, intent(in) :: n, level,  shape(:)
     integer :: i
 
     allocate(zndarray::x(n))
@@ -102,10 +102,10 @@ module factory
 
   end subroutine zndarray_create_array
 
-  subroutine zndarray_destroy_single(this, x, level, kind,  shape)
+  subroutine zndarray_destroy_single(this, x, level,  shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: x
-    integer, intent(in) :: level, kind,  shape(:)
+    integer, intent(in) :: level,  shape(:)
     class(zndarray), pointer :: zndarray_obj
 
     zndarray_obj => cast_as_zndarray(x)
@@ -114,10 +114,10 @@ module factory
   end subroutine zndarray_destroy_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_destroy_array(this, x, n, level, kind,  shape)
+  subroutine zndarray_destroy_array(this, x, n, level,  shape)
     class(zndarray_factory), intent(inout):: this
     class(pf_encap_t), intent(inout), pointer :: x(:)
-    integer, intent(in) :: n, level, kind,  shape(:)
+    integer, intent(in) :: n, level, shape(:)
     class(zndarray), pointer :: zndarray_obj
     integer :: i
 

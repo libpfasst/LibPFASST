@@ -90,6 +90,7 @@ contains
     class(pf_level_t), pointer :: lev    !<  points to current level
 
     integer     :: m, n,k   !<  Loop variables
+
     lev => pf%levels(level_index)   !<  Assign level pointer
     this%tsdc = t0+dt*lev%nodes
 

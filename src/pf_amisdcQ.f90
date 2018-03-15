@@ -56,8 +56,8 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
    
-    call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
+    call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%shape)
+    call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)
     
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -85,10 +85,10 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))
 
-    call lev%ulevel%factory%create_single(rhsA, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%create_single(rhsB, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%create_single(QA,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%create_single(QB,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    call lev%ulevel%factory%create_single(rhsA, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(rhsB, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(QA,   lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(QB,   lev%index,   lev%shape)
 
     call QA%setval(0.0_pfdp)
     call QB%setval(0.0_pfdp)
@@ -135,12 +135,12 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
-    call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    call lev%ulevel%factory%destroy_single(rhsA, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%destroy_single(rhsB, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%destroy_single(QA,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    call lev%ulevel%factory%destroy_single(QB,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)
+    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)
 
     call end_timer(pf, TLEVEL+lev%index-1)
 
@@ -166,8 +166,8 @@ contains
 
     ! call start_timer(pf, TLEVEL+lev%index-1)
    
-    ! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    ! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
+    ! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%shape)
+    ! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)
     
     ! ! compute integrals and add fas correction
     ! do m = 1, lev%nnodes-1
@@ -195,10 +195,10 @@ contains
     ! call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))
     ! call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))
 
-    ! call lev%ulevel%factory%create_single(rhsA, lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
-    ! call lev%ulevel%factory%create_single(rhsB, lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
-    ! call lev%ulevel%factory%create_single(QA,   lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
-    ! call lev%ulevel%factory%create_single(QB,   lev%index, SDC_KIND_SOL_FEVAL, lev%shape)
+    ! call lev%ulevel%factory%create_single(rhsA, lev%index,  lev%shape)
+    ! call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%shape)
+    ! call lev%ulevel%factory%create_single(QA,   lev%index,  lev%shape)
+    ! call lev%ulevel%factory%create_single(QB,   lev%index,  lev%shape)
 
     ! call QA%setval(0.0_pfdp)
     ! call QB%setval(0.0_pfdp)
@@ -245,12 +245,12 @@ contains
 
     ! call lev%qend%copy(lev%Q(lev%nnodes))
 
-    ! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    ! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,SDC_KIND_SOL_FEVAL,lev%shape)
-    ! call lev%ulevel%factory%destroy_single(rhsA, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    ! call lev%ulevel%factory%destroy_single(rhsB, lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    ! call lev%ulevel%factory%destroy_single(QA,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
-    ! call lev%ulevel%factory%destroy_single(QB,   lev%index, SDC_KIND_SOL_FEVAL,  lev%shape)
+    ! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)
+    ! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)
+    ! call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)
+    ! call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)
+    ! call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)
+    ! call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)
 
     ! call end_timer(pf, TLEVEL+lev%index-1)
         

@@ -133,7 +133,6 @@ contains
     call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
 
-    ! Zero temps
     call c_delta%setval(0.0_pfdp)
     call f_delta%setval(0.0_pfdp)
 

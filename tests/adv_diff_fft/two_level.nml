@@ -13,8 +13,8 @@
      qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-13
-     rel_res_tol = 1.d-13
+     abs_res_tol = 0.d-13
+     rel_res_tol = 0.d-13
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
      Pipeline_G =  .true.
