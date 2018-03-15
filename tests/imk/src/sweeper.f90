@@ -132,26 +132,36 @@ contains
       class(imk_sweeper_t), intent(inout) :: this
       class(pf_encap_t), intent(inout) :: a, f, omega
 
-      ! type(zndarray), pointer :: L, B
-      ! integer :: i
-      ! real(pfdp) :: factor
+      type(zndarray), pointer :: a_p, omega_p, f_p
+      integer :: i
+      real(pfdp) :: factor, cc
+      complex(pfdp), allocatable :: D(:,:), C(:,:)
 
+      a_p => cast_as_zndarray(a)
+      f_p => cast_as_zndarray(f)
+      omega_p => cast_as_zndarray(omega)
 
-      ! L => cast_as_zndarray(y)
-      ! B => cast_as_zndarray(f)
+      allocate(D(this%dim, this%dim), C(this%dim, this%dim))
 
-      ! factor = 1.0_pfdp
-      ! do i = 1, this%nterms
-      !    call compute_commutator(L%array, B%array, dim, this%commutator)
-      !    factor = factor / real(i, pfdp)
+      D = omega_p%array
+      C = omega_p%array
+      factor = 1.0_pfdp
+      do i = 1, this%nterms
+         call compute_commutator(a_p%array, C, this%dim, this%commutator)
+         factor = factor / real(i, pfdp)
 
-      !    if (this%bernoullis(i) .ne. 0.0) then
-      !       cc = this%bernoullis(i) * factor
-      !       D = D + cc * this%commutator
-      !    endif
-      ! end do
+         if (this%bernoullis(i) .ne. 0.0) then
+            cc = this%bernoullis(i) * factor
+            D = D + cc * this%commutator
+         endif
 
-      ! nullify(L, B)
+         C = this%commutator
+      end do
+
+      f_p%array = D
+      deallocate(D, C)
+
+      nullify(a_p, f_p, omega_p)
 
   end subroutine dexpinv
 
