@@ -29,14 +29,14 @@ module probin
   character(len=1024), save :: molecule
   character(len=1024), save :: exact_dir
   integer, save :: nparticles
-  logical, save :: toda_periodic, save_solutions
+  logical, save :: toda_periodic, save_solutions, use_sdc
 
   !  Output
   character(len=64), save :: fbase
   integer, save    :: poutmod
 
   namelist /params/ Finterp, ndim, nfake, nnodes, nprob, nsteps, N, dt, Tfin
-  namelist /params/ nsweeps,nsweeps_pred
+  namelist /params/ nsweeps, nsweeps_pred, use_sdc
   namelist /params/ fbase, poutmod, exptol, save_solutions, nparticles, toda_periodic
   namelist /params/ alpha, beta, vab, nterms, basis, molecule, exact_dir
 
@@ -77,6 +77,7 @@ contains
     exptol(:) = 1.0d-20
     save_solutions = .false.
     toda_periodic = .false.
+    use_sdc = .true.
     nparticles = 3
 
     nnodes = 3         !  Set them all to three

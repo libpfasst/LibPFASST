@@ -83,6 +83,7 @@ class Params(object):
     tolerance = attr.ib(default=1e-12)
     qtype = attr.ib(default='lobatto')
     inttype = attr.ib(default='mag')
+    sdc = attr.ib(default=True)
 
     def __attrs_post_init__(self):
         if self.dt is None:
@@ -152,7 +153,7 @@ class PFASST(object):
 abs_res_tol = {}\n\trel_res_tol = {}\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
 &PARAMS\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 {} = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n/\n"
+nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\tuse_sdc = {}\n/\n"
 
         if self.p.filename:
             with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
@@ -201,6 +202,11 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         else:
             periodic = '.false.'
 
+        if self.p.sdc == True:
+            sdc = '.true.'
+        else:
+            sdc = '.false.'
+
         if self.p.vcycle == True:
             vcycle = '.true.'
         else:
@@ -224,7 +230,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
             self.p.nsteps, exptol, self.p.particles, self.p.nprob,
             "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
-            "\'"+self.p.exact_dir+"\'", solns, periodic)
+            "\'"+self.p.exact_dir+"\'", solns, periodic, sdc)
 
         return self.pfstring
 
@@ -484,8 +490,8 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             self.p.nodes = 3
             self.p.magnus = [3]
         else:
-            self.p.nodes = 10
-            self.p.nterms = [12]
+            self.p.nodes = 15
+            self.p.nterms = [20]
 
         traj, _ = self.run(ref=True)
         last_row = len(traj) - 1

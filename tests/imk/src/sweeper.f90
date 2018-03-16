@@ -55,11 +55,11 @@ contains
 
   end function cast_as_imk_sweeper
 
-  subroutine initialize_imk_sweeper(this, level, qtype, debug, nterms)
+  subroutine initialize_imk_sweeper(this, level, debug, use_sdc, qtype, nterms)
     use probin, only: nparticles, dt
     class(pf_sweeper_t), intent(inout) :: this
     integer, intent(in) :: level, qtype, nterms
-    logical, intent(in) :: debug
+    logical, intent(in) :: debug, use_sdc
 
     class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
 
@@ -69,6 +69,7 @@ contains
     imk%nterms = nterms
     imk%debug = debug
     imk%dim = nparticles
+    imk%use_sdc = use_sdc
 
     allocate(imk%commutator(nparticles, nparticles))
 

@@ -45,10 +45,8 @@ module pf_mod_imk
      real(pfdp), allocatable :: dtsdc(:)
      real(pfdp), allocatable :: tsdc(:)
      real(pfdp) :: bernoullis(20)
-     integer ::  qtype
-     logical ::  Lax_pair
-     logical ::  use_SDC
-     integer ::  nterms
+     integer ::  qtype, nterms
+     logical ::  Lax_pair, use_SDC
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
