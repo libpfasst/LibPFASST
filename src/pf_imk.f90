@@ -235,7 +235,7 @@ contains
     if (m > 1) then
        call this%propagate(lev%q0, this%Y(m),lev%Q(m))
     else
-       call this%A(1)%copy(lev%q0)
+       call this%Y(1)%copy(lev%q0)
     end if
 
     !  Compute A(y,t)

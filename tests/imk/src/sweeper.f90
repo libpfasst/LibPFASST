@@ -66,7 +66,6 @@ contains
     imk => cast_as_imk_sweeper(this)
 
     imk%qtype = qtype
-    imk%dt = dt
     imk%nterms = nterms
     imk%debug = debug
     imk%dim = nparticles
@@ -112,23 +111,6 @@ contains
   end subroutine f_eval
 
   subroutine dexpinv(this, a, omega, f)
-!     function [D]=dexpinv(A,C,Nterms)
-!     if(ndims(A) > 2)
-!     display('ndim in bracket')
-!     pause
-!   end program
-!   D= C;
-!   jfact = 1;
-!   bra=C;
-!   for j = 1:Nterms
-!   bra=bracket(A,bra);
-!   jfact=jfact/j;
-!   if (B(j) ~= 0)
-!   cc = B(j)*jfact;
-!   D= D+cc*bra;
-
-! end program
-
       class(imk_sweeper_t), intent(inout) :: this
       class(pf_encap_t), intent(inout) :: a, f, omega
 
@@ -143,11 +125,11 @@ contains
 
       allocate(D(this%dim, this%dim), C(this%dim, this%dim))
 
-      D = omega_p%array
-      C = omega_p%array
+      D = a_p%array
+      C = a_p%array
       factor = 1.0_pfdp
       do i = 1, this%nterms
-         call compute_commutator(a_p%array, C, this%dim, this%commutator)
+         call compute_commutator(omega_p%array, C, this%dim, this%commutator)
          factor = factor / real(i, pfdp)
 
          if (this%bernoullis(i) .ne. 0.0) then
