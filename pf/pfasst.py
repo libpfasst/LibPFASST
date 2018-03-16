@@ -55,8 +55,8 @@ class Params(object):
     nb = attr.ib(default=True, repr=False)
     filename = attr.ib(default=None)
     levels = attr.ib(default=1)
-    tfinal = attr.ib(default=1.0)
-    iterations = attr.ib(default=10)
+    tfinal = attr.ib(default=10.0)
+    iterations = attr.ib(default=30)
     nsteps = attr.ib(default=16)
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
@@ -76,11 +76,11 @@ class Params(object):
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
     timings = attr.ib(default=False)
-    solutions = attr.ib(default=True)
-    particles = attr.ib(default=5)
-    periodic = attr.ib(default=False)
+    solutions = attr.ib(default=False)
+    particles = attr.ib(default=11)
+    periodic = attr.ib(default=True)
     vcycle = attr.ib(default=False)
-    tolerance = attr.ib(default=0.0)
+    tolerance = attr.ib(default=1e-12)
     qtype = attr.ib(default='lobatto')
     inttype = attr.ib(default='mag')
 
@@ -477,11 +477,15 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.tasks = 1
         self.p.levels = 1
         self.p.nsteps = 2**15
-        self.p.nodes = 3
-        self.p.magnus = 3
         self.p.timings = False
         self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
+        if self.p.inttype == 'mag':
+            self.p.nodes = 3
+            self.p.magnus = [3]
+        else:
+            self.p.nodes = 10
+            self.p.nterms = [12]
 
         traj, _ = self.run(ref=True)
         last_row = len(traj) - 1
@@ -490,6 +494,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.nsteps = params['nsteps']
         self.p.nodes = params['nodes']
         self.p.magnus = params['magnus']
+        self.p.nterms = params['nterms']
         self.p.tasks = params['tasks']
         self.p.levels = params['levels']
         self.p.solutions = params['solutions']
