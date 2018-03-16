@@ -44,7 +44,7 @@ module pf_mod_imk
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: dtsdc(:)
      real(pfdp), allocatable :: tsdc(:)
-     real(pfdp) :: dt, bernoullis(20)
+     real(pfdp) :: bernoullis(20)
      integer ::  qtype
      logical ::  Lax_pair
      logical ::  use_SDC
@@ -184,7 +184,6 @@ contains
     this%bernoullis(16) =    -3617.0d0 / 5.10d2
     this%bernoullis(18) =    43867.0d0 / 7.98d2
     this%bernoullis(20) =    -174611.0d0/330.0d0
-
     !>  Assign explicit approximate quadrature rule
     this%QtilE =  lev%qmatFE
 
@@ -233,8 +232,11 @@ contains
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
-    if (m > 1) &
-         call this%propagate(this%Y(1), this%Y(m),lev%Q(m))
+    if (m > 1) then
+       call this%propagate(lev%q0, this%Y(m),lev%Q(m))
+    else
+       call this%A(1)%copy(lev%q0)
+    end if
 
     !  Compute A(y,t)
     call this%f_eval(lev%Q(m), t, lev%index, this%A(m))

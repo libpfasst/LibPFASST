@@ -605,7 +605,7 @@ contains
        !> Call the predictor
        !> Currently the predictor will do nothing but spread q0 to all the nodes
        if (pf%state%status == PF_STATUS_PREDICTOR) then
-          call pf_predictor(pf, pf%state%t0, dt,flags)
+          call pf_predictor(pf, pf%state%t0, dt)
        end if
 
        !>  Start the loops over SDC sweeps

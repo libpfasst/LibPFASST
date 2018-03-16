@@ -449,6 +449,5 @@ contains
     end do
   end subroutine pf_time_interpolation_matrix
 
-  ! Subroutine to spread initial condition for predictors.
 
 end module pf_mod_pfasst
