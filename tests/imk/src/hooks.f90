@@ -64,7 +64,7 @@ contains
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
          pf%rank, state%step+1, state%iter, level%index
     open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
-    write(20) qend%array
+    write(20) qend%y
     close(20)
 
   end subroutine save_solution

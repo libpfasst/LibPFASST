@@ -87,27 +87,27 @@ contains
     real(pfdp), intent(in) :: t
     integer, intent(in) :: level
 
-    type(zndarray), pointer :: L, B
+    type(zndarray), pointer :: y_p, A_p
     integer :: i
 
-    L => cast_as_zndarray(y)
-    B => cast_as_zndarray(f)
+    y_p => cast_as_zndarray(y)
+    A_p => cast_as_zndarray(f)
 
     do i = 1, this%dim
-       B%array(i,i) = 0.0_pfdp
+       A_p%array(i,i) = 0.0_pfdp
     enddo
 
     do i = 1, this%dim-1
-       B%array(i, i+1) = -1.0_pfdp * L%array(i, i+1)
-       B%array(i+1, i) = L%array(i, i+1)
+       A_p%array(i, i+1) = -1.0_pfdp * y_p%y(i, i+1)
+       A_p%array(i+1, i) = y_p%y(i, i+1)
     enddo
 
     if (toda_periodic .eqv. .true.) then
-       B%array(1, this%dim) = L%array(1, this%dim)
-       B%array(this%dim, 1) = -1.0_pfdp * L%array(this%dim, 1)
+       A_p%array(1, this%dim) = y_p%y(1, this%dim)
+       A_p%array(this%dim, 1) = -1.0_pfdp * y_p%y(this%dim, 1)
     endif
 
-    nullify(L, B)
+    nullify(y_p, A_p)
 
   end subroutine f_eval
 
@@ -164,45 +164,43 @@ contains
          zm1, output, dim)
   end subroutine compute_commutator
 
-  subroutine propagate_solution(this, q0, q, omega)
+  subroutine propagate_solution(this, q0, q)
     class(imk_sweeper_t), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: q0
     class(pf_encap_t), intent(inout) :: q
-    class(pf_encap_t), intent(inout) :: omega !< Time-evolution operator
     integer :: dim, nprob=1 !< size of dimensions of P, U
-    class(zndarray), pointer :: q0_p, q_p, omega_p
+    class(zndarray), pointer :: q0_p, q_p
     complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
     real(pfdp) :: exptol=1.d-15
 
     q0_p => cast_as_zndarray(q0)
     q_p => cast_as_zndarray(q)
-    omega_p => cast_as_zndarray(omega)
 
     dim = q0_p%dim
     allocate(tmp(dim, dim), time_ev_op(dim, dim))
 
     time_ev_op = cmplx(0.0, 0.0, pfdp)
-    time_ev_op = compute_matrix_exp(omega_p%array, dim, exptol)
+    time_ev_op = compute_matrix_exp(q_p%array, dim, exptol)
 
     if (nprob < 10) then
        call zgemm('n', 'n', dim, dim, dim, &
             z1, time_ev_op, dim, &
-            q0_p%array, dim, &
+            q0_p%y, dim, &
             z0, tmp, dim)
 
        call zgemm('n', 'c', dim, dim, dim, &
             z1, tmp, dim, &
             time_ev_op, dim, &
-            z0, q_p%array, dim)
+            z0, q_p%y, dim)
     else
        call zgemm('n', 'n', dim, dim, dim, &
             z1, time_ev_op, dim, &
-            q0_p%array, dim, &
-            z0, q_p%array, dim)
+            q0_p%y, dim, &
+            z0, q_p%y, dim)
     endif
 
     deallocate(tmp, time_ev_op)
-    nullify(q0_p, q_p, omega_p)
+    nullify(q0_p, q_p)
   end subroutine propagate_solution
 
   function compute_matrix_exp(matrix_in, dim, tol) result(matexp)

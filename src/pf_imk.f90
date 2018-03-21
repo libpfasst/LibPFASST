@@ -38,9 +38,7 @@ module pf_mod_imk
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
-     class(pf_encap_t), allocatable :: Y(:)
      class(pf_encap_t), allocatable :: A(:)
-     class(pf_encap_t), allocatable :: mexp(:)
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: dtsdc(:)
      real(pfdp), allocatable :: tsdc(:)
@@ -186,19 +184,11 @@ contains
     this%QtilE =  lev%qmatFE
 
     !>  Make space for temporary variables
-    call lev%ulevel%factory%create_array(this%Y, nnodes, &
-         lev%index,   lev%shape)
-
     call lev%ulevel%factory%create_array(this%A, nnodes, &
          lev%index,   lev%shape)
 
-    call lev%ulevel%factory%create_array(this%mexp, nnodes, &
-         lev%index,   lev%shape)
-
     do m = 1, nnodes
-       call this%Y(m)%setval(0.0_pfdp)
        call this%A(m)%setval(0.0_pfdp)
-       call this%mexp(m)%setval(0.0_pfdp)
     end do
 
   end subroutine imk_initialize
@@ -230,11 +220,16 @@ contains
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
+    print*, 'in evaluate ', m, '------------------'
     if (m > 1) then
-       call this%propagate(lev%q0, this%Y(m),lev%Q(m))
+       print*, 'propagating'
+       call this%propagate(lev%q0, lev%Q(m))
     else
-       call this%Y(1)%copy(lev%q0)
+       print*, 'copying'
+       call lev%Q(1)%copy(lev%q0)
     end if
+    print*, 'Q'
+    call lev%Q(m)%eprint()
 
     !  Compute A(y,t)
     call this%f_eval(lev%Q(m), t, lev%index, this%A(m))
@@ -245,7 +240,7 @@ contains
     if (m > 1)  then
        call this%dexpinv(this%A(m), lev%Q(m), lev%F(m,1))
     else
-       call lev%F(1,1)%copy(this%A(1))
+       call lev%F(1,1)%copy(this%A(1), flags=1)
     endif
     if (this%debug) print*, 'depxinv'
     if (this%debug) call lev%F(m,1)%eprint()
@@ -276,7 +271,7 @@ contains
 
     ! subtract out Q  (not initial condition is zero
     do m = 1, lev%nnodes-1
-       call lev%R(m)%copy(lev%I(m))
+       call lev%R(m)%copy(lev%I(m), flags=1)
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
 
@@ -313,7 +308,7 @@ contains
     integer :: m, p
 
     do m = 1, lev%nnodes
-       call lev%pF(m,1)%copy(lev%F(m,1))
+       call lev%pF(m,1)%copy(lev%F(m,1), flags=1)
     end do
   end subroutine imk_save
 
@@ -325,15 +320,8 @@ contains
       deallocate(this%dtsdc)
       deallocate(this%tsdc)
 
-      call lev%ulevel%factory%destroy_array(this%Y, lev%nnodes, &
-           lev%index,   lev%shape)
-
       call lev%ulevel%factory%destroy_array(this%A, lev%nnodes, &
            lev%index,   lev%shape)
-
-      call lev%ulevel%factory%destroy_array(this%mexp, lev%nnodes, &
-           lev%index,  lev%shape)
-
   end subroutine imk_destroy
 
 end module pf_mod_imk

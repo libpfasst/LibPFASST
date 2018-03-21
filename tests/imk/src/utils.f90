@@ -38,24 +38,15 @@ module utils
     type(zndarray), intent(inout) :: L
     real(pfdp), intent(in)  :: t
 
-    complex(pfdp), allocatable :: time_ev_op(:,:), time_ev_op_dagger(:,:), f(:,:)
-    complex(pfdp), allocatable :: u(:,:), uinit(:,:) !> definition of initial state
+    complex(pfdp), allocatable :: u(:,:) !> definition of initial state
     real(pfdp), allocatable :: q(:), p(:)
     real(pfdp) :: tol=1d-15, alpha_toda
     integer :: dim, i
 
     dim = L%dim
-    allocate(time_ev_op(dim, dim), &
-          time_ev_op_dagger(dim, dim), &
-          f(dim, dim), &
-          u(dim, dim), &
-          uinit(dim, dim), q(dim), p(dim))
+    allocate(u(dim, dim), q(dim), p(dim))
 
     u = z0
-    uinit = z0
-    time_ev_op = z0
-    time_ev_op_dagger = z0
-    f = z0
     q = 0.0_pfdp
     p = 0.0_pfdp
 
@@ -90,9 +81,9 @@ module utils
     enddo
 
     u(:,:) = 0.5_pfdp * u(:,:)
-    L%array = u
+    L%y = u
 
-    deallocate(time_ev_op, time_ev_op_dagger, f, u, uinit, q, p)
+    deallocate(u, q, p)
 
   end subroutine exact
 end module utils

@@ -24,7 +24,7 @@ module factory
 
   type, extends(pf_encap_t) :: zndarray
     integer :: dim
-    complex(pfdp), allocatable :: array(:,:)
+    complex(pfdp), allocatable :: array(:,:), y(:,:)
   contains
     procedure :: setval => zndarray_setval
     procedure :: copy => zndarray_copy
@@ -58,9 +58,11 @@ module factory
     zndarray_obj => cast_as_zndarray(encap)
 
     allocate(zndarray_obj%array(dim, dim))
+    allocate(zndarray_obj%y(dim, dim))
 
     zndarray_obj%dim = dim
     zndarray_obj%array(:,:) = cmplx(0.0, 0.0,pfdp)
+    zndarray_obj%y(:,:) = cmplx(0.0, 0.0,pfdp)
 
     nullify(zndarray_obj)
   end subroutine zndarray_build
@@ -69,10 +71,10 @@ module factory
     class(pf_encap_t), intent(inout) :: encap
     type(zndarray), pointer :: zndarray_obj
 
-
     zndarray_obj => cast_as_zndarray(encap)
 
     deallocate(zndarray_obj%array)
+    deallocate(zndarray_obj%y)
     nullify(zndarray_obj)
 
   end subroutine zndarray_destroy
@@ -110,6 +112,7 @@ module factory
 
     zndarray_obj => cast_as_zndarray(x)
     deallocate(zndarray_obj%array)
+    deallocate(zndarray_obj%y)
 
   end subroutine zndarray_destroy_single
 
@@ -124,11 +127,11 @@ module factory
     do i = 1, n
       zndarray_obj => cast_as_zndarray(x(i))
       deallocate(zndarray_obj%array)
+      deallocate(zndarray_obj%y)
     end do
 
 !    deallocate(x)
   end subroutine zndarray_destroy_array
-
 
   !> Set solution value.
   subroutine zndarray_setval(this, val, flags)
@@ -138,7 +141,11 @@ module factory
     complex(pfdp) :: zval
 
     zval = cmplx(val, 0.0, pfdp)
-    this%array = zval
+    if (present(flags)) then
+       this%y =  zval
+    else
+       this%array =  zval
+    endif
   end subroutine zndarray_setval
 
   !> Copy solution value.
@@ -150,7 +157,11 @@ module factory
 
     zndarray_src => cast_as_zndarray(src)
 
-    this%array =  zndarray_src%array
+    if (present(flags)) then
+        this%array =  zndarray_src%array
+    else
+        this%y =  zndarray_src%y
+    endif
   end subroutine zndarray_copy
 
   !> Pack solution q into a flat array.
@@ -160,12 +171,19 @@ module factory
     integer :: nx,ny,nxny,i,j,ij
     nx=this%dim
     ny=this%dim
-    nxny=nx*ny
+    nxny=nx*ny*2
     do j = 1,ny
        do i = 1,nx
           ij = 2*((j-1)*nx + i)
           z(ij-1) =  real(this%array(i,j))
           z(ij) = aimag(this%array(i,j))
+       end do
+    end do
+    do j = 1,ny
+       do i = 1,nx
+          ij = 2*((j-1)*nx + i) + nxny
+          z(ij-1) =  real(this%y(i,j))
+          z(ij) = aimag(this%y(i,j))
        end do
     end do
   end subroutine zndarray_pack
@@ -177,11 +195,17 @@ module factory
     integer :: nx,ny,nxny,i,j,ij
     nx=this%dim
     ny=this%dim
-    nxny=nx*ny
+    nxny=nx*ny*2
     do j = 1,ny
        do i = 1,nx
           ij = 2*((j-1)*nx + i)
           this%array(i,j) = cmplx(z(ij-1), z(ij), pfdp)
+       enddo
+    enddo
+    do j = 1,ny
+       do i = 1,nx
+          ij = 2*((j-1)*nx + i) + nxny
+          this%y(i,j) = cmplx(z(ij-1), z(ij), pfdp)
       enddo
     enddo
   end subroutine zndarray_unpack
@@ -210,8 +234,13 @@ module factory
     integer :: this_shape(2), i
 
     this_shape = shape(this%array)
+    print*, 'omega'
+    do i = 1, this_shape(1)-1
+        print*, this%array(i,i+1)
+    end do
+    print*, 'y'
     do i = 1, this_shape(1)
-        print*, this%array(:,i)
+       print*, this%y(i,i)
     end do
   end subroutine zndarray_eprint
 
@@ -220,7 +249,7 @@ module factory
     character(len=*), intent(in) :: filename
 
     open(unit=1, file=trim(filename), form='unformatted')
-    write(1) this%array
+    write(1) this%y
     close(1)
   end subroutine write_to_disk
 
