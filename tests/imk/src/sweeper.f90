@@ -30,7 +30,6 @@ module sweeper
 
   type, extends(pf_imk_t) :: imk_sweeper_t
      integer :: dim
-     logical :: debug
      complex(pfdp), allocatable :: commutator(:,:)
    contains
      procedure :: f_eval

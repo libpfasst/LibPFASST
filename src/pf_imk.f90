@@ -44,7 +44,7 @@ module pf_mod_imk
      real(pfdp), allocatable :: tsdc(:)
      real(pfdp) :: bernoullis(20)
      integer ::  qtype, nterms
-     logical ::  Lax_pair, use_SDC
+     logical ::  Lax_pair, use_SDC, debug
   contains
     procedure :: sweep        => imk_sweep
     procedure :: initialize   => imk_initialize
@@ -220,16 +220,18 @@ contains
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
-    print*, 'in evaluate ', m, '------------------'
+    if (this%debug) then
+    print*, 'level', lev%index, 'in evaluate ', m, '------------------'
+    endif
     if (m > 1) then
-       print*, 'propagating'
+       if (this%debug) print*, 'propagating'
        call this%propagate(lev%q0, lev%Q(m))
     else
-       print*, 'copying'
+       if (this%debug) print*, 'copying'
        call lev%Q(1)%copy(lev%q0)
     end if
-    print*, 'Q'
-    call lev%Q(m)%eprint()
+    if (this%debug) print*, 'Q'
+    if (this%debug) call lev%Q(m)%eprint()
 
     !  Compute A(y,t)
     call this%f_eval(lev%Q(m), t, lev%index, this%A(m))
