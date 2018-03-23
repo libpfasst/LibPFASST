@@ -158,9 +158,8 @@ contains
     real(pfdp),        intent(in   )         :: dt     !< time step
     integer,           intent(in   )         :: flags(:)  !<  User defined flags
 
-
-    class(pf_level_t), pointer :: c_lev_p     !<  Coasrse level pointer
-    class(pf_level_t), pointer :: f_lev_p     !<  Fine level pointer
+    class(pf_level_t), pointer :: c_lev_p
+    class(pf_level_t), pointer :: f_lev_p     !<
     integer                   :: j, k            !<  Loop indices
     integer                   :: level_index     !<  Local variable for looping over levels
     real(pfdp)                :: t0k             !<  Initial time at time step k
@@ -207,7 +206,7 @@ contains
           do k = 1, pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt   !  Remember t0 is the beginning of this time slice so t0-(pf%rank)*dt is t0 of problem
-             
+
              ! Get new initial value (skip on first iteration)
              if (k > 1) then
                 call c_lev_p%q0%copy(c_lev_p%qend)
@@ -488,26 +487,26 @@ contains
 
        if (pf%state%step >= pf%state%nsteps) exit
        if (qcycle) cycle
-       
+
 !       if (.not. converged) then
        do level_index = 2, pf%nlevels
           f_lev_p => pf%levels(level_index)
           call pf_post(pf, f_lev_p, f_lev_p%index*10000+k)
        end do
-          
+
        if (pf%state%status /= PF_STATUS_CONVERGED) then
-             
+
           f_lev_p => pf%levels(pf%nlevels)
           call pf_send(pf, f_lev_p, f_lev_p%index*10000+k, .false.)
-             
+
           if (pf%nlevels > 1) then
              c_lev_p => pf%levels(pf%nlevels-1)
              call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
              call save(c_lev_p)
           end if
-             
+
        end if
-          
+
        call pf_v_cycle(pf, k, pf%state%t0, dt)
        call call_hooks(pf, -1, PF_POST_ITERATION)
        call end_timer(pf, TITERATION)

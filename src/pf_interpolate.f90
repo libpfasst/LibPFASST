@@ -103,7 +103,6 @@ contains
     end if  !  Feval
 
     !>  reset qend so that it is up to date
-    !BTK
     call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
 
     !> destroy local data structures
