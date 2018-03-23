@@ -1,0 +1,31 @@
+&PF_PARAMS
+	nlevels = 2
+	niters = 30
+	qtype = 1
+	echo_timings = .false.
+	abs_res_tol = 1e-12
+	rel_res_tol = 1e-12
+	Pipeline_G = .false.
+	PFASST_pred = .true.
+	vcycle = .true.
+    debug = .false.
+/
+
+&PARAMS
+	fbase = "output"
+	nnodes = 3 5
+	nsweeps_pred = 1 1
+	nsweeps = 1 1
+	nterms = 3 5
+	Tfin = 10.0
+	nsteps = 128
+	exptol = 1.d-15
+	nparticles = 5
+	nprob = 4
+	basis = ''
+	molecule = ''
+	exact_dir = ''
+	save_solutions = .true.
+	toda_periodic = .true.
+	use_sdc = .true.
+/
