@@ -33,6 +33,7 @@ module pf_mod_imex
      procedure :: evaluate     => imex_evaluate
      procedure :: integrate    => imex_integrate
      procedure :: residual     => imex_residual
+     procedure :: spreadq0     => imex_spreadq0
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy      => imex_destroy
      procedure :: imex_destroy
@@ -189,6 +190,13 @@ contains
     real(pfdp),        intent(in   ) :: dt
     call pf_generic_residual(this, lev, dt)
   end subroutine imex_residual
+
+  subroutine imex_spreadq0(this, lev, t0)
+    class(pf_imex_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    real(pfdp),        intent(in   ) :: t0
+    call pf_generic_spreadq0(this, lev, t0)
+  end subroutine imex_spreadq0
 
   subroutine imex_evaluate_all(this, lev, t)
     class(pf_imex_t),  intent(inout) :: this

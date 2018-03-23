@@ -80,6 +80,7 @@ contains
 
   end subroutine pf_generic_residual
 
+
   !
   !> Generic evaluate all
   !! Each sweeper can define its own evaluate_all or use this generic one
