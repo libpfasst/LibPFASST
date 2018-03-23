@@ -323,6 +323,7 @@ contains
    g => cast_as_zndarray(qG)
 
    g%array = f%array
+   g%y = f%y
  end subroutine restrict
 
  subroutine interpolate(this, levelF, levelG, qF, qG, t)
@@ -337,6 +338,7 @@ contains
    g => cast_as_zndarray(qG)
 
    f%array = g%array
+   f%y = g%y
  end subroutine interpolate
 
  subroutine initialize_as_identity_real(matrix)
