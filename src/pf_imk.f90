@@ -310,7 +310,7 @@ contains
     integer :: m, p
 
     do m = 1, lev%nnodes
-       call lev%pF(m,1)%copy(lev%F(m,1), flags=1)
+       call lev%pF(m,1)%copy(lev%F(m,1))
     end do
   end subroutine imk_save
 
