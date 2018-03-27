@@ -47,7 +47,7 @@ contains
           pf%levels(l)%nsweeps = nsweeps(l)
           pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
           pf%levels(l)%shape(1) = nparticles
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 4
+          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
 
           allocate(imk_context::pf%levels(l)%ulevel)
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)

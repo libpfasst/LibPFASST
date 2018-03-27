@@ -158,9 +158,9 @@ module factory
     zndarray_src => cast_as_zndarray(src)
 
     if (present(flags)) then
-        this%array =  zndarray_src%array
+        this%y = zndarray_src%y
     else
-        this%y =  zndarray_src%y
+        this%array = zndarray_src%array
     endif
   end subroutine zndarray_copy
 
@@ -175,13 +175,6 @@ module factory
     do j = 1,ny
        do i = 1,nx
           ij = 2*((j-1)*nx + i)
-          z(ij-1) =  real(this%array(i,j))
-          z(ij) = aimag(this%array(i,j))
-       end do
-    end do
-    do j = 1,ny
-       do i = 1,nx
-          ij = 2*((j-1)*nx + i) + nxny
           z(ij-1) =  real(this%y(i,j))
           z(ij) = aimag(this%y(i,j))
        end do
@@ -199,12 +192,6 @@ module factory
     do j = 1,ny
        do i = 1,nx
           ij = 2*((j-1)*nx + i)
-          this%array(i,j) = cmplx(z(ij-1), z(ij), pfdp)
-       enddo
-    enddo
-    do j = 1,ny
-       do i = 1,nx
-          ij = 2*((j-1)*nx + i) + nxny
           this%y(i,j) = cmplx(z(ij-1), z(ij), pfdp)
       enddo
     enddo

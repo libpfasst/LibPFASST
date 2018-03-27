@@ -228,7 +228,7 @@ contains
        call this%propagate(lev%q0, lev%Q(m))
     else
        if (this%debug) print*, 'copying'
-       call lev%Q(1)%copy(lev%q0)
+       call lev%Q(1)%copy(lev%q0, flags=1)
     end if
     if (this%debug) print*, 'Q'
     if (this%debug) call lev%Q(m)%eprint()
@@ -242,7 +242,7 @@ contains
     if (m > 1)  then
        call this%dexpinv(this%A(m), lev%Q(m), lev%F(m,1))
     else
-       call lev%F(1,1)%copy(this%A(1), flags=1)
+       call lev%F(1,1)%copy(this%A(1))
     endif
     if (this%debug) print*, 'depxinv'
     if (this%debug) call lev%F(m,1)%eprint()
@@ -273,7 +273,7 @@ contains
 
     ! subtract out Q  (not initial condition is zero
     do m = 1, lev%nnodes-1
-       call lev%R(m)%copy(lev%I(m), flags=1)
+       call lev%R(m)%copy(lev%I(m))
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
 
