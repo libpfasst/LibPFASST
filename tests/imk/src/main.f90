@@ -69,6 +69,7 @@ contains
 
       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
+      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_SWEEP, save_solution)
 
       call zndarray_build(q0, pf%levels(pf%nlevels)%shape(1))
       call zndarray_build(qend, pf%levels(pf%nlevels)%shape(1))
