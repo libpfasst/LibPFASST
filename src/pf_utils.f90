@@ -16,7 +16,7 @@
 ! You should have received a copy of the GNU General Public License
 ! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
-!> Module with random subroutines that don't seem to fit in other modules
+!> Module with useful subroutines that don't  fit in other modules
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
@@ -26,12 +26,7 @@ contains
 
 
   !
-  ! Compute full residual
-  !
-  ! During the process of computing the residual we compute the '0 to
-  ! node' integral and store it in I.  This is used later when doing
-  ! restriction (see restrict_time_space_fas).
-  !
+  !> Compute full residual at each node and measure it's size
   subroutine pf_residual(pf, lev, dt)
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: lev
@@ -39,10 +34,6 @@ contains
 
     real(pfdp) :: norms(lev%nnodes-1)
     integer :: m
-
-!    if (pf%nlevels == 1 .and. pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) return
-!   I think we often want the residual for diagnostics.  Maybe need flag to turn this off
-!   for efficiency?
 
     call start_timer(pf, TRESIDUAL)
 
@@ -61,8 +52,8 @@ contains
   end subroutine pf_residual
 
   !
-  ! Generic residual
-  !
+  !> Generic residual
+  !! Each sweeper can define its own residual, or use this generic one
   subroutine pf_generic_residual(this, lev, dt)
     class(pf_sweeper_t), intent(in)  :: this
     class(pf_level_t),  intent(inout) :: lev
@@ -70,19 +61,17 @@ contains
 
     integer :: m
 
+    !>  Compute the integral of F
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
-!    do m = 2, lev%nnodes-1
-!       call lev%I(M)%axpy(1.0_pfdp, lev%I(m-1))
-!    end do
 
-    ! add tau (which is 'node to node')
+    !> add tau if it exists
     if (allocated(lev%tauQ)) then
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end do
     end if
 
-    ! subtract out Q
+    !> subtract out the solution value
     do m = 1, lev%nnodes-1
        call lev%R(m)%copy(lev%I(m))
        call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
@@ -92,8 +81,8 @@ contains
   end subroutine pf_generic_residual
 
   !
-  ! Generic evaluate all
-  !
+  !> Generic evaluate all
+  !! Each sweeper can define its own evaluate_all or use this generic one
   subroutine pf_generic_evaluate_all(this, lev, t)
     class(pf_sweeper_t), intent(in)  :: this
     class(pf_level_t),  intent(inout) :: lev
@@ -105,6 +94,32 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
+  
+  !> Generic routine to spread initial conditions
+  !! Each sweeper can define its own spreadq0 or use this generic one
+  subroutine pf_generic_spreadq0(this,lev, t0)
+    class(pf_sweeper_t), intent(in)  :: this
+    class(pf_level_t), intent(inout) :: lev  !<  Level on which to spread
+    real(pfdp),       intent(in)    :: t0    !<  time at beginning of interval
+
+    integer :: m, p
+
+    !  Stick initial condition into first node slot
+    call lev%Q(1)%copy(lev%q0)
+
+    !  Evaluate F at first spot
+    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
+
+    ! Spread F and solution to all nodes
+    do m = 2, lev%nnodes
+       call lev%Q(m)%copy(lev%Q(1))
+       do p = 1, lev%ulevel%sweeper%npieces
+         call lev%F(m,p)%copy(lev%F(1,p))
+       end do
+    end do
+  end subroutine pf_generic_spreadq0
+
+  !>  Routine to compute the LU decomposition of spectral integration matrix
   subroutine myLUq(Q,Qtil,Nnodes,fillq)
     real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
     real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
