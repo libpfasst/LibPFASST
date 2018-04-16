@@ -7,9 +7,8 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imexQ
+  use pf_mod_imexR
   implicit none
-!  include 'fftw3.f03'
 
   real(pfdp), parameter :: &
        Lx     = 1.0_pfdp, &    ! domain size
@@ -25,13 +24,13 @@ module feval
      procedure :: interpolate
   end type ad_level_t
 
-  type, extends(pf_imexQ_t) :: ad_sweeper_t
+  type, extends(pf_imexR_t) :: ad_sweeper_t
 !     type(c_ptr) :: ffft, ifft
 !     complex(pfdp), pointer :: wk(:)              ! work space
      real(pfdp), allocatable :: wsave(:)           ! work space
      real(pfdp), allocatable :: work(:)             ! work space
      complex(pfdp), allocatable :: workhat(:)      ! work space
-     integer ::  lenwrk, lensav, ierror,nvars
+     integer ::  lenwrk, lensav, ierror, nx
      complex(pfdp), allocatable :: ddx(:), lap(:) ! operators
    contains
 
@@ -53,10 +52,10 @@ contains
     end select
   end function as_ad_sweeper
 
-  subroutine setup(sweeper, nvars)
+  subroutine setup(sweeper, nx)
     use probin, only: use_LUq, imex_stat 
     class(pf_sweeper_t), intent(inout) :: sweeper
-    integer,             intent(in   ) :: nvars
+    integer,             intent(in   ) :: nx
 
     class(ad_sweeper_t), pointer :: this
     integer     :: i,ierror
@@ -78,27 +77,27 @@ contains
     end if
               
     this%use_LUq =use_LUq
-    this%nvars = nvars 
-    this%lenwrk = 2*nvars 
-    this%lensav = 2*nvars + int(log(real(nvars,kind=8))/log(2.0d+00))+4
+    this%nx = nx 
+    this%lenwrk = 2*nx 
+    this%lensav = 2*nx + int(log(real(nx,kind=8))/log(2.0d+00))+4
 
     ! create complex fft plans
-    allocate(this%workhat(nvars))   !  complex transform
+    allocate(this%workhat(nx))   !  complex transform
     allocate(this%work(this%lenwrk))
     allocate(this%wsave(this%lensav))
-    call cfft1i ( nvars, this%wsave, this%lensav, ierror )
+    call cfft1i ( nx, this%wsave, this%lensav, ierror )
     if (ierror .ne. 0) then
        stop "error  initializing fft"
     end if
 
     ! create spectral operators
-    allocate(this%ddx(nvars))
-    allocate(this%lap(nvars))
-    do i = 1, nvars
-       if (i <= nvars/2+1) then
+    allocate(this%ddx(nx))
+    allocate(this%lap(nx))
+    do i = 1, nx
+       if (i <= nx/2+1) then
           kx = two_pi / Lx * dble(i-1)
        else
-          kx = two_pi / Lx * dble(-nvars + i - 1)
+          kx = two_pi / Lx * dble(-nx + i - 1)
        end if
 
        this%ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
@@ -123,7 +122,7 @@ contains
 !    call fftw_destroy_plan(this%ffft)
 !    call fftw_destroy_plan(this%ifft)
     
-    call this%imexQ_destroy(lev)
+    call this%imexR_destroy(lev)
 
   end subroutine destroy
 
@@ -142,15 +141,15 @@ contains
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
-    integer    :: nvars, i, ii, nbox
+    integer    :: nx, i, ii, nbox
     real(pfdp) :: tol, x
 
-    nvars = size(yex)
+    nx = size(yex)
     yex   = 0
 
     if (nu .gt. 0) then
-       do i = 1, nvars
-          x = Lx*dble(i-nvars/2-1)/dble(nvars) - t*v
+       do i = 1, nx
+          x = Lx*dble(i-nx/2-1)/dble(nx) - t*v
           yex(i) = yex(i) + dsin(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
        end do
     else
@@ -161,10 +160,10 @@ contains
        nbox = 0
 
        do ii = -nbox, nbox
-          do i = 1, nvars
-             x = Lx*dble(i-nvars/2-1)/dble(nvars) + ii*Lx - t*v
+          do i = 1, nx
+             x = Lx*dble(i-nx/2-1)/dble(nx) + ii*Lx - t*v
              yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
-             x = Lx*dble(i)/dble(nvars)  - t*v
+             x = Lx*dble(i)/dble(nx)  - t*v
              yex(i) =  dsin(two_pi*kfreq*x)
           end do
        end do
@@ -191,7 +190,7 @@ contains
 
     this%workhat = yvec
 
-    call cfft1f (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
+    call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
     if (ierror .ne. 0) then
        stop "error  calling cfft1f in f_eval"
     end if
@@ -226,7 +225,7 @@ contains
       call exit(0)
     end select
 
-    call cfft1b (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
+    call cfft1b (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
     if (ierror .ne. 0) then
        stop "error  calling cfft1b in f_eval"
     end if
@@ -259,7 +258,7 @@ contains
        fvec => array1(f)
        this%workhat = rhsvec
        
-       call cfft1f (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
+       call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
        if (ierror .ne. 0) &
           stop "error  calling cfft1f in f_comp"
        if (imex_stat .eq. 2) then
@@ -267,7 +266,7 @@ contains
        else  ! fully implicit
           this%workhat =  this%workhat/ (1.0_pfdp - dtq*(-v * this%ddx +nu*this%lap))
        end if
-       call cfft1b (this%nvars, 1, this%workhat, this%nvars, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
+       call cfft1b (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
        if (ierror .ne. 0) &
                       stop "error  calling cfft1f in f_comp"
       yvec  = real(this%workhat)
@@ -307,7 +306,7 @@ contains
     endif
 
     adG%workhat=g
-    call cfft1f (adG%nvars, 1, adG%workhat, adG%nvars, adG%wsave, adG%lensav, adG%work, adG%lenwrk, ierror )
+    call cfft1f (adG%nx, 1, adG%workhat, adG%nx, adG%wsave, adG%lensav, adG%work, adG%lenwrk, ierror )
     if (ierror .ne. 0) then
        stop "error  calling cfft1f in interpolate"
     end if
@@ -322,7 +321,7 @@ contains
 
 
 !    call fftw_execute_dft(adF%ifft, adF%wk, adF%wk)
-    call cfft1b (adF%nvars, 1, adF%workhat, adF%nvars, adF%wsave, adF%lensav, adF%work, adF%lenwrk, ierror )
+    call cfft1b (adF%nx, 1, adF%workhat, adF%nx, adF%wsave, adF%lensav, adF%work, adF%lenwrk, ierror )
     if (ierror .ne. 0) then
        stop "error  calling cfft1b in interpolate"
     end if

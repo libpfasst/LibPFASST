@@ -58,7 +58,6 @@ contains
        pf%levels(l)%nsweeps = nsweeps(l)
        pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
 
-       pf%levels(l)%nvars  = nvars(l)
        pf%levels(l)%nnodes = nnodes(l)
 
        !  Allocate the user specific level object
@@ -67,11 +66,14 @@ contains
 
        !  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%nvars)
+       call setup(pf%levels(l)%ulevel%sweeper, nx(l))
 
        !  Allocate the shape array for level (here just one dimension)
        allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1) = pf%levels(l)%nvars
+       pf%levels(l)%shape(1) = nx(l)
+       !  Set the size of the send/receive buffer
+       pf%levels(l)%mpibuflen  = nx(l)
+
     end do
 
     !>  Set up some parameters
@@ -79,8 +81,8 @@ contains
 
 
     !> allocate starting and end solutions
-    call ndarray_build(q0, [ pf%levels(pf%nlevels)%nvars ])
-    call ndarray_build(qend, [ pf%levels(pf%nlevels)%nvars ])    
+    call ndarray_build(q0, [ nx(pf%nlevels) ])
+    call ndarray_build(qend, [ nx(pf%nlevels) ])    
 
     !> compute initial condition
     call initial(q0)
@@ -92,6 +94,9 @@ contains
     !> do the time stepping
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)
 
+    print *,'finished pf_pfasst_run on rank', pf%rank
+
+    print *,'cleaning up'
 
     !>  deallocate initial condition
     call ndarray_destroy(q0)

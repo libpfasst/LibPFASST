@@ -15,7 +15,7 @@ contains
     class(pf_level_t), intent(inout) :: level
     type(pf_state_t),  intent(in   ) :: state
 
-    real(c_double) :: yexact(level%nvars)
+    real(c_double) :: yexact(level%mpibuflen)
     real(pfdp), pointer :: qend(:),r(:)
 
     qend => array1(level%qend)

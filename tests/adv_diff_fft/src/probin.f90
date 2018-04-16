@@ -22,7 +22,7 @@ module probin
 
 
   integer, save :: nnodes(MAXLEVS) ! number of nodes
-  integer, save :: nvars(MAXLEVS)  ! number of grid points
+  integer, save :: nx(MAXLEVS)     ! number of grid points
   integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   logical, save :: Finterp
@@ -36,7 +36,7 @@ module probin
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/ Finterp, nnodes, nvars,nprob, nsteps, dt, Tfin
+  namelist /params/ Finterp, nnodes, nx,nprob, nsteps, dt, Tfin
   namelist /params/  pfasst_nml, nsweeps, nsweeps_pred
   namelist /params/  v, nu, t00, sigma, kfreq, use_LUq,imex_stat
 
