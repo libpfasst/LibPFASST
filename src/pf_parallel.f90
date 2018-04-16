@@ -138,7 +138,7 @@ contains
     call start_timer(pf, TPREDICTOR)
 
     fine_lev_p => pf%levels(pf%nlevels)
-    call spreadq0(fine_lev_p, t0)
+    call fine_lev_p%ulevel%sweeper%spreadq0(fine_lev_p, t0)
 
     !>  If we are doing a single level, then we only spreadq0 and return
     if (pf%nlevels > 1) then
@@ -167,7 +167,7 @@ contains
                    call coarse_lev_p%q0%copy(coarse_lev_p%qend)
                    ! spread new coarse value if we are not doing PFASST_pred
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(coarse_lev_p, t0)
+                      call coarse_lev_p%ulevel%sweeper%spreadq0(coarse_lev_p, t0)
                    end if
                 end if
                 !  Do a sweep
@@ -200,7 +200,7 @@ contains
                 if (k > 1) then
                    call coarse_lev_p%q0%copy(coarse_lev_p%qend)
                    if (.not. pf%PFASST_pred) then
-                      call spreadq0(coarse_lev_p, t0k)
+                      call coarse_lev_p%ulevel%sweeper%spreadq0(coarse_lev_p, t0k)
                    end if
                 end if
 
@@ -236,7 +236,7 @@ contains
           if (k > 1) then
              call coarse_lev_p%q0%copy(coarse_lev_p%qend)
              if (.not. pf%PFASST_pred) then
-                call spreadq0(coarse_lev_p, t0k)
+                call coarse_lev_p%ulevel%sweeper%spreadq0(coarse_lev_p, t0k)
              end if
           end if
 

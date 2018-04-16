@@ -86,6 +86,7 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
+     procedure(pf_spreadq0_p),     deferred :: spreadq0
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
@@ -310,6 +311,14 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: dt !<  Time step size
      end subroutine pf_residual_p
 
+     subroutine pf_spreadq0_p(this, lev, t0)
+       import pf_sweeper_t, pf_level_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: this
+       class(pf_level_t),   intent(inout) :: Lev
+       real(pfdp),          intent(in)    :: t0 !<  Time at beginning of step
+     end subroutine pf_spreadq0_p
+
+     
      subroutine pf_destroy_p(this, lev)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
