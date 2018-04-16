@@ -72,12 +72,12 @@ module pf_mod_ndarray
        integer,    intent(in   ), value :: dlen
      end subroutine ndarray_mkdir
      !>  Subroutine to write an the array to a file
-     subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
+     subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
        use iso_c_binding
        character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, nvars
+       integer,    intent(in   ), value :: dim, mpibuflen
        integer,    intent(in   )        :: shape(dim)
-       real(c_double),    intent(in   )        :: array(nvars)
+       real(c_double),    intent(in   )        :: array(mpibuflen)
      end subroutine ndarray_dump_numpy
   end interface
 
@@ -97,20 +97,20 @@ contains
   end subroutine ndarray_build
 
   !> Subroutine to  create a single array
-  subroutine ndarray_create_single(this, x, level, kind, nvars, shape)
+  subroutine ndarray_create_single(this, x, level, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, kind, nvars, shape(:)
+    integer,                intent(in   )              :: level, shape(:)
     integer :: i
     allocate(ndarray::x)
     call ndarray_build(x, shape)
   end subroutine ndarray_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine ndarray_create_array(this, x, n, level, kind, nvars, shape)
+  subroutine ndarray_create_array(this, x, n, level,  shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
+    integer,                intent(in   )              :: n, level, shape(:)
     integer :: i
     allocate(ndarray::x(n))
     do i = 1, n
@@ -133,10 +133,10 @@ contains
   end subroutine ndarray_destroy
 
   !> Subroutine to destroy an single array
-  subroutine ndarray_destroy_single(this, x, level, kind, nvars, shape)
+  subroutine ndarray_destroy_single(this, x, level, shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, kind, nvars, shape(:)
+    integer,                intent(in   )              :: level, shape(:)
     
     select type (x)
     class is (ndarray)
@@ -148,10 +148,10 @@ contains
 
   
   !> Subroutine to destroy an array of arrays
-  subroutine ndarray_destroy_array(this, x, n, level, kind, nvars, shape)
+  subroutine ndarray_destroy_array(this, x, n, level,  shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, kind, nvars, shape(:)
+    integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
     
     select type(x)

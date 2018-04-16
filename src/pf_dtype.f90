@@ -43,13 +43,6 @@ module pf_mod_dtype
   integer, parameter :: SDC_COMPOSITE_NODES = 2**9
   integer, parameter :: SDC_NO_LEFT         = 2**10
 
-  !> Types of encaps node types
-  integer, parameter :: SDC_KIND_SOL_FEVAL    = 1
-  integer, parameter :: SDC_KIND_SOL_NO_FEVAL = 2
-  integer, parameter :: SDC_KIND_FEVAL        = 3
-  integer, parameter :: SDC_KIND_INTEGRAL     = 4
-  integer, parameter :: SDC_KIND_CORRECTION   = 5
-
   !> States of operatrion
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
@@ -86,7 +79,7 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
-     procedure(pf_spreadq0_p),     deferred :: spreadq0
+     procedure(pf_spreadq0_p),     deferred :: spreadq0 
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
@@ -129,15 +122,25 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
+  type :: pf_results_t
+     real(pfdp), allocatable :: errors(:,:,:), residuals(:,:,:), times(:,:,:)
+     integer :: nsteps, niters, nprocs
+   contains
+     procedure :: initialize => initialize_results
+     procedure :: dump => dump_results
+     procedure :: destroy => destroy_results
+  end type pf_results_t
+
   !>  Data type of a PFASST level
   type :: pf_level_t
      integer  :: index        = -1   !< level number (1 is the coarsest)
-     integer  :: nvars        = -1   !< number of variables (dofs)
+     integer  :: mpibuflen    = -1   !< size of solution in pfdp units
      integer  :: nnodes       = -1   !< number of sdc nodes
      integer  :: nsweeps      =  1   !< number of sdc sweeps to perform
      integer  :: nsweeps_pred =  1   !< number of sdc sweeps to perform (predictor)
      logical     :: Finterp = .false.   !< interpolate functions instead of solutions
 
+     real(pfdp)  :: error            !< holds the user defined residual
      real(pfdp)  :: residual            !< holds the user defined residual
      real(pfdp)  :: residual0           !< residual at beginning of PFASST call
                                         ! used for relative residual tolerance calculation
@@ -231,6 +234,7 @@ module pf_mod_dtype
      type(pf_state_t), allocatable :: state   !<  Describes where in the algorithm proc is
      type(pf_level_t), allocatable :: levels(:) !< Holds the levels
      type(pf_comm_t),  pointer :: comm    !< Points to communicator
+     type(pf_results_t) :: results
 
      !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !<  Holds the hooks
@@ -243,6 +247,7 @@ module pf_mod_dtype
 
      !> misc
      logical :: debug = .false.
+     logical :: save_results = .false.
      character(512) :: outdir
 
   end type pf_pfasst_t
@@ -318,7 +323,6 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: t0 !<  Time at beginning of step
      end subroutine pf_spreadq0_p
 
-     
      subroutine pf_destroy_p(this, lev)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
@@ -358,32 +362,32 @@ module pf_mod_dtype
      end subroutine pf_transfer_p
 
      !> encapsulation interfaces
-     subroutine pf_encap_create_single_p(this, x, level, kind, nvars, shape)
+     subroutine pf_encap_create_single_p(this, x, level, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,      intent(in   )              :: level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: level,  shape(:)
      end subroutine pf_encap_create_single_p
 
-     subroutine pf_encap_create_array_p(this, x, n, level, kind, nvars, shape)
+     subroutine pf_encap_create_array_p(this, x, n, level, shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,      intent(in   )              :: n, level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: n, level, shape(:)
      end subroutine pf_encap_create_array_p
 
-     subroutine pf_encap_destroy_single_p(this, x, level, kind, nvars, shape)
+     subroutine pf_encap_destroy_single_p(this, x, level,  shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,      intent(in   )              :: level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: level,  shape(:)
      end subroutine pf_encap_destroy_single_p
 
-     subroutine pf_encap_destroy_array_p(this, x, n, level, kind, nvars, shape)
+     subroutine pf_encap_destroy_array_p(this, x, n, level,   shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,      intent(in   )              :: n, level, kind, nvars, shape(:)
+       integer,      intent(in   )              :: n, level,  shape(:)
      end subroutine pf_encap_destroy_array_p
 
      subroutine pf_encap_setval_p(this, val, flags)
@@ -490,5 +494,59 @@ module pf_mod_dtype
      end subroutine pf_broadcast_p
 
   end interface
+
+contains
+
+  subroutine initialize_results(this, nsteps, niters, nprocs, nlevels)
+    class(pf_results_t), intent(inout) :: this
+    integer, intent(in) :: nsteps, niters, nprocs, nlevels
+
+    allocate(this%errors(niters, nsteps, nlevels), &
+         this%residuals(niters, nsteps, nlevels), &
+         this%times(nsteps, nlevels, nprocs))
+
+    this%errors = 0.0_pfdp
+    this%residuals = 0.0_pfdp
+    this%times = 0.0_pfdp
+  end subroutine initialize_results
+
+  subroutine dump_results(this)
+    class(pf_results_t), intent(inout) :: this
+    integer :: i, j, k,  nsteps, nlevels, niters, nprocs
+
+    niters = size(this%residuals(:,1,1))
+    nsteps = size(this%residuals(1,:,1))
+    nlevels = size(this%residuals(1,1,:))
+    nprocs = size(this%times(1,1,:))
+
+    open(unit=20, file='residuals.dat', form='formatted')
+    write(20, '(I3, I4, I2)') niters, nsteps, nlevels
+    do k = 1, nlevels
+       do j = 1, nsteps
+          do i = 1 , niters
+             write(20, '(F16.14)') this%residuals(i, j, k)
+          end do
+       end do
+    enddo
+    close(20)
+
+    open(unit=20, file='times.dat', form='formatted')
+    write(20, '(I3, I4, I2)') nsteps, nlevels, nprocs
+    do k = 1, nprocs
+       do j = 1, nlevels
+          do i = 1 , nsteps
+             write(20, '(F16.14)') this%times(i, j, k)
+          end do
+       end do
+    enddo
+    close(20)
+
+  end subroutine dump_results
+
+  subroutine destroy_results(this)
+    class(pf_results_t), intent(inout) :: this
+
+    deallocate(this%errors, this%residuals, this%times)
+  end subroutine destroy_results
 
 end module pf_mod_dtype

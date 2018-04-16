@@ -68,6 +68,7 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
+!    pf%save_results = .true.
   end subroutine pf_pfasst_create
 
 
@@ -115,15 +116,15 @@ contains
     type(pf_pfasst_t), intent(in   )         :: pf   !<  Main pfasst structure
     class(pf_level_t), intent(inout), target :: lev  !<  Level to set up
 
-    integer :: nvars, nnodes, npieces
+    integer :: mpibuflen, nnodes, npieces
     integer :: i
 
     !> do some sanity checks
-    if (lev%nvars <= 0) stop "ERROR: Invalid nvars/dofs (pf_pfasst.f90)."
+    if (lev%mpibuflen <= 0) stop "ERROR: Invalid mpibuflen/dofs (pf_pfasst.f90)."
     if (lev%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
     if (lev%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
 
-    nvars  = lev%nvars
+    mpibuflen  = lev%mpibuflen
     nnodes = lev%nnodes
 
     lev%residual = -1.0_pfdp
@@ -131,7 +132,7 @@ contains
 
     !> (re)allocate tauQ (may to need create/destroy tauQ dynamically  when doing AMR)
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
-       call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index, SDC_KIND_INTEGRAL, nvars, lev%shape)
+       call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%shape)
     else if ((lev%index >= pf%nlevels) .and. (allocated(lev%tauQ))) then
        deallocate(lev%tauQ)
     end if
@@ -141,8 +142,8 @@ contains
     lev%allocated = .true.
 
     !> allocate flat buffers for send, and recv
-    allocate(lev%send(nvars))
-    allocate(lev%recv(nvars))
+    allocate(lev%send(mpibuflen))
+    allocate(lev%recv(mpibuflen))
 
 
     !> allocate nodes, flags, and integration matrices
@@ -171,24 +172,23 @@ contains
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
 
-    call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index, SDC_KIND_SOL_FEVAL, nvars, lev%shape)
-    call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index, SDC_KIND_FEVAL, nvars, lev%shape)
+    call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%shape)
+    call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%shape)
     do i = 1, nnodes*npieces
        call lev%Fflt(i)%setval(0.0_pfdp)
     end do
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index, SDC_KIND_INTEGRAL, nvars, lev%shape)
-    call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index, SDC_KIND_INTEGRAL, nvars, lev%shape)
+    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%shape)
+    call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%shape)
 
+    !  Need space for old function values in imexR sweepers
+    call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, lev%shape)
+    lev%pF(1:nnodes,1:npieces) => lev%pFflt
     if (lev%index < pf%nlevels) then
-      if (lev%Finterp) then
-          call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, SDC_KIND_FEVAL, nvars, lev%shape)
-          lev%pF(1:nnodes,1:npieces) => lev%pFflt
-       end if
-       call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index, SDC_KIND_SOL_NO_FEVAL, nvars, lev%shape)
+       call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%shape)
     end if
-    call lev%ulevel%factory%create_single(lev%qend, lev%index, SDC_KIND_FEVAL, nvars, lev%shape)
-    call lev%ulevel%factory%create_single(lev%q0, lev%index, SDC_KIND_FEVAL, nvars, lev%shape)
+    call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
 
 
   end subroutine pf_level_setup
@@ -205,6 +205,7 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
+!    call pf%results%destroy()
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -242,21 +243,19 @@ contains
     npieces = lev%ulevel%sweeper%npieces
 
     if ((lev%index < nlevels) .and. allocated(lev%tauQ)) then
-       call lev%ulevel%factory%destroy_array(lev%tauQ, lev%nnodes-1, lev%index, SDC_KIND_INTEGRAL, lev%nvars, lev%shape)
+       call lev%ulevel%factory%destroy_array(lev%tauQ, lev%nnodes-1, lev%index,   lev%shape)
     end if
 
-    call lev%ulevel%factory%destroy_array(lev%Q, lev%nnodes, lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%Fflt, lev%nnodes*npieces, lev%index, SDC_KIND_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%I, lev%nnodes-1, lev%index, SDC_KIND_INTEGRAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%R, lev%nnodes-1, lev%index, SDC_KIND_INTEGRAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%Q, lev%nnodes, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%Fflt, lev%nnodes*npieces, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%I, lev%nnodes-1, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%R, lev%nnodes-1, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%pFflt, lev%nnodes*npieces, lev%index, lev%shape)
     if (lev%index < nlevels) then
-       if (lev%Finterp) then
-          call lev%ulevel%factory%destroy_array(lev%pFflt, lev%nnodes*npieces, lev%index, SDC_KIND_FEVAL, lev%nvars, lev%shape)
-       end if
-       call lev%ulevel%factory%destroy_array(lev%pQ, lev%nnodes, lev%index, SDC_KIND_SOL_NO_FEVAL, lev%nvars, lev%shape)
+       call lev%ulevel%factory%destroy_array(lev%pQ, lev%nnodes, lev%index,   lev%shape)
     end if
-    call lev%ulevel%factory%destroy_single(lev%qend, lev%index, SDC_KIND_FEVAL, lev%nvars, lev%shape)
-    call lev%ulevel%factory%destroy_single(lev%q0, lev%index, SDC_KIND_FEVAL, lev%nvars, lev%shape)
+    call lev%ulevel%factory%destroy_single(lev%qend, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_single(lev%q0, lev%index,   lev%shape)
 
     !> destroy the sweeper 
     call lev%ulevel%sweeper%destroy(lev)
@@ -385,7 +384,7 @@ contains
     end if
     write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
-    write(un,*) 'nvars:       ', pf%levels(1:pf%nlevels)%nvars, '! number of degrees of freedom per level'
+    write(un,*) 'mpibuflen:   ', pf%levels(1:pf%nlevels)%mpibuflen, '! size of data send between time steps'
     write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
     write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
     write(un,*) 'taui0:     ',   pf%taui0, '! cutoff for tau correction'
@@ -452,22 +451,5 @@ contains
   end subroutine pf_time_interpolation_matrix
 
   ! Subroutine to spread initial condition for predictors.
-  subroutine spreadq0(lev, t0)
-    class(pf_level_t), intent(inout) :: lev  !<  Level on which to spread
-    real(pfdp),       intent(in)    :: t0    !<  time at beginning of interval
-
-    integer :: m, p
-
-    call lev%Q(1)%copy(lev%q0)
-
-    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
-
-    do m = 2, lev%nnodes
-       call lev%Q(m)%copy(lev%Q(1))
-       do p = 1, lev%ulevel%sweeper%npieces
-         call lev%F(m,p)%copy(lev%F(1,p))
-       end do
-    end do
-  end subroutine spreadq0
 
 end module pf_mod_pfasst

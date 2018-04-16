@@ -27,8 +27,7 @@ module pf_mod_magnus_picard
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
      real(pfdp), allocatable :: dtsdc(:)
      integer :: magnus_order, qtype
-     real(pfdp) :: dt
-     real(pfdp), allocatable :: commutator_coefs(:,:,:)
+     real(pfdp) :: dt, commutator_coefs(9,3,4)
      complex(pfdp), allocatable :: commutators(:,:,:)
      class(pf_encap_t), allocatable :: omega(:), time_ev_op(:)
    contains
@@ -37,11 +36,11 @@ module pf_mod_magnus_picard
      procedure :: evaluate   => magpicard_evaluate
      procedure :: integrate  => magpicard_integrate
      procedure :: residual   => magpicard_residual
+     procedure :: spreadq0   => magpicard_spreadq0
      procedure :: evaluate_all => magpicard_evaluate_all
      procedure(pf_f_eval_p), deferred :: f_eval
      procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
-     procedure(pf_compute_time_ev_ops_p), deferred :: compute_time_ev_ops
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
      procedure(pf_destroy_magpicard_p), deferred :: destroy
      procedure :: magpicard_destroy
@@ -69,19 +68,13 @@ module pf_mod_magnus_picard
        real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
        integer, intent(in) :: this_node
      end subroutine pf_compute_omega_p
-     subroutine pf_compute_time_ev_ops_p(this, time_ev_op, omega, level)
-       import pf_magpicard_t, pf_encap_t, pfdp
-       class(pf_magpicard_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: omega
-       class(pf_encap_t), intent(inout) :: time_ev_op
-       integer, intent(in) :: level
-     end subroutine pf_compute_time_ev_ops_p
-     subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, u)
+     subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: sol_t0
-       class(pf_encap_t), intent(inout) :: u
+       class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: sol_tn
+       integer, intent(in) :: level
      end subroutine pf_propagate_solution_p
      subroutine pf_destroy_magpicard_p(this, Lev)
        import pf_magpicard_t, pf_level_t
@@ -120,14 +113,11 @@ contains
           call lev%R(m)%copy(lev%Q(m+1))
        end do
 
-       if (k .eq. 1) then
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(m,1))
-       end if
-
        t = t0
        !$omp parallel do private(m, t)
-       do m = 2, nnodes
-          t = t + dt*this%dtsdc(m-1)
+       do m = 1, nnodes
+!          t = t + dt*this%dtsdc(m)
+           t=t0+dt*lev%nodes(m)
           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
        end do
        !$omp end parallel do
@@ -136,7 +126,7 @@ contains
 
        call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
 
-       if (this%magnus_order > 1) then
+       if (this%magnus_order > 1 .and. nnodes > 2) then
           call start_timer(pf, TAUX)
           call this%compute_single_commutators(lev%F)
           call end_timer(pf, TAUX)
@@ -152,11 +142,7 @@ contains
 
        !$omp parallel do private(m)
        do m = 1, nnodes-1
-          call start_timer(pf, TAUX+2)
-          call this%compute_time_ev_ops(this%time_ev_op(m), this%omega(m), lev%index)
-          call end_timer(pf, TAUX+2)
-
-          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%time_ev_op(m))
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%omega(m), lev%index)
        end do
        !$omp end parallel do
 
@@ -176,6 +162,7 @@ contains
 
     integer :: m, nnodes
 
+    this%commutator_coefs = 0.0_pfdp
     this%npieces = 1
     nnodes = lev%nnodes
 
@@ -185,10 +172,10 @@ contains
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-         lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+         lev%index,  lev%shape)
 
     call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
-         lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+         lev%index,  lev%shape)
 
     do m = 1, nnodes-1
         call this%omega(m)%setval(0.0_pfdp)
@@ -247,17 +234,24 @@ contains
     lev%residual = lev%R(lev%nnodes-1)%norm()
   end subroutine magpicard_residual
 
+  subroutine magpicard_spreadq0(this, lev, t0)
+    class(pf_magpicard_t),  intent(inout) :: this
+    class(pf_level_t), intent(inout) :: lev
+    real(pfdp),        intent(in   ) :: t0
+    call pf_generic_spreadq0(this, lev, t0)
+  end subroutine magpicard_spreadq0
+
   ! Destroy the matrices
   subroutine magpicard_destroy(this, lev)
       class(pf_magpicard_t),  intent(inout) :: this
       class(pf_level_t),    intent(inout) :: lev
 
-      deallocate(this%dtsdc, this%commutator_coefs, this%commutators)
+      deallocate(this%dtsdc, this%commutators)
 
       call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
-           lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+           lev%index,  lev%shape)
       call lev%ulevel%factory%destroy_array(this%time_ev_op, lev%nnodes-1, &
-           lev%index, SDC_KIND_SOL_FEVAL, lev%nvars, lev%shape)
+           lev%index,  lev%shape)
 
   end subroutine magpicard_destroy
 
@@ -273,42 +267,38 @@ contains
     if (qtype == 1) then
        ! we're talking Lobatto nodes, where nnodes=3 includes, t0, t_1/2, tn
        ! need some way to differentiate whether you want full collocation or not
-        if (nnodes > 2) then
-            ! coefs(1:3, 1, 1) = dt**2 * [real(8)::11/480., -1/480., 1/480.]
-            ! coefs(1:3, 1, 2) = dt**2 * [real(8)::1/15., 1/60., 1/15.]
-            coefs(1, 1, 1) = -1/48.d0 * dt**2
-            coefs(2, 1, 2) = -1/12.d0 * dt**2
-        endif
-    else if (qtype == 5) then
-      if (nnodes >= 3) then
-          coefs(1:3, 1, 1) = 1.d-3 * [real(8)::-0.708256232441739d0, 0.201427439334681d0, -0.002608155816283d0]
-          coefs(1:3, 1, 2) = [real(8)::-0.035291589565775d0, 0.004482619613666d0, -0.000569367343553d0]
-          coefs(1:3, 1, 3) = [real(8)::-0.078891497044705d0, -0.018131905893999d0, -0.035152700676886d0]
-          coefs(1:3, 1, 4) = [real(8)::-0.071721913818656d0, -0.035860956909328d0, -0.071721913818656d0]
-          coefs(:,1,:) = dt**2 * coefs(:,1,:)
+       ! coefs(1:3, 1, 1) = dt**2 * [real(8)::11/480., -1/480., 1/480.]
+       ! coefs(1:3, 1, 2) = dt**2 * [real(8)::1/15., 1/60., 1/15.]
+       coefs(1, 1, 1) = -1/48.d0 * dt**2
+       coefs(2, 1, 2) = -1/12.d0 * dt**2
+    elseif (qtype == 5) then
+       coefs(1:3, 1, 1) = 1.d-3 * [real(8)::-0.708256232441739d0, 0.201427439334681d0, -0.002608155816283d0]
+       coefs(1:3, 1, 2) = [real(8)::-0.035291589565775d0, 0.004482619613666d0, -0.000569367343553d0]
+       coefs(1:3, 1, 3) = [real(8)::-0.078891497044705d0, -0.018131905893999d0, -0.035152700676886d0]
+       coefs(1:3, 1, 4) = [real(8)::-0.071721913818656d0, -0.035860956909328d0, -0.071721913818656d0]
+       coefs(:,1,:) = dt**2 * coefs(:,1,:)
 
-          coefs(:, 2, 1) = &
-               [real(8)::1.466782892818107d-6, -2.546845448743404d-6, 7.18855795894042d-7, &
-                -3.065370250683271d-7, 6.962336322868984d-7, -1.96845581200288d-7,  &
-                -2.262216360714434d-8, -2.72797194008496d-9, 8.54843541920492d-10]
-          coefs(:, 2, 2) = &
-               [real(8) ::0.001040114336531742d0, -0.001714330280871491d0, 0.0001980882752518163d0, &
-                -0.00006910549596945875d0, 0.0002905401601450182d0, -0.00003465884693947625d0, &
-                 0.0000924518848932026d0, 0.0000125950571649574d0, -2.4709074423913880d-6]
-          coefs(:, 2, 3) = &
-               [real(8)::0.004148295975360902d0, -0.006387421893168941d0, -0.003594231910817328d0, &
-                 0.000997378110327084d0, 0.0001241530237557625d0, -0.0003805975423160699d0, &
-                 0.003718384934573079d0, 0.001693514295056844d0, -0.001060408584538103d0]
-          coefs(:, 2, 4) = &
-               [real(8)::0.003453850676072909d0, -0.005584950029394391d0, -0.007128159905937654d0, &
-                 0.001653439153439147d0, 0.0d0, -0.001653439153439143d0, &
-                 0.007128159905937675d0, 0.005584950029394475d0, -0.003453850676072897d0]
-          coefs(:,2,:) = dt**3 * coefs(:,2,:)
+       coefs(:, 2, 1) = &
+             [real(8)::1.466782892818107d-6, -2.546845448743404d-6, 7.18855795894042d-7, &
+             -3.065370250683271d-7, 6.962336322868984d-7, -1.96845581200288d-7,  &
+             -2.262216360714434d-8, -2.72797194008496d-9, 8.54843541920492d-10]
+       coefs(:, 2, 2) = &
+             [real(8) ::0.001040114336531742d0, -0.001714330280871491d0, 0.0001980882752518163d0, &
+             -0.00006910549596945875d0, 0.0002905401601450182d0, -0.00003465884693947625d0, &
+               0.0000924518848932026d0, 0.0000125950571649574d0, -2.4709074423913880d-6]
+       coefs(:, 2, 3) = &
+             [real(8)::0.004148295975360902d0, -0.006387421893168941d0, -0.003594231910817328d0, &
+               0.000997378110327084d0, 0.0001241530237557625d0, -0.0003805975423160699d0, &
+               0.003718384934573079d0, 0.001693514295056844d0, -0.001060408584538103d0]
+       coefs(:, 2, 4) = &
+             [real(8)::0.003453850676072909d0, -0.005584950029394391d0, -0.007128159905937654d0, &
+               0.001653439153439147d0, 0.0d0, -0.001653439153439143d0, &
+               0.007128159905937675d0, 0.005584950029394475d0, -0.003453850676072897d0]
+       coefs(:,2,:) = dt**3 * coefs(:,2,:)
 
-          coefs(1, 3, 4) = dt**4 / 60.d0
-      endif
+       coefs(1, 3, 4) = dt**4 / 60.d0
     else
-      stop 'oh no! unsupported qtype'
+       stop 'oh no! unsupported qtype'
     endif
   end subroutine get_commutator_coefs
 end module pf_mod_magnus_picard

@@ -92,35 +92,29 @@ contains
     integer,           intent(inout) :: ierror  !<  error flag
 
 
-    call mpi_irecv(level%recv, level%nvars, MPI_REAL8, &
+    call mpi_irecv(level%recv, level%mpibuflen, MPI_REAL8, &
                    modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
   end subroutine pf_mpi_post
 
 
   !> Subroutine to send convergence status information
   subroutine pf_mpi_send_status(pf, tag,istatus,ierror)
-    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
+    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE, MPI_REQUEST_NULL
 
     type(pf_pfasst_t), intent(inout) :: pf        !<  main pfasst structure
     integer,           intent(in)    :: tag       !<  message tag
     integer,           intent(in) :: istatus      !<  status flag to send
     integer,           intent(inout) :: ierror    !<  error flag
     integer    ::  stat(MPI_STATUS_SIZE)
-    integer(4) :: message(8)
+    integer(4) :: message!(8)
 
-    ! on orga there is some weird issue with send/recv status: the
-    ! first two integer4's always get set to zero on the receiving
-    ! end.  hence we use 8 integer4's and put the message in the
-    ! last two slots.
-
-    message = 666
-    message(7) = istatus
+    message = istatus
 
     if (pf%comm%statreq /= -66) then
        call mpi_wait(pf%comm%statreq, stat, ierror)
     end if
 
-    call mpi_issend(message, 8, MPI_INTEGER4, &
+    call mpi_issend(message, 1, MPI_INTEGER4, &
                     modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%statreq, ierror)
 
   end subroutine pf_mpi_send_status
@@ -133,12 +127,10 @@ contains
     integer,           intent(in)    :: tag       !<  message tag
     integer,           intent(inout) :: istatus   !<  status flag to receive
     integer,           intent(inout) :: ierror    !<  error flag
-    integer    ::  stat(MPI_STATUS_SIZE)
-    integer(4) :: message(8)
+    integer    :: stat(MPI_STATUS_SIZE)
 
-    call mpi_recv(message, 8, MPI_INTEGER4, &
+    call mpi_recv(istatus, 1, MPI_INTEGER4, &
                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
-    istatus = message(7)
 
   end subroutine pf_mpi_recv_status
 
@@ -156,12 +148,12 @@ contains
 
     if (blocking) then
        call level%qend%pack(level%send)
-       call mpi_send(level%send, level%nvars, MPI_REAL8, &
+       call mpi_send(level%send, level%mpibuflen, MPI_REAL8, &
                      modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
        call level%qend%pack(level%send)
-       call mpi_isend(level%send, level%nvars, MPI_REAL8, &
+       call mpi_isend(level%send, level%mpibuflen, MPI_REAL8, &
                       modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send
@@ -177,7 +169,7 @@ contains
     integer ::  stat(MPI_STATUS_SIZE)
 
     if (blocking) then
-       call mpi_recv(level%recv, level%nvars, MPI_REAL8, &
+       call mpi_recv(level%recv, level%mpibuflen, MPI_REAL8, &
                      modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)

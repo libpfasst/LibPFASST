@@ -55,10 +55,8 @@ contains
     call start_timer(pf, TINTERPOLATE + level_index - 1)
 
     !> create workspaces
-    call c_lev_ptr%ulevel%factory%create_array(c_delta,  c_lev_ptr%nnodes, &
-      c_lev_ptr%index, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_array(cf_delta, c_lev_ptr%nnodes, &
-      f_lev_ptr%index, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_array(c_delta,  c_lev_ptr%nnodes, c_lev_ptr%index,  c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_array(cf_delta, c_lev_ptr%nnodes, f_lev_ptr%index,  f_lev_ptr%shape)
 
     !> set time at coarse and fine nodes
     allocate(c_times(c_lev_ptr%nnodes))
@@ -67,7 +65,6 @@ contains
     c_times = t0 + dt*c_lev_ptr%nodes
     f_times = t0 + dt*f_lev_ptr%nodes
 
-    ! needed for amr
     do m = 1, c_lev_ptr%nnodes
        call c_delta(m)%setval(0.0_pfdp)
        call cf_delta(m)%setval(0.0_pfdp)
@@ -106,13 +103,14 @@ contains
     end if  !  Feval
 
     !>  reset qend so that it is up to date
-    call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
+    !BTK
+    call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
 
     !> destroy local data structures
     call c_lev_ptr%ulevel%factory%destroy_array(c_delta,  c_lev_ptr%nnodes, &
-      c_lev_ptr%index, SDC_KIND_CORRECTION, c_lev_ptr%nvars, c_lev_ptr%shape)
+      c_lev_ptr%index,   c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%destroy_array(cf_delta, c_lev_ptr%nnodes, &
-      f_lev_ptr%index, SDC_KIND_CORRECTION, f_lev_ptr%nvars, f_lev_ptr%shape)
+      f_lev_ptr%index,   f_lev_ptr%shape)
 
     call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
     call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_ALL)
@@ -127,47 +125,35 @@ contains
 
     class(pf_encap_t), allocatable ::    c_delta    !<  coarse correction
     class(pf_encap_t), allocatable ::    f_delta    !<  fine correction
-    class(pf_encap_t), allocatable ::    c_q0       !<  coarse initial condition
-    class(pf_encap_t), allocatable ::    f_q0       !<  fine  initial condition
 
     call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
 
     !> create local workspace
-    call c_lev_ptr%ulevel%factory%create_single(c_q0,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(f_q0,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
 
-    ! needed for amr
-    call f_q0%setval(0.0_pfdp)
-    call c_q0%setval(0.0_pfdp)
+    ! Zero temps
     call c_delta%setval(0.0_pfdp)
     call f_delta%setval(0.0_pfdp)
 
-    call c_q0%copy(c_lev_ptr%q0)
-    call f_q0%copy(f_lev_ptr%q0)
-
     !>  restrict fine initial data to coarse
-    call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_q0, c_delta, pf%state%t0)
+    call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_lev_ptr%q0, c_delta, pf%state%t0)
     !>  get coarse level correction
-    call c_delta%axpy(-1.0_pfdp, c_q0)
+    call c_delta%axpy(-1.0_pfdp, c_lev_ptr%q0)    
 
     !>  interpolate correction in space
     call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, f_delta, c_delta, pf%state%t0)
 
     !> update fine inital condition
-    call f_q0%axpy(-1.0_pfdp, f_delta)
-    call f_lev_ptr%q0%copy(f_q0)
+    call f_lev_ptr%q0%axpy(-1.0_pfdp, f_delta)
 
     call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
     call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_Q0)
 
     !> destroy local workspace
-    call c_lev_ptr%ulevel%factory%destroy_single(c_q0,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(f_q0,  f_lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, f_lev_ptr%nvars, f_lev_ptr%shape)
-    call c_lev_ptr%ulevel%factory%destroy_single(c_delta, c_lev_ptr%index, SDC_KIND_CORRECTION,   c_lev_ptr%nvars, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(f_delta, f_lev_ptr%index, SDC_KIND_CORRECTION,   f_lev_ptr%nvars, f_lev_ptr%shape)
+    call c_lev_ptr%ulevel%factory%destroy_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
+    call f_lev_ptr%ulevel%factory%destroy_single(f_delta, f_lev_ptr%index,  f_lev_ptr%shape)
 
   end subroutine interpolate_q0
 
