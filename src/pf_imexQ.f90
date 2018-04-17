@@ -58,6 +58,7 @@ module pf_mod_imexQ
      procedure :: evaluate   => imexQ_evaluate
      procedure :: integrate  => imexQ_integrate
      procedure :: residual   => imexQ_residual
+     procedure :: spreadq0   => imexQ_spreadq0
      procedure :: evaluate_all => imexQ_evaluate_all
      procedure :: destroy   => imexQ_destroy
      procedure :: imexQ_destroy

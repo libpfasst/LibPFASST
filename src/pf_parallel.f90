@@ -262,7 +262,59 @@ contains
   !> (pstatus), the current processor hasn't converged yet either,
   !> regardless of the residual.
   !>
-  subroutine pf_check_convergence(pf, k, dt, residual, energy, converged)
+  subroutine pf_check_convergence_old(pf, k, dt, residual, energy, qcycle)
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp),        intent(inout) :: residual, energy
+    real(pfdp),        intent(in)    :: dt
+    integer,           intent(in)    :: k
+    logical,           intent(out)   :: qcycle
+    real(pfdp)     :: residual1
+    qcycle = .false.
+
+    ! shortcut for fixed block mode
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+       pf%state%pstatus = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
+       return
+    end if
+
+    ! Check to see if tolerances are met
+    residual1 = pf%levels(pf%nlevels)%residual
+    if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
+       if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
+            (abs(residual1)                          < pf%abs_res_tol) ) then
+          pf%state%status = PF_STATUS_CONVERGED
+       end if
+    end if
+    residual = residual1
+
+    call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
+    call pf_recv_status(pf, 8000+k)
+
+    if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING) &
+         pf%state%status = PF_STATUS_ITERATING
+
+    call pf_send_status(pf, 8000+k)
+    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
+
+    ! XXX: this ain't so pretty, perhaps we should use the
+    ! 'nmoved' thinger to break this cycle if everyone is
+    ! done...
+
+    if (pf%state%status == PF_STATUS_CONVERGED) then
+       qcycle = .true.
+       return
+    end if
+
+    if (0 == pf%comm%nproc) then
+       pf%state%status = PF_STATUS_PREDICTOR
+       qcycle = .true.
+       return
+    end if
+
+  end subroutine pf_check_convergence_old
+
+    subroutine pf_check_convergence(pf, k, dt, residual, energy, converged)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual, energy
     real(pfdp),        intent(in)    :: dt
@@ -331,7 +383,7 @@ contains
     real(pfdp)                :: residual, energy
     integer                   ::  ierror  !<  Warning flag for communication routines
 
-    logical :: converged, qbroadcast
+    logical :: qcycle, qbroadcast
     logical :: did_post_step_hook
 
     call start_timer(pf, TTOTAL)
@@ -357,6 +409,9 @@ contains
     call f_lev_p%q0%copy(q0, flags=1)
 
     do k = 1, 666666666   !  Loop over blocks of time steps
+
+       qbroadcast = .false.
+       
        !  Check to see if we should do one more hook 
        if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
          call call_hooks(pf, -1, PF_POST_STEP)
@@ -366,7 +421,6 @@ contains
        end if
 
        ! in block mode, jump to next block if we've reached the max iteration count
-       qbroadcast = .false.
        if (pf%state%iter >= pf%niters) then
 
           if (.not. did_post_step_hook) then
@@ -402,7 +456,8 @@ contains
        ! perform fine sweeps
        !
        pf%state%iter  = pf%state%iter + 1
-
+       pf%state%cycle = 1
+       
        call start_timer(pf, TITERATION)
 
        ! XXX: this if statement is necessary for block mode cycling...
@@ -416,33 +471,36 @@ contains
        ! check convergence, continue with iteration
        !
 
-       call pf_check_convergence(pf, k, dt, residual, energy, converged)
+       !       call pf_check_convergence(pf, k, dt, residual, energy, converged)
+       call pf_check_convergence_old(pf, k, dt, residual, energy, qcycle)
+
 
        if (pf%state%step >= pf%state%nsteps) exit
-
-       if (.not. converged) then
-          do level_index = 2, pf%nlevels
-             f_lev_p => pf%levels(level_index)
-             call pf_post(pf, f_lev_p, f_lev_p%index*10000+k)
-          end do
+       if (qcycle) cycle
+       
+!       if (.not. converged) then
+       do level_index = 2, pf%nlevels
+          f_lev_p => pf%levels(level_index)
+          call pf_post(pf, f_lev_p, f_lev_p%index*10000+k)
+       end do
           
-          if (pf%state%status /= PF_STATUS_CONVERGED) then
+       if (pf%state%status /= PF_STATUS_CONVERGED) then
              
-             f_lev_p => pf%levels(pf%nlevels)
-             call pf_send(pf, f_lev_p, f_lev_p%index*10000+k, .false.)
+          f_lev_p => pf%levels(pf%nlevels)
+          call pf_send(pf, f_lev_p, f_lev_p%index*10000+k, .false.)
              
-             if (pf%nlevels > 1) then
-                c_lev_p => pf%levels(pf%nlevels-1)
-                call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
-                call save(c_lev_p)
-             end if
-             
+          if (pf%nlevels > 1) then
+             c_lev_p => pf%levels(pf%nlevels-1)
+             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
+             call save(c_lev_p)
           end if
+             
+       end if
           
-          call pf_v_cycle(pf, k, pf%state%t0, dt)
-          call call_hooks(pf, -1, PF_POST_ITERATION)
-          call end_timer(pf, TITERATION)
-      end if
+       call pf_v_cycle(pf, k, pf%state%t0, dt)
+       call call_hooks(pf, -1, PF_POST_ITERATION)
+       call end_timer(pf, TITERATION)
+
     end do  !   Loop on k over blocks of time steps
 
     pf%state%iter = -1
@@ -748,7 +806,8 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  ierror, istatus
-    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
+    !    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
+    if (pf%rank /= 0 ) then    
 
        if (pf%debug) print*, pf%rank, 'my status = ', pf%state%status
 
