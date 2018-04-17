@@ -613,7 +613,6 @@ contains
        converged = .FALSE.
        pf%state%status = PF_STATUS_ITERATING
        pf%state%pstatus = PF_STATUS_ITERATING
-
 !       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
 
        call start_timer(pf, TITERATION)
@@ -817,8 +816,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: tag
     integer ::  ierror, istatus
-    !    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
-    if (pf%rank /= 0 ) then    
+    if (pf%rank /= 0 ) then
 
        if (pf%debug) print*, pf%rank, 'my status = ', pf%state%status
 
