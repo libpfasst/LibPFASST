@@ -35,13 +35,15 @@ contains
   !>  This is the main interface to pfasst.
   !!  It examines the parameters and decides which subroutine to call
   !!  to execute the code correctly
-  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf   !<  The complete PFASST structure
     class(pf_encap_t), intent(in   )           :: q0   !<  The initial condition
     real(pfdp),        intent(in   )           :: dt   !<  The time step for each processor
     real(pfdp),        intent(in   )           :: tend !<  The final time of run
     integer,           intent(in   ), optional :: nsteps  !<  The number of time steps
     class(pf_encap_t), intent(inout), optional :: qend    !<  The computed solution at tend
+    integer,           intent(in   ), optional :: flags(:)!<  User defnined flags
+
 
     !  Local variables
     integer :: nproc  !<  Total number of processors
@@ -78,24 +80,24 @@ contains
     if (pf%nlevels .eq. 1) then
        print *,'Calling pipelined SDC with 1 level'
        if (present(qend)) then
-          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
+          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
        else
-          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
+          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)
        end if
     else
        if (pf%Vcycle) then
           !  Right now, we just call the old routine
           if (present(qend)) then
-             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend)
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
           else
-             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc)
+             call pf_pfasst_run_old(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)
           end if
        else
           print *,'Calling pipelined SDC with multiple levels'
           if (present(qend)) then
-             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend)
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
           else
-             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc)
+             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)
           end if
        end if
     end if
@@ -118,25 +120,47 @@ contains
     !  4.  nlevels > 1  and nprocs > 1 -> PFASST
   end subroutine pf_pfasst_run
   !
-  ! Predictor.
-  !
+  !> PFASST Predictor.
   !>  Subroutine  to initialize the solution on each processor
-  !! Spreads the fine initial condition (F%q0) to all levels and all
-  !! nodes.  If we're running with more than one processor, performs
-  !! sweeps on the coarsest level.
+  !!  The goal is to have a solution at each level and each node set to a consistent value
+  !!  When this is called, the value of q0 at the fine level on each processor has been set somehow (see q0_style below)
+  !!
+  !! This can be broken down into four substeps
+  !! 1. Get the  initial condition on the finest level at each node
+  !! 2. Coarsen the initial condition to each coarser level with tau corrections
+  !! 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
+  !!    (this is skipped if the fine initial conditions are already consistent)
+  !! 4. Do some coarse grid sweeps to improve initial solutions on coarsest nodes
+  !! 5. Interpolating coarse correction back to finer levels sweeping along the way.
+  !!
+  !! There are several parameters or flags that determine how things are done:
+  !!  integer  q0_style:    can take 3 values
+  !!           0:  Only the q0 at t=0 is valid  (default)
+  !!           1:  The q0 at each processor is valid
+  !!           2:  q0 and all nodes at each processor is valid
+  !! logical  PFASST_pred:  If true, the burn-in step uses the "PFASST predictor" trick
+  !! integer  nsweeps_burn: Determines how many sweeps are done on the coarse level during burn in
+  !! integer  nsweeps_pred: Determines how many sweeps are done at the coarse level after burn in
+  !! logical Pipeline_burn: True if coarse sweeps during burn in are pipelined  (meaningless if nsweeps_burn>1 on coarse level)
+  !! logical Pipeline_pred: True if coarse sweeps after burn in are pipelined  (meaningless if nsweeps_pred>1 on coarse level)
+  !!    Pipeline variables do nothing if there is only one processor
+  !! logical  RK_pred:      If true, the coarse level is initialized with Runge-Kutta instead of the  PFASST burn in.
+  !!                        We  will still do coarse sweeps after and correct finer levels
   !!
   !! No time communication is performed during the predictor since all
   !! procesors can do the work themselves
   !!
   !!  The iteration count is reset to 0, and the status is reset to
   !!  ITERATING.
-  subroutine pf_predictor(pf, t0, dt)
+  subroutine pf_predictor(pf, t0, dt, flags)
     type(pf_pfasst_t), intent(inout), target :: pf     !< PFASST main data structure
     real(pfdp),        intent(in   )         :: t0     !< Initial time of this processor
     real(pfdp),        intent(in   )         :: dt     !< time step
+    integer,           intent(in   )         :: flags(:)  !<  User defined flags
 
-    class(pf_level_t), pointer :: c_lev_p
-    class(pf_level_t), pointer :: f_lev_p     !<
+    
+    class(pf_level_t), pointer :: c_lev_p     !<  Coasrse level pointer
+    class(pf_level_t), pointer :: f_lev_p     !<  Fine level pointer
     integer                   :: j, k            !<  Loop indices
     integer                   :: level_index     !<  Local variable for looping over levels
     real(pfdp)                :: t0k             !<  Initial time at time step k
@@ -144,115 +168,83 @@ contains
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
+    !! Step 1. Getting the  initial condition on the finest level at each processor
+    !!         If we are doing multiple levels, then we need to coarsen to fine level
     f_lev_p => pf%levels(pf%nlevels)
-    call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0)
+    if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
+       call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0)
+    endif
 
-    !>  If we are doing a single level, then we only spreadq0 and return
-    if (pf%nlevels > 1) then
+    !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
+    if (pf%nlevels > 1) then  
        do level_index = pf%nlevels, 2, -1
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
-          call pf_residual(pf, f_lev_p, dt)
-          call restrict_time_space_fas(pf, t0, dt, level_index)
+          call pf_residual(pf, f_lev_p, dt)  
+          call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
           call save(c_lev_p)
           call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0,c_lev_p%q0,t0)
        end do  !  level_index = pf%nlevels, 2, -1
+    end if
 
-       if (pf%comm%nproc > 1) then
-          c_lev_p => pf%levels(1)
-          if (pf%Pipeline_G .and. (c_lev_p%nsweeps_pred > 1)) then
-             !  This is the weird choice.  We burn in without communication, then do extra sweeps
-             level_index=1
-             c_lev_p => pf%levels(level_index)
-             !  Burn in the processors without communciation
-             do k = 1, pf%rank + 1
-                pf%state%iter = -k
-
-                ! Reset initial value (skip on first iteration)
-                ! This is equivalent to getting value from previous processor
-                if (k > 1) then
-                   call c_lev_p%q0%copy(c_lev_p%qend)
-                   ! spread new coarse value if we are not doing PFASST_pred
-                   if (.not. pf%PFASST_pred) then
-                      call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0)
-                   end if
-                end if
-                !  Do a sweep
-                call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1)
-             end do  ! k = 1, pf%rank + 1
-             ! Now we have mimicked the burn in and we must do pipe-lined sweeps
-             do k = 1, c_lev_p%nsweeps_pred-1
-                pf%state%pstatus = PF_STATUS_ITERATING
-                pf%state%status = PF_STATUS_ITERATING
-                pf%state%iter =-(pf%rank + 1) -k
-
-                !  Get new initial conditions
-                call pf_recv(pf, c_lev_p, c_lev_p%index*20000+pf%rank+k, .true.)
-
-                !  Do a sweep
-                call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1 )
-                !  Send forward
-                call pf_send(pf, c_lev_p,  c_lev_p%index*20000+pf%rank+1+k, .false.)
-
-             end do ! k = 1, c_lev_p%nsweeps_pred-1
-          else  ! (pf%Pipeline_G .and. (c_lev_p%nsweeps_pred > 1)) then
-             ! Normal predictor burn in
-             level_index=1
-             c_lev_p => pf%levels(level_index)
-             do k = 1, pf%rank + 1
-                pf%state%iter = -k
-                t0k = t0-(pf%rank)*dt + (k-1)*dt
-
-                ! Get new initial value (skip on first iteration)
-                if (k > 1) then
-                   call c_lev_p%q0%copy(c_lev_p%qend)
-                   if (.not. pf%PFASST_pred) then
-                      call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
-                   end if
-                end if
-
-                call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,c_lev_p%nsweeps_pred)
-             end do
-          end if ! (pf%Pipeline_G .and. (c_lev_p%nsweeps_pred > 1)) then
-
-          ! Return to fine level...
-          call pf_v_cycle_post_predictor(pf, t0, dt)
-
-       else 
-          ! Single processor... sweep on coarse and return to fine level.
-          level_index = 1
-          c_lev_p => pf%levels(level_index)
-          do k = 1, pf%rank + 1
-             pf%state%iter = -k
-             t0k = t0-(pf%rank)*dt + (k-1)*dt
-             call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,c_lev_p%nsweeps_pred)
-          end do
-
-          ! Return to fine level...
-          call pf_v_cycle_post_predictor(pf, t0, dt)
-
-       end if
-
-    else ! nlevels == 1
-
-       level_index = 1
+    !! Step 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
+    !!         (this is skipped if the fine initial conditions are already consistent)
+    !! The first processor does nothing, the second does one set of sweeps, the 2nd two, etc
+    !! Hence, this is skipped completely if nprocs=1
+    if (pf%q0_style .eq. 0) then  !  The coarse level needs burn in
+       level_index=1
        c_lev_p => pf%levels(level_index)
-       do k = 1, pf%rank+1
+       do k = 1, pf%rank + 1
           pf%state%iter = -k
-          t0k = t0 - (pf%rank)*dt + (k-1)*dt
+          t0k = t0-(pf%rank)*dt + (k-1)*dt   !  Remember t0 is the beginning of this time slice so t0-(pf%rank)*dt is t0 of problem
+                
+          ! Get new initial value (skip on first iteration)
           if (k > 1) then
              call c_lev_p%q0%copy(c_lev_p%qend)
-             if (.not. pf%PFASST_pred) then
-                call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
-             end if
+             ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
+             if (.not. pf%PFASST_pred) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
           end if
+          !  Do some sweeps
+          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
+       end do
+    end if  ! (q0_style .eq. 0)
 
-          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, c_lev_p%nsweeps_pred)
-       enddo
+    ! Step 4: Now we have everyone burned in, so do some coarse sweeps
+    if (pf%Pipeline_pred) then
+       do k = 1, c_lev_p%nsweeps_pred
+          pf%state%pstatus = PF_STATUS_ITERATING
+          pf%state%status = PF_STATUS_ITERATING
+          pf%state%iter =-(pf%rank + 1) -k
+       
+          !  Get new initial conditions
+          call pf_recv(pf, c_lev_p, c_lev_p%index*20000+pf%rank+k, .true.)
+       
+          !  Do a sweep
+          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1 )
+          !  Send forward
+          call pf_send(pf, c_lev_p,  c_lev_p%index*20000+pf%rank+1+k, .false.)
+       end do ! k = 1, c_lev_p%nsweeps_pred-1
+    else  !  Don't pipeline
+       !  Get new initial conditions
+       call pf_recv(pf, c_lev_p, c_lev_p%index*20000+pf%rank, .true.)
+       
+       !  Do a sweeps
+       call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred )
+       !  Send forward
+       call pf_send(pf, c_lev_p,  c_lev_p%index*20000+pf%rank+1, .false.)
+    endif  ! (Pipeline_pred .eq. .true) then
 
-       ! print*, 'rank ', pf%rank, ' just did ', k-1, ' iterations in the predictor'
-
-    end if  ! (pf%nlevels > 1) then
+    !  Step 6:  Return to fine level sweeping on any level in between coarsest and finest
+    do level_index = 2, pf%nlevels  !  Will do nothing with one level
+       f_lev_p => pf%levels(level_index);
+       c_lev_p => pf%levels(level_index-1)
+       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
+       call interpolate_q0(pf, f_lev_p, c_lev_p)
+       !  Do a sweep on unless we are at the finest level
+       if (level_index < pf%nlevels) then
+          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
+       end if
+    end do
 
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
@@ -325,12 +317,13 @@ contains
   !
   ! Run in parallel using PFASST.
   !
-  subroutine pf_pfasst_run_old(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_pfasst_run_old(pf, q0, dt, tend, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(in   )           :: dt, tend
     integer,           intent(in   )           :: nsteps
     class(pf_encap_t), intent(inout), optional :: qend
+    integer,           intent(in   ), optional :: flags(:)
 
     class(pf_level_t), pointer :: f_lev_p, c_lev_p
     integer                   :: j, k
@@ -403,7 +396,7 @@ contains
 
        ! predictor, if requested or we are starting new bloc
        if (pf%state%status == PF_STATUS_PREDICTOR) &
-            call pf_predictor(pf, pf%state%t0, dt)
+            call pf_predictor(pf, pf%state%t0, dt,flags)
 
        !
        ! perform fine sweeps
@@ -465,13 +458,14 @@ contains
   !
   !> Run single level SDC in pipeline fashion
   !
-  subroutine pf_pipeline_run(pf, q0, dt, tend, nsteps, qend)
+  subroutine pf_pipeline_run(pf, q0, dt, tend, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(in   )           :: dt, tend
     integer,           intent(in   )           :: nsteps
     class(pf_encap_t), intent(inout), optional :: qend
-
+    integer,           intent(in   ), optional :: flags(:)
+    
     class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
     integer                   :: j, k
     real(pfdp)                :: residual
@@ -542,7 +536,7 @@ contains
        !> Call the predictor
        !> Currently the predictor will do nothing but spread q0 to all the nodes
        if (pf%state%status == PF_STATUS_PREDICTOR) then
-          call pf_predictor(pf, pf%state%t0, dt)
+          call pf_predictor(pf, pf%state%t0, dt,flags)
        end if
 
        !>  Start the loops over SDC sweeps
@@ -635,36 +629,7 @@ contains
   end subroutine pf_check_convergence_pipeline
 
   !
-  ! After predictor, return to fine level.
-  !
-  subroutine pf_v_cycle_post_predictor(pf, t0, dt)
-    type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in)    :: t0, dt
-
-    class(pf_level_t), pointer :: f_lev_p, c_lev_p
-    integer :: j
-    integer :: level_index
-
-    if (pf%nlevels <= 1) return
-
-    do level_index = 2, pf%nlevels-1
-      f_lev_p => pf%levels(level_index);
-      c_lev_p => pf%levels(level_index-1)
-       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-       call interpolate_q0(pf, f_lev_p, c_lev_p)
-       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
-
-    end do
-    c_lev_p => pf%levels(pf%nlevels-1)
-    f_lev_p => pf%levels(pf%nlevels)
-    call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-    call interpolate_q0(pf, f_lev_p, c_lev_p)
-
-  end subroutine pf_v_cycle_post_predictor
-
-  !
-  ! Execute a V-cycle, starting and ending from the middle level.
-  !
+  !>  Execute a V-cycle, starting and ending from the middle level.
   subroutine pf_v_cycle(pf, iteration, t0, dt)
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt

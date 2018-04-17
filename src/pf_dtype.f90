@@ -137,7 +137,7 @@ module pf_mod_dtype
      integer  :: mpibuflen    = -1   !< size of solution in pfdp units
      integer  :: nnodes       = -1   !< number of sdc nodes
      integer  :: nsweeps      =  1   !< number of sdc sweeps to perform
-     integer  :: nsweeps_pred =  1   !< number of sdc sweeps to perform (predictor)
+     integer  :: nsweeps_pred =  1      !< number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !< interpolate functions instead of solutions
 
      real(pfdp)  :: error            !< holds the user defined residual
@@ -222,12 +222,24 @@ module pf_mod_dtype
      real(pfdp) :: abs_res_tol = 0.d0   !<  absolute convergence tolerance
      real(pfdp) :: rel_res_tol = 0.d0   !<  relative convergence tolerance
 
-     !>  run options  (should be set before pfasst_run is called)
-     logical :: Pipeline_G =  .false.   !<  decides if coarsest level sweeps are pipelined
-     logical :: PFASST_pred = .false.   !<  decides if the PFASST type predictor is used
-     logical :: Vcycle = .true.         !<  decides if Vcycles are done
-     logical :: do_predictor = .true.   !<  decides if the predictor is done
+     !>  predictor options  (should be set before pfasst_run is called)
+     logical :: PFASST_pred = .true.    !<  true if the PFASST type predictor is used
+     logical :: RK_pred = .false.       !<  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+     logical :: Pipeline_pred = .false. !<  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
+     integer :: nsweeps_burn =  1       !<  number of sdc sweeps to perform during coarse level burn in
+!     logical :: Pipeline_burn = .false. !<  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
 
+     
+     !  q0 can take 3 values
+     !  0:  Only the q0 at t=0 is valid  (default)
+     !  1:  The q0 at each processor is valid
+     !  2:  q0 and all nodes at each processor is valid
+     integer :: q0_style =  0                                                   
+
+     !>  run options  (should be set before pfasst_run is called)
+     logical :: Vcycle = .true.         !<  decides if Vcycles are done
+     logical :: Pipeline_G =  .false.   !<  true if coarsest level sweeps are pipelined during run (not predictor)
+     
      integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
      !> pf objects
