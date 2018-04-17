@@ -192,21 +192,32 @@ contains
     !! The first processor does nothing, the second does one set of sweeps, the 2nd two, etc
     !! Hence, this is skipped completely if nprocs=1
     if (pf%q0_style .eq. 0) then  !  The coarse level needs burn in
-       level_index=1
-       c_lev_p => pf%levels(level_index)
-       do k = 1, pf%rank + 1
-          pf%state%iter = -k
-          t0k = t0-(pf%rank)*dt + (k-1)*dt   !  Remember t0 is the beginning of this time slice so t0-(pf%rank)*dt is t0 of problem
-                
-          ! Get new initial value (skip on first iteration)
-          if (k > 1) then
-             call c_lev_p%q0%copy(c_lev_p%qend)
-             ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
-             if (.not. pf%PFASST_pred) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
-          end if
-          !  Do some sweeps
-          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
-       end do
+       !! If RK_pred is true, just do some RK_steps
+       if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
+          !  Get new initial conditions
+          call pf_recv(pf, c_lev_p, 30000+pf%rank+k, .true.)
+          
+          !  Do a RK_step
+          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt,1 )
+          !  Send forward
+          call pf_send(pf, c_lev_p,  30000+pf%rank+1+k, .false.)
+       else  !  Normal PFASST burn in
+          level_index=1
+          c_lev_p => pf%levels(level_index)
+          do k = 1, pf%rank + 1
+             pf%state%iter = -k
+             t0k = t0-(pf%rank)*dt + (k-1)*dt   !  Remember t0 is the beginning of this time slice so t0-(pf%rank)*dt is t0 of problem
+             
+             ! Get new initial value (skip on first iteration)
+             if (k > 1) then
+                call c_lev_p%q0%copy(c_lev_p%qend)
+                ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
+                if (.not. pf%PFASST_pred) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
+             end if
+             !  Do some sweeps
+             call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
+          end do
+       endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps

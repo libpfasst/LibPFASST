@@ -87,7 +87,7 @@ module pf_mod_dtype
   type, abstract :: pf_stepper_t
      integer     :: npieces
    contains
-     procedure(pf_stepN_p),        deferred :: do_N_steps
+     procedure(pf_do_n_steps_p),           deferred :: do_n_steps
      procedure(pf_initialize_stepper_p),   deferred :: initialize
      procedure(pf_destroy_stepper_p),      deferred :: destroy
   end type pf_stepper_t
@@ -117,6 +117,7 @@ module pf_mod_dtype
   type, abstract :: pf_user_level_t
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
+     class(pf_sweeper_t), allocatable :: stepper
    contains
      procedure(pf_transfer_p), deferred :: restrict
      procedure(pf_transfer_p), deferred :: interpolate
@@ -136,6 +137,7 @@ module pf_mod_dtype
      integer  :: index        = -1   !< level number (1 is the coarsest)
      integer  :: mpibuflen    = -1   !< size of solution in pfdp units
      integer  :: nnodes       = -1   !< number of sdc nodes
+     integer  :: nsteps_rk    = -1   !< number of rk steps to perform
      integer  :: nsweeps      =  1   !< number of sdc sweeps to perform
      integer  :: nsweeps_pred =  1      !< number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !< interpolate functions instead of solutions
@@ -239,7 +241,9 @@ module pf_mod_dtype
      !>  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !<  decides if Vcycles are done
      logical :: Pipeline_G =  .false.   !<  true if coarsest level sweeps are pipelined during run (not predictor)
-     
+
+     !> RK and Parareal options
+     logical :: use_rk_stepper = .false. !< decides if RK steps are used instead of the sweeps
      integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
      !> pf objects
@@ -342,15 +346,15 @@ module pf_mod_dtype
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
-     subroutine pf_stepN_p(this, pf, level_index, t0, big_dt,nsteps)
+     subroutine pf_do_n_steps_p(this, pf, level_index, t0, big_dt,nsteps_rk)
        import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: big_dt !<  Time step size
        real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
-       integer,             intent(in)    :: nsteps
-     end subroutine pf_stepN_p
+       integer,             intent(in)    :: nsteps_rk
+     end subroutine pf_do_n_steps_p
 
      subroutine pf_initialize_stepper_p(this, lev)
        import pf_stepper_t, pf_level_t
