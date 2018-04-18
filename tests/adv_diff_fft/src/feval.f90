@@ -7,7 +7,7 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imexR
+  use pf_mod_imexQ
   implicit none
 
   real(pfdp), parameter :: &
@@ -24,7 +24,7 @@ module feval
      procedure :: interpolate
   end type ad_level_t
 
-  type, extends(pf_imexR_t) :: ad_sweeper_t
+  type, extends(pf_imexQ_t) :: ad_sweeper_t
 !     type(c_ptr) :: ffft, ifft
 !     complex(pfdp), pointer :: wk(:)              ! work space
      real(pfdp), allocatable :: wsave(:)           ! work space
@@ -122,7 +122,7 @@ contains
 !    call fftw_destroy_plan(this%ffft)
 !    call fftw_destroy_plan(this%ifft)
     
-    call this%imexR_destroy(lev)
+    call this%imexQ_destroy(lev)
 
   end subroutine destroy
 
