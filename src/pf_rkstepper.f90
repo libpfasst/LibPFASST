@@ -73,7 +73,7 @@ contains
     dt = big_dt/real(nsteps_rk, pfdp)
 
     ! Allocate space for the right-hand side
-    call lev%ulevel%factory%create_single(rhs, lev%index, lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
 
     ! Loop over time steps
     do n = 1, nsteps_rk      
@@ -85,10 +85,14 @@ contains
           call lev%Q(1)%copy(lev%Q(lev%nnodes))
        end if
 
+!       if (level_index == pf%nlevels) &
+!            call lev%Q(1)%eprint()
+
+       ! this assumes that cvec(1) == 0
        if (this%explicit) &
             call this%f_eval(lev%Q(1), t0+dt*(n-1)+dt*this%cvec(1), lev%index, lev%F(1,1),1)
        if (this%implicit) &
-            call lev%F(1,2)%setval(0.0_pfdp)
+            call this%f_eval(lev%Q(1), t0+dt*(n-1)+dt*this%cvec(1), lev%index, lev%F(1,2),2)
      
        ! Loop over stage values
        do m = 1, this%nstages-1  
@@ -155,43 +159,152 @@ contains
     integer    :: nstages
     real(pfdp) :: gamma, delta
 
-    !  Ascher-Ruuth-Spiteri
     this%explicit = .true.
     this%implicit = .true.
 
-    nstages = 3
+    if (this%order == 2) then 
 
-    this%nstages = nstages
-    allocate(this%AmatE(nstages,nstages))  !  Explicit Butcher matrix
-    allocate(this%AmatI(nstages,nstages))  !  Implicit Butcher matrix
-    allocate(this%cvec(nstages))           !  stage times
-    allocate(this%bvecE(nstages))          !  quadrature weights on explicit
-    allocate(this%bvecI(nstages))          !  quadrature weights on implicit
+       !  Ascher-Ruuth-Spiteri
 
-    this%AmatE = 0.0_pfdp
-    this%AmatI = 0.0_pfdp
-    this%bvecE = 0.0_pfdp
-    this%bvecI = 0.0_pfdp
-    this%cvec  = 0.0_pfdp
-    
-    gamma           = (TWO - sqrt(TWO))/TWO
-    delta           = -TWO*sqrt(TWO)/THREE
+       nstages = 3
+       
+       this%nstages = nstages
+       allocate(this%AmatE(nstages,nstages))  !  Explicit Butcher matrix
+       allocate(this%AmatI(nstages,nstages))  !  Implicit Butcher matrix
+       allocate(this%cvec(nstages))           !  stage times
+       allocate(this%bvecE(nstages))          !  quadrature weights on explicit
+       allocate(this%bvecI(nstages))          !  quadrature weights on implicit
 
-    this%AmatE(2,1) = gamma
-    this%AmatE(3,1) = delta
-    this%AmatE(3,2) = ONE-delta
+       this%AmatE = 0.0_pfdp
+       this%AmatI = 0.0_pfdp
+       this%bvecE = 0.0_pfdp
+       this%bvecI = 0.0_pfdp
+       this%cvec  = 0.0_pfdp
+       
+       gamma           = (TWO - sqrt(TWO))/TWO
+       delta           = -TWO*sqrt(TWO)/THREE
+       
+       this%AmatE(2,1) = gamma
+       this%AmatE(3,1) = delta
+       this%AmatE(3,2) = ONE-delta
+       
+       this%AmatI(2,2) = gamma
+       this%AmatI(3,2) = ONE-gamma
+       this%AmatI(3,3) = gamma
+       
+       this%cvec       = (/ ZERO, gamma, ONE /)
+       this%bvecE      = (/ ZERO, ONE-gamma, gamma /)
+       this%bvecI      = this%bvecE
 
-    print *, this%AmatE
+    else if (this%order == 3) then
+      
+       ! Third-order Kennedy-Carpenter
 
-    this%AmatI(2,2) = gamma
-    this%AmatI(3,2) = ONE-gamma
-    this%AmatI(3,3) = gamma
+       nstages = 4
+      
+       this%nstages = nstages
+       allocate(this%AmatE(nstages,nstages))  !  Explicit Butcher matrix
+       allocate(this%AmatI(nstages,nstages))  !  Implicit Butcher matrix
+       allocate(this%cvec(nstages))           !  stage times
+       allocate(this%bvecE(nstages))          !  quadrature weights on explicit
+       allocate(this%bvecI(nstages))          !  quadrature weights on implicit
 
-    print *, this%AmatI
+       this%AmatE = 0.0_pfdp
+       this%AmatI = 0.0_pfdp
+       this%bvecE = 0.0_pfdp
+       this%bvecI = 0.0_pfdp
+       this%cvec  = 0.0_pfdp
 
-    this%cvec       = (/ ZERO, gamma, ONE /)
-    this%bvecE      = (/ ZERO, ONE-gamma, gamma /)
-    this%bvecI      = this%bvecE
+       this%AmatE(2,1) =   1767732205903.0_pfdp  / 2027836641118.0_pfdp
+       this%AmatE(3,1) =   5535828885825.0_pfdp  / 10492691773637.0_pfdp
+       this%AmatE(3,2) =   788022342437.0_pfdp   / 10882634858940.0_pfdp
+       this%AmatE(4,1) =   6485989280629.0_pfdp  / 16251701735622.0_pfdp
+       this%AmatE(4,2) = - 4246266847089.0_pfdp  / 9704473918619.0_pfdp
+       this%AmatE(4,3) =   10755448449292.0_pfdp / 10357097424841.0_pfdp
+
+       this%AmatI(2,1) =   1767732205903.0_pfdp  / 4055673282236.0_pfdp
+       this%AmatI(2,2) =   1767732205903.0_pfdp  / 4055673282236.0_pfdp
+       this%AmatI(3,1) =   2746238789719.0_pfdp  / 10658868560708.0_pfdp
+       this%AmatI(3,2) = - 640167445237.0_pfdp   / 6845629431997.0_pfdp
+       this%AmatI(3,3) =   1767732205903.0_pfdp  / 4055673282236.0_pfdp
+       this%AmatI(4,1) =   1471266399579.0_pfdp  / 7840856788654.0_pfdp
+       this%AmatI(4,2) = - 4482444167858.0_pfdp  / 7529755066697.0_pfdp
+       this%AmatI(4,3) =   11266239266428.0_pfdp / 11593286722821.0_pfdp
+       this%AmatI(4,4) =   1767732205903.0_pfdp  / 4055673282236.0_pfdp
+
+       this%cvec       = (/ 0.0_pfdp, 1767732205903.0_pfdp / 2027836641118.0_pfdp, 3.0_pfdp / 5.0_pfdp, 1.0_pfdp /)
+       this%bvecE      = (/ 1471266399579.0_pfdp  / 7840856788654.0_pfdp,  - 4482444167858.0_pfdp / 7529755066697.0_pfdp,&
+                            11266239266428.0_pfdp / 11593286722821.0_pfdp,   1767732205903.0_pfdp / 4055673282236.0_pfdp /)
+       this%bvecI      = this%bvecE   
+
+    else if (this%order == 4) then
+
+       ! Fourth-order Kennedy-Carpenter
+       
+       nstages = 6 
+
+       this%nstages = nstages
+       allocate(this%AmatE(nstages,nstages))  !  Explicit Butcher matrix
+       allocate(this%AmatI(nstages,nstages))  !  Implicit Butcher matrix
+       allocate(this%cvec(nstages))           !  stage times
+       allocate(this%bvecE(nstages))          !  quadrature weights on explicit
+       allocate(this%bvecI(nstages))          !  quadrature weights on implicit
+
+       this%AmatE = 0.0_pfdp
+       this%AmatI = 0.0_pfdp
+       this%bvecE = 0.0_pfdp
+       this%bvecI = 0.0_pfdp
+       this%cvec  = 0.0_pfdp
+
+       this%AmatE(2,1) =   0.5_pfdp
+       this%AmatE(3,1) =   13861.0_pfdp          / 62500.0_pfdp
+       this%AmatE(3,2) =   6889.0_pfdp           / 62500.0_pfdp
+       this%AmatE(4,1) = - 116923316275.0_pfdp   / 2393684061468.0_pfdp
+       this%AmatE(4,2) = - 2731218467317.0_pfdp  / 15368042101831.0_pfdp
+       this%AmatE(4,3) =   9408046702089.0_pfdp  / 11113171139209.0_pfdp
+       this%AmatE(5,1) = - 451086348788.0_pfdp   / 2902428689909.0_pfdp
+       this%AmatE(5,2) = - 2682348792572.0_pfdp  / 7519795681897.0_pfdp
+       this%AmatE(5,3) =   12662868775082.0_pfdp / 11960479115383.0_pfdp
+       this%AmatE(5,4) =   3355817975965.0_pfdp  / 11060851509271.0_pfdp
+       this%AmatE(6,1) =   647845179188.0_pfdp   / 3216320057751.0_pfdp
+       this%AmatE(6,2) =   73281519250.0_pfdp    / 8382639484533.0_pfdp
+       this%AmatE(6,3) =   552539513391.0_pfdp   / 3454668386233.0_pfdp
+       this%AmatE(6,4) =   3354512671639.0_pfdp  / 8306763924573.0_pfdp 
+       this%AmatE(6,5) =   4040.0_pfdp           / 17871.0_pfdp
+       
+       this%AmatI(2,1) =   0.25_pfdp
+       this%AmatI(2,2) =   0.25_pfdp
+       this%AmatI(3,1) =   8611.0_pfdp        / 62500.0_pfdp
+       this%AmatI(3,2) = - 1743.0_pfdp        / 31250.0_pfdp
+       this%AmatI(3,3) =   0.25_pfdp
+       this%AmatI(4,1) =   5012029.0_pfdp     / 34652500.0_pfdp
+       this%AmatI(4,2) = - 654441.0_pfdp      / 2922500.0_pfdp
+       this%AmatI(4,3) =   174375.0_pfdp      / 388108.0_pfdp
+       this%AmatI(4,4) =   0.25_pfdp
+       this%AmatI(5,1) =   15267082809.0_pfdp / 155376265600.0_pfdp
+       this%AmatI(5,2) = - 71443401.0_pfdp    / 120774400.0_pfdp
+       this%AmatI(5,3) =   730878875.0_pfdp   / 902184768.0_pfdp
+       this%AmatI(5,4) =   2285395.0_pfdp     / 8070912.0_pfdp
+       this%AmatI(5,5) =   0.25_pfdp     
+       this%AmatI(6,1) =   82889.0_pfdp       / 524892.0_pfdp
+       this%AmatI(6,2) =   0.0_pfdp
+       this%AmatI(6,3) =   15625.0_pfdp       / 83664.0_pfdp
+       this%AmatI(6,4) =   69875.0_pfdp       / 102672.0_pfdp
+       this%AmatI(6,5) = - 2260.0_pfdp        / 8211.0_pfdp
+       this%AmatI(6,6) =   0.25_pfdp
+      
+       this%cvec       = (/ 0.0_pfdp,                     0.5_pfdp,                  83.0_pfdp / 250.0_pfdp,       &
+                            31.0_pfdp / 50.0_pfdp,        17.0_pfdp / 20.0_pfdp,     1.0_pfdp /)
+       this%bvecE      = (/ 82889.0_pfdp / 524892.0_pfdp, 0.0_pfdp,                  15625.0_pfdp /  83664.0_pfdp, &
+                            69875.0_pfdp / 102672.0_pfdp, - 2260.0_pfdp / 8211.0_pfdp, 0.25_pfdp /)
+       this%bvecI      = this%bvecE   
+
+    else
+       stop "ark_initialize: This RK order is not supported"
+    end if
+
+    if (lev%nnodes < this%nstages + 1)  &
+         stop "ark_initialize: With RK, lev%nnodes should be equal to rkstepper%nstages + 1"
 
   end subroutine ark_initialize
 

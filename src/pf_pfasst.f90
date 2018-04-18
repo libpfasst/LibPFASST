@@ -101,8 +101,23 @@ contains
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
        allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes))
        allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes))
-       call pf_time_interpolation_matrix(lev_fine%nodes, lev_fine%nnodes, lev_coarse%nodes, lev_coarse%nnodes, lev_fine%tmat)
-       call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
+       ! with the RK stepper, no need to interpolate and restrict in time
+       ! we only copy the first node and last node betweem levels
+       if (pf%use_rk_stepper .eqv. .true.) then
+          lev_fine%tmat = 0.0_pfdp
+          lev_fine%rmat = 0.0_pfdp
+
+          lev_fine%tmat(1,1) = 1.0_pfdp
+          lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes) = 1.0_pfdp
+
+          lev_fine%rmat(1,1) = 1.0_pfdp
+          lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes) = 1.0_pfdp
+
+       ! else compute the interpolation matrix
+       else
+          call pf_time_interpolation_matrix(lev_fine%nodes, lev_fine%nnodes, lev_coarse%nodes, lev_coarse%nnodes, lev_fine%tmat)
+          call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
+       endif
     end do
 
   end subroutine pf_pfasst_setup
@@ -166,7 +181,7 @@ contains
 
     !>  initialize sweeper
     call lev%ulevel%sweeper%initialize(lev)
-
+    call lev%ulevel%stepper%initialize(lev)
 
 
     !> allocate solution and function arrays
