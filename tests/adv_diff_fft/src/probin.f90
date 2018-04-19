@@ -22,9 +22,11 @@ module probin
 
 
   integer, save :: nnodes(MAXLEVS) ! number of nodes
+  integer, save :: nnodes_rk(MAXLEVS) ! number of nodes
   integer, save :: nx(MAXLEVS)     ! number of grid points
   integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
+  integer, save :: nsteps_rk       ! number of time steps for rk
   logical, save :: Finterp
   logical, save :: use_LUq
   integer, save :: imex_stat
@@ -36,7 +38,7 @@ module probin
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/ Finterp, nnodes, nx,nprob, nsteps, dt, Tfin
+  namelist /params/ Finterp, nnodes,nnodes_rk, nx,nprob, nsteps,nsteps_rk, dt, Tfin
   namelist /params/  pfasst_nml, nsweeps, nsweeps_pred
   namelist /params/  v, nu, t00, sigma, kfreq, use_LUq,imex_stat
 
@@ -55,10 +57,11 @@ contains
     nnodes  = 3
 
     nsteps  = -1
+    nsteps_rk  = -1
 
     v       = 1.0_pfdp
     Lx      = 1._pfdp
-    nu      = 0.1_pfdp
+    nu      = 0.01_pfdp
     sigma   = 0.004_pfdp
     kfreq   = 1
     t00      = 0.25_pfdp
@@ -91,7 +94,7 @@ contains
     END DO
 
     !  Reset dt if Tfin is set
-    if (Tfin .gt. 0.0) dt = Tfin/nsteps
+    if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
     !
     ! init
     !

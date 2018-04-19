@@ -36,7 +36,6 @@ contains
     type(ndarray)                  :: q0       !<  the initial condition
     type(ndarray)                  :: qend     !<  the solution at the final time
     character(256)                 :: probin_fname       !<  file name for input parameters
-    class(ad_sweeper_t), pointer   :: ad_sweeper_ptr     !<  pointer to SDC sweeper 
 
     integer                        ::  l   !  loop variable over levels
 
@@ -66,7 +65,8 @@ contains
 
        !  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call setup(pf%levels(l)%ulevel%sweeper, nx(l))
+       call sweeper_setup(pf%levels(l)%ulevel%sweeper, nx(l))
+
 
        !  Allocate the shape array for level (here just one dimension)
        allocate(pf%levels(l)%shape(1))
@@ -87,18 +87,18 @@ contains
     !> compute initial condition
     call initial(q0)
 
+    print *,'print initial condition'    
+    call q0%eprint()
+
     !> add some hooks
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
 
-    !> do the time stepping
+    !> do the PFASST stepping
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)
 
-    print *,'finished pf_pfasst_run on rank', pf%rank
-
-    print *,'cleaning up'
-
     !>  deallocate initial condition
+    print *,'cleaning up'
     call ndarray_destroy(q0)
     call ndarray_destroy(qend)
     

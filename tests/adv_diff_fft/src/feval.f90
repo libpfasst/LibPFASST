@@ -52,7 +52,7 @@ contains
     end select
   end function as_ad_sweeper
 
-  subroutine setup(sweeper, nx)
+  subroutine sweeper_setup(sweeper, nx)
     use probin, only: use_LUq, imex_stat 
     class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: nx
@@ -108,7 +108,7 @@ contains
           this%lap(i) = -kx**2
        end if
     end do
-  end subroutine setup
+  end subroutine sweeper_setup
 
   subroutine destroy(this, lev)
     class(ad_sweeper_t), intent(inout) :: this
