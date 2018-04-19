@@ -88,6 +88,7 @@ module pf_mod_dtype
   !<  Defines the base stepper type
   type, abstract :: pf_stepper_t
      integer     :: npieces
+     integer     :: order
    contains
      procedure(pf_do_n_steps_p),           deferred :: do_n_steps
      procedure(pf_initialize_stepper_p),   deferred :: initialize
@@ -119,7 +120,7 @@ module pf_mod_dtype
   type, abstract :: pf_user_level_t
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
-     class(pf_sweeper_t), allocatable :: stepper
+     class(pf_stepper_t), allocatable :: stepper
    contains
      procedure(pf_transfer_p), deferred :: restrict
      procedure(pf_transfer_p), deferred :: interpolate
