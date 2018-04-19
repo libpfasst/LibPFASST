@@ -7,7 +7,7 @@
     nlevels  = 1
 
     !  These are internal pfasst variables that can be reset
-    niters = 48   !  default is 5
+    niters = 8   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1   

@@ -27,7 +27,7 @@
 !  Now define the local variables you need
 &PARAMS
 !    Finterp = .false.   !  default is 0
-    nnodes =  2 2 2
+    nnodes =  3 5 9
 
     nsweeps_pred= 1 1 1
     nsweeps= 1 1 1
