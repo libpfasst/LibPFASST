@@ -86,6 +86,8 @@ contains
     end do
 
     !>  Set up some parameters
+    pf%use_rk_stepper = .true.
+
     call pf_pfasst_setup(pf)
 
 
@@ -104,7 +106,6 @@ contains
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
 
     !> do the PFASST stepping
-    pf%use_rk_stepper = .false.
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)
 
     !>  print the solution on level 2
