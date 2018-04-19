@@ -277,12 +277,13 @@ contains
     end if
   end subroutine f_comp
 
-  subroutine interpolate(this, levelF, levelG, qF, qG, t)
+  subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
     class(pf_encap_t), intent(inout) :: qF, qG
     real(pfdp),        intent(in   ) :: t
+    integer, intent(in), optional :: flags
 
 
     integer :: nvarF, nvarG, xrat
@@ -330,12 +331,14 @@ contains
 
   end subroutine interpolate
 
-  subroutine restrict(this, levelF, levelG, qF, qG, t)
+  subroutine restrict(this, levelF, levelG, qF, qG, t, flags)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
     class(pf_encap_t), intent(inout) :: qF, qG
-    real(pfdp),        intent(in   ) :: t
+    real(pfdp),        intent(in   ) :: t   
+    integer, intent(in), optional :: flags
+
 
     real(pfdp), pointer :: f(:), g(:)
 

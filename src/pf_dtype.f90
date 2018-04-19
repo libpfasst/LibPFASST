@@ -63,6 +63,8 @@ module pf_mod_dtype
     integer :: pstatus  !< previous rank's status
     integer :: itcnt    !< iteration counter
     integer :: mysteps  !< steps I did
+    integer :: first        ! rank of first processor in time block
+    integer :: last         ! rank of last processor in time block
   end type pf_state_t
 
   type :: pf_hook_t
@@ -280,7 +282,7 @@ module pf_mod_dtype
      end subroutine pf_hook_p
      
      !> SDC sweeper subroutines
-     subroutine pf_sweep_p(this, pf, level_index, t0, dt,nsweeps)
+     subroutine pf_sweep_p(this, pf, level_index, t0, dt, nsweeps, flags)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
@@ -288,21 +290,24 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsweeps
+       integer, optional,   intent(in)    :: flags
      end subroutine pf_sweep_p
 
-     subroutine pf_evaluate_p(this, lev, t, m)
+     subroutine pf_evaluate_p(this, lev, t, m, flags, step)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: lev
        real(pfdp),          intent(in)    :: t
-       integer,      intent(in)    :: m
+       integer,             intent(in)    :: m
+       integer, optional,   intent(in)    :: flags, step
      end subroutine pf_evaluate_p
 
-     subroutine pf_evaluate_all_p(this, lev, t)
+     subroutine pf_evaluate_all_p(this, lev, t, flags, step)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: lev
        real(pfdp),          intent(in)    :: t(:)
+       integer, optional,   intent(in)    :: flags, step
      end subroutine pf_evaluate_all_p
 
      subroutine pf_initialize_p(this, lev)
@@ -316,27 +321,30 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
      end subroutine pf_destroy_sweeper_p
 
-     subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC)
+     subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC, flags)
        import pf_sweeper_t, pf_level_t, pf_encap_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(in)    :: lev
        class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),          intent(in)    :: dt !<  Time step size
        class(pf_encap_t),   intent(inout) :: fintSDC(:)
+       integer, optional,   intent(in)    :: flags
      end subroutine pf_integrate_p
 
-     subroutine pf_residual_p(this, lev, dt)
+     subroutine pf_residual_p(this, lev, dt, flags)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
        real(pfdp),          intent(in)    :: dt !<  Time step size
+       integer, optional,   intent(in)    :: flags
      end subroutine pf_residual_p
 
-     subroutine pf_spreadq0_p(this, lev, t0)
+     subroutine pf_spreadq0_p(this, lev, t0, flags, step)
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
-       real(pfdp),          intent(in)    :: t0 !<  Time at beginning of step
+       real(pfdp),          intent(in)    :: t0 !<  Time at beginning of step; if flags == 2, time at end of step
+       integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
 
      subroutine pf_destroy_p(this, lev)
@@ -369,12 +377,13 @@ module pf_mod_dtype
      end subroutine pf_destroy_stepper_p
 
      !> transfer interfaces used for restriction and interpolation
-     subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t)
+     subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t, flags)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
        class(pf_user_level_t), intent(inout) :: this
        class(pf_level_t), intent(inout)      :: levelF, levelG
        class(pf_encap_t),   intent(inout)    :: qF, qG
        real(pfdp),          intent(in)       :: t
+       integer, optional,   intent(in)       :: flags
      end subroutine pf_transfer_p
 
      !> encapsulation interfaces
@@ -420,22 +429,25 @@ module pf_mod_dtype
        integer,    intent(in   ), optional :: flags
      end subroutine pf_encap_copy_p
 
-     function pf_encap_norm_p(this) result (norm)
+     function pf_encap_norm_p(this, flags) result (norm)
        import pf_encap_t, pfdp
        class(pf_encap_t), intent(in   ) :: this
+       integer,    intent(in   ), optional :: flags
        real(pfdp) :: norm
      end function pf_encap_norm_p
 
-     subroutine pf_encap_pack_p(this, z)
+     subroutine pf_encap_pack_p(this, z, flags)
        import pf_encap_t, pfdp
        class(pf_encap_t), intent(in   ) :: this
        real(pfdp),        intent(  out) :: z(:)
+       integer, optional,   intent(in)  :: flags
      end subroutine pf_encap_pack_p
 
-     subroutine pf_encap_unpack_p(this, z)
+     subroutine pf_encap_unpack_p(this, z, flags)
        import pf_encap_t, pfdp
        class(pf_encap_t), intent(inout) :: this
        real(pfdp),        intent(in   ) :: z(:)
+       integer, optional,   intent(in)  :: flags
      end subroutine pf_encap_unpack_p
 
      subroutine pf_encap_axpy_p(this, a, x, flags)
@@ -452,46 +464,51 @@ module pf_mod_dtype
      end subroutine pf_encap_eprint_p
 
      !> communicator interfaces
-     subroutine pf_post_p(pf, level, tag,ierror)
+     subroutine pf_post_p(pf, level, tag, ierror, direction)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(in)    :: pf
        class(pf_level_t), intent(inout) :: level
-       integer,    intent(in)    :: tag
-       integer,    intent(inout)       :: ierror
+       integer,    intent(in)           :: tag
+       integer,    intent(inout)        :: ierror
+       integer, optional, intent(in)    :: direction
      end subroutine pf_post_p
 
-     subroutine pf_recv_p(pf, level, tag, blocking,ierror)
+     subroutine pf_recv_p(pf, level, tag, blocking, ierror, direction)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
        integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
        integer,    intent(inout)       :: ierror
+       integer, optional, intent(in)    :: direction
      end subroutine pf_recv_p
 
-     subroutine pf_recv_status_p(pf, tag,istatus,ierror)
+     subroutine pf_recv_status_p(pf, tag,istatus,ierror, direction)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,    intent(in)    :: tag
        integer,    intent(inout)       :: istatus
        integer,    intent(inout)       :: ierror
+       integer, optional, intent(in)    :: direction
      end subroutine pf_recv_status_p
 
-     subroutine pf_send_p(pf, level, tag, blocking,ierror)
+     subroutine pf_send_p(pf, level, tag, blocking,ierror, direction)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        class(pf_level_t), intent(inout) :: level
        integer,    intent(in)    :: tag
        logical,           intent(in)    :: blocking
        integer,    intent(inout)       :: ierror
+       integer, optional, intent(in)    :: direction
      end subroutine pf_send_p
 
-     subroutine pf_send_status_p(pf, tag,istatus,ierror)
+     subroutine pf_send_status_p(pf, tag,istatus,ierror, direction)
        import pf_pfasst_t, pf_level_t
        type(pf_pfasst_t), intent(inout) :: pf
        integer,    intent(in)    :: tag
        integer,    intent(in)       :: istatus
        integer,    intent(inout)       :: ierror
+       integer, optional, intent(in)    :: direction
      end subroutine pf_send_status_p
 
      subroutine pf_wait_p(pf, level,ierror)
@@ -516,6 +533,9 @@ contains
   subroutine initialize_results(this, nsteps, niters, nprocs, nlevels)
     class(pf_results_t), intent(inout) :: this
     integer, intent(in) :: nsteps, niters, nprocs, nlevels
+
+    if(allocated(this%errors)) &
+            deallocate(this%errors, this%residuals, this%times)
 
     allocate(this%errors(niters, nsteps, nlevels), &
          this%residuals(niters, nsteps, nlevels), &
@@ -562,7 +582,8 @@ contains
   subroutine destroy_results(this)
     class(pf_results_t), intent(inout) :: this
 
-    deallocate(this%errors, this%residuals, this%times)
+    if(allocated(this%errors)) &
+        deallocate(this%errors, this%residuals, this%times)
   end subroutine destroy_results
 
 end module pf_mod_dtype

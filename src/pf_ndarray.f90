@@ -190,22 +190,25 @@ contains
   end subroutine ndarray_copy
 
   !> Subroutine to pack an array into a flat array for sending
-  subroutine ndarray_pack(this, z)
+  subroutine ndarray_pack(this, z, flags)
     class(ndarray), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
+    integer,     intent(in   ), optional :: flags
     z = this%flatarray
   end subroutine ndarray_pack
 
   !> Subroutine to unpack a flatarray after receiving
-  subroutine ndarray_unpack(this, z)
+  subroutine ndarray_unpack(this, z, flags)
     class(ndarray), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
+    integer,     intent(in   ), optional :: flags
     this%flatarray = z
   end subroutine ndarray_unpack
 
   !> Subroutine to define the norm of the array (here the max norm)
-  function ndarray_norm(this) result (norm)
+  function ndarray_norm(this, flags) result (norm)
     class(ndarray), intent(in   ) :: this
+    integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
     norm = maxval(abs(this%flatarray))
   end function ndarray_norm
