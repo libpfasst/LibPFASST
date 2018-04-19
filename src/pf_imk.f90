@@ -91,7 +91,7 @@ contains
   ! copy flagged behavior : copy the name of the encap
   ! setval default behavior : set the value of the name of the encap
   ! setval flagged behavior : set the value of the solution
-  subroutine imk_sweep(this, pf, level_index, t0, dt,nsweeps)
+  subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -101,6 +101,7 @@ contains
     real(pfdp),        intent(in   ) :: dt             !<  time step size
     real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
     integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
+    integer, optional, intent(in   ) :: flags    
 
     integer :: n,m,k                      !< Loop counters
     class(pf_level_t), pointer :: lev     !<  points to current level
@@ -193,12 +194,13 @@ contains
 
   end subroutine imk_initialize
 
-  subroutine imk_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+  subroutine imk_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(in   ) :: lev
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
+    integer, optional, intent(in   ) :: flags
 
     integer :: j, m, p
 
@@ -211,12 +213,13 @@ contains
 
   end subroutine imk_integrate
 
-  subroutine imk_evaluate(this, lev, t, m)
+  subroutine imk_evaluate(this, lev, t, m, flags, step)
     use pf_mod_dtype
     class(pf_imk_t),   intent(inout) :: this
     real(pfdp),        intent(in   ) :: t
     integer,           intent(in   ) :: m
     class(pf_level_t), intent(inout) :: lev
+    integer, optional, intent(in   ) :: flags, step
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
@@ -249,17 +252,19 @@ contains
     if (this%debug) print*, 'end evaluate ------------'
   end subroutine imk_evaluate
 
-  subroutine imk_evaluate_all(this, lev, t)
+  subroutine imk_evaluate_all(this, lev, t, flags, step)
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t(:)
+    integer, optional, intent(in   ) :: flags, step
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine imk_evaluate_all
 
-  subroutine imk_residual(this, lev, dt)
+  subroutine imk_residual(this, lev, dt, flags)
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: dt
+    integer, optional, intent(in   ) :: flags
     integer :: m
 
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
@@ -279,11 +284,12 @@ contains
 
   end subroutine imk_residual
 
-  subroutine imk_spreadq0(this, lev, t0)
+  subroutine imk_spreadq0(this, lev, t0, flags, step)
     class(pf_imk_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t0
-
+    integer, optional, intent(in   ) :: flags, step
+    
     integer m,p
     !  Stick initial condition into first node slot
     call lev%Q(1)%copy(lev%q0, 1)

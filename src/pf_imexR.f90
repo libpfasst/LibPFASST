@@ -76,7 +76,7 @@ module pf_mod_imexR
 contains
 
   !> Perform nsweep SDC sweeps on level Lev and set qend appropriately.
-  subroutine imexR_sweep(this, pf, level_index, t0, dt,nsweeps)
+  subroutine imexR_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -86,6 +86,8 @@ contains
     real(pfdp),        intent(in   ) :: dt             !<  time step size
     integer,             intent(in)    :: level_index  !<  which level this is
     integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
+    integer, optional, intent(in   ) :: flags    
+
 
     class(pf_level_t), pointer :: lev    !<  points to current level
 
@@ -206,13 +208,14 @@ contains
 
 
   !> Subroutine to compute  Picard integral of function values
-  subroutine imexR_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+  subroutine imexR_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_imexR_t), intent(inout) :: this
     class(pf_level_t), intent(in   ) :: lev          !<  Current level
     class(pf_encap_t), intent(in   ) :: qSDC(:)      !<  Solution values
     class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !<  RHS Function values
     real(pfdp),        intent(in   ) :: dt           !<  Time step
     class(pf_encap_t), intent(inout) :: fintSDC(:)   !<  Integral from t_n to t_m
+    integer, optional, intent(in   ) :: flags    
 
     integer :: n, m, p
 
@@ -228,27 +231,33 @@ contains
   end subroutine imexR_integrate
 
   !> Subroutine to compute  Residual
-  subroutine imexR_residual(this, lev, dt)
+  subroutine imexR_residual(this, lev, dt, flags)
     class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev  !<  Current level
     real(pfdp),        intent(in   ) :: dt   !<  Time step
+    integer, optional, intent(in   ) :: flags    
     call pf_generic_residual(this, lev, dt)
   end subroutine imexR_residual
 
-  subroutine imexR_spreadq0(this, lev, t0)
+  subroutine imexR_spreadq0(this, lev, t0, flags, step)
     class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t0
+    integer, optional, intent(in   ) :: flags    
+    integer, optional, intent(in   ) :: step    
     call pf_generic_spreadq0(this, lev, t0)
   end subroutine imexR_spreadq0
 
   !> Subroutine to evaluate function value at node m
-  subroutine imexR_evaluate(this, lev, t, m)
+  subroutine imexR_evaluate(this, lev, t, m, flags, step)
 
     class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev  !<  Current level
     real(pfdp),        intent(in   ) :: t    !<  Time at which to evaluate
     integer,           intent(in   ) :: m    !<  Node at which to evaluate
+    integer, optional, intent(in   ) :: flags    
+    integer, optional, intent(in   ) :: step    
+
     if (this%explicit) &
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
     if (this%implicit) &
@@ -256,10 +265,12 @@ contains
   end subroutine imexR_evaluate
 
   !> Subroutine to evaluate the function values at all nodes
-  subroutine imexR_evaluate_all(this, lev, t)
+  subroutine imexR_evaluate_all(this, lev, t, flags, step)
     class(pf_imexR_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev   !<  Current level
     real(pfdp),        intent(in   ) :: t(:)  !<  Array of times at each node
+    integer, optional, intent(in   ) :: flags    
+    integer, optional, intent(in   ) :: step    
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine imexR_evaluate_all
 

@@ -85,7 +85,7 @@ module pf_mod_magnus_picard
 contains
 
   ! Perform one SDC sweep on level Lev and set qend appropriately.
-  subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps)
+  subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -94,6 +94,7 @@ contains
     real(pfdp), intent(in) :: dt, t0
     integer,             intent(in)    :: level_index
     integer,             intent(in)    :: nsweeps
+    integer, optional, intent(in   ) :: flags
 
     class(pf_level_t), pointer :: lev
     integer    :: m, nnodes, k
@@ -186,13 +187,14 @@ contains
 
   !> Compute SDC integral
   !>  fintSDC = \int_{t_n}^{t_m} fSDC dt
-  subroutine magpicard_integrate(this, lev, qSDC, fSDC, dt, fintSDC)
+  subroutine magpicard_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t), intent(in   ) :: lev
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
-
+    integer, optional, intent(in   ) :: flags
+    
     integer :: j, m, p
 
     do m = 1, lev%nnodes-1
@@ -204,27 +206,30 @@ contains
   end subroutine magpicard_integrate
 
   ! Evaluate function values
-  subroutine magpicard_evaluate(this, lev, t, m)
+  subroutine magpicard_evaluate(this, lev, t, m, flags, step)
     use pf_mod_dtype
     class(pf_magpicard_t), intent(inout) :: this
     real(pfdp),           intent(in   ) :: t
     integer,              intent(in   ) :: m
     class(pf_level_t),    intent(inout) :: lev
+    integer, optional, intent(in   ) :: flags, step
 
     call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine magpicard_evaluate
 
-  subroutine magpicard_evaluate_all(this, lev, t)
+  subroutine magpicard_evaluate_all(this, lev, t, flags, step)
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t),    intent(inout) :: lev
     real(pfdp),           intent(in   ) :: t(:)
+    integer, optional, intent(in   ) :: flags, step
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine magpicard_evaluate_all
 
-  subroutine magpicard_residual(this, lev, dt)
+  subroutine magpicard_residual(this, lev, dt, flags)
     class(pf_magpicard_t), intent(inout) :: this
     class(pf_level_t),    intent(inout) :: lev
     real(pfdp),           intent(in   ) :: dt
+    integer, optional, intent(in   ) :: flags
     integer :: m
 
     do m = 1, lev%nnodes-1
@@ -234,10 +239,11 @@ contains
     lev%residual = lev%R(lev%nnodes-1)%norm()
   end subroutine magpicard_residual
 
-  subroutine magpicard_spreadq0(this, lev, t0)
+  subroutine magpicard_spreadq0(this, lev, t0, flags, step)
     class(pf_magpicard_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t0
+    integer, optional, intent(in   ) :: flags, step
     call pf_generic_spreadq0(this, lev, t0)
   end subroutine magpicard_spreadq0
 
