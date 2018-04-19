@@ -15,4 +15,10 @@ echo "Implicit MLSDC with nnodes=[3 5 9]" $value
 ./main.exe mlsdc.nml  imex_stat=2 nnodes=[2 3 5] | grep 'step: 008'
 
 
+echo "Imex PFASST with nnodes=[3 5 9]" 
+mpirun -n 8 ./main.exe mlsdc.nml  imex_stat=1  | grep 'step: 008'
+echo "Implicit PFASST with nnodes=[3 5 9]" $value
+mpirun -n 8 ./main.exe mlsdc.nml  imex_stat=2 nnodes=[2 3 5] | grep 'step: 008'
+
+
 
