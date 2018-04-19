@@ -1,0 +1,44 @@
+!
+!  Test parameters for to run advection diffusion example with just MLSDC
+!
+
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 3
+
+    !  These are internal pfasst variables that can be reset
+    niters = 15   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1   
+   
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1.d-13
+     rel_res_tol = 1.d-13
+
+     !  Variable which determine how the predictor runs  (default is .false. and .true.)
+     Pipeline_G =  .true.
+     PFASST_pred = .true.
+
+     !  Variable to tell if Vcycling will be done.  Here we do pipelining
+     Vcycle=.true.
+/
+
+!  Now define the local variables you need
+&PARAMS
+!    Finterp = .false.   !  default is 0
+    nnodes =  2 2 2
+
+    nsweeps_pred= 1 1 1
+    nsweeps= 1 1 1
+
+    nx =  8 16 32
+
+    Tfin = 1.0
+    nsteps = 8
+
+    nu=0.1
+    v=1.0
+
+
+/

@@ -52,6 +52,7 @@ contains
     !>  create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=probin_fname)
 
+
     !> loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
        pf%levels(l)%nsweeps = nsweeps(l)
@@ -79,6 +80,7 @@ contains
     !>  Set up some parameters
     call pf_pfasst_setup(pf)
 
+    call pf_print_options(pf,6,.false.)
 
     !> allocate starting and end solutions
     call ndarray_build(q0, [ nx(pf%nlevels) ])
