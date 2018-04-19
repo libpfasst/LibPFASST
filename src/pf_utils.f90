@@ -27,21 +27,25 @@ contains
 
   !
   !> Compute full residual at each node and measure it's size
-  subroutine pf_residual(pf, lev, dt)
+  subroutine pf_residual(pf, lev, dt, flag)
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: dt
+    integer, optional, intent(in)    :: flag
 
     real(pfdp) :: norms(lev%nnodes-1)
-    integer :: m
+    integer :: m, which
+    
+    which = 0
+    if(present(flag)) which = flag
 
     call start_timer(pf, TRESIDUAL)
 
-    call lev%ulevel%sweeper%residual(lev, dt)
+    call lev%ulevel%sweeper%residual(lev, dt, which)
 
     ! compute max residual norm
     do m = 1, lev%nnodes-1
-       norms(m) = lev%R(m)%norm()
+       norms(m) = lev%R(m)%norm(which)
 !       print *, 'norm(', m, ') = ', norms(m)
     end do
 !    lev%residual = maxval(abs(norms))
@@ -54,28 +58,39 @@ contains
   !
   !> Generic residual
   !! Each sweeper can define its own residual, or use this generic one
-  subroutine pf_generic_residual(this, lev, dt)
+  subroutine pf_generic_residual(this, lev, dt, flags)
     class(pf_sweeper_t), intent(in)  :: this
     class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: dt
+    integer,  intent(in), optional  :: flags
 
-    integer :: m
+    integer :: m, which
+    
+    which = 0
+    if(present(flags)) which = flags
 
     !>  Compute the integral of F
-    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
+    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
 
     !> add tau if it exists
     if (allocated(lev%tauQ)) then
        do m = 1, lev%nnodes-1
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
        end do
     end if
 
     !> subtract out the solution value
     do m = 1, lev%nnodes-1
-       call lev%R(m)%copy(lev%I(m))
-       call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
-       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+       if( (which .eq. 0) .or. (which .eq. 1) ) then
+         call lev%R(m)%copy(lev%I(m), 1)
+         call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
+       end if
+       if( (which .eq. 0) .or. (which .eq. 2) ) then
+         call lev%R(m)%copy(lev%I(m), 2)
+         call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
+         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
+       end if
     end do
 
   end subroutine pf_generic_residual
@@ -84,14 +99,22 @@ contains
   !
   !> Generic evaluate all
   !! Each sweeper can define its own evaluate_all or use this generic one
-  subroutine pf_generic_evaluate_all(this, lev, t)
+  subroutine pf_generic_evaluate_all(this, lev, t, flags, step)
     class(pf_sweeper_t), intent(in)  :: this
     class(pf_level_t),  intent(inout) :: lev
     real(pfdp),        intent(in)    :: t(:)
+    integer, optional, intent(in)    :: flags, step
 
-    integer :: m
+    integer :: m, which, mystep
+        
+    which = 0
+    if(present(flags)) which = flags
+    
+    mystep = 1
+    if(present(step)) mystep = step
+    
     do m = 1, lev%nnodes
-       call lev%ulevel%sweeper%evaluate(lev, t(m), m)
+       call lev%ulevel%sweeper%evaluate(lev, t(m), m, which, mystep)
     end do
   end subroutine pf_generic_evaluate_all
 
@@ -152,8 +175,10 @@ contains
     end do
 
     !  Check
-    print *,'LU error',matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))
-
+    if (maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes)))) .gt. 1e-14) then
+       print *,'LU error in pf_utils'
+    endif 
+    
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
     !  Now scale the columns of U to match the sum of A

@@ -63,17 +63,18 @@ contains
   !! Note that even if the number of variables and nodes is the same,
   !! we should still compute the FAS correction since the function
   !! evaluations may be different.
-  subroutine restrict_time_space_fas(pf, t0, dt, level_index)
+  subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags)
     type(pf_pfasst_t), intent(inout),target :: pf
     real(pfdp),        intent(in)    :: t0            !<  time at beginning of step
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: level_index   !< defines which level to restrict
+    integer, optional, intent(in)    :: flags    
 
     !  Local variables
     class(pf_level_t), pointer :: c_lev_ptr    
     class(pf_level_t), pointer :: f_lev_ptr
 
-    integer    :: m
+    integer    :: m, which, step
 
     real(pfdp), allocatable :: c_times(:)
     real(pfdp), allocatable :: f_times(:)
@@ -85,6 +86,14 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
+    which = 0
+    if (present(flags)) which = flags
+    step = 1 ! dummy
+    
+!     if(pf%rank == 0) &
+!       print *, "restrict_time_space_fas with which ", which, " coarse_level_index ", level_index-1
+    
+    
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
     !
@@ -104,38 +113,38 @@ contains
     c_times = t0 + dt*c_lev_ptr%nodes
     f_times = t0 + dt*f_lev_ptr%nodes
 
-    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,f_times)
+    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,f_times, which)
 
     !  Recompute the functions
-     call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times)
+     call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times, which, step)
 
     !
     ! fas correction
     !
     do m = 1, c_lev_ptr%nnodes-1
-       call c_lev_ptr%tauQ(m)%setval(0.0_pfdp)
+       call c_lev_ptr%tauQ(m)%setval(0.0_pfdp, which)
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
       call c_lev_ptr%ulevel%sweeper%integrate(c_lev_ptr, c_lev_ptr%Q, &
-        c_lev_ptr%F, dt, c_tmp_array)
+        c_lev_ptr%F, dt, c_tmp_array, which)
        ! compute '0 to node' integral on the fine level
       call f_lev_ptr%ulevel%sweeper%integrate(f_lev_ptr, f_lev_ptr%Q, &
-        f_lev_ptr%F, dt, f_lev_ptr%I)
+        f_lev_ptr%F, dt, f_lev_ptr%I, which)
        !  put tau in on fine level
        if (allocated(f_lev_ptr%tauQ)) then
           do m = 1, f_lev_ptr%nnodes-1
-             call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m))
+             call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m), which)
           end do
        end if
 
        ! restrict '0 to node' integral on the fine level  in time and space
-       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times)
+       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times, which)
 
       ! compute '0 to node' tau correction
        do m = 1, c_lev_ptr%nnodes-1
-          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m))
-          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m))
+          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m), which)
+          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m), which)
        end do
     end if
 
@@ -156,7 +165,7 @@ contains
 
   !> Restrict (in time and space) f_sol_array  to c_sol_array
   !! Depending on the flag INTEGRAL, we may be restricting solutions, or integrals of F
-  subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_array, IS_INTEGRAL,f_time)
+  subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_array, IS_INTEGRAL,f_time, flags)
 
 
     class(pf_level_t),  intent(inout) :: f_lev_ptr   !<   pointer to fine level
@@ -165,11 +174,17 @@ contains
     class(pf_encap_t),  intent(inout) :: c_encap_array(:)   !< array of coarse level data to be computed
     logical,            intent(in)    :: IS_INTEGRAL       !< flag determines if it is integral data being restricted
     real(pfdp),         intent(in) :: f_time(:)             !< time at the fine nodes
+    integer, optional, intent(in)    :: flags    
 
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !<  fine solution restricted in space only
-    integer :: m
+    integer :: m, which, r
     integer :: f_nnodes
+    
+    which = 0
+    if (present(flags)) which = flags
 
+!     print *, "restrict_sdc with which ", which
+    
     f_nnodes = f_lev_ptr%nnodes
     !>  create works space
     if (IS_INTEGRAL) then   ! Restriction of integrals 
@@ -183,19 +198,41 @@ contains
     if (IS_INTEGRAL) then   ! Restriction of integrals 
        !  spatial restriction
        do m = 1, f_nnodes-1
-          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m))
+          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
        end do
 
        ! temporal restriction
        ! when restricting '0 to node' integral terms, skip the first entry since it is zero
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c)
-
+!        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., which) ! does this work backwards?
+!         r = 2
+!         if(f_nnodes == c_lev_ptr%nnodes) r = 1
+!         do m = 1, c_lev_ptr%nnodes-1
+!           if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
+!           if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
+!        end do
+       if ((which .eq. 0) .or. (which .eq. 1)) &
+          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
+       if ((which .eq. 0) .or. (which .eq. 2)) then
+          call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
+!           r = 2
+!           if(f_nnodes == c_lev_ptr%nnodes) r = 1
+!           do m = 1, c_lev_ptr%nnodes-1
+!             if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
+!             if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
+!           end do
+       end if
     else
        !  spatial restriction
        do m = 1, f_nnodes
-          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m))
+          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
        end do! temporal restriction
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c)
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., which)
+!         r = 2
+!         if(f_nnodes == c_lev_ptr%nnodes) r = 1
+!         do m = 1, c_lev_ptr%nnodes-1
+!           if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
+!           if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
+!        end do
     end if
 
     !>  destroy workspace
@@ -210,26 +247,59 @@ contains
   
   
   !> Apply an matrix (tmat or rmat) to src and add to dst.
-  subroutine pf_apply_mat(dst, a, mat, src, zero)
+  subroutine pf_apply_mat(dst, a, mat, src, zero, flags)
     class(pf_encap_t), intent(inout) :: dst(:)
     real(pfdp),        intent(in)    :: a, mat(:, :)
     class(pf_encap_t), intent(in)    :: src(:)
     logical,           intent(in), optional :: zero
+    integer,           intent(in), optional :: flags
     
     logical :: lzero
-    integer :: n, m, i, j
+    integer :: n, m, i, j, which
 
-    lzero = .true.; if (present(zero)) lzero = zero
+    lzero = .true.; if (present(zero)) lzero = zero    
+    which = 0;      if(present(flags)) which = flags
+    
+!     print *, "apply_mat with which == ", which, " and zero ", lzero
 
     n = size(mat, dim=1)
     m = size(mat, dim=2)
-
+        
     do i = 1, n
-       if (lzero) call dst(i)%setval(0.0_pfdp)
-       do j = 1, m
-          call dst(i)%axpy(a * mat(i, j), src(j))
-       end do
+      if (lzero) call dst(i)%setval(0.0_pfdp, which)
+      do j = 1, m
+        call dst(i)%axpy(a * mat(i, j), src(j), which)
+      end do
     end do
   end subroutine pf_apply_mat
+  
+    !> Apply an matrix (tmat or rmat) to src and add to dst.
+  subroutine pf_apply_mat_backward(dst, a, mat, src, zero, flags)
+    class(pf_encap_t), intent(inout) :: dst(:)
+    real(pfdp),        intent(in)    :: a, mat(:, :)
+    class(pf_encap_t), intent(in)    :: src(:)
+    logical,           intent(in), optional :: zero
+    integer,           intent(in), optional :: flags
+    
+    logical :: lzero
+    integer :: n, m, i, j, which
+
+    lzero = .true.; if (present(zero)) lzero = zero    
+    which = 0;      if(present(flags)) which = flags
+    
+    if( which /= 2 ) &
+      stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
+!     print *, "apply_mat with which == ", which, " and zero ", lzero
+
+    n = size(mat, dim=1)
+    m = size(mat, dim=2)
+        
+    do i = 1, n
+      if (lzero) call dst(n+1-i)%setval(0.0_pfdp, 2)
+      do j = 1, m
+        call dst(n+1-i)%axpy(a * mat(i, j), src(m+1-j), 2)
+      end do
+    end do
+  end subroutine pf_apply_mat_backward
 
 end module pf_mod_restrict

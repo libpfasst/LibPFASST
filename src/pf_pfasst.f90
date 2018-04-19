@@ -104,7 +104,7 @@ contains
        call pf_time_interpolation_matrix(lev_fine%nodes, lev_fine%nnodes, lev_coarse%nodes, lev_coarse%nnodes, lev_fine%tmat)
        call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
     end do
-
+    
   end subroutine pf_pfasst_setup
 
   !
@@ -175,7 +175,7 @@ contains
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%shape)
     call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%shape)
     do i = 1, nnodes*npieces
-       call lev%Fflt(i)%setval(0.0_pfdp)
+       call lev%Fflt(i)%setval(0.0_pfdp, 0)
     end do
     lev%F(1:nnodes,1:npieces) => lev%Fflt
     call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%shape)
