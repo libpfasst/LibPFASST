@@ -181,7 +181,7 @@ contains
 
     !>  initialize sweeper
     call lev%ulevel%sweeper%initialize(lev)
-    call lev%ulevel%stepper%initialize(lev)
+    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
 
 
     !> allocate solution and function arrays
