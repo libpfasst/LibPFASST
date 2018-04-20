@@ -457,9 +457,10 @@ module pf_mod_dtype
        integer, intent(in), optional :: flags
      end subroutine pf_encap_axpy_p
 
-     subroutine pf_encap_eprint_p(this)
+     subroutine pf_encap_eprint_p(this,flags)
        import pf_encap_t
        class(pf_encap_t), intent(inout) :: this
+       integer, intent(in), optional :: flags
      end subroutine pf_encap_eprint_p
 
      !> communicator interfaces

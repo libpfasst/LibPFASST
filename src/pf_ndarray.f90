@@ -229,22 +229,13 @@ contains
   end subroutine ndarray_axpy
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)
-  subroutine ndarray_eprint(this)
+  subroutine ndarray_eprint(this,flags)
     class(ndarray), intent(inout) :: this
+    integer,           intent(in   ), optional :: flags
     !  Just print the first few values
     print *, this%flatarray(1:10)
   end subroutine ndarray_eprint
 
-  ! ! Helpers
-  ! function dims(solptr) result(r)
-  !   type(ndarray), intent(in   ), value :: solptr
-  !   integer :: r
-
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
-
-  !   r = sol%dim
-  ! end function dims
 
   function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
@@ -256,8 +247,9 @@ contains
     end select
   end function cast_as_ndarray
 
-  function array1(x) result(r)
+  function array1(x,flags) result(r)
     class(pf_encap_t), intent(in) :: x
+    integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
     select type (x)
     type is (ndarray)
@@ -265,100 +257,9 @@ contains
     end select
   end function array1
 
-  ! function array2(solptr) result(r)
-  !   type(ndarray), intent(in   ), value :: solptr
-  !   real(pfdp), pointer :: r(:,:)
 
-  !   integer                :: shp(2)
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
 
-  !   if (sol%dim == 2) then
-  !      shp = sol%shape
-  !      call c_f_pointer(sol%aptr, r, shp)
-  !   else
-  !      stop "ERROR: array2 dimension mismatch."
-  !   end if
-  ! end function array2
 
-  ! function array3(solptr) result(r)
-  !   type(ndarray), intent(in   ), value :: solptr
-  !   real(pfdp), pointer :: r(:,:,:)
-
-  !   integer                :: shp(3)
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
-
-  !   if (sol%dim == 3) then
-  !      shp = sol%shape
-  !      call c_f_pointer(sol%aptr, r, shp)
-  !   else
-  !      stop "ERROR: array3 dimension mismatch."
-  !   end if
-  ! end function array3
-
-  ! function array4(solptr) result(r)
-  !   type(ndarray), intent(in   ), value :: solptr
-  !   real(pfdp), pointer :: r(:,:,:,:)
-
-  !   integer                :: shp(4)
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
-
-  !   if (sol%dim == 4) then
-  !      shp = sol%shape
-  !      call c_f_pointer(sol%aptr, r, shp)
-  !   else
-  !      stop "ERROR: array4 dimension mismatch."
-  !   end if
-  ! end function array4
-
-  ! function array5(solptr) result(r)
-  !   type(ndarray), intent(in   ), value :: solptr
-  !   real(pfdp), pointer :: r(:,:,:,:,:)
-
-  !   integer                :: shp(5)
-  !   type(ndarray), pointer :: sol
-  !   call c_f_pointer(solptr, sol)
-
-  !   if (sol%dim == 5) then
-  !      shp = sol%shape
-  !      call c_f_pointer(sol%aptr, r, shp)
-  !   else
-  !      stop "ERROR: array5 dimension mismatch."
-  !   end if
-  ! end function array5
-
-  ! subroutine ndarray_encap_create(encap)
-  !   type(pf_encap_t), intent(out) :: encap
-
-  !   encap%create  => ndarray_create
-  !   encap%destroy => ndarray_destroy
-  !   encap%setval  => ndarray_setval
-  !   encap%copy    => ndarray_copy
-  !   encap%norm    => ndarray_norm
-  !   encap%pack    => ndarray_pack
-  !   encap%unpack  => ndarray_unpack
-  !   encap%axpy    => ndarray_saxpy
-  ! end subroutine ndarray_encap_create
-
-  ! subroutine ndarray_dump_hook(pf, level, state)
-  !   type(pf_pfasst_t),   intent(inout) :: pf
-  !   type(pf_level_t),    intent(inout) :: level
-  !   type(pf_state_t),    intent(in)    :: state
-
-  !   character(len=256)     :: fname
-  !   type(ndarray), pointer :: qend
-
-  !   call c_f_pointer(level%qend, qend)
-
-  !   write(fname, "('s',i0.5,'i',i0.3,'l',i0.2,'.npy')") &
-  !        state%step, state%iter, level%level
-
-  !   call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fname)//c_null_char, '<f8'//c_null_char, &
-  !        qend%dim, qend%shape, size(qend%flatarray), qend%flatarray)
-
-  ! end subroutine ndarray_dump_hook
 
 
 end module pf_mod_ndarray

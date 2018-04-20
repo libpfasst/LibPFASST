@@ -311,13 +311,13 @@ contains
 
  end subroutine destroy_imk_sweeper
 
- subroutine restrict(this, levelF, levelG, qF, qG, t)
+ subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
    class(imk_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
    class(pf_encap_t), intent(inout) :: qF, qG
    real(pfdp),        intent(in   ) :: t
-
+   integer, intent(in), optional :: flags
    class(zndarray), pointer :: f, g
    f => cast_as_zndarray(qF)
    g => cast_as_zndarray(qG)
@@ -326,12 +326,13 @@ contains
    g%y = f%y
  end subroutine restrict
 
- subroutine interpolate(this, levelF, levelG, qF, qG, t)
+ subroutine interpolate(this, levelF, levelG, qF, qG, t,flags)
    class(imk_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
    class(pf_encap_t), intent(inout) :: qF, qG
    real(pfdp),        intent(in   ) :: t
+   integer, intent(in), optional :: flags
 
    class(zndarray), pointer :: f, g
    f => cast_as_zndarray(qF)

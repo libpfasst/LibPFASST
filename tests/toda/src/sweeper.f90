@@ -502,12 +502,13 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
  end subroutine destroy_magpicard_sweeper
 
- subroutine restrict(this, levelF, levelG, qF, qG, t)
+ subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
    class(magpicard_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
    class(pf_encap_t), intent(inout) :: qF, qG
    real(pfdp),        intent(in   ) :: t
+   integer,           intent(in   ), optional :: flags
 
    class(zndarray), pointer :: f, g
    f => cast_as_zndarray(qF)
@@ -516,12 +517,13 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
    g%array = f%array
  end subroutine restrict
 
- subroutine interpolate(this, levelF, levelG, qF, qG, t)
+ subroutine interpolate(this, levelF, levelG, qF, qG, t,flags)
    class(magpicard_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
    class(pf_encap_t), intent(inout) :: qF, qG
    real(pfdp),        intent(in   ) :: t
+   integer,           intent(in   ), optional :: flags
 
    class(zndarray), pointer :: f, g
    f => cast_as_zndarray(qF)
