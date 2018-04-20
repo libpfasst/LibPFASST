@@ -789,13 +789,14 @@ contains
     residual = residual1
 
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
-    call pf_recv_status(pf, 8000+k, dir)
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, 8000+k, dir)
 
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 1) &
          pf%state%status = PF_STATUS_ITERATING
     if (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 2) &
          pf%state%status = PF_STATUS_ITERATING
          
+!     if (pf%state%status .ne. PF_STATUS_CONVERGED) 
     call pf_send_status(pf, 8000+k, dir)
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
@@ -1140,15 +1141,15 @@ contains
     if(present(direction)) dir = direction
     
     ierror = 0
-!     if (pf%rank /= 0 .and. dir == 1) then
-   if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED .and. dir == 1) then
+    if (pf%rank /= 0 .and. dir == 1) then
+!    if (pf%rank /= 0 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED .and. dir == 1) then
        if (pf%debug) print*, pf%rank, 'my status = ', pf%state%status
        if (pf%debug) print*, pf%rank,  'is receiving status with tag ', tag  
        call pf%comm%recv_status(pf, tag, istatus, ierror, dir)
        if (pf%debug) print *, pf%rank, 'status recvd = ', istatus 
        if (ierror .eq. 0) pf%state%pstatus = istatus
-!     elseif (pf%rank /= pf%comm%nproc-1 .and. dir == 2) then
-   elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED .and. dir == 2) then
+    elseif (pf%rank /= pf%comm%nproc-1 .and. dir == 2) then
+!    elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus .ne. PF_STATUS_CONVERGED .and. dir == 2) then
        if (pf%debug) print*, pf%rank, 'my status = ', pf%state%status
        if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag  
        call pf%comm%recv_status(pf, tag, istatus, ierror, dir)
