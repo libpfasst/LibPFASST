@@ -349,33 +349,76 @@ contains
   end function cast_as_ndarray_oc
 
   
-  function array1_oc(x, flags) result(r)
+  function get_array1d_oc(x, flags) result(r)
     class(pf_encap_t), intent(in) :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
-
     integer                :: which
 
     which = 0
     if (present(flags)) which = flags
-
     select type (x)
     type is (ndarray_oc)
       select case (which)
-        case (0)
-          stop "NOT IMPLEMENTED: array1 for flags=0"
         case (1)
           r => x%yflatarray
-       case (2)
+        case (2)
           r => x%pflatarray
        case default
-       stop "ERROR in array1_oc: only 1, 2 allowed as flags"
+          stop "ERROR in get_array1d_oc: only 1, 2 allowed as flags"
        end select
     class default
-       stop "ERROR: array1 type mismatch."
+       stop "ERROR: get_array1d_oc type mismatch."
     end select
-  end function array1_oc
+  end function get_array1d_oc
 
+  
+  function get_array2d_oc(x, flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,     intent(in   ), optional :: flags
+    real(pfdp), pointer :: r(:,:)
+    integer                :: which
+
+    which = 0
+    if (present(flags)) which = flags
+    select type (x)
+    type is (ndarray_oc)
+      select case (which)
+        case (1)
+          r(1:x%shape(1),1:x%shape(2)) => x%yflatarray
+        case (2)
+          r(1:x%shape(1),1:x%shape(2)) => x%pflatarray
+        case default
+          stop "ERROR in get_array2d_oc: only 1, 2 allowed as flags"
+       end select
+    class default
+       stop "ERROR: get_array2d_oc type mismatch."
+    end select
+  end function get_array2d_oc
+  
+  function get_array3d_oc(x, flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,     intent(in   ), optional :: flags
+    real(pfdp), pointer :: r(:,:,:)
+    integer                :: which
+
+    which = 0
+    if (present(flags)) which = flags
+    select type (x)
+    type is (ndarray_oc)
+      select case (which)
+        case (1)
+          r(1:x%shape(1),1:x%shape(2),1:x%shape(3)) => x%yflatarray
+        case (2)
+          r(1:x%shape(1),1:x%shape(2),1:x%shape(3)) => x%pflatarray
+        case default
+          stop "ERROR in get_array2d_oc: only 1, 2 allowed as flags"
+       end select
+    class default
+       stop "ERROR: get_array2d_oc type mismatch."
+    end select
+  end function get_array3d_oc
+  
   
   subroutine ndarray_oc_dump_hook(pf, lev, state)
     type(pf_pfasst_t),   intent(inout) :: pf

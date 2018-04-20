@@ -27,8 +27,8 @@ subroutine echo_error_hook(pf, level, state)
     real(pfdp) :: pnorms(level%nnodes-1), ynorms(level%nnodes-1)
 
 
-    qend => array1_oc(level%Q(level%nnodes),1) 
-    q0   => array1_oc(level%Q(1),2) 
+    qend => get_array1d_oc(level%Q(level%nnodes),1) 
+    q0   => get_array1d_oc(level%Q(1),2) 
     t = state%t0+state%dt   
 !     call exact_y(t, level%nvars, yexact)
     max_y=maxval(abs(qend))
@@ -72,8 +72,8 @@ subroutine echo_error_hook(pf, level, state)
 
     real(pfdp), pointer :: ry(:), rp(:)
 
-    ry => array1_oc(level%R(level%nnodes-1),1)
-    rp => array1_oc(level%R(2),2)
+    ry => get_array1d_oc(level%R(level%nnodes-1),1)
+    rp => get_array1d_oc(level%R(2),2)
 
     print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," res_y: ",es14.7," res_p: ",es14.7)', &
          state%step+1, state%iter, level%index, maxval(abs(ry)), maxval(abs(rp))

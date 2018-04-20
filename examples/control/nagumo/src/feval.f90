@@ -67,35 +67,35 @@ contains
       select case (flags)
       case (0)
         ! first component: y
-        fvec => array1_oc(f, 1)
-        yvec  => array1_oc(y, 1)
+        fvec => get_array1d_oc(f, 1)
+        yvec  => get_array1d_oc(y, 1)
         if (do_imex .eq. 1) then
           fvec = this%u(idx, :) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
         else
           fvec = this%u(idx, :)
        endif
        ! second component: p
-       fvec => array1_oc(f, 2)      
+       fvec => get_array1d_oc(f, 2)      
        if (do_imex .eq. 1) then
-         p  => array1_oc(y, 2)
+         p  => get_array1d_oc(y, 2)
          fvec = (yvec - this%ydesired(idx,:)) - (yvec*yvec-1.0_pfdp)*p
        else
          fvec = (yvec - this%ydesired(idx,:))
        end if 
       case (1)
-         fvec => array1_oc(f, 1)
+         fvec => get_array1d_oc(f, 1)
          if (do_imex .eq. 1) then
-            yvec  => array1_oc(y, 1)
+            yvec  => get_array1d_oc(y, 1)
             fvec = this%u(idx, :) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
          else
             fvec = this%u(idx, :)
          endif
        case (2)
          ! evaluate y-y_d
-         fvec => array1_oc(f, 2)
-         yvec  => array1_oc(y, 1)
+         fvec => get_array1d_oc(f, 2)
+         yvec  => get_array1d_oc(y, 1)
          if (do_imex .eq. 1) then
-           p  => array1_oc(y, 2)
+           p  => get_array1d_oc(y, 2)
            fvec = (yvec -this%ydesired(idx,:)) - (yvec*yvec-1.0_pfdp)*p
          else
            fvec = (yvec -this%ydesired(idx,:)) 
@@ -119,8 +119,8 @@ contains
          stop "ERROR in f_eval: only 0, 1, 2 allowed as flags"
        end select
        do l = loopstart, loopend	
-        yvec  => array1_oc(y, l)
-        fvec  => array1_oc(f, l)
+        yvec  => get_array1d_oc(y, l)
+        fvec  => get_array1d_oc(f, l)
         wk => this%wk
         wk = yvec
         call fftw_execute_dft(this%ffft, wk, wk)
@@ -151,8 +151,8 @@ contains
 !     select case (flags)
 !     case (0)
 !        ! first component: y
-!        f1 => array1_oc(f, 1)
-!        y  => array1_oc(sol, 1)
+!        f1 => get_array1d_oc(f, 1)
+!        y  => get_array1d_oc(sol, 1)
 !        
 !        if (do_imex .eq. 1) then
 !          f1 = this%u(idx, :) - (1.0_pfdp/3.0_pfdp*y*y-1.0_pfdp)*y 
@@ -161,18 +161,18 @@ contains
 !        endif
 ! 
 !        ! second component: p
-!        f1 => array1_oc(f, 2)      
+!        f1 => get_array1d_oc(f, 2)      
 !        if (do_imex .eq. 1) then
-!          p  => array1_oc(sol, 2)
+!          p  => get_array1d_oc(sol, 2)
 !          f1 = (y - this%ydesired(idx,:)) - (y*y-1.0_pfdp)*p
 !        else
 !          f1 = (y - this%ydesired(idx,:))
 !        end if 
 ! 
 !     case (1)
-!        f1 => array1_oc(f, 1)
+!        f1 => get_array1d_oc(f, 1)
 !        if (do_imex .eq. 1) then
-!          y  => array1_oc(sol, 1)
+!          y  => get_array1d_oc(sol, 1)
 !          f1 = this%u(idx, :) - (1.0_pfdp/3.0_pfdp*y*y-1.0_pfdp)*y 
 !        else
 !          f1 = this%u(idx, :)
@@ -180,10 +180,10 @@ contains
 ! 
 !     case (2)
 !        ! evaluate y-y_d
-!        f1 => array1_oc(f, 2)
-!        y  => array1_oc(sol, 1)
+!        f1 => get_array1d_oc(f, 2)
+!        y  => get_array1d_oc(sol, 1)
 !        if (do_imex .eq. 1) then
-!            p  => array1_oc(sol, 2)
+!            p  => get_array1d_oc(sol, 2)
 !            f1 = (y -this%ydesired(idx,:)) - (y*y-1.0_pfdp)*p
 !          else
 !            f1 = (y -this%ydesired(idx,:)) 
@@ -221,8 +221,8 @@ contains
 !     end select
 !        
 !     do l = loopstart, loopend	
-!        s   => array1_oc(sol, l)
-!        f2  => array1_oc(f, l)
+!        s   => get_array1d_oc(sol, l)
+!        f2  => get_array1d_oc(f, l)
 !        wk => this%wk
 !        wk = s
 !        call fftw_execute_dft(this%ffft, wk, wk)
@@ -266,9 +266,9 @@ contains
       end select
     
       do l = loopstart, loopend	   
-        s  => array1_oc(y, l)
-        rhsvec => array1_oc(rhs, l)
-        fvec => array1_oc(f, l)
+        s  => get_array1d_oc(y, l)
+        rhsvec => get_array1d_oc(rhs, l)
+        fvec => get_array1d_oc(f, l)
         wk => this%wk
       
         wk = rhsvec
@@ -492,12 +492,12 @@ contains
       ! compute norm
       ex(i) = 0.0_pfdp
       diff(i) = 0.0_pfdp
-      do n = 1, nvars-1
+      do n = 1, nvars
          ex(i) = ex(i) + uexact(n)**2.0
          diff(i) = diff(i) + udiff(n)**2.0
       end do
-      ex(i) = ex(i)*Lx/(nvars-1)
-      diff(i) = diff(i)*Lx/(nvars-1)
+      ex(i) = ex(i)*Lx/(nvars)
+      diff(i) = diff(i)*Lx/(nvars)
       
       LinfExactCtrl =  max(maxval(abs(uexact(:))), LinfExactCtrl)
       LinfErrorCtrl =  max(maxval(abs(udiff(:))), LinfErrorCtrl)
@@ -542,10 +542,10 @@ contains
        LinftyNormGrad = max(maxval(abs(grad(m,:))), LinftyNormGrad)  
        !obj(m) = sum((grad(m,:)**2.0))*Lx/nvars
        obj(m) = 0.0_pfdp
-       do n = 1, nvars-1
+       do n = 1, nvars
          obj(m) = obj(m) + grad(m,n)**2.0
        end do
-       obj(m) = obj(m)*Lx/(nvars-1)
+       obj(m) = obj(m)*Lx/(nvars)
      end do
 
     L2NormGradSq = 0.0
@@ -622,10 +622,10 @@ contains
        !          maxval(work%u(m,:)), minval(work%u(m,:))
        obj(m) = 0.0_pfdp
        !obj(m) = sum(work%u(m,:)**2.0)*Lx/nvars !rectangle rule
-       do n = 1, nvars-1
+       do n = 1, nvars
          obj(m) = obj(m) + sweeper%u(m,n)**2.0
        end do
-       obj(m) = obj(m)*Lx/(nvars-1)
+       obj(m) = obj(m)*Lx/(nvars)
     end do
 
     L2normSq = 0.0
@@ -655,13 +655,13 @@ contains
     
     allocate(f(nvars))
 
-       y => array1_oc(sol, 1)
+       y => get_array1d_oc(sol, 1)
        f = (y -sweeper%ydesired(m,:))   
        objective = 0.0_pfdp
-       do n = 1, nvars-1
+       do n = 1, nvars
          objective = objective + f(n)**2
        end do
-       objective = objective * Lx / (nvars-1)
+       objective = objective * Lx / (nvars)
 
     deallocate(f)
   end subroutine objective_function
@@ -679,10 +679,10 @@ contains
     allocate(obj(nnodes))
     do m = 1, nnodes
       obj(m) = 0.0_pfdp
-      do i = 1, nvars-1
+      do i = 1, nvars
         obj(m) = obj(m) + f(m,i)*g(m,i) 
       end do
-      obj(m) = obj(m)*Lx/(nvars-1)
+      obj(m) = obj(m)*Lx/(nvars)
     end do
     do m=1, nnodes-1
       r = r + (obj(m)+obj(m+1))*(nodes(m+1)-nodes(m))*dt
@@ -820,13 +820,13 @@ contains
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
   
     if ((which .eq. 0) .or. (which .eq. 1)) then
-      f => array1_oc(qF,1)
-      g => array1_oc(qG,1)
+      f => get_array1d_oc(qF,1)
+      g => get_array1d_oc(qG,1)
       call interp1(f, g, adF, adG)  
     end if
     if ((which .eq. 0) .or. (which .eq. 2)) then
-      f => array1_oc(qF,2)
-      g => array1_oc(qG,2)
+      f => get_array1d_oc(qF,2)
+      g => get_array1d_oc(qG,2)
       call interp1(f, g, adF, adG)
     end if
   end subroutine interpolate
@@ -847,16 +847,16 @@ contains
     if(present(flags)) which = flags
         
     if ((which .eq. 0) .or. (which .eq. 1)) then
-      f => array1_oc(qF,1)
-      g => array1_oc(qG,1)
+      f => get_array1d_oc(qF,1)
+      g => get_array1d_oc(qG,1)
       nvarF = size(f)
       nvarG = size(g)
       xrat  = nvarF / nvarG
       g = f(::xrat)
     end if
     if ((which .eq. 0) .or. (which .eq. 2)) then
-      f => array1_oc(qF,2)
-      g => array1_oc(qG,2)
+      f => get_array1d_oc(qF,2)
+      g => get_array1d_oc(qG,2)
       nvarF = size(f)
       nvarG = size(g)
       xrat  = nvarF / nvarG
