@@ -36,7 +36,7 @@ contains
     real(pfdp) :: norms(lev%nnodes-1)
     integer :: m, which
     
-    which = 0
+    which = 1
     if(present(flag)) which = flag
 
     call start_timer(pf, TRESIDUAL)
@@ -66,7 +66,7 @@ contains
 
     integer :: m, which
     
-    which = 0
+    which = 1
     if(present(flags)) which = flags
 
     !>  Compute the integral of F
@@ -107,7 +107,7 @@ contains
 
     integer :: m, which, mystep
         
-    which = 0
+    which = 1
     if(present(flags)) which = flags
     
     mystep = 1

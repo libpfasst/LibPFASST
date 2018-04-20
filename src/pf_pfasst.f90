@@ -119,7 +119,7 @@ contains
           call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
        endif
     end do
-    
+
   end subroutine pf_pfasst_setup
 
   !
@@ -181,7 +181,7 @@ contains
 
     !>  initialize sweeper
     call lev%ulevel%sweeper%initialize(lev)
-    call lev%ulevel%stepper%initialize(lev)
+    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
 
 
     !> allocate solution and function arrays
