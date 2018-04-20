@@ -73,7 +73,7 @@ contains
 !        end do
 ! !        print *, pf%rank, maxval(savedAdjoint(1,:))
 !     else
-       call pf_pfasst_block(pf, dt, nsteps, predict, 1)
+       call pf_pfasst_block_oc(pf, dt, nsteps, predict, 1)
 !     end if
     
 !     if (pf%rank .eq. 0) print *, ' *********  compute objective **************'
@@ -173,7 +173,9 @@ contains
 !       call pf_pfasst_block(pf, dt, nsteps, .false., 2) ! do not predict if do_mixed
       ! try predict here instead of copying: this should be similar to solving state and adjoint completely separate
 !     else
-      call pf_pfasst_block(pf, dt, nsteps, predict, 2) !predict
+      if(predict) pf%q0_style = 1
+      call pf_pfasst_block_oc(pf, dt, nsteps, predict, 2) !predict
+      pf%q0_style = 0
 !     end if
 
     if (pf%rank .eq. 0) print *, '*********  compute gradient *************'

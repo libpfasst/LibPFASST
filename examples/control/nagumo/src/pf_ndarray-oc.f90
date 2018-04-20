@@ -178,7 +178,7 @@ contains
     integer,     intent(in   ), optional :: flags
     integer :: which
 
-    which = 3
+    which = 0
     if (present(flags)) which = flags
 
     select case (which)
@@ -203,7 +203,7 @@ contains
     integer,     intent(in   ), optional :: flags
     integer :: which
 
-    which = 3
+    which = 0
     if (present(flags)) which = flags
 
     
@@ -280,7 +280,7 @@ contains
     real(pfdp)   :: norm
     integer :: which
 
-    which = 3
+    which = 0
     if (present(flags)) which = flags
     
     select case (which)
@@ -303,7 +303,7 @@ contains
     integer,     intent(in   ), optional :: flags
     integer :: which
 
-    which = 3
+    which = 0
     if (present(flags)) which = flags
     
     select type(x)
@@ -356,7 +356,7 @@ contains
 
     integer                :: which
 
-    which = 3
+    which = 0
     if (present(flags)) which = flags
 
     select type (x)

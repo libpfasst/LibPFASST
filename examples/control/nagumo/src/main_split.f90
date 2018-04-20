@@ -200,6 +200,8 @@ program main
   rel_res_tol_save = rel_res_tol
   abs_res_tol = 1e-11
   rel_res_tol = 1e-11
+  
+  pf%q0_style = 0
 
 !     ! set Q, F to zero
 !   do l = 1, pf%nlevels-1
@@ -233,7 +235,7 @@ program main
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
   if (pf%rank .eq. 0)  print *, ' **** solve state with zero control ***'
-  call pf_pfasst_block(pf, dt, nsteps, .true., 1)
+  call pf_pfasst_block_oc(pf, dt, nsteps, .true., 1)
   ! solution at t=2.5 has to be send to all later ranks
   allocate(solAt25(nvars(pf%nlevels)))    
   if ( abs(pf%rank+1)*dt - 2.5 .le. 1e-6 ) then
