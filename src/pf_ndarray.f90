@@ -247,7 +247,8 @@ contains
     end select
   end function cast_as_ndarray
 
-  function array1(x,flags) result(r)
+  !>  Helper function to return the array part
+  function get_array1d(x,flags) result(r)
     class(pf_encap_t), intent(in) :: x
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
@@ -255,7 +256,32 @@ contains
     type is (ndarray)
        r => x%flatarray
     end select
-  end function array1
+  end function get_array1d
+  
+
+  function get_array2d(x,flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,           intent(in   ), optional :: flags
+    real(pfdp), pointer :: r(:,:)
+
+    select type (x)
+    type is (ndarray)
+       r(1:x%shape(1),1:x%shape(2)) => x%flatarray
+    end select
+  end function get_array2d
+  
+
+  function get_array3d(x,flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,           intent(in   ), optional :: flags
+    real(pfdp), pointer :: r(:,:,:)
+
+    select type (x)
+    type is (ndarray)
+       r(1:x%shape(1),1:x%shape(2),1:x%shape(3)) => x%flatarray
+    end select
+  end function get_array3d
+  
 
 
 
