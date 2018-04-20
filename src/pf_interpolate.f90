@@ -55,7 +55,7 @@ contains
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + level_index - 1)
     
-    which = 0
+    which = 1
     if(present(flags)) which = flags
     
     step = pf%state%step+1
@@ -109,7 +109,6 @@ contains
     end if  !  Feval
 
     !>  reset qend so that it is up to date
-!     call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
     if ((which .eq. 0) .or. (which .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), 1)
     if ((which .eq. 0) .or. (which .eq. 2))  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), 2)
 

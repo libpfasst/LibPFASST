@@ -491,9 +491,9 @@ contains
     mystep = 1
     if(present(step))  then
       mystep = step !needed for sequential version
-    else
-      print *, "step not present in spreadq0", which
-      stop
+!     else
+!       print *, "step not present in spreadq0", which
+!       stop
     end if
     
     select case(which)

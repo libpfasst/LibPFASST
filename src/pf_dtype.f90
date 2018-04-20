@@ -63,8 +63,6 @@ module pf_mod_dtype
     integer :: pstatus  !< previous rank's status
     integer :: itcnt    !< iteration counter
     integer :: mysteps  !< steps I did
-    integer :: first        ! rank of first processor in time block
-    integer :: last         ! rank of last processor in time block
   end type pf_state_t
 
   type :: pf_hook_t

@@ -86,13 +86,9 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-    which = 0
+    which = 1
     if (present(flags)) which = flags
     step = 1 ! dummy
-    
-!     if(pf%rank == 0) &
-!       print *, "restrict_time_space_fas with which ", which, " coarse_level_index ", level_index-1
-    
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
@@ -177,14 +173,12 @@ contains
     integer, optional, intent(in)    :: flags    
 
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !<  fine solution restricted in space only
-    integer :: m, which, r
+    integer :: m, which
     integer :: f_nnodes
     
-    which = 0
+    which = 1
     if (present(flags)) which = flags
 
-!     print *, "restrict_sdc with which ", which
-    
     f_nnodes = f_lev_ptr%nnodes
     !>  create works space
     if (IS_INTEGRAL) then   ! Restriction of integrals 
@@ -203,23 +197,10 @@ contains
 
        ! temporal restriction
        ! when restricting '0 to node' integral terms, skip the first entry since it is zero
-!        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., which) ! does this work backwards?
-!         r = 2
-!         if(f_nnodes == c_lev_ptr%nnodes) r = 1
-!         do m = 1, c_lev_ptr%nnodes-1
-!           if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
-!           if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
-!        end do
        if ((which .eq. 0) .or. (which .eq. 1)) &
           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
        if ((which .eq. 0) .or. (which .eq. 2)) then
           call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
-!           r = 2
-!           if(f_nnodes == c_lev_ptr%nnodes) r = 1
-!           do m = 1, c_lev_ptr%nnodes-1
-!             if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
-!             if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
-!           end do
        end if
     else
        !  spatial restriction
@@ -227,12 +208,6 @@ contains
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
        end do! temporal restriction
        call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., which)
-!         r = 2
-!         if(f_nnodes == c_lev_ptr%nnodes) r = 1
-!         do m = 1, c_lev_ptr%nnodes-1
-!           if ((which .eq. 0) .or. (which .eq. 1)) call c_encap_array(m)%copy(f_encap_array_c(r*m), 1)
-!           if ((which .eq. 0) .or. (which .eq. 2)) call c_encap_array(c_lev_ptr%nnodes-m)%copy(f_encap_array_c(f_nnodes-r*m),2)
-!        end do
     end if
 
     !>  destroy workspace
@@ -258,7 +233,7 @@ contains
     integer :: n, m, i, j, which
 
     lzero = .true.; if (present(zero)) lzero = zero    
-    which = 0;      if(present(flags)) which = flags
+    which = 1;      if(present(flags)) which = flags
     
 !     print *, "apply_mat with which == ", which, " and zero ", lzero
 
@@ -285,7 +260,7 @@ contains
     integer :: n, m, i, j, which
 
     lzero = .true.; if (present(zero)) lzero = zero    
-    which = 0;      if(present(flags)) which = flags
+    which = 2;      if(present(flags)) which = flags
     
     if( which /= 2 ) &
       stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
