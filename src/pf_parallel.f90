@@ -655,7 +655,7 @@ contains
 
           pf%state%iter = j
 
-          if (j>1) then
+          if (j>1 .and.  pf%state%pstatus /= PF_STATUS_CONVERGED) then
              call pf_recv_status(pf, 8000+k)
              call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
           endif
@@ -664,12 +664,12 @@ contains
           call pf_check_convergence_pipeline(pf, lev_p%residual, converged)
 
           if (pf%state%status .ne. PF_STATUS_CONVERGED) then
+
              call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
 
              if (converged) then
                 pf%state%status = PF_STATUS_CONVERGED
              endif
-
              call pf_send_status(pf, 8000+k)
           endif
 

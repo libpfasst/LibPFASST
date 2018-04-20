@@ -158,6 +158,8 @@ contains
     real(pfdp) :: c
     real(pfdp)  :: U(Nnodes-1,Nnodes-1)
     real(pfdp)  :: L(Nnodes-1,Nnodes-1)
+    real(pfdp)  :: LUerror
+    
     L = 0.0_pfdp
     U = 0.0_pfdp
     N = Nnodes-1
@@ -175,10 +177,12 @@ contains
     end do
 
     !  Check
-    if (maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes)))) .gt. 1e-14) then
-       print *,'LU error in pf_utils'
-    endif 
-    
+    LUerror = maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))))
+    if (LUerror .gt. 1e-14)  then
+       print *,'error in LU too high',LUerror
+       stop
+    end if
+
     Qtil = 0.0_pfdp
     Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
     !  Now scale the columns of U to match the sum of A
