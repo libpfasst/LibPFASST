@@ -434,8 +434,9 @@ contains
 
   
     !>  Subroutine to print the array to the screen (mainly for debugging purposes)
-  subroutine ndarray_oc_eprint(this)
+  subroutine ndarray_oc_eprint(this,flags)
     class(ndarray_oc), intent(inout) :: this
+    integer,     intent(in   ), optional :: flags    
     !  Just print the first few values
     print *, this%yflatarray(1:10)
     print *, this%pflatarray(1:10)
