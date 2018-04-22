@@ -25,8 +25,6 @@ module feval
   end type ad_level_t
 
   type, extends(pf_imexQ_t) :: ad_sweeper_t
-!     type(c_ptr) :: ffft, ifft
-!     complex(pfdp), pointer :: wk(:)              ! work space
      real(pfdp), allocatable :: wsave(:)           ! work space
      real(pfdp), allocatable :: work(:)             ! work space
      complex(pfdp), allocatable :: workhat(:)      ! work space
@@ -119,8 +117,6 @@ contains
     deallocate(this%wsave)
     deallocate(this%ddx)
     deallocate(this%lap)
-!    call fftw_destroy_plan(this%ffft)
-!    call fftw_destroy_plan(this%ifft)
     
     call this%imexQ_destroy(lev)
 
@@ -185,8 +181,8 @@ contains
     real(pfdp),      pointer :: yvec(:), fvec(:)
     integer ::  ierror
 
-    yvec  => array1(y)
-    fvec => array1(f)
+    yvec  => get_array1d(y)
+    fvec => get_array1d(f)
 
     this%workhat = yvec
 
@@ -253,9 +249,9 @@ contains
     integer ::  ierror
     
     if (piece == 2) then
-       yvec  => array1(y)
-       rhsvec => array1(rhs)
-       fvec => array1(f)
+       yvec  => get_array1d(y)
+       rhsvec => get_array1d(rhs)
+       fvec => get_array1d(f)
        this%workhat = rhsvec
        
        call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
@@ -294,8 +290,8 @@ contains
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
 
-    f => array1(qF); 
-    g => array1(qG)
+    f => get_array1d(qF); 
+    g => get_array1d(qG)
 
     nvarF = size(f)
     nvarG = size(g)
@@ -312,16 +308,11 @@ contains
        stop "error  calling cfft1f in interpolate"
     end if
 
-!    call fftw_execute_dft(adG%ffft, wkG, wkG)
-!    adG%workhat = adG%workhat / real(nvarG, kind=8)
-
-
     adF%workhat = 0.0d0
     adF%workhat(1:nvarG/2) = adG%workhat(1:nvarG/2)
     adF%workhat(nvarF-nvarG/2+2:nvarF) = adG%workhat(nvarG/2+2:nvarG)
 
 
-!    call fftw_execute_dft(adF%ifft, adF%wk, adF%wk)
     call cfft1b (adF%nx, 1, adF%workhat, adF%nx, adF%wsave, adF%lensav, adF%work, adF%lenwrk, ierror )
     if (ierror .ne. 0) then
        stop "error  calling cfft1b in interpolate"
@@ -344,8 +335,8 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    f => array1(qF)
-    g => array1(qG)
+    f => get_array1d(qF)
+    g => get_array1d(qG)
 
     nvarF = size(f)
     nvarG = size(g)
