@@ -67,35 +67,35 @@ contains
       select case (flags)
       case (0)
         ! first component: y
-        fvec => array2_oc(f, 1)
-        yvec  => array2_oc(y, 1)
+        fvec => get_array2d_oc(f, 1)
+        yvec  => get_array2d_oc(y, 1)
         if (do_imex .eq. 1) then
           fvec = this%u(idx, :,:) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
         else
           fvec = this%u(idx, :,:)
        endif
        ! second component: p
-       fvec => array2_oc(f, 2)      
+       fvec => get_array2d_oc(f, 2)      
        if (do_imex .eq. 1) then
-         p  => array2_oc(y, 2)
+         p  => get_array2d_oc(y, 2)
          fvec = (yvec - this%ydesired(idx,:,:)) - (yvec*yvec-1.0_pfdp)*p
        else
          fvec = (yvec - this%ydesired(idx,:,:))
        end if 
       case (1)
-         fvec => array2_oc(f, 1)
+         fvec => get_array2d_oc(f, 1)
          if (do_imex .eq. 1) then
-            yvec  => array2_oc(y, 1)
+            yvec  => get_array2d_oc(y, 1)
             fvec = this%u(idx, :,:) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
          else
             fvec = this%u(idx, :,:)
          endif
        case (2)
          ! evaluate y-y_d
-         fvec => array2_oc(f, 2)
-         yvec  => array2_oc(y, 1)
+         fvec => get_array2d_oc(f, 2)
+         yvec  => get_array2d_oc(y, 1)
          if (do_imex .eq. 1) then
-           p  => array2_oc(y, 2)
+           p  => get_array2d_oc(y, 2)
            fvec = (yvec -this%ydesired(idx,:,:)) - (yvec*yvec-1.0_pfdp)*p
          else
            fvec = (yvec -this%ydesired(idx,:,:)) 
@@ -119,8 +119,8 @@ contains
          stop "ERROR in f_eval: only 0, 1, 2 allowed as flags"
        end select
        do l = loopstart, loopend	
-        yvec  => array2_oc(y, l)
-        fvec  => array2_oc(f, l)
+        yvec  => get_array2d_oc(y, l)
+        fvec  => get_array2d_oc(f, l)
         nx=size(fvec,1)
         ny=size(fvec,2)
         wk => this%wk
@@ -170,9 +170,9 @@ contains
       end select
     
       do l = loopstart, loopend	   
-        s  => array2_oc(y, l)
-        rhsvec => array2_oc(rhs, l)
-        fvec => array2_oc(f, l)
+        s  => get_array2d_oc(y, l)
+        rhsvec => get_array2d_oc(rhs, l)
+        fvec => get_array2d_oc(f, l)
         wk => this%wk
       
         wk = rhsvec
@@ -205,9 +205,9 @@ contains
     wk = fftw_alloc_complex(int(nx*ny, c_size_t))
     call c_f_pointer(wk, this%wk, [nx,ny])
 
-    this%ffft = fftw_plan_dft_1d(nx,ny, &
+    this%ffft = fftw_plan_dft_2d(nx,ny, &
          this%wk, this%wk, FFTW_FORWARD, FFTW_ESTIMATE)
-    this%ifft = fftw_plan_dft_1d(nx,ny, &
+    this%ifft = fftw_plan_dft_2d(nx,ny, &
          this%wk, this%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
 
     ! create operators
@@ -277,29 +277,9 @@ contains
   
   
   
-  subroutine fill_ydesired_nagumo(s, pf)
+  subroutine initialize_control(s, t0, dt, nodes)
     class(pf_sweeper_t), intent(inout) :: s
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer :: nnodes, i
-    character(len=256)     :: fname
-    class(ad_sweeper_t), pointer :: sweeper
-    sweeper => as_ad_sweeper(s)
-
-    nnodes = pf%levels(pf%nlevels)%nnodes
-    do i = 1, nnodes
-      call pf%levels(pf%nlevels)%Q(i)%pack(sweeper%ydesired(i,:,:), 1)
-      write(fname, "('y_d','r',i0.2,'m',i0.2,'.npy')") pf%rank, i
-
-      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, size(sweeper%ydesired, 2), sweeper%ydesired(i,:,:))
-    end do
-  end subroutine fill_ydesired_nagumo
-  
-  
-  
-  subroutine initialize_control(s, solAt25, t0, dt, nodes)
-    class(pf_sweeper_t), intent(inout) :: s
-    real(pfdp),        intent(in   ) :: solAt25(:), nodes(:), t0, dt
+    real(pfdp),        intent(in   ) ::  nodes(:), t0, dt
     complex(pfdp), pointer :: wk(:)
     integer                :: nnodes, m,nx,ny
     class(ad_sweeper_t), pointer :: sweeper
@@ -309,14 +289,6 @@ contains
        
     do m = 1, nnodes
        sweeper%u(m,:,:) = 0.0_pfdp
-       if ( t0+dt*nodes(m) > 2.5 ) then
-         wk => sweeper%wk
-         wk = solAt25
-         call fftw_execute_dft(sweeper%ffft, wk, wk)
-         wk = nu * sweeper%lap * wk /dble(nx*ny)
-         call fftw_execute_dft(sweeper%ifft, wk, wk)
-         sweeper%u(m,:,:)  = (1.0_pfdp/3.0_pfdp*solAt25(:)**3 - solAt25(:) -real(wk)) *0.5
-       end if
     end do
   end subroutine
 
@@ -343,10 +315,10 @@ contains
   
   
 
-  subroutine dump_exact_control(s, pf, solAt25, t0, dt, nodes, L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
+  subroutine dump_exact_control(s, pf, t0, dt, nodes, L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
     type(pf_pfasst_t),    intent(inout) :: pf
     class(pf_sweeper_t), intent(inout) :: s
-    real(pfdp),           intent(in   ) :: nodes(:), t0, dt, solAt25(:,:)
+    real(pfdp),           intent(in   ) :: nodes(:), t0, dt
     real(pfdp),           intent(  out) :: L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl
 
     integer                :: nnodes, i,j,m,nx,ny
@@ -373,24 +345,15 @@ contains
     
     do m = 1, nnodes
 !       call exact_rhs(t0+dt*nodes(i), nvars, uexact)
-      uexact = 0.0_pfdp
-      if ( t0+dt*nodes(m) > 2.5 ) then
-        wk => sweeper%wk
-        wk = solAt25
-        call fftw_execute_dft(sweeper%ffft, wk, wk)
-        wk = nu * sweeper%lap * wk / size(wk)
-        call fftw_execute_dft(sweeper%ifft, wk, wk)
-        uexact(:,:)  = (1.0_pfdp/3.0_pfdp*solAt25(:,:)**3 - solAt25(:,:) -real(wk))
-      end if
 
       write(fname, "('uexact','r',i0.2,'m',i0.2,'.npy')") pf%rank, m
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, nvars, uexact)
+           1, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), uexact)
            
       udiff(:,:) = uexact(:,:) - sweeper%u(m,:,:)
       write(fname, "('udiff','r',i0.2,'m',i0.2,'.npy')") pf%rank, m
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, nvars, udiff(:,:))
+           1, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), udiff(:,:))
            
       ! compute norm
       ex(m) = 0.0_pfdp
@@ -514,7 +477,7 @@ contains
 
   subroutine control_L2Q(s, dt, nodes, shape, L2normSq)
     class(pf_sweeper_t), intent(inout) :: s
-    integer,             intent(in)    :: shape(2)f
+    integer,             intent(in)    :: shape(2)
     real(pfdp),          intent(in)    :: nodes(:), dt
     real(pfdp),          intent(out)   :: L2normSq
     
@@ -569,7 +532,7 @@ contains
     
     allocate(f(nx,ny))
 
-       y => array2_oc(sol, 1)
+       y => get_array2d_oc(sol, 1)
        f = (y -sweeper%ydesired(m,:,:))   
        objective = 0.0_pfdp
        do i = 1, nx
@@ -762,13 +725,13 @@ contains
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
   
     if ((which .eq. 0) .or. (which .eq. 1)) then
-      f => array2_oc(qF,1)
-      g => array2_oc(qG,1)
+      f => get_array2d_oc(qF,1)
+      g => get_array2d_oc(qG,1)
       call interp2(f, g, adF, adG)  
     end if
     if ((which .eq. 0) .or. (which .eq. 2)) then
-      f => array2_oc(qF,2)
-      g => array2_oc(qG,2)
+      f => get_array2d_oc(qF,2)
+      g => get_array2d_oc(qG,2)
       call interp2(f, g, adF, adG)
     end if
   end subroutine interpolate
@@ -789,8 +752,8 @@ contains
     if(present(flags)) which = flags
         
     if ((which .eq. 0) .or. (which .eq. 1)) then
-      f => array2_oc(qF,1)
-      g => array2_oc(qG,1)
+      f => get_array2d_oc(qF,1)
+      g => get_array2d_oc(qG,1)
       NxF=size(f,1)
       NyF=size(f,2)
       NxG=size(g,1)
@@ -800,8 +763,8 @@ contains
       g = f(::xrat,::yrat)
     end if
     if ((which .eq. 0) .or. (which .eq. 2)) then
-      f => array2_oc(qF,2)
-      g => array2_oc(qG,2)
+      f => get_array2d_oc(qF,2)
+      g => get_array2d_oc(qG,2)
       NxF=size(f,1)
       NyF=size(f,2)
       NxG=size(g,1)

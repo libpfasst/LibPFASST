@@ -26,7 +26,7 @@ contains
     integer,                   intent(in   ) :: nsteps
     logical,                   intent(in   ) :: predict
     real(pfdp),                intent(  out) :: objective, L2NormUSq
-    real(pfdp),                intent(inout) :: savedAdjoint(:,:)
+    real(pfdp),                intent(inout) :: savedAdjoint(:,:,:)
     logical, optional,         intent(in   ) :: predictAdj
     integer             :: m
     real(pfdp), pointer :: obj(:)
@@ -82,7 +82,7 @@ contains
     do m = 1, pf%levels(pf%nlevels)%nnodes
 !       if (pf%rank .eq. 0) print *, m
       call objective_function(pf%levels(pf%nlevels)%ulevel%sweeper, pf%levels(pf%nlevels)%Q(m), &
-                                    product(pf%levels(pf%nlevels)%shape), m, obj(m))
+                                    pf%levels(pf%nlevels)%shape, m, obj(m))
     end do
     objective = 0.0
     do m = 1, pf%levels(pf%nlevels)%nnodes-1
@@ -91,7 +91,7 @@ contains
     end do
     objective = 0.5*objective !0.5 for trapezoidal rule
     call control_L2Q(pf%levels(pf%nlevels)%ulevel%sweeper, dt, pf%levels(pf%nlevels)%nodes, &
-                                  product(pf%levels(pf%nlevels)%shape), L2NormUSq)
+                                  pf%levels(pf%nlevels)%shape, L2NormUSq)
     objective = 0.5*objective + 0.5*alpha*L2NormUSq
     deallocate(obj)
   end subroutine evaluate_objective
@@ -106,90 +106,40 @@ contains
     real(pfdp),               intent(in   ) :: dt
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
-    real(pfdp),               intent(  out) :: gradient(:,:), LinftyNormGrad, L2NormGradSq
-    real(pfdp),               intent(inout) :: savedAdjoint(:,:)
+    real(pfdp),               intent(  out) :: gradient(:,:,:), LinftyNormGrad, L2NormGradSq
+    real(pfdp),               intent(inout) :: savedAdjoint(:,:,:)
     integer :: m
     integer :: dest, source, ierror, stat(MPI_STATUS_SIZE)
-    real(pfdp), allocatable :: terminal(:), tosend(:)
+    real(pfdp), allocatable :: tmp(:)
     real(pfdp) :: t(pf%levels(pf%nlevels)%nnodes)
 
     solve_y = .false.      
 
-    allocate(terminal(size(savedAdjoint,2)))
-!     allocate(tosend(size(savedAdjoint,2)))
+    allocate(tmp(product(pf%levels(pf%nlevels)%shape)))
 
     !call initial(q1, pf%rank*dt, (pf%rank+1)*dt)
     q1%pflatarray = 0.0_pfdp ! only if no final time term in objective, otherwise this is nonzero, and terminal needs to be added to this
-
-    terminal = 0.0_pfdp
     
-!     if (do_mixed .eq. 1 ) then
-!        
-!        if(pf%rank /= pf%state%last) then
-!           source = modulo(pf%rank+1, pf%comm%nproc)
-!           call mpi_recv(terminal, size(savedAdjoint,2), MPI_REAL8, &
-!                         source, 1, pf%comm%comm, stat, ierror)
-! !           print *, pf%rank, maxval(terminal)
-!        end if
-!        
-!        savedAdjoint(1,:) = savedAdjoint(1,:) + terminal
-!                 
-!        if (pf%rank /= pf%state%first) then
-!           dest = modulo(pf%rank-1, pf%comm%nproc)
-!           call mpi_send(savedAdjoint(1,:), size(savedAdjoint,2), MPI_REAL8, &   !mpi_send(savedAdjoint(1,:),...
-!                         dest, 1, pf%comm%comm, stat, ierror)
-!        end if
-!        
-!        q1%pflatarray = terminal 
-!        
-!        ! shift solution values computed simultaneously with state by 'terminal'
-!        ! would be sufficient to do this only if rank /= last
-!        call pf%levels(pf%nlevels)%Q(1)%unpack(savedAdjoint(1,:), 2)
-!        do m = 2, pf%levels(pf%nlevels)%nnodes
-!           savedAdjoint(m,:) = savedAdjoint(m,:) + terminal
-!           call pf%levels(pf%nlevels)%Q(m)%unpack(savedAdjoint(m,:), 2)
-!           savedAdjoint(m,:) = savedAdjoint(m,:) - terminal
-!        end do
-!        savedAdjoint(1,:) = savedAdjoint(m,:) - terminal  ! reset, to use as initial guess in warm start
-! 
-!        t = pf%rank*dt + dt*pf%levels(pf%nlevels)%nodes
-!        call pf%levels(pf%nlevels)%ulevel%sweeper%evaluate_all(pf%levels(pf%nlevels), t, 2)       
-!    
-!        ! restrict Q(m) from finest to coarser levels; evaluates on coarse levels
-!        call restrict_for_adjoint(pf, 2);
-!     end if        
-
-    !if (((pf%rank+1)*dt >= Tfin) .or. predict) then
-    !  call pf%levels(pf%nlevels)%encap%copy(pf%levels(pf%nlevels)%qend, c_loc(q1), 2)
-    !end if
     call pf%levels(pf%nlevels)%qend%copy(q1, 2)
     ! do this only for final step or predict = true?
     !call restrict_for_adjoint(pf, 1)
 
     
     if (pf%rank .eq. 0) print *, '*********  solve adjoint *************'
-!     call mpi_barrier(pf%comm%comm, ierror)
-!     if (do_mixed .eq. 1) then
-!       call pf_pfasst_block(pf, dt, nsteps, .false., 2) ! do not predict if do_mixed
-      ! try predict here instead of copying: this should be similar to solving state and adjoint completely separate
-!     else
-      if(predict) pf%q0_style = 1
-      call pf_pfasst_block_oc(pf, dt, nsteps, predict, 2) !predict
-      pf%q0_style = 0
-!     end if
+    if(predict) pf%q0_style = 1
+    call pf_pfasst_block_oc(pf, dt, nsteps, predict, 2) !predict
+    pf%q0_style = 0
 
     if (pf%rank .eq. 0) print *, '*********  compute gradient *************'
     
     do m = 1, pf%levels(pf%nlevels)%nnodes
-      call pf%levels(pf%nlevels)%Q(m)%pack(gradient(m,:), 2)
-     ! if (do_mixed .eq. 1 )  gradient(m,:) = gradient(m,:) + savedAdjoint(m,:) ! in this variant, we solve the full adjoint, so no adding is needed
+      call pf%levels(pf%nlevels)%Q(m)%pack(tmp, 2)
+      gradient(m,:,:) = reshape(tmp, (/pf%levels(pf%nlevels)%shape(1), pf%levels(pf%nlevels)%shape(2)/))
     end do
 
     call construct_gradient(pf%levels(pf%nlevels)%ulevel%sweeper, gradient, pf%levels(pf%nlevels)%nodes, &
                                       LinftyNormGrad, L2NormGradSq)
                                       
-!     deallocate(tosend)
-    deallocate(terminal)
   end subroutine evaluate_gradient
 
 
@@ -202,9 +152,9 @@ contains
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint
     logical,                   intent(in   ) :: predict
-    real(pfdp),                intent(in   ) :: searchDir(:,:)  
+    real(pfdp),                intent(in   ) :: searchDir(:,:,:)  
     real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq
-    real(pfdp),                intent(inout) :: stepSize, LinftyNormGrad, L2NormGradSq, gradient(:,:), savedAdjoint(:,:)
+    real(pfdp),                intent(inout) :: stepSize, LinftyNormGrad, L2NormGradSq, gradient(:,:,:), savedAdjoint(:,:,:)
     logical,                   intent(inout) :: stepTooSmall
        
     real(pfdp) :: globObjNew, directionTimesGradient, globDirXGradNew
@@ -418,9 +368,9 @@ contains
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint
     logical,                   intent(in   ) :: predict
-    real(pfdp),                intent(in   ) :: searchDir(:,:) 
+    real(pfdp),                intent(in   ) :: searchDir(:,:,:) 
     real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq
-    real(pfdp),                intent(inout) :: stepSize, gradient(:,:), savedAdjoint(:,:)
+    real(pfdp),                intent(inout) :: stepSize, gradient(:,:,:), savedAdjoint(:,:,:)
     logical,                   intent(inout) :: stepTooSmall
     integer    :: l, ierror
     real(pfdp) :: low, high

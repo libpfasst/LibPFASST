@@ -190,8 +190,7 @@ contains
     case (2)
       this%pflatarray = val
     case default
-       print *,  "ERROR in ndarray_oc_setval: only 0, 1, 2 allowed as flags"
-       stop(666)
+       stop "ERROR in ndarray_oc_setval: only 0, 1, 2 allowed as flags"
     end select
 
   end subroutine ndarray_oc_setval

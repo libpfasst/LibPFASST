@@ -26,7 +26,7 @@ program main
   character(len = 64) :: shell_cmd
   integer        :: iout,nout
 
-  real(pfdp), pointer :: gradient(:,:), prevGrad(:,:), searchDir(:,:), prevSearchDir(:,:), savedAdjoint(:,:), solAt25(:)
+  real(pfdp), pointer :: gradient(:,:,:), prevGrad(:,:,:), searchDir(:,:,:), prevSearchDir(:,:,:), savedAdjoint(:,:,:)
   real(pfdp)          :: LinftyNormGrad, LinftyNormU, objective, objectiveNew, L2NormUSq, L2NormGradSq, &
                          alpha, dx, stepSize, prevStepSize, directionTimesGradient, beta, &
                          globObj, globObjNew, globDirXGrad, prevGlobDirXGrad, globL2NormGradSq, tolGrad, tolObj, &
@@ -190,7 +190,7 @@ program main
 
   call ndarray_oc_build(q1, pf%levels(pf%nlevels)%shape)
   do l = 1, pf%nlevels
-     call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, nvars(l), alpha)
+     call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, pf%levels(l)%shape, alpha)
   end do
 
   ! for Nagumo model: solve state equation with zero right hand side to determine natural
@@ -234,32 +234,6 @@ program main
     q1%yflatarray = 0.0_pfdp
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
-  if (pf%rank .eq. 0)  print *, ' **** solve state with zero control ***'
-  call pf_pfasst_block_oc(pf, dt, nsteps, .true., 1)
-  ! solution at t=2.5 has to be send to all later ranks
-  allocate(solAt25(nvars(pf%nlevels)))    
-  if ( abs(pf%rank+1)*dt - 2.5 .le. 1e-6 ) then
-     ! here for simplicity broadcast, better: create subgroup 
-    call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%pack(solAt25, 1)
-    !root = pf%rank
-  end if 
-  root = floor(2.5/dt) - 1
-
-  call mpi_bcast(solAt25, nvars(pf%nlevels), MPI_REAL8, root, pf%comm%comm, ierror)
-  if (pf%rank > root) then
-    do m = 1, pf%levels(pf%nlevels)%nnodes
-      call pf%levels(pf%nlevels)%Q(m)%unpack(solAt25, 1)
-      !call pf%levels(pf%nlevels)%encap%setval(pf%levels(pf%nlevels)%Q(m), 0.0_pfdp, 1)
-    end do
-  end if
-  ! now every rank has values for the objective in Q(m) -> create y_desired with this
-  call fill_ydesired_nagumo(pf%levels(pf%nlevels)%ulevel%sweeper, pf)
-  call initialize_control(pf%levels(pf%nlevels)%ulevel%sweeper, solAt25, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes)
-  do l = pf%nlevels-1,1,-1
-    call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
-    call restrict_ydesired(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
-  end do
-!   call dump_control_work1(pf%levels(pf%nlevels)%ctx, pf, 'uinit')
 
   abs_res_tol = abs_res_tol_save
   rel_res_tol = rel_res_tol_save      
@@ -293,11 +267,11 @@ program main
      open(unit=105, file = logfilename , & 
          status = 'unknown',  action = 'write')
 
-  allocate(gradient(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
-  allocate(prevGrad(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
-  allocate(searchDir(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
-  allocate(prevSearchDir(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
-  allocate(savedAdjoint(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
+  allocate(gradient(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels)))
+  allocate(prevGrad(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels)))
+  allocate(searchDir(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels)))
+  allocate(prevSearchDir(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels)))
+  allocate(savedAdjoint(pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels)))
   gradient = 0
   prevGrad = 0
   prevGlobDirXGrad = 0.0_pfdp
@@ -450,7 +424,7 @@ program main
    end if
 
   call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'u')
-  call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, solAt25, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
+  call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
                                   L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
   call mpi_allreduce(L2errorCtrl, globL2errorCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
   call mpi_allreduce(LinfErrorCtrl, globLinfErrorCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
