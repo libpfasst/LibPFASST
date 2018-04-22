@@ -277,8 +277,8 @@ contains
     real(pfdp),      pointer :: yvec(:), fvec(:)
     integer ::  ierror
 
-    yvec  => array1(y)
-    fvec => array1(f)
+    yvec  => get_array1d(y)
+    fvec => get_array1d(f)
 
     this%workhat = yvec
 
@@ -346,9 +346,9 @@ contains
     integer ::  ierror
     
     if (piece == 2) then
-       yvec  => array1(y)
-       rhsvec => array1(rhs)
-       fvec => array1(f)
+       yvec  => get_array1d(y)
+       rhsvec => get_array1d(rhs)
+       fvec => get_array1d(f)
        this%workhat = rhsvec
        
        call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
@@ -388,8 +388,8 @@ contains
     real(pfdp),      pointer :: yvec(:), fvec(:)
     integer ::  ierror
 
-    yvec  => array1(y)
-    fvec => array1(f)
+    yvec  => get_array1d(y)
+    fvec => get_array1d(f)
 
     this%workhat = yvec
 
@@ -456,9 +456,9 @@ contains
     integer ::  ierror
     
     if (piece == 2) then
-       yvec  => array1(y)
-       rhsvec => array1(rhs)
-       fvec => array1(f)
+       yvec  => get_array1d(y)
+       rhsvec => get_array1d(rhs)
+       fvec => get_array1d(f)
        this%workhat = rhsvec
        
        call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
@@ -498,8 +498,8 @@ contains
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
 
-    f => array1(qF); 
-    g => array1(qG)
+    f => get_array1d(qF); 
+    g => get_array1d(qG)
 
     nvarF = size(f)
     nvarG = size(g)
@@ -547,8 +547,8 @@ contains
 
     integer :: nvarF, nvarG, xrat
 
-    f => array1(qF)
-    g => array1(qG)
+    f => get_array1d(qF)
+    g => get_array1d(qG)
 
     nvarF = size(f)
     nvarG = size(g)

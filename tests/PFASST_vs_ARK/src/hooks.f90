@@ -18,8 +18,8 @@ contains
     real(c_double) :: yexact(level%mpibuflen)
     real(pfdp), pointer :: qend(:),r(:)
 
-    qend => array1(level%qend)
-    r => array1(level%R(level%nnodes-1))
+    qend => get_array1d(level%qend)
+    r => get_array1d(level%R(level%nnodes-1))
 
     call exact(state%t0+state%dt, yexact)
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
@@ -37,7 +37,7 @@ contains
 
     real(pfdp), pointer :: r(:)
 
-    r => array1(level%R(level%nnodes-1))
+    r => get_array1d(level%R(level%nnodes-1))
 
     print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i3.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r))
