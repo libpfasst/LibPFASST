@@ -5,9 +5,10 @@ import collections
 import re
 import pytest
 
+
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'step', 'iter', 'level', 'error' ])
-EXE = 'tests/adv_diff_fft/main.exe'
-NMLFILE = 'tests/adv_diff_fft/{}.nml'
+EXE = 'test/adv_diff_fft/main.exe'
+NMLFILE = 'test/adv_diff_fft/{}.nml'
 TOL = 1e-4
 
 def make_sdc():

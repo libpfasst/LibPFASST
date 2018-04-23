@@ -1,22 +1,24 @@
 import glob
 import pytest
 from os import remove, mkdir
+from os.path import abspath
 import numpy as np
 from pf.pfasst import PFASST, Params
 
 # defined relative to root of project
-home = '/home/bkrull/devel/pfasst-nwchem/libpfasst'
-base_dir = home+'/tests/imk'
+home = abspath('.')
+base_dir = home+'/test/imk'
 exe = base_dir+'/main.exe'
 output_dir = base_dir+'/output'
 
 try:
     mkdir(base_dir)
 except OSError as exc:
-    if exc.errno == 17:
-        pass
-    else:
-        raise OSError, 'issue making base_dir'
+    # if 'exists' in exc.message:
+    #     pass
+    # else:
+    #     raise OSError, exc.message
+    pass
 
 params = Params(nodes=[3], nterms=[2], \
                 nsteps=128, tfinal=1.0, \
@@ -25,10 +27,6 @@ params = Params(nodes=[3], nterms=[2], \
 ref_particle0 = 1.6125274564234153
 ref_particle8 = -1.7151098584854585
 toda = PFASST(exe, params)
-
-def cleanup():
-    for fname in glob.iglob(output_dir+'/*pkl'):
-        remove(fname)
 
 def make():
     tests = []

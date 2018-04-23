@@ -1,21 +1,23 @@
 import glob
 import pytest
 from os import remove, mkdir
+from os.path import abspath
 import numpy as np
 from pf.pfasst import PFASST, Params
 
 # defined relative to root of project
-home = '/home/bkrull/devel/pfasst-nwchem/libpfasst'
-exe = home+'/tests/toda/main.exe'
-base_dir = home+'/tests/toda/output'
+home = abspath('.')
+exe = home+'/test/toda/main.exe'
+base_dir = home+'/test/toda/output'
 
 try:
     mkdir(base_dir)
 except OSError as exc:
-    if exc.errno == 17:
-        pass #already exists
-    else:
-        raise OSError, 'issue making base_dir'
+    # if 'exists' in exc.message:
+    #     pass
+    # else:
+    #     raise OSError, exc.message
+    pass
 
 params = Params(nodes=[3], magnus=[2], \
                 nsteps=128, tfinal=1.0, iterations=15, \
