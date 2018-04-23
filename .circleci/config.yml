@@ -5,7 +5,6 @@ jobs:
             - image: brandonkrull/libpfasst
         steps:
             - checkout
-            - run: pip install tqdm
             - run:
                 name: env_links
                 command: cd test && ln -s ../pf && cd toda && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
