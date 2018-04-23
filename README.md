@@ -7,19 +7,17 @@ with C and C++ fairly easily.
 
 # NOTICE ON NEW RELEASE
 
-You might notice that the code here has undergone substantial recent changes.
-We are currently in the process of updating the documentation and examples to reflect the changes.
+The libpfasst project is currently a private repository while we work through some paperwork to re-release it with a new open source licsense. 
+If you are interested in obtaining the code, you can contact mlminion@lbl.gov
+
+We are also currently in the process of updating the documentation and examples to reflect substantial changes in the new version.
 Please stay tuned.
 
-You can see the old documentation in the 'docs' directory, and
-an online version of the documentation is available at
 
-  https://libpfasst.readthedocs.org/en/latest/
 
-There is (new) Doxygen info at
+There is (newish) Doxygen info at
 
 https://pfasst.bitbucket.io/Doxygen/html/index.html
-
 
 
 # COMPILERS
