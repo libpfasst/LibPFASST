@@ -62,8 +62,6 @@ def test_advdiff(nodes, status, tasks, nml):
 
     err = errors(output)
 
-    print err
-
     maxstep = max([x.step for x in err])
     maxiter = max([x.iter for x in err if x.step == maxstep])
     lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
@@ -78,6 +76,9 @@ def errors(out):
     for line in out.splitlines():
         m = rx.search(line)
         if m:
-            errors.append(ErrorTuple(*[c(x) for c, x in zip(cast, m.groups())]))
+            try:
+                errors.append(ErrorTuple(*[c(x) for c, x in zip(cast, m.groups())]))
+            except ValueError:
+                assert False, 'Poor convergence behavior\nunable to parse output\n {}'.format(line)
 
     return errors
