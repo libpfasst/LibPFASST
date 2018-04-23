@@ -11,7 +11,8 @@ module probin
   character(len=64), save :: problem_type, window_type
 
   double precision, save :: v      ! advection velocity
-  double precision, save :: Lx     ! domain size
+  double precision, save :: Lx     ! domain size x
+  double precision, save :: Ly     ! domain size y
   double precision, save :: nu     ! viscosity
   double precision, save :: t0     ! initial time for exact solution
   double precision, save :: sigma  ! initial condition parameter
@@ -21,8 +22,15 @@ module probin
 
   double precision, save :: abs_res_tol ! absolute residual tolerance
   double precision, save :: rel_res_tol ! relative residual tolerance
+  
+  ! optimization problem parameters
+  double precision, save :: alpha        ! regularization parameter
+  double precision, save :: tol_grad     ! gradient tolerance, stop optimization if gradient norm below
+  double precision, save :: tol_obj      ! objective function tolerance, stop optimization if objective function value below
+  integer,          save :: max_opt_iter ! maximum number of optimization iterations
+  
 
-  integer, save :: ndim             ! number of dimensions
+  integer, save :: ndim            ! number of dimensions
   integer, save :: nnodes(maxlevs) ! number of nodes
   integer, save :: nvars(maxlevs)  ! number of grid points
   integer, save :: nprob           ! which problem
@@ -58,7 +66,7 @@ module probin
   namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
   namelist /params/ pfasst_nml,fbase ,poutmod
   namelist /params/  abs_res_tol, rel_res_tol 
-  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx
+  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx, Ly, alpha, max_opt_iter
   namelist /params/  do_imex, warmstart, do_mixed, logfile, nsweeps, nsweeps_pred
 
 contains
@@ -75,19 +83,20 @@ contains
     !
 
     Finterp = .FALSE.
-    ndim     = 1
+    ndim     = 2
     nnodes  = [ 2, 3, 3 ]
 
     nsteps  = -1
 
     v       = 0.0_pfdp
     Lx      = 1._pfdp
-    nu      = 0.02_pfdp
+    Ly      = 1._pfdp
+    nu      = 1._pfdp
     sigma   = 0.004_pfdp
     kfreq   = 1
-    t0      = 0.25_pfdp
+    t0      = 0.0_pfdp
     dt      = 0.01_pfdp
-    Tfin    = 0.0_pfdp
+    Tfin    = 1.0_pfdp
 
     abs_res_tol = 0.0
     rel_res_tol = 0.0
@@ -103,6 +112,11 @@ contains
     do_imex = 1
     warmstart = 0
     do_mixed = 0   
+    
+    max_opt_iter = 100
+    alpha = 0.05
+    tol_grad = 1e-6
+    tol_obj  = 1e-6
  
     poutmod = 1
 

@@ -5,7 +5,9 @@ module feval
   use pf_mod_imexQ_oc
   use probin
   use solutions
+  
   implicit none
+  
   include 'fftw3.f03'
 
 !   real(pfdp), parameter :: pi = 3.141592653589793_pfdp    !defined in probin already
@@ -68,25 +70,26 @@ contains
       case (0)
         ! first component: y
         fvec => get_array2d_oc(f, 1)
-        yvec  => get_array2d_oc(y, 1)
+!         yvec  => get_array2d_oc(y, 1)
         if (do_imex .eq. 1) then
-          fvec = this%u(idx, :,:) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
+          fvec = this%u(idx, :,:)
         else
           fvec = this%u(idx, :,:)
        endif
        ! second component: p
+       yvec  => get_array2d_oc(y, 1)
        fvec => get_array2d_oc(f, 2)      
        if (do_imex .eq. 1) then
-         p  => get_array2d_oc(y, 2)
-         fvec = (yvec - this%ydesired(idx,:,:)) - (yvec*yvec-1.0_pfdp)*p
+!          p  => get_array2d_oc(y, 2)
+         fvec = (yvec - this%ydesired(idx,:,:))
        else
          fvec = (yvec - this%ydesired(idx,:,:))
        end if 
       case (1)
          fvec => get_array2d_oc(f, 1)
          if (do_imex .eq. 1) then
-            yvec  => get_array2d_oc(y, 1)
-            fvec = this%u(idx, :,:) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
+!             yvec  => get_array2d_oc(y, 1)
+            fvec = this%u(idx, :,:) 
          else
             fvec = this%u(idx, :,:)
          endif
@@ -95,8 +98,8 @@ contains
          fvec => get_array2d_oc(f, 2)
          yvec  => get_array2d_oc(y, 1)
          if (do_imex .eq. 1) then
-           p  => get_array2d_oc(y, 2)
-           fvec = (yvec -this%ydesired(idx,:,:)) - (yvec*yvec-1.0_pfdp)*p
+!            p  => get_array2d_oc(y, 2)
+           fvec = (yvec -this%ydesired(idx,:,:)) 
          else
            fvec = (yvec -this%ydesired(idx,:,:)) 
          end if
@@ -126,7 +129,7 @@ contains
         wk => this%wk
         wk = yvec
         call fftw_execute_dft(this%ffft, wk, wk)
-        wk = nu * this%lap * wk / dble(nx*ny)
+        wk = this%lap * wk / dble(nx*ny)
         call fftw_execute_dft(this%ifft, wk, wk)
         fvec = real(wk)
        end do
@@ -173,11 +176,15 @@ contains
         s  => get_array2d_oc(y, l)
         rhsvec => get_array2d_oc(rhs, l)
         fvec => get_array2d_oc(f, l)
+        
+        nx = size(s,1)
+        ny = size(s,2)
+        
         wk => this%wk
       
         wk = rhsvec
         call fftw_execute_dft(this%ffft, wk, wk)
-        wk = wk / (1.0_pfdp - nu*dtq*this%lap) /dble(nx*ny)
+        wk = wk / (1.0_pfdp - dtq*this%lap) /dble(nx*ny)
         call fftw_execute_dft(this%ifft, wk, wk)
         s = real(wk)
         fvec = (s - rhsvec) / dtq
@@ -201,6 +208,10 @@ contains
 
     this => as_ad_sweeper(sweeper)
 
+    nx = shape(1)
+    ny = shape(2)
+    print *, "setup", nx, ny
+    
  ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nx*ny, c_size_t))
     call c_f_pointer(wk, this%wk, [nx,ny])
@@ -214,9 +225,9 @@ contains
     allocate(this%lap(nx,ny))
     do j = 1, ny
        if (j <= ny/2+1) then
-          kxj = two_pi / Lx * dble(j-1)
+          kxj = two_pi / Ly * dble(j-1)
        else
-          kxj = two_pi / Lx * dble(-ny + j - 1)
+          kxj = two_pi / Ly * dble(-ny + j - 1)
        end if
        do i = 1, nx
        if (i <= nx/2+1) then
@@ -228,7 +239,7 @@ contains
        if (kxi**2+kxj**2 < 1e-13) then
           this%lap(i,j) = 0.0_pfdp
        else
-          this%lap(i,j) = -kxi**2+kxj**2
+          this%lap(i,j) = -(kxi**2+kxj**2)
        end if
     end do
     end do
@@ -256,43 +267,31 @@ contains
   end subroutine destroy
 
 
-  subroutine initialize_oc(s, t0, dt, nodes, shape, alpha)
+  subroutine initialize_oc(s, t0, dt, nodes, shape)
     class(pf_sweeper_t), intent(inout) :: s
-    real(pfdp), intent(in)    :: nodes(:), t0, dt, alpha
+    real(pfdp), intent(in)    :: nodes(:), t0, dt
     integer,             intent(in)    :: shape(2)
 
     integer :: nnodes, m
+    real(pfdp) :: t
+    
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
     
     nnodes = size(nodes)
+    
+    print *, "intitialize_oc", nnodes, shape
 
     do m = 1, nnodes
+       t = t0 + dt*nodes(m)
+       print *, t
        sweeper%u(m,:,:) = 0.0_pfdp
-!        call exact_rhs(t0+dt*nodes(i), nvars, work%u(i,:))
-!        work%u(m,:,:) = work%u(m,:,:)*0.5
+!        call exact_u(sweeper%u(m,:,:), shape, t)
+       call y_desired(sweeper%ydesired(m,:,:), shape, t)
     end do
     sweeper%alpha = alpha
   end subroutine initialize_oc
   
-  
-  
-  subroutine initialize_control(s, t0, dt, nodes)
-    class(pf_sweeper_t), intent(inout) :: s
-    real(pfdp),        intent(in   ) ::  nodes(:), t0, dt
-    complex(pfdp), pointer :: wk(:)
-    integer                :: nnodes, m,nx,ny
-    class(ad_sweeper_t), pointer :: sweeper
-    sweeper => as_ad_sweeper(s)
-    
-    nnodes = size(nodes)
-       
-    do m = 1, nnodes
-       sweeper%u(m,:,:) = 0.0_pfdp
-    end do
-  end subroutine
-
-
   
   subroutine dump_control(s, pf, fbase)
     class(pf_sweeper_t), intent(inout) :: s
@@ -309,11 +308,60 @@ contains
       write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, size(sweeper%u, 2), sweeper%u(m,:,:))
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), sweeper%u(m,:,:))
     end do
   end subroutine dump_control
   
+  subroutine dump_ydesired(s, pf, fbase)
+    class(pf_sweeper_t), intent(inout) :: s
+    type(pf_pfasst_t), intent(inout) :: pf
+    character(len = *), intent(in   ) :: fbase
+
+    integer :: nnodes, i
+    character(len=256)     :: fname
+    class(ad_sweeper_t), pointer :: sweeper
+    sweeper => as_ad_sweeper(s)
+
+    nnodes = pf%levels(pf%nlevels)%nnodes
+    do i = 1, nnodes
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, i
+
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), sweeper%ydesired(i,:,:))
+    end do
+  end subroutine dump_ydesired
   
+  subroutine dump_exact_adjoint(s, pf, t0, dt, fbase)
+    class(pf_sweeper_t), intent(inout) :: s
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp), intent(in)    ::  t0, dt
+    character(len = *), intent(in   ) :: fbase
+
+    real(pfdp), pointer :: pexact(:,:)
+    
+    integer :: nnodes, i, nx, ny
+    character(len=256)     :: fname
+    class(ad_sweeper_t), pointer :: sweeper
+    sweeper => as_ad_sweeper(s)
+    
+    nx=pf%levels(pf%nlevels)%shape(1)
+    ny=pf%levels(pf%nlevels)%shape(2)
+    
+    allocate(pexact(nx,ny))   
+
+
+    nnodes = pf%levels(pf%nlevels)%nnodes
+    do i = 1, nnodes
+      call exact_p(pexact, shape(pexact), t0+dt*pf%levels(pf%nlevels)%nodes(i))
+      print *, "time = ", t0+dt*pf%levels(pf%nlevels)%nodes(i)
+    
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, i
+
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), sweeper%ydesired(i,:,:))
+    end do
+    deallocate(pexact)
+  end subroutine dump_exact_adjoint
 
   subroutine dump_exact_control(s, pf, t0, dt, nodes, L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
     type(pf_pfasst_t),    intent(inout) :: pf
@@ -344,16 +392,16 @@ contains
     LinfExactCtrl = 0.0_pfdp
     
     do m = 1, nnodes
-!       call exact_rhs(t0+dt*nodes(i), nvars, uexact)
+      call exact_u(uexact, shape(uexact), t0+dt*nodes(m))
 
       write(fname, "('uexact','r',i0.2,'m',i0.2,'.npy')") pf%rank, m
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), uexact)
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), uexact)
            
       udiff(:,:) = uexact(:,:) - sweeper%u(m,:,:)
       write(fname, "('udiff','r',i0.2,'m',i0.2,'.npy')") pf%rank, m
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           1, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), udiff(:,:))
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), udiff(:,:))
            
       ! compute norm
       ex(m) = 0.0_pfdp
@@ -447,31 +495,31 @@ contains
 
 
  
-  subroutine write_control(s, k, fbase)
-    class(pf_sweeper_t), intent(inout) :: s
-    integer,            intent(in) :: k
-    character(len = *), intent(in) :: fbase
-
-    character(len = 64)  :: fname
-    integer              :: nx,ny, i,j
-    real(pfdp)           :: dx,dy
-    class(ad_sweeper_t), pointer :: sweeper
-    sweeper => as_ad_sweeper(s)
-    
-    nx = size(sweeper%u, 2)
-    ny = size(sweeper%u, 3)
-    dx = 1.0_pfdp / nx
-    dy = 1.0_pfdp / ny
-    write(fname, "(A,I0.6,A)") trim(fbase), k, ".txt"
-    fname = trim(fname)
-    open(unit=106, file = fname, status = 'unknown', action = 'write') 
-    do j=1,ny
-       do i=1,nx
-          write(106,*) (i-1)*dx,  sweeper%u(:, i,j)
-       end do
-    end do
-    close(106)
-  end subroutine write_control
+!   subroutine write_control(s, k, fbase)
+!     class(pf_sweeper_t), intent(inout) :: s
+!     integer,            intent(in) :: k
+!     character(len = *), intent(in) :: fbase
+! 
+!     character(len = 64)  :: fname
+!     integer              :: nx,ny, i,j
+!     real(pfdp)           :: dx,dy
+!     class(ad_sweeper_t), pointer :: sweeper
+!     sweeper => as_ad_sweeper(s)
+!     
+!     nx = size(sweeper%u, 2)
+!     ny = size(sweeper%u, 3)
+!     dx = 1.0_pfdp / nx
+!     dy = 1.0_pfdp / ny
+!     write(fname, "(A,I0.6,A)") trim(fbase), k, ".txt"
+!     fname = trim(fname)
+!     open(unit=106, file = fname, status = 'unknown', action = 'write') 
+!     do j=1,ny
+!        do i=1,nx
+!           write(106,*) (i-1)*dx,  sweeper%u(:, i,j)
+!        end do
+!     end do
+!     close(106)
+!   end subroutine write_control
 
 
 
@@ -530,6 +578,8 @@ contains
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
     
+    nx = shape(1)
+    ny = shape(2)
     allocate(f(nx,ny))
 
        y => get_array2d_oc(sol, 1)
@@ -540,7 +590,7 @@ contains
              objective = objective + f(i,j)**2
           end do
        end do
-       objective = objective * Lx**2 / dble(nx*ny)
+       objective = objective * Lx*Ly / dble(nx*ny)
 
     deallocate(f)
   end subroutine objective_function
@@ -655,13 +705,13 @@ contains
     real(pfdp),  intent(inout) :: qF(:,:), qG(:,:)
 
     complex(pfdp), pointer :: wkF(:,:), wkG(:,:)
-    integer      :: NxF, NxG, NyF, NyG, xrat,yrat,i,j,ii,jj
-    NxF=size(qF,1)
-    NyF=size(qF,2)
-    NxG=size(qG,1)
-    NyG=size(qG,2)
-    xrat  = NxF/NxG
-    yrat  = NyF/NyG
+    integer      :: nxF, nxG, nyF, nyG, xrat,yrat,i,j,ii,jj
+    nxF=size(qF,1)
+    nyF=size(qF,2)
+    nxG=size(qG,1)
+    nyG=size(qG,2)
+    xrat  = nxF/nxG
+    yrat  = nyF/nyG
     
 
     if (xrat == 1 .and. yrat==1) then
@@ -675,7 +725,7 @@ contains
        
     wkG = qG
     call fftw_execute_dft(adG%ffft, wkG, wkG)
-    wkG = wkG / NxG
+    wkG = wkG / (nxG*nyG)
        
     wkF = 0.0d0
     do j = 1, nyG
@@ -696,7 +746,7 @@ contains
              cycle
           end if
           
-          wkF(i, j) = wkG(ii, jj)
+          wkF(ii, jj) = wkG(i, j)
        end do
     end do
 
@@ -748,7 +798,7 @@ contains
     real(pfdp), pointer :: f(:,:), g(:,:)
 
     integer :: NxF, NxG,NyF, NyG, xrat, yrat,which
-    which = 0
+    which = 1
     if(present(flags)) which = flags
         
     if ((which .eq. 0) .or. (which .eq. 1)) then

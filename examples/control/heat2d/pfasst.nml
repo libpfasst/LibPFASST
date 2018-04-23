@@ -1,6 +1,6 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 3
+    nlevels  = 2
 
     !  These are internal pfasst variables that can be reset
     niters = 250   !  default is 5
@@ -10,8 +10,8 @@
 
 
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1e-11
-     rel_res_tol = 1e-11
+     abs_res_tol = 1e-10
+     rel_res_tol = 1e-10
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
      Pipeline_G =  .false.

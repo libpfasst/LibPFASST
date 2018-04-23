@@ -28,7 +28,7 @@ program main
 
   real(pfdp), pointer :: gradient(:,:,:), prevGrad(:,:,:), searchDir(:,:,:), prevSearchDir(:,:,:), savedAdjoint(:,:,:)
   real(pfdp)          :: LinftyNormGrad, LinftyNormU, objective, objectiveNew, L2NormUSq, L2NormGradSq, &
-                         alpha, dx, stepSize, prevStepSize, directionTimesGradient, beta, &
+                         dx, stepSize, prevStepSize, directionTimesGradient, beta, &
                          globObj, globObjNew, globDirXGrad, prevGlobDirXGrad, globL2NormGradSq, tolGrad, tolObj, &
                          num, denom, globNum, globDenom, globLinftyNormGrad, &
                          L2errorCtrl, LinfErrorCtrl, globL2errorCtrl, globLinfErrorCtrl, &
@@ -79,15 +79,16 @@ program main
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_oc_factory::pf%levels(l)%ulevel%factory)
 
-       !  Add the sweeper to the level
-       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call setup(pf%levels(l)%ulevel%sweeper, nvars(l), nnodes(l))
-
        !  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(1))
+       allocate(pf%levels(l)%shape(2))
        pf%levels(l)%shape(1) = nvars(l)
+       pf%levels(l)%shape(2) = nvars(l)
        !  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = nvars(l)
+       pf%levels(l)%mpibuflen  = product(pf%levels(l)%shape)
+       
+        !  Add the sweeper to the level
+       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
+       call setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape, nnodes(l))
   end do
 
   call pf_pfasst_setup(pf)
@@ -98,9 +99,9 @@ program main
 !   ! run
   !
 
-!   call pf_add_hook(pf, 3, PF_PRE_PREDICTOR, echo_error_hook)
-!   call pf_add_hook(pf, 3, PF_POST_PREDICTOR, echo_error_hook)
-!   call pf_add_hook(pf,3,PF_POST_ITERATION,echo_error_hook)
+!   call pf_add_hook(pf,-1, PF_PRE_PREDICTOR, echo_error_hook)
+!   call pf_add_hook(pf,-1, PF_POST_PREDICTOR, echo_error_hook)
+!   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_error_hook)
   call pf_add_hook(pf,-1,PF_POST_STEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_residual_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
@@ -158,19 +159,9 @@ program main
         write(nout,*) 'Nnodes=',nnodes(1:pf%nlevels)
         write(nout,*) 'Nvars=',nvars(1:pf%nlevels)
         write(nout,*) 'Finterp=',Finterp
-        write(nout,*) 'nprob=',nprob
         write(nout,*) 'nsteps=',nsteps
         write(nout,*) 'dt=',dt
-        write(nout,*) 'nu=',nu
-        write(nout,*) 'v=',v
-        write(nout,*) 'kfreq=',kfreq
-        write(nout,*) 'do_spec',do_spec
         write(nout,*) 'fbase=',fbase
-        if (do_spec .eq. 0) then
-           write(nout,*) 'N_Vcycles=',N_Vcycles
-           write(nout,*) 'Nrelax',Nrelax
-           write(nout,*) 'mg_interp_order=',mg_interp_order
-        endif
         write(nout,*) 'logfile=',logfilename
         if (do_imex .eq. 1) then
           write(nout,*) 'use IMEX sweeper'
@@ -182,15 +173,15 @@ program main
         else
           write(nout,*) 'cold start with spread initial value'
         endif
-
+          write(nout,*) 'regularization: alpha=', alpha
+          write(nout,*) 'maximum number of optimization iterations=', max_opt_iter
+          write(nout,*) 'optimization tolerances (gradient, objective)=', tol_grad, tol_obj
      end do
   end if
 
-  alpha = 1e-6 !0.0_pfdp
-
   call ndarray_oc_build(q1, pf%levels(pf%nlevels)%shape)
   do l = 1, pf%nlevels
-     call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, pf%levels(l)%shape, alpha)
+     call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, pf%levels(l)%shape)
   end do
 
   ! for Nagumo model: solve state equation with zero right hand side to determine natural
@@ -228,12 +219,12 @@ program main
 !     end do
 !   end do
   
-  if (pf%rank .eq. 0) then
-    call initial(q1, pf%rank*dt, pf%rank*dt+dt) !dt should be given by rank !initial_rd
-  else
-    q1%yflatarray = 0.0_pfdp
-  end if
-  call pf%levels(pf%nlevels)%q0%copy(q1, 1)
+!   if (pf%rank .eq. 0) then
+!     call initial(q1, pf%rank*dt, pf%rank*dt+dt) !dt should be given by rank !initial_rd
+!   else
+!     q1%yflatarray = 0.0_pfdp
+!   end if
+!   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
 
   abs_res_tol = abs_res_tol_save
   rel_res_tol = rel_res_tol_save      
@@ -260,8 +251,7 @@ program main
 !     end do
 !   end do
 !   
-  tolGrad = 1.0e-6
-  tolObj  = 1.0e-6
+
 !   
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , & 
@@ -288,7 +278,7 @@ program main
   if (pf%rank .eq. 0) &
     print *, 'start optimization on ', date, ', ',  time
 
-  do k = 1, 200
+  do k = 1, max_opt_iter
 
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
      
@@ -317,12 +307,12 @@ program main
      call mpi_allreduce(LinftyNormGrad, globLinftyNormGrad, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'gradient (L2, Linf) = ', sqrt(globL2NormGradSq), globLinftyNormGrad
      if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
-     if (sqrt(globL2NormGradSq) < tolGrad) then
+     if (sqrt(globL2NormGradSq) < tol_grad) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (gradient norm small enough), stopping'
        !call write_control_work1(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
        exit
      end if
-     if (globObj < tolObj) then
+     if (globObj < tol_obj) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (objective function small enough), stopping'
        !call write_control_work1(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
        exit
@@ -423,7 +413,9 @@ program main
       print *, 'duration [s]: ', time_end_sec-time_start_sec
    end if
 
+  call dump_ydesired(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'yd')
   call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'u')
+!   call dump_exact_adjoint(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'pex')
   call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
                                   L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
   call mpi_allreduce(L2errorCtrl, globL2errorCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
