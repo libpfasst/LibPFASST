@@ -1,6 +1,6 @@
 import glob
+import pytest
 from os import remove, mkdir
-from nose import with_setup
 import numpy as np
 from pf.pfasst import PFASST, Params
 
@@ -30,16 +30,20 @@ def cleanup():
     for fname in glob.iglob(output_dir+'/*pkl'):
         remove(fname)
 
-def test_all():
+def make():
+    tests = []
     for vcycle in [True, False]:
         for sdc in [True, False]:
             for nlevels in [1, 3]:
                 for nodes in [[3]]:
                     for nterms in [[3]]:
-                        yield toda, nlevels, vcycle, sdc, nodes, nterms
+                        tests.append((nlevels, vcycle, sdc, nodes, nterms))
+    return tests
 
-@with_setup(teardown=cleanup)
-def toda(levels, vcycle, sdc, nodes, nterms):
+tests = make()
+@pytest.mark.parametrize('levels, vcycle, sdc, nodes, nterms',
+                         tests)
+def test_toda(levels, vcycle, sdc, nodes, nterms):
     params = Params(levels=levels, nodes=nodes*levels, nterms=nterms*levels,
                     sweeps=[1]*levels, sweeps_pred=[1]*levels,
                     nsteps=128, tfinal=1.0, inttype='imk',

@@ -1,6 +1,6 @@
 import glob
+import pytest
 from os import remove, mkdir
-from nose import with_setup
 import numpy as np
 from pf.pfasst import PFASST, Params
 
@@ -13,7 +13,7 @@ try:
     mkdir(base_dir)
 except OSError as exc:
     if exc.errno == 17:
-        pass
+        pass #already exists
     else:
         raise OSError, 'issue making base_dir'
 
@@ -29,14 +29,18 @@ def cleanup():
     for fname in glob.iglob(base_dir+'/*pkl'):
         remove(fname)
 
-def test_generator():
+def make():
+    tests = []
     for nodes in [[3]]:
         for magnus in [[2], [1]]:
             if nodes[0] == 2 and magnus[0] == 2: continue
-            yield toda, nodes, magnus
+            tests.append((nodes, magnus))
 
-@with_setup(teardown=cleanup)
-def toda(nodes, magnus):
+    return tests
+
+tests = make()
+@pytest.mark.parametrize('nodes, magnus', tests)
+def test_toda(nodes, magnus):
     params = Params(nodes=nodes, magnus=magnus,
                     tolerance=1e-12,
                     nsteps=128, tfinal=1.0, iterations=30,
