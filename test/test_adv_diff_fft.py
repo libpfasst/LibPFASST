@@ -61,13 +61,21 @@ def test_advdiff(nodes, status, tasks, nml):
     print command
     output = subprocess.check_output(command.split())
 
-    err = errors(output)
+    try:
+        err = errors(output)
+    except ValueError:
+        if status == 0:
+            assert True, \
+                'Expected poor convergence behavior\nunable to parse output\n {}'.format(line)
+        else:
+            assert False, \
+                'Unexpected poor convergence behavior\nunable to parse output\n {}'.format(line)
+    else:
+        maxstep = max([x.step for x in err])
+        maxiter = max([x.iter for x in err if x.step == maxstep])
+        lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
 
-    maxstep = max([x.step for x in err])
-    maxiter = max([x.iter for x in err if x.step == maxstep])
-    lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
-
-    assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)
+        assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)
 
 def errors(out):
     rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
@@ -80,6 +88,6 @@ def errors(out):
             try:
                 errors.append(ErrorTuple(*[c(x) for c, x in zip(cast, m.groups())]))
             except ValueError:
-                assert False, 'Poor convergence behavior\nunable to parse output\n {}'.format(line)
+                raise ValueError
 
     return errors
