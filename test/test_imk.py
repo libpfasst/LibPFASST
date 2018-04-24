@@ -2,6 +2,7 @@ import glob
 import pytest
 from os import remove, mkdir
 from os.path import abspath
+from errno import EEXIST
 import numpy as np
 from pf.pfasst import PFASST, Params
 
@@ -14,11 +15,10 @@ output_dir = base_dir+'/output'
 try:
     mkdir(base_dir)
 except OSError as exc:
-    # if 'exists' in exc.message:
-    #     pass
-    # else:
-    #     raise OSError, exc.message
-    pass
+    if exc.errno == EEXIST:
+        pass
+    else:
+        raise OSError, exc.message
 
 params = Params(nodes=[3], nterms=[2], \
                 nsteps=128, tfinal=1.0, \
