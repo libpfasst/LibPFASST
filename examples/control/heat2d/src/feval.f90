@@ -210,7 +210,6 @@ contains
 
     nx = shape(1)
     ny = shape(2)
-    print *, "setup", nx, ny
     
  ! create in-place, complex fft plans
     wk = fftw_alloc_complex(int(nx*ny, c_size_t))
@@ -280,11 +279,9 @@ contains
     
     nnodes = size(nodes)
     
-    print *, "intitialize_oc", nnodes, shape
-
     do m = 1, nnodes
        t = t0 + dt*nodes(m)
-       print *, t
+!        print *, t
        sweeper%u(m,:,:) = 0.0_pfdp
 !        call exact_u(sweeper%u(m,:,:), shape, t)
        call y_desired(sweeper%ydesired(m,:,:), shape, t)
@@ -331,38 +328,159 @@ contains
     end do
   end subroutine dump_ydesired
   
-  subroutine dump_exact_adjoint(s, pf, t0, dt, fbase)
+
+  
+    subroutine dump_exact_adjoint(s, pf, t0, dt, fbase, L2error, LinfError, L2exact, LinfExact)
     class(pf_sweeper_t), intent(inout) :: s
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp), intent(in)    ::  t0, dt
     character(len = *), intent(in   ) :: fbase
+    real(pfdp),           intent(  out) :: L2error, LinfError, L2exact, LinfExact
 
-    real(pfdp), pointer :: pexact(:,:)
+    real(pfdp), pointer :: pexact(:,:), pdiff(:,:), ex(:), diff(:), p(:,:), nodes(:)
     
-    integer :: nnodes, i, nx, ny
+    
+    integer :: nnodes, m, i, j, nx, ny
     character(len=256)     :: fname
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
     
     nx=pf%levels(pf%nlevels)%shape(1)
     ny=pf%levels(pf%nlevels)%shape(2)
+    nnodes = pf%levels(pf%nlevels)%nnodes
     
     allocate(pexact(nx,ny))   
-
-
-    nnodes = pf%levels(pf%nlevels)%nnodes
-    do i = 1, nnodes
-      call exact_p(pexact, shape(pexact), t0+dt*pf%levels(pf%nlevels)%nodes(i))
-      print *, "time = ", t0+dt*pf%levels(pf%nlevels)%nodes(i)
+    allocate(pdiff(nx,ny)) 
+    allocate(ex(nnodes))
+    allocate(diff(nnodes)) 
     
-      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, i
+    allocate(nodes(nnodes))    
+    nodes = pf%levels(pf%nlevels)%nodes
+
+    do m = 1, nnodes
+      pexact = 0.0_pfdp
+      call exact_p(pexact, shape(pexact), t0+dt*pf%levels(pf%nlevels)%nodes(m))
+      
+      p => get_array2d_oc(pf%levels(pf%nlevels)%Q(m), 2)
+      
+      pdiff(:,:) = pexact(:,:) - p(:,:)
+      
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), sweeper%ydesired(i,:,:))
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), pexact(:,:))
+      ! compute norm
+      
+      ex(m) = 0.0_pfdp
+      diff(m) = 0.0_pfdp
+      do j = 1, ny
+      do i = 1, nx
+         ex(m) = ex(m) + pexact(i,j)**2.0
+         diff(m) = diff(m) + pdiff(i,j)**2.0
+      end do
+      end do
+      ex(m) = ex(m)*Lx/dble(nx*ny)
+      diff(m) = diff(m)*Lx/dble(nx*ny)
+      
+      LinfExact =  max(maxval(abs(pexact(:,:))), LinfExact)
+      LinfError =  max(maxval(abs(pdiff(:,:))), LinfError)
     end do
+
+    L2error = 0.0
+    L2exact = 0.0
+    do m=1, nnodes-1
+       L2error = L2error + (diff(m)+diff(m+1))*(nodes(m+1)-nodes(m))*dt
+       L2exact = L2exact + (ex(m)+ex(m+1))*(nodes(m+1)-nodes(m))*dt
+    end do
+
+    L2error = 0.5*L2error
+    L2exact = 0.5*L2exact    
+    
+    deallocate(nodes)
+    deallocate(diff)
+    deallocate(ex)
+    deallocate(pdiff)
     deallocate(pexact)
   end subroutine dump_exact_adjoint
 
+  
+  
+  subroutine dump_exact_state(s, pf, t0, dt, fbase, L2error, LinfError, L2exact, LinfExact)
+    class(pf_sweeper_t), intent(inout) :: s
+    type(pf_pfasst_t), intent(inout) :: pf
+    real(pfdp), intent(in)    ::  t0, dt
+    character(len = *), intent(in   ) :: fbase
+    real(pfdp),           intent(  out) :: L2error, LinfError, L2exact, LinfExact
+
+    real(pfdp), pointer :: yexact(:,:), ydiff(:,:), ex(:), diff(:), y(:,:), nodes(:)
+    
+    
+    integer :: nnodes, m, i, j, nx, ny
+    character(len=256)     :: fname
+    class(ad_sweeper_t), pointer :: sweeper
+    sweeper => as_ad_sweeper(s)
+    
+    nx=pf%levels(pf%nlevels)%shape(1)
+    ny=pf%levels(pf%nlevels)%shape(2)
+    nnodes = pf%levels(pf%nlevels)%nnodes
+    
+    allocate(yexact(nx,ny))   
+    allocate(ydiff(nx,ny)) 
+    allocate(ex(nnodes))
+    allocate(diff(nnodes)) 
+
+    allocate(nodes(nnodes))    
+    nodes = pf%levels(pf%nlevels)%nodes
+
+
+    do m = 1, nnodes
+      yexact = 0.0_pfdp
+      call exact_y(yexact, shape(yexact), t0+dt*pf%levels(pf%nlevels)%nodes(m))
+      
+      y => get_array2d_oc(pf%levels(pf%nlevels)%Q(m), 1)
+      
+      ydiff(:,:) = yexact(:,:) - y(:,:)
+      
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, m
+
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), yexact(:,:))
+      ! compute norm
+      
+      ex(m) = 0.0_pfdp
+      diff(m) = 0.0_pfdp
+      do j = 1, ny
+      do i = 1, nx
+         ex(m) = ex(m) + yexact(i,j)**2.0
+         diff(m) = diff(m) + ydiff(i,j)**2.0
+      end do
+      end do
+      ex(m) = ex(m)*Lx/dble(nx*ny)
+      diff(m) = diff(m)*Lx/dble(nx*ny)
+      
+      LinfExact =  max(maxval(abs(yexact(:,:))), LinfExact)
+      LinfError =  max(maxval(abs(ydiff(:,:))), LinfError)
+    end do
+
+    L2error = 0.0
+    L2exact = 0.0
+    do m=1, nnodes-1
+       L2error = L2error + (diff(m)+diff(m+1))*(nodes(m+1)-nodes(m))*dt
+       L2exact = L2exact + (ex(m)+ex(m+1))*(nodes(m+1)-nodes(m))*dt
+    end do
+
+    L2error = 0.5*L2error
+    L2exact = 0.5*L2exact    
+    
+    deallocate(nodes)
+    deallocate(diff)
+    deallocate(ex)
+    deallocate(ydiff)
+    deallocate(yexact)
+  end subroutine dump_exact_state
+  
+  
+  
   subroutine dump_exact_control(s, pf, t0, dt, nodes, L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
     type(pf_pfasst_t),    intent(inout) :: pf
     class(pf_sweeper_t), intent(inout) :: s
@@ -377,7 +495,6 @@ contains
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
     
-    nvars = product(pf%levels(pf%nlevels)%shape)
     nx=pf%levels(pf%nlevels)%shape(1)
     ny=pf%levels(pf%nlevels)%shape(2)
 
@@ -751,6 +868,29 @@ contains
     end do
 
     call fftw_execute_dft(adF%ifft, wkF, wkF)
+!     wkG = qG
+!     call fftw_execute_dft(adG%ffft, wkG, wkG)
+!     wkG = wkG / (nxG*nyG)
+! 
+!     wkF = 0
+!     do j = 1, nyG/2
+!        do i = 1, nxG/2
+!           wkF(i,j)       = wkG(i,j)
+!        end do
+!        do i = 0, nxG/2-2
+!           wkF(nxF-i,j) = wkG(nxG-i,j)
+!        end do
+!     end do
+!     do j = 0, nyG/2-2
+!        do i = 1, nxG/2
+!           wkF(i,nyF-j)       = wkG(i,nyG-j)
+!        end do
+!        do i = 0, nxG/2-2
+!           wkF(nxF-i,nyF-j) = wkG(nxG-i,nyG-j)
+!        end do
+!     end do
+! 
+!     call fftw_execute_dft(adF%ifft, wkF, wkF)
        
     qF = real(wkF)    
   end subroutine interp2

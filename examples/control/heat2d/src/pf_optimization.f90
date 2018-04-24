@@ -90,6 +90,7 @@ contains
                  (obj(m)+obj(m+1))*(pf%levels(pf%nlevels)%nodes(m+1)-pf%levels(pf%nlevels)%nodes(m))*dt
     end do
     objective = 0.5*objective !0.5 for trapezoidal rule
+!     print *, "0.5||y-y_d||^2", 0.5*objective
     call control_L2Q(pf%levels(pf%nlevels)%ulevel%sweeper, dt, pf%levels(pf%nlevels)%nodes, &
                                   pf%levels(pf%nlevels)%shape, L2NormUSq)
     objective = 0.5*objective + 0.5*alpha*L2NormUSq

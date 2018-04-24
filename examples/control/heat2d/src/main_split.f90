@@ -33,6 +33,10 @@ program main
                          num, denom, globNum, globDenom, globLinftyNormGrad, &
                          L2errorCtrl, LinfErrorCtrl, globL2errorCtrl, globLinfErrorCtrl, &
                          L2exactCtrl, LinfEXactCtrl, globL2exactCtrl, globLinfExactCtrl, &
+                         L2errorState, LinfErrorState, L2exactState, LinfExactState, &
+                         L2errorAdjoint, LinfErrorAdjoint, L2exactAdjoint, LinfExactAdjoint, &
+                         globL2errorState, globLinfErrorState, globL2exactState, globLinfExactState, &
+                         globL2errorAdjoint, globLinfErrorAdjoint, globL2exactAdjoint, globLinfExactAdjoint, &
                          abs_res_tol_save, rel_res_tol_save
   logical             :: stepTooSmall, predict
   integer             :: itersState, itersAdjoint, root, sumItersState, sumItersAdjoint
@@ -102,7 +106,7 @@ program main
 !   call pf_add_hook(pf,-1, PF_PRE_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,-1, PF_POST_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_error_hook)
-  call pf_add_hook(pf,-1,PF_POST_STEP,echo_error_hook)
+  call pf_add_hook(pf,pf%nlevels,PF_POST_STEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_residual_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
 
@@ -350,9 +354,9 @@ program main
      if(pf%rank == 0) print *, k, 'gradient times searchDir = ', globDirXGrad
 
 
-!       stepSize = 1.0_pfdp
+      stepSize = 1.0_pfdp
 !      stepSize = max(prevStepSize * prevGlobDirXGrad / globDirXGrad, 1.0)
-     stepSize = 10*prevStepSize
+!      stepSize = 10*prevStepSize
      
      ! update for next iteration, as these get re-assigned during linesearch
      prevGlobDirXGrad = globDirXGrad
@@ -415,13 +419,24 @@ program main
 
   call dump_ydesired(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'yd')
   call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'u')
-!   call dump_exact_adjoint(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'pex')
+  call dump_exact_adjoint(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'pex', &
+                         L2errorAdjoint, LinfErrorAdjoint, L2exactAdjoint, LinfExactAdjoint)
+  call dump_exact_state(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'yex', &
+                                  L2errorState, LinfErrorState, L2exactState, LinfExactState)
   call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
                                   L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
   call mpi_allreduce(L2errorCtrl, globL2errorCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
   call mpi_allreduce(LinfErrorCtrl, globLinfErrorCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
   call mpi_allreduce(L2exactCtrl, globL2exactCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
   call mpi_allreduce(LinfExactCtrl, globLinfExactCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
+  call mpi_allreduce(L2errorState, globL2errorState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfErrorState, globLinfErrorState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
+  call mpi_allreduce(L2exactState, globL2exactState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfExactState, globLinfExactState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
+  call mpi_allreduce(L2errorAdjoint, globL2errorAdjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfErrorAdjoint, globLinfErrorAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
+  call mpi_allreduce(L2exactAdjoint, globL2exactAdjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfExactAdjoint, globLinfExactAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
    
   print *, 'rank:', pf%rank, 'total iterations state, adjoint', itersState, itersAdjoint
 
@@ -432,12 +447,20 @@ program main
   
    if( pf%rank == 0 ) then
       print *, 'overall sum iterations state, adjoint', sumItersState, sumItersAdjoint
-      print *, 'absolute error in computed control: L2 = ', sqrt(globL2errorCtrl)
-      print *, '                                  Linf = ', globLinfErrorCtrl
-      print *, 'relative error in computed control: L2 = ', sqrt(globL2errorCtrl)/sqrt(globL2exactCtrl)
-      print *, '                                  Linf = ', globLinfErrorCtrl/globLinfExactCtrl   
-      print *, 'exact control:                      L2 = ', sqrt(globL2exactCtrl)
-      print *, '                                  Linf = ', globLinfExactCtrl
+      print *, 'absolute error in computed control:  L2 = ', sqrt(globL2errorCtrl)
+      print *, '                                   Linf = ', globLinfErrorCtrl
+      print *, 'relative error in computed control:  L2 = ', sqrt(globL2errorCtrl)/sqrt(globL2exactCtrl)
+      print *, '                                   Linf = ', globLinfErrorCtrl/globLinfExactCtrl   
+!       print *, 'exact control:                       L2 = ', sqrt(globL2exactCtrl)
+!       print *, '                                   Linf = ', globLinfExactCtrl
+      print *, 'absolute error in final state sol:   L2 = ', sqrt(globL2errorState)
+      print *, '                                   Linf = ', globLinfErrorState
+      print *, 'relative error in final state sol:   L2 = ', sqrt(globL2errorState)/sqrt(globL2exactState)
+      print *, '                                   Linf = ', globLinfErrorState/globLinfExactState   
+      print *, 'absolute error in final adjoint sol: L2 = ', sqrt(globL2errorAdjoint)
+      print *, '                                   Linf = ', globLinfErrorAdjoint
+      print *, 'relative error in final adjoint sol: L2 = ', sqrt(globL2errorAdjoint)/sqrt(globL2exactAdjoint)
+      print *, '                                   Linf = ', globLinfErrorAdjoint/globLinfExactAdjoint   
 
    end if
 

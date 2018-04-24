@@ -35,9 +35,9 @@ contains
     dy = Ly/dble(ny)
     
 !     factor = (ndim*pi*pi/4.+4./(ndim*pi*pi*alpha))*dexp(Tfin) + (1-ndim*pi*pi/4.-4./(4*alpha+ndim*pi*pi*alpha))*dexp(t)
-    factor = dexp(t)
+!     factor = dexp(t)
 !     factor = -dexp(t)*(alpha*(1+8*pi*pi)**2-1)
-!     factor = (-1./(8*pi*pi*alpha)-8*pi*pi)*dexp(Tfin) - (-1./((8*pi*pi+1)*alpha) - (8*pi*pi-1))*dexp(t)
+    factor = (-1./(8*pi*pi*alpha)-8*pi*pi)*dexp(Tfin) + (1./((8*pi*pi+1)*alpha) - (1-8*pi*pi))*dexp(t)
 
 !     print *, "ydesired, t = " , t, " factor = ", factor
     
@@ -65,8 +65,8 @@ contains
     dy = Ly/dble(ny)
     
 !     factor = 4.0/(ndim*pi*pi*alpha)*dexp(Tfin)-4/(4*alpha+ndim*pi*pi*alpha)*dexp(t)
-    factor = dexp(t)
-!    factor = -1./(8*pi*pi*alpha)*dexp(Tfin)+1./((8*pi*pi+1)*alpha)*dexp(t)
+!     factor = dexp(t)
+   factor = -1./(8*pi*pi*alpha)*dexp(Tfin)+1./((8*pi*pi+1)*alpha)*dexp(t)
 !     print *, "exact_y, t = " , t, " factor = ", factor
 
     do i=1, nx
@@ -94,6 +94,7 @@ contains
     dy = Ly/dble(ny)
     
     factor = dexp(Tfin)-dexp(t)
+!     print *, "exact_p, t = " , t, " factor = ", factor
 !     factor = dexp(t)*alpha*(1+8*pi*pi)
     
     do i=1, nx
@@ -120,18 +121,18 @@ contains
     dy = Ly/dble(ny)
     
 
-    factor = dexp(t)*(1+8*pi*pi)
-
-    do i=1, nx
-       do j=1, ny
-          xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
-          ycoor = (j-1)*dy
-          u(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
-!           print *, "exact_y", i, j, " values = ", y(i,j)
-       end do
-    end do
-!     call exact_p(u, shape, t)
-!     u = u / alpha
+!     factor = dexp(t)*(1+8*pi*pi)
+! 
+!     do i=1, nx
+!        do j=1, ny
+!           xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
+!           ycoor = (j-1)*dy
+!           u(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
+! !           print *, "exact_y", i, j, " values = ", y(i,j)
+!        end do
+!     end do
+    call exact_p(u, shape, t)
+    u = u / (-alpha)
 !     print *, "exact_u", t, maxval(u), minval(u(:,:))
     
   end subroutine exact_u

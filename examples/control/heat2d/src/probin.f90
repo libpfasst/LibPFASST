@@ -65,7 +65,7 @@ module probin
   namelist /params/ Finterp, ndim, nnodes, nvars,nprob, nsteps
   namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
   namelist /params/ pfasst_nml,fbase ,poutmod
-  namelist /params/  abs_res_tol, rel_res_tol 
+  namelist /params/  abs_res_tol, rel_res_tol, tol_grad, tol_obj
   namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx, Ly, alpha, max_opt_iter
   namelist /params/  do_imex, warmstart, do_mixed, logfile, nsweeps, nsweeps_pred
 
