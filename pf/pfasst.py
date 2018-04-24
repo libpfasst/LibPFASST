@@ -186,6 +186,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         sweeps = ' '.join(map(str, self.p.sweeps))
         sweeps_pred = ' '.join(map(str, self.p.sweeps_pred))
         exptol = ' '.join(self.p.exptol)
+        basedir = '"{}"'.format(self.p.base_dir)
 
         if self.p.solutions == True:
             solns = '.true.'
@@ -224,7 +225,6 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             inttype = 'nterms'
             val = nterms
 
-        basedir = '"{}"'.format(self.p.base_dir)
         self.pfstring = self.base_string.format(
             self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
             vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
@@ -479,7 +479,6 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         params = attr.asdict(self.p)
 
-        self.p.qtype = 'gauss'
         self.p.tasks = 1
         self.p.levels = 1
         self.p.nsteps = 2**15
@@ -489,9 +488,11 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         if self.p.inttype == 'mag':
             self.p.nodes = 3
             self.p.magnus = [3]
+            self.p.qtype = 'gauss'
         else:
             self.p.nodes = 15
             self.p.nterms = [20]
+            self.p.qtype = 'lob'
 
         traj, _ = self.run(ref=True)
         last_row = len(traj) - 1
@@ -506,6 +507,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.solutions = params['solutions']
         self.p.timings = params['timings']
         self.p.qtype = params['qtype']
+        self.p.inttype = params['inttype']
 
         return final_solution, traj
 
