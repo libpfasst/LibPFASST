@@ -246,8 +246,9 @@ contains
         ! Do implicit solve  
          if (this%implicit) then
             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,2), 2, 1)
+!             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
          else
-            call lev%Q(m+1)%copy(this%rhs)            
+            call lev%Q(m+1)%copy(this%rhs,1)            
          end if
           !  Compute explicit piece on new value
          if (this%explicit) &
@@ -280,7 +281,7 @@ contains
          if (this%implicit) then
            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
          else
-            call lev%Q(m)%copy(this%rhs)
+            call lev%Q(m)%copy(this%rhs,2)
          end if
          if (this%explicit) &
            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step) 
