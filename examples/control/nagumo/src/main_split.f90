@@ -28,8 +28,8 @@ program main
 
   real(pfdp), pointer :: gradient(:,:), prevGrad(:,:), searchDir(:,:), prevSearchDir(:,:), savedAdjoint(:,:), solAt25(:)
   real(pfdp)          :: LinftyNormGrad, LinftyNormU, objective, objectiveNew, L2NormUSq, L2NormGradSq, &
-                         alpha, dx, stepSize, prevStepSize, directionTimesGradient, beta, &
-                         globObj, globObjNew, globDirXGrad, prevGlobDirXGrad, globL2NormGradSq, tolGrad, tolObj, &
+                         dx, stepSize, prevStepSize, directionTimesGradient, beta, &
+                         globObj, globObjNew, globDirXGrad, prevGlobDirXGrad, globL2NormGradSq, &
                          num, denom, globNum, globDenom, globLinftyNormGrad, &
                          L2errorCtrl, LinfErrorCtrl, globL2errorCtrl, globLinfErrorCtrl, &
                          L2exactCtrl, LinfEXactCtrl, globL2exactCtrl, globLinfExactCtrl, &
@@ -186,7 +186,7 @@ program main
      end do
   end if
 
-  alpha = 1e-6 !0.0_pfdp
+  !alpha = 1e-6 !0.0_pfdp set in probin
 
   call ndarray_oc_build(q1, pf%levels(pf%nlevels)%shape)
   do l = 1, pf%nlevels
@@ -286,8 +286,8 @@ program main
 !     end do
 !   end do
 !   
-  tolGrad = 1.0e-6
-  tolObj  = 1.0e-6
+!   tolGrad = 1.0e-6
+!   tolObj  = 1.0e-6
 !   
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , & 
@@ -314,7 +314,7 @@ program main
   if (pf%rank .eq. 0) &
     print *, 'start optimization on ', date, ', ',  time
 
-  do k = 1, 200
+  do k = 1, max_opt_iter
 
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
      
@@ -343,12 +343,12 @@ program main
      call mpi_allreduce(LinftyNormGrad, globLinftyNormGrad, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'gradient (L2, Linf) = ', sqrt(globL2NormGradSq), globLinftyNormGrad
      if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
-     if (sqrt(globL2NormGradSq) < tolGrad) then
+     if (sqrt(globL2NormGradSq) < tol_grad) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (gradient norm small enough), stopping'
        !call write_control_work1(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
        exit
      end if
-     if (globObj < tolObj) then
+     if (globObj < tol_obj) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (objective function small enough), stopping'
        !call write_control_work1(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
        exit

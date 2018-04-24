@@ -40,6 +40,12 @@ module probin
   integer, save :: nsweeps(maxlevs) !  Sweeps at each levels
   integer, save :: nsweeps_pred(maxlevs)   !  Sweeps during predictor
 
+  ! optimization problem parameters
+  double precision, save :: alpha        ! regularization parameter
+  double precision, save :: tol_grad     ! gradient tolerance, stop optimization if gradient norm below
+  double precision, save :: tol_obj      ! objective function tolerance, stop optimization if objective function value below
+  integer,          save :: max_opt_iter ! maximum number of optimization iterations
+  
   logical, save :: solve_y
   
   character(len=32), save :: pfasst_nml
@@ -57,8 +63,8 @@ module probin
   namelist /params/ Finterp, ndim, nnodes, nvars,nprob, nsteps
   namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
   namelist /params/ pfasst_nml,fbase ,poutmod
-  namelist /params/  abs_res_tol, rel_res_tol 
-  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx
+  namelist /params/  abs_res_tol, rel_res_tol, tol_grad, tol_obj
+  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx, max_opt_iter, alpha
   namelist /params/  do_imex, warmstart, do_mixed, logfile, nsweeps, nsweeps_pred
 
 contains
@@ -103,6 +109,10 @@ contains
     do_imex = 1
     warmstart = 0
     do_mixed = 0   
+ 
+    max_opt_iter = 200
+    tol_grad = 1e-6
+    tol_obj  = 1e-6
  
     poutmod = 1
 
