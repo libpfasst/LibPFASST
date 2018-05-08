@@ -88,7 +88,9 @@ contains
 
     which = 1
     if (present(flags)) which = flags
-    step = 1 ! dummy
+    
+    step = pf%state%step+1
+    
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
@@ -179,6 +181,7 @@ contains
     which = 1
     if (present(flags)) which = flags
 
+    
     f_nnodes = f_lev_ptr%nnodes
     !>  create works space
     if (IS_INTEGRAL) then   ! Restriction of integrals 
@@ -199,15 +202,17 @@ contains
        ! when restricting '0 to node' integral terms, skip the first entry since it is zero
        if ((which .eq. 0) .or. (which .eq. 1)) &
           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
-       if ((which .eq. 0) .or. (which .eq. 2)) then
+       if ((which .eq. 0) .or. (which .eq. 2)) &
           call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
-       end if
     else
        !  spatial restriction
        do m = 1, f_nnodes
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
        end do! temporal restriction
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., which)
+       if ((which .eq. 0) .or. (which .eq. 1)) &
+          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 1)
+       if ((which .eq. 0) .or. (which .eq. 2)) &
+          call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 2)
     end if
 
     !>  destroy workspace
@@ -234,7 +239,7 @@ contains
 
     lzero = .true.; if (present(zero)) lzero = zero    
     which = 1;      if(present(flags)) which = flags
-    
+        
 !     print *, "apply_mat with which == ", which, " and zero ", lzero
 
     n = size(mat, dim=1)

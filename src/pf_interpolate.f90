@@ -110,7 +110,7 @@ contains
 
     !>  reset qend so that it is up to date
     if ((which .eq. 0) .or. (which .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), 1)
-    if ((which .eq. 0) .or. (which .eq. 2))  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), 2)
+    if (which .eq. 2)  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), 2)
 
     !> destroy local data structures
     call c_lev_ptr%ulevel%factory%destroy_array(c_delta,  c_lev_ptr%nnodes, &
@@ -139,8 +139,8 @@ contains
     call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
 
-    call c_delta%setval(0.0_pfdp, 1)
-    call f_delta%setval(0.0_pfdp, 1)
+    call c_delta%setval(0.0_pfdp, 0)
+    call f_delta%setval(0.0_pfdp, 0)
 
     !>  restrict fine initial data to coarse
     call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_lev_ptr%q0, c_delta, pf%state%t0, 1)
@@ -178,8 +178,8 @@ contains
     call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
     call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
 
-    call c_delta%setval(0.0_pfdp, 2)
-    call f_delta%setval(0.0_pfdp, 2)
+    call c_delta%setval(0.0_pfdp, 0)
+    call f_delta%setval(0.0_pfdp, 0)
 
     !>  restrict fine initial data to coarse
     call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_lev_ptr%qend, c_delta, pf%state%t0, 2)
