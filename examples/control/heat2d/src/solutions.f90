@@ -34,19 +34,17 @@ contains
     dx = Lx/dble(nx)
     dy = Ly/dble(ny)
     
-!     factor = (ndim*pi*pi/4.+4./(ndim*pi*pi*alpha))*dexp(Tfin) + (1-ndim*pi*pi/4.-4./(4*alpha+ndim*pi*pi*alpha))*dexp(t)
-!     factor = dexp(t)
-!     factor = -dexp(t)*(alpha*(1+8*pi*pi)**2-1)
-    factor = (-1./(8*pi*pi*alpha)-8*pi*pi)*dexp(Tfin) + (1./((8*pi*pi+1)*alpha) - (1-8*pi*pi))*dexp(t)
-
-!     print *, "ydesired, t = " , t, " factor = ", factor
+!     factor = (-1./(8*pi*pi*alpha)-8*pi*pi)*dexp(Tfin) + (1./((8*pi*pi+1)*alpha) - (1-8*pi*pi))*dexp(t)
+!     factor = -t*exp(Tfin)
+    factor = -1._pfdp-1._pfdp/(64._pfdp*alpha*pi**4) + (-8._pfdp*pi*pi-1._pfdp/(8._pfdp*pi*pi*alpha))*Tfin &
+            + (8._pfdp*pi*pi+1._pfdp/(8._pfdp*pi*pi*alpha))*t
     
     do i=1, nx
        do j=1, ny
-          xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
+          xcoor = (i-1)*dx  ! domain is [0,1]^ndim
           ycoor = (j-1)*dy
-          yd(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
-!           print *, "ydesired ", i, j, " value = ", yd(i,j), xcoor, ycoor
+          yd(i,j) = factor*sin(2._pfdp*pi*xcoor)*sin(2._pfdp*pi*ycoor)
+!           yd(i,j) = factor
        end do
     end do
   end subroutine y_desired
@@ -64,17 +62,16 @@ contains
     dx = Lx/dble(nx)
     dy = Ly/dble(ny)
     
-!     factor = 4.0/(ndim*pi*pi*alpha)*dexp(Tfin)-4/(4*alpha+ndim*pi*pi*alpha)*dexp(t)
-!     factor = dexp(t)
-   factor = -1./(8*pi*pi*alpha)*dexp(Tfin)+1./((8*pi*pi+1)*alpha)*dexp(t)
-!     print *, "exact_y, t = " , t, " factor = ", factor
-
+!    factor = -1./(8*pi*pi*alpha)*dexp(Tfin)+1./((8*pi*pi+1)*alpha)*dexp(t)
+!     factor = -t*exp(Tfin)+ exp(t)
+    factor = -1._pfdp/(64._pfdp*pi**4*alpha) - 1._pfdp/(8._pfdp*pi*pi*alpha)*Tfin + 1._pfdp/(8._pfdp*pi*pi*alpha)*t
+    
     do i=1, nx
        do j=1, ny
           xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
           ycoor = (j-1)*dy
-          y(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
-!           print *, "exact_y", i, j, " values = ", y(i,j)
+          y(i,j) = factor*sin(2._pfdp*pi*xcoor)*sin(2._pfdp*pi*ycoor)
+!           y(i,j) = factor
        end do
     end do
 !     print *, "exact_y ", minval(y), maxval(y)
@@ -93,16 +90,16 @@ contains
     dx = Lx/dble(nx)
     dy = Ly/dble(ny)
     
-    factor = dexp(Tfin)-dexp(t)
-!     print *, "exact_p, t = " , t, " factor = ", factor
-!     factor = dexp(t)*alpha*(1+8*pi*pi)
+!     factor = dexp(Tfin)-dexp(t)
+!     factor = exp(Tfin)-exp(t)
+    factor = Tfin-t
     
     do i=1, nx
        do j=1, ny
-          xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
+          xcoor = (i-1)*dx 
           ycoor = (j-1)*dy
-          p(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
-!           print *, "exact_p, t = " , t, " factor = ", factor, " val", p(i,j)
+          p(i,j) = factor*sin(2._pfdp*pi*xcoor)*sin(2._pfdp*pi*ycoor)
+!           p(i,j) = factor
        end do
     end do
   end subroutine exact_p
@@ -121,20 +118,80 @@ contains
     dy = Ly/dble(ny)
     
 
-!     factor = dexp(t)*(1+8*pi*pi)
-! 
-!     do i=1, nx
-!        do j=1, ny
-!           xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
-!           ycoor = (j-1)*dy
-!           u(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
-! !           print *, "exact_y", i, j, " values = ", y(i,j)
-!        end do
-!     end do
     call exact_p(u, shape, t)
     u = u / (-alpha)
-!     print *, "exact_u", t, maxval(u), minval(u(:,:))
+!     print *, "u", t, maxval(u)
     
   end subroutine exact_u
+  
+  subroutine p_tilde(p, shape, t, tend)    
+    integer,    intent(in)    :: shape(2)
+    real(pfdp), intent(inout) :: p(shape(1),shape(2))
+    real(pfdp), intent(in)    :: t, tend
+    
+    integer    :: nx, ny, i, j
+    real(pfdp) :: dx, dy, xcoor, ycoor, factor
+    
+    nx = shape(1)
+    ny = shape(2)    
+    dx = Lx/dble(nx)
+    dy = Ly/dble(ny)
+    
+!     factor = dexp(Tfin)-dexp(t)+(exp(tend)-exp(Tfin))*exp(-8*pi*pi*(tend-t))
+!     factor = -dexp(t)+dexp(tend)
+    factor = Tfin-t + (tend-Tfin)*exp(-8.0_pfdp*pi*pi*(tend-t))
+    
+    do i=1, nx
+       do j=1, ny
+          xcoor = (i-1)*dx  ! domain is [0,1]^ndim
+          ycoor = (j-1)*dy
+          p(i,j) = factor*sin(2._pfdp*pi*xcoor)*sin(2._pfdp*pi*ycoor)
+!           p(i,j) = factor
+       end do
+    end do
+  end subroutine p_tilde
+  
+  subroutine lap_p_tilde(p, shape, t, tend)    
+    integer,    intent(in)    :: shape(2)
+    real(pfdp), intent(inout) :: p(shape(1),shape(2))
+    real(pfdp), intent(in)    :: t, tend
+    
+    integer    :: nx, ny, i, j
+    real(pfdp) :: dx, dy, xcoor, ycoor, factor
+    
+    nx = shape(1)
+    ny = shape(2)    
+    dx = Lx/dble(nx)
+    dy = Ly/dble(ny)
+    
+    factor = dexp(Tfin)-dexp(t)+(exp(tend)-exp(Tfin))*exp(-8*pi*pi*(tend-t))
+    factor = factor * (-8*pi*pi)
+!     print *, "exact_p, t = " , t, " factor = ", factor
+!     factor = dexp(t)*alpha*(1+8*pi*pi)
+    
+    do i=1, nx
+       do j=1, ny
+          xcoor = (i-1)*dx  ! domain is [-1,1]^ndim
+          ycoor = (j-1)*dy
+          p(i,j) = factor*dsin(2.*pi*xcoor)*dsin(2.*pi*ycoor)
+!           print *, "exact_p, t = " , t, " factor = ", factor, " val", p(i,j)
+       end do
+    end do
+  end subroutine lap_p_tilde
+  
+  subroutine ymyd_exact(y, shape, t)    
+    integer,    intent(in)    :: shape(2)
+    real(pfdp), intent(inout) :: y(shape(1),shape(2))
+    real(pfdp), intent(in)    :: t
+    
+    integer    :: nx, ny, i, j
+    real(pfdp) :: dx, dy, xcoor, ycoor, factor
+    real(pfdp) :: yd(shape(1),shape(2))
+    
+    call exact_y(y, shape, t)
+    call y_desired(yd, shape, t)
+    
+    y = y - yd;
+  end subroutine ymyd_exact
 
 end module solutions

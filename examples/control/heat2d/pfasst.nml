@@ -10,8 +10,8 @@
 
 
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1e-10
-     rel_res_tol = 1e-10
+     abs_res_tol = 1e-12
+     rel_res_tol = 1e-12
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
      Pipeline_G =  .false.

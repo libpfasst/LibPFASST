@@ -63,6 +63,7 @@ contains
     complex(pfdp), pointer :: wk(:,:)
     integer :: l, loopstart, loopend,nx,ny
 
+!     print *, "f_eval, piece = ", piece, "flags = ", flags, "idx = ", idx, "step = ", step
       
     select case (piece)
     case (1)  ! Explicit piece
@@ -157,6 +158,8 @@ contains
     complex(pfdp),   pointer :: wk(:,:)
     integer :: l, loopstart, loopend,nx,ny
     
+!     print *, "f_comp, piece = ", piece, "flags = ", flags, "dtq = ", dtq
+    
     if (piece == 2) then
       select case (flags)
       case (0)
@@ -242,6 +245,8 @@ contains
        end if
     end do
     end do
+
+!     print *, this%lap
     
     ! allocate control and desired state
     allocate(this%u(nnodes,nx,ny))
@@ -265,7 +270,40 @@ contains
 
   end subroutine destroy
 
+  
+  subroutine compute_exp_lap_dt_times_vec(s, dt, sol)
+    class(pf_sweeper_t), intent(inout) :: s
+    real(pfdp),          intent(in)    :: dt
+    class(pf_encap_t),   intent(inout) :: sol
 
+    integer :: nx, ny, i, j    
+    real(pfdp),          pointer :: vec(:,:), expdtL(:,:)
+    complex(pfdp),       pointer :: wk(:,:)
+    class(ad_sweeper_t), pointer :: sweeper
+    sweeper => as_ad_sweeper(s)    
+    vec     => get_array2d_oc(sol, 2) ! for adjoint 
+    nx = size(vec, 1)
+    ny = size(vec, 2)
+    
+    allocate(expdtL(nx,ny))
+    do i=1, nx
+       do j=1, ny
+          expdtL(i,j) = exp(dt*(sweeper%lap(i,j)))
+       end do
+    end do
+    
+    wk => sweeper%wk
+    wk = vec
+    call fftw_execute_dft(sweeper%ffft, wk, wk)
+    wk = expdtL * wk / dble(nx*ny) 
+    call fftw_execute_dft(sweeper%ifft, wk, wk)
+    vec = real(wk)
+    
+    deallocate(expdtL)
+  end subroutine compute_exp_lap_dt_times_vec
+
+  
+  
   subroutine initialize_oc(s, t0, dt, nodes, shape)
     class(pf_sweeper_t), intent(inout) :: s
     real(pfdp), intent(in)    :: nodes(:), t0, dt
@@ -309,13 +347,15 @@ contains
     end do
   end subroutine dump_control
   
-  subroutine dump_ydesired(s, pf, fbase)
+  subroutine dump_ydesired(s, pf, t0, dt, fbase, fbase2, fbase3, fbase4, fbase5)
     class(pf_sweeper_t), intent(inout) :: s
     type(pf_pfasst_t), intent(inout) :: pf
-    character(len = *), intent(in   ) :: fbase
+    real(pfdp),  intent(in) :: t0, dt
+    character(len = *), intent(in   ) :: fbase, fbase2, fbase3, fbase4, fbase5
 
     integer :: nnodes, i
     character(len=256)     :: fname
+    real(pfdp), pointer :: y(:,:), ydiff(:,:), ymyd(:,:)
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
 
@@ -325,19 +365,51 @@ contains
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), sweeper%ydesired(i,:,:))
+           
+      y => get_array2d_oc(pf%levels(pf%nlevels)%Q(i), 1)
+      allocate(ydiff(size(y,1),size(y,2)))
+      allocate(ymyd(size(y,1),size(y,2)))
+      ymyd(:,:) = y(:,:)-sweeper%ydesired(i,:,:)
+      
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase2), pf%rank, i
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), ymyd(:,:))
+      
+      call ymyd_exact(ydiff, shape(ydiff), t0+dt*pf%levels(pf%nlevels)%nodes(i))
+      ydiff = ydiff - ymyd
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase3), pf%rank, i
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), ydiff(:,:))
+      
+      y => get_array2d_oc(pf%levels(pf%nlevels)%F(i,1), 2)
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase4), pf%rank, i
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), y(:,:))
+           
+!       call lap_p_tilde(ydiff, shape(ydiff), t0+dt*pf%levels(pf%nlevels)%nodes(i), t0+dt)
+      call ymyd_exact(ydiff, shape(ydiff), t0+dt*pf%levels(pf%nlevels)%nodes(i))
+      ydiff = ydiff - y
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase5), pf%rank, i
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), ydiff(:,:))
+      
+      deallocate(ymyd)
+      deallocate(ydiff)
+      
+      
     end do
   end subroutine dump_ydesired
   
 
   
-    subroutine dump_exact_adjoint(s, pf, t0, dt, fbase, L2error, LinfError, L2exact, LinfExact)
+    subroutine dump_exact_adjoint(s, pf, t0, dt, fbase, fbase2, fbase3, L2error, LinfError, L2exact, LinfExact, L2norm, LinfNorm)
     class(pf_sweeper_t), intent(inout) :: s
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp), intent(in)    ::  t0, dt
-    character(len = *), intent(in   ) :: fbase
-    real(pfdp),           intent(  out) :: L2error, LinfError, L2exact, LinfExact
+    character(len = *), intent(in   ) :: fbase, fbase2, fbase3
+    real(pfdp),           intent(  out) :: L2error, LinfError, L2exact, LinfExact, L2norm, LinfNorm
 
-    real(pfdp), pointer :: pexact(:,:), pdiff(:,:), ex(:), diff(:), p(:,:), nodes(:)
+    real(pfdp), pointer :: pexact(:,:), pdiff(:,:), ex(:), diff(:), p(:,:), nodes(:), nrm(:)
     
     
     integer :: nnodes, m, i, j, nx, ny
@@ -353,6 +425,7 @@ contains
     allocate(pdiff(nx,ny)) 
     allocate(ex(nnodes))
     allocate(diff(nnodes)) 
+    allocate(nrm(nnodes)) 
     
     allocate(nodes(nnodes))    
     nodes = pf%levels(pf%nlevels)%nodes
@@ -360,6 +433,9 @@ contains
     do m = 1, nnodes
       pexact = 0.0_pfdp
       call exact_p(pexact, shape(pexact), t0+dt*pf%levels(pf%nlevels)%nodes(m))
+!       call p_tilde(pexact, shape(pexact), t0+dt*pf%levels(pf%nlevels)%nodes(m), t0+dt)
+!       print *, pf%rank, m, t0+dt*pf%levels(pf%nlevels)%nodes(m), t0+dt
+      
       
       p => get_array2d_oc(pf%levels(pf%nlevels)%Q(m), 2)
       
@@ -369,34 +445,50 @@ contains
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), pexact(:,:))
+                                 
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase2), pf%rank, m
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), p(:,:))
+           
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase3), pf%rank, m
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), pdiff(:,:))
       ! compute norm
       
       ex(m) = 0.0_pfdp
       diff(m) = 0.0_pfdp
+      nrm(m) = 0.0_pfdp
       do j = 1, ny
       do i = 1, nx
          ex(m) = ex(m) + pexact(i,j)**2.0
          diff(m) = diff(m) + pdiff(i,j)**2.0
+         nrm(m) = p(i,j)**2
       end do
       end do
-      ex(m) = ex(m)*Lx/dble(nx*ny)
-      diff(m) = diff(m)*Lx/dble(nx*ny)
+      ex(m) = ex(m)*Lx*Ly/dble(nx*ny)
+      diff(m) = diff(m)*Lx*Ly/dble(nx*ny)
+      nrm(m) = nrm(m)*Lx*Ly/dble(nx*ny)
       
       LinfExact =  max(maxval(abs(pexact(:,:))), LinfExact)
       LinfError =  max(maxval(abs(pdiff(:,:))), LinfError)
+      LinfNorm =  max(maxval(abs(p(:,:))), LinfNorm)
     end do
 
     L2error = 0.0
     L2exact = 0.0
+    L2norm = 0.0
     do m=1, nnodes-1
        L2error = L2error + (diff(m)+diff(m+1))*(nodes(m+1)-nodes(m))*dt
        L2exact = L2exact + (ex(m)+ex(m+1))*(nodes(m+1)-nodes(m))*dt
+       L2norm = L2norm + (nrm(m)+nrm(m+1))*(nodes(m+1)-nodes(m))*dt
     end do
 
     L2error = 0.5*L2error
     L2exact = 0.5*L2exact    
+    L2norm  = 0.5*L2norm
     
     deallocate(nodes)
+    deallocate(nrm)
     deallocate(diff)
     deallocate(ex)
     deallocate(pdiff)
@@ -405,11 +497,11 @@ contains
 
   
   
-  subroutine dump_exact_state(s, pf, t0, dt, fbase, L2error, LinfError, L2exact, LinfExact)
+  subroutine dump_exact_state(s, pf, t0, dt, fbase, fbase2, fbase3, L2error, LinfError, L2exact, LinfExact)
     class(pf_sweeper_t), intent(inout) :: s
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp), intent(in)    ::  t0, dt
-    character(len = *), intent(in   ) :: fbase
+    character(len = *), intent(in   ) :: fbase, fbase2, fbase3
     real(pfdp),           intent(  out) :: L2error, LinfError, L2exact, LinfExact
 
     real(pfdp), pointer :: yexact(:,:), ydiff(:,:), ex(:), diff(:), y(:,:), nodes(:)
@@ -445,6 +537,16 @@ contains
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), yexact(:,:))
+           
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase2), pf%rank, m
+                 
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), y(:,:))
+           
+      write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase3), pf%rank, m
+      
+      call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
+           ndim, pf%levels(pf%nlevels)%shape, product(pf%levels(pf%nlevels)%shape), ydiff(:,:))
       ! compute norm
       
       ex(m) = 0.0_pfdp
@@ -455,8 +557,8 @@ contains
          diff(m) = diff(m) + ydiff(i,j)**2.0
       end do
       end do
-      ex(m) = ex(m)*Lx/dble(nx*ny)
-      diff(m) = diff(m)*Lx/dble(nx*ny)
+      ex(m) = ex(m)*Lx*Ly/dble(nx*ny)
+      diff(m) = diff(m)*Lx*Ly/dble(nx*ny)
       
       LinfExact =  max(maxval(abs(yexact(:,:))), LinfExact)
       LinfError =  max(maxval(abs(ydiff(:,:))), LinfError)
@@ -529,8 +631,8 @@ contains
          diff(m) = diff(m) + udiff(i,j)**2.0
       end do
       end do
-      ex(m) = ex(m)*Lx/dble(nx*ny)
-      diff(m) = diff(m)*Lx/dble(nx*ny)
+      ex(m) = ex(m)*Lx*Ly/dble(nx*ny)
+      diff(m) = diff(m)*Lx*Ly/dble(nx*ny)
       
       LinfExactCtrl =  max(maxval(abs(uexact(:,:))), LinfExactCtrl)
       LinfErrorCtrl =  max(maxval(abs(udiff(:,:))), LinfErrorCtrl)
@@ -581,7 +683,7 @@ contains
              obj(m) = obj(m) + grad(m,i,j)**2.0
           end do
        end do
-       obj(m) = obj(m)*Lx**2/dble(nx*ny)
+       obj(m) = obj(m)*Lx*Ly/dble(nx*ny)
      end do
 
     L2NormGradSq = 0.0
@@ -610,33 +712,6 @@ contains
     end do
  end subroutine update_control
 
-
- 
-!   subroutine write_control(s, k, fbase)
-!     class(pf_sweeper_t), intent(inout) :: s
-!     integer,            intent(in) :: k
-!     character(len = *), intent(in) :: fbase
-! 
-!     character(len = 64)  :: fname
-!     integer              :: nx,ny, i,j
-!     real(pfdp)           :: dx,dy
-!     class(ad_sweeper_t), pointer :: sweeper
-!     sweeper => as_ad_sweeper(s)
-!     
-!     nx = size(sweeper%u, 2)
-!     ny = size(sweeper%u, 3)
-!     dx = 1.0_pfdp / nx
-!     dy = 1.0_pfdp / ny
-!     write(fname, "(A,I0.6,A)") trim(fbase), k, ".txt"
-!     fname = trim(fname)
-!     open(unit=106, file = fname, status = 'unknown', action = 'write') 
-!     do j=1,ny
-!        do i=1,nx
-!           write(106,*) (i-1)*dx,  sweeper%u(:, i,j)
-!        end do
-!     end do
-!     close(106)
-!   end subroutine write_control
 
 
 
@@ -667,7 +742,7 @@ contains
              obj(m) = obj(m) + sweeper%u(m,i,j)**2.0
           end do
        end do
-       obj(m) = obj(m)*Lx**2/dble(nx*ny)
+       obj(m) = obj(m)*Lx*Ly/dble(nx*ny)
     end do
 
     L2normSq = 0.0
@@ -731,7 +806,7 @@ contains
         obj(m) = obj(m) + f(m,i,j)*g(m,i,j) 
       end do
       end do
-      obj(m) = obj(m)*Lx**2/dble(nx*ny)
+      obj(m) = obj(m)*Lx*Ly/dble(nx*ny)
     end do
     do m=1, nnodes-1
       r = r + (obj(m)+obj(m+1))*(nodes(m+1)-nodes(m))*dt
@@ -910,6 +985,7 @@ contains
              
     which = 0
     if(present(flags)) which = flags
+    if(.not.present(flags)) print *, "interpolate without flags"
 
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
@@ -940,7 +1016,8 @@ contains
     integer :: NxF, NxG,NyF, NyG, xrat, yrat,which
     which = 1
     if(present(flags)) which = flags
-        
+    if(.not.present(flags)) print *, "restrict without flags"
+    
     if ((which .eq. 0) .or. (which .eq. 1)) then
       f => get_array2d_oc(qF,1)
       g => get_array2d_oc(qG,1)

@@ -37,6 +37,7 @@ program main
                          L2errorAdjoint, LinfErrorAdjoint, L2exactAdjoint, LinfExactAdjoint, &
                          globL2errorState, globLinfErrorState, globL2exactState, globLinfExactState, &
                          globL2errorAdjoint, globLinfErrorAdjoint, globL2exactAdjoint, globLinfExactAdjoint, &
+                         L2Adjoint, LinfAdjoint, globL2Adjoint, globLinfAdjoint, &
                          abs_res_tol_save, rel_res_tol_save
   logical             :: stepTooSmall, predict
   integer             :: itersState, itersAdjoint, root, sumItersState, sumItersAdjoint
@@ -106,7 +107,7 @@ program main
 !   call pf_add_hook(pf,-1, PF_PRE_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,-1, PF_POST_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_error_hook)
-  call pf_add_hook(pf,pf%nlevels,PF_POST_STEP,echo_error_hook)
+  call pf_add_hook(pf,-1,PF_POST_STEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_residual_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
 
@@ -233,27 +234,27 @@ program main
   abs_res_tol = abs_res_tol_save
   rel_res_tol = rel_res_tol_save      
 ! 
-!   ! set Q, F to zero
-!   do l = 1, pf%nlevels-1
-!     do m = 1, pf%levels(l)%nnodes
-!       call pf%levels(l)%Q(m)%setval(0.0_pfdp, 0) 
-!       call pf%levels(l)%pQ(m)%setval(0.0_pfdp, 0) ! only on coarser levels, also tauQ
-!       if(m < pf%levels(l)%nnodes) then
-!         call pf%levels(l)%tauQ(m)%setval(0.0_pfdp, 0)
-!         call pf%levels(l)%I(m)%setval(0.0_pfdp, 0) 
-!       end if
-!       do p = 1,size(pf%levels(l)%F(1,:))
-!         call pf%levels(l)%F(m,p)%setval(0.0_pfdp, 0)
-!       end do
-!     end do
-!   end do
-!   
-!   do m = 1, pf%levels(pf%nlevels)%nnodes
-!     call pf%levels(pf%nlevels)%Q(m)%setval(0.0_pfdp, 0) 
-!     do p = 1,size(pf%levels(pf%nlevels)%F(1,:))
-!         call pf%levels(pf%nlevels)%F(m,p)%setval(0.0_pfdp, 0)
-!     end do
-!   end do
+  ! set Q, F to zero
+  do l = 1, pf%nlevels-1
+    do m = 1, pf%levels(l)%nnodes
+      call pf%levels(l)%Q(m)%setval(0.0_pfdp, 0) 
+      call pf%levels(l)%pQ(m)%setval(0.0_pfdp, 0) ! only on coarser levels, also tauQ
+      if(m < pf%levels(l)%nnodes) then
+        call pf%levels(l)%tauQ(m)%setval(0.0_pfdp, 0)
+        call pf%levels(l)%I(m)%setval(0.0_pfdp, 0) 
+      end if
+      do p = 1,size(pf%levels(l)%F(1,:))
+        call pf%levels(l)%F(m,p)%setval(0.0_pfdp, 0)
+      end do
+    end do
+  end do
+  
+  do m = 1, pf%levels(pf%nlevels)%nnodes
+    call pf%levels(pf%nlevels)%Q(m)%setval(0.0_pfdp, 0) 
+    do p = 1,size(pf%levels(pf%nlevels)%F(1,:))
+        call pf%levels(pf%nlevels)%F(m,p)%setval(0.0_pfdp, 0)
+    end do
+  end do
 !   
 
 !   
@@ -325,23 +326,23 @@ program main
 ! exit
 
      
-     if ( k .eq. 1 ) then
+!      if ( k .eq. 1 ) then
         beta = 0.0
-     else
-!         !PR:
-          !num   = compute_scalar_prod(gradient, gradient-prevGrad, pf%levels(pf%nlevels)%nodes, dt)
-          !denom = compute_scalar_prod(prevGrad, prevGrad, pf%levels(pf%nlevels)%nodes, dt)
-!         !DY:
-          num   = compute_scalar_prod(gradient, gradient, pf%levels(pf%nlevels)%nodes, dt) 
-          denom = compute_scalar_prod(gradient-prevGrad, prevSearchDir, pf%levels(pf%nlevels)%nodes, dt)
-!         !FR:
-!         !num   = compute_scalar_prod(gradient, gradient, pf%levels(pf%nlevels)%nodes, dt) 
-!         !denom = compute_scalar_prod(prevGrad, prevGrad, pf%levels(pf%nlevels)%nodes, dt)
-          call mpi_allreduce(num,   globNum,   1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-          call mpi_allreduce(denom, globDenom, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-          beta = globNum/globDenom
-          !print *,  pf%rank, k, 'beta = ', beta, 'num', globNum, 'denom', globDenom
-     end if
+!      else
+! !         !PR:
+!           !num   = compute_scalar_prod(gradient, gradient-prevGrad, pf%levels(pf%nlevels)%nodes, dt)
+!           !denom = compute_scalar_prod(prevGrad, prevGrad, pf%levels(pf%nlevels)%nodes, dt)
+! !         !DY:
+!           num   = compute_scalar_prod(gradient, gradient, pf%levels(pf%nlevels)%nodes, dt) 
+!           denom = compute_scalar_prod(gradient-prevGrad, prevSearchDir, pf%levels(pf%nlevels)%nodes, dt)
+! !         !FR:
+! !         !num   = compute_scalar_prod(gradient, gradient, pf%levels(pf%nlevels)%nodes, dt) 
+! !         !denom = compute_scalar_prod(prevGrad, prevGrad, pf%levels(pf%nlevels)%nodes, dt)
+!           call mpi_allreduce(num,   globNum,   1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+!           call mpi_allreduce(denom, globDenom, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+!           beta = globNum/globDenom
+!           !print *,  pf%rank, k, 'beta = ', beta, 'num', globNum, 'denom', globDenom
+!      end if
 
      searchDir = -gradient + beta*prevSearchDir
 
@@ -391,12 +392,12 @@ program main
 ! end if
      
      stepTooSmall = .false.
-!      call armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
-!                       globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
+     call armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
+                      globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
 !      call wolfe_powell_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
 !                     globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)   
-     call strong_wolfe_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
-                    globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)    
+!      call strong_wolfe_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
+!                     globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)    
                       
      if (stepTooSmall) exit
 
@@ -417,11 +418,11 @@ program main
       print *, 'duration [s]: ', time_end_sec-time_start_sec
    end if
 
-  call dump_ydesired(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'yd')
+  call dump_ydesired(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'yd', 'ymydcomp', 'ymyddiff', 'prhs', 'prhsdiff')
   call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'u')
-  call dump_exact_adjoint(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'pex', &
-                         L2errorAdjoint, LinfErrorAdjoint, L2exactAdjoint, LinfExactAdjoint)
-  call dump_exact_state(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'yex', &
+  call dump_exact_adjoint(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'pex', 'pcomp', 'pdiff', &
+                         L2errorAdjoint, LinfErrorAdjoint, L2exactAdjoint, LinfExactAdjoint, L2Adjoint, LinfAdjoint)
+  call dump_exact_state(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, 'yex', 'ycomp', 'ydiff', &
                                   L2errorState, LinfErrorState, L2exactState, LinfExactState)
   call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
                                   L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
@@ -437,7 +438,8 @@ program main
   call mpi_allreduce(LinfErrorAdjoint, globLinfErrorAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
   call mpi_allreduce(L2exactAdjoint, globL2exactAdjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
   call mpi_allreduce(LinfExactAdjoint, globLinfExactAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
-   
+  call mpi_allreduce(L2Adjoint, globL2Adjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfAdjoint, globLinfAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
   print *, 'rank:', pf%rank, 'total iterations state, adjoint', itersState, itersAdjoint
 
    sumItersState = 0
@@ -461,6 +463,8 @@ program main
       print *, '                                   Linf = ', globLinfErrorAdjoint
       print *, 'relative error in final adjoint sol: L2 = ', sqrt(globL2errorAdjoint)/sqrt(globL2exactAdjoint)
       print *, '                                   Linf = ', globLinfErrorAdjoint/globLinfExactAdjoint   
+      print *, 'adjoint norm:                        L2 = ', sqrt(globL2Adjoint)
+      print *, '                                   Linf = ', globLinfAdjoint
 
    end if
 

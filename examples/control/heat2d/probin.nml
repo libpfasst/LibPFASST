@@ -1,12 +1,12 @@
 &PARAMS
   ndim          = 2
 
-  nsteps       = 4
+  nsteps       = 20
   
   poutmod  = 1
   
-  nvars =   16 32 64
-  nnodes =  2 3 5
+  nvars =   64 128
+  nnodes =  3 5
 
   Finterp = F
 
@@ -14,7 +14,7 @@
   ! Heat
   Lx = 1.0
   Ly = 1.0
-  Tfin = 1
+  Tfin = 1.0
   
   alpha = 0.05
   max_opt_iter = 100
@@ -24,7 +24,7 @@
   warmstart = 0
   do_mixed = 0
   !logfile = "progress_imex3lev_r20_32-64-128_3-5-9_dy_wp_cold_1em11_u0_200iter.log"
-  logfile = "progress_foo.log"
+  logfile = "progress_grad_armijo_n20.log"
   
   pfasst_nml = "pfasst.nml"
   fbase = "pfasst_V"

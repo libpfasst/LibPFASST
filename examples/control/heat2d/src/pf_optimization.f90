@@ -28,13 +28,15 @@ contains
     real(pfdp),                intent(  out) :: objective, L2NormUSq
     real(pfdp),                intent(inout) :: savedAdjoint(:,:,:)
     logical, optional,         intent(in   ) :: predictAdj
-    integer             :: m
-    real(pfdp), pointer :: obj(:)
+    integer             :: m, pred_flags(1), l
+    real(pfdp), pointer :: obj(:), tmp(:)
     real(pfdp) :: t(pf%levels(pf%nlevels)%nnodes)
     logical    :: predictAdjoint
     
     predictAdjoint = .true.
     if (present(predictAdj) ) predictAdjoint = predictAdj
+    allocate(tmp(product(pf%levels(pf%nlevels)%shape)))
+
    
     solve_y = .true.
 
@@ -47,34 +49,39 @@ contains
       call pf%levels(pf%nlevels)%q0%copy(q1, 1) !do this only for rank 0 or predict = true?
     end if
     
-!     if (do_mixed .eq. 1 ) then
-!       q1%pflatarray = 0.0_pfdp
-!       call pf%levels(pf%nlevels)%qend%copy(q1, 2)
+    if (do_mixed .eq. 1 ) then
+!       pred_flags(1) = 2
+      q1%pflatarray = 0.0_pfdp
+      call pf%levels(pf%nlevels)%qend%copy(q1, 2)
 !       if( predict .eqv. .false. .and. predictAdjoint .eqv. .true. ) then
-!         ! call predictor just for adjoint part
-!         call pf_predictor(pf, pf%rank*dt, dt, 2)
-! !           do m = 1, pf%levels(pf%nlevels)%nnodes
-! !             call pf%levels(pf%nlevels)%encap%unpack(pf%levels(pf%nlevels)%Q(m), savedAdjoint(m,:), 2)
-! !           end do
-! ! 
-! !           t = pf%rank*dt + dt*pf%levels(pf%nlevels)%nodes
-! !           call pf%levels(pf%nlevels)%sweeper%evaluate_all(pf%levels(pf%nlevels), t, 2)       
+        ! call predictor just for adjoint part
+!         call pf_predictor(pf, pf%rank*dt, dt, pred_flags)     
 !       end if
-!     end if
+    end if
 
     if (pf%rank .eq. 0) print *, ' *********  solve state **************'
     
-!     if (do_mixed .eq. 1) then
-!        call pf_pfasst_block(pf, dt, nsteps, predict, 0)
+    if (do_mixed .eq. 1) then
+       call pf_pfasst_block_oc(pf, dt, nsteps, predict, flags=0)
+!        if (pf%rank .eq. 0) print *, ' *********  now adjoint w/o comm **************'
+!        do l = 1, pf%nlevels
+!           q1%pflatarray = 0.0_pfdp
+!           q1%yflatarray = 0.0_pfdp
+!           call pf%levels(l)%q0%copy(q1, 2)
+!           call pf%levels(l)%ulevel%sweeper%spreadq0(pf%levels(l), (pf%rank+1)*dt, 2, pf%state%step+1)
+!        end do
+!        call pf_pfasst_block_oc(pf, dt, nsteps, .false., flags=0)
+       
 !        ! need to save values in adjoint component of Q(m)!
 ! !        if(pf%rank .eq. 0) print *, 'saving adjoint'
 !        do m = 1, pf%levels(pf%nlevels)%nnodes
-!          call pf%levels(pf%nlevels)%Q(m)%pack(savedAdjoint(m,:), 2)
+!          call pf%levels(pf%nlevels)%Q(m)%pack(tmp, 2)
+!          savedAdjoint(m,:,:) = reshape(tmp, (/pf%levels(pf%nlevels)%shape(1), pf%levels(pf%nlevels)%shape(2)/))
 !        end do
-! !        print *, pf%rank, maxval(savedAdjoint(1,:))
-!     else
+!        if(pf%rank == 0) print *, "max adjoint val", maxval(savedAdjoint(1,:,:))
+    else
        call pf_pfasst_block_oc(pf, dt, nsteps, predict, 1)
-!     end if
+    end if
     
 !     if (pf%rank .eq. 0) print *, ' *********  compute objective **************'
 
@@ -95,6 +102,7 @@ contains
                                   pf%levels(pf%nlevels)%shape, L2NormUSq)
     objective = 0.5*objective + 0.5*alpha*L2NormUSq
     deallocate(obj)
+    deallocate(tmp)
   end subroutine evaluate_objective
 
 
@@ -109,28 +117,108 @@ contains
     logical,                  intent(in   ) :: predict
     real(pfdp),               intent(  out) :: gradient(:,:,:), LinftyNormGrad, L2NormGradSq
     real(pfdp),               intent(inout) :: savedAdjoint(:,:,:)
-    integer :: m
+    integer :: m, n, nnodes
     integer :: dest, source, ierror, stat(MPI_STATUS_SIZE)
-    real(pfdp), allocatable :: tmp(:)
-    real(pfdp) :: t(pf%levels(pf%nlevels)%nnodes)
-
-    solve_y = .false.      
-
+    real(pfdp), pointer :: tmp(:), terminal(:), adjointAtNode(:,:)
+    real(pfdp) :: nodes(pf%levels(pf%nlevels)%nnodes), tend, t
+    type(ndarray_oc) :: q_tmp
+    
     allocate(tmp(product(pf%levels(pf%nlevels)%shape)))
-
-    !call initial(q1, pf%rank*dt, (pf%rank+1)*dt)
-    q1%pflatarray = 0.0_pfdp ! only if no final time term in objective, otherwise this is nonzero, and terminal needs to be added to this
+    allocate(terminal(product(pf%levels(pf%nlevels)%shape)))
+    terminal = 0.0_pfdp
     
-    call pf%levels(pf%nlevels)%qend%copy(q1, 2)
-    ! do this only for final step or predict = true?
-    !call restrict_for_adjoint(pf, 1)
+    ! test: fill with analytic p_tilde on interval, works...
+!     if (do_mixed == 1) then
+!       nnodes = pf%levels(pf%nlevels)%nnodes
+!       nodes = pf%levels(pf%nlevels)%nodes
+!       do m=1, nnodes
+!         t = pf%rank*dt + dt*(nodes(m)-nodes(1))
+!         tend = (pf%rank+1)*dt
+!         adjointAtNode => get_array2d_oc(pf%levels(pf%nlevels)%Q(m), 2)
+!         call p_tilde(adjointAtNode, shape(adjointAtNode), t, tend)
+!       end do
+!     end if
+    
+    
+    if (do_mixed .eq. 1 ) then       ! receive terminal value
+       if(pf%rank /= pf%comm%nproc-1) then
+          source = modulo(pf%rank+1, pf%comm%nproc)
+!           print *, pf%rank, "receiving from", source, "with buflen", pf%levels(pf%nlevels)%mpibuflen
+          call mpi_recv(terminal, pf%levels(pf%nlevels)%mpibuflen, MPI_REAL8, &
+                        source, 1, pf%comm%comm, stat, ierror)
+!           print *, pf%rank, "received ", maxval(terminal)
+       end if
+       
+       ! apply matrix exponential to compute value at Q(1;2)
+       call ndarray_oc_build(q_tmp, pf%levels(pf%nlevels)%shape) ! todo: destroy
+       call q_tmp%unpack(terminal, 2)
+      m = pf%levels(pf%nlevels)%nnodes          
+!       print *, pf%rank, m, "before exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+      call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%copy(q_tmp, 2)
+      call pf%levels(pf%nlevels)%qend%copy(pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes), 2)
+
+!       print *, pf%rank, m, "after exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+       
+!        call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%unpack(terminal, 2)
+!        call pf%levels(pf%nlevels)%Q(1)%copy(pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes), 2)
+       
+       ! compute fft of data, multiply with, compute ifft
+!        if(pf%rank == 0) print *, "compute Q(1), dt = ", dt
+       m = 1          
+!        print *, pf%rank, m, "before exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+
+       call compute_exp_lap_dt_times_vec(pf%levels(pf%nlevels)%ulevel%sweeper, dt, q_tmp)
+       call pf%levels(pf%nlevels)%Q(1)%axpy(1.0_pfdp, q_tmp, 2)
+       call pf%levels(pf%nlevels)%q0%copy(pf%levels(pf%nlevels)%Q(1), 2)
+!        print *, pf%rank, m, "after exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+
+       
+       ! send new Q(1;2)
+       if (pf%rank /= 0) then
+          call pf%levels(pf%nlevels)%Q(1)%pack(tmp, 2)
+          dest = modulo(pf%rank-1, pf%comm%nproc)
+          
+          call mpi_send(tmp, pf%levels(pf%nlevels)%mpibuflen, MPI_REAL8, &   !mpi_send(savedAdjoint(1,:),...
+                        dest, 1, pf%comm%comm, stat, ierror)
+       end if
+       
+       tend = (pf%rank+1)*dt
+!        print *, pf%rank, "tend", tend
+       ! compute remaining values
+       if(pf%rank /= pf%comm%nproc-1) then
+          nnodes = pf%levels(pf%nlevels)%nnodes
+          nodes = pf%levels(pf%nlevels)%nodes
+          do m = nnodes-1, 2, -1
+!           if(pf%rank == 0) print *, "compute Q(m)", m, " dt = ", dt*(nodes(nnodes)-nodes(m))
+             call q_tmp%unpack(terminal, 2)
+              t = pf%rank*dt + dt*(nodes(m)-nodes(1))
+!           print *, pf%rank, m, "before exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+             call compute_exp_lap_dt_times_vec(pf%levels(pf%nlevels)%ulevel%sweeper, &
+                                            tend-t, q_tmp)
+             call pf%levels(pf%nlevels)%Q(m)%axpy(1.0_pfdp, q_tmp, 2)
+!           print *, pf%rank, m, "after exp", q_tmp%norm(2), pf%levels(pf%nlevels)%Q(m)%norm(2)
+          end do
+       end if
+!        return
+!        ?restrict to the coarser levels?
+       
+       ! to write the npy output
+!        call call_hooks(pf, -1, PF_POST_STEP)
+!         call ndarray_oc_dump_all_hook(pf, pf%levels(pf%nlevels), pf%state)
+    else   
+      q1%pflatarray = 0.0_pfdp ! only if no final time term in objective, otherwise this is nonzero, and terminal needs to be added to this
+    
+      call pf%levels(pf%nlevels)%qend%copy(q1, 2)
+      ! do this only for final step or predict = true?
+      !call restrict_for_adjoint(pf, 1)
 
     
-    if (pf%rank .eq. 0) print *, '*********  solve adjoint *************'
-    if(predict) pf%q0_style = 1
-    call pf_pfasst_block_oc(pf, dt, nsteps, predict, 2) !predict
-    pf%q0_style = 0
-
+      if (pf%rank .eq. 0) print *, '*********  solve adjoint *************'
+      if(predict) pf%q0_style = 1
+      call pf_pfasst_block_oc(pf, dt, nsteps, predict, 2) !predict
+      pf%q0_style = 0
+    end if ! do_mixed
+    
     if (pf%rank .eq. 0) print *, '*********  compute gradient *************'
     
     do m = 1, pf%levels(pf%nlevels)%nnodes
@@ -140,7 +228,8 @@ contains
 
     call construct_gradient(pf%levels(pf%nlevels)%ulevel%sweeper, gradient, pf%levels(pf%nlevels)%nodes, &
                                       LinftyNormGrad, L2NormGradSq)
-                                      
+    deallocate(terminal)
+    deallocate(tmp)
   end subroutine evaluate_gradient
 
 
