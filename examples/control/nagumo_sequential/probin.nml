@@ -12,12 +12,8 @@
   v            = 0.0
   nu           = 1.0
 
- ! nvars  =   64 128 256
-! nvars =  32 64 128
-  nvars  = 64 128
-nnodes =  5 9
-!  nnodes =  5
-! nnodes = 3 5 9
+  nvars  = 32 64 128
+  nnodes =  3 5 9
 
   Finterp = F
 
@@ -31,10 +27,10 @@ nnodes =  5 9
   !dt           = 1.0
   !Tfin = 1
   
-  do_imex = 0
+  do_imex = 1
   warmstart = 0
   !logfile = "progress_newWP_imex3lev_r20_32-64-128_3-5-9_dy_wp_cold_1em11_u05uopt_opttol_051.log"
-  logfile = "progress_seq_misdc_unlagged_restrict_r20.log"
+  logfile = "progress_foo.log"
   
   pfasst_nml = "pfasst.nml"
   fbase = "pfasst_V"

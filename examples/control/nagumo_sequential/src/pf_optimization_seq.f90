@@ -94,8 +94,10 @@ contains
         do m = 1, pf%levels(pf%nlevels)%nnodes
           call pf%levels(pf%nlevels)%Q(m)%unpack(savedStates(step,m,:), 1)
         end do
-        call restrict_for_adjoint(pf, (nsteps-step)*dt, dt, 1) ! save states at all levels instead of restricting?      
-        
+!         call restrict_for_adjoint(pf, (nsteps-step)*dt, dt, 1, step) ! save states at all levels instead of restricting?      
+          call restrict_for_adjoint(pf, (step-1)*dt, dt, 1, step) ! save states at all levels instead of restricting?      
+
+
         call pf_pfasst_block_oc(pf, dt, step, .true., 2, step-1) 
 
         do m = 1, pf%levels(pf%nlevels)%nnodes

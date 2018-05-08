@@ -63,6 +63,8 @@ contains
 
     mystep = 1
     if(present(step)) mystep = step
+    if(.not. present(step)) stop "STEP MISSING IN FEVAL"
+!     print *, step, idx
       
     select case (piece)
     case (1)  ! Explicit piece
@@ -290,7 +292,7 @@ contains
     nnodes = pf%levels(pf%nlevels)%nnodes
     do i = 1, nnodes
       call pf%levels(pf%nlevels)%Q(i)%pack(sweeper%ydesired(step, i,:), 1)
-      write(fname, "('y_d','r',i0.2,'m',i0.2,'.npy')") pf%rank, i
+      write(fname, "('y_d','r',i0.2,'s',i0.2,'m',i0.2,'.npy')") pf%rank, step, i
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            1, pf%levels(pf%nlevels)%shape, size(sweeper%ydesired, 3), sweeper%ydesired(step, i,:))
@@ -349,24 +351,28 @@ contains
 
 
   
-  subroutine dump_control(s, pf, fbase)
+  subroutine dump_control(s, pf, fbase, mylevel)
     class(pf_sweeper_t), intent(inout) :: s
     type(pf_pfasst_t),  intent(inout) :: pf
     character(len = *), intent(in   ) :: fbase
-
-    integer :: nnodes, i, nsteps, n
+    integer, intent(in), optional     :: mylevel
+    
+    integer :: nnodes, i, nsteps, n, level
     character(len=256)     :: fname
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
 
-    nnodes = pf%levels(pf%nlevels)%nnodes
+    level = pf%nlevels
+    if(present(mylevel)) level = mylevel
+    
+    nnodes = pf%levels(level)%nnodes
     nsteps = size(sweeper%u, 1)
     do n = 1, nsteps
       do i = 1, nnodes
-        write(fname, "(A,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), pf%rank, i
+        write(fname, "(A,'l'i0.2,'r',i0.2,'m',i0.2,'.npy')") trim(fbase), level, n-1, i
 
         call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
-            1, pf%levels(pf%nlevels)%shape, size(sweeper%u, 3), sweeper%u(n, i, :))
+            1, pf%levels(level)%shape, size(sweeper%u, 3), sweeper%u(n, i, :))
        end do
     end do
   end subroutine dump_control
@@ -412,12 +418,13 @@ contains
           uexact(:)  = (1.0_pfdp/3.0_pfdp*solAt25(:)**3 - solAt25(:) -real(wk))
         end if
 
-      write(fname, "('uexact','r',i0.2,'m',i0.2,'.npy')") pf%rank, i
+      write(fname, "('uexact','r',i0.2,'s',i0.2,'m',i0.2,'.npy')") pf%rank, step, i
+
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            1, pf%levels(pf%nlevels)%shape, nvars, uexact)
            
       udiff(:) = uexact(:) - sweeper%u(step, i,:)
-      write(fname, "('udiff','r',i0.2,'m',i0.2,'.npy')") pf%rank, i
+      write(fname, "('udiff','r',i0.2,'s',i0.2,'m',i0.2,'.npy')") pf%rank, step, i
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fname)//c_null_char, '<f8'//c_null_char//c_null_char, &
            1, pf%levels(pf%nlevels)%shape, nvars, udiff(:))
            
@@ -465,8 +472,9 @@ contains
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
 
-    nnodes = size(grad,1)
-    nvars  = size(grad,2)
+    nsteps = size(grad,1)
+    nnodes = size(grad,2)
+    nvars  = size(grad,3)
     allocate(obj(nnodes))
 
     LinftyNormGrad =  0
@@ -483,7 +491,6 @@ contains
         obj(m) = obj(m)*Lx/(nvars)
        end do
 
-      L2NormGradSq = 0.0
       do m=1, nnodes-1
         L2normGradSq = L2normGradSq + (obj(m)+obj(m+1))*(nodes(m+1)-nodes(m))*dt
       end do
@@ -502,7 +509,8 @@ contains
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
     
-    nnodes = size(delta,1)
+    nsteps = size(delta,1)
+    nnodes = size(delta,2)
 
     do n=1, nsteps
       do m = 1, nnodes
@@ -612,7 +620,7 @@ contains
     class(pf_sweeper_t), intent(inout) :: sG, sF
         
     real(pfdp), pointer  :: uF(:,:,:), uG(:,:,:)
-    integer :: nvarF, nvarG, xrat, nnodesF, nnodesG, trat, m
+    integer :: nvarF, nvarG, xrat, nnodesF, nnodesG, trat, m, nsteps, n
     
     class(ad_sweeper_t), pointer :: sweeperF, sweeperG
     sweeperF => as_ad_sweeper(sF)
@@ -621,18 +629,19 @@ contains
     uF => sweeperF%u
     uG => sweeperG%u
 
-    nnodesF = size(uF,1)
-    nnodesG = size(uG,1)
-    nvarF = size(uF,2)
-    nvarG = size(uG,2)
+    nsteps  = size(uF,1)
+    nnodesF = size(uF,2)
+    nnodesG = size(uG,2)
+    nvarF = size(uF,3)
+    nvarG = size(uG,3)
 
     xrat  = nvarF / nvarG
     trat  = ceiling(real(nnodesF) / real(nnodesG))
 !     print *, 'restrict u', xrat, trat
 
-    !do m=1,nnodesG
-       uG(:,:,:) = uF(:,::trat,::xrat)
-    !end do
+    do n=1,nsteps
+       uG(n,:,:) = uF(n,::trat,::xrat)
+    end do
   end subroutine restrict_control
 
   
@@ -640,7 +649,7 @@ contains
     class(pf_sweeper_t), intent(inout) :: sG, sF
     
     real(pfdp), pointer  :: ydesiredF(:,:,:), ydesiredG(:,:,:)
-    integer :: nvarF, nvarG, xrat, nnodesF, nnodesG, trat, m
+    integer :: nvarF, nvarG, xrat, nnodesF, nnodesG, trat, m, nsteps, n
     
     class(ad_sweeper_t), pointer :: sweeperF, sweeperG
     sweeperF => as_ad_sweeper(sF)
@@ -649,25 +658,26 @@ contains
     ydesiredF => sweeperF%ydesired
     ydesiredG => sweeperG%ydesired
 
-    nnodesF = size(ydesiredF,1)
-    nnodesG = size(ydesiredG,1)
-    nvarF = size(ydesiredF,2)
-    nvarG = size(ydesiredG,2)
+    nsteps  = size(ydesiredF,1)
+    nnodesF = size(ydesiredF,2)
+    nnodesG = size(ydesiredG,2)
+    nvarF = size(ydesiredF,3)
+    nvarG = size(ydesiredG,3)
 
     xrat  = nvarF / nvarG
     trat  = ceiling(real(nnodesF) / real(nnodesG))
 !     print *, 'restrict ydesired', xrat, trat
 
-    !do m=1,nnodesG
-       ydesiredG(:,:,:) = ydesiredF(:,::trat,::xrat)
-    !end do
+    do n=1,nsteps
+       ydesiredG(n,:,:) = ydesiredF(n,::trat,::xrat)
+    end do
   end subroutine restrict_ydesired
   
   
-  subroutine restrict_for_adjoint(pf, t0, dt, which)
+  subroutine restrict_for_adjoint(pf, t0, dt, which, step)
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(in)    :: t0, dt
-    integer, intent(in) :: which
+    integer, intent(in) :: which, step
     real(pfdp), pointer :: tF(:), tG(:) !zF(:), zG(:)
     integer :: l, m !, nnodesF, nnodesG, nvarsF, nvarsG
     
@@ -677,7 +687,7 @@ contains
       tF = t0 + dt*pf%levels(l)%nodes
       tG = t0 + dt*pf%levels(l-1)%nodes
       call restrict_sdc(pf%levels(l), pf%levels(l-1), pf%levels(l)%Q, pf%levels(l-1)%Q, .false. ,tF, which)
-      call pf%levels(l-1)%ulevel%sweeper%evaluate_all(pf%levels(l-1), tG, which)
+      call pf%levels(l-1)%ulevel%sweeper%evaluate_all(pf%levels(l-1), tG, which, step)
       deallocate(tF)
       deallocate(tG)
     end do
@@ -731,6 +741,7 @@ contains
              
     which = 0
     if(present(flags)) which = flags
+    if(which == 0) stop "interpolate with which == 0"
 
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
     adF => as_ad_sweeper(levelF%ulevel%sweeper)
@@ -761,6 +772,8 @@ contains
     integer :: nvarF, nvarG, xrat, which
     which = 0
     if(present(flags)) which = flags
+    if(which == 0) stop "restrict with which == 0"
+
         
     if ((which .eq. 0) .or. (which .eq. 1)) then
       f => get_array1d_oc(qF,1)

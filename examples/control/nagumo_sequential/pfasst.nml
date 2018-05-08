@@ -1,6 +1,6 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 2
+    nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
     niters = 250   !  default is 5
@@ -9,8 +9,6 @@
      qtype   = 1028
      qtype   = 1
 
-     !  Type of time step windowing   (default is 1 = block windowing)
-     window = 1      
 
      !  optional variables to control termination  (defaults are 0.0)
      abs_res_tol = 1e-11

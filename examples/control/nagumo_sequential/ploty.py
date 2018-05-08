@@ -1,44 +1,79 @@
 import numpy as np
 import matplotlib.pyplot as plt
-nnodes = 9;
-nvars = 128;
+nnodes = 5;
+nvars = 64;
 nsteps = 20;
 dat = np.zeros([nnodes*nsteps,nvars]);
 
-##counter = 0
-##for step in range(1,nsteps+1):
-  ##for m in range(1,nnodes+1):
-    ###fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l01m' + str(m).zfill(2) + '.npy'
-    ##fn='Dat/pfasst_V/numpy/ur00'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
-    ##dat[counter,:] = np.load(fn);
-    ##counter = counter + 1
-##plt.figure()
-##plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
-##plt.colorbar()
-##plt.xlabel('x')
-##plt.ylabel('t')
-##plt.title('control')
-####plt.savefig('controlmisdcnew.png')
+#counter = 0
+#for step in range(0,nsteps):
+  #for m in range(1,nnodes+1):
+    ##fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l01m' + str(m).zfill(2) + '.npy'
+    #fn='Dat/pfasst_V/numpy/ul03' +'r'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
+    #dat[counter,:] = np.load(fn);
+    #counter = counter + 1
+#plt.figure()
+#plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
+#plt.colorbar()
+#plt.xlabel('x')
+#plt.ylabel('t')
+#plt.title('control')
+#####plt.savefig('controlmisdcnew.png')
+
+#nnodes = 5;
+#nvars = 64;
+#dat = np.zeros([nnodes*nsteps,nvars]);
+#counter = 0
+#for step in range(0,nsteps):
+  #for m in range(1,nnodes+1):
+    ##fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l01m' + str(m).zfill(2) + '.npy'
+    #fn='Dat/pfasst_V/numpy/ul02' +'r'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
+    #dat[counter,:] = np.load(fn);
+    #counter = counter + 1
+#plt.figure()
+#plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
+#plt.colorbar()
+#plt.xlabel('x')
+#plt.ylabel('t')
+#plt.title('control')
+
+#nnodes = 3;
+#nvars = 32;
+#dat = np.zeros([nnodes*nsteps,nvars]);
+#counter = 0
+#for step in range(0,nsteps):
+  #for m in range(1,nnodes+1):
+    ##fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l01m' + str(m).zfill(2) + '.npy'
+    #fn='Dat/pfasst_V/numpy/ul01' +'r'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
+    #dat[counter,:] = np.load(fn);
+    #counter = counter + 1
+#plt.figure()
+#plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
+#plt.colorbar()
+#plt.xlabel('x')
+#plt.ylabel('t')
+#plt.title('control')
+
 
 ##plt.figure()
 ##plt.plot(dat[10,:])
 ##plt.savefig('dat10.png', dpi=plt.dpi)
 
-##plt.figure()
-##dat = np.zeros([nnodes*nsteps,nvars]);
-##counter = 0
-##for step in range(0,nsteps):
-  ##for m in range(1,nnodes+1):
-    ##fn='Dat/pfasst_V/numpy/uexactr'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
-    ##dat[counter,:] = np.load(fn);
-    ##counter = counter + 1
-##plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
-##plt.colorbar()
-##plt.xlabel('x')
-##plt.ylabel('t')
-###v = np.linspace(-.65, 0., 15, endpoint=True)
-###plt.colorbar(tics=v)
-##plt.title('exact control')
+#plt.figure()
+#dat = np.zeros([nnodes*nsteps,nvars]);
+#counter = 0
+#for step in range(1,nsteps+1):
+  #for m in range(1,nnodes+1):
+    #fn='Dat/pfasst_V/numpy/uexactr00s'+str(step).zfill(2)+'m'+ str(m).zfill(2) + '.npy'
+    #dat[counter,:] = np.load(fn);
+    #counter = counter + 1
+#plt.imshow(dat,extent=[0,20,0,5],aspect='auto',origin='lower',interpolation='none', vmin=-0.65, vmax=0.0)
+#plt.colorbar()
+#plt.xlabel('x')
+#plt.ylabel('t')
+##v = np.linspace(-.65, 0., 15, endpoint=True)
+##plt.colorbar(tics=v)
+#plt.title('exact control')
 ##plt.savefig('exactcontrolmisdc10finefix.png')
 
 
@@ -112,7 +147,7 @@ dat = np.zeros([nnodes*nsteps,nvars]);
 #plt.xlabel('x')
 #plt.ylabel('t')
 #plt.title('desired state')
-####plt.savefig('desiredmisdc10finefix.png')
+#####plt.savefig('desiredmisdc10finefix.png')
 
 plt.figure()
 dat = np.zeros([nnodes*nsteps,nvars]);
@@ -120,7 +155,7 @@ counter = 0
 for step in range(0,nsteps):
   index = 0
   for m in range(1,nnodes+1):
-    fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l02'+'m'+ str(m).zfill(2) + '.npy'
+    fn='Dat/pfasst_V/numpy/y_s'+str(step).zfill(2)+'l01'+'m'+ str(m).zfill(2) + '.npy'
     #print fn, counter + index
     dat[counter+index,:] = np.load(fn);
     index = index + 1

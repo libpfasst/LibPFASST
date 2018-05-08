@@ -232,6 +232,7 @@ program main
   print *, ' **** restricting control and ydesired ****'
   do l = pf%nlevels-1,1,-1
     call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
+    call dump_control(pf%levels(l)%ulevel%sweeper, pf, 'u', l)
     call restrict_ydesired(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
   end do
 
@@ -241,10 +242,13 @@ program main
   tolGrad = 1.0e-6
   tolObj  = 1.0e-6
 
+
+  
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , & 
          status = 'unknown',  action = 'write')
 
+         
   allocate(gradient(nsteps, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
   allocate(prevGrad(nsteps, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
   allocate(searchDir(nsteps, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
@@ -257,18 +261,19 @@ program main
   globDirXGrad = 0.0_pfdp
   prevStepSize = 0.1_pfdp
   prevSearchDir = 0
-  savedAdjoint = 0.0_pfdp
+  savedStates = 0.0_pfdp
   
 
   itersState = 0
   itersAdjoint = 0
+
   
   call date_and_time(date=date, time=time, values=time_start)
   if (pf%rank .eq. 0) &
     print *, 'start optimization on ', date, ', ',  time
 
-  do k = 1, 2000
-
+  do k = 1, 200
+  
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
      
 !      call mpi_barrier(pf%comm%comm, ierror)
@@ -280,7 +285,7 @@ program main
         objective = objectiveNew  !can we return globObjNew from linesearch, avoids communication; is objective needed somewhere?
      end if 
 !      call mpi_allreduce(objective, globObj, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-     if(pf%rank == 0) print *, k, 'objective (L2) = ', globObj 
+     if(pf%rank == 0) print *, k, 'objective (L2) = ', objective 
 !      exit 
      
 !      call mpi_barrier(pf%comm%comm, ierror)
@@ -365,7 +370,7 @@ program main
      
    end do
    
-   call mpi_barrier(pf%comm%comm, ierror)
+!    call mpi_barrier(pf%comm%comm, ierror)
    call date_and_time(date=date, time=time, values=time_end)
    if (pf%rank .eq. 0) then
      print *, 'end optimization on ', date, ', ',  time
