@@ -209,6 +209,7 @@ contains
        degree = nnodes - 1
        allocate(roots(degree))
        allocate(coeffs(degree+1))
+       allocate(coeffs2(degree))
 
 
        call poly_legendre(coeffs, degree)
