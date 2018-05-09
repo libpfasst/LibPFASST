@@ -115,12 +115,15 @@ contains
     integer,           intent(inout) :: ierror    !<  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: dest
-    integer    ::  stat(MPI_STATUS_SIZE)
+    integer    ::  stat(MPI_STATUS_SIZE), dir
     integer(4) :: message!(8)
 
     message = istatus
     
-    if(present(direction) .and. direction == 2) then
+    dir = 1 ! default 1: send forward; set to 2 for send backwards
+    if(present(direction)) dir = direction
+    
+    if( dir == 2) then
        dest = modulo(pf%rank-1, pf%comm%nproc) 
     else
        dest = modulo(pf%rank+1, pf%comm%nproc) 
@@ -146,9 +149,12 @@ contains
     integer,           intent(inout) :: ierror    !<  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: source
-    integer    ::  stat(MPI_STATUS_SIZE)
+    integer    ::  stat(MPI_STATUS_SIZE), dir
 
-    if(present(direction) .and. direction == 2) then
+    dir = 1 ! default 1: send forward; set to 2 for send backwards
+    if(present(direction)) dir = direction
+    
+    if(dir == 2) then
        source = modulo(pf%rank+1, pf%comm%nproc) 
     else
        source = modulo(pf%rank-1, pf%comm%nproc) 
@@ -170,17 +176,20 @@ contains
     logical,           intent(in   ) :: blocking !<  true if send is blocking
     integer,           intent(inout) :: ierror   !<  error flag
     integer, optional, intent(in)    :: direction
-    integer                          :: dest
+    integer                          :: dest, dir
     integer ::  stat(MPI_STATUS_SIZE)
 
-    if(present(direction) .and. direction == 2) then
+    dir = 1 ! default 1: send forward; set to 2 for send backwards
+    if(present(direction)) dir = direction
+    
+    if(dir == 2) then
        dest = modulo(pf%rank-1, pf%comm%nproc) 
     else
        dest = modulo(pf%rank+1, pf%comm%nproc) 
     end if
     
     if (blocking) then
-      if(present(direction) .and. direction == 2) then
+      if(dir == 2) then
           call level%q0%pack(level%send, 2)
        else
           call level%qend%pack(level%send, 1)
@@ -190,7 +199,7 @@ contains
     else
        call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
 !        call level%qend%pack(level%send)
-       if(present(direction) .and. direction == 2) then
+       if(dir == 2) then
           call level%q0%pack(level%send, 2)
        else
           call level%qend%pack(level%send, 1)
@@ -209,10 +218,13 @@ contains
     logical,           intent(in   ) :: blocking  !<  true if receive is blocking
     integer,           intent(inout) :: ierror  !<  error flag
     integer, optional, intent(in)    :: direction
-    integer                          :: source
+    integer                          :: source, dir
     integer ::  stat(MPI_STATUS_SIZE)
 
-    if(present(direction) .and. direction == 2) then
+    dir = 1 ! default 1: send forward; set to 2 for send backwards
+    if(present(direction)) dir = direction
+    
+    if(dir == 2) then
        source = modulo(pf%rank+1, pf%comm%nproc) 
     else
        source = modulo(pf%rank-1, pf%comm%nproc) 

@@ -180,8 +180,7 @@ contains
        end if
        if(flags(1)==0) which = 0   ! sweep forward and backward simultaneously on two components, communication only forwards
     end if
-    
-
+        
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
@@ -192,7 +191,7 @@ contains
        if( (which == 0) .or. (which == 1)) call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0, 1, pf%state%step+1)
        if( (which == 0) .or. (which == 2)) call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0+dt, 2, pf%state%step+1)
     endif
-
+    
     !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
     if (pf%nlevels > 1) then  
        do level_index = pf%nlevels, 2, -1
@@ -204,21 +203,15 @@ contains
           if( (which == 0) .or. (which == 1)) call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0, 1)
           if( (which == 0) .or. (which == 2)) call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%qend, c_lev_p%qend, t0+dt, 2)
        end do  !  level_index = pf%nlevels, 2, -1
+    else
+      level_index = 1
+      c_lev_p => pf%levels(1)
     end if
-    if (which == 2) then
-      call end_timer(pf, TPREDICTOR)
-      call call_hooks(pf, -1, PF_POST_PREDICTOR)
-
-      pf%state%iter   = 0
-      pf%state%status = PF_STATUS_ITERATING
-      pf%state%pstatus = PF_STATUS_ITERATING
-      return
-    end if
-        
-    !! Step 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
-    !!         (this is skipped if the fine initial conditions are already consistent)
-    !! The first processor does nothing, the second does one set of sweeps, the 2nd two, etc
-    !! Hence, this is skipped completely if nprocs=1
+    
+    ! Step 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
+    !         (this is skipped if the fine initial conditions are already consistent)
+    ! The first processor does nothing, the second does one set of sweeps, the 2nd two, etc
+    ! Hence, this is skipped completely if nprocs=1
     if (pf%q0_style .eq. 0) then  !  The coarse level needs burn in
        !! If RK_pred is true, just do some RK_steps
        if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
@@ -234,20 +227,26 @@ contains
           c_lev_p => pf%levels(level_index)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
-             t0k = t0-(pf%rank)*dt + (k-1)*dt   !  Remember t0 is the beginning of this time slice so t0-(pf%rank)*dt is t0 of problem
+             t0k = t0-(pf%rank)*dt + (k-1)*dt   ! Remember t0=pf%rank*dt is the beginning of this time slice so t0-(pf%rank)*dt is 0
+                                                ! and we iterate up to the correct time step.
+                                                ! for optimal control problem t, t0k has no influence on f_eval, so there this does something else
 
              ! Get new initial value (skip on first iteration)
              if (k > 1) then
                 if ((which == 0) .or. (which == 1)) call c_lev_p%q0%copy(c_lev_p%qend, 1)
-                if ((which == 0) .or. (which == 2)) call c_lev_p%qend%copy(c_lev_p%q0, 2)
+!                 if ((which == 0) .or. (which == 2)) call c_lev_p%qend%copy(c_lev_p%q0, 2) ! for which==0, we solve with zero terminal conditions,
+                                                                                            ! but q0,2 is not zero (source term due to state sweeps)
+                if (which == 2) call c_lev_p%qend%copy(c_lev_p%q0, 2)
                 ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
                 if (.not. pf%PFASST_pred) then
                    if( (which == 0) .or. (which == 1)) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k, 1, pf%state%step+1)
-                   if( (which == 0) .or. (which == 2)) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k+dt, 2, pf%state%step+1)
+!                    if( (which == 0) .or. (which == 2)) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k+dt, 2, pf%state%step+1)
+                   if( which == 2) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k+dt, 2, pf%state%step+1)
                 end if
              end if
              !  Do some sweeps
-             call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn, which)
+             if( which == 0 .or. which == 1 ) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn, 1)
+             if( which == 2 ) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn, 2)
           end do
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
@@ -272,7 +271,8 @@ contains
        call pf_recv(pf, c_lev_p, c_lev_p%index*20000+pf%rank, .true., dir)
        
        !  Do a sweeps
-       call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, which)
+       if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 1) !which
+       if(which == 2)                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 2) !which
        !  Send forward
        call pf_send(pf, c_lev_p,  c_lev_p%index*20000+pf%rank+1, .false., dir)
     endif  ! (Pipeline_pred .eq. .true) then
@@ -283,7 +283,8 @@ contains
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, which)
        if ((which == 0) .or. (which == 1)) call interpolate_q0(pf, f_lev_p, c_lev_p)
-       if ((which == 0) .or. (which == 2)) call interpolate_qend(pf, f_lev_p, c_lev_p)
+!        if ((which == 0) .or. (which == 2)) call interpolate_qend(pf, f_lev_p, c_lev_p)
+       if (which == 2) call interpolate_qend(pf, f_lev_p, c_lev_p) ! for which==0, qend never changes, so don't need to interpolate
        !  Do a sweep on unless we are at the finest level
        if (level_index < pf%nlevels) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, which)
@@ -296,7 +297,7 @@ contains
     pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
-
+    
   end subroutine pf_predictor
 
   !>
@@ -853,7 +854,6 @@ contains
       pf%state%step    = pf%rank
     end if
       
-
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%t0      = pf%state%step * dt
@@ -900,7 +900,7 @@ contains
           pf%state%t0   = pf%state%step * dt
           
           if (pf%state%step >= pf%state%nsteps) exit  ! for optimal control this exit should always happen
-
+          
           pf%state%status = PF_STATUS_PREDICTOR
           !pf%state%block  = pf%state%block + 1
           residual = -1
@@ -909,13 +909,14 @@ contains
 
        if (k > 1 .and. qbroadcast) then
           if (pf%comm%nproc > 1) then
-             stop "broadcast not supported yet" 
+             stop "broadcast not supported" 
              !fine_lev_p => pf%levels(pf%nlevels)
              !call pf%comm%wait(pf, pf%nlevels)
              !call fine_lev_p%encap%pack(fine_lev_p%send, fine_lev_p%qend)
              !call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
              !call fine_lev_p%encap%unpack(fine_lev_p%q0,fine_lev_p%send)
           else
+             stop "we should not be here I guess"
              ! for sequential optimal control, we need to save the Q(m) values for state solution
              ! and load them when solving the adjoint
              ! additionally, state solution is needed for objective, adjoint for gradient
@@ -923,7 +924,7 @@ contains
              !print *, 'copying initial/terminal value'
              fine_lev_p => pf%levels(pf%nlevels)
              if ((which .eq. 0) .or. (which .eq. 1)) call fine_lev_p%q0%copy(fine_lev_p%qend, 1)
-             if ((which .eq. 0) .or. (which .eq. 2)) call fine_lev_p%qend%copy(fine_lev_p%q0, 2)
+             if (which .eq. 2) call fine_lev_p%qend%copy(fine_lev_p%q0, 2)
           end if
        end if
 
@@ -941,6 +942,8 @@ contains
 
       pf%state%iter  = pf%state%iter + 1
 
+!       exit! just do predictor
+      
       call start_timer(pf, TITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
       
@@ -1053,7 +1056,7 @@ contains
           if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p)
        end if
        if (pf%rank /= pf%comm%nproc-1) then
-          if ((which .eq. 0) .or. (which .eq. 2)) call interpolate_qend(pf, f_lev_p, c_lev_p)
+          if (which .eq. 2) call interpolate_qend(pf, f_lev_p, c_lev_p)
        end if
 
        if (level_index < pf%nlevels) then
