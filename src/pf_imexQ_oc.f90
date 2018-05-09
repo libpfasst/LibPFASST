@@ -105,7 +105,6 @@ contains
     integer     :: k, m, n,Nnodes, which
     real(pfdp)  :: t,tend
     real(pfdp)  :: dtq
-    type(c_ptr) :: rhs
 
     logical     :: sweep_y, sweep_p
 !     real(pfdp)  :: norms_y(Lev%nnodes-1), norms_p(Lev%nnodes-1)
@@ -119,6 +118,8 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if (.not.present(flags)) stop "IMEXQ_OC SWEEPER WITHOUT FLAGS"
+!     print *, "IMEXQ_OC SWEEP", which    
     
     Nnodes = lev%nnodes
     tend = t0+dt
@@ -144,13 +145,13 @@ contains
     call call_hooks(pf, level_index, PF_PRE_SWEEP)    
 
     ! compute integrals from previous iteration and add fas correction
-    do m = 1, Nnodes-1
-       call lev%I(m)%setval(0.0_pfdp, 1)
-       call lev%I(m)%setval(0.0_pfdp, 2)
+!     do m = 1, Nnodes-1
 !        call Lev%encap%setval(Lev%S(m), 0.0_pfdp, 1)
 !        call Lev%encap%setval(Lev%S(m), 0.0_pfdp, 2)
 
-       if( sweep_y ) then
+     if( sweep_y ) then
+        do m = 1, Nnodes-1
+          call lev%I(m)%setval(0.0_pfdp, 1)
           !  Forward in y
           if (this%explicit) then
              do n = 1, Nnodes
@@ -168,9 +169,13 @@ contains
             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 1)
 !              call Lev%encap%axpy(Lev%S(m), 1.0_pfdp, Lev%tauQ(m),1)
           end if
-        end if
+        end do
+      end if
 
        if( sweep_p ) then
+         do m =  Nnodes-1,1,-1
+          call lev%I(m)%setval(0.0_pfdp, 2)
+
           !  Backward in p, note S(m) goes backward now
 !2          do n =  1,Nnodes
 !2             call Lev%encap%axpy(Lev%S(Nnodes-m), dt*imexQ_oc%QdiffE(m,n), Lev%F(Nnodes+1-n,1),2)
@@ -191,8 +196,8 @@ contains
           if (allocated(lev%tauQ)) then
              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
           end if
+         end do
        end if
-    end do
 
     ! Reload the newest initial values
     ! Recompute first function values
@@ -209,18 +214,52 @@ contains
 !        call imexQ_oc%f2eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,2), 1)
     end if
     !else 
-    if( sweep_p ) then
-      if (k .eq. 1) then
-        call lev%Q(Nnodes)%copy(lev%qend, 2)
-        if (this%explicit) &
-          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
-        if (this%implicit) &
-          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
-      end if
-!        call Lev%encap%copy(Lev%Q(Nnodes), Lev%qend, 2)
-!        call imexQ_oc%f1eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,1), 2, Nnodes, step)
-!        call imexQ_oc%f2eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,2), 2)
-    end if
+!     if( sweep_p ) then
+!       if (k .eq. 1) then
+!         call lev%Q(Nnodes)%copy(lev%qend, 2)
+!         if (this%explicit) &
+!           call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+!         if (this%implicit) &
+!           call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+!       end if
+! !        call Lev%encap%copy(Lev%Q(Nnodes), Lev%qend, 2)
+! !        call imexQ_oc%f1eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,1), 2, Nnodes, step)
+! !        call imexQ_oc%f2eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,2), 2)
+!     end if
+    
+!     if (sweep_p) then
+!    !  Backward  sweep on p
+!       t = tend
+!       do m =  Nnodes-1,1,-1
+!          t = t - dt*this%dtsdc(m)
+! 
+!          ! Do the dirk parts
+!          call this%rhs%setval(0.0_pfdp, 2)
+!          do n = Nnodes, m+1,-1
+!             if (this%explicit) &
+!               call this%rhs%axpy(dt*this%QtilE(Nnodes-m,Nnodes-n+1), lev%F(n,1), 2)  
+!             if (this%implicit) &
+!               call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), lev%F(n,2), 2)
+!          end do
+!        
+!          call this%rhs%axpy(1.0_pfdp, lev%I(m), 2)
+!          call this%rhs%axpy(1.0_pfdp, lev%Q(Nnodes), 2)
+! 
+!          !  Do implicit solve  
+!          if (this%implicit) then
+!            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
+!          else
+!             call lev%Q(m)%copy(this%rhs,2)
+!          end if
+!          if (this%explicit) &
+!            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step) 
+!       end do
+!       ! reset first value
+!       call lev%q0%copy(lev%Q(1), 2)
+!       call pf_residual(pf, lev, dt, 2)
+! !       call pf_residual(pf, lev, dt, which)
+!     end if
+
 
     !  Make some space
 !     call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)
@@ -232,7 +271,7 @@ contains
          t = t + dt*this%dtsdc(m)  !  forward running time
 
          !  Form rhs with all explicit terms
-         call this%rhs%setval(0.0_pfdp, 1)
+         call this%rhs%setval(0.0_pfdp,1)
          do n = 1, m
             if (this%explicit) &
               call this%rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1), 1)  
@@ -246,7 +285,6 @@ contains
         ! Do implicit solve  
          if (this%implicit) then
             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,2), 2, 1)
-!             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
          else
             call lev%Q(m+1)%copy(this%rhs,1)            
          end if
@@ -256,7 +294,46 @@ contains
       end do
       !  Reset last values
       call lev%qend%copy(lev%Q(Nnodes), 1)
-      call pf_residual(pf, lev, dt, 1)
+!       call pf_residual(pf, lev, dt, 1)
+!       call pf_residual(pf, lev, dt, which)
+    end if
+    
+    if( sweep_p ) then
+!        do m=1, Nnodes-1
+!           call lev%I(m)%setval(0.0_pfdp, 2)
+! 
+!           !  Backward in p, note S(m) goes backward now
+! !2          do n =  1,Nnodes
+! !2             call Lev%encap%axpy(Lev%S(Nnodes-m), dt*imexQ_oc%QdiffE(m,n), Lev%F(Nnodes+1-n,1),2)
+! !2             call Lev%encap%axpy(Lev%S(Nnodes-m), dt*imexQ_oc%QdiffI(m,n), Lev%F(Nnodes+1-n,2),2)
+! !2          end do
+!           if (this%explicit) then
+!             do n =  Nnodes,1,-1
+!               call lev%I(m)%axpy(dt*this%QdiffE(Nnodes-m,Nnodes+1-n), lev%F(n,1), 2)
+!               !call Lev%encap%axpy(Lev%S(m), dt*imexQ_oc%QdiffE(Nnodes-m,Nnodes+1-n), Lev%F(n,1),2)
+!             end do
+!           end if
+!           if (this%implicit) then
+!             do n =  Nnodes,1,-1
+!               call lev%I(m)%axpy(dt*this%QdiffI(Nnodes-m,Nnodes+1-n), lev%F(n,2), 2)
+! !               call Lev%encap%axpy(Lev%S(m), dt*imexQ_oc%QdiffI(Nnodes-m,Nnodes+1-n), Lev%F(n,2),2)
+!             end do
+!           end if
+!           if (allocated(lev%tauQ)) then
+!              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
+!           end if
+!       end do
+    
+      if (k .eq. 1) then
+        call lev%Q(Nnodes)%copy(lev%qend, 2)
+        if (this%explicit) &
+          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+        if (this%implicit) &
+          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+      end if
+!        call Lev%encap%copy(Lev%Q(Nnodes), Lev%qend, 2)
+!        call imexQ_oc%f1eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,1), 2, Nnodes, step)
+!        call imexQ_oc%f2eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,2), 2)
     end if
 
    if (sweep_p) then
@@ -288,9 +365,12 @@ contains
       end do
       ! reset first value
       call lev%q0%copy(lev%Q(1), 2)
-      call pf_residual(pf, lev, dt, 2)
+!       call pf_residual(pf, lev, dt, 2)
     end if
+!     if(sweep_p) &
+!       call this%evaluate_all(lev, t0 + dt*lev%nodes, 2, step)
 
+    call pf_residual(pf, lev, dt, which)
     ! done
     call call_hooks(pf, level_index, PF_POST_SWEEP)
 
@@ -311,7 +391,8 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    
+    if (.not.present(flags)) stop "IMEXQ_OC EVAL WITHOUT FLAGS"
+
     mystep = 1
     if(present(step)) then 
       mystep = step
@@ -319,7 +400,7 @@ contains
       print *, "step not present in evaluate", which
       stop
     end if
-!     print *, 'evaluate step = ', mystep
+!     print *, "IMEXQ_OC EVAL ", which
     
     if (this%explicit) &
       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, which, m, mystep)
@@ -336,6 +417,11 @@ contains
     integer, intent(in), optional   :: flags, step
 !     call pf_generic_evaluate_all(this, lev, t, flags, step)
     integer :: m
+    
+    if (.not.present(flags)) stop "IMEXQ_OC EVAL_ALL WITHOUT FLAGS"
+    if (.not.present(step)) stop "IMEXQ_OC EVAL_ALL WITHOUT step"
+
+    
     do m = 1, lev%nnodes
       call this%evaluate(lev, t(m), m, flags, step)
     end do
@@ -405,7 +491,8 @@ contains
       print *, "flags not present in integrate", which
       stop
     end if
-    
+!     print *, "IMEXQ_OC INTEGRATE ", which
+        
     do n = 1, Nnodes-1
        !  Forward in y
        if( (which .eq. 0) .or. (which .eq. 1) ) then
@@ -454,6 +541,8 @@ contains
       print *, "flags not present in residual", which
       stop
     end if
+!     print *, "IMEXQ_OC RESIDUAL ", which
+
     
     call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
 
@@ -489,12 +578,17 @@ contains
     integer :: m, p, which, mystep
     which = 3
     if(present(flags)) which = flags
+    if (.not.present(flags)) stop "IMEXQ_OC SPREADQ0 WITHOUT FLAGS"
+
+!     print *, "IMEXQ_OC SPREADQ0", which
+
+    
     mystep = 1
     if(present(step))  then
       mystep = step !needed for sequential version
-!     else
-!       print *, "step not present in spreadq0", which
-!       stop
+    else
+      print *, "step not present in spreadq0", which
+      stop
     end if
     
     select case(which)

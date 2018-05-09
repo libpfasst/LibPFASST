@@ -127,9 +127,9 @@ contains
 
     ndarray_oc_obj => cast_as_ndarray_oc(encap) !??
 
-    deallocate(ndarray_oc_obj%shape)
     deallocate(ndarray_oc_obj%pflatarray)
     deallocate(ndarray_oc_obj%yflatarray)
+    deallocate(ndarray_oc_obj%shape)
     nullify(ndarray_oc_obj)
   end subroutine ndarray_oc_destroy
 
@@ -141,9 +141,9 @@ contains
     
     select type (x)
     class is (ndarray_oc)
-       deallocate(x%shape)
        deallocate(x%pflatarray)
        deallocate(x%yflatarray)
+       deallocate(x%shape)
     class default
       stop "TYPE ERROR in ndarray_oc_destroy_single"
     end select
@@ -160,9 +160,9 @@ contains
     select type(x)
     class is (ndarray_oc)
        do i = 1,n
-          deallocate(x(i)%shape)
           deallocate(x(i)%pflatarray)
           deallocate(x(i)%yflatarray)
+          deallocate(x(i)%shape)
        end do
     class default
       stop "TYPE ERROR in ndarray_oc_destroy_array"
@@ -180,6 +180,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if(.not.present(flags)) print *, "setval without flags"
 
     select case (which)
     case (0)
@@ -204,7 +205,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-
+    if(.not.present(flags)) print *, "copy without flags"
     
     select type(src)
     type is (ndarray_oc)
@@ -281,6 +282,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if(.not.present(flags)) print *, "norm without flags"
     
     select case (which)
     case (0)
@@ -304,6 +306,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if (.not.present(flags)) stop "axpy without flags" 
     
     select type(x)
     type is (ndarray_oc)
@@ -356,6 +359,8 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if(.not.present(flags)) print *, "array1d_oc without flags"
+    
     select type (x)
     type is (ndarray_oc)
       select case (which)
@@ -380,6 +385,8 @@ contains
 
     which = 0
     if (present(flags)) which = flags
+    if(.not.present(flags)) print *, "array2d_oc without flags"
+    
     select type (x)
     type is (ndarray_oc)
       select case (which)
