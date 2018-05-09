@@ -147,7 +147,7 @@ program main
 !  print *,'foutbase=',foutbase
   
 !   write (logfilename, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'iter',max_opt_iter,'_Nx',nvars(pf%nlevels),'_Nstep',nsteps,'_Nproc',comm%nproc
-  write(logfilename, "(A,'optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), max_opt_iter, nsteps, comm%nproc
+  write(logfilename, "(A,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), max_opt_iter, nsteps, comm%nproc
 
 !   logfilename = trim(logfile)
   if (warmstart .eq. 1) then
@@ -213,6 +213,9 @@ program main
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , & 
          status = 'unknown',  action = 'write')
+
+  if(pf%rank == 0) write(105,*) "iter", "L2_grad", "objective", "stepsize"
+
 
   allocate(gradient(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels), nvars(pf%nlevels)))
   allocate(prevGrad(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels), nvars(pf%nlevels)))

@@ -10,7 +10,7 @@ EXE = main_split.exe
 include $(LIBPFASST)/Makefile.defaults
 
 VPATHS += src
-FSRC   =  src/feval.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/pf_optimization_seq.f90 src/main_split.f90
+FSRC   =  src/feval.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/pf_optimization_flex.f90 src/main_split.f90
 
 FFLAGS  += -g -I$(FFTW3)/include -I$(LIBPFASST)/include 
 #-fcheck=all,bounds
@@ -29,8 +29,8 @@ include $(LIBPFASST)/Makefile.rules
 
 build/solutions.o:     build/probin.o
 build/feval.o:         build/probin.o build/solutions.o
-build/pf_optimization_seq.o: build/solutions.o build/feval.o build/probin.o
+build/pf_optimization_flex.o: build/solutions.o build/feval.o build/probin.o
 build/hooks.o:         build/numpy.o build/solutions.o
 build/main.o:          build/feval.o build/hooks.o build/probin.o $(LIBPFASST)/lib/libpfasst.a
-build/main_split.o:    build/feval.o build/pf_optimization_seq.o build/hooks.o build/probin.o $(LIBPFASST)/lib/libpfasst.a
-build/main_heat.o:    build/feval.o build/pf_optimization_seq.o build/hooks.o build/probin.o $(LIBPFASST)/lib/libpfasst.a
+build/main_split.o:    build/feval.o build/pf_optimization_flex.o build/hooks.o build/probin.o $(LIBPFASST)/lib/libpfasst.a
+build/main_heat.o:    build/feval.o build/pf_optimization_flex.o build/hooks.o build/probin.o $(LIBPFASST)/lib/libpfasst.a
