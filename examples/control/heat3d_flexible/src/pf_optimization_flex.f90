@@ -103,9 +103,9 @@ contains
     real(pfdp),               intent(in   ) :: dt
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
-    real(pfdp),               intent(  out) :: gradient(:,:,:,:,:), LinftyNormGrad, L2NormGradSq
+    real(pfdp),               intent(inout) :: gradient(:,:,:,:,:), LinftyNormGrad, L2NormGradSq
     real(pfdp),               intent(inout) :: savedStatesFlat(:,:,:)
-    real(pfdp),                intent(inout) :: L2errorState, LinfErrorState, L2exactState, LinfExactState
+    real(pfdp),               intent(inout) :: L2errorState, LinfErrorState, L2exactState, LinfExactState
 
 
     integer :: m, step, thisstep

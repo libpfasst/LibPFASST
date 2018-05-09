@@ -214,7 +214,7 @@ program main
      open(unit=105, file = logfilename , & 
          status = 'unknown',  action = 'write')
 
-  if(pf%rank == 0) write(105,*) "iter", "L2_grad", "objective", "stepsize"
+  if(pf%rank == 0) write(105,*) "iter   L2_grad   objective   stepsize"
 
 
   allocate(gradient(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels), nvars(pf%nlevels), nvars(pf%nlevels)))
@@ -273,7 +273,7 @@ program main
      call mpi_allreduce(L2NormGradSq, globL2NormGradSq, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
      call mpi_allreduce(LinftyNormGrad, globLinftyNormGrad, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'gradient (L2, Linf) = ', sqrt(globL2NormGradSq), globLinftyNormGrad
-     if(pf%rank == 0) write(105,*) k, sqrt(L2NormGradSq), globObj, prevStepSize
+     if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
      if (sqrt(globL2NormGradSq) < tol_grad) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (gradient norm small enough), stopping'
        !call write_control_work1(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
