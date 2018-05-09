@@ -358,7 +358,7 @@ contains
 !         print *, "rank ", sweeper%myrank, "step = ", n, "true step= ", thisstep
 !         t = t0 + (n-1)*dt + dt*nodes(m)
         t = t0 + thisstep*dt + dt*nodes(m)
-        call exact_u(sweeper%u(n,m,:,:,:), shape, t)
+!         call exact_u(sweeper%u(n,m,:,:,:), shape, t)
         call y_desired(sweeper%ydesired(n,m,:,:,:), shape, t)
       end do
     end do

@@ -1,7 +1,7 @@
 &PARAMS
   ndim          = 3
 
-  nsteps       = 10
+  nsteps       = 20
   
   poutmod  = 1
   
@@ -15,17 +15,17 @@
   Lx = 1.0
   Ly = 1.0
   Lz = 1.0
-  Tfin = 1.0
+  Tfin = 2.0
   
   alpha = 0.05
-  max_opt_iter = 100
+  max_opt_iter = 50
 
   
   do_imex = 1
   warmstart = 0
   do_mixed = 0
   !logfile = "progress_imex3lev_r20_32-64-128_3-5-9_dy_wp_cold_1em11_u0_200iter.log"
-  logfile = "progress.log"
+  logfile = "optprogress_u0_T2"
   
   pfasst_nml = "pfasst.nml"
   fbase = "pfasst_V"
