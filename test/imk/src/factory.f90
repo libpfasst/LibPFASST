@@ -214,25 +214,34 @@ module factory
     real(pfdp), intent(in) :: a
     integer, intent(in), optional :: flags
     class(zndarray), pointer :: zndarray_obj
+    integer :: this_shape(2), dim, i
 
     zndarray_obj => cast_as_zndarray(x)
-    this%array = a * zndarray_obj%array + this%array
+    if (present(flags)) then
+       this%y = a * zndarray_obj%y + this%y
+    else
+       this%array = a * zndarray_obj%array + this%array
+    endif
+
   end subroutine zndarray_axpy
 
   subroutine zndarray_eprint(this,flags)
     class(zndarray), intent(inout) :: this
-    integer :: this_shape(2), i
+    integer :: this_shape(2), i, j, dim
     integer, intent(in), optional :: flags
-    
+
     this_shape = shape(this%array)
+    dim = this_shape(1)
     print*, 'omega'
-    do i = 1, this_shape(1)-1
-        print*, this%array(i,i+1)
+    do i = 1, dim-1
+       write(*, 100) real(this%array(i,i+1))
     end do
     print*, 'y'
-    do i = 1, this_shape(1)
-       print*, this%y(i,i)
+    do i = 1, dim
+       write(*, 100) real(this%y(i,i))
     end do
+    100 format (*(F14.11))
+
   end subroutine zndarray_eprint
 
   subroutine write_to_disk(this, filename)

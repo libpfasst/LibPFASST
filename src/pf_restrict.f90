@@ -177,22 +177,15 @@ contains
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !<  fine solution restricted in space only
     integer :: m, which
     integer :: f_nnodes
-    
+
     which = 1
     if (present(flags)) which = flags
 
-    
     f_nnodes = f_lev_ptr%nnodes
-    !>  create works space
-    if (IS_INTEGRAL) then   ! Restriction of integrals 
-
-      call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
-    else    ! Restriction of solutions
-       call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, c_lev_ptr%shape)
-    end if
 
     !>  do the restriction
-    if (IS_INTEGRAL) then   ! Restriction of integrals 
+    if (IS_INTEGRAL) then   ! Restriction of integrals
+       call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
        !  spatial restriction
        do m = 1, f_nnodes-1
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
@@ -204,7 +197,10 @@ contains
           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
        if ((which .eq. 0) .or. (which .eq. 2)) &
           call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
+       end if
+       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
     else
+       call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, c_lev_ptr%shape)
        !  spatial restriction
        do m = 1, f_nnodes
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
@@ -213,19 +209,12 @@ contains
           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 1)
        if ((which .eq. 0) .or. (which .eq. 2)) &
           call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 2)
-    end if
-
-    !>  destroy workspace
-    if (IS_INTEGRAL) then   ! Restriction of integrals 
-       call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
-    else
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., which)
        call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, c_lev_ptr%shape)
     end if
 
   end subroutine restrict_sdc
 
-  
-  
   !> Apply an matrix (tmat or rmat) to src and add to dst.
   subroutine pf_apply_mat(dst, a, mat, src, zero, flags)
     class(pf_encap_t), intent(inout) :: dst(:)

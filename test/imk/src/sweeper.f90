@@ -167,10 +167,10 @@ contains
     class(imk_sweeper_t), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: q0
     class(pf_encap_t), intent(inout) :: q
-    integer :: dim, nprob=1 !< size of dimensions of P, U
+    integer :: i, dim, nprob=1 !< size of dimensions of P, U
     class(zndarray), pointer :: q0_p, q_p
     complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
-    real(pfdp) :: exptol=1.d-15
+    real(pfdp) :: exptol=1.0d-20
 
     q0_p => cast_as_zndarray(q0)
     q_p => cast_as_zndarray(q)
@@ -178,26 +178,45 @@ contains
     dim = q0_p%dim
     allocate(tmp(dim, dim), time_ev_op(dim, dim))
 
+    if (this%debug) then
+      print*, 'expm input'
+      call q_p%eprint()
+    endif
+
+    tmp = cmplx(0.0, 0.0, pfdp)
     time_ev_op = cmplx(0.0, 0.0, pfdp)
     time_ev_op = compute_matrix_exp(q_p%array, dim, exptol)
 
-    if (nprob < 10) then
-       call zgemm('n', 'n', dim, dim, dim, &
-            z1, time_ev_op, dim, &
-            q0_p%y, dim, &
-            z0, tmp, dim)
+    if (this%debug) then
+      print*, 'solution before propagate'
+      call q0_p%eprint()
 
+      print*, 'time_ev_ops'
+      do i = 1, dim
+         print*, time_ev_op(i,i)
+      end do
+    endif
+
+    call zgemm('n', 'n', dim, dim, dim, &
+        z1, time_ev_op, dim, &
+        q0_p%y, dim, &
+        z0, tmp, dim)
+
+    if (nprob < 10) then
        call zgemm('n', 'c', dim, dim, dim, &
             z1, tmp, dim, &
             time_ev_op, dim, &
             z0, q_p%y, dim)
-    else
-       call zgemm('n', 'n', dim, dim, dim, &
-            z1, time_ev_op, dim, &
-            q0_p%y, dim, &
-            z0, q_p%y, dim)
     endif
 
+    if (this%debug) then
+      print*, 'solution after propagate'
+      print*, 'this omega was used to compute time_ev_op'
+      call q_p%eprint()
+
+      print*, 'asymmetry in solution = ', q_p%y(1,1) + q_p%y(dim,dim)
+      !if (real(q_p%y(1,1) + q_p%y(dim,dim)) > 0.001) stop
+    endif
     deallocate(tmp, time_ev_op)
     nullify(q0_p, q_p)
   end subroutine propagate_solution

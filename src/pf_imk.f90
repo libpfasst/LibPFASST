@@ -289,11 +289,12 @@ contains
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t0
     integer, optional, intent(in   ) :: flags, step
-    
+
     integer m,p
     !  Stick initial condition into first node slot
     call lev%Q(1)%copy(lev%q0, 1)
 
+    ! set initial omega to 0
     call lev%Q(1)%setval(0.0d0)
 
     !  Evaluate F at first spot
@@ -301,7 +302,7 @@ contains
 
     ! Spread F and solution to all nodes
     do m = 2, lev%nnodes
-       call lev%Q(m)%copy(lev%Q(1))
+       call lev%Q(m)%copy(lev%Q(1), 1)
        do p = 1, lev%ulevel%sweeper%npieces
          call lev%F(m,p)%copy(lev%F(1,p))
        end do

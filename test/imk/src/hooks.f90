@@ -2,6 +2,7 @@ module hooks
   use pf_mod_dtype
   use factory
   use sweeper
+
   implicit none
 
 contains
@@ -44,9 +45,18 @@ contains
     type(zndarray), pointer :: r, q
 
     r => cast_as_zndarray(level%R(level%nnodes-1))
+    q => cast_as_zndarray(level%Q(level%nnodes-1))
 
     print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%array))
+
+    if (any(isnan(real(q%array)))) then
+       print*, 'omega is NAN', q%array
+       stop
+    elseif (any(isnan(real(q%y)))) then
+       print*, 'y is NAN', q%y
+       stop
+    endif
   end subroutine echo_residual
 
 
