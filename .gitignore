@@ -28,3 +28,8 @@ tests/output
 /tests/toda/.ipynb_checkpoints/testbed-checkpoint.ipynb
 latex
 html
+*.dat
+final_solution
+*.gif
+.pytest_cache
+/TAGS

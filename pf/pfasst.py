@@ -177,7 +177,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
                    'particles_{}-periodic_{}-exact_dir_{}-qtype-{}-'+ \
-                   'levels_{}-coarsenodes_{}-coarsemagnus_{}-tasks_{}.pkl'
+                   'levels_{}-nodes_{}-magnus_{}-tasks_{}.pkl'
 
     def _create_pf_string(self):
         nodes = ' '.join(map(str, self.p.nodes))
@@ -326,11 +326,13 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.magnus = self._make_sure_is_list(self.p.magnus)
         self.p.nodes = self._make_sure_is_list(self.p.nodes)
         self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
+
+        nodes = ', '.join(map(str, self.p.nodes))
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
                                    self.p.particles, self.p.periodic, self.p.exact_dir, self.p.qtype,
-                                   self.p.levels, self.p.nodes[0],
+                                   self.p.levels, nodes,
                                    self.p.magnus[0], self.p.tasks)
 
         return pkl_path
@@ -486,11 +488,11 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
         if self.p.inttype == 'mag':
-            self.p.nodes = 3
+            self.p.nodes = [3]
             self.p.magnus = [3]
             self.p.qtype = 'gauss'
         else:
-            self.p.nodes = 15
+            self.p.nodes = [11]
             self.p.nterms = [20]
             self.p.qtype = 'lob'
 

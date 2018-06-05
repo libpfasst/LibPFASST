@@ -50,8 +50,6 @@ contains
     integer :: nsteps_loc  !<  local number of time steps    
     real(pfdp) :: tend_loc !<  The final time of run
 
-    
-    
     ! make a local copy of nproc
     nproc = pf%comm%nproc
 
@@ -180,7 +178,6 @@ contains
        end if
        if(flags(1)==0) which = 0   ! sweep forward and backward simultaneously on two components, communication only forwards
     end if
-        
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
 
