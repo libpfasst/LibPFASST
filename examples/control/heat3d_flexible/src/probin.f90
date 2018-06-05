@@ -132,7 +132,7 @@ contains
     !  Read in stuff from a file
     un = 9
     write(*,*) 'opening file ',TRIM(filename), '  for input'
-    open(unit=un, file = filename, status = 'old', action = 'read')
+    open(unit=un, file = filename, status = 'old', action = 'read') ! do that with MPI_File_Open?
     read(unit=un, nml = params)
     close(unit=un)
           

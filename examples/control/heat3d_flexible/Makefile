@@ -12,8 +12,8 @@ include $(LIBPFASST)/Makefile.defaults
 VPATHS += src
 FSRC   =  src/feval.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/pf_optimization_flex.f90 src/main_split.f90
 
-FFLAGS  += -g -I$(FFTW3)/include -I$(LIBPFASST)/include 
-#-fcheck=all,bounds
+FFLAGS  += -I$(FFTW3)/include -I$(LIBPFASST)/include 
+#-g -fcheck=all,bounds
 LDFLAGS += -L$(LIBPFASST)/lib -lpfasst 
 #-lblas -llapack
 LDFLAGS += -L$(FFTW3)/lib -lfftw3

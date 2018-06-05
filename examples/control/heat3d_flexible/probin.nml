@@ -1,7 +1,7 @@
 &PARAMS
   ndim          = 3
 
-  nsteps       = 32
+  nsteps       = 48
   
   poutmod  = 1
   
@@ -23,8 +23,8 @@
   
   do_imex = 1
   warmstart = 0
-  do_mixed = 0
-  logfile = "optprogress_u0_T1"
+  do_mixed = 1
+  logfile = "optprogress_u1_T1_stopsweep_new"
   
   pfasst_nml = "pfasst.nml"
   fbase = "pfasst_V"

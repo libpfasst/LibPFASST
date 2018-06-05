@@ -353,7 +353,7 @@ contains
     
     do n = 1, nsteps ! this is nsteps_per_rank
       do m = 1, nnodes        
-        sweeper%u(n,m,:,:,:) = 0.0_pfdp
+        sweeper%u(n,m,:,:,:) = 1.0_pfdp
         thisstep = (n-1)*sweeper%nproc + sweeper%myrank
 !         print *, "rank ", sweeper%myrank, "step = ", n, "true step= ", thisstep
 !         t = t0 + (n-1)*dt + dt*nodes(m)

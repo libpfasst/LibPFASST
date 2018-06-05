@@ -147,18 +147,24 @@ program main
 !  print *,'foutbase=',foutbase
   
 !   write (logfilename, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'iter',max_opt_iter,'_Nx',nvars(pf%nlevels),'_Nstep',nsteps,'_Nproc',comm%nproc
-  write(logfilename, "(A,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), max_opt_iter, nsteps, comm%nproc
-
+  if( do_mixed == 1 ) then
+    logfile = trim(logfile)//'_mixed'
+  end if
+  
 !   logfilename = trim(logfile)
   if (warmstart .eq. 1) then
     predict = .false.
+    logfile = trim(logfile)//'_warm'
   else
     predict = .true.
-  endif
+    logfile = trim(logfile)//'_cold'
+  endif    
   if (nsteps_per_rank > 1 ) predict = .true. ! for state, on the first block we could in principle warm start as we load the state values
                                              ! for the adjoint solve; for paraexp like integration, however, this will not be the case
                                              ! -> decide in evaluate_objective according to warmstart, step and do_mixed
 
+  write(logfilename, "(A,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), max_opt_iter, nsteps, comm%nproc
+                                             
 !  open(unit=101, file = foutbase, status = 'unknown', action = 'write')
 
   !  Output the run parameters
@@ -250,7 +256,7 @@ program main
      if ( k .eq. 1 ) then
         call evaluate_objective(pf, q1, dt, nsteps_per_rank, .true., alpha, objective, L2NormUSq, savedStatesFlat, &
                                 L2errorState, LinfErrorState, L2exactState, LinfExactState)
-        itersState = itersState + pf%state%itcnt
+        itersState = itersState + pf%state%itcnt - pf%state%skippedy
 !         exit
      else
         objective = objectiveNew  !can we return globObjNew from linesearch, avoids communication; is objective needed somewhere?
@@ -372,24 +378,27 @@ program main
    call date_and_time(date=date, time=time, values=time_end)
    if (pf%rank .eq. 0) then
      print *, 'end optimization on ', date, ', ',  time
-     time_start_sec = time_start(5) * 3600 + time_start(6) * 60 &
+     time_start_sec = time_start(3) * 24 * 3600 + time_start(5) * 3600 + time_start(6) * 60 &
            + time_start(7) + 0.001 * time_start(8)
-      time_end_sec = time_end(5) * 3600 + time_end(6) * 60 &
+      time_end_sec = time_end(3) * 24 * 3600 + time_end(5) * 3600 + time_end(6) * 60 &
            + time_end(7) + 0.001 * time_end(8)
       print *, 'duration [s]: ', time_end_sec-time_start_sec
+      if (time_end(2) /= time_start(2) ) then
+          print *, 'run finished in a different month than it started, duration needs to be corrected!'
+      end if
    end if
 
   call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'u')
-  call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, pf%rank*dt, dt, pf%levels(pf%nlevels)%nodes, &
+  call dump_exact_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 0.0_pfdp, dt, pf%levels(pf%nlevels)%nodes, &
                                   L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfExactCtrl)
-!   call mpi_allreduce(L2errorCtrl, globL2errorCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-!   call mpi_allreduce(LinfErrorCtrl, globLinfErrorCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
-!   call mpi_allreduce(L2exactCtrl, globL2exactCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-!   call mpi_allreduce(LinfExactCtrl, globLinfExactCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
-  call mpi_allreduce(L2errorState, globL2errorState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-  call mpi_allreduce(LinfErrorState, globLinfErrorState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
-  call mpi_allreduce(L2exactState, globL2exactState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-  call mpi_allreduce(LinfExactState, globLinfExactState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
+  call mpi_allreduce(L2errorCtrl, globL2errorCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfErrorCtrl, globLinfErrorCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
+  call mpi_allreduce(L2exactCtrl, globL2exactCtrl, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+  call mpi_allreduce(LinfExactCtrl, globLinfExactCtrl, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
+!   call mpi_allreduce(L2errorState, globL2errorState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+!   call mpi_allreduce(LinfErrorState, globLinfErrorState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
+!   call mpi_allreduce(L2exactState, globL2exactState, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+!   call mpi_allreduce(LinfExactState, globLinfExactState, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror) 
 !   call mpi_allreduce(L2errorAdjoint, globL2errorAdjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
 !   call mpi_allreduce(LinfErrorAdjoint, globLinfErrorAdjoint, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
 !   call mpi_allreduce(L2exactAdjoint, globL2exactAdjoint, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
@@ -405,16 +414,16 @@ program main
   
    if( pf%rank == 0 ) then
       print *, 'overall sum iterations state, adjoint', sumItersState, sumItersAdjoint
-      print *, 'absolute error in computed control:  L2 = ', sqrt(L2errorCtrl)
-      print *, '                                   Linf = ', LinfErrorCtrl
-      print *, 'relative error in computed control:  L2 = ', sqrt(L2errorCtrl)/sqrt(L2exactCtrl)
-      print *, '                                   Linf = ', LinfErrorCtrl/LinfExactCtrl   
+      print *, 'absolute error in computed control:  L2 = ', sqrt(globL2errorCtrl)
+      print *, '                                   Linf = ', globLinfErrorCtrl
+      print *, 'relative error in computed control:  L2 = ', sqrt(globL2errorCtrl)/sqrt(globL2exactCtrl)
+      print *, '                                   Linf = ', globLinfErrorCtrl/globLinfExactCtrl   
 !       print *, 'exact control:                       L2 = ', sqrt(globL2exactCtrl)
 !       print *, '                                   Linf = ', globLinfExactCtrl
-      print *, 'absolute error in final state sol:   L2 = ', sqrt(globL2errorState)
-      print *, '                                   Linf = ', globLinfErrorState
-      print *, 'relative error in final state sol:   L2 = ', sqrt(globL2errorState)/sqrt(globL2exactState)
-      print *, '                                   Linf = ', globLinfErrorState/globLinfExactState   
+      print *, 'absolute error in final state sol:   L2 = ', sqrt(L2errorState)
+      print *, '                                   Linf = ', LinfErrorState
+      print *, 'relative error in final state sol:   L2 = ', sqrt(L2errorState)/sqrt(L2exactState)
+      print *, '                                   Linf = ', LinfErrorState/LinfExactState   
 !       print *, 'absolute error in final adjoint sol: L2 = ', sqrt(L2errorAdjoint)
 !       print *, '                                   Linf = ', LinfErrorAdjoint
 !       print *, 'relative error in final adjoint sol: L2 = ', sqrt(L2errorAdjoint)/sqrt(L2exactAdjoint)
