@@ -62,6 +62,7 @@ module pf_mod_dtype
     integer :: status   !< status (iterating, converged etc)
     integer :: pstatus  !< previous rank's status
     integer :: itcnt    !< iteration counter
+    integer :: skippedy !< skipped sweeps for state (for mixed integration)
     integer :: mysteps  !< steps I did
   end type pf_state_t
 

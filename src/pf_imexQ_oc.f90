@@ -107,11 +107,11 @@ contains
     real(pfdp)  :: dtq
 
     logical     :: sweep_y, sweep_p
-!     real(pfdp)  :: norms_y(Lev%nnodes-1), norms_p(Lev%nnodes-1)
+    real(pfdp), allocatable  :: norms_y(:) !, norms_p(Lev%nnodes-1)
     integer     ::step
     
     lev => pf%levels(level_index)   !<  Assign level pointer
-    
+        
     step = pf%state%step+1
 !     print *, 'sweep on step', step
 
@@ -136,6 +136,16 @@ contains
     else
        sweep_y = .true.
        sweep_p = .true.
+       allocate(norms_y(lev%nnodes-1))
+       do m = 1, Nnodes-1
+          norms_y(m) = lev%R(m)%norm(1)
+       end do
+       if ( maxval(abs(norms_y)) < pf%abs_res_tol ) then 
+         sweep_y = .false.
+         pf%state%skippedy = pf%state%skippedy + 1
+       end if
+       deallocate(norms_y)
+       !if ( maxval(abs(norms_p)) < pf%abs_res_tol ) sweep_p = .false.
     end if
 
 !     if( sweep_p .and. pf%rank == 0)  print *, "sweep on p with which = ", which
@@ -370,7 +380,15 @@ contains
 !     if(sweep_p) &
 !       call this%evaluate_all(lev, t0 + dt*lev%nodes, 2, step)
 
-    call pf_residual(pf, lev, dt, which)
+    if( sweep_p .and. sweep_y ) then
+      call pf_residual(pf, lev, dt, 0)
+    else if( sweep_y ) then
+      call pf_residual(pf, lev, dt, 1)
+    else if (sweep_p ) then
+      call pf_residual(pf, lev, dt, 2)
+    else
+      stop "neither sweep on p nor on y : that should not happen"
+    end if
     ! done
     call call_hooks(pf, level_index, PF_POST_SWEEP)
 

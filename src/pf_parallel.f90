@@ -859,7 +859,7 @@ contains
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
     pf%state%cycle   = -1
-    pf%state%itcnt   = 0
+!     pf%state%itcnt   = 0
     pf%state%mysteps = 0
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
@@ -1035,9 +1035,17 @@ contains
           call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .false., dir)
        end do
     else
-       call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
-       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
-       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
+!       if (which == 0) then
+!         call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
+!         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 1)
+!         call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
+!         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 2) ! this interferes with skipping y sweeps: have to check 
+!                                                                                        ! state residual in case of which==1 in sweeper as well
+!       else
+        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
+        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
+        call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
+!       endif
     endif
     
     !
