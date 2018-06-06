@@ -68,8 +68,12 @@ contains
     !>  allocate arrarys for and and receive requests
     allocate(pf_comm%recvreq(pf%nlevels))
     allocate(pf_comm%sendreq(pf%nlevels))
+    allocate(pf_comm%recvreq_bwd(pf%nlevels))
+    allocate(pf_comm%sendreq_bwd(pf%nlevels))
 
+    
     pf_comm%sendreq = MPI_REQUEST_NULL
+    pf_comm%sendreq_bwd = MPI_REQUEST_NULL
     pf_comm%statreq = -66
   end subroutine pf_mpi_setup
 
@@ -80,6 +84,8 @@ contains
 
     deallocate(pf_comm%recvreq)
     deallocate(pf_comm%sendreq)
+    deallocate(pf_comm%recvreq_bwd)
+    deallocate(pf_comm%sendreq_bwd)
   end subroutine pf_mpi_destroy
 
   !>  Subroutine to post receive requests.
@@ -96,12 +102,16 @@ contains
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
 
-    if(dir==1) source = modulo(pf%rank-1, pf%comm%nproc)
-    if(dir==2) source = modulo(pf%rank+1, pf%comm%nproc)
+!     if(dir==1) source = modulo(pf%rank-1, pf%comm%nproc)
+!     if(dir==2) source = modulo(pf%rank+1, pf%comm%nproc)
 
-    call mpi_irecv(level%recv, level%mpibuflen, MPI_REAL8, &
-                   source, tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
-
+    if (dir==2 ) then        
+        call mpi_irecv(level%recv_bwd, level%mpibuflen, MPI_REAL8, &
+                   modulo(pf%rank+1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq_bwd(level%index), ierror)
+    else
+        call mpi_irecv(level%recv, level%mpibuflen, MPI_REAL8, &
+                   modulo(pf%rank-1, pf%comm%nproc), tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
+    end if
   end subroutine pf_mpi_post
 
 
@@ -190,22 +200,26 @@ contains
     
     if (blocking) then
       if(dir == 2) then
-          call level%q0%pack(level%send, 2)
-       else
-          call level%qend%pack(level%send, 1)
-       end if       
-       call mpi_send(level%send, level%mpibuflen, MPI_REAL8, &
+          call level%q0%pack(level%send_bwd, 2)
+          call mpi_send(level%send_bwd, level%mpibuflen, MPI_REAL8, &
                      dest, tag, pf%comm%comm, stat, ierror)
-    else
-       call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
-!        call level%qend%pack(level%send)
-       if(dir == 2) then
-          call level%q0%pack(level%send, 2)
        else
           call level%qend%pack(level%send, 1)
-       end if
-       call mpi_isend(level%send, level%mpibuflen, MPI_REAL8, &
+          call mpi_send(level%send, level%mpibuflen, MPI_REAL8, &
+                     dest, tag, pf%comm%comm, stat, ierror)
+       end if       
+    else
+       if(dir == 2) then
+          call mpi_wait(pf%comm%sendreq_bwd(level%index), stat, ierror)
+          call level%q0%pack(level%send_bwd, 2)
+          call mpi_isend(level%send_bwd, level%mpibuflen, MPI_REAL8, &
+                      dest, tag, pf%comm%comm, pf%comm%sendreq_bwd(level%index), ierror)
+       else
+          call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
+          call level%qend%pack(level%send, 1)
+          call mpi_isend(level%send, level%mpibuflen, MPI_REAL8, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
+       end if
     end if
   end subroutine pf_mpi_send
 
@@ -231,10 +245,19 @@ contains
     end if
     
     if (blocking) then
-       call mpi_recv(level%recv, level%mpibuflen, MPI_REAL8, &
+      if (dir==2 ) then
+        call mpi_recv(level%recv_bwd, level%mpibuflen, MPI_REAL8, &
                      source, tag, pf%comm%comm, stat, ierror)
+      else
+        call mpi_recv(level%recv, level%mpibuflen, MPI_REAL8, &
+                     source, tag, pf%comm%comm, stat, ierror)
+      end if
     else
-       call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)
+      if (dir == 2) then
+        call mpi_wait(pf%comm%recvreq_bwd(level%index), stat, ierror)
+      else
+        call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)
+      end if
     end if
   end subroutine pf_mpi_recv
 

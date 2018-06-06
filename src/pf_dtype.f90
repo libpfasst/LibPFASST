@@ -61,6 +61,7 @@ module pf_mod_dtype
     integer :: sweep    !< sweep number
     integer :: status   !< status (iterating, converged etc)
     integer :: pstatus  !< previous rank's status
+    integer :: nstatus_d  !< next rank's status for backward integration
     integer :: itcnt    !< iteration counter
     integer :: skippedy !< skipped sweeps for state (for mixed integration)
     integer :: mysteps  !< steps I did
@@ -155,6 +156,8 @@ module pf_mod_dtype
      real(pfdp), allocatable :: &
           send(:),    &                 !< send buffer
           recv(:),    &                 !< recv buffer
+          send_bwd(:),  &               !< send buffer for backward send
+          recv_bwd(:),  &               !< recv buffer for backward recv
           nodes(:),   &                 !< list of SDC nodes
           t_sdc(:),   &                 !< time at the SDC nodes
           qmat(:,:),  &                 !< spectral integration matrix (0 to node)
@@ -199,6 +202,9 @@ module pf_mod_dtype
      integer, pointer :: &
           recvreq(:), &                 ! receive requests (indexed by level)
           sendreq(:)                    ! send requests (indexed by level)
+     integer, pointer :: &
+          recvreq_bwd(:), &             ! receive requests for backward recv (indexed by level)
+          sendreq_bwd(:)                ! send requests for backward send (indexed by level)
      integer :: statreq                 ! status send request
 
      ! fakie, needs modernization

@@ -67,6 +67,7 @@ contains
     !>  allocate status
     allocate(pf%state)
     pf%state%pstatus = 0
+!     pf%state%nstatus = 0
     pf%state%status  = 0
     pf%save_results = .true.
   end subroutine pf_pfasst_create
@@ -159,7 +160,8 @@ contains
     !> allocate flat buffers for send, and recv
     allocate(lev%send(mpibuflen))
     allocate(lev%recv(mpibuflen))
-
+    allocate(lev%send_bwd(mpibuflen))
+    allocate(lev%recv_bwd(mpibuflen))
 
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes))
@@ -243,6 +245,8 @@ contains
     !> deallocate flat buffers for communcition
     deallocate(lev%send)
     deallocate(lev%recv)
+    deallocate(lev%send_bwd)
+    deallocate(lev%recv_bwd)
 
     !> deallocate nodes, flags, and integration matrices
     deallocate(lev%nodes)

@@ -130,6 +130,17 @@ contains
     if (which .eq. 1) then
         sweep_y = .true.
         sweep_p = .false.
+        if (pf%state%itcnt > 1) then
+          allocate(norms_y(lev%nnodes-1))
+          do m = 1, Nnodes-1
+            norms_y(m) = lev%R(m)%norm(1)
+          end do
+          if ( maxval(abs(norms_y)) < pf%abs_res_tol ) then 
+            sweep_y = .false.
+            if (level_index == pf%nlevels) pf%state%skippedy = pf%state%skippedy + 1
+          end if
+          deallocate(norms_y)
+        end if
     else if (which .eq. 2) then
         sweep_y = .false.
         sweep_p = .true.
@@ -142,7 +153,7 @@ contains
        end do
        if ( maxval(abs(norms_y)) < pf%abs_res_tol ) then 
          sweep_y = .false.
-         pf%state%skippedy = pf%state%skippedy + 1
+         if (level_index == pf%nlevels) pf%state%skippedy = pf%state%skippedy + 1
        end if
        deallocate(norms_y)
        !if ( maxval(abs(norms_p)) < pf%abs_res_tol ) sweep_p = .false.
@@ -381,13 +392,13 @@ contains
 !       call this%evaluate_all(lev, t0 + dt*lev%nodes, 2, step)
 
     if( sweep_p .and. sweep_y ) then
-      call pf_residual(pf, lev, dt, 0)
+      call pf_residual(pf, lev, dt, 0) 
     else if( sweep_y ) then
       call pf_residual(pf, lev, dt, 1)
     else if (sweep_p ) then
       call pf_residual(pf, lev, dt, 2)
-    else
-      stop "neither sweep on p nor on y : that should not happen"
+!     else
+!       stop "neither sweep on p nor on y : that should not happen"
     end if
     ! done
     call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -578,10 +589,10 @@ contains
           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
           call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
        end if
-       if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call lev%R(m)%copy(lev%I(m), 2)
-          call lev%R(m)%axpy(1.0_pfdp,  lev%Q(lev%nnodes), 2)
-          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
+       if( (which .eq. 0) .or. (which .eq. 2) ) then ! for adjoint I(m) is computed backwards; in pf_residual, residual = R(nnodes-1), so reverse here as well?
+          call lev%R(lev%nnodes-m)%copy(lev%I(m), 2)
+          call lev%R(lev%nnodes-m)%axpy(1.0_pfdp,  lev%Q(lev%nnodes), 2)
+          call lev%R(lev%nnodes-m)%axpy(-1.0_pfdp, lev%Q(m), 2)
        end if
     end do
 
