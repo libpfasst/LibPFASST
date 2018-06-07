@@ -19,33 +19,7 @@
 ! Restriction and FAS routines.
 
 !
-! Notes:
-!
-!   2013-04-30 - Matthew Emmett
-!
-!    The pf_residual subroutine is now called after each SDC sweep,
-!     and it computes the '0 to node' integrals and stores them in
-!     'F%I' while it is computing the full SDC residual.  Furthermore,
-!     these 'F%I' integrals also contain the appropriate tau corrections.
-!
-!     This means that when computing FAS corrections: the fine
-!     integral term is already done for us, and it is already FAS
-!     corrected, so we dont't have to "bring down fas corrections"
-!     from finer levels.
-!
-!
 !   2013-04-17 - Matthew Emmett
-!
-!     Time restriction was switched from point injection to polynomial
-!     interpolation (ie, using the 'rmat's in each level) so that we
-!     can use proper nodes for each level.
-!
-!     To recover point injection (ie, use copy instead of axpy)
-!     properly we should really do some masking trickery with the
-!     restriction matrices (rmat).  XXX.
-!
-!     Finally, perhaps the workspaces should be preallocated (along
-!     with interpolation workspaces...).  XXX
 !
 !>  Module to restrict solutions between pfasst levels and create the FAS tau correction
 module pf_mod_restrict
@@ -66,18 +40,18 @@ contains
   subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags)
     type(pf_pfasst_t), intent(inout),target :: pf
     real(pfdp),        intent(in)    :: t0            !<  time at beginning of step
-    real(pfdp),        intent(in)    :: dt
+    real(pfdp),        intent(in)    :: dt            !<  time step
     integer,           intent(in)    :: level_index   !< defines which level to restrict
     integer, optional, intent(in)    :: flags    
 
-    !  Local variables
+    !>  Local variables
     class(pf_level_t), pointer :: c_lev_ptr    
     class(pf_level_t), pointer :: f_lev_ptr
 
     integer    :: m, which, step
 
-    real(pfdp), allocatable :: c_times(:)
-    real(pfdp), allocatable :: f_times(:)
+    real(pfdp), allocatable :: c_times(:)  !<  Simulation time at coarse nodes  
+    real(pfdp), allocatable :: f_times(:)  !<  Simulation time at fine nodes
     class(pf_encap_t), allocatable :: &
          c_tmp_array(:), &    ! coarse integral of coarse function values
          f_int_array(:), &    ! fine integral of fine function values
@@ -94,9 +68,8 @@ contains
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
-    !
-    ! create workspaces
-    !
+    
+    !> create workspaces
     call c_lev_ptr%ulevel%factory%create_array(c_tmp_array, c_lev_ptr%nnodes, &
       c_lev_ptr%index,   c_lev_ptr%shape)
     call c_lev_ptr%ulevel%factory%create_array(f_int_arrayr, c_lev_ptr%nnodes, &
@@ -105,20 +78,18 @@ contains
       f_lev_ptr%index,   f_lev_ptr%shape)
     allocate(c_times(c_lev_ptr%nnodes))
     allocate(f_times(f_lev_ptr%nnodes))
-    !
-    ! restrict q's and recompute f's
-    !
+
+    !> restrict q's and recompute f's
     c_times = t0 + dt*c_lev_ptr%nodes
     f_times = t0 + dt*f_lev_ptr%nodes
 
     call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,f_times, which)
 
-    !  Recompute the functions
-     call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times, which, step)
+    !>  Recompute the functions
+    call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times, which, step)
 
-    !
-    ! fas correction
-    !
+
+    !>  Compute  FAS correction
     do m = 1, c_lev_ptr%nnodes-1
        call c_lev_ptr%tauQ(m)%setval(0.0_pfdp, which)
     end do
@@ -149,6 +120,7 @@ contains
     call end_timer(pf, TRESTRICT + level_index - 1)
     call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
+    !>  Clean up
     call c_lev_ptr%ulevel%factory%destroy_array(c_tmp_array, c_lev_ptr%nnodes, &
       c_lev_ptr%index,   c_lev_ptr%shape)
     call c_lev_ptr%ulevel%factory%destroy_array(f_int_arrayr, c_lev_ptr%nnodes, &
@@ -213,50 +185,61 @@ contains
 
   end subroutine restrict_sdc
 
-  !> Apply an matrix (tmat or rmat) to src and add to dst.
+  !> Apply a matrix (tmat or rmat) to src and add to dst.
+  !> Mathematically this is 
+  !>     dst= dst + a*mat*src
+  !>  Where dst and src are vectors, mat is a matrix, and a is a scalar
+  !>  If the optional variable "zero" is provided and is false, then we compute
+  !>     dst= dst + a*mat*src
   subroutine pf_apply_mat(dst, a, mat, src, zero, flags)
-    class(pf_encap_t), intent(inout) :: dst(:)
-    real(pfdp),        intent(in)    :: a, mat(:, :)
-    class(pf_encap_t), intent(in)    :: src(:)
-    logical,           intent(in), optional :: zero
-    integer,           intent(in), optional :: flags
+    class(pf_encap_t), intent(inout) :: dst(:)       !<  destination vector
+    real(pfdp),        intent(in)    :: a            !<  scalar
+    real(pfdp),        intent(in)    :: mat(:, :)    !<  matrix
+    class(pf_encap_t), intent(in)    :: src(:)       !<  src vector
+    logical,           intent(in), optional :: zero   !< If false, don't zero out the the dst variable before computing 
+    integer,           intent(in), optional :: flags  !< Used for choosing which variable to operate on 
     
-    logical :: lzero
-    integer :: n, m, i, j, which
+    !>  Local variables
+    logical :: lzero   !<  local version of input parameter zero
+    integer :: which   !<  local version of flags
+    integer :: n, m    !<  size of mat   
+    integer :: i, j    !<  loop variables
 
     lzero = .true.; if (present(zero)) lzero = zero    
     which = 1;      if(present(flags)) which = flags
         
-!     print *, "apply_mat with which == ", which, " and zero ", lzero
-
     n = size(mat, dim=1)
     m = size(mat, dim=2)
         
     do i = 1, n
       if (lzero) call dst(i)%setval(0.0_pfdp, which)
       do j = 1, m
-        call dst(i)%axpy(a * mat(i, j), src(j), which)
+         if (a*mat(i, j) /= 0.0_pfdp)  call dst(i)%axpy(a * mat(i, j), src(j), which)
       end do
     end do
   end subroutine pf_apply_mat
   
-    !> Apply an matrix (tmat or rmat) to src and add to dst.
+  !> Apply an matrix (tmat or rmat) to src and add to dst.
   subroutine pf_apply_mat_backward(dst, a, mat, src, zero, flags)
-    class(pf_encap_t), intent(inout) :: dst(:)
-    real(pfdp),        intent(in)    :: a, mat(:, :)
-    class(pf_encap_t), intent(in)    :: src(:)
-    logical,           intent(in), optional :: zero
-    integer,           intent(in), optional :: flags
+    class(pf_encap_t), intent(inout) :: dst(:)       !<  destination vector
+    real(pfdp),        intent(in)    :: a            !<  scalar
+    real(pfdp),        intent(in)    :: mat(:, :)    !<  matrix
+    class(pf_encap_t), intent(in)    :: src(:)       !<  src vector
+    logical,           intent(in), optional :: zero   !< If false, don't zero out the the dst variable before computing 
+    integer,           intent(in), optional :: flags  !< Used for choosing which variable to operate on 
+
     
-    logical :: lzero
-    integer :: n, m, i, j, which
+    !>  Local variables
+    logical :: lzero   !<  local version of input parameter zero
+    integer :: which   !<  local version of flags
+    integer :: n, m    !<  size of mat   
+    integer :: i, j    !<  loop variables
 
     lzero = .true.; if (present(zero)) lzero = zero    
     which = 2;      if(present(flags)) which = flags
     
     if( which /= 2 ) &
       stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
-!     print *, "apply_mat with which == ", which, " and zero ", lzero
 
     n = size(mat, dim=1)
     m = size(mat, dim=2)
@@ -264,7 +247,7 @@ contains
     do i = 1, n
       if (lzero) call dst(n+1-i)%setval(0.0_pfdp, 2)
       do j = 1, m
-        call dst(n+1-i)%axpy(a * mat(i, j), src(m+1-j), 2)
+        if (a*mat(i, j) /= 0.0_pfdp)  call dst(n+1-i)%axpy(a * mat(i, j), src(m+1-j), 2)
       end do
     end do
   end subroutine pf_apply_mat_backward
