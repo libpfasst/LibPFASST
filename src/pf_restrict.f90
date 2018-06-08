@@ -48,7 +48,7 @@ contains
     class(pf_level_t), pointer :: c_lev_ptr    
     class(pf_level_t), pointer :: f_lev_ptr
 
-    integer    :: m, which, step
+    integer    :: m, step
 
     real(pfdp), allocatable :: c_times(:)  !<  Simulation time at coarse nodes  
     real(pfdp), allocatable :: f_times(:)  !<  Simulation time at fine nodes
@@ -60,8 +60,8 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-    which = 1
-    if (present(flags)) which = flags
+!     which = 1
+!     if (present(flags)) which = flags
     
     step = pf%state%step+1
     
@@ -83,37 +83,37 @@ contains
     c_times = t0 + dt*c_lev_ptr%nodes
     f_times = t0 + dt*f_lev_ptr%nodes
 
-    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false.,f_times, which)
+    call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%Q, c_lev_ptr%Q, .false., f_times, flags)
 
     !>  Recompute the functions
-    call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times, which, step)
+    call c_lev_ptr%ulevel%sweeper%evaluate_all(c_lev_ptr, c_times, flags=flags, step=step)
 
 
     !>  Compute  FAS correction
     do m = 1, c_lev_ptr%nnodes-1
-       call c_lev_ptr%tauQ(m)%setval(0.0_pfdp, which)
+       call c_lev_ptr%tauQ(m)%setval(0.0_pfdp, flags)
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
       call c_lev_ptr%ulevel%sweeper%integrate(c_lev_ptr, c_lev_ptr%Q, &
-        c_lev_ptr%F, dt, c_tmp_array, which)
+        c_lev_ptr%F, dt, c_tmp_array, flags)
        ! compute '0 to node' integral on the fine level
       call f_lev_ptr%ulevel%sweeper%integrate(f_lev_ptr, f_lev_ptr%Q, &
-        f_lev_ptr%F, dt, f_lev_ptr%I, which)
+        f_lev_ptr%F, dt, f_lev_ptr%I, flags)
        !  put tau in on fine level
        if (allocated(f_lev_ptr%tauQ)) then
           do m = 1, f_lev_ptr%nnodes-1
-             call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m), which)
+             call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m), flags)
           end do
        end if
-
+  
        ! restrict '0 to node' integral on the fine level  in time and space
-       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times, which)
+       call restrict_sdc(f_lev_ptr, c_lev_ptr, f_lev_ptr%I, f_int_arrayr, .true.,f_times, flags)
 
       ! compute '0 to node' tau correction
        do m = 1, c_lev_ptr%nnodes-1
-          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m), which)
-          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m), which)
+          call c_lev_ptr%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m), flags)
+          call c_lev_ptr%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m), flags)
        end do
     end if
 
@@ -147,11 +147,11 @@ contains
     integer, optional, intent(in)    :: flags    
 
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !<  fine solution restricted in space only
-    integer :: m, which
+    integer :: m
     integer :: f_nnodes
 
-    which = 1
-    if (present(flags)) which = flags
+!     which = 1
+!     if (present(flags)) which = flags
 
     f_nnodes = f_lev_ptr%nnodes
 
@@ -160,26 +160,34 @@ contains
        call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
        !  spatial restriction
        do m = 1, f_nnodes-1
-          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
+          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), flags)
        end do
 
        ! temporal restriction
        ! when restricting '0 to node' integral terms, skip the first entry since it is zero
-       if ((which .eq. 0) .or. (which .eq. 1)) &
-          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
-       if ((which .eq. 0) .or. (which .eq. 2)) &
-          call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
+       if (present(flags)) then
+          if ((flags .eq. 0) .or. (flags .eq. 1)) &
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
+          if ((flags .eq. 0) .or. (flags .eq. 2)) &
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
+       else
+          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
+       end if
        call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
     else
        call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, c_lev_ptr%shape)
        !  spatial restriction
        do m = 1, f_nnodes
-          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), which)
+          call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), flags)
        end do! temporal restriction
-       if ((which .eq. 0) .or. (which .eq. 1)) &
-          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 1)
-       if ((which .eq. 0) .or. (which .eq. 2)) &
-          call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 2)
+       if (present(flags)) then
+          if ((flags .eq. 0) .or. (flags .eq. 1)) &
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 1)
+          if ((flags .eq. 0) .or. (flags .eq. 2)) &
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 2)
+        else
+           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true.)
+        end if
        call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes, c_lev_ptr%index, c_lev_ptr%shape)
     end if
 
@@ -212,9 +220,9 @@ contains
     m = size(mat, dim=2)
         
     do i = 1, n
-      if (lzero) call dst(i)%setval(0.0_pfdp, which)
+      if (lzero) call dst(i)%setval(0.0_pfdp, flags)
       do j = 1, m
-         if (a*mat(i, j) /= 0.0_pfdp)  call dst(i)%axpy(a * mat(i, j), src(j), which)
+         if (a*mat(i, j) /= 0.0_pfdp)  call dst(i)%axpy(a * mat(i, j), src(j), flags)
       end do
     end do
   end subroutine pf_apply_mat

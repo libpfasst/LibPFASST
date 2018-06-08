@@ -34,18 +34,18 @@ contains
     integer, optional, intent(in)    :: flag
 
     real(pfdp) :: norms(lev%nnodes-1)
-    integer :: m, which
+    integer :: m
     
-    which = 1
-    if(present(flag)) which = flag
+!     which = 1
+!     if(present(flag)) which = flag
 
     call start_timer(pf, TRESIDUAL)
 
-    call lev%ulevel%sweeper%residual(lev, dt, which)
+    call lev%ulevel%sweeper%residual(lev, dt, flag)
 
     ! compute max residual norm
     do m = 1, lev%nnodes-1
-       norms(m) = lev%R(m)%norm(which)
+       norms(m) = lev%R(m)%norm(flag)
 !       print *, 'norm(', m, ') = ', norms(m)
     end do
 !    lev%residual = maxval(abs(norms))
@@ -64,34 +64,42 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer,  intent(in), optional  :: flags
 
-    integer :: m, which
+    integer :: m
     
-    which = 1
-    if(present(flags)) which = flags
+!     which = 1
+!     if(present(flags)) which = flags
 
     !>  Compute the integral of F
-    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
+    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
 
     !> add tau if it exists
     if (allocated(lev%tauQ)) then
        do m = 1, lev%nnodes-1
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
        end do
     end if
 
     !> subtract out the solution value
-    do m = 1, lev%nnodes-1
-       if( (which .eq. 0) .or. (which .eq. 1) ) then
-         call lev%R(m)%copy(lev%I(m), 1)
-         call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
-         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
-       end if
-       if( (which .eq. 0) .or. (which .eq. 2) ) then
-         call lev%R(m)%copy(lev%I(m), 2)
-         call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
-         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
-       end if
-    end do
+    if (present(flags)) then
+      do m = 1, lev%nnodes-1      
+        if( (flags .eq. 0) .or. (flags .eq. 1) ) then
+          call lev%R(m)%copy(lev%I(m), 1)
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
+        end if
+        if( (flags .eq. 0) .or. (flags .eq. 2) ) then
+          call lev%R(m)%copy(lev%I(m), 2)
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
+        end if
+      end do
+    else
+      do m = 1, lev%nnodes-1      
+        call lev%R(m)%copy(lev%I(m))
+        call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+      end do
+    end if
 
   end subroutine pf_generic_residual
 
@@ -105,16 +113,16 @@ contains
     real(pfdp),        intent(in)    :: t(:)
     integer, optional, intent(in)    :: flags, step
 
-    integer :: m, which, mystep
+    integer :: m
         
-    which = 1
-    if(present(flags)) which = flags
+!     which = 1
+!     if(present(flags)) which = flags
     
-    mystep = 1
-    if(present(step)) mystep = step
+!     mystep = 1
+!     if(present(step)) mystep = step
     
     do m = 1, lev%nnodes
-       call lev%ulevel%sweeper%evaluate(lev, t(m), m, which, mystep)
+       call lev%ulevel%sweeper%evaluate(lev, t(m), m, flags=flags, step=step)
     end do
   end subroutine pf_generic_evaluate_all
 

@@ -192,7 +192,11 @@ contains
       if(dir == 2) then
           call level%q0%pack(level%send, 2)
        else
-          call level%qend%pack(level%send, 1)
+          if(present(direction)) then
+            call level%qend%pack(level%send, 1)
+          else 
+            call level%qend%pack(level%send)
+          end if
        end if       
        call mpi_send(level%send, level%mpibuflen, MPI_REAL8, &
                      dest, tag, pf%comm%comm, stat, ierror)
@@ -202,7 +206,11 @@ contains
        if(dir == 2) then
           call level%q0%pack(level%send, 2)
        else
-          call level%qend%pack(level%send, 1)
+          if(present(direction)) then
+             call level%qend%pack(level%send, 1)
+          else
+            call level%qend%pack(level%send)
+          end if
        end if
        call mpi_isend(level%send, level%mpibuflen, MPI_REAL8, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)

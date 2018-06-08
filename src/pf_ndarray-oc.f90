@@ -180,7 +180,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if(.not.present(flags)) print *, "setval without flags"
+!     if(.not.present(flags)) print *, "setval without flags"
 
     select case (which)
     case (0)
@@ -205,7 +205,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if(.not.present(flags)) print *, "copy without flags"
+!     if(.not.present(flags)) print *, "copy without flags"
     
     select type(src)
     type is (ndarray_oc)
@@ -306,7 +306,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if (.not.present(flags)) stop "axpy without flags" 
+!     if (.not.present(flags)) stop "axpy without flags" 
     
     select type(x)
     type is (ndarray_oc)
@@ -359,7 +359,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if(.not.present(flags)) print *, "array1d_oc without flags"
+!     if(.not.present(flags)) print *, "array1d_oc without flags"
     
     select type (x)
     type is (ndarray_oc)
@@ -385,7 +385,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if(.not.present(flags)) print *, "array2d_oc without flags"
+!     if(.not.present(flags)) print *, "array2d_oc without flags"
     
     select type (x)
     type is (ndarray_oc)
