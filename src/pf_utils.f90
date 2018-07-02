@@ -33,7 +33,8 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer, optional, intent(in)    :: flag
 
-    real(pfdp) :: norms(lev%nnodes-1)
+    real(pfdp) :: res_norms(lev%nnodes-1)    !<  Holds norms of residual
+    real(pfdp) :: sol_norms(lev%nnodes-1)    !<  Holds norms of solution
     integer :: m
     
 !     which = 1
@@ -45,11 +46,13 @@ contains
 
     ! compute max residual norm
     do m = 1, lev%nnodes-1
-       norms(m) = lev%R(m)%norm(flag)
-!       print *, 'norm(', m, ') = ', norms(m)
+       res_norms(m) = lev%R(m)%norm(flag)
+       sol_norms(m) = lev%Q(m+1)%norm(flag)
     end do
-!    lev%residual = maxval(abs(norms))
-    lev%residual = norms(lev%nnodes-1)
+
+    lev%residual = res_norms(lev%nnodes-1)
+    lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
+    
 
     call end_timer(pf, TRESIDUAL)
 

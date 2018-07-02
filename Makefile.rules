@@ -55,7 +55,7 @@ clean:
 #
 # LIBPFASST dependencies
 #
-
+build/pf_comm.o:        build/pf_dtype.o
 build/pf_timer.o:       build/pf_dtype.o
 build/pf_ndarray.o:     build/pf_dtype.o
 build/pf_ndarray-oc.o:  build/pf_dtype.o
@@ -70,8 +70,8 @@ build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o build/pf_hooks.o
 build/pf_interpolate.o: build/pf_restrict.o build/pf_hooks.o
 build/pf_magnus_picard.o:  build/pf_dtype.o build/pf_hooks.o build/pf_utils.o build/pf_hooks.o
 build/pf_imk.o:         build/pf_dtype.o build/pf_timer.o build/pf_hooks.o build/pf_utils.o
-build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o
-build/pf_parallel_oc.o:    build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o
+build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o  build/pf_comm.o 
+build/pf_parallel_oc.o: build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o  build/pf_comm.o 
 build/pf_fake.o:        build/pf_parallel.o build/pf_fakecomm.o
 build/pf_quadrature.o:  build/pf_dtype.o
 build/pf_pfasst.o:      build/pf_utils.o build/pf_quadrature.o  build/pf_hooks.o build/pf_mpi.o 

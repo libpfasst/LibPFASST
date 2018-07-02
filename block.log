@@ -1,0 +1,26 @@
+
+Steps to make a new block controller:
+
+1.  Removed the communications helpers to to a new module called pf_comm.f90
+   -  Add pf_comm.o to Makefile.defaults and Makefile.rules  (should clean both up and automate dependencies)
+
+2.  Removed the oc to a new module called pf_parallel_oc.f90
+   -  Add pf_parallel_oc to Makefile.defaults and Makefile.rules
+      (should clean both up and automate dependencies)
+
+3. Changed the check on the residual to not have the stupid type of rel_res_tol.
+   -  Changed residual0 in the pf_level_t structure to residual_rel
+   -  Changed the utils routine to scale residual_rel by norm of solution
+   -  Changed the test to compare to  residual_rel
+   -  Made a separate routine to just check residual for cleanness
+
+4. Cleaned up the logic in check_convergence considerably in check_convergence_block
+   -  This is the only place that send and receive status are called so there is no logic in the comm routines for these
+   -  Changed the interface to be much cleaner
+
+5.  Removed state%cycle
+
+6. Put the stuff directly before v_cycle into v_cycle
+
+7.  I took the conditional  .and. pf%state%status == PF_STATUS_ITERATING out of pf_send.  Since send is used in the predictor, this
+can't be correct

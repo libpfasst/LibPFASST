@@ -144,10 +144,9 @@ module pf_mod_dtype
      integer  :: nsweeps_pred =  1      !< number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !< interpolate functions instead of solutions
 
-     real(pfdp)  :: error            !< holds the user defined residual
-     real(pfdp)  :: residual            !< holds the user defined residual
-     real(pfdp)  :: residual0           !< residual at beginning of PFASST call
-                                        ! used for relative residual tolerance calculation
+     real(pfdp)  :: error            !< holds the user defined error
+     real(pfdp)  :: residual         !< holds the user defined residual
+     real(pfdp)  :: residual_rel     !< holds the user defined relative residual (scaled by solution magnitude)
 
      class(pf_user_level_t), allocatable :: ulevel  !<  user customized level info
 

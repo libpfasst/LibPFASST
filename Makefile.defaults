@@ -16,6 +16,7 @@ VPATHS = $(LIBPFASST)/src
 
 FSRC = src/pfasst.f90 \
        src/pf_dtype.f90 \
+       src/pf_comm.f90 \
        src/pf_hooks.f90 \
        src/pf_imexQ.f90 \
        src/pf_imexQ_oc.f90 \
@@ -27,6 +28,7 @@ FSRC = src/pfasst.f90 \
        src/pf_ndarray.f90 \
        src/pf_ndarray-oc.f90 \
        src/pf_parallel.f90 \
+       src/pf_parallel_oc.f90 \
        src/pf_pfasst.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
