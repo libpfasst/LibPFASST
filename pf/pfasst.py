@@ -53,6 +53,7 @@ class Params(object):
     """
     #pylint: disable=too-many-instance-attributes
     nb = attr.ib(default=True, repr=False)
+    exe = attr.ib(default=None)
     filename = attr.ib(default=None)
     levels = attr.ib(default=1)
     tfinal = attr.ib(default=10.0)
@@ -84,12 +85,25 @@ class Params(object):
     qtype = attr.ib(default='lobatto')
     inttype = attr.ib(default='mag')
     sdc = attr.ib(default=True)
+    rk = attr.ib(default=False)
+    mkrk = attr.ib(default=False)
 
     def __attrs_post_init__(self):
         if self.dt is None:
             self.dt = self.tfinal / self.nsteps
         else:
             self.nsteps = self.tfinal / self.dt
+
+        if 'imk' in self.inttype:
+            pieces = self.inttype.split('.')
+            if len(pieces) <= 1:
+                return
+            else:
+                if 'mk' in pieces[-1]:
+                    self.mkrk = True
+                else:
+                    self.rk = True
+
 
     def asdict(self):
         return attr.asdict(self)
@@ -139,26 +153,27 @@ class PFASST(object):
     >>> results = pf.run()
     """
 
-    def __init__(self, exe, params=None, **kwargs):
-        self.exe = exe
+    def __init__(self, params=None, **kwargs):
         if params is None:
             self.p = Params()
         else:
             self.p = params
 
+        self.exe = self.p.exe
         for k, v in kwargs.iteritems():
-            settatr(self.p, k, v)
+            setattr(self.p, k, v)
 
         self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
 abs_res_tol = {}\n\trel_res_tol = {}\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
 &PARAMS\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
 {} = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\tuse_sdc = {}\n/\n"
+nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
+use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n"
 
-        if self.p.filename:
-            with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
-                content = f.read()
-            self._override_default_params(content)
+        # if self.p.filename:
+        #     with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
+        #         content = f.read()
+        #     self._override_default_params(content)
 
         if self.p.nprob == 1:
             self.p.filename = 'rabi.nml'
@@ -177,7 +192,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
                    'particles_{}-periodic_{}-exact_dir_{}-qtype-{}-'+ \
-                   'levels_{}-nodes_{}-magnus_{}-tasks_{}.pkl'
+                   'levels_{}-nodes_{}-{}_{}-tasks_{}-sdc_{}-inttype_{}.pkl'
 
     def _create_pf_string(self):
         nodes = ' '.join(map(str, self.p.nodes))
@@ -225,12 +240,22 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             inttype = 'nterms'
             val = nterms
 
+        if self.p.rk == True:
+            rk = '.true.'
+            mkrk = '.false.'
+        else:
+            rk = '.false.'
+            if self.p.mkrk == True:
+                mkrk = '.true.'
+            else:
+                mkrk = '.false.'
+
         self.pfstring = self.base_string.format(
             self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
             vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
             self.p.nsteps, exptol, self.p.particles, self.p.nprob,
             "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
-            "\'"+self.p.exact_dir+"\'", solns, periodic, sdc)
+            "\'"+self.p.exact_dir+"\'", solns, periodic, sdc, rk, mkrk)
 
         return self.pfstring
 
@@ -322,19 +347,27 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         return command
 
-    def _pre_run_setup(self):
+    def _pre_run_setup(self, ref):
         self.p.magnus = self._make_sure_is_list(self.p.magnus)
+        self.p.nterms = self._make_sure_is_list(self.p.nterms)
         self.p.nodes = self._make_sure_is_list(self.p.nodes)
         self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
 
-        nodes = ', '.join(map(str, self.p.nodes))
+        nodes = '_'.join(map(str, self.p.nodes))
+        if self.p.inttype == 'mag':
+            term = 'magnus'
+            mag = '_'.join(map(str, self.p.magnus))
+        else:
+            term = 'nterms'
+            mag = '_'.join(map(str, self.p.nterms))
         self._create_pf_string()
         self.write_to_file()
         pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
                                    self.p.particles, self.p.periodic, self.p.exact_dir, self.p.qtype,
-                                   self.p.levels, nodes,
-                                   self.p.magnus[0], self.p.tasks)
+                                   self.p.levels, nodes, term, mag, self.p.tasks, self.p.sdc, self.p.inttype)
 
+        if ref:
+            pkl_path = pkl_path+'_ref'
         return pkl_path
 
     def _cleanup(self):
@@ -347,7 +380,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         remove('final_solution')
 
     def run(self, ref=False):
-        pkl_path = self._pre_run_setup()
+        pkl_path = self._pre_run_setup(ref)
 
         try:
             trajectory = pd.read_pickle(pkl_path)
@@ -376,7 +409,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
     def _get_trajectory_from_output(self, output, nsteps, ref=False):
         trajectory = pd.DataFrame(columns=[
-            'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution'
+            'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution', 'eigval'
         ])
         prog_state = re.compile(
             "resid: time: (.*) rank: (.*) step: (.*) iter: (.*) level: (.*) resid: (.*)"
@@ -414,11 +447,13 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
                                             "time_{:06.5f}-rank_{:03d}-step_{:05d}-iter_{:03d}-level_{:01d}_soln".format(
                                                 time, rank, step, iteration, level)
                         solution = self._get_solution(path_to_solution)
+                        eigval = np.linalg.eigvals(solution)
                     else:
                         solution = None
+                        eigval = None
 
                     trajectory.loc[idx] = time, rank, step, iteration, \
-                                level, residual_value, solution
+                                level, residual_value, solution, eigval
                     idx += 1
 
                 time_match = time_state.search(line)
@@ -483,7 +518,7 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
 
         self.p.tasks = 1
         self.p.levels = 1
-        self.p.nsteps = 2**15
+        self.p.nsteps = 2**11
         self.p.timings = False
         self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
@@ -492,7 +527,10 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             self.p.magnus = [3]
             self.p.qtype = 'gauss'
         else:
-            self.p.nodes = [11]
+            self.p.inttype = 'imk'
+            self.p.rk = False
+            self.p.mkrk = False
+            self.p.nodes = [9]
             self.p.nterms = [20]
             self.p.qtype = 'lob'
 
@@ -510,6 +548,8 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
         self.p.timings = params['timings']
         self.p.qtype = params['qtype']
         self.p.inttype = params['inttype']
+        self.p.rk = params['rk']
+        self.p.mkrk = params['mkrk']
 
         return final_solution, traj
 
@@ -519,7 +559,6 @@ nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = 
             return [thing]
         else:
             return thing
-
 
     @staticmethod
     def back_transform(l, nparticles):

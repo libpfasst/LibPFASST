@@ -587,7 +587,7 @@ contains
 
           !  If we are converged, exit block
           if (pf%state%status == PF_STATUS_CONVERGED) then
-             call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
+             ! call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
              exit
           end if
 

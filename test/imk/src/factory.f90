@@ -165,10 +165,10 @@ module factory
   end subroutine zndarray_copy
 
   !> Pack solution q into a flat array.
-  subroutine zndarray_pack(this, z,flags)
+  subroutine zndarray_pack(this, z, flags)
     class(zndarray), intent(in) :: this
-    real(pfdp), intent(out) :: z(:)
     integer, intent(in), optional :: flags
+    real(pfdp), intent(out) :: z(:)
     integer :: nx,ny,nxny,i,j,ij
     nx=this%dim
     ny=this%dim
@@ -183,10 +183,10 @@ module factory
   end subroutine zndarray_pack
 
   ! Unpack solution from a flat array.
-  subroutine zndarray_unpack(this, z,flags)
+  subroutine zndarray_unpack(this, z, flags)
     class(zndarray), intent(inout) :: this
-    real(pfdp), intent(in) :: z(:)
     integer, intent(in), optional :: flags
+    real(pfdp), intent(in) :: z(:)
     integer :: nx,ny,nxny,i,j,ij
     nx=this%dim
     ny=this%dim
@@ -200,7 +200,7 @@ module factory
   end subroutine zndarray_unpack
 
   ! Compute norm of solution
-  function zndarray_norm(this,flags) result (norm)
+  function zndarray_norm(this, flags) result (norm)
     class(zndarray), intent(in) :: this
     integer, intent(in), optional :: flags
     real(pfdp) :: norm
@@ -225,10 +225,10 @@ module factory
 
   end subroutine zndarray_axpy
 
-  subroutine zndarray_eprint(this,flags)
+  subroutine zndarray_eprint(this, flags)
     class(zndarray), intent(inout) :: this
-    integer :: this_shape(2), i, j, dim
     integer, intent(in), optional :: flags
+    integer :: this_shape(2), i, j, dim
 
     this_shape = shape(this%array)
     dim = this_shape(1)
