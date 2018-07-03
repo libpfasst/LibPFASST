@@ -127,7 +127,10 @@ module pf_mod_dtype
 
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:), residuals(:,:,:), times(:,:,:)
-     integer :: nsteps, niters, nprocs
+     integer :: nsteps, niters, nprocs, nlevels, p_index,nblocks
+     character(len = 16   ) :: fname_r
+     character(len = 18) :: fname_t
+     character(len = 18) :: fname_e     
    contains
      procedure :: initialize => initialize_results
      procedure :: dump => dump_results
@@ -530,16 +533,26 @@ module pf_mod_dtype
 
 contains
 
-  subroutine initialize_results(this, nsteps, niters, nprocs, nlevels)
+  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
     class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps, niters, nprocs, nlevels
+    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
+
+    print *, 'initialize resutls',nsteps_in, niters_in, nprocs_in, nlevels_in
+    this%nsteps=nsteps_in
+    this%nblocks=nsteps_in/nprocs_in
+    this%niters=niters_in
+    this%nprocs=nprocs_in
+    this%nlevels=nlevels_in
+    this%p_index=rank_in+100
+
+    write (this%fname_r, "(A9,I0.3,A4)") 'residual_',rank_in,'.dat'
 
     if(allocated(this%errors)) &
             deallocate(this%errors, this%residuals, this%times)
 
-    allocate(this%errors(niters, nsteps, nlevels), &
-         this%residuals(niters, nsteps, nlevels), &
-         this%times(nsteps, nlevels, nprocs))
+    allocate(this%errors(niters_in, nsteps_in, nlevels_in), &
+         this%residuals(niters_in, nsteps_in, nlevels_in), &
+         this%times(nsteps_in, nlevels_in, nprocs_in))
 
     this%errors = 0.0_pfdp
     this%residuals = 0.0_pfdp
@@ -548,34 +561,30 @@ contains
 
   subroutine dump_results(this)
     class(pf_results_t), intent(inout) :: this
-    integer :: i, j, k,  nsteps, nlevels, niters, nprocs
+    integer :: i, j, k
 
-    niters = size(this%residuals(:,1,1))
-    nsteps = size(this%residuals(1,:,1))
-    nlevels = size(this%residuals(1,1,:))
-    nprocs = size(this%times(1,1,:))
-
-    open(unit=20, file='residuals.dat', form='formatted')
-    write(20, '(I3, I4, I2)') niters, nsteps, nlevels
-    do k = 1, nlevels
-       do j = 1, nsteps
-          do i = 1 , niters
-             write(20, '(F16.14)') this%residuals(i, j, k)
+    open(unit=this%p_index, file=this%fname_r, form='formatted')
+!    write(this%p_index, '(I3, I4, I2)') this%niters, this%nsteps, this%nlevels
+    do k = 1, this%nlevels
+       do j = 1, this%nblocks
+          do i = 1 , this%niters
+             write(this%p_index, '(I4, I4, I4, e21.14)') i,j,k,this%residuals(i, j, k)
           end do
        end do
     enddo
     close(20)
 
-    open(unit=20, file='times.dat', form='formatted')
-    write(20, '(I3, I4, I2)') nsteps, nlevels, nprocs
-    do k = 1, nprocs
-       do j = 1, nlevels
-          do i = 1 , nsteps
-             write(20, '(F16.14)') this%times(i, j, k)
+    open(unit=this%p_index+1, file='times.dat', form='formatted')
+    write(this%p_index+1, '(I3, I4, I2)') this%nsteps, this%nlevels, this%nprocs
+    do k = 1, this%nprocs
+       do j = 1, this%nblocks
+          do i = 1 , this%nsteps
+             write(this%p_index+1, '(F16.14)') this%times(i, j, k)
           end do
        end do
-    enddo
-    close(20)
+    end do
+    close(this%p_index)
+    close(this%p_index+1)
 
   end subroutine dump_results
 

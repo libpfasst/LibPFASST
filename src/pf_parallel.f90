@@ -74,7 +74,7 @@ contains
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
-!    call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels)
+    call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
 
     ! figure out what routine to call
     if (pf%nlevels .eq. 1) then
@@ -102,9 +102,9 @@ contains
        end if
     end if
 
-!    if (pf%save_results) then
-!       call pf%results%dump()
-!    endif
+    if (pf%save_results) then
+       call pf%results%dump()
+    endif
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -476,7 +476,7 @@ contains
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
-!          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
+          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
 
           if (pf%state%status == PF_STATUS_CONVERGED) exit
        end do  !  Loop over the iteration in this bloc
@@ -595,8 +595,8 @@ contains
           call pf_v_cycle(pf, k, pf%state%t0, dt)
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
-!          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
-
+          pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
+          print *,'boo',pf%state%iter, pf%state%step+1, lev_p%index,lev_p%residual
        end do  !  Loop over the iteration in this bloc
 
        call end_timer(pf, TITERATION)
