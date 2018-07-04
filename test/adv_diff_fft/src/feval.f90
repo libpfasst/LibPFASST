@@ -1,7 +1,7 @@
 !
-! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
+! This file is part of LIBPFASST.
 !
-
+!
 ! RHS routines for 1-D advection/diffusion example.
 !     u_t + v*u_x = nu*u_xx
 module feval

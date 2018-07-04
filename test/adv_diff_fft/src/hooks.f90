@@ -1,7 +1,7 @@
 !
-! Copyright (c) 2012, Matthew Emmett and Michael Minion.  All rights reserved.
+! This file is part of LIBPFASST.
 !
-
+!>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray

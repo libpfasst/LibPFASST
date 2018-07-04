@@ -1,4 +1,6 @@
 !
+! This file is part of LIBPFASST.
+!
 !> Simple example of using LIBPFASST.
 !!
 !!  This program solves the 1-d advection diffusion problem on a periodic domain

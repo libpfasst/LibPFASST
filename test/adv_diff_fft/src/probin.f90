@@ -1,3 +1,7 @@
+!
+! This file is part of LIBPFASST.
+!
+!>  Module for reading parameters for the problem
 module probin
   use pf_mod_dtype
 
