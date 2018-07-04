@@ -1,26 +1,7 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-! Restriction and FAS routines.
 
-!
-!   2013-04-17 - Matthew Emmett
-!
 !>  Module to restrict solutions between pfasst levels and create the FAS tau correction
 module pf_mod_restrict
   use pf_mod_dtype
@@ -60,8 +41,6 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-!     which = 1
-!     if (present(flags)) which = flags
     
     step = pf%state%step+1
     
@@ -150,8 +129,6 @@ contains
     integer :: m
     integer :: f_nnodes
 
-!     which = 1
-!     if (present(flags)) which = flags
 
     f_nnodes = f_lev_ptr%nnodes
 

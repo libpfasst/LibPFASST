@@ -95,6 +95,7 @@ contains
     !> add some hooks
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !> do the PFASST stepping
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)

@@ -1,25 +1,8 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
 
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-
-!> Module of parallel PFASST routines.
-
+!> Module of routines to run  PFASST 
 module pf_mod_parallel
   use pf_mod_pfasst
   use pf_mod_interpolate
@@ -268,9 +251,9 @@ contains
        call interpolate_q0(pf, f_lev_p, c_lev_p)
 
        !  Do a sweep on unless we are at the finest level
-!       if (level_index < pf%nlevels) then
+       if (level_index < pf%nlevels) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
-!       end if
+       end if
     end do
 
     call end_timer(pf, TPREDICTOR)
@@ -282,8 +265,6 @@ contains
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'ending predictor'    
   end subroutine pf_predictor
   
-  
-
 
   !> Subroutine to test residuals to determine if the current processor has converged.
   subroutine pf_check_residual(pf, residual_converged)
@@ -362,7 +343,6 @@ contains
 
   !
   !> Run single level SDC in pipeline fashion
-  !
   subroutine pf_pipeline_run(pf, q0, dt, tend, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
@@ -578,9 +558,7 @@ contains
           pf%state%iter = j
 
           !  Sweep on the finest level
-!          if (pf%state%status /= PF_STATUS_CONVERGED) then
           call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
-!          end if
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)
@@ -730,7 +708,7 @@ contains
              ! new fine initial condition
              call interpolate_q0(pf, f_lev_p, c_lev_p)
           end if
-          
+          ! don't sweep on the finest level since that is done in the controller  
           if (level_index < pf%nlevels) then
              call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
           end if

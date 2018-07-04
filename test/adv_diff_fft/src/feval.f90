@@ -12,7 +12,7 @@ module feval
 
   real(pfdp), parameter :: &
        Lx     = 1.0_pfdp, &    ! domain size
-       kfreq  = 8.0_pfdp, &    ! Frequency of initial conditions
+       kfreq  = 1.0_pfdp, &    ! Frequency of initial conditions
        t00    = 0.15_pfdp      ! initial time for exact solution starting from delta function (Gaussian)
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp

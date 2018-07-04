@@ -1,3 +1,7 @@
+/*
+ This file is part of LIBPFASST.
+*/
+
 /* Dump routines for the NumPy binary format */
 
 #include <stdio.h>

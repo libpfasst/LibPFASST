@@ -1,10 +1,6 @@
 !
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the BSD license
-!
-
 module pf_mod_mpi
   include "mpif.h"
 end module pf_mod_mpi

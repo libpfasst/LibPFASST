@@ -1,22 +1,6 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-
 !> Module to do interpolation between pfasst levels
 module pf_mod_interpolate
   use pf_mod_dtype
@@ -55,8 +39,6 @@ contains
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
     call start_timer(pf, TINTERPOLATE + level_index - 1)
     
-!     which = 1
-!     if(present(flags)) which = flags
     
     step = pf%state%step+1
 
@@ -186,8 +168,6 @@ contains
     class(pf_level_t),  intent(inout) :: f_lev_ptr  !<  fine level
     class(pf_level_t),  intent(inout) :: c_lev_ptr  !<  coarse level
     
-    ! do we need to use a flag here as well, or is this only ever used for the adjoint?
-
     class(pf_encap_t), allocatable ::    c_delta    !<  coarse correction
     class(pf_encap_t), allocatable ::    f_delta    !<  fine correction
 

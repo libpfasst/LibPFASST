@@ -1,29 +1,13 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
 !>  Module to define the main parameters, data types, and interfaces in pfasst
-!!
 module pf_mod_dtype
   use iso_c_binding
   implicit none
 
-  !  static pfasst paramters
-!  integer, parameter :: pfdp = c_long_double
+  !>  static pfasst paramters
+  !  integer, parameter :: pfdp = c_long_double
   integer, parameter :: pfdp = c_double
 
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
@@ -66,11 +50,12 @@ module pf_mod_dtype
     integer :: mysteps  !< steps I did
   end type pf_state_t
 
+  !<  Hook to call diagnostic routines from various places in code
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-  !<  Defines the base sweeper type
+  !<  The base SDC sweeper type
   type, abstract :: pf_sweeper_t
      integer     :: npieces
    contains
@@ -84,7 +69,7 @@ module pf_mod_dtype
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
-  !<  Defines the base stepper type
+  !<  The base stepper type
   type, abstract :: pf_stepper_t
      integer     :: npieces
      integer     :: order
@@ -94,7 +79,7 @@ module pf_mod_dtype
      procedure(pf_destroy_stepper_p),      deferred :: destroy
   end type pf_stepper_t
 
-  !<  Defines the base data type 
+  !<  The base data type for the solution
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
@@ -125,12 +110,22 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
+  !>  Tool for storing results for later output
   type :: pf_results_t
-     real(pfdp), allocatable :: errors(:,:,:), residuals(:,:,:), times(:,:,:)
-     integer :: nsteps, niters, nprocs, nlevels, p_index,nblocks
-     character(len = 16   ) :: fname_r
-     character(len = 18) :: fname_t
-     character(len = 18) :: fname_e     
+     real(pfdp), allocatable :: errors(:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:)
+     real(pfdp), allocatable :: times(:,:,:)
+     integer :: nsteps
+     integer :: niters
+     integer :: nprocs
+     integer :: nlevels
+     integer :: p_index
+     integer :: nblocks
+     
+     character(len = 16   ) :: fname_r  !<  output file name for residuals
+     character(len = 18) :: fname_t     !<  output file name timings
+     character(len = 18) :: fname_e     !<  output file name errors
+     
    contains
      procedure :: initialize => initialize_results
      procedure :: dump => dump_results
@@ -532,7 +527,6 @@ module pf_mod_dtype
   end interface
 
 contains
-
   subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
     class(pf_results_t), intent(inout) :: this
     integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
@@ -594,5 +588,5 @@ contains
     if(allocated(this%errors)) &
         deallocate(this%errors, this%residuals, this%times)
   end subroutine destroy_results
-
+  
 end module pf_mod_dtype

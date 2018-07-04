@@ -1,8 +1,10 @@
+!
+! This file is part of LIBPFASST.
+!
+!> Module of communication wrappers
 module pf_mod_comm
   use pf_mod_pfasst
-  !
-  !> Communication helpers
-  !
+
   implicit none
 contains
   
