@@ -10,10 +10,7 @@ module feval
   use pf_mod_imexQ
   implicit none
 
-  real(pfdp), parameter :: &
-       Lx     = 1.0_pfdp, &    ! domain size
-       kfreq  = 1.0_pfdp, &    ! Frequency of initial conditions
-       t00    = 0.15_pfdp      ! initial time for exact solution starting from delta function (Gaussian)
+  real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
 
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
@@ -133,36 +130,46 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   subroutine exact(t, yex)
-    use probin, only: nu, v
+    use probin, only: nprob,nu, v, t00, kfreq
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
-    integer    :: nx, i, ii, nbox
-    real(pfdp) :: tol, x
+    integer    :: nx, i, ii, k,nbox
+    real(pfdp) :: tol, x, t0,Dx, omega
 
     nx = size(yex)
-    yex   = 0
+    Dx = Lx/dble(nx)
+    
 
-    if (nu .gt. 0) then
+
+    if (nprob .eq. 1) then
+       !  Using sin wave initial condition
+       omega = 2*pi*kfreq
        do i = 1, nx
-          x = Lx*dble(i-nx/2-1)/dble(nx) - t*v
-          yex(i) = yex(i) + dsin(2.0_pfdp*pi*x)*dexp(-4.0_pfdp*pi*pi*nu*t)
+          x = Lx*dble(i-1-nx/2)/dble(nx) - t*v 
+          yex(i) = dsin(omega*x)*dexp(-omega*omega*nu*t)
        end do
-    else
-
-       ! decide how many images so that contribution is neglible
-       tol  = 1e-16
-       !nbox = 1 + ceiling( sqrt( -(4.0*t00)*log((4.0*pi*(t00))**(0.5)*tol) ))
-       nbox = 0
-
-       do ii = -nbox, nbox
-          do i = 1, nx
-             x = Lx*dble(i-nx/2-1)/dble(nx) + ii*Lx - t*v
-             yex(i) = yex(i) + 1.0/(4.0*pi*t00)**(0.5)*dexp(-x**2/(4.0*t00))
-             x = Lx*dble(i)/dble(nx)  - t*v
-             yex(i) =  dsin(two_pi*kfreq*x)
+    else  !  Use periodic image of Gaussians
+       yex=0
+       if (nu .gt. 0) thengti
+          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          do k = -nbox,nbox
+             do i = 1, nx
+                x = (i-1)*Dx-0.5d0 - t*v + dble(k)*Lx
+                yex(i) = yex(i) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
+             end do
           end do
-       end do
+       else
+          nbox = ceiling(sqrt(37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          do k = -nbox,nbox
+             do i = 1, nx
+                x = i*Dx-0.5d0 - t*v + dble(k)*Lx
+                yex(i) = yex(i) + dexp(-x*x)
+             end do
+          end do
+          
+       end if  ! nbox
+!       print *,yex
     end if
   end subroutine exact
 

@@ -1,22 +1,27 @@
 %  Quick and dirty plotter for results 
-Niter=10
-Nlevel=2
-Nproc=32
-Nlev=2
-Nstep=32
+load('result-size.dat')
+Nstep=result_size(1)
+Niter=result_size(2)
+Nproc=result_size(3)
+Nlevel=result_size(4)
+
+
 Nblock=Nstep/Nproc
 
-res=zeros(Niter,Nproc);
-for k = 0:Nproc-1
-   fname=['residual_',num2str(k,'%3.3i'),'.dat'];
-   foob=load(fname);
-   resk=reshape(foob(:,4),Niter,Nblock,Nlev);
-   res(:,k+1)=squeeze(resk(:,end,end));
-end
-figure(2);clf
-for k = 1:Niter
-   semilogy([1:Nproc],res(k,:),'-*'); hold on;
-end
-xlabel('processor')
-ylabel('residual')
 
+for j = 1:Nblock
+    res=zeros(Niter,Nproc);
+    for k = 0:Nproc-1
+        fname=['residual_',num2str(k,'%3.3i'),'.dat'];
+        foob=load(fname);
+        resk=reshape(foob(:,4),Niter,Nblock,Nlevel);
+        res(:,k+1)=squeeze(resk(:,j,end));
+    end
+    figure(j);clf
+    for k = 1:Niter
+        semilogy([1:Nproc],res(k,:)+eps,'-*'); hold on;
+    end
+    xlabel('processor')
+    ylabel('residual')
+    
+end

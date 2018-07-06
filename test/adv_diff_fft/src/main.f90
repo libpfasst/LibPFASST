@@ -91,11 +91,7 @@ contains
     !> compute initial condition
     call initial(q0)
 
-    print *,'print initial condition'    
-    call q0%eprint()
-
     !> add some hooks
-    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 

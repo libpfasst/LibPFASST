@@ -7,7 +7,7 @@
     nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
-    niters = 5   !  default is 5
+    niters = 10   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype  = 1   
@@ -27,15 +27,18 @@
 !  Now define the local variables you need
 &PARAMS
 !    Finterp = .false.   !  default is 0
-    nnodes =    3  5 9
+    nnodes =    3  3  5
 
     nsweeps_pred=1 1 1 
     nsweeps= 1 1 1 
 
-    nx =   64 128 256
-    nu = 0.05
-    v=0.4
-    Tfin = 0.5
-    nsteps = 16
+    nx =  64 128 256
+    nu = 0.02
+    v=1.0
+
+    Tfin = 0.9
+    nsteps = 32
+
+    imex_stat=1
 
 /
