@@ -20,7 +20,6 @@ FSRC = src/pfasst.f90 \
        src/pf_hooks.f90 \
        src/pf_imexQ.f90 \
        src/pf_imexQ_oc.f90 \
-       src/pf_imexR.f90 \
        src/pf_imk.f90 \
        src/pf_rkstepper.f90 \
        src/pf_interpolate.f90 \
@@ -35,7 +34,6 @@ FSRC = src/pfasst.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 
 
-CSRC = src/pf_numpy.c
 
 ifdef NOMPI
   FFLAGS += -DNOMPI

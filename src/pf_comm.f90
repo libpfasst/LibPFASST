@@ -193,14 +193,14 @@ contains
     integer,           intent(in)    :: nvar, root
     integer :: ierror
     call start_timer(pf, TBROADCAST)
-    print *,'beginning broadcast'
+    if(pf%debug) print *,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
-       if (ierror /= 0) then
-          print *, pf%rank, 'warning:  error during broadcast', ierror
-          stop "pf_parallel:pf_broadcast"
-       endif
-       call end_timer(pf, TBROADCAST)
-       print *,'ending broadcast'
+    if (ierror /= 0) then
+       print *, pf%rank, 'warning:  error during broadcast', ierror
+       stop "pf_parallel:pf_broadcast"
+    endif
+    call end_timer(pf, TBROADCAST)
+    if(pf%debug)print *,'ending broadcast'
   end subroutine pf_broadcast
 
     !> Save current solution and function value so that future corrections can be computed

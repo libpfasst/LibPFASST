@@ -69,13 +69,14 @@ contains
        end if
     else
        if (pf%Vcycle) then
-          !  Right now, we just call the old routine
+          !  Call the full PFASST
           if (present(qend)) then
              call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,qend=qend,flags=flags)             
           else
              call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)             
           end if
        else
+          !  Call a pipeline with multilevel predictor
           print *,'Calling pipelined SDC with multiple levels'
           if (present(qend)) then
              call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
@@ -85,9 +86,9 @@ contains
        end if
     end if
 
-    if (pf%save_results) then
+!    if (pf%save_results) then
        call pf%results%dump()
-    endif
+!    endif
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -272,7 +273,7 @@ contains
     logical,           intent(out)   :: residual_converged  !< Return true if residual is below tolerances
     
     residual_converged = .false.
-    
+
     ! Check to see if relative tolerance is met
     if (pf%levels(pf%nlevels)%residual_rel < pf%rel_res_tol) then
        if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(pf%nlevels)%residual_rel
@@ -295,6 +296,7 @@ contains
     integer,           intent(in)    :: send_tag  !< identifier for status send and receive
 
     logical           :: residual_converged, converged
+
 
     ! Shortcut for fixed iteration mode
     if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
@@ -391,6 +393,13 @@ contains
        !      2c.  Send
        !  3.  Move solution to next block
 
+       !> Reset some flags
+       pf%state%iter    = -1
+       pf%state%itcnt   = 0
+       pf%state%mysteps = 0
+       pf%state%status  = PF_STATUS_PREDICTOR
+       pf%state%pstatus = PF_STATUS_PREDICTOR
+       pf%comm%statreq  = -66
 
        !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
@@ -406,59 +415,36 @@ contains
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
-
-          pf%state%status = PF_STATUS_PREDICTOR
-          pf%state%iter    = -1
-          pf%state%itcnt   = 0
-          pf%state%mysteps = 0
-          pf%state%status  = PF_STATUS_PREDICTOR
-          pf%state%pstatus = PF_STATUS_PREDICTOR
-          pf%comm%statreq  = -66
        end if
 
        !> Call the predictor
        !> Currently the predictor will do nothing but spread q0 to all the nodes
-       if (pf%state%status == PF_STATUS_PREDICTOR) then
-          call pf_predictor(pf, pf%state%t0, dt, flags)
-       end if
+       call pf_predictor(pf, pf%state%t0, dt, flags)
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-       converged = .FALSE.
-       pf%state%status = PF_STATUS_ITERATING
-       pf%state%pstatus = PF_STATUS_ITERATING
 
 !       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
 
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
+
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           pf%state%iter = j
 
-          if (j>1 .and.  pf%state%pstatus /= PF_STATUS_CONVERGED) then
-             call pf_recv_status(pf, 1+k)
-             call pf_recv(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .true.)
-          endif
+          call pf_recv(pf, lev_p, lev_p%index*100000+200*k+pf%state%iter, .true.)
 
           call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
-          call pf_check_convergence_pipeline(pf, lev_p%residual, converged)
+          call pf_check_convergence_block(pf, send_tag=1111*k+j)
+          call pf_send(pf, lev_p, lev_p%index*100000+200*k+pf%state%iter, .false.)
 
-          if (pf%state%status .ne. PF_STATUS_CONVERGED) then
+          pf%results%residuals(j, k, lev_p%index) = lev_p%residual
+          
+          if (pf%state%status == PF_STATUS_CONVERGED) then
+             exit
+          end if
 
-             call pf_send(pf, lev_p, lev_p%index*10000+100*k+pf%state%iter, .false.)
-
-             if (converged) then
-                pf%state%status = PF_STATUS_CONVERGED
-             endif
-             call pf_send_status(pf, 1+k)
-          endif
-
-          call call_hooks(pf, -1, PF_POST_ITERATION)
-
-          pf%results%residuals(pf%state%iter, pf%state%step+1, lev_p%index) = lev_p%residual
-
-          if (pf%state%status == PF_STATUS_CONVERGED) exit
        end do  !  Loop over the iteration in this bloc
 
        call end_timer(pf, TITERATION)
@@ -471,6 +457,7 @@ contains
     if (present(qend)) then
        call qend%copy(lev_p%qend, flags=1)
     end if
+
   end subroutine pf_pipeline_run
 
   !>  PFASST controller for block mode
@@ -540,7 +527,6 @@ contains
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
-
        end if    
 
        !> Call the predictor to get an initial guess on all levels and all processors
@@ -574,7 +560,6 @@ contains
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
           pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
-          print *,'boo',pf%state%iter, pf%state%step+1, lev_p%index,lev_p%residual
        end do  !  Loop over the iteration in this bloc
 
        call end_timer(pf, TITERATION)
