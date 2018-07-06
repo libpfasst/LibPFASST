@@ -151,7 +151,7 @@ contains
        end do
     else  !  Use periodic image of Gaussians
        yex=0
-       if (nu .gt. 0) thengti
+       if (nu .gt. 0) then
           nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
           do k = -nbox,nbox
              do i = 1, nx
