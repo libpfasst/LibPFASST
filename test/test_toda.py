@@ -19,13 +19,13 @@ except OSError as exc:
     else:
         raise OSError, exc.message
 
-params = Params(nodes=[3], magnus=[2], \
+params = Params(exe=exe, nodes=[3], magnus=[2], \
                 nsteps=128, tfinal=1.0, iterations=15, \
                 nb=False, base_dir=base_dir)
 
 ref_particle0 = 1.6125274564234153
 ref_particle8 = -1.7151098584854585
-toda = PFASST(exe, params)
+toda = PFASST(params)
 
 def cleanup():
     for fname in glob.iglob(base_dir+'/*pkl'):
@@ -43,12 +43,12 @@ def make():
 tests = make()
 @pytest.mark.parametrize('nodes, magnus', tests)
 def test_toda(nodes, magnus):
-    params = Params(nodes=nodes, magnus=magnus,
+    params = Params(exe=exe, nodes=nodes, magnus=magnus,
                     tolerance=1e-12,
                     nsteps=128, tfinal=1.0, iterations=30,
                     nb=False, base_dir=base_dir)
 
-    toda = PFASST(exe, params)
+    toda = PFASST(params)
     results = toda.run()[0]
     final_solution = results.loc[len(results)-1, 'solution']
 

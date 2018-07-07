@@ -1,39 +1,20 @@
 !
-! Copyright (C) 2016 Michael Minion and Sebastian Goetschel
+! This file is part of LIBPFASST.
 !
-! This file is part of LIBPFASST-OC.
-!
-! LIBPFASST-OC is free software: you can redistribute it and/or modify it
-! under the terms of the GNU Lesser General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU Lesser General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-
-!
-! N-dimensional array encapsulation.
-!
-! When a new solution is created by a PFASST level, this encapsulation
-! uses the levels 'shape' attribute to create a new array with that
-! shape.  Thus, the 'shape' attributes of the PFASST levels should be
-! set appropriately.  For example, before calling pf_pfasst_run we can
-! set the shape of the coarsest level by doing:
-!
-!   allocate(pf%levels(1)%shape(2))
-!   pf%levels(1)%shape = [ 3, 10 ]
-!
-! The helper routines array1, array2, array3, etc can be used to
-! extract pointers to the encapsulated array from a C pointer without
-! performing any copies.
-!
-
+!> N-dimensional array encapsulation for optimal control problems.
+!!
+!! When a new solution is created by a PFASST level, this encapsulation
+!! uses the levels 'shape' attribute to create a new array with that
+!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! set appropriately.  For example, before calling pf_pfasst_run we can
+!! set the shape of the coarsest level by doing:
+!!
+!!   allocate(pf%levels(1)%shape(2))
+!!   pf%levels(1)%shape = [ 3, 10 ]
+!!
+!! The helper routines array1, array2, array3, etc can be used to
+!! extract pointers to the encapsulated array from a C pointer without
+!! performing any copies.
 module pf_mod_ndarray_oc
   use iso_c_binding
   use pf_mod_dtype

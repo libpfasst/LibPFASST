@@ -1,29 +1,13 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
 !>  Module to define the main parameters, data types, and interfaces in pfasst
-!!
 module pf_mod_dtype
   use iso_c_binding
   implicit none
 
-  !  static pfasst paramters
-!  integer, parameter :: pfdp = c_long_double
+  !>  static pfasst paramters
+  !  integer, parameter :: pfdp = c_long_double
   integer, parameter :: pfdp = c_double
 
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
@@ -66,11 +50,12 @@ module pf_mod_dtype
     integer :: mysteps  !< steps I did
   end type pf_state_t
 
+  !<  Hook to call diagnostic routines from various places in code
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-  !<  Defines the base sweeper type
+  !<  The base SDC sweeper type
   type, abstract :: pf_sweeper_t
      integer     :: npieces
    contains
@@ -84,7 +69,7 @@ module pf_mod_dtype
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
-  !<  Defines the base stepper type
+  !<  The base stepper type
   type, abstract :: pf_stepper_t
      integer     :: npieces
      integer     :: order
@@ -94,7 +79,7 @@ module pf_mod_dtype
      procedure(pf_destroy_stepper_p),      deferred :: destroy
   end type pf_stepper_t
 
-  !<  Defines the base data type 
+  !<  The base data type for the solution
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
@@ -125,9 +110,22 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
+  !>  Tool for storing results for later output
   type :: pf_results_t
-     real(pfdp), allocatable :: errors(:,:,:), residuals(:,:,:), times(:,:,:)
-     integer :: nsteps, niters, nprocs
+     real(pfdp), allocatable :: errors(:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:)
+     real(pfdp), allocatable :: times(:,:,:)
+     integer :: nsteps
+     integer :: niters
+     integer :: nprocs
+     integer :: nlevels
+     integer :: p_index
+     integer :: nblocks
+     
+     character(len = 16   ) :: fname_r  !<  output file name for residuals
+     character(len = 15) :: fname_t     !<  output file name timings
+     character(len = 14) :: fname_e     !<  output file name errors
+     
    contains
      procedure :: initialize => initialize_results
      procedure :: dump => dump_results
@@ -144,10 +142,9 @@ module pf_mod_dtype
      integer  :: nsweeps_pred =  1      !< number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !< interpolate functions instead of solutions
 
-     real(pfdp)  :: error            !< holds the user defined residual
-     real(pfdp)  :: residual            !< holds the user defined residual
-     real(pfdp)  :: residual0           !< residual at beginning of PFASST call
-                                        ! used for relative residual tolerance calculation
+     real(pfdp)  :: error            !< holds the user defined error
+     real(pfdp)  :: residual         !< holds the user defined residual
+     real(pfdp)  :: residual_rel     !< holds the user defined relative residual (scaled by solution magnitude)
 
      class(pf_user_level_t), allocatable :: ulevel  !<  user customized level info
 
@@ -530,17 +527,33 @@ module pf_mod_dtype
   end interface
 
 contains
-
-  subroutine initialize_results(this, nsteps, niters, nprocs, nlevels)
+  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
     class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps, niters, nprocs, nlevels
+    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
+
+    if (rank_in == 0) then
+       open(unit=123, file='result-size.dat', form='formatted')
+       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nlevels_in
+       close(unit=123)
+    end if
+
+    this%nsteps=nsteps_in
+    this%nblocks=nsteps_in/nprocs_in
+    this%niters=niters_in
+    this%nprocs=nprocs_in
+    this%nlevels=nlevels_in
+    this%p_index=rank_in+100
+
+    write (this%fname_r, "(A9,I0.3,A4)") 'residual_',rank_in,'.dat'
+    write (this%fname_t, "(A8,I0.3,A4)") 'timings_',rank_in,'.dat'
+    write (this%fname_e, "(A7,I0.3,A4)") 'errors_',rank_in,'.dat'
 
     if(allocated(this%errors)) &
             deallocate(this%errors, this%residuals, this%times)
 
-    allocate(this%errors(niters, nsteps, nlevels), &
-         this%residuals(niters, nsteps, nlevels), &
-         this%times(nsteps, nlevels, nprocs))
+    allocate(this%errors(niters_in, this%nblocks, nlevels_in), &
+         this%residuals(niters_in, this%nblocks, nlevels_in), &
+         this%times(niters_in,this%nblocks, nlevels_in))
 
     this%errors = 0.0_pfdp
     this%residuals = 0.0_pfdp
@@ -549,34 +562,29 @@ contains
 
   subroutine dump_results(this)
     class(pf_results_t), intent(inout) :: this
-    integer :: i, j, k,  nsteps, nlevels, niters, nprocs
-
-    niters = size(this%residuals(:,1,1))
-    nsteps = size(this%residuals(1,:,1))
-    nlevels = size(this%residuals(1,1,:))
-    nprocs = size(this%times(1,1,:))
-
-    open(unit=20, file='residuals.dat', form='formatted')
-    write(20, '(I3, I4, I2)') niters, nsteps, nlevels
-    do k = 1, nlevels
-       do j = 1, nsteps
-          do i = 1 , niters
-             write(20, '(F16.14)') this%residuals(i, j, k)
+    integer :: i, j, k
+    
+    open(unit=this%p_index, file=this%fname_r, form='formatted')
+    do k = 1, this%nlevels
+       do j = 1, this%nblocks
+          do i = 1 , this%niters
+             write(this%p_index, '(I4, I4, I4, e21.14)') i,j,k,this%residuals(i, j, k)
           end do
        end do
     enddo
     close(20)
 
-    open(unit=20, file='times.dat', form='formatted')
-    write(20, '(I3, I4, I2)') nsteps, nlevels, nprocs
-    do k = 1, nprocs
-       do j = 1, nlevels
-          do i = 1 , nsteps
-             write(20, '(F16.14)') this%times(i, j, k)
+    open(unit=this%p_index+1, file=this%fname_t, form='formatted')
+    write(this%p_index+1, '(I3, I4, I2)') this%nsteps, this%nlevels, this%nprocs
+    do k = 1, this%nlevels
+       do j = 1, this%nblocks
+          do i = 1 , this%niters
+             write(this%p_index+1, '(F16.14)') this%times(i, j, k)
           end do
        end do
-    enddo
-    close(20)
+    end do
+    close(this%p_index)
+    close(this%p_index+1)
 
   end subroutine dump_results
 
@@ -586,5 +594,5 @@ contains
     if(allocated(this%errors)) &
         deallocate(this%errors, this%residuals, this%times)
   end subroutine destroy_results
-
+  
 end module pf_mod_dtype

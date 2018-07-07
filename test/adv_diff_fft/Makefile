@@ -39,7 +39,7 @@ build/%.o: %.f90
 #
 # dependencies
 #
-
+main.exe : $(LIBPFASST)/lib/libpfasst.a
 build/feval.o:build/probin.o
 build/probin.o:
 build/hooks.o: build/feval.o

@@ -1,23 +1,6 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
 !
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
-!
-
-
 module pf_mod_mpi
   include "mpif.h"
 end module pf_mod_mpi
@@ -33,15 +16,15 @@ contains
   subroutine pf_mpi_create(pf_comm, mpi_comm)
     type(pf_comm_t), intent(out) :: pf_comm
     integer,         intent(in)  :: mpi_comm
-
+    
     integer :: ierror
-
+    
     !> assign communicator
     pf_comm%comm = mpi_comm
-
+    
     !> assign number of processors
     call mpi_comm_size(mpi_comm, pf_comm%nproc, ierror)
-
+    
     !>  assign procedure pointers
     pf_comm%post => pf_mpi_post
     pf_comm%recv => pf_mpi_recv
@@ -70,7 +53,7 @@ contains
     allocate(pf_comm%sendreq(pf%nlevels))
 
     pf_comm%sendreq = MPI_REQUEST_NULL
-    pf_comm%statreq = -66
+    pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive
   end subroutine pf_mpi_setup
 
 
@@ -107,7 +90,7 @@ contains
 
   !> Subroutine to send convergence status information
   subroutine pf_mpi_send_status(pf, tag,istatus,ierror, direction)
-    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE, MPI_REQUEST_NULL
+    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE, MPI_REQUEST_NULL
 
     type(pf_pfasst_t), intent(inout) :: pf        !<  main pfasst structure
     integer,           intent(in)    :: tag       !<  message tag
@@ -116,8 +99,8 @@ contains
     integer, optional, intent(in)    :: direction
     integer                          :: dest
     integer    ::  stat(MPI_STATUS_SIZE), dir
-    integer(4) :: message!(8)
 
+    integer :: message
     message = istatus
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
@@ -129,19 +112,20 @@ contains
        dest = modulo(pf%rank+1, pf%comm%nproc) 
     end if
 
-
     if (pf%comm%statreq /= -66) then
+       if (pf%debug) print*, 'DEBUG --',pf%rank, 'waiting in send_status with statreq',pf%comm%statreq
        call mpi_wait(pf%comm%statreq, stat, ierror)
+       if (pf%debug) print*, 'DEBUG --',pf%rank, 'done waiting in send_status'
     end if
 
-    call mpi_issend(message, 1, MPI_INTEGER4, &
+    call mpi_issend(message, 1, MPI_INTEGER, &
                     dest, tag, pf%comm%comm, pf%comm%statreq, ierror)
 
   end subroutine pf_mpi_send_status
 
   !> Subroutine to receive convergence status information
   subroutine pf_mpi_recv_status(pf, tag,istatus,ierror, direction)
-    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
+    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf        !<  main pfasst structure
     integer,           intent(in)    :: tag       !<  message tag
@@ -151,6 +135,8 @@ contains
     integer                          :: source
     integer    ::  stat(MPI_STATUS_SIZE), dir
 
+    integer :: message
+
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
     
@@ -159,9 +145,10 @@ contains
     else
        source = modulo(pf%rank-1, pf%comm%nproc) 
     end if
-    
-    call mpi_recv(istatus, 1, MPI_INTEGER4, &
-                  source, tag, pf%comm%comm, stat, ierror)
+
+    ! Get the message
+    call mpi_recv(message, 1, MPI_INTEGER,source, tag, pf%comm%comm, stat, ierror)
+    istatus=message
 
   end subroutine pf_mpi_recv_status
 
@@ -218,6 +205,8 @@ contains
   end subroutine pf_mpi_send
 
   !> Subroutine to receive solutions
+  !! Note when blocking == .false. this is actually a wait because the
+  !! nonblocking receive  should have already been posted
   subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, direction)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(inout) :: pf     !<  main pfasst structure

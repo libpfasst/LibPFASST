@@ -1,20 +1,5 @@
 !
-! Copyright (C) 2012, 2013 Matthew Emmett and Michael Minion.
-!
 ! This file is part of LIBPFASST.
-!
-! LIBPFASST is free software: you can redistribute it and/or modify it
-! under the terms of the GNU General Public License as published by
-! the Free Software Foundation, either version 3 of the License, or
-! (at your option) any later version.
-!
-! LIBPFASST is distributed in the hope that it will be useful, but
-! WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-! General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with LIBPFASST.  If not, see <http://www.gnu.org/licenses/>.
 !
 !> Module with useful subroutines that don't  fit in other modules
 module pf_mod_utils
@@ -33,23 +18,23 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer, optional, intent(in)    :: flag
 
-    real(pfdp) :: norms(lev%nnodes-1)
+    real(pfdp) :: res_norms(lev%nnodes-1)    !<  Holds norms of residual
+    real(pfdp) :: sol_norms(lev%nnodes-1)    !<  Holds norms of solution
     integer :: m
     
-!     which = 1
-!     if(present(flag)) which = flag
-
     call start_timer(pf, TRESIDUAL)
 
     call lev%ulevel%sweeper%residual(lev, dt, flag)
 
     ! compute max residual norm
     do m = 1, lev%nnodes-1
-       norms(m) = lev%R(m)%norm(flag)
-!       print *, 'norm(', m, ') = ', norms(m)
+       res_norms(m) = lev%R(m)%norm(flag)
+       sol_norms(m) = lev%Q(m+1)%norm(flag)
     end do
-!    lev%residual = maxval(abs(norms))
-    lev%residual = norms(lev%nnodes-1)
+
+    lev%residual = res_norms(lev%nnodes-1)
+    lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
+    
 
     call end_timer(pf, TRESIDUAL)
 
@@ -66,9 +51,6 @@ contains
 
     integer :: m
     
-!     which = 1
-!     if(present(flags)) which = flags
-
     !>  Compute the integral of F
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
 

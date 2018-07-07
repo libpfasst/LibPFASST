@@ -20,13 +20,13 @@ except OSError as exc:
     else:
         raise OSError, exc.message
 
-params = Params(nodes=[3], nterms=[2], \
+params = Params(exe=exe, nodes=[3], nterms=[2], \
                 nsteps=128, tfinal=1.0, \
                 inttype='imk', nb=False, base_dir=output_dir)
 
 ref_particle0 = 1.6125274564234153
 ref_particle8 = -1.7151098584854585
-toda = PFASST(exe, params)
+toda = PFASST(params)
 
 def make():
     tests = []
@@ -42,12 +42,12 @@ tests = make()
 @pytest.mark.parametrize('levels, vcycle, sdc, nodes, nterms',
                          tests)
 def test_toda(levels, vcycle, sdc, nodes, nterms):
-    params = Params(levels=levels, nodes=nodes*levels, nterms=nterms*levels,
+    params = Params(exe=exe, levels=levels, nodes=nodes*levels, nterms=nterms*levels,
                     sweeps=[1]*levels, sweeps_pred=[1]*levels,
                     nsteps=128, tfinal=1.0, inttype='imk',
                     nb=False, base_dir=output_dir)
 
-    toda = PFASST(exe, params)
+    toda = PFASST(params)
     results = toda.run()[0]
     final_solution = results.loc[len(results)-1, 'solution']
 

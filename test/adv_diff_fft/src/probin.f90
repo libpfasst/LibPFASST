@@ -1,8 +1,10 @@
+!
+! This file is part of LIBPFASST.
+!
+!>  Module for reading parameters for the problem
 module probin
   use pf_mod_dtype
 
-  double precision, parameter :: pi     = 3.141592653589793d0
-  double precision, parameter :: two_pi = 6.2831853071795862d0
 
   integer, parameter :: MAXLEVS = 4
 
@@ -10,7 +12,6 @@ module probin
   character(len=64), save :: problem_type, window_type
 
   double precision, save :: v      ! advection velocity
-  double precision, save :: Lx     ! domain size
   double precision, save :: nu     ! viscosity
   double precision, save :: t00     ! initial time for exact solution
   double precision, save :: sigma  ! initial condition parameter
@@ -60,14 +61,12 @@ contains
     nsteps_rk  = -1
 
     v       = 1.0_pfdp
-    Lx      = 1._pfdp
     nu      = 0.01_pfdp
-    sigma   = 0.004_pfdp
-    kfreq   = 1
-    t00      = 0.25_pfdp
+    kfreq   = 1.0_pfdp
+    t00      = 0.08_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
-
+    nprob = 0  !  0: Gaussian, 1: Sin wave
     use_LUq=.TRUE.
     imex_stat=2    !  Default is full IMEX
     

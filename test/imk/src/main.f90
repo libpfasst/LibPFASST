@@ -54,7 +54,7 @@ contains
           allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
           call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
-               l, pf%debug, use_sdc, pf%qtype, nterms(l))
+               l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
 
           if (pf%qtype == 5) then
              pf%levels(l)%nnodes = nnodes(l)+2

@@ -1,4 +1,6 @@
 !
+! This file is part of LIBPFASST.
+!
 !> Simple example of using LIBPFASST.
 !!
 !!  This program solves the 1-d advection diffusion problem on a periodic domain
@@ -89,12 +91,9 @@ contains
     !> compute initial condition
     call initial(q0)
 
-    print *,'print initial condition'    
-    call q0%eprint()
-
     !> add some hooks
-    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !> do the PFASST stepping
     call pf_pfasst_run(pf, q0, dt, 0.d0, nsteps,qend)

@@ -1,10 +1,11 @@
+
 &PF_PARAMS
 	nlevels = 2
 	niters = 30
 	qtype = 1
 	echo_timings = .false.
-	abs_res_tol = 1e-12
-	rel_res_tol = 1e-12
+	abs_res_tol = 0.0e-22
+	rel_res_tol = 0.0e-22
 	Pipeline_G = .false.
 	PFASST_pred = .true.
 	vcycle = .true.

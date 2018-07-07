@@ -35,6 +35,7 @@ module sweeper
      procedure :: f_eval
      procedure :: dexpinv
      procedure :: propagate => propagate_solution
+     procedure :: commutator_p
      procedure :: destroy => destroy_imk_sweeper
   end type imk_sweeper_t
 
@@ -54,11 +55,11 @@ contains
 
   end function cast_as_imk_sweeper
 
-  subroutine initialize_imk_sweeper(this, level, debug, use_sdc, qtype, nterms)
+  subroutine initialize_imk_sweeper(this, level, debug, use_sdc, rk, mkrk, qtype, nterms)
     use probin, only: nparticles, dt
     class(pf_sweeper_t), intent(inout) :: this
     integer, intent(in) :: level, qtype, nterms
-    logical, intent(in) :: debug, use_sdc
+    logical, intent(in) :: debug, use_sdc, rk, mkrk
 
     class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
 
@@ -69,6 +70,8 @@ contains
     imk%debug = debug
     imk%dim = nparticles
     imk%use_sdc = use_sdc
+    imk%rk = rk
+    imk%mkrk = mkrk
 
     allocate(imk%commutator(nparticles, nparticles))
 
@@ -146,6 +149,35 @@ contains
       nullify(a_p, f_p, omega_p)
 
   end subroutine dexpinv
+
+  subroutine commutator_p(this, a, b, out, flags)
+    ! this interface routine is just a wrapper to the actual
+    ! compute commutator routine and is ONLY used by imk_sweeper_t%rk_step()
+    ! for rk_step() it requires the matmul of B and Y
+    class(imk_sweeper_t), intent(inout) :: this
+    class(pf_encap_t), intent(inout) :: a, b, out
+    integer, intent(in), optional :: flags
+
+    type(zndarray), pointer :: a_p, b_p, out_p
+    integer :: dim
+
+    a_p => cast_as_zndarray(a)
+    b_p => cast_as_zndarray(b)
+    out_p => cast_as_zndarray(out)
+
+    dim = a_p%dim
+
+    if (present(flags)) then
+       if (flags .eq. 1) b_p%array = b_p%y
+       if (flags .eq. 2) then
+          b_p%y = b_p%array
+          return
+       end if
+    endif
+
+    call compute_commutator(a_p%array, b_p%array, dim, out_p%array)
+
+  end subroutine commutator_p
 
   subroutine compute_commutator(a, b, dim, output)
     complex(pfdp), intent(in) :: a(dim,dim), b(dim,dim)
@@ -330,13 +362,14 @@ contains
 
  end subroutine destroy_imk_sweeper
 
- subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
+ subroutine restrict(this, levelF, levelG, qF, qG, t, flags)
    class(imk_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
    class(pf_encap_t), intent(inout) :: qF, qG
    real(pfdp),        intent(in   ) :: t
    integer, intent(in), optional :: flags
+
    class(zndarray), pointer :: f, g
    f => cast_as_zndarray(qF)
    g => cast_as_zndarray(qG)
@@ -345,7 +378,7 @@ contains
    g%y = f%y
  end subroutine restrict
 
- subroutine interpolate(this, levelF, levelG, qF, qG, t,flags)
+ subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
    class(imk_context), intent(inout) :: this
    class(pf_level_t), intent(inout) :: levelF
    class(pf_level_t), intent(inout) :: levelG
