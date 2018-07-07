@@ -58,32 +58,10 @@ contains
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
     call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
-
-    ! figure out what routine to call
-    if (pf%nlevels .eq. 1) then
-       print *,'Calling pipelined SDC with 1 level'
-       if (present(qend)) then
-          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
-       else
-          call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)
-       end if
+    if (present(qend)) then
+       call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,qend=qend,flags=flags)             
     else
-       if (pf%Vcycle) then
-          !  Call the full PFASST
-          if (present(qend)) then
-             call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,qend=qend,flags=flags)             
-          else
-             call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)             
-          end if
-       else
-          !  Call a pipeline with multilevel predictor
-          print *,'Calling pipelined SDC with multiple levels'
-          if (present(qend)) then
-             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc, qend=qend,flags=flags)
-          else
-             call pf_pipeline_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)
-          end if
-       end if
+       call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)             
     end if
 
 !    if (pf%save_results) then
@@ -290,7 +268,7 @@ contains
   !> Subroutine to check if the current processor has converged and
   !> to update the next processor on the status
   !> Note that if the previous processor hasn't converged yet
-  !> (pstatus), the current processor can't converged yet either
+  !> (pstatus), the current processor can't be converged yet either
   subroutine pf_check_convergence_block(pf, send_tag)
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: send_tag  !< identifier for status send and receive
@@ -344,121 +322,6 @@ contains
   end subroutine pf_check_convergence_block
 
   !
-  !> Run single level SDC in pipeline fashion
-  subroutine pf_pipeline_run(pf, q0, dt, tend, nsteps, qend,flags)
-    type(pf_pfasst_t), intent(inout), target   :: pf
-    class(pf_encap_t), intent(in   )           :: q0
-    real(pfdp),        intent(in   )           :: dt, tend
-    integer,           intent(in   )           :: nsteps
-    class(pf_encap_t), intent(inout), optional :: qend
-    integer,           intent(in   ), optional :: flags(:)
-    
-    class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
-    integer                   :: j, k
-    real(pfdp)                :: residual
-    integer                   :: nblocks !<  The number of blocks of steps to do
-    integer                   :: nproc   !<  The number of processors being used
-    integer                   :: ierror  !<  Warning flag for communication routines
-
-    logical :: converged   !<  True when this processor is converged to residual
-
-    call start_timer(pf, TTOTAL)
-
-    pf%state%dt      = dt
-    pf%state%proc    = pf%rank+1
-    pf%state%step    = pf%rank
-    pf%state%t0      = pf%state%step * dt
-    pf%state%iter    = -1
-    pf%state%itcnt   = 0
-    pf%state%mysteps = 0
-    pf%state%status  = PF_STATUS_PREDICTOR
-    pf%state%pstatus = PF_STATUS_PREDICTOR
-    pf%comm%statreq  = -66
-
-!    if (pf%nlevels > 1) stop "ERROR: nlevels  must be 1 to run pipeline mode (pf_parallel.f90)"
-
-    !  pointer to fine level on which we will iterate
-    lev_p => pf%levels(pf%nlevels)
-    call lev_p%q0%copy(q0, flags=1)
-
-    nproc = pf%comm%nproc
-    nblocks = nsteps/nproc
-    do k = 1, nblocks   !  Loop over blocks of time steps
-       ! print *,'Starting  step=',pf%state%step,'  block k=',k      
-       ! Each block will consist of
-       !  1.  predictor
-       !  2.  A loop until max iterations, or tolerances met
-       !      2a.  Recieve
-       !      2b.  Do SDC sweep(s)1
-       !      2c.  Send
-       !  3.  Move solution to next block
-
-       !> Reset some flags
-       pf%state%iter    = -1
-       pf%state%itcnt   = 0
-       pf%state%mysteps = 0
-       pf%state%status  = PF_STATUS_PREDICTOR
-       pf%state%pstatus = PF_STATUS_PREDICTOR
-       pf%comm%statreq  = -66
-
-       !>  When starting a new block, broadcast new initial conditions to all procs
-       !>  For initial block, this is done when initial conditions are set
-       if (k > 1) then
-          if (nproc > 1)  then
-             call lev_p%qend%pack(lev_p%send)    !<  Pack away your last solution
-             call pf_broadcast(pf, lev_p%send, lev_p%mpibuflen, pf%comm%nproc-1)
-             call lev_p%q0%unpack(lev_p%send)    !<  Everyone resets their q0
-          else
-             call lev_p%q0%copy(lev_p%qend, flags=1)    !<  Just stick qend in q0
-          end if
-
-          !>  Update the step and t0 variables for new block
-          pf%state%step = pf%state%step + pf%comm%nproc
-          pf%state%t0   = pf%state%step * dt
-       end if
-
-       !> Call the predictor
-       !> Currently the predictor will do nothing but spread q0 to all the nodes
-       call pf_predictor(pf, pf%state%t0, dt, flags)
-
-       !>  Start the loops over SDC sweeps
-       pf%state%iter = 0
-
-!       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
-
-       call start_timer(pf, TITERATION)
-       do j = 1, pf%niters
-
-          call call_hooks(pf, -1, PF_PRE_ITERATION)
-
-          pf%state%iter = j
-
-          call pf_recv(pf, lev_p, lev_p%index*100000+200*k+pf%state%iter, .true.)
-
-          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
-          call pf_check_convergence_block(pf, send_tag=1111*k+j)
-          call pf_send(pf, lev_p, lev_p%index*100000+200*k+pf%state%iter, .false.)
-
-          pf%results%residuals(j, k, lev_p%index) = lev_p%residual
-          
-          if (pf%state%status == PF_STATUS_CONVERGED) then
-             exit
-          end if
-
-       end do  !  Loop over the iteration in this bloc
-
-       call end_timer(pf, TITERATION)
-
-    end do
-
-    call end_timer(pf, TTOTAL)
-
-    !  Grab the last solution for return (if wanted)
-    if (present(qend)) then
-       call qend%copy(lev_p%qend, flags=1)
-    end if
-
-  end subroutine pf_pipeline_run
 
   !>  PFASST controller for block mode
   subroutine pf_block_run(pf, q0, dt, tend, nsteps, qend,flags)
@@ -475,7 +338,7 @@ contains
     integer                   :: nblocks !<  The number of blocks of steps to do
     integer                   :: nproc   !<  The number of processors being used
     integer                   :: ierror  !<  Warning flag for communication routines
-
+    integer                   :: level_index_c !<  Coarsest leve in V-cycle
 
 
     call start_timer(pf, TTOTAL)
@@ -495,6 +358,10 @@ contains
     
     nproc = pf%comm%nproc
     nblocks = nsteps/nproc
+
+    !  Decide what the coarsest level in the V-cycle is
+    level_index_c=1
+    if (.not. pf%Vcycle)     level_index_c=pf%nlevels
 
     do k = 1, nblocks   !  Loop over blocks of time steps
        ! print *,'Starting  step=',pf%state%step,'  block k=',k      
@@ -543,23 +410,16 @@ contains
 
           pf%state%iter = j
 
-          !  Sweep on the finest level
-          call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
+          !  Do a v_cycle
+          call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
+          call call_hooks(pf, -1, PF_POST_ITERATION)
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)
-
-          !  If we are converged, exit block
-          if (pf%state%status == PF_STATUS_CONVERGED) then
-             ! call lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, lev_p%nsweeps)
-             exit
-          end if
-
-          !  Do a v_cycle
-          call pf_v_cycle(pf, k, pf%state%t0, dt)
-          call call_hooks(pf, -1, PF_POST_ITERATION)
-
           pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
+          
+          !  If we are converged, exit block
+          if (pf%state%status == PF_STATUS_CONVERGED)  exit
        end do  !  Loop over the iteration in this bloc
 
        call end_timer(pf, TITERATION)
@@ -575,113 +435,57 @@ contains
   end subroutine pf_block_run
   
 
-  !>
-  !> Test residuals to determine if the current processor has converged.
-  !>
-  !> Note that if the previous processor hasn't converged yet
-  !> (pstatus), the current processor hasn't converged yet either,
-  !> regardless of the residual.
-  !>
-  subroutine pf_check_convergence_pipeline(pf, residual, converged)
-    type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(inout) :: residual
-    logical,           intent(out)   :: converged   !<  True if this processor is done
-    real(pfdp)     :: residual1
-
-    call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
-    converged = .false.
-
-    ! shortcut for fixed block mode
-    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
-       pf%state%pstatus = PF_STATUS_ITERATING
-       pf%state%status  = PF_STATUS_ITERATING
-       return
-    end if
-
-    ! Check to see if tolerances are met
-    if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
-       if (pf%rank > 0) then
-          if (abs(residual) < pf%abs_res_tol .and. &
-               pf%state%pstatus == PF_STATUS_CONVERGED) then
-             converged = .true.
-          endif
-       else
-          if (abs(residual) < pf%abs_res_tol) converged = .true.
-       endif
-    end if
-
-    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
-
-  end subroutine pf_check_convergence_pipeline
-
 
   !> Execute a V-cycle between levels nfine and ncoarse  
-  subroutine pf_v_cycle(pf, iteration, t0, dt, flags)
+  subroutine pf_v_cycle(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
   
 
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
     integer,           intent(in)    :: iteration
+    integer,           intent(in)    :: level_index_c  !< Coarsest level of V-cycle
+    integer,           intent(in)    :: level_index_f  !< Finest level of V-cycle
     integer, optional, intent(in)    :: flags
 
     type(pf_level_t), pointer :: f_lev_p, c_lev_p
     integer :: level_index, j
 
-    !  For a single level, just get new initial conditions and return
-    if (pf%nlevels == 1) then
-       f_lev_p => pf%levels(1)
-       call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true.)
-       return
-    else
-       !  Post the nonblocking receives on the all the levels that will be recieving later
-       do level_index = 2, pf%nlevels
-          f_lev_p => pf%levels(level_index)
-          call pf_post(pf, f_lev_p, f_lev_p%index*10000+iteration)
-       end do
-       
-       !  Send the solution forward on the finest level
-       f_lev_p => pf%levels(pf%nlevels)
-       call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration, .false.)
-       
-       !  Restrict finest level
-       call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels)
-       
-       !  Save second finest level
-       c_lev_p => pf%levels(pf%nlevels-1)
-       call save(c_lev_p)
-       
-       !
-       ! move from fine to coarse doing sweeps (but note not on the finest level)
-       !
-       do level_index = pf%nlevels-1, 2, -1
-          f_lev_p => pf%levels(level_index);
-          c_lev_p => pf%levels(level_index-1)
-          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
-          call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
-          call restrict_time_space_fas(pf, t0, dt, level_index)
-          call save(c_lev_p)
-       end do
-       !
-       ! bottom  (coarsest level)
-       !
-       level_index=1
+    !>  Post the nonblocking receives on the all the levels that will be recieving later
+    !>    (for single level this will be skipped)
+    do level_index = level_index_c+1, level_index_f
        f_lev_p => pf%levels(level_index)
-       if (pf%Pipeline_G) then
-          do j = 1, f_lev_p%nsweeps
-             call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .true.)
-             call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
-             call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .false.)
-          end do
-       else
-          call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true.)
-          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
-          call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
-       endif
+       call pf_post(pf, f_lev_p, f_lev_p%index*10000+iteration)
+    end do
+    
+    
+    !> move from fine to coarse doing sweeps 
+    do level_index = level_index_f, level_index_c+1, -1
+       f_lev_p => pf%levels(level_index);
+       c_lev_p => pf%levels(level_index-1)
+       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
+       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
+       call restrict_time_space_fas(pf, t0, dt, level_index)
+       call save(c_lev_p)
+    end do
+
+    
+    ! Do the coarsest level
+    level_index=level_index_c
+    f_lev_p => pf%levels(level_index)
+    if (pf%Pipeline_G) then
+       do j = 1, f_lev_p%nsweeps
+          call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .true.)
+          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
+          call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .false.)
+       end do
+    else
+       call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true.)
+       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
+       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
+    endif
        
-       !
-       ! up  (coarse to fine)
-       !
-       do level_index = 2, pf%nlevels
+    ! Now move coarse to fine interpolating and sweeping
+       do level_index = level_index_c+1,level_index_f
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
           call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
@@ -693,13 +497,12 @@ contains
              ! new fine initial condition
              call interpolate_q0(pf, f_lev_p, c_lev_p)
           end if
-          ! don't sweep on the finest level since that is done in the controller  
-          if (level_index < pf%nlevels) then
+          ! don't sweep on the finest level since that is only done at beginning
+          if (level_index < level_index_f) then
              call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
           end if
        end do
-       
-    end if ! (nlevels == 1)
+
   end subroutine pf_v_cycle
 
 end module pf_mod_parallel
