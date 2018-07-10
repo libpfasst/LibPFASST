@@ -44,3 +44,15 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. toctree::
+   :hidden:
+
+   self
+   maths
+   download
+   tutorial
+   overview
+   reference
+   communicators
+   parameters
