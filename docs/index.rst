@@ -29,6 +29,13 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
    :maxdepth: 2
    :caption: Contents:
 
+**Main parts of the documentation**
+
+* :doc:`Download <download>` - download and installation instructions.
+* :doc:`Tutorial <tutorial>` - getting started and basic usage.
+* :doc:`Overview <overview>` - design and interface overview.
+* :doc:`Reference <reference>` - information about the internals of LIBPFASST.
+
 
 
 Indices and tables
