@@ -3,11 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to LIBPFASST's documentation!
+Welcome to the  LIBPFASST documentation!
 =====================================
 
-LIBPFASST
-=========
 
 LIBPFASST is a Fortran implementation of the PFASST algorithm.
 
@@ -28,7 +26,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+   :download: 
 **Main parts of the documentation**
 
 * :doc:`Download <download>` - download and installation instructions.
@@ -36,6 +34,14 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 * :doc:`Overview <overview>` - design and interface overview.
 * :doc:`Reference <reference>` - information about the internals of LIBPFASST.
 
+Download
+========
+
+You can obtain a copy of LIBPFASST through the `PFASST@lbl.gov project
+page`_ on `bitbucket.org`_.  
+
+.. _`LIBPFASST project page`: https://pfasst.lbl.gov
+.. _`bitbucket.org`: https://bitbucket.org/berkeleylab/libpfasst/src/master/
 
 
 Indices and tables
@@ -50,7 +56,6 @@ Indices and tables
 
    self
    maths
-   download
    tutorial
    overview
    reference
