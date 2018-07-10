@@ -1,55 +1,39 @@
-PFASST
-======
+.. LIBPFASST documentation master file, created by
+   sphinx-quickstart on Tue Jul 10 15:22:48 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-The **Parallel Full Approximation Scheme in Space and Time** (PFASST)
-algorithm is a method for parallelizing ODEs and PDEs in time.  The
-maths behind the PFASST algorithm are breifly described on the
-:doc:`maths` page.
-
-This work was supported by the Director, DOE Office of Science, Office
-of Advanced Scientific Computing Research, Office of Mathematics,
-Information, and Computational Sciences, Applied Mathematical Sciences
-Program, under contract DE-SC0004011.  This work is currently authored
-by `Michael L. Minion`_ and `Matthew Emmett`_.  Contributions are
-welcome -- please contact `Matthew Emmett`_.
-
+Welcome to LIBPFASST's documentation!
+=====================================
 
 LIBPFASST
 =========
 
 LIBPFASST is a Fortran implementation of the PFASST algorithm.
 
-**Main parts of the documentation**
+Libpfasst Copyright (c) 2018, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy) and Sebastian Goetschel.  All rights reserved.
 
-* :doc:`Download <download>` - download and installation instructions.
-* :doc:`Tutorial <tutorial>` - getting started and basic usage.
-* :doc:`Overview <overview>` - design and interface overview.
-* :doc:`Reference <reference>` - information about the internals of LIBPFASST.
-* :doc:`Communicators <communicators>` - information about the various communicators available.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
+(1) Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-Contributing
-------------
+(2) Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-LIBPFASST is released under the GNU GPL, please see the LICENSE file
-in the source code repository for more information.
+(3) Neither the name of the University of California, Lawrence Berkeley National Laboratory, U.S. Dept. of Energy, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-If you would like to contribute to the development of LIBPFASST,
-please, dive right in by visiting the `LIBPFASST project page`_.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-.. _`Michael L. Minion`: http://amath.unc.edu/Minion/Minion
-.. _`Matthew Emmett`: http://emmett.ca/matthew/
-.. _`LIBPFASST project page`: https://bitbucket.org/memmett/libpfasst
+You are under no obligation whatsoever to provide any bug fixes, patches, or upgrades to the features, functionality or performance of the source code ("Enhancements") to anyone; however, if you choose to make your Enhancements available either publicly, or directly to Lawrence Berkeley National Laboratory, without imposing a separate written license agreement for such Enhancements, then you hereby grant the following license: a  non-exclusive, royalty-free perpetual license to install, use, modify, prepare derivative works, incorporate into other computer software, distribute, and sublicense such enhancements or derivative works thereof, in binary and source code form.
 
 .. toctree::
-   :hidden:
+   :maxdepth: 2
+   :caption: Contents:
 
-   self
-   maths
-   download
-   tutorial
-   overview
-   reference
-   communicators
-   parameters
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
