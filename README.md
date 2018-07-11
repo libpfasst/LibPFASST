@@ -19,7 +19,8 @@ We have changed the License Agreement.  Please see LICENSE for details
 
 There is (newish) Doxygen info at
 https://pfasst.bitbucket.io/Doxygen/html/index.html
-We are currently writing better documentation, examples, and a tutorial, so check back soon.
+
+We are currently writing better documentation, examples, and a tutorial,  https://pfasst.bitbucket.io/docs/build/html/index.html
 
 
 # COMPILERS
