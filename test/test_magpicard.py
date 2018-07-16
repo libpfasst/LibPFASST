@@ -8,8 +8,8 @@ from pf.pfasst import PFASST, Params
 
 # defined relative to root of project
 home = abspath('.')
-exe = home+'/test/toda/main.exe'
-base_dir = home+'/test/toda/output'
+exe = home+'/test/magpicard/main.exe'
+base_dir = home+'/test/magpicard/output'
 
 try:
     mkdir(base_dir)

@@ -23,7 +23,7 @@ def make_sdc():
 
 def make_mlsdc():
     mlsdc = []
-    nml = NMLFILE.format('mlsdc')
+    nml = NMLFILE.format('multi_level')
     tasks = 1
     for status in [1, 2]:
         if status == 2:
@@ -37,7 +37,7 @@ def make_mlsdc():
 
 def make_pfasst():
     pfasst = []
-    nml = NMLFILE.format('mlsdc')
+    nml = NMLFILE.format('multi_level')
     tasks = 4
     for status in [1, 2]:
         if status == 1:

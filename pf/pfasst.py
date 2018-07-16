@@ -163,12 +163,20 @@ class PFASST(object):
         for k, v in kwargs.iteritems():
             setattr(self.p, k, v)
 
-        self.base_string = "&PF_PARAMS\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
-abs_res_tol = {}\n\trel_res_tol = {}\n\tPipeline_G = .true.\n\tPFASST_pred = .true.\n\tvcycle = {}\n/\n\n\
-&PARAMS\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
-{} = {}\n\tTfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
-use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n"
+        if 'mag' in self.p.inttype:
+            self.base_string = "&pf_params\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
+    abs_res_tol = {}\n\trel_res_tol = {}\n\tpipeline_g = .true.\n\tpfasst_pred = .true.\n\tvcycle = {}\n/\n\n\
+    &params\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
+    {} = {}\n\ttfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
+    nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
+    use_sdc = {}\n/\n"
+        elif 'imk' in self.p.inttype:
+            self.base_string = "&pf_params\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
+    abs_res_tol = {}\n\trel_res_tol = {}\n\tpipeline_g = .true.\n\tpfasst_pred = .true.\n\tvcycle = {}\n/\n\n\
+    &params\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
+    {} = {}\n\ttfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
+    nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
+    use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n"
 
         # if self.p.filename:
         #     with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
@@ -250,12 +258,20 @@ use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n"
             else:
                 mkrk = '.false.'
 
-        self.pfstring = self.base_string.format(
-            self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
-            vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
-            self.p.nsteps, exptol, self.p.particles, self.p.nprob,
-            "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
-            "\'"+self.p.exact_dir+"\'", solns, periodic, sdc, rk, mkrk)
+        if 'mag' in self.p.inttype:
+            self.pfstring = self.base_string.format(
+                self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
+                vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
+                self.p.nsteps, exptol, self.p.particles, self.p.nprob,
+                "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
+                "\'"+self.p.exact_dir+"\'", solns, periodic, sdc)
+        elif 'imk' in self.p.inttype:
+            self.pfstring = self.base_string.format(
+                self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
+                vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
+                self.p.nsteps, exptol, self.p.particles, self.p.nprob,
+                "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
+                "\'"+self.p.exact_dir+"\'", solns, periodic, sdc, rk, mkrk)
 
         return self.pfstring
 
