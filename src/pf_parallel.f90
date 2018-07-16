@@ -229,7 +229,7 @@ contains
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
        call interpolate_q0(pf, f_lev_p, c_lev_p)
 
-       !  Do a sweep on unless we are at the finest level
+       !  Do a sweep on level unless we are at the finest level
        if (level_index < pf%nlevels) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
        end if
