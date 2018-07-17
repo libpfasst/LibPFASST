@@ -4,7 +4,7 @@ from os import remove, mkdir
 from os.path import abspath
 from errno import EEXIST
 import numpy as np
-from pf.pfasst import PFASST, Params
+from pf.pfasst import PFASST, MagpicardParams
 
 # defined relative to root of project
 home = abspath('.')
@@ -19,7 +19,7 @@ except OSError as exc:
     else:
         raise OSError, exc.message
 
-params = Params(exe=exe, nodes=[3], magnus=[2], \
+params = MagpicardParams(exe=exe, nodes=[3], magnus=[2], \
                 nsteps=128, tfinal=1.0, iterations=15, \
                 nb=False, base_dir=base_dir)
 
@@ -43,7 +43,7 @@ def make():
 tests = make()
 @pytest.mark.parametrize('nodes, magnus', tests)
 def test_toda(nodes, magnus):
-    params = Params(exe=exe, nodes=nodes, magnus=magnus,
+    params = MagpicardParams(exe=exe, nodes=nodes, magnus=magnus,
                     tolerance=1e-12,
                     nsteps=128, tfinal=1.0, iterations=30,
                     nb=False, base_dir=base_dir)

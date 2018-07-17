@@ -54,56 +54,30 @@ class Params(object):
     #pylint: disable=too-many-instance-attributes
     nb = attr.ib(default=True, repr=False)
     exe = attr.ib(default=None)
-    filename = attr.ib(default=None)
     levels = attr.ib(default=1)
     tfinal = attr.ib(default=10.0)
     iterations = attr.ib(default=30)
     nsteps = attr.ib(default=16)
     nodes = attr.ib(default=[2], validator=attr.validators.instance_of(list))
-    magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
-    nterms = attr.ib(default=[5], validator=attr.validators.instance_of(list))
     sweeps = attr.ib(default=[1], validator=attr.validators.instance_of(list))
     sweeps_pred = attr.ib(default=[1],
                           validator=attr.validators.instance_of(list))
-    exptol = attr.ib(default=['1.d-15'],
-                     validator=attr.validators.instance_of(list))
-    nprob = attr.ib(default=4)
     tasks = attr.ib(default=1)
-    basis = attr.ib(default='')
-    molecule = attr.ib(default='')
-    exact_dir = attr.ib(default='')
     base_dir = attr.ib(default='output', repr=False)
     verbose = attr.ib(default=False, repr=False)
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
     timings = attr.ib(default=False)
-    solutions = attr.ib(default=False)
-    particles = attr.ib(default=11)
-    periodic = attr.ib(default=True)
     vcycle = attr.ib(default=False)
     tolerance = attr.ib(default=1e-12)
     qtype = attr.ib(default='lobatto')
-    inttype = attr.ib(default='mag')
     sdc = attr.ib(default=True)
-    rk = attr.ib(default=False)
-    mkrk = attr.ib(default=False)
 
-    def __attrs_post_init__(self):
+    def _init_dt(self):
         if self.dt is None:
             self.dt = self.tfinal / self.nsteps
         else:
             self.nsteps = self.tfinal / self.dt
-
-        if 'imk' in self.inttype:
-            pieces = self.inttype.split('.')
-            if len(pieces) <= 1:
-                return
-            else:
-                if 'mk' in pieces[-1]:
-                    self.mkrk = True
-                else:
-                    self.rk = True
-
 
     def asdict(self):
         return attr.asdict(self)
@@ -114,10 +88,202 @@ class Params(object):
             'nsteps': self.nsteps,
             'dt': self.dt,
             'nodes': self.nodes,
-            'magnus': self.magnus,
-            'nterms': self.nterms
         }
         pprint(params, width=1)
+
+
+@attr.s(slots=True)
+class MagpicardParams(Params):
+    filename = attr.ib(default='mag.nml')
+    inttype = attr.ib(default='mag')
+    magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
+    exptol = attr.ib(default=['1.d-15'],
+                     validator=attr.validators.instance_of(list))
+    solutions = attr.ib(default=False)
+    particles = attr.ib(default=11)
+    periodic = attr.ib(default=True)
+    exptol = attr.ib(default=['1.d-15'],
+                     validator=attr.validators.instance_of(list))
+    base_string = attr.ib(default=
+                          '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
+                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
+                          'rel_res_tol = {}\n\tpipeline_g = .true.\n\t' + \
+                          'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
+                          '&params\n\tfbase = {}\n\tnnodes = {}\n\t'+ \
+                          'nsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
+                          'magnus_order = {}\n\ttfin = {}\n\tnsteps = {}\n\t'+ \
+                          'exptol = {}\n\tnparticles = {}\n\t'+ \
+                          'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
+                          'use_sdc = {}\n/\n')
+    param_list = attr.ib(default=None)
+    pkl = attr.ib(default='/tfinal_{}-dt_{}-'+ \
+                  'particles_{}-periodic_{}-qtype-{}-'+ \
+                  'levels_{}-nodes_{}-magorder_{}-tasks_{}-sdc_{}-inttype_{}.pkl')
+
+
+    def __attrs_post_init__(self):
+        self.param_list = self._make_list()
+        self.pkl = self.base_dir + self.pkl
+        self._init_dt()
+
+    def _make_list(self):
+        nodes = ' '.join(map(str, self.nodes))
+        magnus = ' '.join(map(str, self.magnus))
+        sweeps = ' '.join(map(str, self.sweeps))
+        sweeps_pred = ' '.join(map(str, self.sweeps_pred))
+        exptol = ' '.join(self.exptol)
+        basedir = '"{}"'.format(self.base_dir)
+
+        if self.solutions == True:
+            solns = '.true.'
+        else:
+            solns = '.false.'
+
+        if self.timings == True:
+            timings = '.true.'
+        else:
+            timings = '.false.'
+
+        if self.periodic == True:
+            periodic = '.true.'
+        else:
+            periodic = '.false.'
+
+        if self.sdc == True:
+            sdc = '.true.'
+        else:
+            sdc = '.false.'
+
+        if self.vcycle == True:
+            vcycle = '.true.'
+        else:
+            vcycle = '.false.'
+
+        if self.qtype == 'gauss':
+            qtype = 5
+        else:
+            qtype = 1
+
+        return [self.levels, self.iterations, qtype, timings,
+                self.tolerance, self.tolerance, vcycle, basedir,
+                nodes, sweeps_pred, sweeps, magnus, self.tfinal,
+                self.nsteps, exptol, self.particles,
+                solns, periodic, sdc]
+
+    def get_pkl_path(self):
+        nodes = '_'.join(map(str, self.nodes))
+        magnus = '_'.join(map(str, self.magnus))
+        pkl_path = self.pkl.format(self.tfinal, self.dt,
+                                   self.particles, self.periodic,
+                                   self.qtype, self.levels,
+                                   nodes, magnus, self.tasks, self.sdc, self.inttype)
+        return pkl_path
+
+
+@attr.s(slots=True)
+class IMKParams(Params):
+    filename = attr.ib(default='imk.nml')
+    inttype = attr.ib(default='imk')
+    exptol = attr.ib(default=['1.d-15'],
+                     validator=attr.validators.instance_of(list))
+    solutions = attr.ib(default=False)
+    particles = attr.ib(default=11)
+    periodic = attr.ib(default=True)
+    nterms = attr.ib(default=[5], validator=attr.validators.instance_of(list))
+    rk = attr.ib(default=False)
+    mkrk = attr.ib(default=False)
+    exptol = attr.ib(default=['1.d-15'],
+                     validator=attr.validators.instance_of(list))
+    base_string = attr.ib(default=
+                          '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
+                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
+                          'rel_res_tol = {}\n\tpipeline_g = .true.\n\t' + \
+                          'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
+                          '&params\n\tfbase = {}\n\tnnodes = {}\n\t'+ \
+                          'nsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
+                          'nterms = {}\n\ttfin = {}\n\tnsteps = {}\n\t'+ \
+                          'exptol = {}\n\tnparticles = {}\n\t'+ \
+                          'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
+                          'use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n')
+    param_list = attr.ib(default=None)
+    pkl = attr.ib(default='/tfinal_{}-dt_{}-'+ \
+                  'particles_{}-periodic_{}-qtype-{}-'+ \
+                  'levels_{}-nodes_{}-nterms_{}-tasks_{}-sdc_{}-inttype_{}.pkl')
+
+    def __attrs_post_init__(self):
+        pieces = self.inttype.split('.')
+        if len(pieces) > 1:
+            if 'mk' in pieces[-1]:
+                self.mkrk = True
+            else:
+                self.rk = True
+        self.param_list = self._make_list()
+        self.pkl = self.base_dir + self.pkl
+        self._init_dt()
+
+    def _make_list(self):
+        nodes = ' '.join(map(str, self.nodes))
+        nterms = ' '.join(map(str, self.nterms))
+        sweeps = ' '.join(map(str, self.sweeps))
+        sweeps_pred = ' '.join(map(str, self.sweeps_pred))
+        exptol = ' '.join(self.exptol)
+        basedir = '"{}"'.format(self.base_dir)
+
+        if self.solutions == True:
+            solns = '.true.'
+        else:
+            solns = '.false.'
+
+        if self.timings == True:
+            timings = '.true.'
+        else:
+            timings = '.false.'
+
+        if self.periodic == True:
+            periodic = '.true.'
+        else:
+            periodic = '.false.'
+
+        if self.sdc == True:
+            sdc = '.true.'
+        else:
+            sdc = '.false.'
+
+        if self.vcycle == True:
+            vcycle = '.true.'
+        else:
+            vcycle = '.false.'
+
+        if self.qtype == 'gauss':
+            qtype = 5
+        else:
+            qtype = 1
+
+        if self.rk == True:
+            rk = '.true.'
+            mkrk = '.false.'
+        else:
+            rk = '.false.'
+            if self.mkrk == True:
+                mkrk = '.true.'
+            else:
+                mkrk = '.false.'
+
+        return [self.levels, self.iterations, qtype, timings,
+                self.tolerance, self.tolerance, vcycle, basedir,
+                nodes, sweeps_pred, sweeps, nterms, self.tfinal,
+                self.nsteps, exptol, self.particles,
+                solns, periodic, sdc, rk, mkrk]
+
+    def get_pkl_path(self):
+        nodes = '_'.join(map(str, self.nodes))
+        nterms = '_'.join(map(str, self.nterms))
+        print self.pkl
+        pkl_path = self.pkl.format(self.tfinal, self.dt,
+                                   self.particles, self.periodic,
+                                   self.qtype, self.levels,
+                                   nodes, nterms, self.tasks, self.sdc, self.inttype)
+        return pkl_path
 
 
 class PFASST(object):
@@ -163,235 +329,44 @@ class PFASST(object):
         for k, v in kwargs.iteritems():
             setattr(self.p, k, v)
 
-        if 'mag' in self.p.inttype:
-            self.base_string = "&pf_params\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
-    abs_res_tol = {}\n\trel_res_tol = {}\n\tpipeline_g = .true.\n\tpfasst_pred = .true.\n\tvcycle = {}\n/\n\n\
-    &params\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
-    {} = {}\n\ttfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-    nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
-    use_sdc = {}\n/\n"
-        elif 'imk' in self.p.inttype:
-            self.base_string = "&pf_params\n\tnlevels = {}\n\tniters = {}\n\tqtype = {}\n\techo_timings = {}\n\t\
-    abs_res_tol = {}\n\trel_res_tol = {}\n\tpipeline_g = .true.\n\tpfasst_pred = .true.\n\tvcycle = {}\n/\n\n\
-    &params\n\tfbase = {}\n\tnnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t\
-    {} = {}\n\ttfin = {}\n\tnsteps = {}\n\texptol = {}\n\tnparticles = {}\n\t\
-    nprob = {}\n\tbasis = {}\n\tmolecule = {}\n\texact_dir = {}\n\tsave_solutions = {}\n\ttoda_periodic = {}\n\t\
-    use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n"
-
-        # if self.p.filename:
-        #     with open(self.p.base_dir + '/' + self.p.filename, 'r') as f:
-        #         content = f.read()
-        #     self._override_default_params(content)
-
-        if self.p.nprob == 1:
-            self.p.filename = 'rabi.nml'
-        elif self.p.nprob == 2:
-            self.p.filename = 'tdrabi.nml'
-        elif self.p.nprob == 3:
-            mol_name = re.findall(r'([A-Z]+)', self.p.molecule, re.IGNORECASE)
-            self.p.filename = ''.join(mol_name) + '_' + self.p.basis + '.nml'
-        else:
-            self.p.filename = 'toda.nml'
-
         try:
             mkdir(self.p.base_dir)
         except OSError:
             pass
 
-        self.pkl = self.p.base_dir + '/nprob_{}-tfinal_{}-dt_{}-'+ \
-                   'particles_{}-periodic_{}-exact_dir_{}-qtype-{}-'+ \
-                   'levels_{}-nodes_{}-{}_{}-tasks_{}-sdc_{}-inttype_{}.pkl'
-
     def _create_pf_string(self):
-        nodes = ' '.join(map(str, self.p.nodes))
-        magnus = ' '.join(map(str, self.p.magnus))
-        nterms = ' '.join(map(str, self.p.nterms))
-        sweeps = ' '.join(map(str, self.p.sweeps))
-        sweeps_pred = ' '.join(map(str, self.p.sweeps_pred))
-        exptol = ' '.join(self.p.exptol)
-        basedir = '"{}"'.format(self.p.base_dir)
+        return self.p.base_string.format(*self.p.param_list)
 
-        if self.p.solutions == True:
-            solns = '.true.'
-        else:
-            solns = '.false.'
-
-        if self.p.timings == True:
-            timings = '.true.'
-        else:
-            timings = '.false.'
-
-        if self.p.periodic == True:
-            periodic = '.true.'
-        else:
-            periodic = '.false.'
-
-        if self.p.sdc == True:
-            sdc = '.true.'
-        else:
-            sdc = '.false.'
-
-        if self.p.vcycle == True:
-            vcycle = '.true.'
-        else:
-            vcycle = '.false.'
-
-        if self.p.qtype == 'gauss':
-            qtype = 5
-        else:
-            qtype = 1
-
-        if self.p.inttype == 'mag':
-            inttype = 'magnus_order'
-            val = magnus
-        else:
-            inttype = 'nterms'
-            val = nterms
-
-        if self.p.rk == True:
-            rk = '.true.'
-            mkrk = '.false.'
-        else:
-            rk = '.false.'
-            if self.p.mkrk == True:
-                mkrk = '.true.'
-            else:
-                mkrk = '.false.'
-
-        if 'mag' in self.p.inttype:
-            self.pfstring = self.base_string.format(
-                self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
-                vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
-                self.p.nsteps, exptol, self.p.particles, self.p.nprob,
-                "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
-                "\'"+self.p.exact_dir+"\'", solns, periodic, sdc)
-        elif 'imk' in self.p.inttype:
-            self.pfstring = self.base_string.format(
-                self.p.levels, self.p.iterations, qtype, timings, self.p.tolerance, self.p.tolerance,
-                vcycle, basedir, nodes, sweeps_pred, sweeps, inttype, val, self.p.tfinal,
-                self.p.nsteps, exptol, self.p.particles, self.p.nprob,
-                "\'"+self.p.basis+"\'", "\'"+self.p.molecule+"\'",
-                "\'"+self.p.exact_dir+"\'", solns, periodic, sdc, rk, mkrk)
-
-        return self.pfstring
-
-    def _override_default_params(self, content):
-        try:
-            match = re.search(r'magnus_order = (.+)', content)
-        except AttributeError:
-            pass
-        else:
-            self.p.magnus = map(int, match.group(1).split())
-
-        try:
-            match = re.search(r'nsweeps = (.+)', content)
-        except AttributeError:
-            pass
-        else:
-            self.p.sweeps = map(int, match.group(1).split())
-
-        try:
-            match = re.search(r'nnodes = (.+)', content)
-        except AttributeError:
-            pass
-        else:
-            self.p.nodes = map(int, match.group(1).split())
-
-        try:
-            self.p.levels = int(
-                re.search(r'nlevels\ =\ (.+)', content).group(1))
-        except AttributeError:
-            pass
-        try:
-            self.p.iterations = int(
-                re.search(r'niters\ =\ (.+)', content).group(1))
-        except AttributeError:
-            pass
-        try:
-            self.p.tfinal = float(re.search(r'Tfin\ =\ (.+)', content).group(1))
-        except AttributeError:
-            pass
-        try:
-            self.p.nsteps = int(re.search(r'nsteps\ =\ (.+)', content).group(1))
-        except AttributeError:
-            pass
-        try:
-            self.p.dt = self.p.tfinal / self.p.nsteps
-        except AttributeError:
-            pass
-        try:
-            self.p.nprob = int(
-                re.search(r'nprob\ =\ ([0-9])', content).group(1))
-        except AttributeError:
-            pass
-
-        if self.p.nprob == 3:
-            try:
-                self.p.basis = re.search(r'basis\ =\ \'(.+)\'',
-                                         content).group(1)
-            except AttributeError:
-                pass
-            try:
-                self.p.molecule = re.search(r'molecule\ =\ \'(.+)\'',
-                                            content).group(1)
-            except AttributeError:
-                pass
-            try:
-                self.p.exact_dir = re.search(r'exact\_dir\ =\ \'(.+)\'',
-                                             content).group(1)
-            except AttributeError:
-                pass
-        else:
-            self.p.basis = ''
-            self.p.molecule = ''
-            self.p.exact_dir = ''
-
-    def write_to_file(self):
+    def _write_to_file(self, string):
         """creates the input file on disk in the base_dir for the exe to run"""
-        self.pfstring = self._create_pf_string()
-
         with open(self.p.base_dir + '/' + self.p.filename, 'w') as f:
-            f.write(self.pfstring)
+            f.write(string)
 
     def _build_command(self):
         if self.p.nersc:
             command = ['srun', '-n', str(self.p.tasks)]
-            command.extend([self.exe, self.p.base_dir + '/' + self.p.filename])
+            command.extend([self.p.exe, self.p.base_dir + '/' + self.p.filename])
         else:
-            command = ['mpirun', '-np', str(self.p.tasks), self.exe, \
+            command = ['mpirun', '-np', str(self.p.tasks), self.p.exe, \
                         self.p.base_dir + '/' + self.p.filename]
 
         return command
 
     def _pre_run_setup(self, ref):
-        self.p.magnus = self._make_sure_is_list(self.p.magnus)
-        self.p.nterms = self._make_sure_is_list(self.p.nterms)
-        self.p.nodes = self._make_sure_is_list(self.p.nodes)
-        self.p.sweeps = self._make_sure_is_list(self.p.sweeps)
-
-        nodes = '_'.join(map(str, self.p.nodes))
-        if self.p.inttype == 'mag':
-            term = 'magnus'
-            mag = '_'.join(map(str, self.p.magnus))
-        else:
-            term = 'nterms'
-            mag = '_'.join(map(str, self.p.nterms))
-        self._create_pf_string()
-        self.write_to_file()
-        pkl_path = self.pkl.format(self.p.nprob, self.p.tfinal, self.p.dt,
-                                   self.p.particles, self.p.periodic, self.p.exact_dir, self.p.qtype,
-                                   self.p.levels, nodes, term, mag, self.p.tasks, self.p.sdc, self.p.inttype)
+        pf_string = self._create_pf_string()
+        self._write_to_file(pf_string)
+        pkl_path = self.p.get_pkl_path()
 
         if ref:
             pkl_path = pkl_path+'_ref'
         return pkl_path
 
     def _cleanup(self):
-        for file in glob.iglob(self.p.base_dir + '/*_soln'):
-            remove(file)
+        for fname in glob.iglob(self.p.base_dir + '/*_soln'):
+            remove(fname)
 
-        for file in glob.iglob('fort.*'):
-            remove(file)
+        for fname in glob.iglob('fort.*'):
+            remove(fname)
 
         remove('final_solution')
 

@@ -4,7 +4,7 @@ from os import remove, mkdir
 from os.path import abspath
 from errno import EEXIST
 import numpy as np
-from pf.pfasst import PFASST, Params
+from pf.pfasst import PFASST, IMKParams
 
 # defined relative to root of project
 home = abspath('.')
@@ -20,9 +20,9 @@ except OSError as exc:
     else:
         raise OSError, exc.message
 
-params = Params(exe=exe, nodes=[3], nterms=[2], \
-                nsteps=128, tfinal=1.0, \
-                inttype='imk', nb=False, base_dir=output_dir)
+params = IMKParams(exe=exe, nodes=[3], nterms=[2], \
+                   nsteps=128, tfinal=1.0, \
+                   inttype='imk', nb=False, base_dir=output_dir)
 
 ref_particle0 = 1.6125274564234153
 ref_particle8 = -1.7151098584854585
@@ -42,10 +42,10 @@ tests = make()
 @pytest.mark.parametrize('levels, vcycle, sdc, nodes, nterms',
                          tests)
 def test_toda(levels, vcycle, sdc, nodes, nterms):
-    params = Params(exe=exe, levels=levels, nodes=nodes*levels, nterms=nterms*levels,
-                    sweeps=[1]*levels, sweeps_pred=[1]*levels,
-                    nsteps=128, tfinal=1.0, inttype='imk',
-                    nb=False, base_dir=output_dir)
+    params = IMKParams(exe=exe, levels=levels, nodes=nodes*levels, nterms=nterms*levels,
+                       sweeps=[1]*levels, sweeps_pred=[1]*levels,
+                       nsteps=128, tfinal=1.0, inttype='imk',
+                       nb=False, base_dir=output_dir)
 
     toda = PFASST(params)
     results = toda.run()[0]
