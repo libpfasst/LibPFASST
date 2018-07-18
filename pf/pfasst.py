@@ -13,7 +13,6 @@ Params     : stores all PFASST parameters, mostly implemented to reduce number o
 Results    : pd.DataFrame child that implements pfasst-related plots, and results
              storing
 """
-import argparse
 import glob
 import re
 import attr
@@ -38,8 +37,8 @@ else:
 
 @attr.s(slots=True)
 class Params(object):
-    """Class containing all parameters necessary for running an NWC/PFASST
-    calculation.
+    """Class containing all sweeper-independent parameters necessary for
+    running a PFASST calculation.
 
     This is the main class that is ultimately passed around from all three of
     the other classes found in this file. Its structure/usability is very
@@ -79,9 +78,6 @@ class Params(object):
         else:
             self.nsteps = self.tfinal / self.dt
 
-    def asdict(self):
-        return attr.asdict(self)
-
     def print_params(self):
         params = {
             'tfinal': self.tfinal,
@@ -91,9 +87,33 @@ class Params(object):
         }
         pprint(params, width=1)
 
+    def pack(self):
+        return attr.asdict(self)
+
+    def unpack(self, params):
+        for k, v in params.iteritems():
+            setattr(self, k, v)
+
 
 @attr.s(slots=True)
 class MagpicardParams(Params):
+    """ Classes that derive from Params are implementations of sweeper/problem-specific
+    parameters. When building a new derived Params class one should do the following:
+    1. Define new params (e.g. magnus, exptol, solutions, ...)
+    2. Define new 'base_string' which is the parameter-less string that will be
+       written to disk with the appropriate params when a calculation is run
+    3. Define new 'pkl' string which is a string that uniquely identifies a previous
+       run whose results were stored on disk (this will likely utilize the new params)
+    4. Define method make_list() that constructs a list of the params that will be
+       injected into base_strings before writing to disk
+    5. Define method get_pkl_path() which constructs the string to/from which data
+       will be saved/loaded
+    6. Define ref_param_list which is a dictionary with k, v pairs that indicate the
+       parameters for a reference calculation
+    7. Implement method __attrs_post_init_() that does some final initialization that
+       is required (a quirk of the attrs library)
+    """
+    #pylint: disable=too-many-instance-attributes
     filename = attr.ib(default='mag.nml')
     inttype = attr.ib(default='mag')
     magnus = attr.ib(default=[1], validator=attr.validators.instance_of(list))
@@ -116,14 +136,19 @@ class MagpicardParams(Params):
                           'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
                           'use_sdc = {}\n/\n')
     param_list = attr.ib(default=None)
-    pkl = attr.ib(default='/tfinal_{}-dt_{}-'+ \
-                  'particles_{}-periodic_{}-qtype-{}-'+ \
-                  'levels_{}-nodes_{}-magorder_{}-tasks_{}-sdc_{}-inttype_{}.pkl')
-
+    pkl = attr.ib(default=None)
+    ref_param_list = attr.ib(default={
+        'nodes': [3],
+        'magnus': [3],
+        'qtype': 'gauss'
+    })
 
     def __attrs_post_init__(self):
         self.param_list = self._make_list()
-        self.pkl = self.base_dir + self.pkl
+        self.pkl = self.base_dir + \
+                  '/tfinal_{}-dt_{}-'+ \
+                  'particles_{}-periodic_{}-qtype-{}-'+ \
+                  'levels_{}-nodes_{}-magorder_{}-tasks_{}-sdc_{}-inttype_{}.pkl'
         self._init_dt()
 
     def _make_list(self):
@@ -206,9 +231,15 @@ class IMKParams(Params):
                           'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
                           'use_sdc = {}\n\trk = {}\n\tmkrk = {}\n/\n')
     param_list = attr.ib(default=None)
-    pkl = attr.ib(default='/tfinal_{}-dt_{}-'+ \
-                  'particles_{}-periodic_{}-qtype-{}-'+ \
-                  'levels_{}-nodes_{}-nterms_{}-tasks_{}-sdc_{}-inttype_{}.pkl')
+    pkl = attr.ib(default=None)
+    ref_param_list = attr.ib(default={
+        'inttype': 'imk',
+        'rk': False,
+        'mkrk': False,
+        'nodes': [9],
+        'nterms': [20],
+        'qtype': 'lob',
+    })
 
     def __attrs_post_init__(self):
         pieces = self.inttype.split('.')
@@ -218,7 +249,10 @@ class IMKParams(Params):
             else:
                 self.rk = True
         self.param_list = self._make_list()
-        self.pkl = self.base_dir + self.pkl
+        self.pkl = self.base_dir + \
+                  '/tfinal_{}-dt_{}-'+ \
+                  'particles_{}-periodic_{}-qtype-{}-'+ \
+                  'levels_{}-nodes_{}-nterms_{}-tasks_{}-sdc_{}-inttype_{}.pkl'
         self._init_dt()
 
     def _make_list(self):
@@ -278,7 +312,6 @@ class IMKParams(Params):
     def get_pkl_path(self):
         nodes = '_'.join(map(str, self.nodes))
         nterms = '_'.join(map(str, self.nterms))
-        print self.pkl
         pkl_path = self.pkl.format(self.tfinal, self.dt,
                                    self.particles, self.periodic,
                                    self.qtype, self.levels,
@@ -313,7 +346,7 @@ class PFASST(object):
     Example
     ======
     >>> from pf.pfasst import PFASST
-    >>> pf = PFASST('/exe/bkrull/pfasst/')
+    >>> pf = PFASST(params)
     >>> pf.p.nsteps = 32
     >>> pf.p.tfinal = 5.0
     >>> results = pf.run()
@@ -335,7 +368,8 @@ class PFASST(object):
             pass
 
     def _create_pf_string(self):
-        return self.p.base_string.format(*self.p.param_list)
+        param_list = self.p._make_list()
+        return self.p.base_string.format(*param_list)
 
     def _write_to_file(self, string):
         """creates the input file on disk in the base_dir for the exe to run"""
@@ -380,10 +414,9 @@ class PFASST(object):
             try:
                 if self.p.verbose:
                     nodes = ' '.join(map(str, self.p.nodes))
-                    magnus = ' '.join(map(str, self.p.magnus))
 
-                    print '---- running pfasst: tasks={}, nodes={}, magnus={}, dt={} ----'.format(
-                        self.p.tasks, nodes, magnus, self.p.dt)
+                    print '---- running pfasst: tasks={}, nodes={}, dt={} ----'.format(
+                        self.p.tasks, nodes, self.p.dt)
 
                 command = self._build_command()
 
@@ -399,6 +432,9 @@ class PFASST(object):
         return trajectory, total_times
 
     def _get_trajectory_from_output(self, output, nsteps, ref=False):
+        """If one was to replace reading stdout with reading dat files from disk
+        this is the function that you would want to redefine.
+        """
         trajectory = pd.DataFrame(columns=[
             'time', 'rank', 'step', 'iter', 'level', 'residual', 'solution', 'eigval'
         ])
@@ -505,51 +541,24 @@ class PFASST(object):
 
     def compute_reference(self):
 
-        params = attr.asdict(self.p)
+        params = self.p.pack()
 
         self.p.tasks = 1
         self.p.levels = 1
         self.p.nsteps = 2**11
-        self.p.timings = False
-        self.p.solutions = False
         self.p.dt = self.p.tfinal / self.p.nsteps
-        if self.p.inttype == 'mag':
-            self.p.nodes = [3]
-            self.p.magnus = [3]
-            self.p.qtype = 'gauss'
-        else:
-            self.p.inttype = 'imk'
-            self.p.rk = False
-            self.p.mkrk = False
-            self.p.nodes = [9]
-            self.p.nterms = [20]
-            self.p.qtype = 'lob'
+
+        for k, v in self.p.ref_param_list.iteritems():
+            setattr(self.p, k, v)
 
         traj, _ = self.run(ref=True)
         last_row = len(traj) - 1
         final_solution = traj.loc[last_row, 'solution']
 
-        self.p.nsteps = params['nsteps']
-        self.p.nodes = params['nodes']
-        self.p.magnus = params['magnus']
-        self.p.nterms = params['nterms']
-        self.p.tasks = params['tasks']
-        self.p.levels = params['levels']
-        self.p.solutions = params['solutions']
-        self.p.timings = params['timings']
-        self.p.qtype = params['qtype']
-        self.p.inttype = params['inttype']
-        self.p.rk = params['rk']
-        self.p.mkrk = params['mkrk']
+        self.p.unpack(params)
+
 
         return final_solution, traj
-
-    @staticmethod
-    def _make_sure_is_list(thing):
-        if type(thing) is not list:
-            return [thing]
-        else:
-            return thing
 
     @staticmethod
     def back_transform(l, nparticles):
@@ -625,7 +634,7 @@ class Results(pd.DataFrame):
 
     def __init__(self, params, trajectory=None, pkl_path=None):
         columns = [
-            'dt', 'nsteps', 'nodes', 'magnus', 'iterations', 'tfinal',
+            'dt', 'nsteps', 'nodes', 'iterations', 'tfinal',
             'final_solution', 'total_times', 'trajectory'
         ]
 
@@ -645,8 +654,7 @@ class Results(pd.DataFrame):
 
         iterations = iterations / len(traj.step.unique()+1)
 
-        self.loc[idx] = self.p.dt, self.p.nsteps, \
-                      self.p.nodes, self.p.magnus, \
+        self.loc[idx] = self.p.dt, self.p.nsteps, self.p.nodes,  \
                       iterations, self.p.tfinal, \
                       final_solution, total_times, traj
         return
@@ -656,7 +664,6 @@ class Results(pd.DataFrame):
         traj = self.loc[idx, 'trajectory']
         last_steps = self.loc[idx, 'nsteps'] - self.p.tasks
 
-        # final_block = traj[(traj['step'] > last_steps)]
         final_block = traj[(traj['step'] > last_steps) & (traj['iter'] > 0)]
         return final_block
 
@@ -767,20 +774,6 @@ class Experiment(object):
     def __init__(self):
         pass
 
-    def nodes_exp(self, pf, nodes=[2, 3], magnus=[1, 2]):
-        """an experiment for testing the convergence of different number of sdc
-        nodes. wraps around the convergence experiment.
-        """
-        results = []
-
-        for i, node in enumerate(nodes):
-            pf.nodes = node
-            pf.magnus = magnus[i]
-            r = self.convergence_exp(pf, steps=[4, 7])
-            results.append(r)
-
-        return results
-
     def convergence_exp(self, pf, steps=[3, 4, 5, 6]):
         """convergence experiment for testing residual vs nsteps. has default
         number of steps, but can be overridden for larger tests. returns a Results
@@ -794,7 +787,7 @@ class Experiment(object):
         errors = []
         nsteps = [2**i for i in steps]
         for i, step in tqdm(enumerate(nsteps), total=len(nsteps),
-                            desc='magnus{}, nodes{}'.format(pf.p.magnus, pf.p.nodes)):
+                            desc='nodes{}'.format(pf.p.nodes)):
             pf.p.nsteps = step
             pf.p.dt = pf.p.tfinal / pf.p.nsteps
             trajectory, total_times = pf.run()
