@@ -1,5 +1,5 @@
 !
-!  Test parameters for the exact solution (without nonlinearity) from Bjorn
+!  Test parameters for a single level example
 !
 
 &PF_PARAMS
@@ -16,26 +16,22 @@
      abs_res_tol = 1.d-12
      rel_res_tol = 1.d-12
 
-     !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .true.
-     PFASST_pred = .true.
+     nnodes =  5
 
-     !  Variable to tell if Vcycling will be done.  Here we do pipelining
-     Vcycle=.true.
+     nsweeps_pred= 1 
+     nsweeps= 1 
 /
 
 !  Now define the local variables you need
 &PARAMS
-!    Finterp = .false.   !  default is 0
-    nnodes =  5
-
-    nsweeps_pred= 1 
-    nsweeps= 1 
 
     nx =  64
+    nu = 0.02
+    v=1.0
 
-    Tfin = 0.1
+    Tfin = 1.0
     nsteps = 64
 
+    imex_stat=2
 
 /

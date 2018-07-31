@@ -16,6 +16,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: THREE  = 3.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
+  integer, parameter :: PF_MAXLEVS = 4  
   integer, parameter :: PF_MAX_HOOKS = 32
   !> Quadrature node types
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
@@ -58,6 +59,7 @@ module pf_mod_dtype
   !<  The base SDC sweeper type
   type, abstract :: pf_sweeper_t
      integer     :: npieces
+     logical     :: use_LUq
    contains
      procedure(pf_sweep_p),        deferred :: sweep
      procedure(pf_initialize_p),   deferred :: initialize
@@ -217,18 +219,24 @@ module pf_mod_dtype
      !>  Parameters
      integer :: nlevels = -1            !< number of pfasst levels
      integer :: niters  = 5             !< number of PFASST iterations to do
-     integer :: rank    = -1            !< rank of current processor
      integer :: qtype   = SDC_GAUSS_LOBATTO  !< type of nodes
+     
+     !>  Level dependend parameters
+     integer :: nsweeps(PF_MAXLEVS) = 1       !<  number of sweeps at each levels
+     integer :: nsweeps_pred(PF_MAXLEVS) =1   !<  number of sweeps during predictor
+     integer :: nnodes(PF_MAXLEVS)=3          !< number of nodes
+     integer :: nnodes_rk(PF_MAXLEVS)=3       !< number of runge-kutta nodes
 
+     !>  Tolerances
      real(pfdp) :: abs_res_tol = 0.d0   !<  absolute convergence tolerance
      real(pfdp) :: rel_res_tol = 0.d0   !<  relative convergence tolerance
 
      !>  predictor options  (should be set before pfasst_run is called)
      logical :: PFASST_pred = .true.    !<  true if the PFASST type predictor is used
      logical :: RK_pred = .false.       !<  true if the coarse level is initialized with Runge-Kutta instead of PFASST
-     logical :: Pipeline_pred = .false. !<  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
+     logical :: pipeline_pred = .false. !<  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
      integer :: nsweeps_burn =  1       !<  number of sdc sweeps to perform during coarse level burn in
-!     logical :: Pipeline_burn = .false. !<  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
+!     logical :: pipeline_burn = .false. !<  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
 
      
      !  q0 can take 3 values
@@ -239,11 +247,19 @@ module pf_mod_dtype
 
      !>  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !<  decides if Vcycles are done
-     logical :: Pipeline_G =  .false.   !<  true if coarsest level sweeps are pipelined during run (not predictor)
+     logical :: Finterp = .false.    !<  True if transfer functions operate on rhs
+     logical :: use_LUq = .true.     !<  True if LU type implicit matrix is used 
+     integer :: taui0 = -999999     !< iteration cutoff for tau inclusion
 
      !> RK and Parareal options
      logical :: use_rk_stepper = .false. !< decides if RK steps are used instead of the sweeps
-     integer     :: taui0 = -999999     !< iteration cutoff for tau inclusion
+
+     !> misc
+     logical :: debug = .false.
+     logical :: save_results = .false.
+     logical    :: echo_timings  = .false.
+
+     integer :: rank    = -1            !< rank of current processor
 
      !> pf objects
      type(pf_state_t), allocatable :: state   !<  Describes where in the algorithm proc is
@@ -256,13 +272,10 @@ module pf_mod_dtype
      integer,  allocatable :: nhooks(:,:)   !<  Holds the number hooks
 
      !> timing variables
-     logical    :: echo_timings  = .false.
      integer :: timers(100)   = 0
      integer :: runtimes(100) = 0
 
-     !> misc
-     logical :: debug = .false.
-     logical :: save_results = .false.
+     !> output directory
      character(512) :: outdir
 
   end type pf_pfasst_t

@@ -17,7 +17,6 @@ module pf_mod_imexQ_oc
 
      logical                 :: explicit = .true. !>  Is there an explicit piece
      logical                 :: implicit = .true. !>  Is there an implicit piece
-     logical                 :: use_LUq = .true.  !>  Use the LU trick
 
      class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
      

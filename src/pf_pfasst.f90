@@ -22,7 +22,8 @@ contains
     logical,           intent(in   ), optional :: nocmd     !< Determines if command line variables are to be read
 
     logical :: read_cmd              !< Local version of nocmd
-
+    integer :: ierror
+    integer :: l                     !<  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
     pf%outdir = ""
@@ -41,8 +42,26 @@ contains
     !>  set communicator
     pf%comm => comm
 
+    !>  Set up the mpi communicator
+    call pf_mpi_setup(pf%comm, pf,ierror) 
+    if (ierror /=0 )        stop "ERROR: mpi_setup failed"
+    
+
+    if (pf%rank < 0) then
+       stop 'Invalid PF rank: did you call setup correctly?'
+    end if
+
     !>  allocate level pointers
     allocate(pf%levels(pf%nlevels))
+
+    !>  loop over levels to set parameters
+    do l = 1, pf%nlevels
+       pf%levels(l)%index = l
+       pf%levels(l)%nsweeps = pf%nsweeps(l)
+       pf%levels(l)%nsweeps_pred = pf%nsweeps_pred(l)
+       pf%levels(l)%nnodes = pf%nnodes(l)              
+    end do
+
     
     !>  allocate hooks
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
@@ -66,21 +85,11 @@ contains
     integer                   :: l                      !<  Level loop index
     integer                   :: ierror                 !<  error flag
 
-    !>  Set up the mpi communicator
-    call pf_mpi_setup(pf%comm, pf,ierror) ! XXX: move this into pf_pfasst_setup
-    if (ierror /=0 )        stop "ERROR: mpi_setup failed"
-
-
-    if (pf%rank < 0) then
-       stop 'Invalid PF rank: did you call setup correctly?'
-    end if
-
-    !>  loop over levels to set parameters
+!!$    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
-       pf%levels(l)%index = l
        call pf_level_setup(pf, pf%levels(l))
     end do
-
+!!$
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
@@ -97,9 +106,7 @@ contains
 
           lev_fine%rmat(1,1) = 1.0_pfdp
           lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes) = 1.0_pfdp
-
-       ! else compute the interpolation matrix
-       else
+       else         ! else compute the interpolation matrix
           call pf_time_interpolation_matrix(lev_fine%nodes, lev_fine%nnodes, lev_coarse%nodes, lev_coarse%nnodes, lev_fine%tmat)
           call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
        endif
@@ -166,8 +173,9 @@ contains
 
     !>  initialize sweeper
     call lev%ulevel%sweeper%initialize(lev)
+    lev%ulevel%sweeper%use_LUq=pf%use_LUq
+    
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
-
 
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
@@ -280,10 +288,18 @@ contains
     character(len=*),  intent(in   ), optional :: fname
     
     ! local versions of pfasst parameters
-    integer          :: niters, nlevels, qtype, taui0
-    double precision :: abs_res_tol, rel_res_tol
-    logical          :: pipeline_g , pfasst_pred, echo_timings, debug, Vcycle
+    integer :: niters, nlevels, qtype
+    integer :: nsweeps(PF_MAXLEVS)
+    integer :: nsweeps_pred(PF_MAXLEVS) 
+    integer :: nnodes(PF_MAXLEVS)
+    integer :: nnodes_rk(PF_MAXLEVS)
 
+    real(pfdp) :: abs_res_tol, rel_res_tol
+    logical    :: PFASST_pred, RK_pred, pipeline_pred
+    integer    ::  nsweeps_burn, q0_style, taui0
+    logical    ::  Vcycle,Finterp, use_LUq
+    logical    :: echo_timings, debug, save_results, use_rk_stepper
+    
     ! stuff for reading the command line
     integer, parameter :: un = 9
     integer            :: i, ios
@@ -292,23 +308,39 @@ contains
     character(len=255) :: message  ! use for i/o error messages
     character(len=512) :: outdir
 
+    
     !> define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, abs_res_tol, rel_res_tol, debug
-    namelist /pf_params/ pipeline_g, pfasst_pred, echo_timings, taui0, outdir, Vcycle
+    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nnodes_rk, abs_res_tol, rel_res_tol
+    namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_results, use_rk_stepper
+
 
     !> set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
     niters       = pf%niters
     qtype        = pf%qtype
+    nsweeps      = pf%nsweeps
+    nsweeps_pred = pf%nsweeps_pred
+    nnodes       = pf%nnodes
+    nnodes_rk    = pf%nnodes_rk    
     abs_res_tol  = pf%abs_res_tol
     rel_res_tol  = pf%rel_res_tol
-    pipeline_g   = pf%pipeline_g
+    pipeline_pred= pf%pipeline_pred
     pfasst_pred  = pf%pfasst_pred
-    echo_timings = pf%echo_timings
-    taui0        = pf%taui0
-    outdir       = pf%outdir
-    debug        = pf%debug
+    rk_pred      = pf%rk_pred
+    pipeline_pred= pf%pipeline_pred
+    nsweeps_burn = pf%nsweeps_burn
+    q0_style     = pf%q0_style
     Vcycle       = pf%Vcycle
+    Finterp      = pf%Finterp
+    use_LUq      = pf%use_LUq
+    taui0        = pf%taui0
+    echo_timings = pf%echo_timings
+    outdir       = pf%outdir
+    use_rk_stepper= pf%use_rk_stepper
+    debug        = pf%debug
+    save_results = pf%save_results
+    echo_timings = pf%echo_timings
 
     !> open the file "fname" and read the pfasst namelist
     if (present(fname))  then
@@ -332,18 +364,31 @@ contains
     end if
 
     !> re-assign the pfasst internals
-    pf%niters       = niters
     pf%nlevels      = nlevels
+    pf%niters       = niters
     pf%qtype        = qtype
+    pf%nsweeps      = nsweeps
+    pf%nsweeps_pred = nsweeps_pred
+    pf%nnodes       = nnodes
+    pf%nnodes_rk    = nnodes_rk    
     pf%abs_res_tol  = abs_res_tol
     pf%rel_res_tol  = rel_res_tol
-    pf%pipeline_g   = pipeline_g
+    pf%pipeline_pred= pipeline_pred
     pf%pfasst_pred  = pfasst_pred
-    pf%echo_timings = echo_timings
-    pf%taui0        = taui0
-    pf%outdir       = outdir
-    pf%debug        = debug
+    pf%rk_pred      = rk_pred
+    pf%pipeline_pred= pipeline_pred
+    pf%nsweeps_burn = nsweeps_burn
+    pf%q0_style     = q0_style
     pf%Vcycle       = Vcycle
+    pf%Finterp      = Finterp
+    pf%use_LUq      = use_LUq
+    pf%taui0        = taui0
+    pf%echo_timings = echo_timings
+    pf%outdir       = outdir
+    pf%use_rk_stepper=use_rk_stepper
+    pf%debug        = debug
+    pf%save_results = save_results
+    pf%echo_timings = echo_timings
 
     !>  Sanity check
     if (pf%nlevels < 1) then
@@ -353,20 +398,20 @@ contains
   end subroutine pf_read_opts
 
   !>  Subroutine to write out run parameters
-  subroutine pf_print_options(pf, unitno, show_mats)
+  subroutine pf_print_options(pf, un_opt, show_mats_opt)
     type(pf_pfasst_t), intent(inout)           :: pf   
-    integer,           intent(in   ), optional :: unitno
-    logical,           intent(in   ), optional :: show_mats
+    integer,           intent(in   ), optional :: un_opt
+    logical,           intent(in   ), optional :: show_mats_opt
 
     integer :: un = 6
+    logical :: show_mats = .FALSE.
     integer :: l, i
     character(8)   :: date
     character(10)  :: time
 
-    print *,'Print options', pf%rank
     if (pf%rank /= 0) return
-    if (present(unitno)) un = unitno
-
+    if (present(un_opt)) un = un_opt
+    
     write(un,*) 'PFASST Configuration'
     write(un,*) '===================='
 
@@ -388,10 +433,10 @@ contains
     write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
     write(un,*) 'taui0:     ',   pf%taui0, '! cutoff for tau correction'
 
-    if (pf%Pipeline_G) then
-       write(un,*) 'Predictor Pipelining is ON    '
+    if (pf%pipeline_pred) then
+       write(un,*) 'Predictor pipelining is ON    '
     else
-       write(un,*) 'Predictor Pipelining is OFF    '
+       write(un,*) 'Predictor pipelining is OFF    '
     end if
     if (pf%PFASST_pred) then
        write(un,*) 'PFASST Predictor style  '
@@ -402,20 +447,20 @@ contains
 
     write(un,*) ''
 
-    if (present(show_mats)) then
-       if (show_mats) then
-          do l = 1, pf%nlevels
-             print *, "Level", l
-             print *, "-----------------"
-             print *, "  nodes"
-             print *, pf%levels(l)%nodes
-             print *, "  Q"
-             do i = 1, pf%levels(l)%nnodes-1
-                 print *, pf%levels(l)%qmat(i,:)
-             end do
+    if (present(show_mats_opt)) show_mats=show_mats_opt
+    if (show_mats) then
+       do l = 1, pf%nlevels
+          print *, "Level", l
+          print *, "-----------------"
+          print *, "  nodes"
+          print *, pf%levels(l)%nodes
+          print *, "  Q"
+          do i = 1, pf%levels(l)%nnodes-1
+             print *, pf%levels(l)%qmat(i,:)
           end do
-       end if
+       end do
     end if
+ 
 
 
   end subroutine pf_print_options

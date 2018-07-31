@@ -10,7 +10,6 @@
 !!
 !!     implicit:  Make false if there is no implicit piece
 !!
-!!     use_LUqt:  Make false if backward Euler sweepers should be used instead of the 'LU trick'
 !!
 !!  The user needs to supply the feval and fcomp routines for a given example   
 module pf_mod_imexQ
@@ -29,7 +28,6 @@ module pf_mod_imexQ
 
      logical                 :: explicit = .true. !<  True if there is an explicit piece
      logical                 :: implicit = .true. !<  True if there an implicit piece
-     logical                 :: use_LUq = .true.  !<  Use the LU trick if true
 
      class(pf_encap_t), allocatable :: rhs   !< holds rhs for implicit solve
 

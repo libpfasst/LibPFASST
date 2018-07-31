@@ -6,10 +6,7 @@ module probin
   use pf_mod_dtype
 
 
-  integer, parameter :: MAXLEVS = 4
-
-
-  character(len=64), save :: problem_type, window_type
+  character(len=64), save :: problem_type
 
   double precision, save :: v      ! advection velocity
   double precision, save :: nu     ! viscosity
@@ -18,19 +15,12 @@ module probin
   integer,          save :: kfreq  ! initial condition parameter
   double precision, save :: dt     ! time step
   double precision, save :: Tfin   ! Final time
-  integer, save    :: nsweeps(MAXLEVS) !  Sweeps at each levels
-  integer, save    :: nsweeps_pred(MAXLEVS)   !  Sweeps during predictor
 
-
-  integer, save :: nnodes(MAXLEVS) ! number of nodes
-  integer, save :: nnodes_rk(MAXLEVS) ! number of nodes
-  integer, save :: nx(MAXLEVS)     ! number of grid points
+  integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   integer, save :: nsteps_rk       ! number of time steps for rk
-  logical, save :: Finterp
-  logical, save :: use_LUq
-  integer, save :: imex_stat
+  integer, save :: imex_stat       ! type of imex splitting
 
   character(len=32), save :: pfasst_nml
 
@@ -39,24 +29,18 @@ module probin
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/ Finterp, nnodes,nnodes_rk, nx,nprob, nsteps,nsteps_rk, dt, Tfin
-  namelist /params/  pfasst_nml, nsweeps, nsweeps_pred
-  namelist /params/  v, nu, t00, sigma, kfreq, use_LUq,imex_stat
+  namelist /params/  nx,nprob, nsteps,nsteps_rk, dt, Tfin
+  namelist /params/  pfasst_nml, v, nu, t00, sigma, kfreq,imex_stat
 
 contains
 
   subroutine probin_init(filename)
     character(len=*), intent(in) :: filename
     integer :: i
-    CHARACTER(len=32) :: arg
+    character(len=32) :: arg
     integer :: un
 
-    !
-    ! defaults
-    !
-    Finterp = .FALSE.
-    nnodes  = 3
-
+    !> set defaults
     nsteps  = -1
     nsteps_rk  = -1
 
@@ -67,37 +51,30 @@ contains
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
     nprob = 0  !  0: Gaussian, 1: Sin wave
-    use_LUq=.TRUE.
     imex_stat=2    !  Default is full IMEX
     
-    !
-    ! read
-    !
-    !  Read in stuff from a file
+
+    !>  Read in stuff from input file
     un = 9
     write(*,*) 'opening file ',TRIM(filename), '  for input'
     open(unit=un, file = filename, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)
           
-
+    !>  Read the command line
     i = 0
-    DO
-       CALL get_command_argument(i, arg)
-       IF (LEN_TRIM(arg) == 0) EXIT
+    do
+       call get_command_argument(i, arg)
+       if (LEN_TRIM(arg) == 0) EXIT
        if (i > 0) then
           istring="&PARAMS "//TRIM(arg)//" /"    
           READ(istring,nml=params,iostat=ios,iomsg=message) ! internal read of NAMELIST
        end if
        i = i+1
-    END DO
+    end do
 
     !  Reset dt if Tfin is set
     if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
-    !
-    ! init
-    !
-
   end subroutine probin_init
 
 end module probin

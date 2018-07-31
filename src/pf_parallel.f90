@@ -472,7 +472,7 @@ contains
     ! Do the coarsest level
     level_index=level_index_c
     f_lev_p => pf%levels(level_index)
-    if (pf%Pipeline_G) then
+    if (pf%pipeline_pred) then
        do j = 1, f_lev_p%nsweeps
           call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .true.)
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)

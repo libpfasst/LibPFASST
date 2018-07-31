@@ -1,45 +1,43 @@
 !
-!  Test parameters to run advection diffusion example with multilevel pipeline
+!  Test parameters for multi-level pipeline IMEX
 !
-!  If run in serial, this will be SDC with a multilevel predictor
-!  If run in parallel, this will be pipelined SDC with a multilevel predictor
 
+!  These are internal pfasst variables that must be set
 &PF_PARAMS
-   !  These are internal pfasst variables that must be set
-    nlevels  = 2
+    nlevels  = 3   !  must be set
 
-    !  These are internal pfasst variables that can be reset
-    niters = 32   !  default is 5
- 
-     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-     qtype   = 1   
+    niters = 10   !  default is 5
+    nnodes =    3  3  5
+
+    nsweeps_pred=3 1 1 
+    nsweeps= 3 1 1
+    
+    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+    qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-13
-     rel_res_tol = 1.d-13
+     abs_res_tol = 0.d-14
+     rel_res_tol = 0.d-14
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .true.
+     pipeline_pred =  .true.
      PFASST_pred = .true.
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
      Vcycle=.false.
+
 /
 
 !  Now define the local variables you need
 &PARAMS
-!    Finterp = .false.   !  default is 0
-    nnodes =  3 5
 
-    nsweeps_pred= 1 1 
-    nsweeps= 1 1 
-
-    nx =  128 256
+    nx =  64 128 256
+    nu = 0.02
+    v=1.0
 
     Tfin = 0.9
-    nsteps = 64
+    nsteps = 32
 
-    nu=0.02
-    v=1.0
+    imex_stat=2
 
 /

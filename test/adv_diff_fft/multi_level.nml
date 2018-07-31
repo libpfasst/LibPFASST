@@ -1,36 +1,34 @@
 !
-!  Test parameters for the exact solution (without nonlinearity) from Bjorn
+!  Test parameters for multi-level imex
 !
 
+!  These are internal pfasst variables that must be set
 &PF_PARAMS
-   !  These are internal pfasst variables that must be set
-    nlevels  = 3
+    nlevels  = 3   !  must be set
 
-    !  These are internal pfasst variables that can be reset
     niters = 10   !  default is 5
- 
-     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-     qtype  = 1   
+    nnodes =    3  3  5
+
+    nsweeps_pred=3 1 1 
+    nsweeps= 3 1 1
+    
+    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+    qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
      abs_res_tol = 0.d-14
      rel_res_tol = 0.d-14
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .false.
+     pipeline_pred =  .true.
      PFASST_pred = .true.
 
-     !  Variable to tell if Vcycling will be done.  Here we do pipelining
+     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
      Vcycle=.TRUE.
 /
 
 !  Now define the local variables you need
 &PARAMS
-!    Finterp = .false.   !  default is 0
-    nnodes =    3  3  5
-
-    nsweeps_pred=1 1 1 
-    nsweeps= 1 1 1 
 
     nx =  64 128 256
     nu = 0.02
@@ -39,6 +37,6 @@
     Tfin = 0.9
     nsteps = 32
 
-    imex_stat=1
+    imex_stat=2
 
 /

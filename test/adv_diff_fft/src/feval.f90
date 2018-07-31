@@ -2,8 +2,8 @@
 ! This file is part of LIBPFASST.
 !
 !
-! RHS routines for 1-D advection/diffusion example.
-!     u_t + v*u_x = nu*u_xx
+!> Sweeper and RHS routines for 1-D advection/diffusion example.
+!>     u_t + v*u_x = nu*u_xx
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
@@ -15,18 +15,20 @@ module feval
   real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
+  !>  extend the generic level type by defining transfer operators
   type, extends(pf_user_level_t) :: ad_level_t
    contains
      procedure :: restrict
      procedure :: interpolate
   end type ad_level_t
 
+  !>  extend the imex sweeper type with stuff we need to compute rhs
   type, extends(pf_imexQ_t) :: ad_sweeper_t
-     real(pfdp), allocatable :: wsave(:)           ! work space
-     real(pfdp), allocatable :: work(:)             ! work space
-     complex(pfdp), allocatable :: workhat(:)      ! work space
+     real(pfdp), allocatable :: wsave(:)          ! work space
+     real(pfdp), allocatable :: work(:)           ! work space
+     complex(pfdp), allocatable :: workhat(:)     ! work space
      integer ::  lenwrk, lensav, ierror, nx
-     complex(pfdp), allocatable :: ddx(:), lap(:) ! operators
+     complex(pfdp), allocatable :: ddx(:), lap(:) ! spectral operators
    contains
 
      procedure :: f_eval    !  Computes the advection and diffusion terms
@@ -36,6 +38,7 @@ module feval
 
 contains
 
+  !>  Helper function to return sweeper pointer
   function as_ad_sweeper(sweeper) result(r)
     class(pf_sweeper_t), intent(inout), target :: sweeper
     class(ad_sweeper_t), pointer :: r
@@ -47,8 +50,9 @@ contains
     end select
   end function as_ad_sweeper
 
+  !>  Routine to set up sweeper variables and operators
   subroutine sweeper_setup(sweeper, nx)
-    use probin, only: use_LUq, imex_stat 
+    use probin, only:  imex_stat 
     class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: nx
 
@@ -59,7 +63,7 @@ contains
 
     this => as_ad_sweeper(sweeper)
 
-
+    !>  Set variables for explicit and implicit parts
     if (imex_stat .eq. 0 ) then
        this%explicit=.TRUE.
        this%implicit=.FALSE.
@@ -70,8 +74,8 @@ contains
        this%implicit=.TRUE.
        this%explicit=.TRUE.
     end if
-              
-    this%use_LUq =use_LUq
+
+    !  FFT Storage
     this%nx = nx 
     this%lenwrk = 2*nx 
     this%lensav = 2*nx + int(log(real(nx,kind=8))/log(2.0d+00))+4
@@ -105,6 +109,7 @@ contains
     end do
   end subroutine sweeper_setup
 
+  !>  destroy the sweeper type
   subroutine destroy(this, lev)
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_level_t), intent(inout)   :: lev
@@ -119,62 +124,9 @@ contains
 
   end subroutine destroy
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  ! Set initial condition.
-  subroutine initial(q0)
-    type(ndarray), intent(inout) :: q0
-    call exact(0.0_pfdp, q0%flatarray)
-  end subroutine initial
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine exact(t, yex)
-    use probin, only: nprob,nu, v, t00, kfreq
-    real(pfdp), intent(in)  :: t
-    real(pfdp), intent(out) :: yex(:)
-
-    integer    :: nx, i, ii, k,nbox
-    real(pfdp) :: tol, x, t0,Dx, omega
-
-    nx = size(yex)
-    Dx = Lx/dble(nx)
-    
-
-
-    if (nprob .eq. 1) then
-       !  Using sin wave initial condition
-       omega = 2*pi*kfreq
-       do i = 1, nx
-          x = Lx*dble(i-1-nx/2)/dble(nx) - t*v 
-          yex(i) = dsin(omega*x)*dexp(-omega*omega*nu*t)
-       end do
-    else  !  Use periodic image of Gaussians
-       yex=0
-       if (nu .gt. 0) then
-          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
-          do k = -nbox,nbox
-             do i = 1, nx
-                x = (i-1)*Dx-0.5d0 - t*v + dble(k)*Lx
-                yex(i) = yex(i) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
-             end do
-          end do
-       else
-          nbox = ceiling(sqrt(37.0d0/(Lx*Lx)))  !  Decide how many periodic images
-          do k = -nbox,nbox
-             do i = 1, nx
-                x = i*Dx-0.5d0 - t*v + dble(k)*Lx
-                yex(i) = yex(i) + dexp(-x*x)
-             end do
-          end do
-          
-       end if  ! nbox
-!       print *,yex
-    end if
-  end subroutine exact
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! These routines must be provided for the sweeper
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Evaluate the explicit function at y, t.
   subroutine f_eval(this, y, t, level_index, f, piece)
     use probin, only:  imex_stat ,nu, v
@@ -280,11 +232,15 @@ contains
     end if
   end subroutine f_comp
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>  These are the transfer functions that must be  provided for the level
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF
     class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF, qG
+    class(pf_encap_t), intent(inout) :: qF,qG
     real(pfdp),        intent(in   ) :: t
     integer, intent(in), optional :: flags
 
@@ -295,7 +251,7 @@ contains
 
     integer ::  ierror
     adG => as_ad_sweeper(levelG%ulevel%sweeper)
-    adF => as_ad_sweeper(levelF%ulevel%sweeper)
+    adF => as_ad_sweeper(levelf%ulevel%sweeper)
 
     f => get_array1d(qF); 
     g => get_array1d(qG)
@@ -329,27 +285,79 @@ contains
 
   end subroutine interpolate
 
-  subroutine restrict(this, levelF, levelG, qF, qG, t, flags)
+  !>  Restrict from fine level to coarse
+  subroutine restrict(this, levelf, levelG, qF, qG, t, flags)
     class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelF
-    class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF, qG
-    real(pfdp),        intent(in   ) :: t   
+    class(pf_level_t), intent(inout) :: levelf  !<  fine level
+    class(pf_level_t), intent(inout) :: levelG  !<  coarse level
+    class(pf_encap_t), intent(inout) :: qF    !<  fine solution
+    class(pf_encap_t), intent(inout) :: qG    !<  coarse solution
+    real(pfdp),        intent(in   ) :: t      !<  time of solution
     integer, intent(in), optional :: flags
 
 
-    real(pfdp), pointer :: f(:), g(:)
+    real(pfdp), pointer :: f(:), c(:)  
 
-    integer :: nvarF, nvarG, xrat
+    integer :: irat
 
     f => get_array1d(qF)
-    g => get_array1d(qG)
+    c => get_array1d(qG)
 
-    nvarF = size(f)
-    nvarG = size(g)
-    xrat  = nvarF / nvarG
+    irat  = size(f)/size(c)
 
-    g = f(::xrat)
+    c = f(::irat)
   end subroutine restrict
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>  Here are some extra routines which are problem dependent  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !> Routine to set initial condition.
+  subroutine initial(q0)
+    type(ndarray), intent(inout) :: q0
+    call exact(0.0_pfdp, q0%flatarray)
+  end subroutine initial
+
+  !> Routine to set initial condition.
+  subroutine exact(t, yex)
+    use probin, only: nprob,nu, v, t00, kfreq
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(out) :: yex(:)
+
+    integer    :: nx, i, ii, k,nbox
+    real(pfdp) :: tol, x, t0,Dx, omega
+
+    nx = size(yex)
+    Dx = Lx/dble(nx)
+
+    if (nprob .eq. 1) then
+       !  Using sin wave initial condition
+       omega = 2*pi*kfreq
+       do i = 1, nx
+          x = Lx*dble(i-1-nx/2)/dble(nx) - t*v 
+          yex(i) = dsin(omega*x)*dexp(-omega*omega*nu*t)
+       end do
+    else  !  Use periodic image of Gaussians
+       yex=0
+       if (nu .gt. 0) then
+          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          do k = -nbox,nbox
+             do i = 1, nx
+                x = (i-1)*Dx-0.5d0 - t*v + dble(k)*Lx
+                yex(i) = yex(i) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
+             end do
+          end do
+       else
+          nbox = ceiling(sqrt(37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          do k = -nbox,nbox
+             do i = 1, nx
+                x = i*Dx-0.5d0 - t*v + dble(k)*Lx
+                yex(i) = yex(i) + dexp(-x*x)
+             end do
+          end do
+       end if  ! nbox
+
+    end if
+  end subroutine exact
 
 end module feval
