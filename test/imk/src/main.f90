@@ -44,8 +44,6 @@ contains
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
           allocate(pf%levels(l)%shape(1))
-          pf%levels(l)%nsweeps = nsweeps(l)
-          pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
           pf%levels(l)%shape(1) = nparticles
           pf%levels(l)%mpibuflen = nparticles * nparticles * 2
 
@@ -55,12 +53,6 @@ contains
 
           call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
                l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
-
-          if (pf%qtype == 5) then
-             pf%levels(l)%nnodes = nnodes(l)+2
-          else
-             pf%levels(l)%nnodes = nnodes(l)
-          endif
 
       end do
 

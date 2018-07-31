@@ -6,25 +6,20 @@ module probin
   use pf_mod_dtype
   implicit none
 
-  integer, parameter :: MAXLEVS = 4
-  integer, save    :: Finterp         !  Decides if interpolation of function values is done
   integer, save    :: ndim            !  Number of dimensions
   integer, save    :: nfake           !  Number of fake processors
-  integer, save    :: nnodes(MAXLEVS) !  number of nodes on each level
   integer, save    :: nprob           !  define which problem to run
 
   integer, save    :: nsteps          !  Number of time steps to take
-  integer, save    :: N(MAXLEVS)      !  Size of problem on each level
-  integer, save    :: nterms(MAXLEVS)    !  The order of the Magnus expansion to use
+  integer, save    :: N(PF_MAXLEVS)      !  Size of problem on each level
+  integer, save    :: nterms(PF_MAXLEVS)    !  The order of the Magnus expansion to use
   real(pfdp), save :: dt              !  Time step
   real(pfdp), save :: Tfin            !  Final time of run
   real(pfdp), save :: alpha           !  energy of state A for 2x2 problem
   real(pfdp), save :: beta            !  energy of state B for 2x2 problem
   real(pfdp), save :: vab             !  coupling of states A, B for 2x2 problem
-  real(pfdp), save :: exptol(MAXLEVS)
-  integer, save    :: nsweeps(MAXLEVS) !  Sweeps at each levels
-  integer, save    :: nsweeps_pred(MAXLEVS)   !  Sweeps during predictor
-  ! character(len=64), save :: basis(MAXLEVS)
+  real(pfdp), save :: exptol(PF_MAXLEVS)
+  ! character(len=64), save :: basis(PF_MAXLEVS)
   character(len=64), save :: basis
   character(len=1024), save :: molecule
   character(len=1024), save :: exact_dir
@@ -35,8 +30,8 @@ module probin
   character(len=64), save :: fbase
   integer, save    :: poutmod
 
-  namelist /params/ Finterp, ndim, nfake, nnodes, nprob, nsteps, N, dt, Tfin
-  namelist /params/ nsweeps, nsweeps_pred, use_sdc, rk, mkrk
+  namelist /params/ ndim, nfake,  nprob, nsteps, N, dt, Tfin
+  namelist /params/ use_sdc, rk, mkrk
   namelist /params/ fbase, poutmod, exptol, save_solutions, nparticles, toda_periodic
   namelist /params/ alpha, beta, vab, nterms, basis, molecule, exact_dir
 
@@ -54,7 +49,6 @@ contains
     ! initialize the runtime parameters
 
     ! Defaults
-    Finterp = 0
     ndim = 2
     nfake = 0
     nprob = 3
@@ -82,7 +76,6 @@ contains
     mkrk = .false.
     nparticles = 3
 
-    nnodes = 3         !  Set them all to three
 
     open(unit=un, file = filename, status = 'old', action = 'read')
     read(unit=un, nml = params)
@@ -106,12 +99,12 @@ contains
        Tfin = dt*nsteps
     endif
 
-    do ird = 1, MAXLEVS
-      if (nnodes(ird) < 2) then
-        nterms(ird) = 1
-      else
-      endif
-    enddo
+!!$    do ird = 1, PF_MAXLEVS
+!!$      if (nnodes(ird) < 2) then
+!!$        nterms(ird) = 1
+!!$      else
+!!$      endif
+!!$    enddo
   end subroutine probin_init
 
 end module probin
