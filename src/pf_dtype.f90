@@ -116,7 +116,6 @@ module pf_mod_dtype
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:)
      real(pfdp), allocatable :: residuals(:,:,:)
-     real(pfdp), allocatable :: times(:,:,:)
      integer :: nsteps
      integer :: niters
      integer :: nprocs
@@ -125,7 +124,6 @@ module pf_mod_dtype
      integer :: nblocks
      
      character(len = 16   ) :: fname_r  !<  output file name for residuals
-     character(len = 15) :: fname_t     !<  output file name timings
      character(len = 14) :: fname_e     !<  output file name errors
      
    contains
@@ -557,20 +555,17 @@ contains
     this%nlevels=nlevels_in
     this%p_index=rank_in+100
 
-    write (this%fname_r, "(A9,I0.3,A4)") 'residual_',rank_in,'.dat'
-    write (this%fname_t, "(A8,I0.3,A4)") 'timings_',rank_in,'.dat'
-    write (this%fname_e, "(A7,I0.3,A4)") 'errors_',rank_in,'.dat'
+    write (this%fname_r, "(A9,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
+    write (this%fname_e, "(A7,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
 
     if(allocated(this%errors)) &
-            deallocate(this%errors, this%residuals, this%times)
+            deallocate(this%errors, this%residuals)
 
     allocate(this%errors(niters_in, this%nblocks, nlevels_in), &
-         this%residuals(niters_in, this%nblocks, nlevels_in), &
-         this%times(niters_in,this%nblocks, nlevels_in))
+         this%residuals(niters_in, this%nblocks, nlevels_in))
 
     this%errors = 0.0_pfdp
     this%residuals = 0.0_pfdp
-    this%times = 0.0_pfdp
   end subroutine initialize_results
 
   subroutine dump_results(this)
@@ -586,18 +581,7 @@ contains
        end do
     enddo
     close(20)
-
-    open(unit=this%p_index+1, file=this%fname_t, form='formatted')
-    write(this%p_index+1, '(I3, I4, I2)') this%nsteps, this%nlevels, this%nprocs
-    do k = 1, this%nlevels
-       do j = 1, this%nblocks
-          do i = 1 , this%niters
-             write(this%p_index+1, '(F16.14)') this%times(i, j, k)
-          end do
-       end do
-    end do
     close(this%p_index)
-    close(this%p_index+1)
 
   end subroutine dump_results
 
@@ -605,7 +589,7 @@ contains
     class(pf_results_t), intent(inout) :: this
 
     if(allocated(this%errors)) &
-        deallocate(this%errors, this%residuals, this%times)
+        deallocate(this%errors, this%residuals)
   end subroutine destroy_results
   
 end module pf_mod_dtype

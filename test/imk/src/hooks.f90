@@ -68,14 +68,22 @@ contains
 
     type(zndarray), pointer :: qend
     character(len=256) :: time, filename
+    integer :: N,i,j,un
 
     qend => cast_as_zndarray(level%qend)
+    un = 200+pf%rank
     write(time, '(f10.5)') state%t0+state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
          pf%rank, state%step+1, state%iter, level%index
-    open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
-    write(20) qend%y
-    close(20)
+    open(unit=un, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='formatted')
+    N =qend%dim
+    do j = 1,N
+       do i = 1,N
+         write(un,*) qend%y(i,j)
+       end do
+    end do
+    
+    close(un)
 
   end subroutine save_solution
 

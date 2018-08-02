@@ -203,15 +203,13 @@ contains
     if(pf%debug)print *,'ending broadcast'
   end subroutine pf_broadcast
 
-    !> Save current solution and function value so that future corrections can be computed
+  !> Save current solution and function value so that future corrections can be computed
   subroutine save(lev, flags)
     class(pf_level_t), intent(inout) :: lev  !<  Level to save on
     integer, optional, intent(in)   :: flags !<  which component to save (state/adjoint)
     integer :: m, p
     
-!     which = 1
-!     if(present(flags)) which = flags
-    
+
     if (lev%Finterp) then
        if (allocated(lev%pFflt)) then
           do m = 1, lev%nnodes
@@ -229,5 +227,5 @@ contains
        end if
     end if
   end subroutine save
-
+  
 end module pf_mod_comm

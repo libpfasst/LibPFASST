@@ -241,7 +241,7 @@ module factory
        write(*, 100) real(this%y(i,i))
     end do
     100 format (*(F14.11))
-
+    call flush
   end subroutine zndarray_eprint
 
   subroutine write_to_disk(this, filename)

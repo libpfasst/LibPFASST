@@ -148,9 +148,9 @@ contains
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
           call pf_residual(pf, f_lev_p, dt)  
+          call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0)          
           call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
           call save(c_lev_p)
-          call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0)          
        end do  !  level_index = pf%nlevels, 2, -1
     else
       level_index = 1
@@ -183,7 +183,7 @@ contains
 
              ! Get new initial value (skip on first iteration)
              if (k > 1) then
-                call c_lev_p%q0%copy(c_lev_p%qend)
+                call c_lev_p%q0%copy(c_lev_p%qend,flags=1)
                 ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
                 if (.not. pf%PFASST_pred) then
                    call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
@@ -402,29 +402,31 @@ contains
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
 
-!       pf%results%times(pf%state%step+1, lev_p%index, pf%rank+1) = pf%state%t0
-
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
+
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           pf%state%iter = j
 
           !  Do a v_cycle
           call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
-          call call_hooks(pf, -1, PF_POST_ITERATION)
+!          call call_hooks(pf, -1, PF_POST_ITERATION)
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)
           pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
-          
+
+!          print *,pf%rank, ' post res'
+          call call_hooks(pf, -1, PF_POST_ITERATION)
+
           !  If we are converged, exit block
           if (pf%state%status == PF_STATUS_CONVERGED)  exit
        end do  !  Loop over the iteration in this bloc
-
+       call call_hooks(pf, -1, PF_POST_CONVERGENCE)
        call end_timer(pf, TITERATION)
 
-    end do
+    end do !  Loop over the blocks
 
     call end_timer(pf, TTOTAL)
 

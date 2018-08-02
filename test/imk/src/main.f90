@@ -58,11 +58,17 @@ contains
 
       print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
+!      call pf_add_hook(pf, -1, PF_PRE_ITERATION, echo_residual)
+!      call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_residual)      
+!      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
+      call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+      !      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
+      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)      
 
-      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
-      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_SWEEP, save_solution)
 
+      !>  output the run options 
+      call pf_print_options(pf,un_opt=6)
+      
       call zndarray_build(q0, pf%levels(pf%nlevels)%shape(1))
       call zndarray_build(qend, pf%levels(pf%nlevels)%shape(1))
       call initial(q0)
@@ -81,7 +87,7 @@ contains
 
       if(pf%rank == comm%nproc-1) then
         call qend%write_to_disk('final_solution') !necessary for pfasst.py
-        if (pf%debug) call qend%eprint() !only for debug purpose
+        call qend%eprint() !only for debug purpose
       endif
 
       call zndarray_destroy(q0)

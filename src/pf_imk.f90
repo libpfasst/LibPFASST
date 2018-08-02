@@ -259,7 +259,6 @@ contains
     call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !<  Loop over sweeps
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -268,7 +267,7 @@ contains
              call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
           end do
           if (level_index < pf%nlevels) then
-            call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
 
@@ -298,7 +297,6 @@ contains
        call pf_residual(pf, lev, dt)
        call lev%qend%copy(lev%Q(lev%nnodes), 1)
 
-       call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
 
     call end_timer(pf, TLEVEL+lev%index-1)
