@@ -13,14 +13,14 @@
 	PFASST_pred = .true.
 	vcycle = .true.
         debug = .false.
-
+	save_results=.true/
 /
 
 &PARAMS
 	fbase = "output"
 	nterms = 3 12
-	Tfin = 5.0
-	nsteps = 64
+	Tfin = 3.0
+	nsteps = 48
 	exptol = 1.d-15
 	nparticles = 11
 	nprob = 4

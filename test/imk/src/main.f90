@@ -7,7 +7,11 @@ program pfasst_imk
   call mpi_comm_rank(MPI_COMM_WORLD, rank, err)
 
   call simulate()
+  if(rank == 0) print *,'shutting down mpi'
+
   call mpi_finalize(err)
+  if(rank == 0) print *,'all done - bye bye'
+  
 
 contains
   subroutine simulate()
@@ -56,7 +60,7 @@ contains
 
       end do
 
-      print *,'Initializing mpi and pfasst...'
+      if(pf%rank == 0) print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
 !      call pf_add_hook(pf, -1, PF_PRE_ITERATION, echo_residual)
 !      call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_residual)      
@@ -76,7 +80,7 @@ contains
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       start = MPI_Wtime()
-      print*, 'Running pfasst...'
+      if(pf%rank == 0) print*, 'Running pfasst...'
       call pf_pfasst_run(pf, q0, dt, 0.0_pfdp, nsteps, qend)
 
       finish = MPI_Wtime()
@@ -87,13 +91,13 @@ contains
 
       if(pf%rank == comm%nproc-1) then
         call qend%write_to_disk('final_solution') !necessary for pfasst.py
-        call qend%eprint() !only for debug purpose
+        if (pf%debug) call qend%eprint() !only for debug purpose
       endif
 
       call zndarray_destroy(q0)
       call zndarray_destroy(qend)
 
-      print *,'destroying pf'
+      if(pf%rank == 0) print *,'destroying pf'
       call pf_pfasst_destroy(pf)
 
     end subroutine simulate
