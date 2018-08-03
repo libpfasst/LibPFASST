@@ -533,6 +533,7 @@ class PFASST(object):
 
     @staticmethod
     def _get_solution(path_to_solution):
+        print path_to_solution
         f = FortranFile(path_to_solution)
         solution = f.read_record(np.complex_)
         f.close()

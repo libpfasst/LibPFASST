@@ -43,8 +43,6 @@ contains
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
           allocate(pf%levels(l)%shape(1))
-          pf%levels(l)%nsweeps = nsweeps(l)
-          pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
           pf%levels(l)%shape(1) = nparticles
           pf%levels(l)%mpibuflen = nparticles * nparticles * 2
 
