@@ -269,62 +269,68 @@ contains
      integer :: i, ik, im, nterms, mscale
      logical :: converged
 
-     matexp = z0
-     norm = compute_inf_norm(matrix, dim)
-     ratio = log(2.5_pfdp*norm) / log(2.0_pfdp)
-     mscale = max(int(ratio), 0)
+     matexp=z0
+     norm = compute_inf_norm(matrix_in, dim)
+     if (norm .eq. 0.0d0) then
+        call initialize_as_identity(matexp,dim)
+        return
+     else
 
-     ! print*, 'norm=', norm, 'ratio=', ratio, 'mscale=', mscale
-
-     scale_val = 1.0_pfdp/(2.0_pfdp**mscale)
-     zscale = cmplx(scale_val)
-
-     matrix = zscale * matrix_in
-     call initialize_as_identity(prev)
-     call initialize_as_identity(matexp)
-
-     ik = 1
-     nterms = 0
-     next = z0
-     converged = .false.
-
-     do while (.not. converged)
-        zinvk = z1 / cmplx(ik)
-        call zgemm('n', 'n', dim, dim, dim, &
-             zinvk, prev, dim, &
-             matrix, dim, &
-             z0, next, dim)
-        matexp = matexp + next
-
-        norm = compute_inf_norm(next, dim)
-        if(norm < tol) nterms = nterms + 1
-        if(nterms >= MAX_TERMS) converged = .true.
-
-        prev = next
-
-        ik = ik + 1
-     end do
-
-     next = matexp
-
-     do im = 1, mscale
-        prev = z0
-        if (maxval(abs(matexp))*0.0 /= 0.0) then
-           do ik = 1, 92
-              print*, 'ik=', ik
-              print*, next
-              next = matmul(next, next)
-              if (maxval(abs(next))*0.0 /= 0.0) stop
-           end do
-        endif
-
-        call zgemm('n', 'n', dim, dim, dim, &
-             z1, matexp, dim, &
-             matexp, dim, &
-             z0, prev, dim)
-
-        matexp = prev
-     enddo
+        ratio = log(2.5_pfdp*norm) / log(2.0_pfdp)
+        mscale = max(int(ratio), 0)
+        
+        ! print*, 'norm=', norm, 'ratio=', ratio, 'mscale=', mscale
+        
+        scale_val = 1.0_pfdp/(2.0_pfdp**mscale)
+        zscale = cmplx(scale_val)
+        
+        matrix = zscale * matrix_in
+        call initialize_as_identity(prev,dim)
+        call initialize_as_identity(matexp,dim)
+        
+        ik = 1
+        nterms = 0
+        next = z0
+        converged = .false.
+        
+        do while (.not. converged)
+           zinvk = z1 / cmplx(ik)
+           call zgemm('n', 'n', dim, dim, dim, &
+                zinvk, prev, dim, &
+                matrix, dim, &
+                z0, next, dim)
+           matexp = matexp + next
+           
+           norm = compute_inf_norm(next, dim)
+           if(norm < tol) nterms = nterms + 1
+           if(nterms >= MAX_TERMS) converged = .true.
+           
+           prev = next
+           
+           ik = ik + 1
+        end do
+        
+        next = matexp
+        
+        do im = 1, mscale
+           prev = z0
+           if (maxval(abs(matexp))*0.0 /= 0.0) then
+              do ik = 1, 92
+                 print*, 'ik=', ik
+                 print*, next
+                 next = matmul(next, next)
+                 if (maxval(abs(next))*0.0 /= 0.0) stop
+              end do
+           endif
+           
+           call zgemm('n', 'n', dim, dim, dim, &
+                z1, matexp, dim, &
+                matexp, dim, &
+                z0, prev, dim)
+           
+           matexp = prev
+        enddo
+     endif
    end function compute_matrix_exp
 
   function compute_inf_norm(matrix, n) result(norm)
@@ -394,25 +400,21 @@ contains
    f%y = g%y
  end subroutine interpolate
 
- subroutine initialize_as_identity_real(matrix)
-   real(pfdp), intent(inout) :: matrix(:,:)
+ subroutine initialize_as_identity_real(matrix,dim)
+   integer, intent(in)  :: dim
+   real(pfdp), intent(inout) :: matrix(dim,dim)
 
-   integer :: i, dim, shp(2)
-
-   shp = shape(matrix)
-   dim = shp(1)
+   integer :: i 
 
    matrix = 0.0_pfdp
    forall (i=1:dim) matrix(i,i) = 1.0_pfdp
  end subroutine initialize_as_identity_real
 
- subroutine initialize_as_identity(zmatrix)
-   complex(pfdp), intent(inout) :: zmatrix(:,:)
+ subroutine initialize_as_identity(zmatrix,dim)
+   integer, intent(in)  :: dim
+   complex(pfdp), intent(inout) :: zmatrix(dim,dim)
 
-   integer :: i, dim, shp(2)
-
-   shp = shape(zmatrix)
-   dim = shp(1)
+   integer :: i 
 
    zmatrix = z0
    forall (i=1:dim) zmatrix(i,i) = z1

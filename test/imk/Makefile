@@ -10,7 +10,7 @@ FSRC = probin.f90 factory.f90 sweeper.f90 main.f90 hooks.f90 utils.f90
 
 OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
 
-FFLAGS  += -I$(LIBPFASST)/include
+FFLAGS  += -I$(LIBPFASST)/include 
 LDFLAGS += -L$(LIBPFASST)/lib -lpfasst -lopenblas -llapack
 
 VPATHS = src
