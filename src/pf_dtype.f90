@@ -123,8 +123,8 @@ module pf_mod_dtype
      integer :: p_index
      integer :: nblocks
      
-     character(len = 16   ) :: fname_r  !<  output file name for residuals
-     character(len = 14) :: fname_e     !<  output file name errors
+     character(len = 20   ) :: fname_r  !<  output file name for residuals
+     character(len = 18) :: fname_e     !<  output file name errors
      
    contains
      procedure :: initialize => initialize_results
@@ -555,8 +555,8 @@ contains
     this%nlevels=nlevels_in
     this%p_index=rank_in+100
 
-    write (this%fname_r, "(A9,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
-    write (this%fname_e, "(A7,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
+    write (this%fname_r, "(A13,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
+    write (this%fname_e, "(A10,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
 
     if(allocated(this%errors)) &
             deallocate(this%errors, this%residuals)
