@@ -72,7 +72,6 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
-    pf%save_results = .true.
   end subroutine pf_pfasst_create
 
 

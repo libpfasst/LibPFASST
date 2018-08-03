@@ -7,6 +7,10 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
     nlevels  = 1
+    nnodes =  5
+
+    nsweeps_pred= 1 
+    nsweeps= 1 
 
     !  These are internal pfasst variables that can be reset
     niters = 32   !  default is 5
@@ -19,7 +23,7 @@
      rel_res_tol = 1.d-13
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .true.
+     Pipeline_pred =  .true.
      PFASST_pred = .true.
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
@@ -28,11 +32,7 @@
 
 !  Now define the local variables you need
 &PARAMS
-!    Finterp = .false.   !  default is 0
-    nnodes =  5
 
-    nsweeps_pred= 1 
-    nsweeps= 1 
 
     nx =  256
 

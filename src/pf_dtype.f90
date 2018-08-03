@@ -580,7 +580,6 @@ contains
           end do
        end do
     enddo
-    close(20)
     close(this%p_index)
 
   end subroutine dump_results

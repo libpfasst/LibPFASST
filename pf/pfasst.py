@@ -126,11 +126,11 @@ class MagpicardParams(Params):
                      validator=attr.validators.instance_of(list))
     base_string = attr.ib(default=
                           '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
+                          'nnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
                           'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
-                          'rel_res_tol = {}\n\tpipeline_g = .true.\n\t' + \
+                          'rel_res_tol = {}\n\tpipeline_pred = .true.\n\t' + \
                           'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
-                          '&params\n\tfbase = {}\n\tnnodes = {}\n\t'+ \
-                          'nsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
+                          '&params\n\tfbase = {}\n\t'+ \
                           'magnus_order = {}\n\ttfin = {}\n\tnsteps = {}\n\t'+ \
                           'exptol = {}\n\tnparticles = {}\n\t'+ \
                           'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
@@ -189,9 +189,10 @@ class MagpicardParams(Params):
         else:
             qtype = 1
 
-        return [self.levels, self.iterations, qtype, timings,
+        return [self.levels, self.iterations,
+                nodes, sweeps_pred, sweeps, qtype, timings,
                 self.tolerance, self.tolerance, vcycle, basedir,
-                nodes, sweeps_pred, sweeps, magnus, self.tfinal,
+                magnus, self.tfinal,
                 self.nsteps, exptol, self.particles,
                 solns, periodic, sdc]
 
@@ -221,11 +222,12 @@ class IMKParams(Params):
                      validator=attr.validators.instance_of(list))
     base_string = attr.ib(default=
                           '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
-                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
-                          'rel_res_tol = {}\n\tpipeline_g = .true.\n\t' + \
-                          'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
-                          '&params\n\tfbase = {}\n\tnnodes = {}\n\t'+ \
+                          'nnodes = {}\n\t' + \
                           'nsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
+                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
+                          'rel_res_tol = {}\n\tpipeline_pred = .true.\n\t' + \
+                          'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
+                          '&params\n\tfbase = {}\n\t'+ \
                           'nterms = {}\n\ttfin = {}\n\tnsteps = {}\n\t'+ \
                           'exptol = {}\n\tnparticles = {}\n\t'+ \
                           'save_solutions = {}\n\ttoda_periodic = {}\n\t'+ \
@@ -303,9 +305,10 @@ class IMKParams(Params):
             else:
                 mkrk = '.false.'
 
-        return [self.levels, self.iterations, qtype, timings,
+        return [self.levels, self.iterations,
+                nodes, sweeps_pred, sweeps,qtype, timings,
                 self.tolerance, self.tolerance, vcycle, basedir,
-                nodes, sweeps_pred, sweeps, nterms, self.tfinal,
+                 nterms, self.tfinal,
                 self.nsteps, exptol, self.particles,
                 solns, periodic, sdc, rk, mkrk]
 
