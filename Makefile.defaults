@@ -7,10 +7,12 @@ CC = mpicc
 AR = ar rcs
 PY = python
 NOSE = nosetests
+DEBUG = FALSE
 
 FFLAGS = -Ibuild -Jinclude -cpp
-#-fimplicit-none -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
-
+ifeq ($(DEBUG),TRUE)
+FFLAGS += -fimplicit-none -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
+endif
 
  
 
@@ -52,9 +54,6 @@ endif
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 $(PY py/script.py)
 
-#  We can use this to build a new dependency file
-#depend: .depend
-#	makedepf90 -b ./build -o foo $(FSRC) > .depend
 	
 # src/pf_misdc.f90 \
 #       src/pf_misdcQ.f90 \

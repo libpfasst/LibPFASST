@@ -44,15 +44,19 @@ else
 	@$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
 endif
 
-.PHONY: clean
+.PHONY: clean depend
 
 clean:
 	find . -name build | xargs rm -rf
 	find . -name '*.exe' | xargs rm -f
 	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
 	\rm include/*.mod
+	\rm .depend
 
 
+#  We can use this to build a new dependency file
+depend $(LIBPFASST)/.depend:
+	makedepf90 -b ./build -o foo $(FSRC) > .depend
 
 #
 # LIBPFASST dependencies

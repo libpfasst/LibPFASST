@@ -17,4 +17,4 @@ build/libpfasst.a: $(OBJ)
 include $(LIBPFASST)/Makefile.rules
 include $(LIBPFASST)/Makefile.external
 
-.PHONY: clean
+.PHONY: clean depend
