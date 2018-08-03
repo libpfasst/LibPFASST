@@ -178,7 +178,7 @@ contains
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, optional, intent(in   ) :: flags
     
-    integer :: j, m, p
+    integer :: j, m
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)

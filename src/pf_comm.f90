@@ -189,8 +189,8 @@ contains
   !>  Subroutine to broadcast the initial condition to all processors
   subroutine pf_broadcast(pf, y, nvar, root)
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp)  ,      intent(in)    :: y(nvar)
     integer,           intent(in)    :: nvar, root
+    real(pfdp)  ,      intent(in)    :: y(nvar)
     integer :: ierror
     call start_timer(pf, TBROADCAST)
     if(pf%debug) print *,'beginning broadcast'

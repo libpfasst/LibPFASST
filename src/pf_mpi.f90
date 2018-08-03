@@ -250,8 +250,8 @@ contains
   subroutine pf_mpi_broadcast(pf, y, nvar, root,ierror)
     use pf_mod_mpi, only: MPI_REAL8
     type(pf_pfasst_t), intent(inout) :: pf      !<  main pfasst structure
-    real(pfdp),        intent(in)    :: y(nvar) !<  data to broadcast
     integer,           intent(in)    :: nvar    !<  size of data to broadcast
+    real(pfdp),        intent(in)    :: y(nvar) !<  data to broadcast
     integer,           intent(in)    :: root    !<  rank of broadcaster
     integer,           intent(inout) :: ierror  !<  error flag
     call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)

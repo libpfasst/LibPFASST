@@ -99,9 +99,6 @@ contains
     !>  Local variables
     class(pf_level_t), pointer :: lev    !<  points to current level
 
-    integer     :: m, n,k   !<  Loop variables
-    real(pfdp)  :: t        !<  Time at nodes
-
     this%t0 = t0
     this%dt = dt
     if (this%rk) then
@@ -126,7 +123,7 @@ contains
     !>  Local variables
     class(pf_level_t), pointer :: lev    !<  points to current level
 
-    integer     :: m, n,k   !<  Loop variables
+    integer     :: m        !<  Loop variables
     real(pfdp)  :: t        !<  Time at nodes
 
     t = t0 + dt
@@ -193,7 +190,7 @@ contains
     !>  Local variables
     class(pf_level_t), pointer :: lev    !<  points to current level
 
-    integer     :: m, n,k   !<  Loop variables
+    integer     :: m        !<  Loop variables
     real(pfdp)  :: t        !<  Time at nodes
 
     lev => pf%levels(1)
@@ -306,7 +303,7 @@ contains
     class(pf_imk_t),   intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
 
-    integer :: n,m, nnodes
+    integer :: m, nnodes
 
     this%npieces = 1
 
@@ -350,7 +347,7 @@ contains
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, optional,   intent(in)    :: flags
 
-    integer :: j, m, p
+    integer :: j, m
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
@@ -521,7 +518,7 @@ contains
   subroutine imk_save(lev)
     class(pf_level_t), intent(inout) :: lev  !<  Level to save on
 
-    integer :: m, p
+    integer :: m
 
     do m = 1, lev%nnodes
        call lev%pF(m,1)%copy(lev%F(m,1))

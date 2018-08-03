@@ -173,7 +173,7 @@ contains
     class(pf_imexQ_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev    !<  Current level
 
-    integer    :: m,n, nnodes
+    integer    ::  nnodes
 
     this%npieces = 2
 
@@ -238,7 +238,7 @@ contains
     class(pf_encap_t), intent(inout) :: fintSDC(:)   !<  Integral from t_n to t_m
     integer, optional, intent(in   ) :: flags    
 
-    integer :: n, m, p
+    integer :: n, m
 
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)

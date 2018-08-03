@@ -61,9 +61,9 @@ contains
        call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
     endif
     if (present(qend)) then
-       call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,qend=qend,flags=flags)             
+       call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)             
     else
-       call pf_block_run(pf, q0, dt, tend_loc, nsteps_loc,flags=flags)             
+       call pf_block_run(pf, q0, dt,  nsteps_loc,flags=flags)             
     end if
 
     if (pf%save_results) call pf%results%dump()
@@ -127,7 +127,7 @@ contains
 
     class(pf_level_t), pointer :: c_lev_p
     class(pf_level_t), pointer :: f_lev_p     !<
-    integer                   :: j, k            !<  Loop indices
+    integer                   :: k               !<  Loop indices
     integer                   :: level_index     !<  Local variable for looping over levels
     real(pfdp)                :: t0k             !<  Initial time at time step k
 
@@ -167,12 +167,12 @@ contains
        !! If RK_pred is true, just do some RK_steps
        if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
           !  Get new initial conditions
-          call pf_recv(pf, c_lev_p, 100000+pf%rank+k, .true.)
+          call pf_recv(pf, c_lev_p, 100000+pf%rank, .true.)
 
           !  Do a RK_step
           call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
           !  Send forward
-          call pf_send(pf, c_lev_p,  100000+pf%rank+1+k, .false.)
+          call pf_send(pf, c_lev_p,  100000+pf%rank+1, .false.)
        else  !  Normal PFASST burn in
           level_index=1
           c_lev_p => pf%levels(level_index)
@@ -325,20 +325,18 @@ contains
   !
 
   !>  PFASST controller for block mode
-  subroutine pf_block_run(pf, q0, dt, tend, nsteps, qend,flags)
+  subroutine pf_block_run(pf, q0, dt, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
-    real(pfdp),        intent(in   )           :: dt, tend
+    real(pfdp),        intent(in   )           :: dt
     integer,           intent(in   )           :: nsteps
     class(pf_encap_t), intent(inout), optional :: qend
     integer,           intent(in   ), optional :: flags(:)
     
     class(pf_level_t), pointer :: lev_p  !<  pointer to the one level we are operating on
     integer                   :: j, k
-    real(pfdp)                :: residual
     integer                   :: nblocks !<  The number of blocks of steps to do
     integer                   :: nproc   !<  The number of processors being used
-    integer                   :: ierror  !<  Warning flag for communication routines
     integer                   :: level_index_c !<  Coarsest leve in V-cycle
 
 

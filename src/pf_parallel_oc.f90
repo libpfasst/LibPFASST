@@ -19,8 +19,8 @@ contains
     integer,           intent(in   ), optional :: flags(:)  !<  User defined flags
 
     class(pf_level_t), pointer :: c_lev_p
-    class(pf_level_t), pointer :: f_lev_p     !<
-    integer                   :: j, k            !<  Loop indices
+    class(pf_level_t), pointer :: f_lev_p
+    integer                   :: k               !<  Loop indices
     integer                   :: level_index     !<  Local variable for looping over levels
     real(pfdp)                :: t0k             !<  Initial time at time step k
     integer :: which, dir
@@ -69,12 +69,12 @@ contains
        !! If RK_pred is true, just do some RK_steps
        if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
           !  Get new initial conditions
-          call pf_recv(pf, c_lev_p, 30000+pf%rank+k, .true., dir)
+          call pf_recv(pf, c_lev_p, 30000+pf%rank, .true., dir)
 
           !  Do a RK_step
           call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1, which )
           !  Send forward
-          call pf_send(pf, c_lev_p,  30000+pf%rank+1+k, .false., dir)
+          call pf_send(pf, c_lev_p,  30000+pf%rank+1, .false., dir)
        else  !  Normal PFASST burn in
           level_index=1
           c_lev_p => pf%levels(level_index)
@@ -162,10 +162,9 @@ contains
   !> (pstatus), the current processor hasn't converged yet either,
   !> regardless of the residual.
   !>
-  subroutine pf_check_convergence_oc(pf, k, dt, residual, energy, converged, flags)
+  subroutine pf_check_convergence_oc(pf, k, residual,converged, flags)
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(inout) :: residual, energy
-    real(pfdp),        intent(in)    :: dt
+    real(pfdp),        intent(inout) :: residual
     integer,           intent(in)    :: k
     logical,           intent(out)   :: converged   !<  True if this processor is done
     integer, optional, intent(in)    :: flags
@@ -254,9 +253,8 @@ contains
     ! not yet clear how to handle send and receive for forward and backward combined 
 
     type(pf_level_t), pointer :: fine_lev_p, coarse_lev_p
-    integer                   :: j, k, l, which, pred_flags(1), dir !dir to choose forward or backward send 
-    real(pfdp)                :: residual, energy
-    real(pfdp), pointer       :: z(:)
+    integer                   :: k, l, which, pred_flags(1), dir !dir to choose forward or backward send 
+    real(pfdp)                :: residual
 
     logical :: converged, qbroadcast
     logical :: did_post_step_hook
@@ -290,7 +288,6 @@ contains
     
 
     residual = -1
-    energy   = -1
     did_post_step_hook = .false.
     
 !    call pf%results%initialize(nsteps, pf%niters, pf%comm%nproc, pf%nlevels)
@@ -375,7 +372,7 @@ contains
        end if
       
       ! check convergence  (should always be not converged)
-      call pf_check_convergence_oc(pf, k, dt, residual, energy, converged, dir)
+      call pf_check_convergence_oc(pf, k,  residual, converged, dir)
       
       if (pf%state%step >= pf%state%nsteps) exit
       

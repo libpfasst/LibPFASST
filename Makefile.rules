@@ -52,35 +52,19 @@ clean:
 	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
 	\rm include/*.mod
 
+
+
 #
 # LIBPFASST dependencies
 #
-build/pf_comm.o:        build/pf_dtype.o
-build/pf_timer.o:       build/pf_dtype.o
-build/pf_ndarray.o:     build/pf_dtype.o
-build/pf_ndarray-oc.o:  build/pf_dtype.o
-build/pf_utils.o:       build/pf_timer.o
-build/pf_hooks.o:       build/pf_timer.o
-build/pf_mpi.o:         build/pf_timer.o build/pf_dtype.o
-build/pf_imexQ.o:       build/pf_dtype.o build/pf_timer.o  build/pf_utils.o build/pf_hooks.o
-build/pf_imexQ_oc.o:    build/pf_dtype.o build/pf_timer.o  build/pf_utils.o build/pf_hooks.o
-build/pf_rkstepper.o:   build/pf_dtype.o build/pf_timer.o  build/pf_utils.o
-build/pf_restrict.o:    build/pf_utils.o build/pf_timer.o build/pf_hooks.o
-build/pf_interpolate.o: build/pf_restrict.o build/pf_hooks.o
-build/pf_magnus_picard.o:  build/pf_dtype.o build/pf_hooks.o build/pf_utils.o build/pf_hooks.o
-build/pf_imk.o:         build/pf_dtype.o build/pf_timer.o build/pf_hooks.o build/pf_utils.o
-build/pf_parallel.o:    build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o  build/pf_comm.o 
-build/pf_parallel_oc.o: build/pf_interpolate.o build/pf_hooks.o build/pf_pfasst.o  build/pf_comm.o 
-build/pf_fake.o:        build/pf_parallel.o build/pf_fakecomm.o
-build/pf_quadrature.o:  build/pf_dtype.o
-build/pf_pfasst.o:      build/pf_utils.o build/pf_quadrature.o  build/pf_hooks.o build/pf_mpi.o 
-build/pf_fakecomm.o:    build/pf_timer.o build/pf_pfasst.o
+include $(LIBPFASST)/.depend
 
-ifdef NOMPI
-build/pfasst.o:         build/pf_parallel.o build/pf_pfasst.o  build/pf_imexQ.o build/pf_imexQ_oc.o build/pf_rkstepper.o 
-else
-build/pfasst.o:         build/pf_parallel.o  build/pf_pfasst.o build/pf_mpi.o build/pf_imexQ.o build/pf_rkstepper.o 
-endif
+#  Outdated dependencies
+#ifdef NOMPI
+#  build/pfasst.o: build/pf_parallel.o build/pf_pfasst.o  build/pf_imexQ.o build/pf_imexQ_oc.o build/pf_rks#tepper.o 
+#else
+#build/pfasst.o:         build/pf_parallel.o  build/pf_pfasst.o build/pf_mpi.o build/pf_imexQ.o build/pf_rk#stepper.o 
+#endif
 
 #build/pf_misdcQ.o:      build/pf_dtype.o build/pf_timer.o build/pf_utils.o build/pf_hooks.o
 #build/pf_misdc.o:       build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o

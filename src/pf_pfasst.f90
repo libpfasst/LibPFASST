@@ -82,13 +82,12 @@ contains
 
     class(pf_level_t), pointer :: lev_fine, lev_coarse  !<  Pointers to level structures for brevity
     integer                   :: l                      !<  Level loop index
-    integer                   :: ierror                 !<  error flag
 
-!!$    !>  loop over levels to set parameters
+   !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        call pf_level_setup(pf, pf%levels(l))
     end do
-!!$
+
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)

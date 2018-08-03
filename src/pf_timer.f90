@@ -101,7 +101,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer,           intent(in)    :: timer
 
-    integer(8) :: t, rate
+    integer :: t, rate
 
     call system_clock(t, rate)
     pf%runtimes(timer) = pf%runtimes(timer) + t - pf%timers(timer)

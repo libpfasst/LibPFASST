@@ -88,7 +88,6 @@ contains
     
     integer     :: k, m, n,Nnodes, which
     real(pfdp)  :: t,tend
-    real(pfdp)  :: dtq
 
     logical     :: sweep_y, sweep_p
     real(pfdp), allocatable  :: norms_y(:) !, norms_p(Lev%nnodes-1)
@@ -435,7 +434,7 @@ contains
     class(pf_imexQ_oc_t), intent(inout) :: this
     class(pf_level_t),    intent(inout) :: lev  
     
-    integer    :: m, n, Nnodes
+    integer    ::  Nnodes
     
     this%npieces = 2
 
@@ -483,7 +482,7 @@ contains
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, intent(in), optional    :: flags
 
-    integer :: n, m, p,Nnodes, which
+    integer :: n, m, Nnodes, which
     Nnodes=lev%nnodes
     
     which = 0
@@ -534,7 +533,7 @@ contains
     real(pfdp),        intent(in)     :: dt
     integer, intent(in), optional     :: flags
     
-    integer :: m, n, which
+    integer :: m, which
 
     which = 0
     if(present(flags)) then

@@ -33,8 +33,11 @@ contains
     end do
 
     lev%residual = res_norms(lev%nnodes-1)
-    lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
-    
+    if (sol_norms(lev%nnodes-1) > 0.0d0) then
+       lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
+    else
+       lev%residual_rel = 0.0d0
+    end if
 
     call end_timer(pf, TRESIDUAL)
 
@@ -135,9 +138,9 @@ contains
 
   !>  Routine to compute the LU decomposition of spectral integration matrix
   subroutine myLUq(Q,Qtil,Nnodes,fillq)
-    real(pfdp),       intent(in)    :: Q(Nnodes-1,Nnodes)
-    real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
     integer,        intent (in)     :: Nnodes
+    real(pfdp),     intent(in)      :: Q(Nnodes-1,Nnodes)
+    real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
     integer,        intent (in)     :: fillq
 
     ! Return the Qtil=U^T where U is the LU decomposition of Q without pivoting
