@@ -14,7 +14,6 @@
 !!  The user needs to supply the feval and fcomp routines for a given example   
 module pf_mod_imexQ
   use pf_mod_dtype
-  use pf_mod_utils
 
   implicit none
 
@@ -28,6 +27,7 @@ module pf_mod_imexQ
 
      logical                 :: explicit = .true. !<  True if there is an explicit piece
      logical                 :: implicit = .true. !<  True if there an implicit piece
+
 
      class(pf_encap_t), allocatable :: rhs   !< holds rhs for implicit solve
 
@@ -63,6 +63,8 @@ module pf_mod_imexQ
      subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece)
        import pf_imexQ_t, pf_encap_t, pfdp
        class(pf_imexQ_t),  intent(inout) :: this
+
+
        class(pf_encap_t), intent(inout) :: y      !<  Solution of implicit solve 
        real(pfdp),        intent(in   ) :: t      !<  Time of solve
        real(pfdp),        intent(in   ) :: dtq    !<  dt*quadrature weight
@@ -82,11 +84,11 @@ contains
 
     !>  Inputs
     class(pf_imexQ_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf      !<  PFASST structure
-    integer,             intent(in)    :: level_index  !<  which level to sweep on
-    real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt             !<  time step size
-    integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
+    type(pf_pfasst_t), intent(inout),target :: pf    !<  PFASST structure
+    integer,           intent(in)    :: level_index  !<  which level to sweep on
+    real(pfdp),        intent(in   ) :: t0           !<  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt           !<  time step size
+    integer,           intent(in)    :: nsweeps      !<  number of sweeps to do
     integer, optional, intent(in   ) :: flags    
 
     !>  Local variables
