@@ -7,13 +7,13 @@ foo: $(FOBJ)
 ./build/pf_dtype.o : src/pf_dtype.f90 
 ./build/pf_comm.o : src/pf_comm.f90 ./build/pf_pfasst.o 
 ./build/pf_hooks.o : src/pf_hooks.f90 ./build/pf_timer.o ./build/pf_dtype.o 
-./build/pf_imexQ.o : src/pf_imexQ.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
+./build/pf_imexQ.o : src/pf_imexQ.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imexQ_oc.o : src/pf_imexQ_oc.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imk.o : src/pf_imk.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_rkstepper.o : src/pf_rkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_interpolate.o : src/pf_interpolate.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_restrict.o ./build/pf_dtype.o 
 ./build/pf_magnus_picard.o : src/pf_magnus_picard.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_misdcQ.o : src/pf_misdcQ.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
+./build/pf_misdcQ.o : src/pf_misdcQ.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_ndarray.o : src/pf_ndarray.f90 ./build/pf_dtype.o 
 ./build/pf_ndarray-oc.o : src/pf_ndarray-oc.f90 ./build/pf_dtype.o 
 ./build/pf_parallel.o : src/pf_parallel.f90 ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
