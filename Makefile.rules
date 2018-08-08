@@ -7,7 +7,7 @@ vpath %.c   $(VPATHS)
 vpath %.f   $(VPATHS)
 
 $(EXE): $(OBJ)
-ifdef MKVERBOSE
+ifeq ($(MKVERBOSE),TRUE)
 	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
 else
 	@echo "Linking..."
@@ -17,7 +17,7 @@ endif
 build/%.o build/%.mod: %.f90
 	@mkdir -p build
 	@mkdir -p include
-ifdef MKVERBOSE
+ifeq ($(MKVERBOSE),TRUE)
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
@@ -27,7 +27,8 @@ endif
 build/%.o: %.c
 	@mkdir -p build
 	@mkdir -p include
-ifdef MKVERBOSE
+
+ifeq ($(MKVERBOSE),TRUE)
 	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
@@ -37,7 +38,7 @@ endif
 build/%.o: %.f
 	@mkdir -p build
 	@mkdir -p include
-ifdef MKVERBOSE
+ifeq ($(MKVERBOSE),TRUE)
 	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."

@@ -7,7 +7,8 @@
 !!  Afer this sweeper is initialized (usually in main), the locgical flags can be changed if desired
 module pf_mod_misdcQ
   use pf_mod_dtype
-
+  use pf_mod_utils
+  
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_misdcQ_t

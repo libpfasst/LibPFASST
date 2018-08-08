@@ -14,6 +14,7 @@
 !!  The user needs to supply the feval and fcomp routines for a given example   
 module pf_mod_imexQ
   use pf_mod_dtype
+  use pf_mod_utils
 
   implicit none
 

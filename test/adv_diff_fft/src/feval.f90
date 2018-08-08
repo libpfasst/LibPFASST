@@ -51,16 +51,17 @@ contains
   end function as_ad_sweeper
 
   !>  Routine to set up sweeper variables and operators
-  subroutine sweeper_setup(sweeper, nx)
+  subroutine sweeper_setup(sweeper, grid_shape)
     use probin, only:  imex_stat 
     class(pf_sweeper_t), intent(inout) :: sweeper
-    integer,             intent(in   ) :: nx
+    integer,             intent(in   ) :: grid_shape(1)
 
     class(ad_sweeper_t), pointer :: this
-    integer     :: i,ierror
+    integer     :: i,ierror,nx
     type(c_ptr) :: wk
     real(pfdp)  :: kx
 
+    nx=grid_shape(1)
     this => as_ad_sweeper(sweeper)
 
     !>  Set variables for explicit and implicit parts

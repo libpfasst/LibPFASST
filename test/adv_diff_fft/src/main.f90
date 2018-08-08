@@ -61,13 +61,14 @@ contains
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
-       !>  Add the sweeper to the level
-       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, nx(l))
-
        !>  Allocate the shape array for level (here just one dimension)
        allocate(pf%levels(l)%shape(1))
        pf%levels(l)%shape(1) = nx(l)
+
+       !>  Add the sweeper to the level
+       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
+       call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
+
 
        !>  Set the size of the send/receive buffer
        pf%levels(l)%mpibuflen  = nx(l)

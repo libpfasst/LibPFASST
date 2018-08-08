@@ -5,16 +5,16 @@
 FC = mpif90
 CC = mpicc
 AR = ar rcs
-PY = python
-NOSE = nosetests
-DEBUG = FALSE
 
+DEBUG = FALSE
+MKVERBOSE = FALSE
+
+#  Set some compiler flags
 FFLAGS = -Ibuild -Jinclude -cpp
+
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -fimplicit-none -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
 endif
-
- 
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
@@ -55,7 +55,7 @@ ifdef OMP
 endif
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-$(PY py/script.py)
+
 
 	
 
