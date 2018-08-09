@@ -7,21 +7,23 @@ LIBPFASST ?= ../..
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = feval.f90 \
-       hooks.f90 \
-       main.f90 \
-       probin.f90 \
-       fftpack5.1d.f90 
-#       transfer.f90
+FSRC = src/feval.f90 \
+       src/hooks.f90 \
+       src/main.f90 \
+       src/probin.f90 
 
-OBJ = $(addprefix build/,$(FSRC:.f90=.o))
+F77SRC  =  src/dfftpack.o
 
-FFLAGS  += -g -I$(LIBPFASST)/include 
-LDFLAGS += -g -L$(LIBPFASST)/lib -lpfasst 
+OBJ = $(subst src,build,$(FSRC:.f90=.o))
+OBJ  += $(subst src,build,$(F77SRC:.f=.o))
+FFLAGS  += -g -I$(LIBPFASST)/include
+LDFLAGS += -g -L$(LIBPFASST)/lib -lpfasst
+
 
 all: $(EXE)
 
-VPATHS = src
+VPATHS = src 
+
 
 include $(LIBPFASST)/Makefile.rules
 
@@ -39,9 +41,8 @@ build/%.o: %.f90
 #
 # dependencies
 #
-main.exe : $(LIBPFASST)/lib/libpfasst.a
-build/feval.o:build/probin.o
-build/probin.o:
-build/hooks.o: build/feval.o
-build/main.o:  build/hooks.o build/feval.o build/probin.o
-build/transfer.o:  build/feval.o
+main.exe : $(LIBPFASST)/lib/libpfasst.a 
+build/feval.o : src/feval.f90 ./build/probin.o 
+build/hooks.o : src/hooks.f90 ./build/feval.o 
+build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
+build/probin.o : src/probin.f90 

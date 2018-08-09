@@ -8,11 +8,8 @@ module feval
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_imexQ
-  implicit none
 
-  real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
 
-  real(pfdp), parameter :: pi = 3.141592653589793_pfdp
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
   !>  extend the generic level type by defining transfer operators
@@ -25,9 +22,8 @@ module feval
   !>  extend the imex sweeper type with stuff we need to compute rhs
   type, extends(pf_imexQ_t) :: ad_sweeper_t
      real(pfdp), allocatable :: wsave(:)          ! work space
-     real(pfdp), allocatable :: work(:)           ! work space
      complex(pfdp), allocatable :: workhat(:)     ! work space
-     integer ::  lenwrk, lensav, ierror, nx
+     integer ::   lensav,  nx
      complex(pfdp), allocatable :: ddx(:), lap(:) ! spectral operators
    contains
 
@@ -57,7 +53,7 @@ contains
     integer,             intent(in   ) :: grid_shape(1)
 
     class(ad_sweeper_t), pointer :: this
-    integer     :: i,ierror,nx
+    integer     :: i,nx
     type(c_ptr) :: wk
     real(pfdp)  :: kx
 
@@ -78,26 +74,22 @@ contains
 
     !  FFT Storage
     this%nx = nx 
-    this%lenwrk = 2*nx 
-    this%lensav = 2*nx + int(log(real(nx,kind=8))/log(2.0d+00))+4
+    this%lensav = 4*nx + 15
 
     ! create complex fft plans
     allocate(this%workhat(nx))   !  complex transform
-    allocate(this%work(this%lenwrk))
     allocate(this%wsave(this%lensav))
-    call cfft1i ( nx, this%wsave, this%lensav, ierror )
-    if (ierror .ne. 0) then
-       stop "error  initializing fft"
-    end if
+    !  Initialize FFT
+    call ZFFTI( nx, this%wsave )
 
     ! create spectral operators
     allocate(this%ddx(nx))
     allocate(this%lap(nx))
     do i = 1, nx
        if (i <= nx/2+1) then
-          kx = two_pi / Lx * dble(i-1)
+          kx = two_pi * dble(i-1)
        else
-          kx = two_pi / Lx * dble(-nx + i - 1)
+          kx = two_pi * dble(-nx + i - 1)
        end if
 
        this%ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
@@ -115,7 +107,6 @@ contains
     class(ad_sweeper_t), intent(inout) :: this
     class(pf_level_t), intent(inout)   :: lev
 
-    deallocate(this%work)
     deallocate(this%workhat)
     deallocate(this%wsave)
     deallocate(this%ddx)
@@ -139,18 +130,17 @@ contains
     integer,             intent(in   ) :: piece
     
     real(pfdp),      pointer :: yvec(:), fvec(:)
-    integer ::  ierror
 
     yvec  => get_array1d(y)
     fvec => get_array1d(f)
 
+    
+
+    ! Take the fft of y
     this%workhat = yvec
+    call zfftf(this%nx, this%workhat, this%wsave )    
 
-    call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1f in f_eval"
-    end if
-
+    ! Apply spectral operators
     select case (piece)
     case (1)  ! Explicit piece
        select case (imex_stat)
@@ -181,17 +171,16 @@ contains
       call exit(0)
     end select
 
-    call cfft1b (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1b in f_eval"
-    end if
+    !  Normalize the fft
+    this%workhat=this%workhat/dble(this%nx)
 
+    !  Do the inverse fft
+    call zfftb(this%nx, this%workhat, this%wsave)
+
+    !  The function is the real part
     fvec = real(this%workhat)
 
   end subroutine f_eval
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
   ! Solve for y and return f2 also.
   subroutine f_comp(this, y, t, dtq, rhs, level_index, f,piece)
@@ -206,30 +195,37 @@ contains
     integer,             intent(in   ) :: piece
 
     real(pfdp),      pointer :: yvec(:), rhsvec(:), fvec(:)
-    integer ::  ierror
     
     if (piece == 2) then
        yvec  => get_array1d(y)
        rhsvec => get_array1d(rhs)
        fvec => get_array1d(f)
        this%workhat = rhsvec
-       
-       call cfft1f (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )
-       if (ierror .ne. 0) &
-          stop "error  calling cfft1f in f_comp"
+
+       !  Take the FFT
+       call zfftf(this%nx, this%workhat, this%wsave )
+
+       !  Apply spectral inverse operators
        if (imex_stat .eq. 2) then
           this%workhat =  this%workhat/ (1.0_pfdp - nu*dtq*this%lap)
        else  ! fully implicit
           this%workhat =  this%workhat/ (1.0_pfdp - dtq*(-v * this%ddx +nu*this%lap))
        end if
-       call cfft1b (this%nx, 1, this%workhat, this%nx, this%wsave, this%lensav, this%work, this%lenwrk, ierror )      
-       if (ierror .ne. 0) &
-                      stop "error  calling cfft1f in f_comp"
-      yvec  = real(this%workhat)
-      fvec = (yvec - rhsvec) / dtq
+
+       !  Normalize the FFT
+       this%workhat=this%workhat/dble(this%nx)
+
+       !  Take the inverse FFT
+       call zfftb(this%nx, this%workhat,this%wsave)
+
+       !  The solution is the real part
+       yvec  = real(this%workhat)
+
+       !  The function is easy to derive
+       fvec = (yvec - rhsvec) / dtq
     else
-      print *,'Bad piece in f_comp ',piece
-      call exit(0)
+       print *,'Bad piece in f_comp ',piece
+       call exit(0)
     end if
   end subroutine f_comp
 
@@ -247,42 +243,36 @@ contains
 
 
     integer :: nvarF, nvarG, xrat
-    class(ad_sweeper_t), pointer :: adF, adG
-    real(pfdp),         pointer :: f(:), g(:)
+    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
+    real(pfdp),         pointer :: yvec_f(:), yvec_c(:)
 
-    integer ::  ierror
-    adG => as_ad_sweeper(levelG%ulevel%sweeper)
-    adF => as_ad_sweeper(levelf%ulevel%sweeper)
+    sweeper_c => as_ad_sweeper(levelG%ulevel%sweeper)
+    sweeper_f => as_ad_sweeper(levelf%ulevel%sweeper)
 
-    f => get_array1d(qF); 
-    g => get_array1d(qG)
+    yvec_f => get_array1d(qF); 
+    yvec_c => get_array1d(qG)
 
-    nvarF = size(f)
-    nvarG = size(g)
+    nvarF = size(yvec_f)
+    nvarG = size(yvec_c)
     xrat  = nvarF / nvarG
 
     if (xrat == 1) then
-       f = g
+       yvec_f = yvec_c
        return
     endif
 
-    adG%workhat=g
-    call cfft1f (adG%nx, 1, adG%workhat, adG%nx, adG%wsave, adG%lensav, adG%work, adG%lenwrk, ierror )
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1f in interpolate"
-    end if
+    sweeper_c%workhat=yvec_c
+    call zfftf(sweeper_c%nx, sweeper_c%workhat, sweeper_c%wsave )    
 
-    adF%workhat = 0.0d0
-    adF%workhat(1:nvarG/2) = adG%workhat(1:nvarG/2)
-    adF%workhat(nvarF-nvarG/2+2:nvarF) = adG%workhat(nvarG/2+2:nvarG)
+    sweeper_f%workhat = 0.0d0
+    sweeper_f%workhat(1:nvarG/2) = sweeper_c%workhat(1:nvarG/2)
+    sweeper_f%workhat(nvarF-nvarG/2+2:nvarF) = sweeper_c%workhat(nvarG/2+2:nvarG)
 
 
-    call cfft1b (adF%nx, 1, adF%workhat, adF%nx, adF%wsave, adF%lensav, adF%work, adF%lenwrk, ierror )
-    if (ierror .ne. 0) then
-       stop "error  calling cfft1b in interpolate"
-    end if
+    sweeper_f%workhat=sweeper_f%workhat/dble(sweeper_f%nx)
+    call zfftb(sweeper_f%nx, sweeper_f%workhat, sweeper_f%wsave)    
 
-    f = real(adF%workhat)
+    yvec_f = real(sweeper_f%workhat)
 
   end subroutine interpolate
 
@@ -297,16 +287,16 @@ contains
     integer, intent(in), optional :: flags
 
 
-    real(pfdp), pointer :: f(:), c(:)  
+    real(pfdp), pointer :: yvec_f(:), yvec_c(:)  
 
     integer :: irat
 
-    f => get_array1d(qF)
-    c => get_array1d(qG)
+    yvec_f => get_array1d(qF)
+    yvec_c => get_array1d(qG)
 
-    irat  = size(f)/size(c)
+    irat  = size(yvec_f)/size(yvec_c)
 
-    c = f(::irat)
+    yvec_c = yvec_f(::irat)
   end subroutine restrict
 
 
@@ -314,12 +304,12 @@ contains
 !>  Here are some extra routines which are problem dependent  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
-  subroutine initial(q0)
-    type(ndarray), intent(inout) :: q0
-    call exact(0.0_pfdp, q0%flatarray)
+  subroutine initial(y_0)
+    type(ndarray), intent(inout) :: y_0
+    call exact(0.0_pfdp, y_0%flatarray)
   end subroutine initial
 
-  !> Routine to set initial condition.
+  !> Routine to return the exact solution
   subroutine exact(t, yex)
     use probin, only: nprob,nu, v, t00, kfreq
     real(pfdp), intent(in)  :: t
@@ -329,30 +319,30 @@ contains
     real(pfdp) :: tol, x, t0,Dx, omega
 
     nx = size(yex)
-    Dx = Lx/dble(nx)
+    Dx = 1.0d0/dble(nx)
 
     if (nprob .eq. 1) then
        !  Using sin wave initial condition
-       omega = 2*pi*kfreq
+       omega = two_pi*kfreq
        do i = 1, nx
-          x = Lx*dble(i-1-nx/2)/dble(nx) - t*v 
+          x = dble(i-1-nx/2)/dble(nx) - t*v 
           yex(i) = dsin(omega*x)*dexp(-omega*omega*nu*t)
        end do
     else  !  Use periodic image of Gaussians
        yex=0
        if (nu .gt. 0) then
-          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0))  !  Decide how many periodic images
           do k = -nbox,nbox
              do i = 1, nx
-                x = (i-1)*Dx-0.5d0 - t*v + dble(k)*Lx
+                x = (i-1)*Dx-0.5d0 - t*v + dble(k)
                 yex(i) = yex(i) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
              end do
           end do
        else
-          nbox = ceiling(sqrt(37.0d0/(Lx*Lx)))  !  Decide how many periodic images
+          nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
           do k = -nbox,nbox
              do i = 1, nx
-                x = i*Dx-0.5d0 - t*v + dble(k)*Lx
+                x = i*Dx-0.5d0 - t*v + dble(k)
                 yex(i) = yex(i) + dexp(-x*x)
              end do
           end do
@@ -360,5 +350,6 @@ contains
 
     end if
   end subroutine exact
+
 
 end module feval

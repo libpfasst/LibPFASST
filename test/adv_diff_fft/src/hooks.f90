@@ -16,15 +16,15 @@ contains
     type(pf_state_t),  intent(in   ) :: state
 
     real(pfdp) :: yexact(level%mpibuflen)
-    real(pfdp), pointer :: qend(:)
+    real(pfdp), pointer :: y_end(:)
     real(pfdp) :: maxerr
 
-    qend => get_array1d(level%qend)
+    y_end => get_array1d(level%qend)
 
     !>  compute the exact solution
     call exact(state%t0+state%dt, yexact)
     !>  compute error
-    maxerr = maxval(abs(qend-yexact))
+    maxerr = maxval(abs(y_end-yexact))
     
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
          state%step+1, state%iter,level%index, maxerr,level%residual
