@@ -268,8 +268,7 @@ contains
     sweeper_f%workhat(1:nvarG/2) = sweeper_c%workhat(1:nvarG/2)
     sweeper_f%workhat(nvarF-nvarG/2+2:nvarF) = sweeper_c%workhat(nvarG/2+2:nvarG)
 
-
-    sweeper_f%workhat=sweeper_f%workhat/dble(sweeper_f%nx)
+    sweeper_f%workhat=sweeper_f%workhat/dble(sweeper_c%nx)
     call zfftb(sweeper_f%nx, sweeper_f%workhat, sweeper_f%wsave)    
 
     yvec_f = real(sweeper_f%workhat)

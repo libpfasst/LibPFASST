@@ -7,10 +7,10 @@
     nlevels  = 3   !  must be set
 
     niters = 25   !  default is 5
-    nnodes =    3  3  5
+    nnodes =    2  3  5
 
-    nsweeps_pred=3 1 1 
-    nsweeps= 3 1 1
+    nsweeps_pred= 1 1 
+    nsweeps= 1 1 1
     
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
     qtype  = 1   
@@ -37,7 +37,7 @@
     Tfin = 0.9
     nsteps = 32
 
-    imex_stat=2
-    nprob = 0
+    imex_stat=1
+    nprob = 1
 
 /
