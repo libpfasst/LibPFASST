@@ -326,8 +326,8 @@ contains
     this%bernoullis(18) =    43867.0d0 / 7.98d2
     this%bernoullis(20) =    -174611.0d0/330.0d0
     !>  Assign explicit approximate quadrature rule
-    this%QtilE =  lev%qmatFE
-    this%QdiffE = lev%qmat-this%QtilE
+    this%QtilE =  lev%sdcmats%qmatFE
+    this%QdiffE = lev%sdcmats%qmat-this%QtilE
 
     !>  Make space for temporary variables
     call lev%ulevel%factory%create_array(this%A, nnodes, &
@@ -352,7 +352,7 @@ contains
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
-          call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
+          call fintSDC(m)%axpy(dt*lev%sdcmats%qmat(m,j), fSDC(j,1))
        end do
     end do
 

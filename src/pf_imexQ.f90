@@ -173,6 +173,7 @@ contains
 
   !> Subroutine to initialize matrices and space for sweeper
   subroutine imexQ_initialize(this, lev)
+    use pf_mod_quadrature
     class(pf_imexQ_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev    !<  Current level
 
@@ -191,24 +192,20 @@ contains
     this%QtilI = 0.0_pfdp
 
     !>  Array of substep sizes
-    this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
+    this%dtsdc = lev%sdcmats%qnodes(2:nnodes) - lev%sdcmats%qnodes(1:nnodes-1)
 
     ! Implicit matrix
     if (this%use_LUq) then 
-       ! Get the LU
-       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,0)
-       this%QtilI = lev%LUmat
-!       print *,'LU',lev%LUmat
-!       print *,'BE',lev%qmatBE
+       this%QtilI = lev%sdcmats%qmatLU
     else 
-       this%QtilI =  lev%qmatBE
+       this%QtilI =  lev%sdcmats%qmatBE
     end if
 
     ! Explicit matrix
-    this%QtilE =  lev%qmatFE
+    this%QtilE =  lev%sdcmats%qmatFE
 
-    this%QdiffE = lev%qmat-this%QtilE
-    this%QdiffI = lev%qmat-this%QtilI
+    this%QdiffE = lev%sdcmats%qmat-this%QtilE
+    this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
     call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
@@ -247,9 +244,9 @@ contains
        call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
           if (this%explicit) &
-               call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,1))
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,1))
           if (this%implicit) &
-               call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,2))
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,2))
        end do
     end do
   end subroutine imexQ_integrate

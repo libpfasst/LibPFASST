@@ -4,6 +4,7 @@
 
 FC = mpif90
 CC = mpicc
+
 AR = ar rcs
 
 DEBUG = FALSE
@@ -13,7 +14,7 @@ MKVERBOSE = FALSE
 FFLAGS = -Ibuild -Jinclude -cpp
 
 ifeq ($(DEBUG),TRUE)
-FFLAGS += -fimplicit-none -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
+FFLAGS +=  -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
 endif
 
 include $(wildcard $(LIBPFASST)/*.defs)
@@ -38,6 +39,7 @@ FSRC = src/pfasst.f90 \
        src/pf_pfasst.f90 \
        src/pf_quadrature.f90 \
        src/pf_restrict.f90 \
+       src/pf_results.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 
 
