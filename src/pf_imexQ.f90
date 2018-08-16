@@ -201,7 +201,6 @@ contains
        this%QtilI =  lev%sdcmats%qmatBE
     end if
 
-    print *,this%use_LUq, lev%sdcmats%qmatLU
     ! Explicit matrix
     this%QtilE =  lev%sdcmats%qmatFE
 
