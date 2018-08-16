@@ -1,7 +1,7 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module for the calling of user defined routines from various places in the pfasst algorithm
+!>  Module for the storing results for eventual output
 module pf_mod_results
   use pf_mod_dtype
   implicit none
