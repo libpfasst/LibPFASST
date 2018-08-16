@@ -134,7 +134,6 @@ contains
     yvec  => get_array1d(y)
     fvec => get_array1d(f)
 
-    
 
     ! Take the fft of y
     this%workhat = yvec

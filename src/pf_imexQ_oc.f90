@@ -452,19 +452,16 @@ contains
     ! Implicit matrix
     if (this%use_LUq) then 
        ! Get the LU
-       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,0)
-       this%QtilI = lev%LUmat
-!       print *,'LU',lev%LUmat
-!       print *,'BE',lev%qmatBE
+       this%QtilI = lev%sdcmats%qmatLU
     else 
-       this%QtilI =  lev%qmatBE
+       this%QtilI =  lev%sdcmats%qmatBE
     end if
 
     ! Explicit matrix
-    this%QtilE =  lev%qmatFE
+    this%QtilE =  lev%sdcmats%qmatFE
 
-    this%QdiffE = lev%qmat-this%QtilE
-    this%QdiffI = lev%qmat-this%QtilI
+    this%QdiffE = lev%sdcmats%qmat-this%QtilE
+    this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
     call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%shape)
@@ -500,12 +497,12 @@ contains
           call fintSDC(n)%setval(0.0_pfdp, 1)
           do m = 1, Nnodes
 !               do p = 1, npieces
-!                 call Lev%encap%axpy(fintSDC(n), dt*Lev%qmat(n,m), fSDC(m,p),1)
+!                 call Lev%encap%axpy(fintSDC(n), dt*Lev%sdcmats%qmat(n,m), fSDC(m,p),1)
 !               end do
             if (this%explicit) &
-               call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,1), 1)
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,1), 1)
             if (this%implicit) &
-               call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,2), 1)
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,2), 1)
           end do
        end if
        
@@ -514,12 +511,12 @@ contains
           call fintSDC(Nnodes-n)%setval(0.0_pfdp, 2)
           do m = 1, Nnodes
 !               do p = 1, npieces
-!                 call Lev%encap%axpy(fintSDC(Nnodes-n), dt*Lev%qmat(n,m), fSDC(Nnodes+1-m,p),2)
+!                 call Lev%encap%axpy(fintSDC(Nnodes-n), dt*Lev%sdcmats%qmat(n,m), fSDC(Nnodes+1-m,p),2)
 !               end do
             if (this%explicit) &
-               call fintSDC(Nnodes-n)%axpy(dt*lev%qmat(n,m), fSDC(Nnodes+1-m,1), 2)
+               call fintSDC(Nnodes-n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(Nnodes+1-m,1), 2)
             if (this%implicit) &
-               call fintSDC(Nnodes-n)%axpy(dt*lev%qmat(n,m), fSDC(Nnodes+1-m,2), 2)
+               call fintSDC(Nnodes-n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(Nnodes+1-m,2), 2)
           end do
        end if
     end do

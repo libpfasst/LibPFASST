@@ -20,6 +20,90 @@ module pf_mod_quadrature
   end interface
 
 contains
+  !>  
+  subroutine pf_init_sdcmats(SDCmats,qtype,nnodes,nnodes0,nflags)
+    type(pf_sdcmats_t), intent(inout) :: SDCmats
+     integer, intent(in) :: nnodes,nnodes0
+     integer, intent(in) :: qtype
+     integer,    intent(out) :: nflags(nnodes)
+
+     allocate(SDCmats%qmat(nnodes-1,nnodes))  
+     allocate(SDCmats%qmatFE(nnodes-1,nnodes))  
+     allocate(SDCmats%qmatBE(nnodes-1,nnodes))  
+     allocate(SDCmats%qmatLU(nnodes-1,nnodes))  
+     allocate(SDCmats%s0mat(nnodes-1,nnodes))  
+     allocate(SDCmats%qnodes(nnodes))       
+
+     call pf_quadrature(qtype, nnodes, nnodes0, &
+          SDCmats%qnodes, nflags, SDCmats%s0mat, SDCmats%qmat,SDCmats%qmatFE,SDCmats%qmatBE)
+
+     call myLUq(SDCmats%qmat,SDCmats%qmatLU,nnodes,0)
+  end subroutine pf_init_sdcmats
+  
+  subroutine pf_destroy_sdcmats(SDCmats)
+    type(pf_sdcmats_t), intent(inout) :: SDCmats
+
+
+     deallocate(SDCmats%qmat)  
+     deallocate(SDCmats%qmatFE)  
+     deallocate(SDCmats%qmatBE)  
+     deallocate(SDCmats%qmatLU)  
+     deallocate(SDCmats%s0mat)  
+     deallocate(SDCmats%qnodes)       
+
+  end subroutine pf_destroy_sdcmats
+  
+    
+  !>  Routine to compute the LU decomposition of spectral integration matrix
+  subroutine myLUq(Q,QLU,Nnodes,fillq)
+    integer,        intent (in)     :: Nnodes
+    real(pfdp),     intent(in)      :: Q(Nnodes-1,Nnodes)
+    real(pfdp),     intent(inout)   :: QLU(Nnodes-1,Nnodes)
+    integer,        intent (in)     :: fillq
+
+    ! Return the QLU=U^T where U is the LU decomposition of Q without pivoting
+    ! if fillq is positive, then the first row of QLU is filled to make
+    ! the matrix consistent
+
+    integer :: i,j,N
+    real(pfdp) :: c
+    real(pfdp)  :: U(Nnodes-1,Nnodes-1)
+    real(pfdp)  :: L(Nnodes-1,Nnodes-1)
+    real(pfdp)  :: LUerror
+    
+    L = 0.0_pfdp
+    U = 0.0_pfdp
+    N = Nnodes-1
+    U=transpose(Q(1:Nnodes-1,2:Nnodes))
+
+    do i = 1,N
+       if (U(i,i) /= 0.0) then
+          do j=i+1,N
+             c = U(j,i)/U(i,i)
+             U(j,i:N)=U(j,i:N)-c*U(i,i:N)
+             L(j,i)=c
+          end do
+       end if
+       L(i,i) = 1.0_pfdp
+    end do
+
+    !  Check
+    LUerror = maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))))
+    if (LUerror .gt. 1e-14)  then
+       print *,'error in LU too high',LUerror
+       stop
+    end if
+
+    QLU = 0.0_pfdp
+    QLU(1:Nnodes-1,2:Nnodes)=transpose(U)
+    !  Now scale the columns of U to match the sum of A
+    if (fillq .eq. 1) then
+       do j=1,Nnodes-1
+          QLU(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,1:Nnodes-1))
+       end do
+    end if
+
+  end subroutine myLUq
 
   !>  Subroutine to create quadrature matrices
   subroutine pf_quadrature(qtype_in, nnodes, nnodes0, nodes, nflags, smat, qmat,qmatFE,qmatBE)

@@ -112,25 +112,17 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
-  !>  Tool for storing results for later output
-  type :: pf_results_t
-     real(pfdp), allocatable :: errors(:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:)
-     integer :: nsteps
-     integer :: niters
-     integer :: nprocs
-     integer :: nlevels
-     integer :: p_index
-     integer :: nblocks
-     
-     character(len = 20   ) :: fname_r  !<  output file name for residuals
-     character(len = 18) :: fname_e     !<  output file name errors
-     
-   contains
-     procedure :: initialize => initialize_results
-     procedure :: dump => dump_results
-     procedure :: destroy => destroy_results
-  end type pf_results_t
+    type :: pf_sdcmats_t
+     real(pfdp), allocatable :: qmat(:,:)
+     real(pfdp), allocatable :: qmatFE(:,:)
+     real(pfdp), allocatable :: qmatBE(:,:)
+     real(pfdp), allocatable :: qmatLU(:,:)
+     real(pfdp), allocatable :: s0mat(:,:)
+     real(pfdp), allocatable :: qnodes(:)          
+     integer :: nnodes
+     integer :: qtype
+  end type pf_sdcmats_t
+
 
   !>  Data type of a PFASST level
   type :: pf_level_t
@@ -153,12 +145,6 @@ module pf_mod_dtype
           send(:),    &                 !< send buffer
           recv(:),    &                 !< recv buffer
           nodes(:),   &                 !< list of SDC nodes
-          t_sdc(:),   &                 !< time at the SDC nodes
-          qmat(:,:),  &                 !< spectral integration matrix (0 to node)
-          qmatFE(:,:),  &               !< Forward Euler integration matrix (0 to node)
-          qmatBE(:,:),  &               !< Backward Euler matrix (0 to node)
-          LUmat(:,:), &                 !< LU factorization (replaces BE matrix in Q form)
-          s0mat(:,:), &                 !< integration matrix (node to node)
           rmat(:,:),  &                 !< time restriction matrix
           tmat(:,:)                     !< time interpolation matrix
 
@@ -184,7 +170,7 @@ module pf_mod_dtype
 
 
      integer, allocatable :: shape(:)   !< user defined shape array
-
+     type(pf_sdcmats_t) :: sdcmats
      logical :: allocated = .false.
   end type pf_level_t
 
@@ -211,6 +197,25 @@ module pf_mod_dtype
      procedure(pf_wait_p),        pointer, nopass :: wait
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
+
+  !>  Type for storing results for later output
+  type :: pf_results_t
+     real(pfdp), allocatable :: errors(:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:)
+     integer :: nsteps
+     integer :: niters
+     integer :: nprocs
+     integer :: nlevels
+     integer :: p_index
+     integer :: nblocks
+     
+     character(len = 20   ) :: fname_r  !<  output file name for residuals
+     character(len = 18) :: fname_e     !<  output file name errors
+     
+!     procedure(pf_init_results_p), pointer, nopass :: initialize_results
+     procedure(pf_results_p), pointer, nopass :: dump 
+     procedure(pf_results_p), pointer, nopass :: destroy 
+  end type pf_results_t
 
   !>  The main data type which includes pretty much everything
   type :: pf_pfasst_t
@@ -535,60 +540,23 @@ module pf_mod_dtype
        integer,    intent(inout)       :: ierror
      end subroutine pf_broadcast_p
 
-  end interface
+!!$     subroutine pf_init_results_p(nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
+!!$!       import pf_results_t
+!!$!       type(pf_results_t), intent(inout) :: this
+!!$       integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
+!!$     end subroutine pf_init_results_p
+     
 
-contains
-  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
-    class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
+!     subroutine pf_results_p()
 
-    if (rank_in == 0) then
-       open(unit=123, file='result-size.dat', form='formatted')
-       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nlevels_in
-       close(unit=123)
-    end if
+     subroutine pf_results_p(this)
+       import pf_results_t
+       type(pf_results_t), intent(inout) :: this
 
-    this%nsteps=nsteps_in
-    this%nblocks=nsteps_in/nprocs_in
-    this%niters=niters_in
-    this%nprocs=nprocs_in
-    this%nlevels=nlevels_in
-    this%p_index=rank_in+100
+     end subroutine pf_results_p
+     
 
-    write (this%fname_r, "(A13,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
-    write (this%fname_e, "(A10,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
-
-    if(allocated(this%errors)) &
-            deallocate(this%errors, this%residuals)
-
-    allocate(this%errors(niters_in, this%nblocks, nlevels_in), &
-         this%residuals(niters_in, this%nblocks, nlevels_in))
-
-    this%errors = 0.0_pfdp
-    this%residuals = 0.0_pfdp
-  end subroutine initialize_results
-
-  subroutine dump_results(this)
-    class(pf_results_t), intent(inout) :: this
-    integer :: i, j, k
-    
-    open(unit=this%p_index, file=this%fname_r, form='formatted')
-    do k = 1, this%nlevels
-       do j = 1, this%nblocks
-          do i = 1 , this%niters
-             write(this%p_index, '(I4, I4, I4, e21.14)') i,j,k,this%residuals(i, j, k)
-          end do
-       end do
-    enddo
-    close(this%p_index)
-
-  end subroutine dump_results
-
-  subroutine destroy_results(this)
-    class(pf_results_t), intent(inout) :: this
-
-    if(allocated(this%errors)) &
-        deallocate(this%errors, this%residuals)
-  end subroutine destroy_results
+     
+    end interface
   
 end module pf_mod_dtype

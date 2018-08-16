@@ -12,6 +12,7 @@ module pf_mod_parallel
   use pf_mod_dtype
   use pf_mod_hooks
   use pf_mod_comm
+  use pf_mod_results
   implicit none
 contains
 
@@ -54,19 +55,19 @@ contains
     end if
     pf%state%nsteps = nsteps_loc
 
+    !>  Allocate stuff for holding results
+    call initialize_results(pf%results,nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
+
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
-    if (pf%save_results) then
-       call pf%results%initialize(nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
-    endif
     if (present(qend)) then
        call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)             
     else
        call pf_block_run(pf, q0, dt,  nsteps_loc,flags=flags)             
     end if
 
-    if (pf%save_results) call pf%results%dump()
+    if (pf%save_results) call pf%results%dump(pf%results)
 
 
     !  What we would like to do is check for
@@ -196,6 +197,7 @@ contains
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
+    if (pf%nlevels .eq. 1) return
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'do sweeps  in predictor', 'Pipeline_pred',pf%Pipeline_pred    
     pf%state%pstatus = PF_STATUS_ITERATING
@@ -400,7 +402,8 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-
+       call call_hooks(pf, -1, PF_POST_ITERATION)
+       
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
 
@@ -410,7 +413,7 @@ contains
 
           !  Do a v_cycle
           call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
-!          call call_hooks(pf, -1, PF_POST_ITERATION)
+
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)

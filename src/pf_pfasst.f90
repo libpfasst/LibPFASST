@@ -61,7 +61,6 @@ contains
        pf%levels(l)%nsweeps_pred = pf%nsweeps_pred(l)
        pf%levels(l)%nnodes = pf%nnodes(l)              
     end do
-
     
     !>  allocate hooks
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
@@ -72,6 +71,8 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
+
+
   end subroutine pf_pfasst_create
 
 
@@ -121,7 +122,7 @@ contains
     type(pf_pfasst_t), intent(in   )         :: pf   !<  Main pfasst structure
     class(pf_level_t), intent(inout), target :: lev  !<  Level to set up
 
-    integer :: mpibuflen, nnodes, npieces
+    integer :: mpibuflen, nnodes, npieces, nnodes0
     integer :: i
 
     !> do some sanity checks
@@ -154,24 +155,21 @@ contains
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes))
     allocate(lev%nflags(nnodes))
-    allocate(lev%s0mat(nnodes-1,nnodes))
-    allocate(lev%qmat(nnodes-1,nnodes))
-    allocate(lev%qmatFE(nnodes-1,nnodes))
-    allocate(lev%qmatBE(nnodes-1,nnodes))
-    allocate(lev%LUmat(nnodes-1,nnodes))
-
+    
     !> make quadrature matrices
     if (btest(pf%qtype, 8)) then
-       call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
-            lev%nodes, lev%nflags, lev%s0mat, lev%qmat,lev%qmatFE,lev%qmatBE)
+       nnodes0=pf%levels(1)%nnodes
     else
-       call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            lev%nodes, lev%nflags, lev%s0mat, lev%qmat,lev%qmatFE,lev%qmatBE)
+       nnodes0=pf%levels(pf%nlevels)%nnodes
     end if
-
+    !>  Allocate and compute all the matrices
+    call pf_init_sdcmats(lev%sdcmats,pf%qtype, nnodes,nnodes0,lev%nflags)
+    lev%nodes = lev%sdcmats%qnodes
+    
     !>  initialize sweeper
-    call lev%ulevel%sweeper%initialize(lev)
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
+    call lev%ulevel%sweeper%initialize(lev)
+
     
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
 
@@ -196,7 +194,7 @@ contains
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
 
-
+    
   end subroutine pf_level_setup
 
 
@@ -211,7 +209,7 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
-    call pf%results%destroy()
+    call  pf%results%destroy(pf%results)
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -223,6 +221,7 @@ contains
 
   !> Deallocate PFASST level
   subroutine pf_level_destroy(lev,nlevels)
+    use pf_mod_quadrature
     class(pf_level_t), intent(inout) :: lev      !<  level to destroy
     integer                          :: nlevels  !<  number of pfasst levels
 
@@ -238,12 +237,8 @@ contains
     !> deallocate nodes, flags, and integration matrices
     deallocate(lev%nodes)
     deallocate(lev%nflags)
-    deallocate(lev%qmat)
-    deallocate(lev%qmatFE)
-    deallocate(lev%qmatBE)
-    deallocate(lev%s0mat)
-    deallocate(lev%LUmat)
 
+    call pf_destroy_sdcmats(lev%sdcmats)
     !> deallocate solution and function storage
     npieces = lev%ulevel%sweeper%npieces
 
@@ -320,12 +315,10 @@ contains
     nsweeps      = pf%nsweeps
     nsweeps_pred = pf%nsweeps_pred
     nnodes       = pf%nnodes
-    nnodes_rk    = pf%nnodes_rk    
+
     abs_res_tol  = pf%abs_res_tol
     rel_res_tol  = pf%rel_res_tol
-    pipeline_pred= pf%pipeline_pred
     pfasst_pred  = pf%pfasst_pred
-    rk_pred      = pf%rk_pred
     pipeline_pred= pf%pipeline_pred
     nsweeps_burn = pf%nsweeps_burn
     q0_style     = pf%q0_style
@@ -333,12 +326,14 @@ contains
     Finterp      = pf%Finterp
     use_LUq      = pf%use_LUq
     taui0        = pf%taui0
-    echo_timings = pf%echo_timings
     outdir       = pf%outdir
-    use_rk_stepper= pf%use_rk_stepper
     debug        = pf%debug
     save_results = pf%save_results
     echo_timings = pf%echo_timings
+
+    nnodes_rk    = pf%nnodes_rk
+    rk_pred      = pf%rk_pred
+    use_rk_stepper= pf%use_rk_stepper
 
     !> open the file "fname" and read the pfasst namelist
     if (present(fname))  then
@@ -368,12 +363,10 @@ contains
     pf%nsweeps      = nsweeps
     pf%nsweeps_pred = nsweeps_pred
     pf%nnodes       = nnodes
-    pf%nnodes_rk    = nnodes_rk    
     pf%abs_res_tol  = abs_res_tol
     pf%rel_res_tol  = rel_res_tol
-    pf%pipeline_pred= pipeline_pred
+
     pf%pfasst_pred  = pfasst_pred
-    pf%rk_pred      = rk_pred
     pf%pipeline_pred= pipeline_pred
     pf%nsweeps_burn = nsweeps_burn
     pf%q0_style     = q0_style
@@ -381,12 +374,16 @@ contains
     pf%Finterp      = Finterp
     pf%use_LUq      = use_LUq
     pf%taui0        = taui0
+
     pf%echo_timings = echo_timings
     pf%outdir       = outdir
-    pf%use_rk_stepper=use_rk_stepper
     pf%debug        = debug
     pf%save_results = save_results
     pf%echo_timings = echo_timings
+
+    pf%use_rk_stepper=use_rk_stepper
+    pf%nnodes_rk    = nnodes_rk    
+    pf%rk_pred      = rk_pred
 
     !>  Sanity check
     if (pf%nlevels < 1) then
@@ -419,28 +416,65 @@ contains
 
     write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
     write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
+    
     if (pf%comm%nproc == 1) then
        write(un,*) '            ', '             ', ' ! since 1 time proc is being used, this is a serial sdc run'
     else
        write(un,*) '            ', '             ', ' ! since >1 time procs are being used, this is a parallel pfasst run'
     end if
     write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
+    select case(pf%qtype)
+
+    case (SDC_GAUSS_LEGENDRE)
+       write(un,*) 'qtype:',pf%qtype, '! Gauss Legendre nodes are used'
+    case (SDC_GAUSS_LOBATTO)
+       write(un,*) 'qtype:',pf%qtype,'! Gauss Lobatto nodes are used'
+    case (SDC_GAUSS_RADAU)
+       write(un,*) 'qtype:',pf%qtype,'! Gauss Radua nodes are used'
+    case (SDC_CLENSHAW_CURTIS)
+       write(un,*) 'qtype:',pf%qtype,'! Clenshaw Curtis nodes are used'
+    case (SDC_UNIFORM)
+       write(un,*) 'qtype:', pf%qtype,'! Uniform  nodes are used'
+    case default
+       print *,'qtype = ',pf%qtype
+       stop "ERROR: Invalid qtype"
+    end select
+
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
+    
     write(un,*) 'mpibuflen:   ', pf%levels(1:pf%nlevels)%mpibuflen, '! size of data send between time steps'
     write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
     write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
     write(un,*) 'taui0:     ',   pf%taui0, '! cutoff for tau correction'
+    write(un,*) 'abs_res_tol:', pf%abs_res_tol, '! absolute residual tolerance: '
+    write(un,*) 'rel_res_tol:', pf%rel_res_tol, '! relative residual tolerance: '
+    if (pf%use_Luq) then
+       write(un,*) 'Implicit matrix is LU  '
+    else
+       write(un,*) 'Implicit matrix is backward Euler  '
+    end if
+    if (pf%Vcycle) then
+       write(un,*) 'V-cycling is on'
+    else
+       write(un,*) 'V-cycling is off, fine level is pipelining'
+    end if
 
-    if (pf%pipeline_pred) then
-       write(un,*) 'Predictor pipelining is ON    '
+    if (pf%rk_pred) then
+       write(un,*) 'Runge-Kutta used for predictor'
     else
-       write(un,*) 'Predictor pipelining is OFF    '
-    end if
-    if (pf%PFASST_pred) then
-       write(un,*) 'PFASST Predictor style  '
-    else
-       write(un,*) 'Serial Predictor style  '
-    end if
+       
+       if (pf%pipeline_pred) then
+          write(un,*) 'Predictor pipelining is ON    '
+       else
+          write(un,*) 'Predictor pipelining is OFF    '
+       end if
+       if (pf%PFASST_pred) then
+          write(un,*) 'PFASST Predictor style  '
+       else
+          write(un,*) 'Serial Predictor style  '
+       end if
+    endif
+
     if (pf%debug) write(un,*) 'Debug mode is on '
 
     write(un,*) ''
@@ -454,7 +488,7 @@ contains
           print *, pf%levels(l)%nodes
           print *, "  Q"
           do i = 1, pf%levels(l)%nnodes-1
-             print *, pf%levels(l)%qmat(i,:)
+             print *, pf%levels(l)%sdcmats%qmat(i,:)
           end do
        end do
     end if
