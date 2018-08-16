@@ -1,5 +1,5 @@
 !
-!  Test parameters to run advection diffusion example with just SDC
+!  Test parameters to run the Dahlquist example with just SDC
 !
 !  If run in serial, this will be SDC
 !  If run in parallel, this will be pipelined SDC

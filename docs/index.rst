@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to the  LIBPFASST documentation!
-=====================================
+========================================
 
 LIBPFASST is a Fortran implementation of the PFASST algorithm.
 
@@ -29,6 +29,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 **Main parts of the documentation**
 
 * :doc:`Download <download>` - download and installation instructions.
+* :doc:`Compiling <compiling>` - instructions for compiling
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
 * :doc:`Overview <overview>` - design and interface overview.
 * :doc:`Reference <reference>` - information about the internals of LIBPFASST.
@@ -41,6 +42,39 @@ page`_ on `bitbucket.org`_.
 
 .. _`LIBPFASST project page`: https://pfasst.lbl.gov
 .. _`bitbucket.org`: https://bitbucket.org/berkeleylab/libpfasst/src/master/
+
+Compiling
+=========
+
+libpfasst comes with its own Makefiles, and it is possible that simply typing 'make' in the directory /libpfasst will compile the code succesfully.  If not, the user will probably have to adjust some flags in 'Makefile.defaults' as discussed below.  A successful make will build the file libpfasst/lib/libpfasst.a
+
+The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.
+
+FC = mpif90
+CC = mpicc
+AR = ar rcs
+
+Some optional flags are
+
+DEBUG = FALSE
+
+which if made true will add many diagnostic flags to the build, and
+
+MKVERBOSE=FALSE
+
+which if made true will show more info in the build steps.  These can both be changed on the command line as in
+
+ make MKVERBOSE=TRUE DEBUG=TRUE
+
+There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
+
+make depend
+
+Finally, one can type
+
+make clean
+
+to remove all intermediate files and start from scratch.
 
 
 Indices and tables

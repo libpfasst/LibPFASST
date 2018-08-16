@@ -32,12 +32,6 @@ LIBPFASST has been successfully compiled with
   + PGI 12.9 (almost, minor issues, but overall OK).
    
 
-Before compiling, you will need an MPI library installed.  On Debian
-or Ubuntu machines, we recommend MPICH2:
-
-  `$ sudo apt-get install mpich2 libmpich2-dev`
-
-
 # COMPILING
 
 Before compiling, you should check the definitions of the Fortran (FC)  and C (CC) compiler in Makefile.defaults
