@@ -95,7 +95,7 @@ contains
           do n = 1, lev%nnodes
              call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
              call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
-             call lev%I(m)%axpy(dt*lev%qmat(m,n),    lev%F(n,3))
+             call lev%I(m)%axpy(dt*lev%sdcmats%qmat(m,n),    lev%F(n,3))
              call this%I3(m)%axpy(dt*this%QtilI(m,n),     lev%F(n,3))
              !  Note we have to leave off the -dt*Qtil here and put it in after f2comp
           end do
@@ -174,16 +174,16 @@ contains
     ! Implicit matrix
     if (this%use_LUq) then 
        ! Get the LU
-       call myLUq(lev%qmat,lev%LUmat,lev%nnodes,0)
-       this%QtilI = lev%LUmat
+       this%QtilI = lev%sdcmats%qmatLU
+
     else 
-       this%QtilI = lev%qmatBE
+       this%QtilI = lev%sdcmats%qmatBE
     end if
     ! Explicit matrix    
-    this%QtilE=lev%qmatFE
+    this%QtilE=lev%sdcmats%qmatFE
 
-    this%QdiffE = lev%qmat-this%QtilE
-    this%QdiffI = lev%qmat-this%QtilI
+    this%QdiffE = lev%sdcmats%qmat-this%QtilE
+    this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
     call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
@@ -223,7 +223,7 @@ contains
        call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
           do p = 1, this%npieces
-             call fintSDC(n)%axpy(dt*lev%qmat(n,m), fSDC(m,p))
+             call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,p))
           end do
        end do
     end do    

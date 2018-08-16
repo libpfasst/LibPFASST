@@ -136,56 +136,6 @@ contains
     end do
   end subroutine pf_generic_spreadq0
 
-  !>  Routine to compute the LU decomposition of spectral integration matrix
-  subroutine myLUq(Q,Qtil,Nnodes,fillq)
-    integer,        intent (in)     :: Nnodes
-    real(pfdp),     intent(in)      :: Q(Nnodes-1,Nnodes)
-    real(pfdp),     intent(inout)   :: Qtil(Nnodes-1,Nnodes)
-    integer,        intent (in)     :: fillq
-
-    ! Return the Qtil=U^T where U is the LU decomposition of Q without pivoting
-    ! if fillq is positive, then the first row of Qtil is filled to make
-    ! the matrix consistent
-
-    integer :: i,j,N
-    real(pfdp) :: c
-    real(pfdp)  :: U(Nnodes-1,Nnodes-1)
-    real(pfdp)  :: L(Nnodes-1,Nnodes-1)
-    real(pfdp)  :: LUerror
-    
-    L = 0.0_pfdp
-    U = 0.0_pfdp
-    N = Nnodes-1
-    U=transpose(Q(1:Nnodes-1,2:Nnodes))
-
-    do i = 1,N
-       if (U(i,i) /= 0.0) then
-          do j=i+1,N
-             c = U(j,i)/U(i,i)
-             U(j,i:N)=U(j,i:N)-c*U(i,i:N)
-             L(j,i)=c
-          end do
-       end if
-       L(i,i) = 1.0_pfdp
-    end do
-
-    !  Check
-    LUerror = maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))))
-    if (LUerror .gt. 1e-14)  then
-       print *,'error in LU too high',LUerror
-       stop
-    end if
-
-    Qtil = 0.0_pfdp
-    Qtil(1:Nnodes-1,2:Nnodes)=transpose(U)
-    !  Now scale the columns of U to match the sum of A
-    if (fillq .eq. 1) then
-       do j=1,Nnodes-1
-          Qtil(j,1)=sum(Q(j,1:Nnodes))-sum(U(j,1:Nnodes-1))
-       end do
-    end if
-
-  end subroutine myLUq
 
 
 end module pf_mod_utils

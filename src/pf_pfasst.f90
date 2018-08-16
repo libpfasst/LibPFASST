@@ -61,7 +61,6 @@ contains
        pf%levels(l)%nsweeps_pred = pf%nsweeps_pred(l)
        pf%levels(l)%nnodes = pf%nnodes(l)              
     end do
-
     
     !>  allocate hooks
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
@@ -72,6 +71,8 @@ contains
     allocate(pf%state)
     pf%state%pstatus = 0
     pf%state%status  = 0
+
+
   end subroutine pf_pfasst_create
 
 
@@ -121,7 +122,7 @@ contains
     type(pf_pfasst_t), intent(in   )         :: pf   !<  Main pfasst structure
     class(pf_level_t), intent(inout), target :: lev  !<  Level to set up
 
-    integer :: mpibuflen, nnodes, npieces
+    integer :: mpibuflen, nnodes, npieces, nnodes0
     integer :: i
 
     !> do some sanity checks
@@ -154,21 +155,17 @@ contains
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes))
     allocate(lev%nflags(nnodes))
-    allocate(lev%s0mat(nnodes-1,nnodes))
-    allocate(lev%qmat(nnodes-1,nnodes))
-    allocate(lev%qmatFE(nnodes-1,nnodes))
-    allocate(lev%qmatBE(nnodes-1,nnodes))
-    allocate(lev%LUmat(nnodes-1,nnodes))
-
+    
     !> make quadrature matrices
     if (btest(pf%qtype, 8)) then
-       call pf_quadrature(pf%qtype, nnodes, pf%levels(1)%nnodes, &
-            lev%nodes, lev%nflags, lev%s0mat, lev%qmat,lev%qmatFE,lev%qmatBE)
+       nnodes0=pf%levels(1)%nnodes
     else
-       call pf_quadrature(pf%qtype, nnodes, pf%levels(pf%nlevels)%nnodes, &
-            lev%nodes, lev%nflags, lev%s0mat, lev%qmat,lev%qmatFE,lev%qmatBE)
+       nnodes0=pf%levels(pf%nlevels)%nnodes
     end if
-
+    !>  Allocate and compute all the matrices
+    call pf_init_sdcmats(lev%sdcmats,pf%qtype, nnodes,nnodes0,lev%nflags)
+    lev%nodes = lev%sdcmats%qnodes
+    
     !>  initialize sweeper
     call lev%ulevel%sweeper%initialize(lev)
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
@@ -196,7 +193,7 @@ contains
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
 
-
+    
   end subroutine pf_level_setup
 
 
@@ -211,7 +208,7 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
-    call pf%results%destroy()
+    call  pf%results%destroy(pf%results)
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -223,6 +220,7 @@ contains
 
   !> Deallocate PFASST level
   subroutine pf_level_destroy(lev,nlevels)
+    use pf_mod_quadrature
     class(pf_level_t), intent(inout) :: lev      !<  level to destroy
     integer                          :: nlevels  !<  number of pfasst levels
 
@@ -238,12 +236,8 @@ contains
     !> deallocate nodes, flags, and integration matrices
     deallocate(lev%nodes)
     deallocate(lev%nflags)
-    deallocate(lev%qmat)
-    deallocate(lev%qmatFE)
-    deallocate(lev%qmatBE)
-    deallocate(lev%s0mat)
-    deallocate(lev%LUmat)
 
+    call pf_destroy_sdcmats(lev%sdcmats)
     !> deallocate solution and function storage
     npieces = lev%ulevel%sweeper%npieces
 
@@ -454,7 +448,7 @@ contains
           print *, pf%levels(l)%nodes
           print *, "  Q"
           do i = 1, pf%levels(l)%nnodes-1
-             print *, pf%levels(l)%qmat(i,:)
+             print *, pf%levels(l)%sdcmats%qmat(i,:)
           end do
        end do
     end if

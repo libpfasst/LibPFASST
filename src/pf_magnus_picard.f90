@@ -120,7 +120,7 @@ contains
        do m = 1, nnodes-1
           call start_timer(pf, TAUX+1)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
-               lev%nodes, lev%qmat, dt, m, this%commutator_coefs(:,:,m))
+               lev%nodes, lev%sdcmats%qmat, dt, m, this%commutator_coefs(:,:,m))
           call end_timer(pf, TAUX+1)
        end do
 
@@ -183,7 +183,7 @@ contains
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
        do j = 1, lev%nnodes
-          call fintSDC(m)%axpy(dt*lev%qmat(m,j), fSDC(j,1))
+          call fintSDC(m)%axpy(dt*lev%sdcmats%qmat(m,j), fSDC(j,1))
        end do
     end do
   end subroutine magpicard_integrate
