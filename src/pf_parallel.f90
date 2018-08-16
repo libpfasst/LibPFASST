@@ -197,6 +197,7 @@ contains
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
+    if (pf%nlevels .eq. 1) return
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'do sweeps  in predictor', 'Pipeline_pred',pf%Pipeline_pred    
     pf%state%pstatus = PF_STATUS_ITERATING
@@ -401,7 +402,8 @@ contains
 
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
-
+       call call_hooks(pf, -1, PF_POST_ITERATION)
+       
        call start_timer(pf, TITERATION)
        do j = 1, pf%niters
 
@@ -411,7 +413,7 @@ contains
 
           !  Do a v_cycle
           call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
-!          call call_hooks(pf, -1, PF_POST_ITERATION)
+
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)

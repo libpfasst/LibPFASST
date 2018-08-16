@@ -32,7 +32,8 @@ contains
        sol_norms(m) = lev%Q(m+1)%norm(flag)
     end do
 
-    lev%residual = res_norms(lev%nnodes-1)
+    !    lev%residual = res_norms(lev%nnodes-1)
+    lev%residual = maxval(res_norms)    
     if (sol_norms(lev%nnodes-1) > 0.0d0) then
        lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
     else
