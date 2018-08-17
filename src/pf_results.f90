@@ -1,3 +1,4 @@
+!! Storing results for eventual output
 !
 ! This file is part of LIBPFASST.
 !

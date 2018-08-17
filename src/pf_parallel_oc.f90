@@ -1,5 +1,8 @@
+!!  Main controllers for optimal control problems
+!
+! This file is part of LIBPFASST.
+!
 !> Module of parallel PFASST routines for optimal control problems.
-
 module pf_mod_parallel_oc
   use pf_mod_pfasst
   use pf_mod_interpolate
@@ -13,16 +16,16 @@ module pf_mod_parallel_oc
 contains
 
   subroutine pf_predictor_oc(pf, t0, dt, flags)
-    type(pf_pfasst_t), intent(inout), target :: pf     !< PFASST main data structure
-    real(pfdp),        intent(in   )         :: t0     !< Initial time of this processor
-    real(pfdp),        intent(in   )         :: dt     !< time step
-    integer,           intent(in   ), optional :: flags(:)  !<  User defined flags
+    type(pf_pfasst_t), intent(inout), target :: pf     !! PFASST main data structure
+    real(pfdp),        intent(in   )         :: t0     !! Initial time of this processor
+    real(pfdp),        intent(in   )         :: dt     !! time step
+    integer,           intent(in   ), optional :: flags(:)  !!  User defined flags
 
     class(pf_level_t), pointer :: c_lev_p
     class(pf_level_t), pointer :: f_lev_p
-    integer                   :: k               !<  Loop indices
-    integer                   :: level_index     !<  Local variable for looping over levels
-    real(pfdp)                :: t0k             !<  Initial time at time step k
+    integer                   :: k               !!  Loop indices
+    integer                   :: level_index     !!  Local variable for looping over levels
+    real(pfdp)                :: t0k             !!  Initial time at time step k
     integer :: which, dir
 
     which = 1                   ! standard: predict and sweep forward-in-time
@@ -166,7 +169,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     real(pfdp),        intent(inout) :: residual
     integer,           intent(in)    :: k
-    logical,           intent(out)   :: converged   !<  True if this processor is done
+    logical,           intent(out)   :: converged   !!  True if this processor is done
     integer, optional, intent(in)    :: flags
     real(pfdp)     :: residual1
     integer :: dir, which
@@ -205,7 +208,7 @@ contains
 !           pf%state%status = PF_STATUS_CONVERGED
 !       end if
 !     end if
-!     !<-
+!     !!-
     
     residual = residual1
 

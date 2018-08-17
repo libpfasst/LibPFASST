@@ -1,9 +1,10 @@
+!! Multi-implicit sweeper module
 !
 ! This file is part of LIBPFASST.
 !
 !>  Module of the  the derived sweeper class for doing MISDC sweeps for an equation of the form
-!!            y' = f_1(y) + f_2(y) + f_3(y)
-!!  The f_1 piece is treated explicitly and f_2 and f_3 implicitly
+!!       $$     y' = f_1(y) + f_2(y) + f_3(y) $$
+!!  The \(f_1\) piece is treated explicitly and \(f_2\) and \(f_3\) implicitly
 !!  Afer this sweeper is initialized (usually in main), the locgical flags can be changed if desired
 module pf_mod_misdcQ
   use pf_mod_dtype
@@ -41,23 +42,23 @@ module pf_mod_misdcQ
        !>  Evaluate f_piece(y), where piece is one or two 
        import pf_misdcQ_t, pf_encap_t, pfdp
        class(pf_misdcQ_t),  intent(inout) :: this
-       class(pf_encap_t), intent(in   ) :: y        !<  Argument for evaluation
-       real(pfdp),        intent(in   ) :: t        !<  Time at evaluation
-       integer,    intent(in   ) :: level_index     !<  Level index
-       class(pf_encap_t), intent(inout) :: f        !<  RHS function value
-       integer,    intent(in   ) :: piece           !<  Which piece to evaluate
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       class(pf_encap_t), intent(inout) :: f        !!  RHS function value
+       integer,    intent(in   ) :: piece           !!  Which piece to evaluate
      end subroutine pf_f_eval_p
-     !>  Solve the equation y - dtq*f_2(y) =rhs
+     !>  Solve the equation \(y - dtq*f_n(y) =rhs \) where n is given by the argument piece
      subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece)
        import pf_misdcQ_t, pf_encap_t, pfdp
        class(pf_misdcQ_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: y      !<  Solution of implicit solve 
-       real(pfdp),        intent(in   ) :: t      !<  Time of solve
-       real(pfdp),        intent(in   ) :: dtq    !<  dt*quadrature weight
-       class(pf_encap_t), intent(in   ) :: rhs    !<  RHS for solve
-       integer,    intent(in   ) :: level_index   !<  Level index
-       class(pf_encap_t), intent(inout) :: f      !<  f_2 of solution y
-       integer,    intent(in   ) :: piece         !<  Which piece to evaluate
+       class(pf_encap_t), intent(inout) :: y      !!  Solution of implicit solve 
+       real(pfdp),        intent(in   ) :: t      !!  Time of solve
+       real(pfdp),        intent(in   ) :: dtq    !!  dt*quadrature weight
+       class(pf_encap_t), intent(in   ) :: rhs    !!  RHS for solve
+       integer,    intent(in   ) :: level_index   !!  Level index
+       class(pf_encap_t), intent(inout) :: f      !!  f_n of solution y
+       integer,    intent(in   ) :: piece         !!  Which piece to evaluate
      end subroutine pf_f_comp_p
   end interface
 
@@ -68,11 +69,11 @@ contains
     use pf_mod_timer
     use pf_mod_hooks    
     class(pf_misdcQ_t),      intent(inout) :: this
-    type(pf_pfasst_t),target,intent(inout) :: pf  !<  PFASST structure
-    integer,          intent(in) :: level_index   !<  which level to sweep on
-    real(pfdp),       intent(in) :: t0            !<  Time at beginning of time step
-    real(pfdp),       intent(in) :: dt            !<  time step size
-    integer,          intent(in) :: nsweeps       !<  number of sweeps to do
+    type(pf_pfasst_t),target,intent(inout) :: pf  !!  PFASST structure
+    integer,          intent(in) :: level_index   !!  which level to sweep on
+    real(pfdp),       intent(in) :: t0            !!  Time at beginning of time step
+    real(pfdp),       intent(in) :: dt            !!  time step size
+    integer,          intent(in) :: nsweeps       !!  number of sweeps to do
     integer, optional, intent(in   ) :: flags    
     !>  Local variables    
     class(pf_level_t), pointer:: lev
@@ -81,9 +82,9 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
-    lev => pf%levels(level_index)   !<  Assign level pointer
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
-    do k = 1,nsweeps   !<  Loop over sweeps
+    do k = 1,nsweeps   !!  Loop over sweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
 
        ! compute integrals and add fas correction
@@ -233,9 +234,9 @@ contains
   subroutine misdcQ_evaluate(this, lev, t, m, flags, step)
 
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !<  Current level
-    real(pfdp),        intent(in   ) :: t    !<  Time at which to evaluate
-    integer,           intent(in   ) :: m    !<  Node at which to evaluate
+    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
+    integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
 
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
@@ -246,8 +247,8 @@ contains
   !> Subroutine to evaluate the function values at all nodes
   subroutine misdcQ_evaluate_all(this, lev, t, flags, step)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev   !<  Current level
-    real(pfdp),        intent(in   ) :: t(:)  !<  Array of times at each node
+    class(pf_level_t), intent(inout) :: lev   !!  Current level
+    real(pfdp),        intent(in   ) :: t(:)  !!  Array of times at each node
     integer, intent(in), optional   :: flags, step
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine misdcQ_evaluate_all
@@ -255,8 +256,8 @@ contains
   !> Subroutine to compute  Residual
   subroutine misdcQ_residual(this, lev, dt, flags)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !<  Current level
-    real(pfdp),        intent(in   ) :: dt   !<  Time step
+    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
     call pf_generic_residual(this, lev, dt)
   end subroutine misdcQ_residual

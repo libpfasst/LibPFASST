@@ -1,3 +1,4 @@
+!!  Sweeper for Magnus integrator
 !
 ! This file is part of LIBPFASST.
 !

@@ -1,8 +1,9 @@
+!!  MPI communicator routines
 !
 ! This file is part of LIBPFASST.
 !
 module pf_mod_mpi
-  include "mpif.h"
+ ! include "mpif.h"
 end module pf_mod_mpi
 
 !> Module to implement communication routines in  MPI.
@@ -19,8 +20,8 @@ contains
     
     integer :: ierror
     
-    !> assign communicator
-    pf_comm%comm = mpi_comm
+
+    pf_comm%comm = mpi_comm       !! assign communicator
     
     !> assign number of processors
     call mpi_comm_size(mpi_comm, pf_comm%nproc, ierror)
@@ -41,9 +42,9 @@ contains
   subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
 
-    type(pf_comm_t),   intent(inout) :: pf_comm    !>  communicator 
-    type(pf_pfasst_t), intent(inout) :: pf         !>  main pfasst structure
-    integer,           intent(inout) :: ierror     !>  error flag
+    type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator 
+    type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
+    integer,           intent(inout) :: ierror     !!  error flag
 
     !>  set the rank
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
@@ -70,9 +71,9 @@ contains
     use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(in   ) :: pf
-    class(pf_level_t), intent(inout) :: level   !<  level to send from
-    integer,           intent(in   ) :: tag     !<  message tag
-    integer,           intent(inout) :: ierror  !<  error flag
+    class(pf_level_t), intent(inout) :: level   !!  level to send from
+    integer,           intent(in   ) :: tag     !!  message tag
+    integer,           intent(inout) :: ierror  !!  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: dir, source
 
@@ -92,10 +93,10 @@ contains
   subroutine pf_mpi_send_status(pf, tag,istatus,ierror, direction)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE, MPI_REQUEST_NULL
 
-    type(pf_pfasst_t), intent(inout) :: pf        !<  main pfasst structure
-    integer,           intent(in)    :: tag       !<  message tag
-    integer,           intent(in) :: istatus      !<  status flag to send
-    integer,           intent(inout) :: ierror    !<  error flag
+    type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
+    integer,           intent(in)    :: tag       !!  message tag
+    integer,           intent(in) :: istatus      !!  status flag to send
+    integer,           intent(inout) :: ierror    !!  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: dest
     integer    ::  stat(MPI_STATUS_SIZE), dir
@@ -127,10 +128,10 @@ contains
   subroutine pf_mpi_recv_status(pf, tag,istatus,ierror, direction)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
 
-    type(pf_pfasst_t), intent(inout) :: pf        !<  main pfasst structure
-    integer,           intent(in)    :: tag       !<  message tag
-    integer,           intent(inout) :: istatus   !<  status flag to receive
-    integer,           intent(inout) :: ierror    !<  error flag
+    type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
+    integer,           intent(in)    :: tag       !!  message tag
+    integer,           intent(inout) :: istatus   !!  status flag to receive
+    integer,           intent(inout) :: ierror    !!  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: source
     integer    ::  stat(MPI_STATUS_SIZE), dir
@@ -157,11 +158,11 @@ contains
   subroutine pf_mpi_send(pf, level, tag, blocking,ierror, direction)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
 
-    type(pf_pfasst_t), intent(inout) :: pf       !<  main pfasst structure
-    class(pf_level_t), intent(inout) :: level    !<  level to send from
-    integer,           intent(in   ) :: tag      !<  message tag
-    logical,           intent(in   ) :: blocking !<  true if send is blocking
-    integer,           intent(inout) :: ierror   !<  error flag
+    type(pf_pfasst_t), intent(inout) :: pf       !!  main pfasst structure
+    class(pf_level_t), intent(inout) :: level    !!  level to send from
+    integer,           intent(in   ) :: tag      !!  message tag
+    logical,           intent(in   ) :: blocking !!  true if send is blocking
+    integer,           intent(inout) :: ierror   !!  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: dest, dir
     integer ::  stat(MPI_STATUS_SIZE)
@@ -209,11 +210,11 @@ contains
   !! nonblocking receive  should have already been posted
   subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, direction)
     use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
-    type(pf_pfasst_t), intent(inout) :: pf     !<  main pfasst structure
-    class(pf_level_t), intent(inout) :: level  !<  level to recieve into
-    integer,           intent(in   ) :: tag    !<  message tag
-    logical,           intent(in   ) :: blocking  !<  true if receive is blocking
-    integer,           intent(inout) :: ierror  !<  error flag
+    type(pf_pfasst_t), intent(inout) :: pf     !!  main pfasst structure
+    class(pf_level_t), intent(inout) :: level  !!  level to recieve into
+    integer,           intent(in   ) :: tag    !!  message tag
+    logical,           intent(in   ) :: blocking  !!  true if receive is blocking
+    integer,           intent(inout) :: ierror  !!  error flag
     integer, optional, intent(in)    :: direction
     integer                          :: source, dir
     integer ::  stat(MPI_STATUS_SIZE)
@@ -240,20 +241,20 @@ contains
   !
   subroutine pf_mpi_wait(pf, level, ierror)
     use pf_mod_mpi, only: MPI_STATUS_SIZE
-    type(pf_pfasst_t), intent(in) :: pf           !<  main pfasst structure
-    integer,           intent(in) :: level        !<  level on which to wait
-    integer,           intent(inout) :: ierror    !<  error flag
+    type(pf_pfasst_t), intent(in) :: pf           !!  main pfasst structure
+    integer,           intent(in) :: level        !!  level on which to wait
+    integer,           intent(inout) :: ierror    !!  error flag
     integer ::  stat(MPI_STATUS_SIZE)
     call mpi_wait(pf%comm%sendreq(level), stat, ierror)
   end subroutine pf_mpi_wait
 
   subroutine pf_mpi_broadcast(pf, y, nvar, root,ierror)
     use pf_mod_mpi, only: MPI_REAL8
-    type(pf_pfasst_t), intent(inout) :: pf      !<  main pfasst structure
-    integer,           intent(in)    :: nvar    !<  size of data to broadcast
-    real(pfdp),        intent(in)    :: y(nvar) !<  data to broadcast
-    integer,           intent(in)    :: root    !<  rank of broadcaster
-    integer,           intent(inout) :: ierror  !<  error flag
+    type(pf_pfasst_t), intent(inout) :: pf      !!  main pfasst structure
+    integer,           intent(in)    :: nvar    !!  size of data to broadcast
+    real(pfdp),        intent(in)    :: y(nvar) !!  data to broadcast
+    integer,           intent(in)    :: root    !!  rank of broadcaster
+    integer,           intent(inout) :: ierror  !!  error flag
     call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)
   end subroutine pf_mpi_broadcast
 

@@ -1,9 +1,9 @@
+!! N-dimensional array encapsulation for optimal control problems.
 !
 ! This file is part of LIBPFASST.
 !
-!> N-dimensional array encapsulation for optimal control problems.
 !!
-!! When a new solution is created by a PFASST level, this encapsulation
+!> When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'shape' attribute to create a new array with that
 !! shape.  Thus, the 'shape' attributes of the PFASST levels should be
 !! set appropriately.  For example, before calling pf_pfasst_run we can

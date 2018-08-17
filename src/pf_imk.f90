@@ -1,19 +1,20 @@
+!!  Implicit Munthe-Kass Runge-Kutta sweeper
 !
 ! This file is part of LIBPFASST.
 !
 !>  This module implements fully implicit Munthe-Kaas Runge Kutta methods using explicit SDC sweeping
 !!
 !!  The equation to be solved is 
+!! 
+!! $$ y'=A(y,t)y  $$
 !!
-!! y'=A(y,t)y
+!! where \(A\) is a matrix and \(y)\ is  a vector or matrix or if Lax_pair = true
 !!
-!! where A is a matrix and y is  a vector or matrix or if Lax_pair = true
-!!
-!! Y'=[A(Y,t),Y] where both A and Y are matrices
+!! $$Y'=[A(Y,t),Y]$$ where both \(A\) and \(Y\) are matrices
 !!
 !!  We solve this by finding the solution to
 !!
-!!  Q' = dexpinv_Q(A)
+!!  $$Q' = dexpinv_Q(A)$$
 !!
 !!  Using PFASST
 module pf_mod_imk
@@ -26,7 +27,7 @@ module pf_mod_imk
      real(pfdp), allocatable :: QtilE(:,:)
      real(pfdp), allocatable :: dtsdc(:)
      real(pfdp), allocatable :: tsdc(:)
-     real(pfdp), allocatable :: QdiffE(:,:)  !<  qmat-QtilE
+     real(pfdp), allocatable :: QdiffE(:,:)  !!  qmat-QtilE
      real(pfdp) :: bernoullis(20), t0, dt
      integer ::  qtype, nterms
      logical ::  Lax_pair, use_SDC, debug, mkrk, rk
@@ -60,7 +61,7 @@ module pf_mod_imk
        class(pf_imk_t), intent(inout) :: this
        class(pf_encap_t), intent(inout) :: a
        class(pf_encap_t), intent(inout) :: omega
-       class(pf_encap_t), intent(inout) :: f       !<  The resultign-level
+       class(pf_encap_t), intent(inout) :: f       !!  The resultign-level
      end subroutine pf_dexpinv_p
     !>  Subroutine propagate   computes y_m=expm(Om_m)y_0(expm(Om_m))-1 or (expm(Om_m))y_0 or
      subroutine pf_propagate_p(this, q0, q)
@@ -89,15 +90,15 @@ contains
 
     !>  Inputs
     class(pf_imk_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf      !<  PFASST structure
-    integer,             intent(in)    :: level_index  !<  which level to sweep on
-    real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt             !<  time step size
-    integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
+    type(pf_pfasst_t), intent(inout),target :: pf      !!  PFASST structure
+    integer,             intent(in)    :: level_index  !!  which level to sweep on
+    real(pfdp),        intent(in   ) :: t0             !!  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt             !!  time step size
+    integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
     integer, optional,   intent(in)    :: flags
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !<  points to current level
+    class(pf_level_t), pointer :: lev    !!  points to current level
 
     this%t0 = t0
     this%dt = dt
@@ -116,15 +117,15 @@ contains
 
     !>  Inputs
     class(pf_imk_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf      !<  PFASST structure
-    real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt             !<  time step size
+    type(pf_pfasst_t), intent(inout),target :: pf      !!  PFASST structure
+    real(pfdp),        intent(in   ) :: t0             !!  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt             !!  time step size
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !<  points to current level
+    class(pf_level_t), pointer :: lev    !!  points to current level
 
-    integer     :: m        !<  Loop variables
-    real(pfdp)  :: t        !<  Time at nodes
+    integer     :: m        !!  Loop variables
+    real(pfdp)  :: t        !!  Time at nodes
 
     t = t0 + dt
 
@@ -183,15 +184,15 @@ contains
 
     !>  Inputs
     class(pf_imk_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf      !<  PFASST structure
-    real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt             !<  time step size
+    type(pf_pfasst_t), intent(inout),target :: pf      !!  PFASST structure
+    real(pfdp),        intent(in   ) :: t0             !!  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt             !!  time step size
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !<  points to current level
+    class(pf_level_t), pointer :: lev    !!  points to current level
 
-    integer     :: m        !<  Loop variables
-    real(pfdp)  :: t        !<  Time at nodes
+    integer     :: m        !!  Loop variables
+    real(pfdp)  :: t        !!  Time at nodes
 
     lev => pf%levels(1)
 
@@ -240,22 +241,22 @@ contains
 
     !>  Inputs
     class(pf_imk_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf      !<  PFASST structure
-    integer,             intent(in)    :: level_index  !<  which level to sweep on
-    real(pfdp),        intent(in   ) :: t0             !<  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt             !<  time step size
-    integer,             intent(in)    :: nsweeps      !<  number of sweeps to do
+    type(pf_pfasst_t), intent(inout),target :: pf      !!  PFASST structure
+    integer,             intent(in)    :: level_index  !!  which level to sweep on
+    real(pfdp),        intent(in   ) :: t0             !!  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt             !!  time step size
+    integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !<  points to current level
+    class(pf_level_t), pointer :: lev    !!  points to current level
 
-    integer     :: m, n,k   !<  Loop variables
-    real(pfdp)  :: t        !<  Time at nodes
-    lev => pf%levels(level_index)   !<  Assign level pointer
+    integer     :: m, n,k   !!  Loop variables
+    real(pfdp)  :: t        !!  Time at nodes
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
-    do k = 1,nsweeps   !<  Loop over sweeps
+    do k = 1,nsweeps   !!  Loop over sweeps
 
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -276,7 +277,7 @@ contains
 
        t = t0
        ! do the sub-stepping in sweep
-       do m = 1, lev%nnodes-1  !>  Loop over substeps
+       do m = 1, lev%nnodes-1  !!  Loop over substeps
           t = t + dt*this%dtsdc(m)
 
           !>  Accumulate rhs
@@ -289,7 +290,7 @@ contains
 
           !>  Compute explicit function on new value
           call this%evaluate(lev, t, m+1)
-       end do  !>  End substep loop
+       end do  !!  End substep loop
 
        call pf_residual(pf, lev, dt)
        call lev%qend%copy(lev%Q(lev%nnodes), 1)
@@ -516,7 +517,7 @@ contains
 
   !>  Save function values so that difference can be computed
   subroutine imk_save(lev)
-    class(pf_level_t), intent(inout) :: lev  !<  Level to save on
+    class(pf_level_t), intent(inout) :: lev  !!  Level to save on
 
     integer :: m
 

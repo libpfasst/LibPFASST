@@ -1,3 +1,4 @@
+!! Useful subroutines that don't  fit in other modules
 !
 ! This file is part of LIBPFASST.
 !
@@ -18,8 +19,8 @@ contains
     real(pfdp),        intent(in)    :: dt
     integer, optional, intent(in)    :: flag
 
-    real(pfdp) :: res_norms(lev%nnodes-1)    !<  Holds norms of residual
-    real(pfdp) :: sol_norms(lev%nnodes-1)    !<  Holds norms of solution
+    real(pfdp) :: res_norms(lev%nnodes-1)    !!  Holds norms of residual
+    real(pfdp) :: sol_norms(lev%nnodes-1)    !!  Holds norms of solution
     integer :: m
     
     call start_timer(pf, TRESIDUAL)
@@ -117,8 +118,8 @@ contains
   !! Each sweeper can define its own spreadq0 or use this generic one
   subroutine pf_generic_spreadq0(this,lev, t0)
     class(pf_sweeper_t), intent(in)  :: this
-    class(pf_level_t), intent(inout) :: lev  !<  Level on which to spread
-    real(pfdp),       intent(in)    :: t0    !<  time at beginning of interval
+    class(pf_level_t), intent(inout) :: lev  !!  Level on which to spread
+    real(pfdp),       intent(in)    :: t0    !!  time at beginning of interval
 
     integer :: m, p
 

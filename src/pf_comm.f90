@@ -1,3 +1,4 @@
+!!  Communication wrappers
 !
 ! This file is part of LIBPFASST.
 !
@@ -205,8 +206,8 @@ contains
 
   !> Save current solution and function value so that future corrections can be computed
   subroutine save(lev, flags)
-    class(pf_level_t), intent(inout) :: lev  !<  Level to save on
-    integer, optional, intent(in)   :: flags !<  which component to save (state/adjoint)
+    class(pf_level_t), intent(inout) :: lev  !!  Level to save on
+    integer, optional, intent(in)   :: flags !!  which component to save (state/adjoint)
     integer :: m, p
     
 

@@ -1,3 +1,4 @@
+!!  Runge-Kutta time steppers
 !
 ! This file is part of LIBPFASST.
 !
@@ -53,34 +54,35 @@ module pf_mod_rkstepper
 
 contains
 
-  !> Perform N step of ark on level level_index and set qend appropriately.
+  !> Perform N steps of ark on level level_index and set qend appropriately.
   subroutine ark_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk)
     use pf_mod_timer
     use pf_mod_hooks
 
     class(pf_ark_t),   intent(inout)         :: this
     type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in   )         :: t0           !  Time at start of time interval
-    real(pfdp),        intent(in   )         :: big_dt       !  Size of time interval to integrato on
-    integer,           intent(in)            :: level_index  !  Level of the index to step on
-    integer,           intent(in)            :: nsteps_rk    !  Number of steps to use
+    real(pfdp),        intent(in   )         :: t0           !!  Time at start of time interval
+    real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrato on
+    integer,           intent(in)            :: level_index  !!  Level of the index to step on
+    integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
 
-    class(pf_level_t), pointer               :: lev          !  Pointer to level level_index
-    class(pf_encap_t), allocatable           :: rhs          !  Accumulated right hand side for implicit solves
-    integer                                  :: j, m, n   !  Loop counters
-    real(pfdp)                               :: t, dt        !  Size of each ark step
+    class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
+    class(pf_encap_t), allocatable           :: rhs          !!  Accumulated right hand side for implicit solves
+    integer                                  :: j, m, n      !!  Loop counters
+    real(pfdp)                               :: t            !!  Time
+    real(pfdp)                               :: dt           !!  Size of each ark step
 
-    ! Assign pointer to appropriate level
-    lev => pf%levels(level_index)   
     
-    ! Set the internal time step size based on the number of rk steps
-    dt = big_dt/real(nsteps_rk, pfdp)
+    lev => pf%levels(level_index)   !! Assign pointer to appropriate level
+    
+
+    dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
 
     ! Allocate space for the right-hand side
     call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
 
-    ! Loop over time steps
-    do n = 1, nsteps_rk      
+    
+    do n = 1, nsteps_rk      ! Loop over time steps
 
        ! Recompute the first explicit function value 
        if (n == 1) then
@@ -89,8 +91,6 @@ contains
           call lev%Q(1)%copy(lev%Q(lev%nnodes))
        end if
 
-!       if (level_index == pf%nlevels) &
-!            call lev%Q(1)%eprint()
 
        ! this assumes that cvec(1) == 0
        if (this%explicit) &

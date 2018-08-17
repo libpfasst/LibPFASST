@@ -1,7 +1,7 @@
+!!  Old style multi-implicit sweeper
 !
 ! This file is part of LIBPFASST.
 !
-!>  Old style multi-implicit sweeper
 module pf_mod_misdc
   use pf_mod_dtype
   use pf_mod_utils

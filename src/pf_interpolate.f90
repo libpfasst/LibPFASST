@@ -1,3 +1,4 @@
+!! Interpolation operators
 !
 ! This file is part of LIBPFASST.
 !
@@ -15,11 +16,11 @@ contains
   !! Interpolation is done by interpolating increments.  
   !! The fine function values are re-evaluated after interpolation.
   subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flags)
-    type(pf_pfasst_t), intent(inout),target :: pf      !< main pfasst structure
-    real(pfdp),        intent(in)    :: t0             !< time at beginning of time interval
-    real(pfdp),        intent(in)    :: dt             !< time step
-    integer,           intent(in)    :: level_index    !< defines which level to interpolate to
-    logical,           intent(in)    :: F_INTERP !<  Flag, if true, then do interp on f not sol
+    type(pf_pfasst_t), intent(inout),target :: pf      !! main pfasst structure
+    real(pfdp),        intent(in)    :: t0             !! time at beginning of time interval
+    real(pfdp),        intent(in)    :: dt             !! time step
+    integer,           intent(in)    :: level_index    !! defines which level to interpolate to
+    logical,           intent(in)    :: F_INTERP !!  Flag, if true, then do interp on f not sol
     integer, optional, intent(in)    :: flags
 
     !  Local variables
@@ -111,15 +112,15 @@ contains
   !>  Subroutine to update the fine initial condition from coarse increment by spatial interpolation
   subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
 
-    type(pf_pfasst_t), intent(inout) :: pf          !<  main pfasst structure
-    class(pf_level_t),  intent(inout) :: f_lev_ptr  !<  fine level
-    class(pf_level_t),  intent(inout) :: c_lev_ptr  !<  coarse level
-    integer, optional, intent(in)    :: flags       !<  optional: specify component on which to operate
+    type(pf_pfasst_t), intent(inout) :: pf          !!  main pfasst structure
+    class(pf_level_t),  intent(inout) :: f_lev_ptr  !!  fine level
+    class(pf_level_t),  intent(inout) :: c_lev_ptr  !!  coarse level
+    integer, optional, intent(in)    :: flags       !!  optional: specify component on which to operate
                                                     !   here flags more or less is logical, if it is present we operate on component 1
                                                     !   of the ndarray-type
 
-    class(pf_encap_t), allocatable ::    c_delta    !<  coarse correction
-    class(pf_encap_t), allocatable ::    f_delta    !<  fine correction
+    class(pf_encap_t), allocatable ::    c_delta    !!  coarse correction
+    class(pf_encap_t), allocatable ::    f_delta    !!  fine correction
 
     call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
@@ -153,12 +154,12 @@ contains
     !>  used for adjoint solver
   subroutine interpolate_qend(pf, f_lev_ptr, c_lev_ptr)
   
-    type(pf_pfasst_t), intent(inout) :: pf          !<  main pfasst structure
-    class(pf_level_t),  intent(inout) :: f_lev_ptr  !<  fine level
-    class(pf_level_t),  intent(inout) :: c_lev_ptr  !<  coarse level
+    type(pf_pfasst_t), intent(inout) :: pf          !!  main pfasst structure
+    class(pf_level_t),  intent(inout) :: f_lev_ptr  !!  fine level
+    class(pf_level_t),  intent(inout) :: c_lev_ptr  !!  coarse level
     
-    class(pf_encap_t), allocatable ::    c_delta    !<  coarse correction
-    class(pf_encap_t), allocatable ::    f_delta    !<  fine correction
+    class(pf_encap_t), allocatable ::    c_delta    !!  coarse correction
+    class(pf_encap_t), allocatable ::    f_delta    !!  fine correction
 
     call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)

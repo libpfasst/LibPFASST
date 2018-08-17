@@ -1,3 +1,4 @@
+!!  N-dimensional array encapsulation.
 !
 ! This file is part of LIBPFASST.
 !

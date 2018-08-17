@@ -1,3 +1,4 @@
+!!  Data types and interfaces
 !
 ! This file is part of LIBPFASST.
 !
@@ -34,29 +35,29 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
   type, bind(c) :: pf_state_t
-    real(pfdp) :: t0  !<  Time at beginning of this time step
-    real(pfdp) :: dt  !<  Time step size
-    integer :: nsteps   !< total number of time steps
-    integer :: cycle    !< deprecated?
-    integer :: iter     !< current iteration number
-    integer :: step     !< current time step number assigned to processor
-    integer :: level    !< which level is currently being operated on
-    integer :: hook     !< which hook
-    integer :: proc     !< which processor
-    integer :: sweep    !< sweep number
-    integer :: status   !< status (iterating, converged etc)
-    integer :: pstatus  !< previous rank's status
-    integer :: itcnt    !< iteration counter
-    integer :: skippedy !< skipped sweeps for state (for mixed integration)
-    integer :: mysteps  !< steps I did
+    real(pfdp) :: t0  !!  Time at beginning of this time step
+    real(pfdp) :: dt  !!  Time step size
+    integer :: nsteps   !! total number of time steps
+    integer :: cycle    !! deprecated?
+    integer :: iter     !! current iteration number
+    integer :: step     !! current time step number assigned to processor
+    integer :: level    !! which level is currently being operated on
+    integer :: hook     !! which hook
+    integer :: proc     !! which processor
+    integer :: sweep    !! sweep number
+    integer :: status   !! status (iterating, converged etc)
+    integer :: pstatus  !! previous rank's status
+    integer :: itcnt    !! iteration counter
+    integer :: skippedy !! skipped sweeps for state (for mixed integration)
+    integer :: mysteps  !! steps I did
   end type pf_state_t
 
-  !<  Hook to call diagnostic routines from various places in code
+  !!  Hook to call diagnostic routines from various places in code
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-  !<  The base SDC sweeper type
+  !!  The base SDC sweeper type
   type, abstract :: pf_sweeper_t
      integer     :: npieces
      logical     :: use_LUq
@@ -71,7 +72,7 @@ module pf_mod_dtype
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
-  !<  The base stepper type
+  !!  The base stepper type
   type, abstract :: pf_stepper_t
      integer     :: npieces
      integer     :: order
@@ -81,7 +82,7 @@ module pf_mod_dtype
      procedure(pf_destroy_stepper_p),      deferred :: destroy
   end type pf_stepper_t
 
-  !<  The base data type for the solution
+  !!  The base data type for the solution
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
@@ -93,7 +94,7 @@ module pf_mod_dtype
      procedure(pf_encap_eprint_p),  deferred :: eprint
   end type pf_encap_t
 
-  !<  Generic type for creation and desstruction of objects
+  !!  Generic type for creation and desstruction of objects
   type, abstract :: pf_factory_t
    contains
      procedure(pf_encap_create_single_p),  deferred :: create_single
@@ -102,7 +103,7 @@ module pf_mod_dtype
      procedure(pf_encap_destroy_array_p),  deferred :: destroy_array
   end type pf_factory_t
 
-  !<  The user level which is inherited  to include problem dependent stuff
+  !!  The user level which is inherited  to include problem dependent stuff
   type, abstract :: pf_user_level_t
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
@@ -126,50 +127,50 @@ module pf_mod_dtype
 
   !>  Data type of a PFASST level
   type :: pf_level_t
-     integer  :: index        = -1   !< level number (1 is the coarsest)
-     integer  :: mpibuflen    = -1   !< size of solution in pfdp units
-     integer  :: nnodes       = -1   !< number of sdc nodes
-     integer  :: nsteps_rk    = -1   !< number of rk steps to perform
-     integer  :: nsweeps      =  1   !< number of sdc sweeps to perform
-     integer  :: nsweeps_pred =  1      !< number of coarse sdc sweeps to perform predictor in predictor
-     logical     :: Finterp = .false.   !< interpolate functions instead of solutions
+     integer  :: index        = -1   !! level number (1 is the coarsest)
+     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
+     integer  :: nnodes       = -1   !! number of sdc nodes
+     integer  :: nsteps_rk    = -1   !! number of rk steps to perform
+     integer  :: nsweeps      =  1   !! number of sdc sweeps to perform
+     integer  :: nsweeps_pred =  1      !! number of coarse sdc sweeps to perform predictor in predictor
+     logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
-     real(pfdp)  :: error            !< holds the user defined error
-     real(pfdp)  :: residual         !< holds the user defined residual
-     real(pfdp)  :: residual_rel     !< holds the user defined relative residual (scaled by solution magnitude)
+     real(pfdp)  :: error            !! holds the user defined error
+     real(pfdp)  :: residual         !! holds the user defined residual
+     real(pfdp)  :: residual_rel     !! holds the user defined relative residual (scaled by solution magnitude)
 
-     class(pf_user_level_t), allocatable :: ulevel  !<  user customized level info
+     class(pf_user_level_t), allocatable :: ulevel  !!  user customized level info
 
      !>  Simple data storage at each level
      real(pfdp), allocatable :: &
-          send(:),    &                 !< send buffer
-          recv(:),    &                 !< recv buffer
-          nodes(:),   &                 !< list of SDC nodes
-          rmat(:,:),  &                 !< time restriction matrix
-          tmat(:,:)                     !< time interpolation matrix
+          send(:),    &                 !! send buffer
+          recv(:),    &                 !! recv buffer
+          nodes(:),   &                 !! list of SDC nodes
+          rmat(:,:),  &                 !! time restriction matrix
+          tmat(:,:)                     !! time interpolation matrix
 
      integer, allocatable :: &
-          nflags(:)                     !< sdc node flags
+          nflags(:)                     !! sdc node flags
 
      !>  Solution variable storage
      class(pf_encap_t), allocatable :: &
-          Q(:),     &           !< solution at sdc nodes
-          pQ(:),    &           !< unknowns at sdc nodes, previous sweep
-          R(:),     &           !< full residuals
-          I(:),     &           !< 0 to node integrals
-          Fflt(:),  &           !< functions values at sdc nodes (flat)
-          tauQ(:),  &           !< fas correction in Q form
-          pFflt(:), &           !< functions at sdc nodes, previous sweep (flat)
-          q0,       &           !< initial condition 
-          qend                  !< solution at end time
+          Q(:),     &           !! solution at sdc nodes
+          pQ(:),    &           !! unknowns at sdc nodes, previous sweep
+          R(:),     &           !! full residuals
+          I(:),     &           !! 0 to node integrals
+          Fflt(:),  &           !! functions values at sdc nodes (flat)
+          tauQ(:),  &           !! fas correction in Q form
+          pFflt(:), &           !! functions at sdc nodes, previous sweep (flat)
+          q0,       &           !! initial condition 
+          qend                  !! solution at end time
 
      !>  Function  storage
      class(pf_encap_t), pointer :: &
-          F(:,:), &                     !< functions values at sdc nodes
-          pF(:,:)                       !< functions at sdc nodes, previous sweep
+          F(:,:), &                     !! functions values at sdc nodes
+          pF(:,:)                       !! functions at sdc nodes, previous sweep
 
 
-     integer, allocatable :: shape(:)   !< user defined shape array
+     integer, allocatable :: shape(:)   !! user defined shape array
      type(pf_sdcmats_t) :: sdcmats
      logical :: allocated = .false.
   end type pf_level_t
@@ -209,8 +210,8 @@ module pf_mod_dtype
      integer :: p_index
      integer :: nblocks
      
-     character(len = 20   ) :: fname_r  !<  output file name for residuals
-     character(len = 18) :: fname_e     !<  output file name errors
+     character(len = 20   ) :: fname_r  !!  output file name for residuals
+     character(len = 18) :: fname_e     !!  output file name errors
      
 !     procedure(pf_init_results_p), pointer, nopass :: initialize_results
      procedure(pf_results_p), pointer, nopass :: dump 
@@ -220,26 +221,26 @@ module pf_mod_dtype
   !>  The main data type which includes pretty much everything
   type :: pf_pfasst_t
      !>  Parameters
-     integer :: nlevels = -1            !< number of pfasst levels
-     integer :: niters  = 5             !< number of PFASST iterations to do
-     integer :: qtype   = SDC_GAUSS_LOBATTO  !< type of nodes
+     integer :: nlevels = -1            !! number of pfasst levels
+     integer :: niters  = 5             !! number of PFASST iterations to do
+     integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
      
      !>  Level dependend parameters
-     integer :: nsweeps(PF_MAXLEVS) = 1       !<  number of sweeps at each levels
-     integer :: nsweeps_pred(PF_MAXLEVS) =1   !<  number of sweeps during predictor
-     integer :: nnodes(PF_MAXLEVS)=3          !< number of nodes
-     integer :: nnodes_rk(PF_MAXLEVS)=3       !< number of runge-kutta nodes
+     integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
+     integer :: nsweeps_pred(PF_MAXLEVS) =1   !!  number of sweeps during predictor
+     integer :: nnodes(PF_MAXLEVS)=3          !! number of nodes
+     integer :: nnodes_rk(PF_MAXLEVS)=3       !! number of runge-kutta nodes
 
      !>  Tolerances
-     real(pfdp) :: abs_res_tol = 0.d0   !<  absolute convergence tolerance
-     real(pfdp) :: rel_res_tol = 0.d0   !<  relative convergence tolerance
+     real(pfdp) :: abs_res_tol = 0.d0   !!  absolute convergence tolerance
+     real(pfdp) :: rel_res_tol = 0.d0   !!  relative convergence tolerance
 
      !>  predictor options  (should be set before pfasst_run is called)
-     logical :: PFASST_pred = .true.    !<  true if the PFASST type predictor is used
-     logical :: RK_pred = .false.       !<  true if the coarse level is initialized with Runge-Kutta instead of PFASST
-     logical :: pipeline_pred = .false. !<  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
-     integer :: nsweeps_burn =  1       !<  number of sdc sweeps to perform during coarse level burn in
-!     logical :: pipeline_burn = .false. !<  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
+     logical :: PFASST_pred = .true.    !!  true if the PFASST type predictor is used
+     logical :: RK_pred = .false.       !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+     logical :: pipeline_pred = .false. !!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
+     integer :: nsweeps_burn =  1       !!  number of sdc sweeps to perform during coarse level burn in
+!     logical :: pipeline_burn = .false. !!  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
 
      
      !  q0 can take 3 values
@@ -249,30 +250,30 @@ module pf_mod_dtype
      integer :: q0_style =  0                                                   
 
      !>  run options  (should be set before pfasst_run is called)
-     logical :: Vcycle = .true.         !<  decides if Vcycles are done
-     logical :: Finterp = .false.    !<  True if transfer functions operate on rhs
-     logical :: use_LUq = .true.     !<  True if LU type implicit matrix is used 
-     integer :: taui0 = -999999     !< iteration cutoff for tau inclusion
+     logical :: Vcycle = .true.         !!  decides if Vcycles are done
+     logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
+     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used 
+     integer :: taui0 = -999999     !! iteration cutoff for tau inclusion
 
      !> RK and Parareal options
-     logical :: use_rk_stepper = .false. !< decides if RK steps are used instead of the sweeps
+     logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
 
      !> misc
      logical :: debug = .false.
      logical :: save_results = .false.
      logical    :: echo_timings  = .false.
 
-     integer :: rank    = -1            !< rank of current processor
+     integer :: rank    = -1            !! rank of current processor
 
      !> pf objects
-     type(pf_state_t), allocatable :: state   !<  Describes where in the algorithm proc is
-     type(pf_level_t), allocatable :: levels(:) !< Holds the levels
-     type(pf_comm_t),  pointer :: comm    !< Points to communicator
+     type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm proc is
+     type(pf_level_t), allocatable :: levels(:) !! Holds the levels
+     type(pf_comm_t),  pointer :: comm    !! Points to communicator
      type(pf_results_t) :: results
 
      !> hooks variables
-     type(pf_hook_t), allocatable :: hooks(:,:,:)  !<  Holds the hooks
-     integer,  allocatable :: nhooks(:,:)   !<  Holds the number hooks
+     type(pf_hook_t), allocatable :: hooks(:,:,:)  !!  Holds the hooks
+     integer,  allocatable :: nhooks(:,:)   !!  Holds the number hooks
 
      !> timing variables
      integer :: timers(100)   = 0
@@ -339,7 +340,7 @@ module pf_mod_dtype
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(in)    :: lev
        class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
-       real(pfdp),          intent(in)    :: dt !<  Time step size
+       real(pfdp),          intent(in)    :: dt !!  Time step size
        class(pf_encap_t),   intent(inout) :: fintSDC(:)
        integer, optional,   intent(in)    :: flags
      end subroutine pf_integrate_p
@@ -348,7 +349,7 @@ module pf_mod_dtype
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
-       real(pfdp),          intent(in)    :: dt !<  Time step size
+       real(pfdp),          intent(in)    :: dt !!  Time step size
        integer, optional,   intent(in)    :: flags
      end subroutine pf_residual_p
 
@@ -356,7 +357,7 @@ module pf_mod_dtype
        import pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        class(pf_level_t),   intent(inout) :: Lev
-       real(pfdp),          intent(in)    :: t0 !<  Time at beginning of step; if flags == 2, time at end of step
+       real(pfdp),          intent(in)    :: t0 !!  Time at beginning of step; if flags == 2, time at end of step
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
 
@@ -371,7 +372,7 @@ module pf_mod_dtype
        import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
-       real(pfdp),          intent(in)    :: big_dt !<  Time step size
+       real(pfdp),          intent(in)    :: big_dt !!  Time step size
        real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk

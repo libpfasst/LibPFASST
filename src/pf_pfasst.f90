@@ -1,3 +1,4 @@
+!! Main data structure routines 
 !
 ! This file is part of LIBPFASST.
 !
@@ -15,15 +16,15 @@ contains
     use pf_mod_hooks, only: PF_MAX_HOOK
 
 
-    type(pf_pfasst_t), intent(inout)           :: pf        !< Main pfasst object
-    type(pf_comm_t),   intent(inout), target   :: comm      !< Communicator
-    integer,           intent(in   ), optional :: nlevels   !< number of pfasst levels
-    character(len=*),  intent(in   ), optional :: fname     !< Input file for pfasst parameters
-    logical,           intent(in   ), optional :: nocmd     !< Determines if command line variables are to be read
+    type(pf_pfasst_t), intent(inout)           :: pf        !! Main pfasst object
+    type(pf_comm_t),   intent(inout), target   :: comm      !! Communicator
+    integer,           intent(in   ), optional :: nlevels   !! number of pfasst levels
+    character(len=*),  intent(in   ), optional :: fname     !! Input file for pfasst parameters
+    logical,           intent(in   ), optional :: nocmd     !! Determines if command line variables are to be read
 
-    logical :: read_cmd              !< Local version of nocmd
+    logical :: read_cmd              !! Local version of nocmd
     integer :: ierror
-    integer :: l                     !<  Loop variable for levels
+    integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
     pf%outdir = ""
@@ -79,10 +80,10 @@ contains
   !> Setup both the PFASST object and the comm object
   subroutine pf_pfasst_setup(pf)
     use pf_mod_utils
-    type(pf_pfasst_t), intent(inout), target :: pf   !<  Main pfasst structure
+    type(pf_pfasst_t), intent(inout), target :: pf   !!  Main pfasst structure
 
-    class(pf_level_t), pointer :: lev_fine, lev_coarse  !<  Pointers to level structures for brevity
-    integer                   :: l                      !<  Level loop index
+    class(pf_level_t), pointer :: lev_fine, lev_coarse  !!  Pointers to level structures for brevity
+    integer                   :: l                      !!  Level loop index
 
    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
@@ -119,8 +120,8 @@ contains
   !! (or deallocate) tauQ appropriately.
   subroutine pf_level_setup(pf, lev)
     use pf_mod_quadrature
-    type(pf_pfasst_t), intent(in   )         :: pf   !<  Main pfasst structure
-    class(pf_level_t), intent(inout), target :: lev  !<  Level to set up
+    type(pf_pfasst_t), intent(in   )         :: pf   !!  Main pfasst structure
+    class(pf_level_t), intent(inout), target :: lev  !!  Level to set up
 
     integer :: mpibuflen, nnodes, npieces, nnodes0
     integer :: i
@@ -200,7 +201,7 @@ contains
 
   !> Deallocate PFASST object
   subroutine pf_pfasst_destroy(pf)
-    type(pf_pfasst_t), intent(inout) :: pf  !<  Main pfasst structure
+    type(pf_pfasst_t), intent(inout) :: pf  !!  Main pfasst structure
 
     integer :: l
 
@@ -222,11 +223,11 @@ contains
   !> Deallocate PFASST level
   subroutine pf_level_destroy(lev,nlevels)
     use pf_mod_quadrature
-    class(pf_level_t), intent(inout) :: lev      !<  level to destroy
-    integer                          :: nlevels  !<  number of pfasst levels
+    class(pf_level_t), intent(inout) :: lev      !!  level to destroy
+    integer                          :: nlevels  !!  number of pfasst levels
 
 
-    integer                          :: npieces  !<  local copy of number of function pieces
+    integer                          :: npieces  !!  local copy of number of function pieces
 
     if (.not. lev%allocated) return
 
@@ -499,11 +500,11 @@ contains
 
   !> Subroutine to make the matrices for interpolation  between noodes
   subroutine pf_time_interpolation_matrix(f_nodes, f_nnodes, c_nodes, c_nnodes, tmat)
-    integer,    intent(in)  :: f_nnodes  !>  number of nodes on fine level
-    integer,    intent(in)  :: c_nnodes  !>  number of nodes on coarse  level
-    real(pfdp), intent(in)  :: f_nodes(0:f_nnodes-1)  !>  quadrature nodes on fine  level
-    real(pfdp), intent(in)  :: c_nodes(0:c_nnodes-1)  !>  quadrature nodes on coarse  level
-    real(pfdp), intent(out) :: tmat(0:f_nnodes-1,0:c_nnodes-1)  !>  Interpolation matrix to compute
+    integer,    intent(in)  :: f_nnodes  !!  number of nodes on fine level
+    integer,    intent(in)  :: c_nnodes  !!  number of nodes on coarse  level
+    real(pfdp), intent(in)  :: f_nodes(0:f_nnodes-1)  !!  quadrature nodes on fine  level
+    real(pfdp), intent(in)  :: c_nodes(0:c_nnodes-1)  !!  quadrature nodes on coarse  level
+    real(pfdp), intent(out) :: tmat(0:f_nnodes-1,0:c_nnodes-1)  !!  Interpolation matrix to compute
     
     integer    :: i, j, k
     real(pfdp) :: xi, num, den

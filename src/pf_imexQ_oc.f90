@@ -1,3 +1,4 @@
+!!  IMEX sweeper for optimal control problems
 !
 ! This file is part of LIBPFASST_OC.
 !
@@ -9,20 +10,20 @@ module pf_mod_imexQ_oc
   implicit none
 
   type, extends(pf_sweeper_t), abstract :: pf_imexQ_oc_t
-     real(pfdp), allocatable :: QtilE(:,:)   !>  Approximate explcit quadrature rule
-     real(pfdp), allocatable :: QtilI(:,:)   !>  Approximate implcit quadrature rule
-     real(pfdp), allocatable :: dtsdc(:)     !>  SDC step sizes
-     real(pfdp), allocatable :: QdiffE(:,:)  !>  qmat-QtilE
-     real(pfdp), allocatable :: QdiffI(:,:)  !>  qmat-QtilI
+     real(pfdp), allocatable :: QtilE(:,:)   !!  Approximate explcit quadrature rule
+     real(pfdp), allocatable :: QtilI(:,:)   !!  Approximate implcit quadrature rule
+     real(pfdp), allocatable :: dtsdc(:)     !!  SDC step sizes
+     real(pfdp), allocatable :: QdiffE(:,:)  !!  qmat-QtilE
+     real(pfdp), allocatable :: QdiffI(:,:)  !!  qmat-QtilI
 
-     logical                 :: explicit = .true. !>  Is there an explicit piece
-     logical                 :: implicit = .true. !>  Is there an implicit piece
+     logical                 :: explicit = .true. !!  Is there an explicit piece
+     logical                 :: implicit = .true. !!  Is there an implicit piece
 
-     class(pf_encap_t), allocatable :: rhs   !> holds rhs for implicit solve
+     class(pf_encap_t), allocatable :: rhs   !! holds rhs for implicit solve
      
   contains
-     procedure(pf_f_eval_p), deferred :: f_eval   !>  RHS function evaluations
-     procedure(pf_f_comp_p), deferred :: f_comp   !>  Implicit solver
+     procedure(pf_f_eval_p), deferred :: f_eval   !!  RHS function evaluations
+     procedure(pf_f_comp_p), deferred :: f_comp   !!  Implicit solver
      !>  Set the generic functions
      procedure :: sweep        => imexQ_oc_sweep
      procedure :: initialize   => imexQ_oc_initialize
@@ -36,16 +37,16 @@ module pf_mod_imexQ_oc
   end type pf_imexQ_oc_t
     
   interface
-     !>  This is the interface for the routine to compute the RHS function values
+     !!  This is the interface for the routine to compute the RHS function values
      subroutine pf_f_eval_p(this,y, t, level_index, f, piece, flags, idx, step)
-       !>  Evaluae f_piece(y), where piece is one or two 
+       !!  Evaluae f_piece(y), where piece is one or two 
        import pf_imexQ_oc_t, pf_encap_t, pfdp
        class(pf_imexQ_oc_t),  intent(inout) :: this
-       class(pf_encap_t),  intent(in   ) :: y        !>  Argument for evaluation
-       real(pfdp),         intent(in   ) :: t        !>  Time at evaluation
-       integer,            intent(in   ) :: level_index     !>  Level index
-       class(pf_encap_t),  intent(inout) :: f        !>  RHS function value
-       integer,            intent(in   ) :: piece           !>  Which piece to evaluate
+       class(pf_encap_t),  intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),         intent(in   ) :: t        !!  Time at evaluation
+       integer,            intent(in   ) :: level_index     !!  Level index
+       class(pf_encap_t),  intent(inout) :: f        !!  RHS function value
+       integer,            intent(in   ) :: piece           !!  Which piece to evaluate
        
        integer, intent(in)              :: flags
        integer, intent(in), optional    :: idx       ! index of quadrature node
@@ -53,16 +54,16 @@ module pf_mod_imexQ_oc
        
      end subroutine pf_f_eval_p
      subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags)
-       !>  Solve the equation y - dtq*f_2(y) =rhs
+       !!  Solve the equation y - dtq*f_2(y) =rhs
        import pf_imexQ_oc_t, pf_encap_t, pfdp
        class(pf_imexQ_oc_t),  intent(inout) :: this
-       class(pf_encap_t), intent(inout) :: y      !>  Solution of implicit solve 
-       real(pfdp),        intent(in   ) :: t      !>  Time of solve
-       real(pfdp),        intent(in   ) :: dtq    !>  dt*quadrature weight
-       class(pf_encap_t), intent(in   ) :: rhs    !>  RHS for solve
-       integer,    intent(in   ) :: level_index   !>  Level index
-       class(pf_encap_t), intent(inout) :: f      !>  f_2 of solution y
-       integer,    intent(in   ) :: piece         !>  Which piece to evaluate
+       class(pf_encap_t), intent(inout) :: y      !!  Solution of implicit solve 
+       real(pfdp),        intent(in   ) :: t      !!  Time of solve
+       real(pfdp),        intent(in   ) :: dtq    !!  dt*quadrature weight
+       class(pf_encap_t), intent(in   ) :: rhs    !!  RHS for solve
+       integer,    intent(in   ) :: level_index   !!  Level index
+       class(pf_encap_t), intent(inout) :: f      !!  f_2 of solution y
+       integer,    intent(in   ) :: piece         !!  Which piece to evaluate
        
        integer,            intent(in)    :: flags
      end subroutine pf_f_comp_p
@@ -75,14 +76,14 @@ contains
     use pf_mod_hooks
 
     class(pf_imexQ_oc_t), intent(inout) :: this
-    type(pf_pfasst_t), intent(inout),target :: pf  !<  PFASST structure
-    real(pfdp),        intent(in   ) :: t0         !>  Time at beginning of time step
-    real(pfdp),        intent(in   ) :: dt     !>  time step size
-    integer,             intent(in)    :: level_index  !>  which level this is
-    integer,             intent(in)    :: nsweeps      !>  number of sweeps to do
+    type(pf_pfasst_t), intent(inout),target :: pf  !!  PFASST structure
+    real(pfdp),        intent(in   ) :: t0         !!  Time at beginning of time step
+    real(pfdp),        intent(in   ) :: dt     !!  time step size
+    integer,             intent(in)    :: level_index  !!  which level this is
+    integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
     integer, optional, intent(in   ) :: flags    
 
-    class(pf_level_t), pointer :: lev    !>  points to current level
+    class(pf_level_t), pointer :: lev    !!  points to current level
     
     ! indicate if sweep on both (0, default; might skip y or p if tolerance satisfied), just y (1), just p (2)
     
@@ -93,7 +94,7 @@ contains
     real(pfdp), allocatable  :: norms_y(:) !, norms_p(Lev%nnodes-1)
     integer     ::step
     
-    lev => pf%levels(level_index)   !<  Assign level pointer
+    lev => pf%levels(level_index)   !!  Assign level pointer
         
     step = pf%state%step+1
 !     print *, 'sweep on step', step
@@ -134,7 +135,7 @@ contains
 !     if( sweep_p .and. pf%rank == 0)  print *, "sweep on p with which = ", which
 
     
-  do k = 1,nsweeps   !>  Loop over sweeps
+  do k = 1,nsweeps   !!  Loop over sweeps
     call call_hooks(pf, level_index, PF_PRE_SWEEP)    
 
     ! compute integrals from previous iteration and add fas correction
@@ -411,7 +412,7 @@ contains
 
   
   subroutine imexQ_oc_evaluate_all(this, lev, t, flags, step)
-    !> Evaluate all function values
+    !! Evaluate all function values
     class(pf_imexQ_oc_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     real(pfdp),        intent(in   ) :: t(:)
@@ -463,7 +464,7 @@ contains
     this%QdiffE = lev%sdcmats%qmat-this%QtilE
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
-    !>  Make space for rhs
+    !!  Make space for rhs
     call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%shape)
     
   end subroutine imexQ_oc_initialize
@@ -622,7 +623,7 @@ contains
   end subroutine imexQ_oc_spreadq0
   
   subroutine imexQ_oc_destroy(this, lev)
-    !>  deallocate
+    !!  deallocate
     class(pf_imexQ_oc_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
     

@@ -1,9 +1,9 @@
+!!  Restriction operators
 !
 ! This file is part of LIBPFASST.
 !
-
-!>  Module to restrict solutions between pfasst levels and create the FAS tau correction
 module pf_mod_restrict
+  !!  Module to restrict solutions between pfasst levels and create the FAS tau correction
   use pf_mod_dtype
   use pf_mod_timer
   use pf_mod_hooks
@@ -12,17 +12,17 @@ contains
 
 
 
-  !> Restrict (in time and space) fine level to coarse and set coarse level FAS correction.
-  !!
-  !! The coarse function values are re-evaluated after restriction.
-  !! Note that even if the number of variables and nodes is the same,
-  !! we should still compute the FAS correction since the function
-  !! evaluations may be different.
   subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags)
+    !! Restrict (in time and space) fine level to coarse and set coarse level FAS correction.
+    !!
+    !! The coarse function values are re-evaluated after restriction.
+    !! Note that even if the number of variables and nodes is the same,
+    !! we should still compute the FAS correction since the function
+    !! evaluations may be different.
     type(pf_pfasst_t), intent(inout),target :: pf
-    real(pfdp),        intent(in)    :: t0            !<  time at beginning of step
-    real(pfdp),        intent(in)    :: dt            !<  time step
-    integer,           intent(in)    :: level_index   !< defines which level to restrict
+    real(pfdp),        intent(in)    :: t0            !!  time at beginning of step
+    real(pfdp),        intent(in)    :: dt            !!  time step
+    integer,           intent(in)    :: level_index   !! defines which level to restrict
     integer, optional, intent(in)    :: flags    
 
     !>  Local variables
@@ -31,8 +31,8 @@ contains
 
     integer    :: m, step
 
-    real(pfdp), allocatable :: c_times(:)  !<  Simulation time at coarse nodes  
-    real(pfdp), allocatable :: f_times(:)  !<  Simulation time at fine nodes
+    real(pfdp), allocatable :: c_times(:)  !!  Simulation time at coarse nodes  
+    real(pfdp), allocatable :: f_times(:)  !!  Simulation time at fine nodes
     class(pf_encap_t), allocatable :: &
          c_tmp_array(:), &    ! coarse integral of coarse function values
          f_int_array(:), &    ! fine integral of fine function values
@@ -112,27 +112,27 @@ contains
   end subroutine restrict_time_space_fas
 
 
-  !> Restrict (in time and space) f_sol_array  to c_sol_array
-  !! Depending on the flag INTEGRAL, we may be restricting solutions, or integrals of F
   subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_array, IS_INTEGRAL,f_time, flags)
 
-
-    class(pf_level_t),  intent(inout) :: f_lev_ptr   !<   pointer to fine level
-    class(pf_level_t),  intent(inout) :: c_lev_ptr   !<   pointer to coarse level
-    class(pf_encap_t),  intent(inout) :: f_encap_array(:)   !< array of fine level data to be restricted
-    class(pf_encap_t),  intent(inout) :: c_encap_array(:)   !< array of coarse level data to be computed
-    logical,            intent(in)    :: IS_INTEGRAL       !< flag determines if it is integral data being restricted
-    real(pfdp),         intent(in) :: f_time(:)             !< time at the fine nodes
+    !! Restrict (in time and space) f_sol_array  to c_sol_array
+    !! Depending on the flag INTEGRAL, we may be restricting solutions, or integrals of F
+    
+    class(pf_level_t),  intent(inout) :: f_lev_ptr   !!   pointer to fine level
+    class(pf_level_t),  intent(inout) :: c_lev_ptr   !!   pointer to coarse level
+    class(pf_encap_t),  intent(inout) :: f_encap_array(:)   !! array of fine level data to be restricted
+    class(pf_encap_t),  intent(inout) :: c_encap_array(:)   !! array of coarse level data to be computed
+    logical,            intent(in)    :: IS_INTEGRAL       !! flag determines if it is integral data being restricted
+    real(pfdp),         intent(in) :: f_time(:)             !! time at the fine nodes
     integer, optional, intent(in)    :: flags    
 
-    class(pf_encap_t), allocatable :: f_encap_array_c(:)  !<  fine solution restricted in space only
+    class(pf_encap_t), allocatable :: f_encap_array_c(:)  !!  fine solution restricted in space only
     integer :: m
     integer :: f_nnodes
 
 
     f_nnodes = f_lev_ptr%nnodes
 
-    !>  do the restriction
+    !!  do the restriction
     if (IS_INTEGRAL) then   ! Restriction of integrals
        call c_lev_ptr%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
        !  spatial restriction
@@ -170,25 +170,25 @@ contains
 
   end subroutine restrict_sdc
 
-  !> Apply a matrix (tmat or rmat) to src and add to dst.
-  !> Mathematically this is 
-  !>     dst= dst + a*mat*src
-  !>  Where dst and src are vectors, mat is a matrix, and a is a scalar
-  !>  If the optional variable "zero" is provided and is false, then we compute
-  !>     dst= dst + a*mat*src
   subroutine pf_apply_mat(dst, a, mat, src, zero, flags)
-    class(pf_encap_t), intent(inout) :: dst(:)       !<  destination vector
-    real(pfdp),        intent(in)    :: a            !<  scalar
-    real(pfdp),        intent(in)    :: mat(:, :)    !<  matrix
-    class(pf_encap_t), intent(in)    :: src(:)       !<  src vector
-    logical,           intent(in), optional :: zero   !< If false, don't zero out the the dst variable before computing 
-    integer,           intent(in), optional :: flags  !< Used for choosing which variable to operate on 
+    !! Apply a matrix (tmat or rmat) to src and add to dst.
+    !! Mathematically this is 
+    !!     dst= dst + a*mat*src
+    !!  Where dst and src are vectors, mat is a matrix, and a is a scalar
+    !!  If the optional variable "zero" is provided and is false, then we compute
+    !!     dst= dst + a*mat*src
+    class(pf_encap_t), intent(inout) :: dst(:)       !!  destination vector
+    real(pfdp),        intent(in)    :: a            !!  scalar
+    real(pfdp),        intent(in)    :: mat(:, :)    !!  matrix
+    class(pf_encap_t), intent(in)    :: src(:)       !!  src vector
+    logical,           intent(in), optional :: zero   !! If false, don't zero out the the dst variable before computing 
+    integer,           intent(in), optional :: flags  !! Used for choosing which variable to operate on 
     
-    !>  Local variables
-    logical :: lzero   !<  local version of input parameter zero
-    integer :: which   !<  local version of flags
-    integer :: n, m    !<  size of mat   
-    integer :: i, j    !<  loop variables
+    !!  Local variables
+    logical :: lzero   !!  local version of input parameter zero
+    integer :: which   !!  local version of flags
+    integer :: n, m    !!  size of mat   
+    integer :: i, j    !!  loop variables
 
     lzero = .true.; if (present(zero)) lzero = zero    
     which = 1;      if(present(flags)) which = flags
@@ -204,21 +204,22 @@ contains
     end do
   end subroutine pf_apply_mat
   
-  !> Apply an matrix (tmat or rmat) to src and add to dst.
+
   subroutine pf_apply_mat_backward(dst, a, mat, src, zero, flags)
-    class(pf_encap_t), intent(inout) :: dst(:)       !<  destination vector
-    real(pfdp),        intent(in)    :: a            !<  scalar
-    real(pfdp),        intent(in)    :: mat(:, :)    !<  matrix
-    class(pf_encap_t), intent(in)    :: src(:)       !<  src vector
-    logical,           intent(in), optional :: zero   !< If false, don't zero out the the dst variable before computing 
-    integer,           intent(in), optional :: flags  !< Used for choosing which variable to operate on 
+    !! Apply a matrix (tmat or rmat) to src and add to dst.
+    class(pf_encap_t), intent(inout) :: dst(:)       !!  destination vector
+    real(pfdp),        intent(in)    :: a            !!  scalar
+    real(pfdp),        intent(in)    :: mat(:, :)    !!  matrix
+    class(pf_encap_t), intent(in)    :: src(:)       !!  src vector
+    logical,           intent(in), optional :: zero   !! If false, don't zero out the the dst variable before computing 
+    integer,           intent(in), optional :: flags  !! Used for choosing which variable to operate on 
 
     
-    !>  Local variables
-    logical :: lzero   !<  local version of input parameter zero
-    integer :: which   !<  local version of flags
-    integer :: n, m    !<  size of mat   
-    integer :: i, j    !<  loop variables
+    !!  Local variables
+    logical :: lzero   !!  local version of input parameter zero
+    integer :: which   !!  local version of flags
+    integer :: n, m    !!  size of mat   
+    integer :: i, j    !!  loop variables
 
     lzero = .true.; if (present(zero)) lzero = zero    
     which = 2;      if(present(flags)) which = flags

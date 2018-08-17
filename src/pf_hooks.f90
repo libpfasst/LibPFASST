@@ -1,3 +1,4 @@
+!! Calling of user defined routines from various places in the pfasst algorithm
 !
 ! This file is part of LIBPFASST.
 !
@@ -54,10 +55,10 @@ contains
 
   !> Subroutine to add a procedure to the hook on the given level
   subroutine pf_add_hook(pf, level_ind, hook, proc)
-    type(pf_pfasst_t), intent(inout) :: pf            !< main pfasst structure
-    integer,           intent(in)    :: level_ind     !< which pfasst level to add hook
-    integer,           intent(in)    :: hook          !< which hook to add
-    procedure(pf_hook_p)             :: proc          !< precudre to call from hook
+    type(pf_pfasst_t), intent(inout) :: pf            !! main pfasst structure
+    integer,           intent(in)    :: level_ind     !! which pfasst level to add hook
+    integer,           intent(in)    :: hook          !! which hook to add
+    procedure(pf_hook_p)             :: proc          !! precudre to call from hook
 
     integer :: l   !
 
@@ -76,12 +77,12 @@ contains
   !> Subroutine to call hooks associated with the hook and level
   subroutine call_hooks(pf, level_ind, hook)
     use pf_mod_timer
-    type(pf_pfasst_t), intent(inout), target :: pf         !< main pfasst structure
-    integer,           intent(in)            :: level_ind  !< which pfasst level to call hook
-    integer,           intent(in)            :: hook       !< which hook to call
+    type(pf_pfasst_t), intent(inout), target :: pf         !! main pfasst structure
+    integer,           intent(in)            :: level_ind  !! which pfasst level to call hook
+    integer,           intent(in)            :: hook       !! which hook to call
 
-    integer :: i  !<  hook loop index
-    integer :: l  !<  level loop index
+    integer :: i  !!  hook loop index
+    integer :: l  !!  level loop index
 
     call start_timer(pf, THOOKS)
 
