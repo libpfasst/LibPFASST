@@ -13,35 +13,11 @@ If you have questions about your rights to use or distribute this software, plea
 
 NOTICE.  This Software was developed under funding from the U.S. Department of Energy and the U.S. Government consequently retains certain rights. As such, the U.S. Government has been granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in the Software to reproduce, distribute copies to the public, prepare derivative works, and perform publicly and display publicly, and to permit other to do so. IBPFASST
 
-# NOTICE ON NEW RELEASE
+#  Documentation
+We are currently writing better documentation, examples, and a tutorial, at https://pfasst.bitbucket.io/index.html
 
-We have changed the License Agreement.  Please see LICENSE for details
+There is new  FORD source file documentation  at
+https://pfasst.bitbucket.io/FORD/doc/index.html
 
-There is (newish) Doxygen info at
-https://pfasst.bitbucket.io/Doxygen/html/index.html
-
-We are currently writing better documentation, examples, and a tutorial,  https://pfasst.bitbucket.io/docs/build/html/index.html
-
-
-# COMPILERS
-
-LIBPFASST has been successfully compiled with
-
-  + GNU 4.5 and 4.8,
-  + Intel 13.0.1, and
-  + PGI 12.9 (almost, minor issues, but overall OK).
-   
-
-# COMPILING
-
-Before compiling, you should check the definitions of the Fortran (FC)  and C (CC) compiler in Makefile.defaults
-and change them if necessary
-
-+ FC =mpif90
-+ CC = mpicc
-
-Once you have configured your compilers, you can build LIBPFASST by
-running 'make' in the LIBPFASST directory.  The resulting (static)
-library should be in the 'lib' directory.
 
 
