@@ -28,6 +28,7 @@ contains
      integer, intent(in) :: qtype
      integer,    intent(out) :: nflags(nnodes)
 
+     print *,nnodes,nnodes0,nflags,qtype
      allocate(SDCmats%qmat(nnodes-1,nnodes))  
      allocate(SDCmats%qmatFE(nnodes-1,nnodes))  
      allocate(SDCmats%qmatBE(nnodes-1,nnodes))  
