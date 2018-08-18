@@ -20,21 +20,29 @@ module pf_mod_quadrature
      module procedure poly_eval_complex
   end interface
 
+
+  
 contains
   !>  
   subroutine pf_init_sdcmats(SDCmats,qtype,nnodes,nnodes0,nflags)
     type(pf_sdcmats_t), intent(inout) :: SDCmats
      integer, intent(in) :: nnodes,nnodes0
      integer, intent(in) :: qtype
-     integer,    intent(out) :: nflags(nnodes)
+     integer,    intent(inout) :: nflags(nnodes)
+     integer :: ierr
 
-     print *,nnodes,nnodes0,nflags,qtype
-     allocate(SDCmats%qmat(nnodes-1,nnodes))  
-     allocate(SDCmats%qmatFE(nnodes-1,nnodes))  
-     allocate(SDCmats%qmatBE(nnodes-1,nnodes))  
-     allocate(SDCmats%qmatLU(nnodes-1,nnodes))  
-     allocate(SDCmats%s0mat(nnodes-1,nnodes))  
-     allocate(SDCmats%qnodes(nnodes))       
+     allocate(SDCmats%qmat(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmat"
+     allocate(SDCmats%qmatFE(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmatFE"
+     allocate(SDCmats%qmatBE(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmatBE"
+     allocate(SDCmats%qmatLU(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmatLU"
+     allocate(SDCmats%s0mat(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error s0mat"
+     allocate(SDCmats%qnodes(nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qnodes"
 
      call pf_quadrature(qtype, nnodes, nnodes0, &
           SDCmats%qnodes, nflags, SDCmats%s0mat, SDCmats%qmat,SDCmats%qmatFE,SDCmats%qmatBE)
@@ -52,7 +60,6 @@ contains
      deallocate(SDCmats%qmatLU)  
      deallocate(SDCmats%s0mat)  
      deallocate(SDCmats%qnodes)       
-
   end subroutine pf_destroy_sdcmats
   
     
@@ -256,7 +263,7 @@ contains
        end do
 
     case (SDC_GAUSS_LOBATTO)
-
+       
        degree = nnodes - 1
        allocate(roots(degree-1))
        allocate(coeffs(degree+1))

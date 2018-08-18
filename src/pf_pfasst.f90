@@ -23,7 +23,7 @@ contains
     logical,           intent(in   ), optional :: nocmd     !! Determines if command line variables are to be read
 
     logical :: read_cmd              !! Local version of nocmd
-    integer :: ierror
+    integer :: ierr
     integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
@@ -44,8 +44,8 @@ contains
     pf%comm => comm
 
     !>  Set up the mpi communicator
-    call pf_mpi_setup(pf%comm, pf,ierror) 
-    if (ierror /=0 )        stop "ERROR: mpi_setup failed"
+    call pf_mpi_setup(pf%comm, pf,ierr) 
+    if (ierr /=0 )        stop "ERROR: mpi_setup failed"
     
 
     if (pf%rank < 0) then
@@ -53,8 +53,8 @@ contains
     end if
 
     !>  allocate level pointers
-    allocate(pf%levels(pf%nlevels))
-
+    allocate(pf%levels(pf%nlevels),stat=ierr)
+    if (ierr /= 0) stop "allocate error levels"
     !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        pf%levels(l)%index = l
@@ -64,12 +64,15 @@ contains
     end do
     
     !>  allocate hooks
-    allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS))
-    allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK))
+    allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS),stat=ierr)
+    if (ierr /= 0) stop "allocate error hooks"
+    allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK),stat=ierr)
+    if (ierr /= 0) stop "allocate error nhooks"
     pf%nhooks = 0
 
     !>  allocate status
-    allocate(pf%state)
+    allocate(pf%state,stat=ierr)
+    if (ierr /= 0) stop "allocate error state"
     pf%state%pstatus = 0
     pf%state%status  = 0
 
@@ -84,7 +87,9 @@ contains
 
     class(pf_level_t), pointer :: lev_fine, lev_coarse  !!  Pointers to level structures for brevity
     integer                   :: l                      !!  Level loop index
+    integer                   :: ierr                   !!  error flag
 
+    
    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        call pf_level_setup(pf, pf%levels(l))
@@ -93,8 +98,13 @@ contains
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
-       allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes))
-       allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes))
+       allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes),stat=ierr)
+       if (ierr /= 0) stop "allocate error tmat"
+
+       allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes),stat=ierr)
+       if (ierr /= 0) stop "allocate error rmat"
+
+
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels
        if (pf%use_rk_stepper .eqv. .true.) then
@@ -124,7 +134,7 @@ contains
     class(pf_level_t), intent(inout), target :: lev  !!  Level to set up
 
     integer :: mpibuflen, nnodes, npieces, nnodes0
-    integer :: i
+    integer :: i,ierr
 
     !> do some sanity checks
     if (lev%mpibuflen <= 0) stop "ERROR: Invalid mpibuflen/dofs (pf_pfasst.f90)."
@@ -149,14 +159,17 @@ contains
     lev%allocated = .true.
 
     !> allocate flat buffers for send, and recv
-    allocate(lev%send(mpibuflen))
-    allocate(lev%recv(mpibuflen))
-
+    allocate(lev%send(mpibuflen),stat=ierr)
+    if (ierr /= 0) stop "allocate error send buffer"
+    allocate(lev%recv(mpibuflen),stat=ierr)
+    if (ierr /= 0) stop "allocate error recieve buffer"
 
     !> allocate nodes, flags, and integration matrices
-    allocate(lev%nodes(nnodes))
-    allocate(lev%nflags(nnodes))
-    
+    allocate(lev%nodes(nnodes),stat=ierr)
+    if (ierr /= 0) stop "allocate error nodes"
+    allocate(lev%nflags(nnodes),stat=ierr)
+    if (ierr /= 0) stop "allocate error nflags"
+    lev%nflags=0
     !> make quadrature matrices
     if (btest(pf%qtype, 8)) then
        nnodes0=pf%levels(1)%nnodes
@@ -164,9 +177,14 @@ contains
        nnodes0=pf%levels(pf%nlevels)%nnodes
     end if
     !>  Allocate and compute all the matrices
+    allocate(lev%sdcmats,stat=ierr)
+    if (ierr /= 0) stop "allocate error sdcmats"
+
+
     call pf_init_sdcmats(lev%sdcmats,pf%qtype, nnodes,nnodes0,lev%nflags)
+
     lev%nodes = lev%sdcmats%qnodes
-    
+
     !>  initialize sweeper
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
     call lev%ulevel%sweeper%initialize(lev)
@@ -194,7 +212,6 @@ contains
     end if
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
-
     
   end subroutine pf_level_setup
 
@@ -240,6 +257,8 @@ contains
     deallocate(lev%nflags)
 
     call pf_destroy_sdcmats(lev%sdcmats)
+    deallocate(lev%sdcmats)
+
     !> deallocate solution and function storage
     npieces = lev%ulevel%sweeper%npieces
 
@@ -407,9 +426,9 @@ contains
 
     if (pf%rank /= 0) return
     if (present(un_opt)) un = un_opt
-    
+    write(un,*) '=================================================='
     write(un,*) 'PFASST Configuration'
-    write(un,*) '===================='
+    write(un,*) '--------------------'
 
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date

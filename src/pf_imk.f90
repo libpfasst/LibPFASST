@@ -307,12 +307,13 @@ contains
     integer :: m, nnodes
 
     this%npieces = 1
+    nnodes = lev%nnodes
 
     allocate(this%QdiffE(nnodes-1,nnodes), this%QtilE(nnodes-1,nnodes))
     allocate(this%dtsdc(nnodes-1))
     allocate(this%tsdc(nnodes))
 
-    nnodes = lev%nnodes
+
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     this%bernoullis = 0.0_pfdp
     this%bernoullis(1 ) =       -1.0d0 / 2.0d0

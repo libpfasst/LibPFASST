@@ -171,7 +171,7 @@ module pf_mod_dtype
 
 
      integer, allocatable :: shape(:)   !! user defined shape array
-     type(pf_sdcmats_t) :: sdcmats
+     type(pf_sdcmats_t), allocatable :: sdcmats
      logical :: allocated = .false.
   end type pf_level_t
 

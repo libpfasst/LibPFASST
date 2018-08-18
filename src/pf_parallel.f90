@@ -195,7 +195,6 @@ contains
                 end if
              end if
              !  Do some sweeps
-             print *,'doing sweep'
              call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
           end do
        endif  !  RK_pred
@@ -421,7 +420,6 @@ contains
           !  Do a v_cycle
           call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
 
-
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)
           if (pf%save_results) pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
@@ -496,23 +494,25 @@ contains
     endif
        
     ! Now move coarse to fine interpolating and sweeping
-       do level_index = level_index_c+1,level_index_f
-          f_lev_p => pf%levels(level_index);
-          c_lev_p => pf%levels(level_index-1)
-          call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-          call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false.)
-          
-          if (pf%rank /= 0) then
-             ! interpolate increment to q0 -- the fine initial condition
-             ! needs the same increment that Q(1) got, but applied to the
-             ! new fine initial condition
-             call interpolate_q0(pf, f_lev_p, c_lev_p)
-          end if
-          ! don't sweep on the finest level since that is only done at beginning
-          if (level_index < level_index_f) then
-             call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
-          end if
-       end do
+    do level_index = level_index_c+1,level_index_f
+       f_lev_p => pf%levels(level_index);
+       c_lev_p => pf%levels(level_index-1)
+       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
+       call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false.)
+       
+       if (pf%rank /= 0) then
+          ! interpolate increment to q0 -- the fine initial condition
+          ! needs the same increment that Q(1) got, but applied to the
+          ! new fine initial condition
+          call interpolate_q0(pf, f_lev_p, c_lev_p)
+       end if
+       ! don't sweep on the finest level since that is only done at beginning
+       if (level_index < level_index_f) then
+          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
+       else  !  compute residual for diagnostics since we didn't sweep
+          call pf_residual(pf, f_lev_p, dt)
+       end if
+    end do
 
   end subroutine pf_v_cycle
 
