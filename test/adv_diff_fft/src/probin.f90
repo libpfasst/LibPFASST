@@ -68,7 +68,7 @@ contains
        if (LEN_TRIM(arg) == 0) EXIT
        if (i > 0) then
           istring="&PARAMS "//TRIM(arg)//" /"    
-          READ(istring,nml=params,iostat=ios,iomsg=message) ! internal read of NAMELIST
+          read(istring,nml=params,iostat=ios,iomsg=message) ! internal read of NAMELIST
        end if
        i = i+1
     end do
@@ -76,5 +76,49 @@ contains
     !  Reset dt if Tfin is set
     if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
   end subroutine probin_init
+
+  subroutine ad_print_options(pf, un_opt)
+    type(pf_pfasst_t), intent(inout)           :: pf   
+    integer,           intent(in   ), optional :: un_opt
+    integer :: un = 6
+
+    if (pf%rank /= 0) return
+    if (present(un_opt)) un = un_opt
+
+    !  Print out the local parameters
+    write(un,*) '=================================================='
+    write(un,*) ' '
+    write(un,*) 'Local Variables'
+    write(un,*) '----------------'
+    write(un,*) 'nsteps: ', nsteps, '! Number of steps'
+    write(un,*) 'Dt:     ', Dt, '! Time step size'
+    write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
+    write(un,*) 'nx:     ',  nx(1:pf%nlevels), '! grid size per level'
+    write(un,*) 'v:      ',  v, '! advection constant'
+    write(un,*) 'nu:     ', nu, '! diffusion constant'
+    select case (imex_stat)
+    case (0)  
+       write(un,*) 'imex_stat:', imex_stat, '! Fully explicit'
+    case (1)  
+       write(un,*) 'imex_stat:', imex_stat, '! Fully implicit'
+    case (2)  
+       write(un,*) 'imex_stat:', imex_stat, '! Implicit/Explicit'
+    case DEFAULT
+       print *,'Bad case for imex_stat in probin ', imex_stat
+       call exit(0)
+    end select
+
+    select case (nprob)
+    case (0)  
+       write(un,*) 'Periodic Gaussian initial conditions with t00=',t00
+    case (1)  
+       write(un,*) 'Sine initial conditions with kfreq=',kfreq
+    case DEFAULT
+       print *,'Bad case for nprob in probin ', nprob
+       call exit(0)
+    end select
+    write(un,*) '=================================================='
+  end subroutine ad_print_options
+  
 
 end module probin

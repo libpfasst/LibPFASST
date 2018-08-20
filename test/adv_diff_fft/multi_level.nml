@@ -6,10 +6,10 @@
 &PF_PARAMS
     nlevels  = 3   !  must be set
 
-    niters = 25   !  default is 5
-    nnodes =    2  3  5
+    niters = 5   !  default is 5
+    nnodes =    2 3   5
 
-    nsweeps_pred= 1 1 
+    nsweeps_pred= 0 1 0
     nsweeps= 1 1 1
     
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
@@ -30,14 +30,14 @@
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  64 128 256
+    nx =  16 32 64
     nu = 0.02
     v=1.0
 
     Tfin = 0.9
     nsteps = 32
 
-    imex_stat=1
+    imex_stat=2
     nprob = 1
 
 /

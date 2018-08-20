@@ -77,12 +77,16 @@ contains
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
+
     !> add some hooks for output
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
 
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
 
+    !>  Output local parameters
+    call ad_print_options(pf,un_opt=6)
+    
     !> allocate initial and final solutions
     call ndarray_build(y_0, [ nx(pf%nlevels) ])
     call ndarray_build(y_end, [ nx(pf%nlevels) ])    

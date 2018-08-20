@@ -42,5 +42,6 @@
     nu=0.02
     v=1.0
 
+    imex_stat=2
     nprob = 1
 /
