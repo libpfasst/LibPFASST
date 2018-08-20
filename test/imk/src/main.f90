@@ -47,11 +47,11 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-          allocate(imk_context::pf%levels(l)%ulevel)
-          allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
-
           allocate(pf%levels(l)%shape(1))
           pf%levels(l)%shape(1) = nparticles
+
+          allocate(imk_context::pf%levels(l)%ulevel)
+          allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
 
 
 

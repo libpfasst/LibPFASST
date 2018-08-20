@@ -74,7 +74,6 @@ contains
     imk%mkrk = mkrk
 
     allocate(imk%commutator(nparticles, nparticles))
-
     imk%commutator = z0
 
     nullify(imk)
@@ -127,7 +126,6 @@ contains
       omega_p => cast_as_zndarray(omega)
 
       allocate(D(this%dim, this%dim), C(this%dim, this%dim))
-
       D = a_p%array
       C = a_p%array
       factor = 1.0_pfdp

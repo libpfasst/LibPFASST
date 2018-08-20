@@ -56,7 +56,6 @@ module factory
     type(zndarray), pointer :: zndarray_obj
 
     zndarray_obj => cast_as_zndarray(encap)
-
     allocate(zndarray_obj%array(dim, dim))
     allocate(zndarray_obj%y(dim, dim))
 
