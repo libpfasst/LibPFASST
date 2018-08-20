@@ -11,10 +11,10 @@ DEBUG = FALSE
 MKVERBOSE = FALSE
 
 #  Set some compiler flags
-FFLAGS = -Ibuild -Jinclude -cpp
+FFLAGS = -Ibuild -Jinclude -cpp 
 
 ifeq ($(DEBUG),TRUE)
-FFLAGS +=  -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow 
+FFLAGS += -Wall -Wextra -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none
 endif
 
 include $(wildcard $(LIBPFASST)/*.defs)
