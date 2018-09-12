@@ -45,9 +45,9 @@ contains
       nsteps_loc = nsteps
       tend_loc=dble(nsteps_loc*dt)
     else
-      nsteps_loc = ceiling(1.0*tend/dt)
+      nsteps_loc = ceiling(tend/dt)
       !  Do  sanity check on steps
-      if (abs(dble(nsteps_loc)-tend/dt) > dt/100.0) then
+      if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/100.0) then
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend

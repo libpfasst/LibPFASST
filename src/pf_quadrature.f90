@@ -122,7 +122,7 @@ contains
     real(pfdp), intent(out) :: qmatFE(nnodes-1,nnodes), qmatBE(nnodes-1,nnodes)
     integer,    intent(out) :: nflags(nnodes)
 
-    real(c_long_double) :: qnodes0(nnodes0), qnodes(nnodes), dt
+    real(pfqp) :: qnodes0(nnodes0), qnodes(nnodes), dt
     real(pfdp)          :: qmat0(nnodes0-1,nnodes0), smat0(nnodes0-1,nnodes0)
     integer             :: flags0(nnodes0)
 
@@ -217,7 +217,7 @@ contains
 
   !>  Function to decide if the restriction of the nodes is pointwise, e.g. coarse nodes are every other fine node
   logical function not_proper(flags, node)
-    integer(c_int), intent(in) :: flags(:)
+    integer , intent(in) :: flags(:)
     integer,        intent(in) :: node
 
     not_proper = .not. btest(flags(node), 0)
@@ -226,17 +226,17 @@ contains
 
 
   !> Subroutine to compute high precision quadrature nodes.
-  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) bind(c)
-    integer(c_int),       intent(in), value  :: nnodes          !!  Number of nodes
-    integer(c_int),       intent(in), value  :: qtype           !!  Type of nodes (see pf_dtype)
-    real(c_long_double),  intent(out)        :: qnodes(nnodes)  !!  The computed quadrature nodes
-    integer(c_int),       intent(out)        :: flags(nnodes)   !!
+  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) 
+    integer ,       intent(in), value  :: nnodes          !!  Number of nodes
+    integer ,       intent(in), value  :: qtype           !!  Type of nodes (see pf_dtype)
+    real(pfqp),  intent(out)        :: qnodes(nnodes)  !!  The computed quadrature nodes
+    integer ,       intent(out)        :: flags(nnodes)   !!
 
     integer :: j, degree
-    real(qp), allocatable :: roots(:)
-    real(qp), allocatable :: coeffs(:), coeffs2(:)
+    real(pfqp), allocatable :: roots(:)
+    real(pfqp), allocatable :: coeffs(:), coeffs2(:)
 
-    real(qp), parameter :: pi = 3.141592653589793115997963468544185161590576171875_qp
+    real(pfqp), parameter :: pi = 3.141592653589793115997963468544185161590576171875_pfdp
 
     flags = 0
 
@@ -251,9 +251,9 @@ contains
        call poly_legendre(coeffs, degree)
        call poly_roots(roots, coeffs, degree)
 
-       qnodes(1) = 0.0_qp
-       qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
-       qnodes(nnodes) = 1.0_qp
+       qnodes(1) = 0.0_pfqp
+       qnodes(2:nnodes-1) = 0.5_pfqp * (1.0_pfqp + roots)
+       qnodes(nnodes) = 1.0_pfqp
 
        deallocate(coeffs)
        deallocate(roots)
@@ -272,9 +272,9 @@ contains
        call poly_diff(coeffs, degree)
        call poly_roots(roots, coeffs(:degree), degree-1)
 
-       qnodes(1)          = 0.0_qp
-       qnodes(2:nnodes-1) = 0.5_qp * (1.0_qp + roots)
-       qnodes(nnodes)     = 1.0_qp
+       qnodes(1)          = 0.0_pfdp
+       qnodes(2:nnodes-1) = 0.5_pfdp * (1.0_pfdp + roots)
+       qnodes(nnodes)     = 1.0_pfdp
 
        deallocate(coeffs)
        deallocate(roots)
@@ -296,11 +296,11 @@ contains
        coeffs(:degree) = coeffs(:degree) + coeffs2
        call poly_roots(roots, coeffs, degree)
 
-       qnodes(1)      = 0.0_qp
+       qnodes(1)      = 0.0_pfdp
        do j = 2, nnodes-1
-          qnodes(j) = 0.5_qp * (1.0_qp - roots(nnodes+1-j))
+          qnodes(j) = 0.5_pfdp * (1.0_pfdp - roots(nnodes+1-j))
        end do
-       qnodes(nnodes) = 1.0_qp
+       qnodes(nnodes) = 1.0_pfdp
 
        deallocate(coeffs2)
        deallocate(coeffs)
@@ -313,7 +313,7 @@ contains
     case (SDC_CLENSHAW_CURTIS)
 
        do j = 0, nnodes-1
-          qnodes(j+1) = 0.5_qp * (1.0_qp - cos(j * pi / (nnodes-1)))
+          qnodes(j+1) = 0.5_pfqp * (1.0_pfdp - cos(j * pi / (nnodes-1)))
        end do
 
        do j = 1, nnodes
@@ -323,7 +323,7 @@ contains
     case (SDC_UNIFORM)
 
        do j = 0, nnodes-1
-          qnodes(j+1) = j * (1.0_qp / (nnodes-1))
+          qnodes(j+1) = j * (1.0_pfqp / (nnodes-1))
        end do
 
        do j = 1, nnodes
@@ -339,20 +339,20 @@ contains
   end subroutine sdc_qnodes
 
   !>  Subroutine to compute the quadrature matrices 
-  subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc) bind(c)
-    integer(c_int),      intent(in), value  :: ndst   !!  Number of destination points
-    integer(c_int),      intent(in), value  :: nsrc   !!  Number of source points
-    real(c_long_double), intent(in)  :: dst(ndst)     !!  Destination points
-    real(c_long_double), intent(in)  :: src(nsrc)     !!  Source points
+  subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc)
+    integer ,  intent(in), value  :: ndst   !!  Number of destination points
+    integer ,   intent(in), value  :: nsrc   !!  Number of source points
+    real(pfqp), intent(in)  :: dst(ndst)     !!  Destination points
+    real(pfqp), intent(in)  :: src(nsrc)     !!  Source points
     real(pfdp),      intent(out) :: qmat(ndst-1, nsrc)  !!  O to dst quadrature weights
     real(pfdp),      intent(out) :: smat(ndst-1, nsrc)  !! dst(m) to dst(m+1) quadrature weights
-    integer(c_int),      intent(in)  :: flags(nsrc)     
+    integer ,      intent(in)  :: flags(nsrc)     
 
     integer  :: i, j, m
-    real(qp) :: q, s, den, p(0:nsrc)
+    real(pfqp) :: q, s, den, p(0:nsrc)
 
-    qmat = 0.0_dp
-    smat = 0.0_dp
+    qmat = 0.0_pfqp
+    smat = 0.0_pfqp
 
     ! construct qmat and smat
     do i = 1, nsrc
@@ -360,8 +360,8 @@ contains
        if (not_proper(flags, i)) cycle
 
        ! construct interpolating polynomial coefficients
-       p    = 0.0_qp
-       p(0) = 1.0_qp
+       p    = 0.0_pfdp
+       p(0) = 1.0_pfdp
        do m = 1, nsrc
           if (not_proper(flags, m) .or. m == i) cycle
           p = eoshift(p, -1) - src(m) * p
@@ -373,11 +373,11 @@ contains
 
        ! evaluate integrals
        do j = 2, ndst
-          q = poly_eval(p, nsrc, dst(j)) - poly_eval(p, nsrc,   0.0_qp)
+          q = poly_eval(p, nsrc, dst(j)) - poly_eval(p, nsrc,   0.0_pfqp)
           s = poly_eval(p, nsrc, dst(j)) - poly_eval(p, nsrc, dst(j-1))
 
-          qmat(j-1,i) = real(q / den, dp)
-          smat(j-1,i) = real(s / den, dp)
+          qmat(j-1,i) = real(q / den, pfqp)
+          smat(j-1,i) = real(s / den, pfqp)
        end do
     end do
 
@@ -396,9 +396,9 @@ contains
   !!
   
   !> Function to evaluate real polynomial
-  real(qp) function poly_eval(p, n, x) result(v) bind(c)
+  real(pfqp) function poly_eval(p, n, x) result(v) 
     integer, intent(in), value :: n
-    real(qp),       intent(in)        :: p(0:n), x
+    real(pfqp),       intent(in)        :: p(0:n), x
 
     integer :: j
 
@@ -409,10 +409,10 @@ contains
   end function
 
   !> Function to evaluate complex polynomial
-  complex(qp) function poly_eval_complex(p, n, x) result(v)
+  complex(pfdp) function poly_eval_complex(p, n, x) result(v)
     integer, intent(in), value :: n
-    real(qp),       intent(in)        :: p(0:n)
-    complex(qp),    intent(in)        :: x
+    real(pfqp),       intent(in)        :: p(0:n)
+    complex(pfqp),    intent(in)        :: x
 
     integer :: j
 
@@ -425,14 +425,14 @@ contains
 
 
   !> Subroutine to differentiate polynomial (in place)
-  subroutine poly_diff(p, n) bind(c)
+  subroutine poly_diff(p, n) 
     integer, intent(in),   value :: n
-    real(qp),       intent(inout) :: p(0:n)
+    real(pfqp),       intent(inout) :: p(0:n)
 
     integer  :: j
-    real(qp) :: pp(0:n)
+    real(pfdp) :: pp(0:n)
 
-    pp = 0.0_qp
+    pp = 0.0_pfqp
 
     do j = 1, n
        pp(j-1) = j * p(j)
@@ -443,14 +443,14 @@ contains
 
 
   !> Subroutine to integrate polynomial (in place)
-  subroutine poly_int(p, n) bind(c)
+  subroutine poly_int(p, n) 
     integer, intent(in),   value :: n
-    real(qp),       intent(inout) :: p(0:n)
+    real(pfqp),       intent(inout) :: p(0:n)
 
     integer  :: j
-    real(qp) :: pp(0:n)
+    real(pfqp) :: pp(0:n)
 
-    pp = 0.0_qp
+    pp = 0.0_pfqp
 
     do j = 0, n-1
        pp(j+1) = p(j) / (j+1)
@@ -461,27 +461,29 @@ contains
 
 
   !> Subroutine to compute Legendre polynomial coefficients using Bonnet's recursion formula.
-  subroutine poly_legendre(p, n) bind(c)
+  subroutine poly_legendre(p, n) 
     integer, intent(in), value :: n
-    real(qp),       intent(out)       :: p(0:n)
+    real(pfqp),       intent(out)       :: p(0:n)
 
-    real(qp), dimension(0:n) :: p0, p1, p2
+    real(pfqp), dimension(0:n) :: p0, p1, p2
     integer :: j, m
 
     if (n == 0) then
-       p = [ 1.0_qp ]
+       p = [ 1.0_pfqp ]
        return
     end if
 
     if (n == 1) then
-       p = [ 0.0_qp, 1.0_qp ]
+       p = [ 0.0_pfqp, 1.0_pfqp ]
        return
     end if
 
-    p0 = 0.0_qp; p1 = 0.0_qp; p2 = 0.0_qp
+    p0 = 0.0_pfqp;
+    p1 = 0.0_pfqp;
+    p2 = 0.0_pfqp
 
-    p0(0) = 1.0_qp
-    p1(1) = 1.0_qp
+    p0(0) = 1.0_pfqp
+    p1(1) = 1.0_pfqp
 
     ! (n + 1) P_{n+1} = (2n + 1) x P_{n} - n P_{n-1}
     do m = 1, n-1
@@ -499,20 +501,23 @@ contains
 
   !> Subroutine to compute polynomial roots using the Durand-Kerner algorithm.
   !! The roots are assumed to be real.
-  subroutine poly_roots(roots, p0, n) bind(c)
+  subroutine poly_roots(roots, p0, n) 
     integer,  intent(in), value   :: n
-    real(qp),        intent(out)  :: roots(n)
-    real(qp),        intent(in)   :: p0(0:n)
+    real(pfqp),        intent(out)  :: roots(n)
+    real(pfqp),        intent(in)   :: p0(0:n)
 
     integer     :: i, j, k
-    complex(qp) :: num, den, z0(n), z1(n)
-    real(qp)    :: p(0:n)
+    complex(pfqp) :: num, den, z0(n), z1(n)
+    real(pfqp)    :: p(0:n)
+    
+    real(pfqp) ::  eps 
 
+    eps = epsilon(1.0_pfqp)*100.0_pfqp
     p = p0 / p0(n)
 
     ! initial guess
     do i = 1, n
-       z0(i) = (0.4_qp, 0.9_qp)**i
+       z0(i) = (0.4_pfqp, 0.9_pfqp)**i
     end do
 
     ! durand-kerner-weierstrass iterations
@@ -521,10 +526,10 @@ contains
        do i = 1, n
 
           ! evaluate poly at z0(i)
-          num = poly_eval(p, n, z0(i))
+          num = poly_eval_complex(p, n, z0(i))
 
           ! evaluate denominator
-          den = 1.0_qp
+          den = 1.0_pfqp
           do j = 1, n
              if (j == i) cycle
              den = den * (z0(i) - z0(j))
@@ -541,7 +546,7 @@ contains
     end do
 
     roots = real(z0)
-    where (abs(roots) < eps) roots = 0.0_qp
+    where (abs(roots) < eps) roots = 0.0_pfqp
     call qsort(roots)
 
   end subroutine poly_roots
@@ -549,7 +554,7 @@ contains
   !> Subroutine to sort (inplace) using the quick sort algorithm.
   !> Adapted from http://www.fortran.com/qsort_c.f95.
   recursive subroutine qsort(a)
-    real(qp), intent(inout) :: a(:)
+    real(pfqp), intent(inout) :: a(:)
     integer :: iq
 
     if (size(a) > 1) then
@@ -560,11 +565,11 @@ contains
   end subroutine qsort
 
   subroutine qsort_partition(a, marker)
-    real(qp), intent(inout) :: a(:)
+    real(pfqp), intent(inout) :: a(:)
     integer,  intent(out)   :: marker
 
     integer  :: i, j
-    real(qp) :: temp, x
+    real(pfqp) :: temp, x
 
     x = a(1)
     i = 0

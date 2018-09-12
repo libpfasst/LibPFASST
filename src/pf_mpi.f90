@@ -10,7 +10,12 @@ end module pf_mod_mpi
 module pf_mod_comm_mpi
   use pf_mod_dtype
   use pf_mod_timer
+  use pf_mod_mpi, only: MPI_REAL16, MPI_REAL8
   implicit none
+  !  For normal double precision
+  integer, parameter :: myMPI_Datatype=MPI_REAL8  
+  !  For  quadruple precision  (see top of pf_dtype.f90)
+  ! integer, parameter :: myMPI_Datatype=MPI_REAL16  
 contains
 
   !> Subroutine to create an MPI based PFASST communicator using the MPI communicator *mpi_comm*.
@@ -68,7 +73,6 @@ contains
 
   !>  Subroutine to post receive requests.
   subroutine pf_mpi_post(pf, level, tag, ierror, direction)
-    use pf_mod_mpi, only: MPI_REAL8
 
     type(pf_pfasst_t), intent(in   ) :: pf
     class(pf_level_t), intent(inout) :: level   !!  level to send from
@@ -83,7 +87,7 @@ contains
     if(dir==1) source = modulo(pf%rank-1, pf%comm%nproc)
     if(dir==2) source = modulo(pf%rank+1, pf%comm%nproc)
 
-    call mpi_irecv(level%recv, level%mpibuflen, MPI_REAL8, &
+    call mpi_irecv(level%recv, level%mpibuflen, myMPI_Datatype, &
                    source, tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
 
   end subroutine pf_mpi_post
@@ -156,7 +160,7 @@ contains
 
   !> Subroutine to send solutions
   subroutine pf_mpi_send(pf, level, tag, blocking,ierror, direction)
-    use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
+    use pf_mod_mpi, only:  MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf       !!  main pfasst structure
     class(pf_level_t), intent(inout) :: level    !!  level to send from
@@ -209,7 +213,7 @@ contains
   !! Note when blocking == .false. this is actually a wait because the
   !! nonblocking receive  should have already been posted
   subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, direction)
-    use pf_mod_mpi, only: MPI_REAL8, MPI_STATUS_SIZE
+    use pf_mod_mpi, only:  MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(inout) :: pf     !!  main pfasst structure
     class(pf_level_t), intent(inout) :: level  !!  level to recieve into
     integer,           intent(in   ) :: tag    !!  message tag
@@ -229,7 +233,7 @@ contains
     end if
     
     if (blocking) then
-       call mpi_recv(level%recv, level%mpibuflen, MPI_REAL8, &
+       call mpi_recv(level%recv, level%mpibuflen, myMPI_Datatype, &
                      source, tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%recvreq(level%index), stat, ierror)
@@ -249,13 +253,12 @@ contains
   end subroutine pf_mpi_wait
 
   subroutine pf_mpi_broadcast(pf, y, nvar, root,ierror)
-    use pf_mod_mpi, only: MPI_REAL8
     type(pf_pfasst_t), intent(inout) :: pf      !!  main pfasst structure
     integer,           intent(in)    :: nvar    !!  size of data to broadcast
     real(pfdp),        intent(in)    :: y(nvar) !!  data to broadcast
     integer,           intent(in)    :: root    !!  rank of broadcaster
     integer,           intent(inout) :: ierror  !!  error flag
-    call mpi_bcast(y, nvar, MPI_REAL8, root, pf%comm%comm, ierror)
+    call mpi_bcast(y, nvar, myMPI_Datatype, root, pf%comm%comm, ierror)
   end subroutine pf_mpi_broadcast
 
 end module pf_mod_comm_mpi

@@ -175,8 +175,8 @@ contains
     !! Mathematically this is 
     !!     dst= dst + a*mat*src
     !!  Where dst and src are vectors, mat is a matrix, and a is a scalar
-    !!  If the optional variable "zero" is provided and is false, then we compute
-    !!     dst= dst + a*mat*src
+    !!  If the optional variable "zero" is provided and is true, then we compute
+    !!     dst=  a*mat*src
     class(pf_encap_t), intent(inout) :: dst(:)       !!  destination vector
     real(pfdp),        intent(in)    :: a            !!  scalar
     real(pfdp),        intent(in)    :: mat(:, :)    !!  matrix

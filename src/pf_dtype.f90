@@ -8,9 +8,10 @@ module pf_mod_dtype
   implicit none
 
   !>  static pfasst paramters
-  !  integer, parameter :: pfdp = c_long_double
-  integer, parameter :: pfdp = c_double
-
+  integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
+  !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
+  
+  integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variables
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
   real(pfdp), parameter :: TWO   = 2.0_pfdp
@@ -127,14 +128,20 @@ module pf_mod_dtype
 
   !>  Data type of a PFASST level
   type :: pf_level_t
+     !  level parameters set by the pfasst_t values
      integer  :: index        = -1   !! level number (1 is the coarsest)
-     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
      integer  :: nnodes       = -1   !! number of sdc nodes
      integer  :: nsteps_rk    = -1   !! number of rk steps to perform
-     integer  :: nsweeps      =  1   !! number of sdc sweeps to perform
-     integer  :: nsweeps_pred =  1      !! number of coarse sdc sweeps to perform predictor in predictor
+     integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
+     integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
+     !  Mandatory level parameter
+     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
+
+
+
+     !  Diagnostics
      real(pfdp)  :: error            !! holds the user defined error
      real(pfdp)  :: residual         !! holds the user defined residual
      real(pfdp)  :: residual_rel     !! holds the user defined relative residual (scaled by solution magnitude)
@@ -220,36 +227,33 @@ module pf_mod_dtype
 
   !>  The main data type which includes pretty much everything
   type :: pf_pfasst_t
-     !>  Parameters
-     integer :: nlevels = -1            !! number of pfasst levels
+     !>  Mandatory parameters (must be set on command line or input file)
+     integer :: nlevels = -1             !! number of pfasst levels
+
+     !>  Optional parameters
      integer :: niters  = 5             !! number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
      
-     !>  Level dependend parameters
+     ! --  level dependent parameters
      integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
      integer :: nsweeps_pred(PF_MAXLEVS) =1   !!  number of sweeps during predictor
      integer :: nnodes(PF_MAXLEVS)=3          !! number of nodes
-     integer :: nnodes_rk(PF_MAXLEVS)=3       !! number of runge-kutta nodes
 
-     !>  Tolerances
+     ! --  tolerances
      real(pfdp) :: abs_res_tol = 0.d0   !!  absolute convergence tolerance
      real(pfdp) :: rel_res_tol = 0.d0   !!  relative convergence tolerance
 
-     !>  predictor options  (should be set before pfasst_run is called)
+     ! --  predictor options  (should be set before pfasst_run is called)
      logical :: PFASST_pred = .true.    !!  true if the PFASST type predictor is used
-     logical :: RK_pred = .false.       !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
      logical :: pipeline_pred = .false. !!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
      integer :: nsweeps_burn =  1       !!  number of sdc sweeps to perform during coarse level burn in
-!     logical :: pipeline_burn = .false. !!  true if coarse level sweeps are pipelined in predictor (meaningless if nsweeps_burn>1 )
+     integer :: q0_style =  0           !!  q0 can take 3 values
+                                        !!  0:  Only the q0 at t=0 is valid  (default)
+                                        !!  1:  The q0 at each processor is valid
+                                        !!  2:  q0 and all nodes at each processor is valid
 
-     
-     !  q0 can take 3 values
-     !  0:  Only the q0 at t=0 is valid  (default)
-     !  1:  The q0 at each processor is valid
-     !  2:  q0 and all nodes at each processor is valid
-     integer :: q0_style =  0                                                   
 
-     !>  run options  (should be set before pfasst_run is called)
+     ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used 
@@ -257,11 +261,13 @@ module pf_mod_dtype
 
      !> RK and Parareal options
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
+     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta nodes
+     logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
-     !> misc
-     logical :: debug = .false.
-     logical :: save_results = .false.
-     logical    :: echo_timings  = .false.
+     ! -- misc
+     logical :: debug = .false.         !!  If true, debug diagnostics are printed
+     logical :: save_results = .false.  !!  If true, results are output
+     logical    :: echo_timings  = .false.    !!  If true, timings are output
 
      integer :: rank    = -1            !! rank of current processor
 
@@ -541,14 +547,6 @@ module pf_mod_dtype
        integer,    intent(inout)       :: ierror
      end subroutine pf_broadcast_p
 
-!!$     subroutine pf_init_results_p(nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
-!!$!       import pf_results_t
-!!$!       type(pf_results_t), intent(inout) :: this
-!!$       integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
-!!$     end subroutine pf_init_results_p
-     
-
-!     subroutine pf_results_p()
 
      subroutine pf_results_p(this)
        import pf_results_t
