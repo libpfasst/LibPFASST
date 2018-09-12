@@ -8,13 +8,13 @@ module probin
 
   character(len=64), save :: problem_type
 
-  double precision, save :: v      ! advection velocity
-  double precision, save :: nu     ! viscosity
-  double precision, save :: t00     ! initial time for exact solution
-  double precision, save :: sigma  ! initial condition parameter
+  real(pfdp), save :: v      ! advection velocity
+  real(pfdp), save :: nu     ! viscosity
+  real(pfdp), save :: t00     ! initial time for exact solution
+  real(pfdp), save :: sigma  ! initial condition parameter
   integer,          save :: kfreq  ! initial condition parameter
-  double precision, save :: dt     ! time step
-  double precision, save :: Tfin   ! Final time
+  real(pfdp), save :: dt     ! time step
+  real(pfdp), save :: Tfin   ! Final time
 
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: nprob           ! which problem
@@ -52,7 +52,7 @@ contains
     Tfin    = 0.0_pfdp
     nprob = 0  !  0: Gaussian, 1: Sin wave
     imex_stat=2    !  Default is full IMEX
-    
+    pfasst_nml=filename
 
     !>  Read in stuff from input file
     un = 9
@@ -77,7 +77,7 @@ contains
     if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
   end subroutine probin_init
 
-  subroutine ad_print_options(pf, un_opt)
+  subroutine print_loc_options(pf, un_opt)
     type(pf_pfasst_t), intent(inout)           :: pf   
     integer,           intent(in   ), optional :: un_opt
     integer :: un = 6
@@ -117,8 +117,9 @@ contains
        print *,'Bad case for nprob in probin ', nprob
        call exit(0)
     end select
+    write(un,*) 'PFASST parameters read from input file ', pfasst_nml
     write(un,*) '=================================================='
-  end subroutine ad_print_options
+  end subroutine print_loc_options
   
 
 end module probin

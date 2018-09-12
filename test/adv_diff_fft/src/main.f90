@@ -85,7 +85,7 @@ contains
     call pf_print_options(pf,un_opt=6)
 
     !>  Output local parameters
-    call ad_print_options(pf,un_opt=6)
+    call print_loc_options(pf,un_opt=6)
     
     !> allocate initial and final solutions
     call ndarray_build(y_0, [ nx(pf%nlevels) ])
@@ -95,7 +95,7 @@ contains
     call initial(y_0)
 
     !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.d0, nsteps,y_end)
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
     
     !>  deallocate initial condition and final solution
     call ndarray_destroy(y_0)
