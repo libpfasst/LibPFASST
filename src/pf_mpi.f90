@@ -190,7 +190,7 @@ contains
             call level%qend%pack(level%send)
           end if
        end if       
-       call mpi_send(level%send, level%mpibuflen, MPI_REAL8, &
+       call mpi_send(level%send, level%mpibuflen, myMPI_Datatype, &
                      dest, tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
@@ -204,7 +204,7 @@ contains
             call level%qend%pack(level%send)
           end if
        end if
-       call mpi_isend(level%send, level%mpibuflen, MPI_REAL8, &
+       call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send
