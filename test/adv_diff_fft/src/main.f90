@@ -100,6 +100,11 @@ contains
     !>  deallocate initial condition and final solution
     call ndarray_destroy(y_0)
     call ndarray_destroy(y_end)
+
+    !> deallocate sweeper stuff
+    do l = 1, pf%nlevels
+       call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
+    end do
     
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)

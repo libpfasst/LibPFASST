@@ -103,18 +103,21 @@ contains
   end subroutine sweeper_setup
 
   !>  destroy the sweeper type
-  subroutine destroy(this, lev)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)   :: lev
+  subroutine sweeper_destroy(sweeper)
+    class(pf_sweeper_t), intent(inout) :: sweeper
+    
+    class(ad_sweeper_t), pointer :: this
+    this => as_ad_sweeper(sweeper)    
 
+    print *,'in destroy sweeper'
     deallocate(this%workhat)
     deallocate(this%wsave)
     deallocate(this%ddx)
     deallocate(this%lap)
     
-    call this%imexQ_destroy(lev)
+!    call this%imexQ_destroy(lev)
 
-  end subroutine destroy
+  end subroutine sweeper_destroy
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! These routines must be provided for the sweeper
