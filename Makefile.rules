@@ -70,8 +70,6 @@ include $(LIBPFASST)/.depend
 #build/pfasst.o:         build/pf_parallel.o  build/pf_pfasst.o build/pf_mpi.o build/pf_imexQ.o build/pf_rk#stepper.o 
 #endif
 
-#build/pf_amisdc.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
-#build/pf_amisdcQ.o:      build/pf_timer.o build/pf_explicit.o build/pf_implicit.o build/pf_utils.o
 
 
 
