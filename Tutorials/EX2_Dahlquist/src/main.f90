@@ -94,7 +94,10 @@ contains
 
     !> do the PFASST stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
-    
+
+    !>  wait for everyone to be done
+    call mpi_barrier(pf%comm%comm, ierror)
+
     
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)

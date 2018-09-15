@@ -97,6 +97,9 @@ contains
     !> do the PFASST stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
     
+    !>  wait for everyone to be done
+    call mpi_barrier(pf%comm%comm, ierror)
+
     !>  deallocate initial condition and final solution
     call ndarray_destroy(y_0)
     call ndarray_destroy(y_end)

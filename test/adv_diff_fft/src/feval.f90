@@ -109,7 +109,6 @@ contains
     class(ad_sweeper_t), pointer :: this
     this => as_ad_sweeper(sweeper)    
 
-    print *,'in destroy sweeper'
     deallocate(this%workhat)
     deallocate(this%wsave)
     deallocate(this%ddx)
