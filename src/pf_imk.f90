@@ -22,6 +22,7 @@ module pf_mod_imk
   use pf_mod_utils
   implicit none
 
+  !>  Implicit Munthe-Kaas Runge-Kutta sweeper type, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
      class(pf_encap_t), allocatable :: A(:)
      real(pfdp), allocatable :: QtilE(:,:)

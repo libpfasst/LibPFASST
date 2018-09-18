@@ -1,8 +1,13 @@
-!! Verlet type sweeoer for 2nd order problems
+!! Verlet type sweeper for 2nd order problems!
 !
-!  This will work for
-! $$   q'=p, p'=f(q) $$ 
+! This file is part of LIBPFASST.
 !
+!> Verlet type sweeper for 2nd order problems
+!!
+!!  This is intended for Hamiltonian problems of the form
+!!
+!! $$   q'=p, p'=f(q) $$ 
+!!
 module pf_mod_verlet
   use pf_mod_dtype
   use pf_mod_utils
@@ -79,8 +84,7 @@ module pf_mod_verlet
 contains
 
   !-----------------------------------------------------------------------------
-  ! Perform one SDC sweep on level lev_index and set qend appropriately
-  !
+  !> Perform one SDC sweep on level lev_index and set qend appropriately
   subroutine verlet_sweep(this, pf, level_index, t0, dt,nsweeps, flags)  
     use pf_mod_timer
     use pf_mod_hooks
@@ -199,21 +203,21 @@ contains
        !  unless the sweep was an initial Verlet
        !  For Lobatto nodes, we have a choice of whether to just use the
        !  value at the last node, or recompute it.
-!!$       if (this%iqend .and. pf%state%iter .gt. 1) then
-!!$          call Lev%encap%copy(Lev%qend, Lev%Q(1))
-!!$          call Lev%encap%axpy(Lev%qend, dt, Lev%Q(1), 12)  !  Add the dt*v_0 term
-!!$          m = nnodes
-!!$          do n = 1, nnodes
-!!$             call Lev%encap%axpy(Lev%qend, dt*this%Qmat(m,n), Lev%F(n,1),1)
-!!$             call Lev%encap%axpy(Lev%qend, dtsq*this%QQmat(m,n), Lev%F(n,1),2)
-!!$          end do
-!!$          if (associated(Lev%tauQ)) then
-!!$             call Lev%encap%axpy(Lev%qend, 1.0_pfdp, Lev%tauQ(nnodes-1))  
-!!$             !          print *,'XXXXXXXXXXX  need code in verlet.f90'
-!!$          end if
-!!$       else
-!!$          call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
-!!$       end if
+!       if (this%iqend .and. pf%state%iter .gt. 1) then
+!          call Lev%encap%copy(Lev%qend, Lev%Q(1))
+!          call Lev%encap%axpy(Lev%qend, dt, Lev%Q(1), 12)  !  Add the dt*v_0 term
+!          m = nnodes
+!          do n = 1, nnodes
+!             call Lev%encap%axpy(Lev%qend, dt*this%Qmat(m,n), Lev%F(n,1),1)
+!             call Lev%encap%axpy(Lev%qend, dtsq*this%QQmat(m,n), Lev%F(n,1),2)
+!          end do
+!          if (associated(Lev%tauQ)) then
+!             call Lev%encap%axpy(Lev%qend, 1.0_pfdp, Lev%tauQ(nnodes-1))  
+!             !          print *,'XXXXXXXXXXX  need code in verlet.f90'
+!          end if
+!       else
+!          call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
+!       end if
        
        call pf_residual(pf, lev, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
@@ -228,8 +232,7 @@ contains
 
 
   !-----------------------------------------------------------------------------
-  ! Initialize integration matrices
-  !
+  !> Initialize integration matrices
   subroutine verlet_initialize(this,lev)
     class(pf_verlet_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
@@ -308,16 +311,16 @@ contains
    this%QQtil = matmul(lev%sdcmats%qmatFE,this%Qtil) + 0.5_pfdp*lev%sdcmats%qmatFE*lev%sdcmats%qmatFE
 
    !  Get LU matrices if desired
-!!$    if (this%use_LUq .eq. 1) then 
-!!$       print *,'Doing LU with doLU=',this%doLU
-!!$       call myLUq(SDCmats%qmat,SDCmats%qmatLU,nnodes,0)
-!!$       call pf_myLUexp(this%QQmat,L,U,nnodes,this%doLU)
-!!$      this%QQLU=U
-!!$      print *, 'U from LU',this%QQLU
-!!$   else
+!    if (this%use_LUq .eq. 1) then 
+!       print *,'Doing LU with doLU=',this%doLU
+!       call myLUq(SDCmats%qmat,SDCmats%qmatLU,nnodes,0)
+!       call pf_myLUexp(this%QQmat,L,U,nnodes,this%doLU)
+!      this%QQLU=U
+!      print *, 'U from LU',this%QQLU
+!   else
         this%QQLU=this%QQtil  !  Normal verlet all the time     
-!!$   end if
-!!$
+!   end if
+!
     !  Make differences
     this%DQQtil = this%QQmat-this%QQtil
     this%DQQLU = this%QQmat-this%QQLU
@@ -326,7 +329,7 @@ contains
   end subroutine verlet_initialize
   
   !-----------------------------------------------------------------------------
-  ! Integrate (t_n to node)
+  !> Integrate (t_n to node)
   subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC,flags)
     class(pf_verlet_t), intent(inout) :: this
     class(pf_level_t), intent(in   ) :: lev          !!  Current level
@@ -350,7 +353,7 @@ contains
 
   end subroutine verlet_integrate
   !-----------------------------------------------------------------------------
-  ! Compute residual (t_n to node)
+  !> Compute residual (t_n to node)
   subroutine verlet_residual(this, lev, dt, flags)
     class(pf_verlet_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev  !!  Current level
@@ -381,33 +384,30 @@ contains
   !-----------------------------------------------------------------------------
   ! Integrate to fill qend
   !
-!!$  subroutine verlet_qend_integrate(Lev, dt)
-!!$    type(pf_level_t), intent(in) :: Lev
-!!$    real(pfdp),       intent(in) :: dt
-!!$
-!!$
-!!$    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
-!!$    integer :: nnodes, m
-!!$    type(pf_verlet_t), pointer :: verlet
-!!$    call c_f_pointer(Lev%sweeper%sweeperctx, verlet)
-!!$
-!!$    nnodes = Lev%nnodes
-!!$  
-!!$    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
-!!$    call Lev%encap%copy(Lev%qend, Lev%Q(1))        
-!!$    call Lev%encap%axpy(Lev%qend, dt, Lev%Q(1), 12)  !  Add the dt*v_0 term
-!!$    do m = 1, Lev%nnodes
-!!$       call Lev%encap%axpy(Lev%qend, dt*Lev%qmat(nnodes,m), Lev%F(m,1),1)
-!!$       call Lev%encap%axpy(Lev%qend, dt*dt*thisSSmat(nnodes,m), Lev%F(m,1),2)
-!!$    end do
-!!$  end subroutine verlet_qend_integrate
+!  subroutine verlet_qend_integrate(Lev, dt)
+!    type(pf_level_t), intent(in) :: Lev
+!    real(pfdp),       intent(in) :: dt
+!
+!
+!    real(pfdp) :: dtsdc(1:Lev%nnodes-1)
+!    integer :: nnodes, m
+!    type(pf_verlet_t), pointer :: verlet
+!    call c_f_pointer(Lev%sweeper%sweeperctx, verlet)
+!
+!    nnodes = Lev%nnodes
+!  
+!    dtsdc = dt * (Lev%nodes(2:Lev%nnodes) - Lev%nodes(1:Lev%nnodes-1))
+!    call Lev%encap%copy(Lev%qend, Lev%Q(1))        
+!    call Lev%encap%axpy(Lev%qend, dt, Lev%Q(1), 12)  !  Add the dt*v_0 term
+!    do m = 1, Lev%nnodes
+!       call Lev%encap%axpy(Lev%qend, dt*Lev%qmat(nnodes,m), Lev%F(m,1),1)
+!       call Lev%encap%axpy(Lev%qend, dt*dt*thisSSmat(nnodes,m), Lev%F(m,1),2)
+!    end do
+!  end subroutine verlet_qend_integrate
 
 
   !-----------------------------------------------------------------------------
-  ! Create Verlet sweeper
-  !
-
-
+  !> Destroy Verlet sweeper matrices
   subroutine verlet_destroy(this,lev)
     class(pf_verlet_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev   !!  Current level
@@ -434,6 +434,7 @@ contains
     call lev%ulevel%factory%destroy_single(this%rhs, lev%index,  lev%shape)    
   end subroutine verlet_destroy
 
+  !> Spread the intial data for Verlet sweepers
   subroutine verlet_spreadq0(this, lev, t0, flags, step)
     class(pf_verlet_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev

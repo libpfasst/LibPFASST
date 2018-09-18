@@ -20,7 +20,8 @@ module pf_mod_dtype
 
   integer, parameter :: PF_MAXLEVS = 4  
   integer, parameter :: PF_MAX_HOOKS = 32
-  !> Quadrature node types
+
+  !> Quadrature node varieties
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
   integer, parameter :: SDC_GAUSS_RADAU     = 2
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
@@ -30,11 +31,12 @@ module pf_mod_dtype
   integer, parameter :: SDC_COMPOSITE_NODES = 2**9
   integer, parameter :: SDC_NO_LEFT         = 2**10
 
-  !> States of operatrion
+  !> States of operation
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
+  !>  The type that holds the state of the system 
   type, bind(c) :: pf_state_t
     real(pfdp) :: t0  !!  Time at beginning of this time step
     real(pfdp) :: dt  !!  Time step size
@@ -53,12 +55,12 @@ module pf_mod_dtype
     integer :: mysteps  !! steps I did
   end type pf_state_t
 
-  !!  Hook to call diagnostic routines from various places in code
+  !>  Abstract hook type: hooks call diagnostic routines from various places in code
   type :: pf_hook_t
      procedure(pf_hook_p), pointer, nopass :: proc
   end type pf_hook_t
 
-  !!  The base SDC sweeper type
+  !>  The abstract SDC sweeper type (must be extended)
   type, abstract :: pf_sweeper_t
      integer     :: npieces
      logical     :: use_LUq
@@ -73,7 +75,7 @@ module pf_mod_dtype
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
-  !!  The base stepper type
+  !>  The abstract time stepper type (must be extended)
   type, abstract :: pf_stepper_t
      integer     :: npieces
      integer     :: order
@@ -83,7 +85,7 @@ module pf_mod_dtype
      procedure(pf_destroy_stepper_p),      deferred :: destroy
   end type pf_stepper_t
 
-  !!  The base data type for the solution
+  !>  The abstract data type of the solution (must be extended)
   type, abstract :: pf_encap_t
    contains
      procedure(pf_encap_setval_p),  deferred :: setval
@@ -95,7 +97,7 @@ module pf_mod_dtype
      procedure(pf_encap_eprint_p),  deferred :: eprint
   end type pf_encap_t
 
-  !!  Generic type for creation and desstruction of objects
+  !>  Abstract type for creation and destruction of objects
   type, abstract :: pf_factory_t
    contains
      procedure(pf_encap_create_single_p),  deferred :: create_single
@@ -104,7 +106,7 @@ module pf_mod_dtype
      procedure(pf_encap_destroy_array_p),  deferred :: destroy_array
   end type pf_factory_t
 
-  !!  The user level which is inherited  to include problem dependent stuff
+  !>  The absract definition of level which is inherited  to include problem dependent stuff
   type, abstract :: pf_user_level_t
      class(pf_factory_t), allocatable :: factory
      class(pf_sweeper_t), allocatable :: sweeper
@@ -114,7 +116,8 @@ module pf_mod_dtype
      procedure(pf_transfer_p), deferred :: interpolate
   end type pf_user_level_t
 
-    type :: pf_sdcmats_t
+  !>  The type to store quadrature matrices
+  type :: pf_sdcmats_t
      real(pfdp), allocatable :: qmat(:,:)
      real(pfdp), allocatable :: qmatFE(:,:)
      real(pfdp), allocatable :: qmatBE(:,:)
@@ -225,7 +228,7 @@ module pf_mod_dtype
      procedure(pf_results_p), pointer, nopass :: destroy 
   end type pf_results_t
 
-  !>  The main data type which includes pretty much everything
+  !>  The main PFASST data type which includes pretty much everything
   type :: pf_pfasst_t
      !>  Mandatory parameters (must be set on command line or input file)
      integer :: nlevels = -1             !! number of pfasst levels

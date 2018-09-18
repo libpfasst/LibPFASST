@@ -2,11 +2,13 @@
 !
 ! This file is part of LIBPFASST.
 !
+!> Old style Asynchronous MISDC sweeper
 module pf_mod_amisdc
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
 
+  !>  Asynchronous multi-implicit sweeper type (old style)
   type, extends(pf_sweeper_t), abstract :: pf_amisdc_t
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)

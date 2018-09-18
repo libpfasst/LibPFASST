@@ -20,6 +20,7 @@ module pf_mod_ndarray_oc
   use pf_mod_dtype
   implicit none
 
+  !>  Type to create and destroy N-dimenstional arrays for optimal control
   type, extends(pf_factory_t) :: ndarray_oc_factory
    contains
      procedure :: create_single  => ndarray_oc_create_single
@@ -27,7 +28,8 @@ module pf_mod_ndarray_oc
      procedure :: destroy_single => ndarray_oc_destroy_single
      procedure :: destroy_array  => ndarray_oc_destroy_array
   end type ndarray_oc_factory
-  
+
+  !>  N-dimensional array type for optimal control,  extends the abstract encap type  
   type, extends(pf_encap_t) :: ndarray_oc
      integer                 :: dim
      integer,    allocatable :: shape(:)    

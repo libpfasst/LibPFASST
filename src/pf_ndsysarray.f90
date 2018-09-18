@@ -27,7 +27,7 @@ module pf_mod_ndsysarray
   use pf_mod_dtype
   implicit none
 
-  !>  Type to create and destroy the arrays
+  !>  Type to create and destroy systems of N-dimensional arrays
   type, extends(pf_factory_t) :: ndsysarray_factory
    contains
      procedure :: create_single  => ndsysarray_create_single
@@ -36,7 +36,7 @@ module pf_mod_ndsysarray
      procedure :: destroy_array => ndsysarray_destroy_array
   end type ndsysarray_factory
 
-  !>  Type to extend the abstract encap and set procedure pointers
+  !> Type for system of  N-dimensional arrays,  extends the abstract encap type  
   type, extends(pf_encap_t) :: ndsysarray
      integer             :: dim    !  The spatial dimension of each component in system
      integer             :: ncomp  !  The number of components in the system
@@ -94,7 +94,7 @@ contains
     class(ndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level, shape(:)
-    integer :: i
+
     allocate(ndsysarray::x)
     call ndsysarray_build(x, shape)
   end subroutine ndsysarray_create_single
@@ -110,8 +110,8 @@ contains
        call ndsysarray_build(x(i), shape)
     end do
   end subroutine ndsysarray_create_array
-
-  !>  Subroutine to destroy array
+!!$
+  !>  Subroutine to destroy array (simple)
   subroutine ndsysarray_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
     type(ndsysarray), pointer :: ndsysarray_obj

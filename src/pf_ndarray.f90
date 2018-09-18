@@ -23,7 +23,7 @@ module pf_mod_ndarray
   use pf_mod_dtype
   implicit none
 
-  !>  Type to create and destroy the arrays
+  !>  Type to create and destroy N-dimenstional arrays
   type, extends(pf_factory_t) :: ndarray_factory
    contains
      procedure :: create_single  => ndarray_create_single
@@ -32,7 +32,7 @@ module pf_mod_ndarray
      procedure :: destroy_array => ndarray_destroy_array
   end type ndarray_factory
 
-  !>  Type to extend the abstract encap and set procedure pointers
+  !>  N-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: ndarray
      integer             :: dim
      integer,    allocatable :: shape(:)

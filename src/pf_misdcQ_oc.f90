@@ -12,6 +12,7 @@ module pf_mod_misdcQ_oc
 
   implicit none
 
+  !>  Multi-implicit SDC sweeper type for optimal control, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_misdcQ_oc_t
      real(pfdp), allocatable :: QdiffE(:,:)
      real(pfdp), allocatable :: QdiffI(:,:)

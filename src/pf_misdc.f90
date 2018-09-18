@@ -7,6 +7,7 @@ module pf_mod_misdc
   use pf_mod_utils
   implicit none
 
+  !>  Multi-implicit SDC sweeper type (old style), extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_misdc_t
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)

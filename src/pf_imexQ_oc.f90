@@ -9,6 +9,7 @@ module pf_mod_imexQ_oc
   
   implicit none
 
+  !>  IMEX SDC sweeper type for optimal control, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_imexQ_oc_t
      real(pfdp), allocatable :: QtilE(:,:)   !!  Approximate explcit quadrature rule
      real(pfdp), allocatable :: QtilI(:,:)   !!  Approximate implcit quadrature rule

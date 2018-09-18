@@ -1,15 +1,13 @@
-!! Main data structure routines 
+!!  High level routines for PFASST data type
 !
 ! This file is part of LIBPFASST.
 !
 !>  Module containing the routines to create, setup, and destroy the main data structure in PFASST
-!!  See pf_dtype.f90 for the type definition
 module pf_mod_pfasst
   use pf_mod_dtype
   use pf_mod_comm_mpi
   implicit none
 contains
-
 
   !> Create a PFASST object
   subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
@@ -34,9 +32,9 @@ contains
     if (present(nocmd)) then
          if (nocmd) read_cmd = .false.
     end if
-    if (present(fname)) then      !>  fname  present,  read inputs from a file (and maybe command line)
+    if (present(fname)) then      !!  fname  present,  read inputs from a file (and maybe command line)
        call pf_read_opts(pf, read_cmd, fname)
-    else                           !>  fname not present, only call read_opts if we want command line read
+    else                           !!  fname not present, only call read_opts if we want command line read
        if (read_cmd) call pf_read_opts(pf, read_cmd)
     end if
 
@@ -45,7 +43,7 @@ contains
 
     !>  Set up the mpi communicator
     call pf_mpi_setup(pf%comm, pf,ierr) 
-    if (ierr /=0 )        stop "ERROR: mpi_setup failed"
+    if (ierr /=0 )  stop "ERROR: mpi_setup failed"
     
 
     if (pf%rank < 0) then
@@ -126,7 +124,6 @@ contains
 
   end subroutine pf_pfasst_setup
 
-  !
   !> Setup (allocate) PFASST level
   !! If the level is already setup, calling this again will allocate
   !! (or deallocate) tauQ appropriately.

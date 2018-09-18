@@ -1,5 +1,8 @@
 This directory contains the parameter files to run the FORD
-"FORtran Documenter".  The file libpfasst.md contains the parameters, and running
+"FORtran Documenter".
+
+The file libpfasst.md contains the parameters, and running
+
 >ford libpfasst.md will create the html in the directory docs/.
 
 Unfortunately the  line

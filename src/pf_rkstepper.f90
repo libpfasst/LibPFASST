@@ -8,6 +8,7 @@ module pf_mod_rkstepper
   use pf_mod_utils
   implicit none
 
+  !>  IMEX or additive or semi-implicit Runge-Kutta stepper  type
   type, extends(pf_stepper_t), abstract :: pf_ark_t
      real(pfdp), allocatable :: AmatI(:,:)
      real(pfdp), allocatable :: AmatE(:,:)
