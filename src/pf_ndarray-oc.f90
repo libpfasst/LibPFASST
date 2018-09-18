@@ -335,7 +335,7 @@ contains
 
   
   function get_array1d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), target, intent(in) :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
     integer                :: which
