@@ -47,6 +47,7 @@ module pf_mod_ndarray_oc
   ! interfaces to routines in pf_numpy.c
   interface
      subroutine ndarray_mkdir(dname, dlen) bind(c)
+       use pf_mod_dtype       
        use iso_c_binding
        character(c_char), intent(in   )        :: dname
        integer(c_int),    intent(in   ), value :: dlen
@@ -54,10 +55,11 @@ module pf_mod_ndarray_oc
 
      subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
        use iso_c_binding
+       use pf_mod_dtype
        character(c_char), intent(in   )        :: dname, fname, endian(5)
        integer(c_int),    intent(in   ), value :: dim, nvars
        integer(c_int),    intent(in   )        :: shape(dim)
-       real(c_double),    intent(in   )        :: array(nvars)
+       real(pfdp),    intent(in   )        :: array(nvars)
      end subroutine ndarray_dump_numpy
   end interface
 
@@ -333,7 +335,7 @@ contains
 
   
   function get_array1d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), target, intent(in) :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
     integer                :: which

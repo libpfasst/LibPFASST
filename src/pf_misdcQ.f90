@@ -92,7 +92,7 @@ contains
        do m = 1, lev%nnodes-1
           
           call lev%I(m)%setval(0.0_pfdp)
-          call this%I3(m)%setval(0.0d0)
+          call this%I3(m)%setval(0.0_pfdp)
           do n = 1, lev%nnodes
              call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
              call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))

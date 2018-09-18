@@ -130,7 +130,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>  These are the transfer functions that must be  provided for the level
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+  !>  Interpolate from coarse  level to fine
   subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
     class(my_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: levelF

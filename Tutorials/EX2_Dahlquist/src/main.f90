@@ -86,12 +86,18 @@ contains
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
 
+    !>  Output local parameters
+    call print_loc_options(pf,un_opt=6)
+    
     !> compute initial condition
-    y_0%y=1.0d0
+    y_0%y=1.0_pfdp
 
     !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.d0, nsteps,y_end)
-    
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
+
+    !>  wait for everyone to be done
+    call mpi_barrier(pf%comm%comm, ierror)
+
     
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)

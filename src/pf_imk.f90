@@ -316,17 +316,17 @@ contains
 
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     this%bernoullis = 0.0_pfdp
-    this%bernoullis(1 ) =       -1.0d0 / 2.0d0
-    this%bernoullis(2 ) =        1.0d0 / 6.0d0
-    this%bernoullis(4 ) =       -1.0d0 / 3.0d1
-    this%bernoullis(6 ) =        1.0d0 / 4.2d1
-    this%bernoullis(8 ) =       -1.0d0 / 3.0d1
-    this%bernoullis(10) =        5.0d0 / 6.6d1
-    this%bernoullis(12) =     -691.0d0 / 2.73d3
-    this%bernoullis(14) =        7.0d0 / 6.0d0
-    this%bernoullis(16) =    -3617.0d0 / 5.10d2
-    this%bernoullis(18) =    43867.0d0 / 7.98d2
-    this%bernoullis(20) =    -174611.0d0/330.0d0
+    this%bernoullis(1 ) =       -1.0_pfdp / 2.0_pfdp
+    this%bernoullis(2 ) =        1.0_pfdp / 6.0_pfdp
+    this%bernoullis(4 ) =       -1.0_pfdp / 3.0_pfdp
+    this%bernoullis(6 ) =        1.0_pfdp / 4.2e1_pfdp
+    this%bernoullis(8 ) =       -1.0_pfdp / 3.0e1_pfdp
+    this%bernoullis(10) =        5.0_pfdp / 6.6e1_pfdp
+    this%bernoullis(12) =     -691.0_pfdp / 2.73e3_pfdp
+    this%bernoullis(14) =        7.0_pfdp / 6.0_pfdp
+    this%bernoullis(16) =    -3617.0_pfdp / 5.10e2_pfdp
+    this%bernoullis(18) =    43867.0_pfdp / 7.98e2_pfdp
+    this%bernoullis(20) =    -174611.0_pfdp/330.0_pfdp
     !>  Assign explicit approximate quadrature rule
     this%QtilE =  lev%sdcmats%qmatFE
     this%QdiffE = lev%sdcmats%qmat-this%QtilE
@@ -500,7 +500,7 @@ contains
     call lev%Q(1)%copy(lev%q0, 1)
 
     ! set initial omega to 0
-    call lev%Q(1)%setval(0.0d0)
+    call lev%Q(1)%setval(0.0_pfdp)
 
     !  Evaluate F at first spot
     call lev%ulevel%sweeper%evaluate(lev, t0, 1)

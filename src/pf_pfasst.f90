@@ -34,9 +34,9 @@ contains
     if (present(nocmd)) then
          if (nocmd) read_cmd = .false.
     end if
-    if (present(fname)) then
+    if (present(fname)) then      !>  fname  present,  read inputs from a file (and maybe command line)
        call pf_read_opts(pf, read_cmd, fname)
-    else
+    else                           !>  fname not present, only call read_opts if we want command line read
        if (read_cmd) call pf_read_opts(pf, read_cmd)
     end if
 
@@ -60,7 +60,9 @@ contains
        pf%levels(l)%index = l
        pf%levels(l)%nsweeps = pf%nsweeps(l)
        pf%levels(l)%nsweeps_pred = pf%nsweeps_pred(l)
-       pf%levels(l)%nnodes = pf%nnodes(l)              
+       pf%levels(l)%nnodes = pf%nnodes(l)
+       pf%levels(l)%Finterp = pf%Finterp
+       pf%levels(l)%nsteps_rk = pf%nsteps_rk(l)
     end do
     
     !>  allocate hooks
@@ -137,9 +139,9 @@ contains
     integer :: i,ierr
 
     !> do some sanity checks
-    if (lev%mpibuflen <= 0) stop "ERROR: Invalid mpibuflen/dofs (pf_pfasst.f90)."
-    if (lev%nnodes <= 0) stop "ERROR: Invalid nnodes (pf_pfasst.f90)."
-    if (lev%nsweeps <= 0) stop "ERROR: Invalid nsweeps (pf_pfasst.f90)."
+    if (lev%mpibuflen <= 0) stop "ERROR: Invalid mpibuflen, set before calling pfasst_setup."
+    if (lev%nnodes <= 0) stop "ERROR: Invalid nnodes, should have been set in pfasst_create."
+    if (lev%nsweeps <= 0) stop "ERROR: Invalid nsweeps, should have been set in pfasst_create."
 
     mpibuflen  = lev%mpibuflen
     nnodes = lev%nnodes
@@ -305,7 +307,7 @@ contains
     integer :: nsweeps(PF_MAXLEVS)
     integer :: nsweeps_pred(PF_MAXLEVS) 
     integer :: nnodes(PF_MAXLEVS)
-    integer :: nnodes_rk(PF_MAXLEVS)
+    integer :: nsteps_rk(PF_MAXLEVS)
 
     real(pfdp) :: abs_res_tol, rel_res_tol
     logical    :: PFASST_pred, RK_pred, pipeline_pred
@@ -323,7 +325,7 @@ contains
 
     
     !> define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nnodes_rk, abs_res_tol, rel_res_tol
+    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
     namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_results, use_rk_stepper
 
@@ -351,7 +353,7 @@ contains
     save_results = pf%save_results
     echo_timings = pf%echo_timings
 
-    nnodes_rk    = pf%nnodes_rk
+    nsteps_rk    = pf%nsteps_rk
     rk_pred      = pf%rk_pred
     use_rk_stepper= pf%use_rk_stepper
 
@@ -402,14 +404,15 @@ contains
     pf%echo_timings = echo_timings
 
     pf%use_rk_stepper=use_rk_stepper
-    pf%nnodes_rk    = nnodes_rk    
+    pf%nsteps_rk    = nsteps_rk    
     pf%rk_pred      = rk_pred
 
     !>  Sanity check
     if (pf%nlevels < 1) then
-       write(*,*) 'Bad specification for nlevels=', pf%nlevels
-       stop
+       print *,'pf%nlevels = ',pf%nlevels
+       stop 'Bad specification for nlevels'
     endif
+
   end subroutine pf_read_opts
 
   !>  Subroutine to write out run parameters
@@ -433,6 +436,9 @@ contains
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date
     write(un,*) 'time:        ', time
+
+    write(un,*) 'double precision:   ', pfdp   ,'  bytes'
+    write(un,*) 'quad precision:   ', pfqp   ,'  bytes'    
 
     write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
     write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'

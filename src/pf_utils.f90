@@ -14,13 +14,13 @@ contains
   !
   !> Compute full residual at each node and measure it's size
   subroutine pf_residual(pf, lev, dt, flag)
-    type(pf_pfasst_t), intent(inout) :: pf
+    type(pf_pfasst_t),  intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: lev
-    real(pfdp),        intent(in)    :: dt
-    integer, optional, intent(in)    :: flag
+    real(pfdp),         intent(in)    :: dt
+    integer, optional,  intent(in)    :: flag
 
     real(pfdp) :: res_norms(lev%nnodes-1)    !!  Holds norms of residual
-    real(pfdp) :: sol_norms(lev%nnodes-1)    !!  Holds norms of solution
+    real(pfdp) :: sol_norms(lev%nnodes)      !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
     integer :: m
     
     call start_timer(pf, TRESIDUAL)
@@ -28,15 +28,20 @@ contains
     call lev%ulevel%sweeper%residual(lev, dt, flag)
 
     ! compute max residual norm
+    sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint
     do m = 1, lev%nnodes-1
        res_norms(m) = lev%R(m)%norm(flag)
-       sol_norms(m) = lev%Q(m+1)%norm(flag)
+       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right? 
     end do
 
     !    lev%residual = res_norms(lev%nnodes-1)
+    m = lev%nnodes  ! for usual forward integration
+    if(present(flag)) then
+      if(flag==2) m = 1
+    end if
     lev%residual = maxval(res_norms)    
-    if (sol_norms(lev%nnodes-1) > 0.0d0) then
-       lev%residual_rel = lev%residual/sol_norms(lev%nnodes-1)
+    if (sol_norms(m) > 0.0d0) then
+       lev%residual_rel = lev%residual/sol_norms(m)
     else
        lev%residual_rel = 0.0d0
     end if

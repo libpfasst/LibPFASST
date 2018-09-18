@@ -20,7 +20,7 @@ contains
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
-    if (pf%debug) print*,'DEBUG --', pf%rank, 'is begining pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag     
+    if (pf%debug) print*,'DEBUG --', pf%rank, 'is beginning pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
     ierror = 0
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then

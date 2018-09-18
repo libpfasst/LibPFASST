@@ -85,6 +85,9 @@ contains
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
 
+    !>  output local parameters
+    call print_loc_options(pf,un_opt=6)
+    
     !> allocate initial and final solutions
     call ndarray_build(y_0, [ 1 ])
     call ndarray_build(y_end, [ 1 ])    
@@ -93,8 +96,11 @@ contains
     call initial(y_0)
 
     !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.d0, nsteps,y_end)
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
     
+    !>  wait for everyone to be done
+    call mpi_barrier(pf%comm%comm, ierror)
+
     !>  deallocate initial condition and final solution
     call ndarray_destroy(y_0)
     call ndarray_destroy(y_end)

@@ -1,5 +1,5 @@
 !
-!  Test parameters to run the Dahlquist example with just SDC
+!  Test parameters to run advection diffusion example with just SDC
 !
 !  If run in serial, this will be SDC
 !  If run in parallel, this will be pipelined SDC
@@ -23,7 +23,7 @@
      rel_res_tol = 1.d-13
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_pred =  .true.
+     Pipeline_G =  .true.
      PFASST_pred = .true.
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
@@ -32,11 +32,15 @@
 
 !  Now define the local variables you need
 &PARAMS
+!    Finterp = .false.   !  default is 0
 
-    Tfin = 1.0
-    nsteps = 32
+    nx =  64 
 
-    lam1=1.0
-    lam2=-2.0
+    Tfin = 0.9
+    nsteps = 256
+
+    nu=0.02
+    a=1.0
+    a=-1.0    
 
 /

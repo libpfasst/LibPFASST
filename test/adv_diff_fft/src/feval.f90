@@ -103,18 +103,20 @@ contains
   end subroutine sweeper_setup
 
   !>  destroy the sweeper type
-  subroutine destroy(this, lev)
-    class(ad_sweeper_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)   :: lev
+  subroutine sweeper_destroy(sweeper)
+    class(pf_sweeper_t), intent(inout) :: sweeper
+    
+    class(ad_sweeper_t), pointer :: this
+    this => as_ad_sweeper(sweeper)    
 
     deallocate(this%workhat)
     deallocate(this%wsave)
     deallocate(this%ddx)
     deallocate(this%lap)
     
-    call this%imexQ_destroy(lev)
+!    call this%imexQ_destroy(lev)
 
-  end subroutine destroy
+  end subroutine sweeper_destroy
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! These routines must be provided for the sweeper
@@ -324,7 +326,7 @@ contains
        omega = two_pi*kfreq
        do i = 1, nx
           x = dble(i-1-nx/2)/dble(nx) - t*v 
-          yex(i) = dsin(omega*x)*dexp(-omega*omega*nu*t)
+          yex(i) = sin(omega*x)*exp(-omega*omega*nu*t)
        end do
     else  !  Use periodic image of Gaussians
        yex=0
@@ -333,7 +335,7 @@ contains
           do k = -nbox,nbox
              do i = 1, nx
                 x = (i-1)*Dx-0.5d0 - t*v + dble(k)
-                yex(i) = yex(i) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
+                yex(i) = yex(i) + sqrt(t00)/sqrt(t00+t)*exp(-x*x/(4.0*nu*(t00+t)))
              end do
           end do
        else
@@ -341,7 +343,7 @@ contains
           do k = -nbox,nbox
              do i = 1, nx
                 x = i*Dx-0.5d0 - t*v + dble(k)
-                yex(i) = yex(i) + dexp(-x*x)
+                yex(i) = yex(i) + exp(-x*x)
              end do
           end do
        end if  ! nbox
