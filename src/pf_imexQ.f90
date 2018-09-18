@@ -4,7 +4,7 @@
 !
 !>  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
 !!         $$   y' = f_1(y) + f_2(y)  $$
-!!  The \(f_1\) piece is treated explicitly and \(f_2\) implicitly
+!!  The \(f_1\) piece is treated explicitly and \(f_2\) implicitl
 !!  Afer this sweeper is initialized (usually in main), the logical flags can be changed if desired
 !!
 !!     explicit:  Make false if there is no explicit piece
@@ -145,7 +145,7 @@ contains
              if (this%implicit) &
                   call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2))
           end do
-          !>  Add the tau term
+          !>  Add the integral term
           call this%rhs%axpy(1.0_pfdp, lev%I(m))
 
           !>  Add the starting value
@@ -178,16 +178,21 @@ contains
     class(pf_imexQ_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev    !!  Current level
 
-    integer    ::  nnodes
+    integer    ::  nnodes,ierr
 
     this%npieces = 2
 
     nnodes = lev%nnodes
-    allocate(this%QdiffE(nnodes-1,nnodes))  
-    allocate(this%QdiffI(nnodes-1,nnodes))  
-    allocate(this%QtilE(nnodes-1,nnodes))  
-    allocate(this%QtilI(nnodes-1,nnodes))  
-    allocate(this%dtsdc(nnodes-1))  
+    allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QdiffE"
+    allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QdiffI"    
+    allocate(this%QtilE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilE"    
+    allocate(this%QtilI(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilI"    
+    allocate(this%dtsdc(nnodes-1),stat=ierr)
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for dtsdc"    
 
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp

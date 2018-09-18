@@ -55,8 +55,8 @@ clean:
 
 
 #  We can use this to build a new dependency file if makedepf90 is installed  type "make depend"
-#depend $(LIBPFASST)/.depend:
-#	makedepf90 -b ./build -o foo $(FSRC) > .depend
+depend $(LIBPFASST)/.depend:
+	makedepf90 -b ./build -o foo $(FSRC) > .depend
 
 #
 # LIBPFASST dependencies
