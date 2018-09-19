@@ -8,6 +8,7 @@ module pf_mod_magnus_picard
   use pf_mod_utils
   implicit none
 
+  !>  Magnus Picard sweeper type, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_magpicard_t
      real(pfdp), allocatable :: dtsdc(:)
      integer :: magnus_order, qtype

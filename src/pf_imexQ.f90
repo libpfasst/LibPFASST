@@ -2,7 +2,8 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
+!>  IMEX Sweeper Module
+!!  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
 !!         $$   y' = f_1(y) + f_2(y)  $$
 !!  The \(f_1\) piece is treated explicitly and \(f_2\) implicitl
 !!  Afer this sweeper is initialized (usually in main), the logical flags can be changed if desired
@@ -19,7 +20,7 @@ module pf_mod_imexQ
 
   implicit none
 
-  !>  Define sweeper type
+  !>  IMEX SDC sweeper type, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_imexQ_t
      real(pfdp), allocatable :: QtilE(:,:)   !!  Approximate explicit quadrature rule
      real(pfdp), allocatable :: QtilI(:,:)   !!  Approximate implicit quadrature rule

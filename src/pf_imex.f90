@@ -7,6 +7,7 @@ module pf_mod_imex
   use pf_mod_utils
   implicit none
 
+  !>  IMEX SDC sweeper type (old style), extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_imex_t
      real(pfdp), allocatable :: SdiffE(:,:)
      real(pfdp), allocatable :: SdiffI(:,:)

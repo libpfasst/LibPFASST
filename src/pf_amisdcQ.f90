@@ -7,6 +7,7 @@ module pf_mod_amisdcQ
   use pf_mod_amisdc
   implicit none
 
+  !>  Asynchronous multi-implicit sweeper type 
   type, extends(pf_amisdc_t), abstract :: pf_amisdcQ_t
      real(pfdp), allocatable :: QdiffE(:,:)
      real(pfdp), allocatable :: QdiffI(:,:)
