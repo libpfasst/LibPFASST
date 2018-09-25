@@ -1,0 +1,50 @@
+!
+!  Test parameters to run advection diffusion example with just SDC
+!
+!  If run in serial, this will be SDC
+!  If run in parallel, this will be pipelined SDC
+
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 1
+    nnodes =  5
+
+    nsweeps_pred= 1 
+    nsweeps= 1 
+
+    !  These are internal pfasst variables that can be reset
+    niters = 8   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1   
+   
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 0.d-14
+     rel_res_tol = 0.d-14
+
+     !  Variable which determine how the predictor runs  (default is .false. and .true.)
+     Pipeline_pred =  .true.
+     PFASST_pred = .true.
+
+     !  Variable to tell if Vcycling will be done.  Here we do pipelining
+     Vcycle=.false.
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+
+    nx =  32
+    ny =  32
+
+
+    Tfin = 0.9
+    nsteps = 32
+
+    nu=0.02
+    a=0.6
+    b=-0.7
+
+    imex_stat=2
+
+/

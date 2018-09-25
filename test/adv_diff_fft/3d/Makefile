@@ -2,8 +2,10 @@
 # Makefile for mpi-advection example.
 #
 
-LIBPFASST ?= ../..
+LIBPFASST ?= ../../..
 
+
+FFTW=TRUE
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
@@ -12,13 +14,9 @@ FSRC = src/feval.f90 \
        src/main.f90 \
        src/probin.f90 
 
-F77SRC  =  src/dfftpack.o
-
 OBJ = $(subst src,build,$(FSRC:.f90=.o))
-OBJ  += $(subst src,build,$(F77SRC:.f=.o))
-FFLAGS  += -g -I$(LIBPFASST)/include
-LDFLAGS += -g -L$(LIBPFASST)/lib -lpfasst
-
+LDFLAGS += -L$(LIBPFASST)/lib -lpfasst
+FFLAGS  += -I$(LIBPFASST)/include 
 
 all: $(EXE)
 
@@ -41,8 +39,10 @@ build/%.o: %.f90
 #
 # dependencies
 #
-main.exe : $(LIBPFASST)/lib/libpfasst.a 
-build/feval.o : src/feval.f90 ./build/probin.o 
-build/hooks.o : src/hooks.f90 ./build/feval.o 
-build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
-build/probin.o : src/probin.f90 
+./build/feval.o : src/feval.f90 ./build/probin.o 
+./build/hooks.o : src/hooks.f90 ./build/feval.o 
+./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
+./build/probin.o : src/probin.f90 
+
+
+
