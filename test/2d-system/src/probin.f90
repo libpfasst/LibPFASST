@@ -18,7 +18,6 @@ module probin
 
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: ny(PF_MAXLEVS)     ! number of grid points  
-  integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   integer, save :: nsteps_rk       ! number of time steps for rk
   integer, save :: imex_stat       ! type of imex splitting
@@ -30,7 +29,7 @@ module probin
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/  a,b,nx,ny,nprob, nsteps,nsteps_rk, dt, Tfin
+  namelist /params/  a,b,nx,ny, nsteps,nsteps_rk, dt, Tfin
   namelist /params/  pfasst_nml, nu, t00, sigma, kfreq,imex_stat
 
 contains
@@ -52,7 +51,6 @@ contains
     t00      = 0.08_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
-    nprob = 0  !  0: Gaussian, 1: Sin wave
     imex_stat=2    !  Default is full IMEX
     nx=4
     ny=4
@@ -114,15 +112,8 @@ contains
        call exit(0)
     end select
 
-    select case (nprob)
-    case (0)  
-       write(un,*) 'Periodic Gaussian initial conditions with t00=',t00
-    case (1)  
-       write(un,*) 'Sine initial conditions with kfreq=',kfreq
-    case DEFAULT
-       print *,'Bad case for nprob in probin ', nprob
-       call exit(0)
-    end select
+    write(un,*) 'Sine initial conditions with kfreq=',kfreq
+
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml
     write(un,*) '=================================================='
   end subroutine ad_print_options

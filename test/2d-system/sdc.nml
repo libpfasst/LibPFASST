@@ -13,7 +13,7 @@
     nsweeps= 1 
 
     !  These are internal pfasst variables that can be reset
-    niters = 32   !  default is 5
+    niters = 10   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1   
@@ -23,24 +23,25 @@
      rel_res_tol = 1.d-13
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_G =  .true.
+     pipeline_pred =  .false.
      PFASST_pred = .true.
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
-     Vcycle=.false.
+     Vcycle=.TRUE.
 /
 
 !  Now define the local variables you need
 &PARAMS
-!    Finterp = .false.   !  default is 0
 
-    nx =  64 
+    nx =  64
+    ny =  64
 
     Tfin = 0.9
-    nsteps = 256
+    nsteps = 32
 
     nu=0.02
     a=1.0
-    a=-1.0    
+    b=-1.0
+    imex_stat=2
 
 /
