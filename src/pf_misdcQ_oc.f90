@@ -69,7 +69,7 @@ module pf_mod_misdcQ_oc
 
 contains
 
-  ! Perform on SDC sweep on level Lev and set qend appropriately.
+  ! Perform one forward and/or backward SDC sweep on level and set qend/q0 appropriately.
   subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     use pf_mod_timer
     use pf_mod_hooks
@@ -79,16 +79,17 @@ contains
     real(pfdp),                 intent(in   ) :: dt, t0
     integer,          optional, intent(in   ) :: flags
     !>  Local variables
-    class(pf_level_t), pointer :: Lev
+    class(pf_level_t), pointer :: lev
     integer     :: k, m, n, which, Nnodes
     real(pfdp)  :: t, tend
     logical     :: sweep_y, sweep_p
     integer     :: step
 
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
     call start_timer(pf, TLEVEL+lev%index-1)
 
-    Lev => pf%levels(level_index)   !!  Assign level pointer
-
+    
     step = pf%state%step+1
 
     which = 0
@@ -105,7 +106,7 @@ contains
        sweep_p = .true.
     end if
 
-    Nnodes = Lev%nnodes
+    Nnodes = lev%nnodes
     tend = t0+dt
 
     do k = 1,nsweeps
@@ -113,32 +114,32 @@ contains
 
        ! compute integrals and add fas correction
        do m = 1, Nnodes-1
-         call Lev%I(m)%setval(0.0_pfdp)
+         call lev%I(m)%setval(0.0_pfdp)
          call this%I3(m)%setval(0.0_pfdp)
 
          if( sweep_y ) then
             !  Forward in y
             do n = 1, Nnodes
-               call Lev%I(m)%axpy(dt*this%QdiffE(m,n), Lev%F(n,1), 1)
-               call Lev%I(m)%axpy(dt*this%QdiffI(m,n), Lev%F(n,2), 1)
-               call Lev%I(m)%axpy(dt*Lev%sdcmats%qmat(m,n), Lev%F(n,3), 1)
-               call this%I3(m)%axpy(dt*this%QtilI(m,n), Lev%F(n,3), 1)
+               call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1), 1)
+               call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2), 1)
+               call lev%I(m)%axpy(dt*lev%sdcmats%qmat(m,n), lev%F(n,3), 1)
+               call this%I3(m)%axpy(dt*this%QtilI(m,n), lev%F(n,3), 1)
             end do
-            if (allocated(Lev%tauQ)) then
-               call Lev%I(m)%axpy(1.0_pfdp, Lev%tauQ(m),1)
+            if (allocated(lev%tauQ)) then
+               call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m),1)
             end if
          end if
 
          if( sweep_p ) then
             !  Backward in p
             do n = Nnodes,1,-1
-               call Lev%I(m)%axpy(dt*this%QdiffE(Nnodes-m,Nnodes+1-n), Lev%F(n,1), 2)
-               call Lev%I(m)%axpy(dt*this%QdiffI(Nnodes-m,Nnodes+1-n), Lev%F(n,2), 2)
-               call Lev%I(m)%axpy(dt*Lev%sdcmats%qmat(Nnodes-m,Nnodes+1-n), Lev%F(n,3), 2)
-               call this%I3(m)%axpy(dt*this%QtilI(Nnodes-m,Nnodes+1-n), Lev%F(n,3), 2)
+               call lev%I(m)%axpy(dt*this%QdiffE(Nnodes-m,Nnodes+1-n), lev%F(n,1), 2)
+               call lev%I(m)%axpy(dt*this%QdiffI(Nnodes-m,Nnodes+1-n), lev%F(n,2), 2)
+               call lev%I(m)%axpy(dt*lev%sdcmats%qmat(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
+               call this%I3(m)%axpy(dt*this%QtilI(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
             end do
-            if (allocated(Lev%tauQ)) then
-               call Lev%I(m)%axpy(1.0_pfdp, Lev%tauQ(m), 2)
+            if (allocated(lev%tauQ)) then
+               call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
             end if
          end if
        end do
@@ -146,49 +147,49 @@ contains
        ! do the time-stepping
        if (k .eq. 1) then
          if( sweep_y ) then
-            call Lev%Q(1)%copy(Lev%q0, 1)
-            call this%f_eval(Lev%Q(1), t0, Lev%index, Lev%F(1,1), 1, 1, 1, step)
-            call this%f_eval(Lev%Q(1), t0, Lev%index, Lev%F(1,2), 2, 1, 1, step)
-            call this%f_eval(Lev%Q(1), t0, Lev%index, Lev%F(1,3), 3, 1, 1, step)
+            call lev%Q(1)%copy(lev%q0, 1)
+            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1), 1, 1, 1, step)
+            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2), 2, 1, 1, step)
+            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,3), 3, 1, 1, step)
          end if
          if( sweep_p ) then
-            call Lev%Q(Nnodes)%copy(Lev%qend, 2)
-            call this%f_eval(Lev%Q(Nnodes), tend, Lev%index, Lev%F(Nnodes,1), 1, 2, Nnodes, step)
-            call this%f_eval(Lev%Q(Nnodes), tend, Lev%index, Lev%F(Nnodes,2), 2, 2, Nnodes, step)
-            call this%f_eval(Lev%Q(Nnodes), tend, Lev%index, Lev%F(Nnodes,3), 3, 2, Nnodes, step)
+            call lev%Q(Nnodes)%copy(lev%qend, 2)
+            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,3), 3, 2, Nnodes, step)
          end if
        end if ! k .eq. 1
 
        if (sweep_y) then
          t = t0
-         do m = 1, Lev%nnodes-1
+         do m = 1, lev%nnodes-1
             t = t + dt*this%dtsdc(m)
 
             call this%rhs%setval(0.0_pfdp)
             do n = 1, m
-               call this%rhs%axpy(dt*this%QtilE(m,n), Lev%F(n,1), 1)
-               call this%rhs%axpy(dt*this%QtilI(m,n), Lev%F(n,2), 1)
+               call this%rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1), 1)
+               call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2), 1)
             end do
             !  Add the tau term
-            call this%rhs%axpy(1.0_pfdp, Lev%I(m), 1)
+            call this%rhs%axpy(1.0_pfdp, lev%I(m), 1)
             !  Add the starting value
-            call this%rhs%axpy(1.0_pfdp, Lev%Q(1), 1)
+            call this%rhs%axpy(1.0_pfdp, lev%Q(1), 1)
 
-            call this%f_comp(Lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, Lev%index, Lev%F(m+1,2), 2, 1)
+            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,2), 2, 1)
 
             !  Now we need to do the final subtraction for the f3 piece
-            call this%rhs%copy(Lev%Q(m+1), 1)
+            call this%rhs%copy(lev%Q(m+1), 1)
             do n = 1, m
-               call this%rhs%axpy(dt*this%QtilI(m,n), Lev%F(n,3), 1)
+               call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,3), 1)
             end do
 
             call this%rhs%axpy(-1.0_pfdp, this%I3(m), 1)
-            call this%f_comp(Lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, Lev%index, Lev%F(m+1,3), 3, 1)
-            call this%f_eval(Lev%Q(m+1), t, Lev%index, Lev%F(m+1,1), 1, 1, m+1, step)
-            call this%f_eval(Lev%Q(m+1), t, Lev%index, Lev%F(m+1,2), 2, 1, m+1, step)
+            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,3), 3, 1)
+            call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, 1, m+1, step)
+            call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
          end do
          !call pf_residual(pf, lev, dt, 1)
-         call Lev%qend%copy(Lev%Q(Lev%nnodes), 1)
+         call lev%qend%copy(lev%Q(lev%nnodes), 1)
        end if ! sweep_y
 
        if (sweep_p) then
@@ -197,30 +198,30 @@ contains
             t = t - dt*this%dtsdc(m)
             call this%rhs%setval(0.0_pfdp)
             do n = Nnodes, m+1,-1
-               call this%rhs%axpy(dt*this%QtilE(Nnodes-m,Nnodes-n+1), Lev%F(n,1), 2)
-               call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), Lev%F(n,2), 2)
+               call this%rhs%axpy(dt*this%QtilE(Nnodes-m,Nnodes-n+1), lev%F(n,1), 2)
+               call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), lev%F(n,2), 2)
             end do
             !  Add the tau term
-            call this%rhs%axpy(1.0_pfdp, Lev%I(m), 2)
+            call this%rhs%axpy(1.0_pfdp, lev%I(m), 2)
             !  Add the starting value
-            call this%rhs%axpy(1.0_pfdp, Lev%Q(Nnodes), 2)
+            call this%rhs%axpy(1.0_pfdp, lev%Q(Nnodes), 2)
 
-            call this%f_comp(Lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, Lev%index, Lev%F(m,2), 2, 2)
+            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
 
             !  Now we need to do the final subtraction for the f3 piece
-            call this%rhs%copy(Lev%Q(m), 2)
+            call this%rhs%copy(lev%Q(m), 2)
             do n = Nnodes, m+1,-1
-               call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), Lev%F(n,3), 2)
+               call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), lev%F(n,3), 2)
             end do
 
             call this%rhs%axpy(-1.0_pfdp, this%I3(m), 2)
 
-            call this%f_comp(Lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, Lev%index, Lev%F(m,3), 3, 2)
-            call this%f_eval(Lev%Q(m), t, Lev%index, Lev%F(m,1), 1, 2, m, step)
-            call this%f_eval(Lev%Q(m), t, Lev%index, Lev%F(m,2), 2, 2, m, step)
+            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,3), 3, 2)
+            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
+            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, 2, m, step)
          end do
          !call pf_residual(pf, lev, dt, 2)
-         call Lev%q0%copy(Lev%Q(1), 2)
+         call lev%q0%copy(lev%Q(1), 2)
        end if  ! sweep_p
 
        if( sweep_p .and. sweep_y ) then
@@ -273,7 +274,7 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%shape)
 
     !>  Make space for extra integration piece
     call lev%ulevel%factory%create_array(this%I3,lev%nnodes-1,lev%index,lev%shape)
@@ -321,10 +322,10 @@ contains
 
        !  Backward in p
        if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call fintSDC(Lev%nnodes-n)%setval(0.0_pfdp, 2)
+          call fintSDC(lev%nnodes-n)%setval(0.0_pfdp, 2)
           do m = 1, lev%nnodes
             do p = 1, this%npieces
-              call fintSDC(lev%nnodes-n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(Lev%nnodes+1-m,p), 2)
+              call fintSDC(lev%nnodes-n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(lev%nnodes+1-m,p), 2)
             end do
           end do
        end if
@@ -332,11 +333,11 @@ contains
   end subroutine misdcQ_oc_integrate
 
   ! Evaluate function values
-  subroutine misdcQ_oc_evaluate(this, Lev, t, m, flags, step)
+  subroutine misdcQ_oc_evaluate(this, lev, t, m, flags, step)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
     real(pfdp),             intent(in   ) :: t
     integer,                intent(in   ) :: m
-    class(pf_level_t),       intent(inout) :: Lev
+    class(pf_level_t),       intent(inout) :: lev
     integer,      optional, intent(in   ) :: flags, step
 
     integer  :: which, mystep
@@ -346,9 +347,9 @@ contains
     mystep = 1
     if(present(step)) mystep = step
 
-    call this%f_eval(Lev%Q(m), t, Lev%index, Lev%F(m,1), 1, which, m, step)
-    call this%f_eval(Lev%Q(m), t, Lev%index, Lev%F(m,2), 2, which, m, step)
-    call this%f_eval(Lev%Q(m), t, Lev%index, Lev%F(m,3), 3, which, m, step)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, which, m, step)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, which, m, step)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,3), 3, which, m, step)
   end subroutine misdcQ_oc_evaluate
 
 
@@ -370,9 +371,9 @@ contains
     end do
   end subroutine misdcQ_oc_evaluate_all
 
-  subroutine misdcQ_oc_residual(this, Lev, dt, flags)
+  subroutine misdcQ_oc_residual(this, lev, dt, flags)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
-    class(pf_level_t),       intent(inout) :: Lev
+    class(pf_level_t),       intent(inout) :: lev
     real(pfdp),             intent(in)    :: dt
     integer,      optional, intent(in)    :: flags
 
@@ -381,26 +382,26 @@ contains
     which = 0
     if(present(flags)) which = flags
 
-    call this%integrate(Lev, Lev%Q, Lev%F, dt, Lev%I, which)
+    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
 
     ! add tau (which is 'node to node')
-    if (allocated(Lev%tauQ)) then
-       do m = 1, Lev%nnodes-1
-          call Lev%I(m)%axpy(1.0_pfdp, Lev%tauQ(m), which)
+    if (allocated(lev%tauQ)) then
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
        end do
     end if
 
     ! subtract out Q
-    do m = 1, Lev%nnodes-1
+    do m = 1, lev%nnodes-1
        if( (which .eq. 0) .or. (which .eq. 1) ) then
-          call Lev%R(m)%copy(Lev%I(m), 1)
-          call Lev%R(m)%axpy(1.0_pfdp, Lev%Q(1), 1)
-          call Lev%R(m)%axpy(-1.0_pfdp, Lev%Q(m+1), 1)
+          call lev%R(m)%copy(lev%I(m), 1)
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
        end if
        if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call Lev%R(m)%copy(Lev%I(m), 2)
-          call Lev%R(m)%axpy(1.0_pfdp, Lev%Q(Lev%nnodes), 2)
-          call Lev%R(m)%axpy(-1.0_pfdp, Lev%Q(m), 2)
+          call lev%R(m)%copy(lev%I(m), 2)
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
        end if
     end do
 

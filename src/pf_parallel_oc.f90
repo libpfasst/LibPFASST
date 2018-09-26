@@ -359,6 +359,8 @@ contains
     else
       pf%state%step    = pf%rank
     end if
+    
+!     print *, pf%state%step
       
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
@@ -510,8 +512,8 @@ contains
       if (pf%state%status == PF_STATUS_CONVERGED)  exit
     end do  !  Loop over the iteration in this block
     call call_hooks(pf, -1, PF_POST_CONVERGENCE)
-    call call_hooks(pf, -1, PF_POST_STEP)
     pf%state%itcnt = pf%state%itcnt + pf%state%iter
+    call call_hooks(pf, -1, PF_POST_STEP)
     
     if (pf%save_results) call pf%results%dump(pf%results)
     
