@@ -3,7 +3,7 @@
 !
 !> Example of using LIBPFASST.
 !!
-!!  This program solves the 2-d advection diffusion problem on a periodic domain
+!!  This program solves the 3-d advection diffusion problem on a periodic domain
 
 !>  The main program here just initializes mpi, calls the solver and then finalizes mpi
 program main
@@ -18,7 +18,6 @@ program main
 
   !> call the advection-diffusion solver 
   call run_pfasst()
-
 
   !> close mpi
   call mpi_finalize(ierror)
@@ -36,8 +35,8 @@ contains
     !>  Local variables
     type(pf_pfasst_t) :: pf       !<  the main pfasst structure
     type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
-    type(ndsysarray)     :: y_0      !<  the initial condition
-    type(ndsysarray)     :: y_end    !<  the solution at the final time
+    type(ndarray)     :: y_0      !<  the initial condition
+    type(ndarray)     :: y_end    !<  the solution at the final time
     character(256)    :: probin_fname   !<  file name for input parameters
 
     integer           ::  l   !  loop variable over levels
@@ -60,59 +59,59 @@ contains
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
-       allocate(ndsysarray_factory::pf%levels(l)%ulevel%factory)
+       allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
-
-       !>  Allocate the arr_shape array for level (here just two dimension)
-       allocate(pf%levels(l)%shape(3))
-       pf%levels(l)%shape(1) = nx(l)
-       pf%levels(l)%shape(2) = ny(l)
-       pf%levels(l)%shape(3) = 2
+       !>  Allocate the shape array for level (here just one dimension)
+       allocate(pf%levels(l)%shape(2))
+       pf%levels(l)%shape = [nx(l),ny(l)]
 
        !>  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
        call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
 
+
        !>  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = product(pf%levels(l)%shape)
+       pf%levels(l)%mpibuflen  = nx(l)*ny(l)
     end do
 
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
+
     !> add some hooks for output
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
 
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
 
-    !>  output the run options 
-    call ad_print_options(pf,un_opt=6)
-
+    !>  Output local parameters
+    call print_loc_options(pf,un_opt=6)
+    
     !> allocate initial and final solutions
-    call ndsysarray_build(y_0,  pf%levels(pf%nlevels)%shape)
-    call ndsysarray_build(y_end, pf%levels(pf%nlevels)%shape)
+    call ndarray_build(y_0, [ pf%levels(pf%nlevels)%shape])
+    call ndarray_build(y_end, [ pf%levels(pf%nlevels)%shape])
 
     !> compute initial condition
     call initial(y_0)
 
     !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.d0, nsteps,y_end)
-
-    !>  wait for everyone to b e done
-    call mpi_barrier(pf%comm%comm, ierror)
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
     
+    !>  wait for everyone to be done
+    call mpi_barrier(pf%comm%comm, ierror)
+
     !>  deallocate initial condition and final solution
-    call ndsysarray_destroy(y_0)
-    call ndsysarray_destroy(y_end)
+    call ndarray_destroy(y_0)
+    call ndarray_destroy(y_end)
 
     !> deallocate sweeper stuff
     do l = 1, pf%nlevels
        call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
     end do
-
+    
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)
+
   end subroutine run_pfasst
 
 end program

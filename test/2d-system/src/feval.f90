@@ -8,14 +8,8 @@ module feval
   use pf_mod_dtype
   use pf_mod_ndsysarray
   use pf_mod_imexQ
+  use pf_mod_fftpackage
   implicit none
-
-  include 'fftw3.f03'
-  real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
-  real(pfdp), parameter ::  Ly     = 1.0_pfdp    ! domain size  
-
-  real(pfdp), parameter :: pi = 3.141592653589793_pfdp
-  real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
 
   type, extends(pf_user_level_t) :: ad_level_t
    contains
@@ -24,16 +18,16 @@ module feval
   end type ad_level_t
 
   type, extends(pf_imexQ_t) :: ad_sweeper_t
-     type(c_ptr) :: ffft, ifft
-     integer ::  ierror, nx,ny
-     complex(pfdp), pointer :: wk(:,:)              ! work space     
+     type(pf_fft_t), pointer :: fft_tool     
+     integer ::   nx,ny
      complex(pfdp), allocatable :: lap(:,:)         ! Lapclacian operators
-     complex(pfdp), allocatable :: ddy(:,:), ddx(:,:) ! First derivative operators
+     complex(pfdp), allocatable :: ddx(:,:) ! First derivative operators
+     complex(pfdp), allocatable :: ddy(:,:) ! First derivative operators     
+     
    contains
 
      procedure :: f_eval    !  Computes the advection and diffusion terms
      procedure :: f_comp    !  Does implicit solves 
-
   end type ad_sweeper_t
 
 contains
@@ -55,7 +49,7 @@ contains
     integer,             intent(in   ) :: arr_shape(3)
 
     class(ad_sweeper_t), pointer :: this
-    integer     :: i,j,ierror,nx,ny
+    integer     :: i,j,nx,ny
     type(c_ptr) :: wk
     real(pfdp)  :: kxj,kxi
 
@@ -76,59 +70,31 @@ contains
     ny = arr_shape(2)
     this%nx = nx
     this%ny = ny
-
-    ! create in-place, complex fft plans
-    wk = fftw_alloc_complex(int(nx*ny, c_size_t))
-    call c_f_pointer(wk, this%wk, [nx,ny])
-    
-    this%ffft = fftw_plan_dft_2d(nx,ny, &
-         this%wk, this%wk, FFTW_FORWARD, FFTW_ESTIMATE)
-    this%ifft = fftw_plan_dft_2d(nx,ny, &
-         this%wk, this%wk, FFTW_BACKWARD, FFTW_ESTIMATE)
-
-
     allocate(this%lap(nx,ny))
     allocate(this%ddx(nx,ny))
-    allocate(this%ddy(nx,ny))        
-    do j = 1, ny
-       if (j <= ny/2+1) then
-          kxj = two_pi / Ly * dble(j-1)
-       else
-          kxj = two_pi / Ly * dble(-ny + j - 1)
-       end if
-       do i = 1, nx
-       if (i <= nx/2+1) then
-          kxi = two_pi / Lx * dble(i-1)
-       else
-          kxi = two_pi / Lx * dble(-nx + i - 1)
-       end if
+    allocate(this%ddy(nx,ny))
 
-       if (kxi**2+kxj**2 < 1e-13) then
-          this%lap(i,j) = 0.0_pfdp
-       else
-          this%lap(i,j) = -(kxi**2+kxj**2)
-       end if
-       this%ddx(i,j) = (0.0_pfdp,1.0_pfdp)*kxi
-       this%ddy(i,j) = (0.0_pfdp,1.0_pfdp)*kxj       
-    end do
-    end do
+    allocate(this%fft_tool)
+    call this%fft_tool%fft_setup([nx,ny],2)
+
+    call this%fft_tool%make_lap_2d(this%lap)
+    call this%fft_tool%make_deriv_2d(this%ddx,1)
+    call this%fft_tool%make_deriv_2d(this%ddy,2)        
   end subroutine sweeper_setup
-    !>  destroy the sweeper type
 
+  !>  destroy the sweeper type
   subroutine sweeper_destroy(sweeper)
     class(pf_sweeper_t), intent(inout) :: sweeper
     
     class(ad_sweeper_t), pointer :: this
     this => as_ad_sweeper(sweeper)    
-    deallocate(this%wk)
+
     deallocate(this%lap)
     deallocate(this%ddx)
-    deallocate(this%ddy)
-    call fftw_destroy_plan(this%ffft)
-    call fftw_destroy_plan(this%ifft)
+    deallocate(this%ddy)    
     
-    
-!    call this%imexQ_destroy(lev)
+    call this%fft_tool%fft_destroy()
+    deallocate(this%fft_tool)    
 
   end subroutine sweeper_destroy
 
@@ -139,13 +105,13 @@ contains
     
   !> Routine to return the exact solution
   subroutine exact(t, y_ex)
-    use probin, only: nprob,nu, a,b, t00, kfreq
+    use probin, only: nu, a,b, kfreq
     real(pfdp), intent(in)  :: t
     type(ndsysarray), intent(inout) :: y_ex
 
     integer    :: ny,nx
     integer    :: i,j, ii, k,nbox
-    real(pfdp) :: tol, x,y, t0,Dx, omega
+    real(pfdp) :: tol, x,y, omega
     real(pfdp),pointer :: u_ex(:,:),v_ex(:,:)
     
     nx=y_ex%arr_shape(1)
@@ -154,41 +120,16 @@ contains
     u_ex=>get_array2d(y_ex,1)
     v_ex=>get_array2d(y_ex,2)
     
-
-!    if (nprob .eq. 1) then
-       !  Using sin wave initial condition
-       omega = 2*pi*kfreq
-       do j=1, ny
-          y = Ly*dble(j-1-ny/2)/dble(ny) - t*b 
-          do i = 1, nx
-             x = Lx*dble(i-1-nx/2)/dble(nx) - t*a 
-             u_ex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
-             v_ex(i,j) = cos(omega*x)*cos(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)             
-          end do
+    omega = two_pi*kfreq
+    do j=1, ny
+       y = Ly*dble(j-1-ny/2)/dble(ny) - t*b 
+       do i = 1, nx
+          x = Lx*dble(i-1-nx/2)/dble(nx) - t*a 
+          u_ex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
+          v_ex(i,j) = cos(omega*x)*cos(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)             
        end do
-       
-!!$    else  !  Use periodic image of Gaussians
-!!$       yex=0
-!!$       if (nu .gt. 0) then
-!!$          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0/(Lx*Lx)))  !  Decide how many periodic images
-!!$          do k = -nbox,nbox
-!!$             do i = 1, nx
-!!$                x = (i-1)*Dx-0.5d0 - t*v + dble(k)*Lx
-!!$                yex(i,:) = yex(i,:) + dsqrt(t00)/dsqrt(t00+t)*dexp(-x*x/(4.0*nu*(t00+t)))
-!!$             end do
-!!$          end do
-!!$       else
-!!$          nbox = ceiling(sqrt(37.0d0/(Lx*Lx)))  !  Decide how many periodic images
-!!$          do k = -nbox,nbox
-!!$             do i = 1, nx
-!!$                x = i*Dx-0.5d0 - t*v + dble(k)*Lx
-!!$                yex(i) = yex(i) + dexp(-x*x)
-!!$             end do
-!!$          end do
-!!$          
-!!$       end if  ! nbox
-!       print *,yex
-!    end if
+    end do
+    
   end subroutine exact
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -205,51 +146,49 @@ contains
     
     real(pfdp),      pointer :: yvec(:,:), fvec(:,:)
     complex(pfdp), pointer :: wk(:,:)
-    integer ::  ierror,nx,ny,n
+    type(pf_fft_t),     pointer :: fft    
+    integer ::  n
 
-
+    fft => this%fft_tool
     do n=1,2
-    yvec  => get_array2d(y,n)
-    fvec => get_array2d(f,n)
-    wk => this%wk
-    wk = yvec
-    nx=size(yvec,1)
-    ny=size(yvec,2)
-
-    call fftw_execute_dft(this%ffft, wk, wk)
+       yvec  => get_array2d(y,n)
+       fvec => get_array2d(f,n)
+       wk => fft%get_wk_ptr_2d()
+       
+       wk = yvec
+       call fft%fftf()          
     
-    select case (piece)
-    case (1)  ! Explicit piece
-       select case (imex_stat)
-       case (0)  ! Fully Explicit        
-          wk = (-a * this%ddx -b * this%ddy + nu * this%lap) *  wk
-       case (1)  ! Fully Implicit
-          print *,'Should not be in this case in feval'
-       case (2)  ! IMEX
-          wk = (-a * this%ddx -b * this%ddy) *  wk
+       select case (piece)
+       case (1)  ! Explicit piece
+          select case (imex_stat)
+          case (0)  ! Fully Explicit        
+             wk = (-a * this%ddx -b * this%ddy + nu * this%lap) *  wk
+          case (1)  ! Fully Implicit
+             print *,'Should not be in this case in feval'
+          case (2)  ! IMEX
+             wk = (-a * this%ddx -b * this%ddy) *  wk
+          case DEFAULT
+             print *,'Bad case for imex_stat in f_eval ', imex_stat
+             call exit(0)
+          end select
+       case (2)  ! Implicit piece
+          select case (imex_stat)
+          case (0)  ! Fully Explicit        
+             print *,'Should not be in this case in feval'
+          case (1)  ! Fully Implicit
+             wk = (-a * this%ddx -b * this%ddy + nu * this%lap) *  wk
+          case (2)  ! IMEX
+             wk = (nu * this%lap) *  wk
+          case DEFAULT
+             print *,'Bad case for imex_stat in f_eval ', imex_stat
+             call exit(0)
+          end select
        case DEFAULT
-          print *,'Bad case for imex_stat in f_eval ', imex_stat
+          print *,'Bad case for piece in f_eval ', piece
           call exit(0)
        end select
-    case (2)  ! Implicit piece
-       select case (imex_stat)
-       case (0)  ! Fully Explicit        
-          print *,'Should not be in this case in feval'
-       case (1)  ! Fully Implicit
-          wk = (-a * this%ddx -b * this%ddy + nu * this%lap) *  wk
-       case (2)  ! IMEX
-          wk = (nu * this%lap) *  wk
-       case DEFAULT
-          print *,'Bad case for imex_stat in f_eval ', imex_stat
-          call exit(0)
-       end select
-    case DEFAULT
-      print *,'Bad case for piece in f_eval ', piece
-      call exit(0)
-    end select
-    wk =  wk / dble(nx*ny)
-    call fftw_execute_dft(this%ifft, wk, wk)
-    fvec = real(wk)
+       call fft%fftb()
+       fvec = real(wk)    
     end do
   end subroutine f_eval
 
@@ -269,93 +208,93 @@ contains
     integer,             intent(in   ) :: piece
 
     real(pfdp),      pointer :: yvec(:,:), rhsvec(:,:), fvec(:,:)
-    complex(pfdp), pointer :: wk(:,:)
-    integer ::  ierror,nx,ny,n
+    complex(pfdp),   pointer :: wk(:,:)
+    type(pf_fft_t),     pointer :: fft        
+    integer ::  n
     
-    wk => this%wk
+    fft => this%fft_tool
+    wk => fft%get_wk_ptr_2d()
+    
     do n=1,2
        yvec=>get_array2d(y,n)
        fvec=>get_array2d(f,n)
        rhsvec=>get_array2d(rhs,n)                
-           
-       wk = rhsvec
-       nx = size(yvec,1)
-       ny = size(yvec,2)
 
        if (piece == 2) then
-          
-          call fftw_execute_dft(this%ffft, wk, wk)
-!          if (ierror .ne. 0) &
-!               stop "error  calling cfft1f in f_comp"
+          wk = rhsvec
+          call fft%fftf()          
           if (imex_stat .eq. 2) then
              wk = wk / (1.0_pfdp - dtq*nu*this%lap) 
           else  ! fully implicit
-             wk = wk / (1.0_pfdp - dtq*(-a * this%ddx -b * this%ddy + nu * this%lap))               
+             wk = wk / (1.0_pfdp - dtq*(-a * this%ddx -b * this%ddy + nu * this%lap))
           end if
        else
           print *,'Bad piece in f_comp ',piece
           call exit(0)
        end if
-       wk = wk /dble(nx*ny)
-       call fftw_execute_dft(this%ifft, wk, wk)
-       yvec = real(wk)
+       call fft%fftb()
+       yvec=real(wk)
        fvec = (yvec - rhsvec) / dtq
     end do
     
   end subroutine f_comp
-  subroutine interp2(qF, qG, adF, adG)
-    class(ad_sweeper_t), pointer :: adF, adG
-    real(pfdp),  intent(inout) :: qF(:,:), qG(:,:)
+  subroutine interp2(q_f, q_c, sweeper_f, sweeper_c)
+    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
+    real(pfdp), pointer, intent(inout) :: q_f(:,:), q_c(:,:)
 
-    complex(pfdp), pointer :: wkF(:,:), wkG(:,:)
-    integer      :: nxF, nxG, nyF, nyG, xrat,yrat,i,j,ii,jj
-    nxF=size(qF,1)
-    nyF=size(qF,2)
-    nxG=size(qG,1)
-    nyG=size(qG,2)
-    xrat  = nxF/nxG
-    yrat  = nyF/nyG
+    integer      :: nx_f, nx_c, ny_f, ny_c, xrat,yrat,i,j,ii,jj
+    complex(pfdp),         pointer ::  wk_f(:,:),wk_c(:,:)    
+    type(pf_fft_t),     pointer :: fft_f,fft_c
     
-
+    nx_f=size(q_f,1)
+    ny_f=size(q_f,2)
+    nx_c=size(q_c,1)
+    ny_c=size(q_c,2)
+    xrat  = nx_f/nx_c
+    yrat  = ny_f/ny_c
+    
     if (xrat == 1 .and. yrat==1) then
-       qF = qG
+       q_f = q_c
        return
     endif
 
     
-    wkF => adF%wk
-    wkG => adG%wk
+    fft_c => sweeper_c%fft_tool
+    fft_f => sweeper_f%fft_tool    
+    wk_f => fft_f%get_wk_ptr_2d()
+    wk_c => fft_c%get_wk_ptr_2d()
        
-    wkG = qG
-    call fftw_execute_dft(adG%ffft, wkG, wkG)
-    wkG = wkG / (nxG*nyG)
-       
-    wkF = 0.0d0
-    do j = 1, nyG
-       if (j <= nyG/2) then
+    wk_c = q_c
+    call fft_c%fftf()              
+    wk_c = wk_c *4.0_pfdp
+
+    !  fill fine spectral reprentations of y with coarse spectrum
+    wk_f = 0.0d0
+    do j = 1, ny_c
+       if (j <= ny_c/2) then
           jj = j
-       else if (j > nyG/2+1) then
-          jj = nyF - nyG + j
+       else if (j > ny_c/2+1) then
+          jj = ny_f - ny_c + j
        else
           cycle
        end if
        
-       do i = 1, nxG
-          if (i <= nxG/2) then
+       do i = 1, nx_c
+          if (i <= nx_c/2) then
              ii = i
-          else if (i > nxG/2+1) then
-             ii = nxF - nxG + i
+          else if (i > nx_c/2+1) then
+             ii = nx_f - nx_c + i
           else
              cycle
           end if
           
-          wkF(ii, jj) = wkG(i, j)
+          wk_f(ii, jj) = wk_c(i, j)
        end do
     end do
 
-    call fftw_execute_dft(adF%ifft, wkF, wkF)
-       
-    qF = real(wkF)    
+    call fft_f%fftb()
+    q_f = real(wk_f)    
+    
   end subroutine interp2
 
   subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
@@ -368,21 +307,19 @@ contains
 
 
     integer :: nvarF, nvarG, xrat,n
-    class(ad_sweeper_t), pointer :: adF, adG
+    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
     type(ndsysarray), pointer :: ndsysarray_F
     real(pfdp),         pointer :: f(:,:), g(:,:)
 
-    integer ::  ierror
-    adG => as_ad_sweeper(levelG%ulevel%sweeper)
-    adF => as_ad_sweeper(levelF%ulevel%sweeper)
+    sweeper_c => as_ad_sweeper(levelG%ulevel%sweeper)
+    sweeper_f => as_ad_sweeper(levelF%ulevel%sweeper)
 
     ndsysarray_F => cast_as_ndsysarray(qF)
     
     do n=1,ndsysarray_F%ncomp
-       f => get_array2d(qF,n); 
+       f => get_array2d(qF,n) 
        g => get_array2d(qG,n)
-       
-       call interp2(f, g, adF, adG)  
+       call interp2(f, g, sweeper_f, sweeper_c)  
     end do
     
 
@@ -396,25 +333,20 @@ contains
     real(pfdp),        intent(in   ) :: t   
     integer, intent(in), optional :: flags
 
-    integer :: NxF, NxG,NyF, NyG, xrat, yrat,n
-    real(pfdp), pointer :: f(:,:), g(:,:)
+    integer :: xrat, yrat,n
+    real(pfdp), pointer :: q_f(:,:), q_c(:,:)
 
     type(ndsysarray), pointer :: ndsysarray_F
     ndsysarray_F => cast_as_ndsysarray(qF)
 
-
     
     do n=1,ndsysarray_F%ncomp
-       f => get_array2d(qF,n)
-       g => get_array2d(qG,n)
+       q_f => get_array2d(qF,n)
+       q_c => get_array2d(qG,n)
        
-       NxF=size(f,1)
-       NyF=size(f,2)
-       NxG=size(g,1)
-       NyG=size(g,2)
-       xrat  = NxF/NxG
-       yrat  = NyF/NyG
-       g = f(::xrat,::yrat)
+       xrat  = size(q_f,1)/size(q_c,1)
+       yrat  = size(q_f,2)/size(q_c,2)
+       q_c = q_f(::xrat,::yrat)
     end do
  
   end subroutine restrict
