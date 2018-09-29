@@ -319,7 +319,7 @@ contains
     this%bernoullis = 0.0_pfdp
     this%bernoullis(1 ) =       -1.0_pfdp / 2.0_pfdp
     this%bernoullis(2 ) =        1.0_pfdp / 6.0_pfdp
-    this%bernoullis(4 ) =       -1.0_pfdp / 3.0_pfdp
+    this%bernoullis(4 ) =       -1.0_pfdp / 3.0e1_pfdp
     this%bernoullis(6 ) =        1.0_pfdp / 4.2e1_pfdp
     this%bernoullis(8 ) =       -1.0_pfdp / 3.0e1_pfdp
     this%bernoullis(10) =        5.0_pfdp / 6.6e1_pfdp
