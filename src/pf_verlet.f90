@@ -10,8 +10,9 @@
 !!
 !! or
 !!
-!! $$   x''=f(x), x'=v $$
+!! $$    x'=v, x''=f(x) $$
 !!
+!!  So p is not momentum here, but velocity
 module pf_mod_verlet
   use pf_mod_dtype
   use pf_mod_utils
@@ -130,8 +131,6 @@ contains
     !
 !    call this%hamiltonian(t0+dt, Lev%qend, encapctx%m,H)
 !    print *,'Ham=',H,this%Htol,this%H0
-
-
 !    if ((pf%state%iter > 1) .and. (abs(H-this%H0) < this%Htol)) then
 !       call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
 !          print *, 'Skipping SDC sweep'
@@ -164,7 +163,7 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1),0)
+          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
        end if
 
        t = t0
@@ -197,7 +196,7 @@ contains
           call lev%Q(m+1)%copy(this%rhs,2)
           
           !  update function values
-          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1),0)  
+          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1))  
 
           !  Now do the v peice
           call this%rhs%setval(0.0_pfdp,1)          
@@ -507,7 +506,7 @@ contains
     integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
 
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),0)
+       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine verlet_evaluate
 
   !> Subroutine to evaluate the function values at all nodes
