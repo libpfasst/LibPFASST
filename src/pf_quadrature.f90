@@ -37,6 +37,10 @@ contains
      if (ierr /= 0) stop "allocate error qmatFE"
      allocate(SDCmats%qmatBE(nnodes-1,nnodes),stat=ierr)
      if (ierr /= 0) stop "allocate error qmatBE"
+     allocate(SDCmats%qmatTrap(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmatBE"
+     allocate(SDCmats%qmatVer(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) stop "allocate error qmatBE"
      allocate(SDCmats%qmatLU(nnodes-1,nnodes),stat=ierr)
      if (ierr /= 0) stop "allocate error qmatLU"
      allocate(SDCmats%s0mat(nnodes-1,nnodes),stat=ierr)
@@ -48,6 +52,8 @@ contains
           SDCmats%qnodes, nflags, SDCmats%s0mat, SDCmats%qmat,SDCmats%qmatFE,SDCmats%qmatBE)
 
      call myLUq(SDCmats%qmat,SDCmats%qmatLU,nnodes,0)
+     SDCmats%qmatTrap=0.5_pfdp*(SDCmats%qmatFE+SDCmats%qmatBE)
+
   end subroutine pf_init_sdcmats
   
   subroutine pf_destroy_sdcmats(SDCmats)
@@ -58,6 +64,8 @@ contains
      deallocate(SDCmats%qmatFE)  
      deallocate(SDCmats%qmatBE)  
      deallocate(SDCmats%qmatLU)  
+     deallocate(SDCmats%qmatTrap)  
+     deallocate(SDCmats%qmatVer)  
      deallocate(SDCmats%s0mat)  
      deallocate(SDCmats%qnodes)       
   end subroutine pf_destroy_sdcmats

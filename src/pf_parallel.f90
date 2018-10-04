@@ -22,7 +22,7 @@ contains
   !!  to execute the code correctly
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend, flags)
     type(pf_pfasst_t), intent(inout), target   :: pf   !!  The complete PFASST structure
-    class(pf_encap_t), intent(in   )           :: q0   !!  The initial condition
+    class(pf_encap_t), intent(inout   )           :: q0   !!  The initial condition
     real(pfdp),        intent(in   )           :: dt   !!  The time step for each processor
     real(pfdp),        intent(in   )           :: tend !!  The final time of run
     integer,           intent(in   ), optional :: nsteps  !!  The number of time steps
@@ -34,6 +34,7 @@ contains
     integer :: nproc  !!  Total number of processors
     integer :: nsteps_loc  !!  local number of time steps    
     real(pfdp) :: tend_loc !!  The final time of run
+
 
     ! make a local copy of nproc
     nproc = pf%comm%nproc
@@ -141,6 +142,7 @@ contains
     !! Step 1. Getting the  initial condition on the finest level at each processor
     !!         If we are doing multiple levels, then we need to coarsen to fine level
     f_lev_p => pf%levels(pf%nlevels)
+    
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
        call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0)
     endif
@@ -188,7 +190,7 @@ contains
 
              ! Get new initial value (skip on first iteration)
              if (k > 1) then
-                call c_lev_p%q0%copy(c_lev_p%qend,flags=1)
+                call c_lev_p%q0%copy(c_lev_p%qend,flags=0)
                 ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
                 if (.not. pf%PFASST_pred) then
                    call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
@@ -236,8 +238,9 @@ contains
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-       call interpolate_q0(pf, f_lev_p, c_lev_p)
-
+!       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
+       call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
+       
        !  Do a sweep on level unless we are at the finest level
        if (level_index < pf%nlevels) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
@@ -360,7 +363,9 @@ contains
     lev_p => pf%levels(pf%nlevels)
 
     !  Stick the initial condition into q0 (will happen on all processors)
-    call lev_p%q0%copy(q0, flags=1)
+    ! aaaaaaaaaaaaaaaaaaaaa
+!        call lev_p%q0%copy(q0)
+        call lev_p%q0%copy(q0, flags=0)    
 
     
     nproc = pf%comm%nproc
@@ -395,7 +400,9 @@ contains
              call pf_broadcast(pf, lev_p%send, lev_p%mpibuflen, pf%comm%nproc-1)
              call lev_p%q0%unpack(lev_p%send)    !!  Everyone resets their q0
           else
-             call lev_p%q0%copy(lev_p%qend, flags=1)    !!  Just stick qend in q0
+             !aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+             call lev_p%q0%copy(lev_p%qend, flags=0)    !!  Just stick qend in q0
+!             call lev_p%q0%copy(lev_p%qend)    !!  Just stick qend in q0             
           end if
 
           !>  Update the step and t0 variables for new block
@@ -439,7 +446,9 @@ contains
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
-       call qend%copy(lev_p%qend, flags=1)
+       !aaaaaaaaaaaaaaaaaaaaa
+       call qend%copy(lev_p%qend, flags=0)
+!       call qend%copy(lev_p%qend)       
     end if
   end subroutine pf_block_run
   
@@ -498,13 +507,14 @@ contains
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
+!       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
        call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false.)
        
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
-          call interpolate_q0(pf, f_lev_p, c_lev_p)
+          call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
        end if
        ! don't sweep on the finest level since that is only done at beginning
        if (level_index < level_index_f) then

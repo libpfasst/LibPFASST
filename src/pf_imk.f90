@@ -231,7 +231,7 @@ contains
     call this%propagate(lev%q0, lev%Q(5))
 
     call pf_residual(pf, lev, dt)
-    call lev%qend%copy(lev%Q(lev%nnodes), 1)
+    call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
 
     call call_hooks(pf, 1, PF_POST_SWEEP)
   end subroutine mkrk_step
@@ -294,7 +294,7 @@ contains
        end do  !!  End substep loop
 
        call pf_residual(pf, lev, dt)
-       call lev%qend%copy(lev%Q(lev%nnodes), 1)
+       call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
 
     end do  !  End loop on sweeps
 
@@ -319,7 +319,7 @@ contains
     this%bernoullis = 0.0_pfdp
     this%bernoullis(1 ) =       -1.0_pfdp / 2.0_pfdp
     this%bernoullis(2 ) =        1.0_pfdp / 6.0_pfdp
-    this%bernoullis(4 ) =       -1.0_pfdp / 3.0_pfdp
+    this%bernoullis(4 ) =       -1.0_pfdp / 3.0e1_pfdp
     this%bernoullis(6 ) =        1.0_pfdp / 4.2e1_pfdp
     this%bernoullis(8 ) =       -1.0_pfdp / 3.0e1_pfdp
     this%bernoullis(10) =        5.0_pfdp / 6.6e1_pfdp
@@ -498,7 +498,7 @@ contains
 
     integer m,p
     !  Stick initial condition into first node slot
-    call lev%Q(1)%copy(lev%q0, 1)
+    call lev%Q(1)%copy(lev%q0, flags=1)
 
     ! set initial omega to 0
     call lev%Q(1)%setval(0.0_pfdp)
@@ -508,7 +508,7 @@ contains
 
     ! Spread F and solution to all nodes
     do m = 2, lev%nnodes
-       call lev%Q(m)%copy(lev%Q(1), 1)
+       call lev%Q(m)%copy(lev%Q(1), flags=1)
        call lev%Q(m)%copy(lev%Q(1))
        do p = 1, lev%ulevel%sweeper%npieces
          call lev%F(m,p)%copy(lev%F(1,p))

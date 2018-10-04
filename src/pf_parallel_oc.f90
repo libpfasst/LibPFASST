@@ -58,9 +58,11 @@ contains
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
           call pf_residual(pf, f_lev_p, dt, which)  
-          if( (which == 0) .or. (which == 1)) call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0, 1)
-          if( (which == 0) .or. (which == 2)) call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%qend, c_lev_p%qend, t0+dt, 2)
-          call restrict_time_space_fas(pf, t0, dt, level_index, which)  !  Restrict
+          if( (which == 0) .or. (which == 1)) &
+               call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0, flags=1)
+          if( (which == 0) .or. (which == 2)) &
+               call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%qend, c_lev_p%qend, t0+dt, flags=2)
+          call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)  !  Restrict
           call save(c_lev_p, which)
        end do  !  level_index = pf%nlevels, 2, -1
     end if
@@ -152,9 +154,15 @@ contains
     do level_index = 2, pf%nlevels  !  Will do nothing with one level
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
-       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, which)
-       if ((which == 0) .or. (which == 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, 1)
-       if (which == 2)                     call interpolate_qend(pf, f_lev_p, c_lev_p) ! for which==0, qend never changes, so don't need to interpolate
+       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
+       if ((which == 0) .or. (which == 1)) then
+          call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=1)          
+          call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
+       end if
+       if (which == 2) then ! for which==0, qend never changes, so don't need to interpolate
+          call f_lev_p%q0%copy(f_lev_p%Q(1), flags=2)          
+          call interpolate_qend(pf, f_lev_p, c_lev_p) 
+       end if
        !  Do sweeps on level unless we are at the finest level
        if (level_index < pf%nlevels) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, which)
@@ -474,7 +482,7 @@ contains
 !           call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false., dir)
 !           if (pf%nlevels > 1) then
 !             coarse_lev_p => pf%levels(pf%nlevels-1)
-!             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels, which)
+!             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels, flags=which)
 !             call save(coarse_lev_p, which)
 !           end if             
 !         end if
@@ -559,7 +567,7 @@ contains
 !       c_lev_p => pf%levels(level_index-1)
 !       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
 !       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-!       call restrict_time_space_fas(pf, t0, dt, level_index, which)
+!       call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)
 !       call save(c_lev_p, which)
 !     end do
     !> move from fine to coarse doing sweeps 
@@ -568,7 +576,7 @@ contains
        c_lev_p => pf%levels(level_index-1)
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
        call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-       call restrict_time_space_fas(pf, t0, dt, level_index, which)
+       call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)
        call save(c_lev_p, which)
     end do
 
@@ -617,14 +625,14 @@ contains
 !     do level_index = 2, pf%nlevels
 !       f_lev_p => pf%levels(level_index);
 !       c_lev_p => pf%levels(level_index-1)
-!       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, which)
+!       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
 !       call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false., dir)
 ! 
 !        if (pf%rank /= 0) then
 !           ! interpolate increment to q0 -- the fine initial condition
 !           ! needs the same increment that Q(1) got, but applied to the
 !           ! new fine initial condition
-!           if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, 1)
+!           if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
 !        end if
 !        if (pf%rank /= pf%comm%nproc-1) then
 !           if (which .eq. 2) call interpolate_qend(pf, f_lev_p, c_lev_p)
@@ -643,14 +651,14 @@ contains
     do level_index = level_index_c+1,level_index_f
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
-       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, which)
+       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
        call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false., dir)
        
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
           ! needs the same increment that Q(1) got, but applied to the
           ! new fine initial condition
-          if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, 1)
+          if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
        end if
        if (pf%rank /= pf%comm%nproc-1) then
           if (which .eq. 2)                       call interpolate_qend(pf, f_lev_p, c_lev_p)

@@ -121,6 +121,8 @@ module pf_mod_dtype
      real(pfdp), allocatable :: qmat(:,:)
      real(pfdp), allocatable :: qmatFE(:,:)
      real(pfdp), allocatable :: qmatBE(:,:)
+     real(pfdp), allocatable :: qmatTrap(:,:)
+     real(pfdp), allocatable :: qmatVer(:,:)
      real(pfdp), allocatable :: qmatLU(:,:)
      real(pfdp), allocatable :: s0mat(:,:)
      real(pfdp), allocatable :: qnodes(:)          

@@ -39,10 +39,10 @@ build/%.o: %.f
 	@mkdir -p build
 	@mkdir -p include
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
+	$(FC)  -c $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
+	@$(FC)  -c $< $(OUTPUT_OPTION)
 endif
 
 .PHONY: clean depend
