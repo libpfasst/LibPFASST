@@ -62,7 +62,7 @@ module pf_mod_verlet
   interface
      !>  This is the interface for the routine to compute the RHS function values
      !>  Evaluate f_piece(y), where piece is one or two 
-     subroutine pf_f_eval_p(this,y, t, level_index, f, piece)
+     subroutine pf_f_eval_p(this,y, t, level_index, f)
        !>  Evaluate f_piece(y), where piece is one or two 
        import pf_verlet_t, pf_encap_t, pfdp
        class(pf_verlet_t),  intent(inout) :: this
@@ -70,7 +70,7 @@ module pf_mod_verlet
        real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
        integer,    intent(in   ) :: level_index     !!  Level index
        class(pf_encap_t), intent(inout) :: f        !!  RHS function value
-       integer,    intent(in   ) :: piece           !!  Which piece to evaluate
+!       integer,    intent(in   ) :: piece           !!  Which piece to evaluate
      end subroutine pf_f_eval_p
      !>  Solve the equation y - dtq*f_2(y) =rhs
      subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece)
