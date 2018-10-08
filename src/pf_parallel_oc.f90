@@ -157,11 +157,11 @@ contains
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
        if ((which == 0) .or. (which == 1)) then
           call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=1)          
-          call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
+           if (pf%rank /= 0) call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
        end if
        if (which == 2) then ! for which==0, qend never changes, so don't need to interpolate
           call f_lev_p%q0%copy(f_lev_p%Q(1), flags=2)          
-          call interpolate_qend(pf, f_lev_p, c_lev_p) 
+          if (pf%rank /= pf%comm%nproc-1) call interpolate_qend(pf, f_lev_p, c_lev_p) 
        end if
        !  Do sweeps on level unless we are at the finest level
        if (level_index < pf%nlevels) then
@@ -654,6 +654,10 @@ contains
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
+       
+       if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=1)
+       if (flags .eq. 2)                        call f_lev_p%q0%copy(f_lev_p%Q(1), flags=2)
+       
        call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false., dir)
        
        if (pf%rank /= 0) then

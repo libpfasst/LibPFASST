@@ -93,12 +93,12 @@ contains
 
     !>  reset qend so that it is up to date
     !  This block moved to controllers
-        if (present(flags)) then
-          if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
-          if (flags .eq. 2)  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), flags=2)
-        else
-          call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
-        end if
+!         if (present(flags)) then
+!           if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
+!           if (flags .eq. 2)  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), flags=2)
+!         else
+!           call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
+!         end if
     
 
     !> destroy local data structures
