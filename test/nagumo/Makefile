@@ -1,9 +1,8 @@
 #
-# Makefile for mpi-advection example.
+# Makefile for nagumo example.
 #
 
-LIBPFASST ?= ../../../libpfasst
-FFTW3     ?= $(LIBPFASST)/fftw3
+LIBPFASST ?= ../..
 
 EXE = main_split.exe
 
@@ -12,7 +11,7 @@ include $(LIBPFASST)/Makefile.defaults
 VPATHS += src
 FSRC   =  src/feval.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/pf_optimization.f90 src/main_split.f90
 CSRC   = src/numpy.c
-FFLAGS  += -I$(FFTW3)/include -I$(LIBPFASST)/include 
+FFLAGS  += -I$(LIBPFASST)/include 
 LDFLAGS += -L$(LIBPFASST)/lib -lpfasst 
 
 all: $(EXE)
