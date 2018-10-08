@@ -7,7 +7,7 @@ import pytest
 
 
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'rank', 'step', 'iter', 'level', 'residual' ])   # This is what is scraped from the output
-EXE = 'nagumo/main_split.exe'                                                        # The name of the executable to run
+EXE = 'test/nagumo/main_split.exe'                                                        # The name of the executable to run
 NMLFILE = 'test/nagumo/{}.nml'                                                            # The name of the input files
 TOL = 1e-11                                                                               # The error tolerance that must be met for a successful test
 
