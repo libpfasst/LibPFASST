@@ -43,8 +43,8 @@ tests = []
 tests.extend(make_pfasst())
 
 """pytest command to call the following routing with the different parameters loaded into tests """
-#@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
-                          #tests)
+@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
+                          tests)
 # later: add misdc sweeper as well
 
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
