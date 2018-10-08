@@ -3,7 +3,7 @@
 import subprocess   #  python native module to run processes from python
 import collections  #  python native module of container classes
 import re           #  python native module to compare regular expressions
-#import pytest
+import pytest
 
 
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'rank', 'step', 'iter', 'level', 'residual' ])   # This is what is scraped from the output
