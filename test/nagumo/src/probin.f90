@@ -117,6 +117,8 @@ contains
     poutmod = 1
 
     logfile = "progress.log"
+    
+    pfasst_nml=filename
 
 !     nsweeps =  [1, 1, 1]
 !     nsweeps_pred = [1, 1, 1]

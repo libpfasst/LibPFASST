@@ -51,11 +51,13 @@ subroutine echo_error_hook(pf, level, state)
 !           pf%rank, level%index, state%step+1, t, state%t0, state%iter, max_y, max_p, &
 !           maxval(abs(ynorms)), maxval(abs(pnorms)), res, level%residual_rel
     res = min(level%residual, level%residual_rel)
-    print '(" rank:",i5," lev:",i5," step:",i5," t=",es10.3," t0=",es10.3," iter:",i3," Max_y:",es13.6, &
-          &" Max_p:",es13.6," yres:",es13.6," pres:",es13.6," Res:",es13.6)', &
-          pf%rank, level%index, state%step+1, t, state%t0, state%iter, max_y, max_p, &
-          maxval(abs(ynorms)), maxval(abs(pnorms)), res
-
+!     print '(" rank:",i5," lev:",i5," step:",i5," iter:",i3, &
+!           &" Res:",es13.6)', &
+!           pf%rank, level%index, state%step+1, state%iter,  &
+!           res
+    print '("rank:",i4.3," step: ",i3.3," iter: ",i4.3," level: ",i2.2," res: ",es18.10)', &
+         pf%rank, state%step+1, state%iter,level%index, res
+    call flush
 
 !     un = 1000+state%step+1
 !     write(stepstring,"(I0.3)") state%step+1

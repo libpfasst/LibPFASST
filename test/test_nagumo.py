@@ -3,11 +3,11 @@
 import subprocess   #  python native module to run processes from python
 import collections  #  python native module of container classes
 import re           #  python native module to compare regular expressions
-import pytest
+#import pytest
 
 
-ErrorTuple = collections.namedtuple('ErrorTuple', [ 'level', 'step', 'iter', 'residual' ])   # This is what is scraped from the output
-EXE = 'test/nagumo/main_split.exe'                                                        # The name of the executable to run
+ErrorTuple = collections.namedtuple('ErrorTuple', [ 'rank', 'step', 'iter', 'level', 'residual' ])   # This is what is scraped from the output
+EXE = 'nagumo/main_split.exe'                                                        # The name of the executable to run
 NMLFILE = 'test/nagumo/{}.nml'                                                            # The name of the input files
 TOL = 1e-11                                                                               # The error tolerance that must be met for a successful test
 
@@ -24,8 +24,8 @@ def make_pfasst():
 """scrape the output looking for the error statement"""
 def errors(out):
     #rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
-    rx = re.compile(r"rank:\s*lev:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*Res:\s*(\S+)")
-    cast = [int, int, int, float]
+    rx = re.compile(r"rank:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*res:\s*(\S+)")
+    cast = [int, int, int, int, float]
 
     errors = []
     for line in out.splitlines():
@@ -43,8 +43,8 @@ tests = []
 tests.extend(make_pfasst())
 
 """pytest command to call the following routing with the different parameters loaded into tests """
-@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
-                          tests)
+#@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
+                          #tests)
 # later: add misdc sweeper as well
 
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
@@ -60,15 +60,20 @@ def test_nagumo(mpi_tasks, nml, max_opt_iter):
                 'Unexpected poor convergence behavior\nunable to parse output\n {}'.format(line)
     else:   # Find the error from the last step and last iteratoin 
         if max_opt_iter == 0:
-          maxstep = max([x.step for x in err])
+          maxrank = max([x.rank for x in err])
+          maxstep = max([x.step for x in err if x.rank == maxrank])
           maxiter = max([x.iter for x in err if x.step == maxstep])
-          lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
-
+          lasterr = max([x.residual for x in err if x.step == maxstep and x.iter == maxiter])
+          
           assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)   # This decides if the test was successful
+
         if max_opt_iter == 1: # for the adjoint: rank 0 is the last one, with supposedly the largest error
-          maxstep = min([x.step for x in err])
-          maxiter = max([x.iter for x in err if x.step == maxstep])
-          lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
-
+          minrank = min([x.rank for x in err])
+          maxstep = max([x.step for x in err if x.rank == minrank])
+          maxiter = max([x.iter for x in err if x.step == maxstep and x.rank == minrank])
+          lasterr = max([x.residual for x in err if x.step == maxstep and x.iter == maxiter and x.rank == minrank])
+          #print minrank, maxstep, maxiter, lasterr
+          
           assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)   # This decides if the test was successful
+
 

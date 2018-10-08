@@ -1,3 +1,25 @@
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 3
+
+    !  These are internal pfasst variables that can be reset
+    niters = 250   !  default is 5
+
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1
+
+
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1e-11
+     rel_res_tol = 1e-11
+
+     PFASST_pred = .false.
+
+     echo_timings = .false.
+
+/
+
+
 &PARAMS
   nprob         = 0	 
   ndim          = 1
@@ -27,7 +49,6 @@
   do_mixed = 0
   logfile = "progress.log"
   
-  pfasst_nml = "test/nagumo/pfasst.nml"
   fbase = "pfasst_V"
 
 
