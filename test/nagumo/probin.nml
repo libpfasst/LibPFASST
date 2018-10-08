@@ -27,7 +27,7 @@
   do_mixed = 0
   logfile = "progress.log"
   
-  pfasst_nml = "pfasst.nml"
+  pfasst_nml = "test/nagumo/pfasst.nml"
   fbase = "pfasst_V"
 
 
