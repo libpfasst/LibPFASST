@@ -26,7 +26,7 @@ contains
     integer                   :: k               !!  Loop indices
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
-    integer :: which, dir, send_tag 
+    integer :: which, dir, send_tag, burnin_sweeps 
  
     which = 1                   ! standard: predict and sweep forward-in-time
     dir = 1                     ! for MPI communication, standard is forward-in-time
@@ -76,7 +76,7 @@ contains
     if (pf%q0_style .eq. 0) then  !  The coarse level needs burn in
        if (pf%debug) print*,  'DEBUG --', pf%rank, 'do burnin in pred', ' RK_pred', pf%RK_pred, ' PFASST_pred', pf%PFASST_pred
        !! If RK_pred is true, just do some RK_steps
-       if (pf%RK_pred) then  !  Use Runge-Kutta to get the coarse initial data
+       if (pf%RK_pred .or. which==2) then  !  Use Runge-Kutta to get the coarse initial data
           !  Get new initial conditions
           call pf_recv(pf, c_lev_p, 100000+pf%rank, .true., dir)
 
@@ -87,12 +87,21 @@ contains
           if (dir == 2) send_tag = 100000+pf%rank-1
           call pf_send(pf, c_lev_p, send_tag, .false., dir)
        else  !  Normal PFASST burn in
-          do k = 1, pf%rank + 1
+          burnin_sweeps = pf%rank+1
+          if(which == 2) then
+            if(pf%rank == 0) &
+              print *, 'WARNING --- normal PFASST burn in is not suitable for adjoint as rhs cannot be evaluated for [t0k, t0k+dt]'
+            burnin_sweeps = pf%comm%nproc-pf%rank            
+          end if
+          if (pf%debug) print *, 'DEBUG ---', pf%rank, 'which = ', which, 'burnin_sweeps = ', burnin_sweeps
+          do k = 1, burnin_sweeps !pf%rank + 1
              pf%state%iter = -k
              t0k = t0-(pf%rank)*dt + (k-1)*dt   ! Remember t0=pf%rank*dt is the beginning of this time slice so t0-(pf%rank)*dt is 0
                                                 ! and we iterate up to the correct time step.
                                                 ! for optimal control problem t, t0k has no influence on f_eval, so there this does something else
-
+             if(which == 2) t0k = t0 + (burnin_sweeps-1)*dt - (k-1)*dt
+             if(pf%debug) print *, 'DEBUG ----', pf%rank, 't0k = ', t0k 
+             
              ! Get new initial value (skip on first iteration)
              if (k > 1) then
                 if ((which == 0) .or. (which == 1)) call c_lev_p%q0%copy(c_lev_p%qend, 1)
@@ -381,6 +390,7 @@ contains
     pf%state%pstatus = PF_STATUS_PREDICTOR
     pf%comm%statreq  = -66
     pf%state%nsteps  = nsteps
+!     pf%state%component = which
     
 
     residual = -1
