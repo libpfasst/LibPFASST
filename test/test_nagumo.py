@@ -3,11 +3,11 @@
 import subprocess   #  python native module to run processes from python
 import collections  #  python native module of container classes
 import re           #  python native module to compare regular expressions
-#import pytest
+import pytest
 
 
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'rank', 'step', 'iter', 'level', 'residual' ])   # This is what is scraped from the output
-EXE = 'nagumo/main_split.exe'                                                        # The name of the executable to run
+EXE = 'test/nagumo/main_split.exe'                                                        # The name of the executable to run
 NMLFILE = 'test/nagumo/{}.nml'                                                            # The name of the input files
 TOL = 1e-11                                                                               # The error tolerance that must be met for a successful test
 
@@ -43,8 +43,8 @@ tests = []
 tests.extend(make_pfasst())
 
 """pytest command to call the following routing with the different parameters loaded into tests """
-#@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
-                          #tests)
+@pytest.mark.parametrize('mpi_tasks, nml, max_opt_iter',
+                          tests)
 # later: add misdc sweeper as well
 
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
