@@ -143,6 +143,20 @@ contains
     end do
   end subroutine pf_generic_spreadq0
 
+  subroutine pf_stop(pf_file,Nline,msg, N)
+    character(len=*), intent(in) :: pf_file
+    integer, intent(in):: Nline
+    character(len=*), intent(in) :: msg
+    integer, intent(in), optional :: N
 
+    print *,'Stopping in File: ', pf_file
+    print *,'Line number: ', Nline
+    print *,msg
+    if (present(N))   print *,N
+    stop
+  end subroutine pf_stop
+  
+  
+  
 
 end module pf_mod_utils

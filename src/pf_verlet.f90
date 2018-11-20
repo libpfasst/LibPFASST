@@ -21,7 +21,7 @@ module pf_mod_verlet
 
   !> Define sweeper type
   type, extends(pf_sweeper_t), abstract :: pf_verlet_t
-     integer :: whichQQ
+     integer :: whichQQ=1
      integer :: doLU
      real(pfdp) :: Htol, H0
 
@@ -304,7 +304,7 @@ contains
 
     !  The quadrature rule is the last row of Q
     this%bvec=this%Qmat(nnodes-1,:);
-    this%bbarvec=this%QQmat(nnodes-1,:);    
+
     allocate(qtemp(nnodes,nnodes),stat=ierr)
     allocate(qtemp2(nnodes,nnodes),stat=ierr)    
 
@@ -319,15 +319,20 @@ contains
        this%QQmat = qtemp(2:nnodes,:)
        print *,shape(this%QQmat)
     case (1)  !  Make the pair like in Lobatto A/B pair
-       print *,'Error Making QQ by collocation Lobatto pair'
-!!$
-!!$       print *,'Making QQ by collocation Lobatto pair'
-!!$       do i = 1,nnodes-1
-!!$          do j = 1,nnodes
-!!$             this%QQmat(i,j) =  this%bvec(j)*(1.0_pfdp-this%Qmat(j,i)/this%bvec(i))
-!!$          end do
-!!$       end do
-!!$       this%QQmat = matmul(this%Qmat,this%QQmat)
+       print *,'Making QQ by collocation Lobatto pair'
+       qtemp=0.0_pfdp
+       qtemp(2:nnodes,:)=this%Qmat
+       qtemp2=0.0_pfdp
+       do i = 1,nnodes
+          do j = 1,nnodes
+             qtemp2(i,j) =  this%bvec(j)*(1.0_pfdp-qtemp(j,i)/this%bvec(i))
+          end do
+       end do
+       
+       qtemp2 = matmul(qtemp,qtemp2)
+       this%QQmat =  0.0_pfdp
+       this%QQmat =  qtemp2(2:nnodes,:)       
+       this%bbarvec=this%QQmat(nnodes-1,:);           
     case (2)  !  Make the pair like in Lobatto B/A pair
        print *,'Error Making QQ by collocation Lobatto pair'
 

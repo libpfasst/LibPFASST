@@ -6,6 +6,8 @@
 module pf_mod_pfasst
   use pf_mod_dtype
   use pf_mod_comm_mpi
+    use pf_mod_utils
+  
   implicit none
 contains
 
@@ -43,16 +45,18 @@ contains
 
     !>  Set up the mpi communicator
     call pf_mpi_setup(pf%comm, pf,ierr) 
-    if (ierr /=0 )  stop "ERROR: mpi_setup failed"
+    if (ierr /=0 )  call pf_stop(__FILE__,__LINE__,"ERROR: mpi_setup failed")
     
 
     if (pf%rank < 0) then
-       stop 'Invalid PF rank: did you call setup correctly?'
+       call pf_stop(__FILE__,__LINE__,&
+            "Invalid PF rank: did you call setup correctly?")
     end if
 
     !>  allocate level pointers
     allocate(pf%levels(pf%nlevels),stat=ierr)
-    if (ierr /= 0) stop "allocate error levels"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
+         "allocate error",pf%nlevels)
     !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        pf%levels(l)%index = l
@@ -65,14 +69,17 @@ contains
     
     !>  allocate hooks
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS),stat=ierr)
-    if (ierr /= 0) stop "allocate error hooks"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
+         "allocate error hooks")
     allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK),stat=ierr)
-    if (ierr /= 0) stop "allocate error nhooks"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
+         "allocate error nhooks")
     pf%nhooks = 0
 
     !>  allocate status
     allocate(pf%state,stat=ierr)
-    if (ierr /= 0) stop "allocate error state"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
+         "allocate error state")
     pf%state%pstatus = 0
     pf%state%status  = 0
 
@@ -82,7 +89,6 @@ contains
 
   !> Setup both the PFASST object and the comm object
   subroutine pf_pfasst_setup(pf)
-    use pf_mod_utils
     type(pf_pfasst_t), intent(inout), target :: pf   !!  Main pfasst structure
 
     class(pf_level_t), pointer :: lev_fine, lev_coarse  !!  Pointers to level structures for brevity
@@ -94,17 +100,15 @@ contains
     do l = 1, pf%nlevels
        call pf_level_setup(pf, pf%levels(l))
     end do
-
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
        allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes),stat=ierr)
-       if (ierr /= 0) stop "allocate error tmat"
+       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
 
        allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes),stat=ierr)
-       if (ierr /= 0) stop "allocate error rmat"
-
-
+       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
+       
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels
        if (pf%use_rk_stepper .eqv. .true.) then
@@ -136,12 +140,11 @@ contains
     integer :: i,ierr
 
     !> do some sanity checks
-    if (lev%mpibuflen <= 0) stop "ERROR: Invalid mpibuflen, set before calling pfasst_setup."
-    if (lev%nnodes <= 0) stop "ERROR: Invalid nnodes, should have been set in pfasst_create."
-    if (lev%nsweeps <= 0) stop "ERROR: Invalid nsweeps, should have been set in pfasst_create."
-
     mpibuflen  = lev%mpibuflen
+    if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',mpibuflen)
+
     nnodes = lev%nnodes
+    if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',nnodes)    
 
     lev%residual = -1.0_pfdp
 
@@ -159,15 +162,15 @@ contains
 
     !> allocate flat buffers for send, and recv
     allocate(lev%send(mpibuflen),stat=ierr)
-    if (ierr /= 0) stop "allocate error send buffer"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%recv(mpibuflen),stat=ierr)
-    if (ierr /= 0) stop "allocate error recieve buffer"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
 
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error nodes"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%nflags(nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error nflags"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
     !> make quadrature matrices
     if (btest(pf%qtype, 8)) then
@@ -177,7 +180,7 @@ contains
     end if
     !>  Allocate and compute all the matrices
     allocate(lev%sdcmats,stat=ierr)
-    if (ierr /= 0) stop "allocate error sdcmats"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
 
 
     call pf_init_sdcmats(lev%sdcmats,pf%qtype, nnodes,nnodes0,lev%nflags)
@@ -406,8 +409,7 @@ contains
 
     !>  Sanity check
     if (pf%nlevels < 1) then
-       print *,'pf%nlevels = ',pf%nlevels
-       stop 'Bad specification for nlevels'
+       call pf_stop(__FILE__,__LINE__,'Bad specification for nlevels',pf%nlevels)
     endif
 
   end subroutine pf_read_opts
@@ -459,8 +461,7 @@ contains
     case (SDC_UNIFORM)
        write(un,*) 'qtype:', pf%qtype,'! Uniform  nodes are used'
     case default
-       print *,'qtype = ',pf%qtype
-       stop "ERROR: Invalid qtype"
+       call pf_stop(__FILE__,__LINE__,"Invalid qtype",pf%qtype)
     end select
 
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'

@@ -363,9 +363,7 @@ contains
     lev_p => pf%levels(pf%nlevels)
 
     !  Stick the initial condition into q0 (will happen on all processors)
-    ! aaaaaaaaaaaaaaaaaaaaa
-!        call lev_p%q0%copy(q0)
-        call lev_p%q0%copy(q0, flags=0)    
+    call lev_p%q0%copy(q0, flags=0)    
 
     
     nproc = pf%comm%nproc
@@ -400,9 +398,7 @@ contains
              call pf_broadcast(pf, lev_p%send, lev_p%mpibuflen, pf%comm%nproc-1)
              call lev_p%q0%unpack(lev_p%send)    !!  Everyone resets their q0
           else
-             !aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
              call lev_p%q0%copy(lev_p%qend, flags=0)    !!  Just stick qend in q0
-!             call lev_p%q0%copy(lev_p%qend)    !!  Just stick qend in q0             
           end if
 
           !>  Update the step and t0 variables for new block
@@ -439,16 +435,14 @@ contains
        end do  !  Loop over the iteration in this bloc
        call call_hooks(pf, -1, PF_POST_CONVERGENCE)
        call end_timer(pf, TITERATION)
-
+       call call_hooks(pf, -1, PF_POST_STEP)
     end do !  Loop over the blocks
 
     call end_timer(pf, TTOTAL)
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
-       !aaaaaaaaaaaaaaaaaaaaa
        call qend%copy(lev_p%qend, flags=0)
-!       call qend%copy(lev_p%qend)       
     end if
   end subroutine pf_block_run
   

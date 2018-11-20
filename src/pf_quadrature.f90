@@ -30,7 +30,7 @@ contains
      integer, intent(in) :: qtype
      integer,    intent(inout) :: nflags(nnodes)
      integer :: ierr
-
+     
      allocate(SDCmats%qmat(nnodes-1,nnodes),stat=ierr)
      if (ierr /= 0) stop "allocate error qmat"
      allocate(SDCmats%qmatFE(nnodes-1,nnodes),stat=ierr)
