@@ -238,7 +238,7 @@ contains
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-!       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
+       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
        call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
        
        !  Do a sweep on level unless we are at the finest level
@@ -501,7 +501,7 @@ contains
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-!       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
+       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
        call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false.)
        
        if (pf%rank /= 0) then

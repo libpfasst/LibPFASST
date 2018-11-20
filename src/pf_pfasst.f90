@@ -229,7 +229,7 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
-    call  pf%results%destroy(pf%results)
+    call pf%results%destroy(pf%results)
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)

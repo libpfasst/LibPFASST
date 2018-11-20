@@ -6,14 +6,15 @@ module pf_mod_fftpackage
   use pf_mod_dtype
   implicit none
   
-  real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
-  real(pfdp), parameter ::  Ly     = 1.0_pfdp    ! domain size
-  real(pfdp), parameter ::  Lz     = 1.0_pfdp    ! domain size
+!   real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
+!   real(pfdp), parameter ::  Ly     = 1.0_pfdp    ! domain size
+!   real(pfdp), parameter ::  Lz     = 1.0_pfdp    ! domain size
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
   type :: pf_fft_t
      integer ::   nx,ny,nz,dim
      integer ::   lensavx, lensavy, lensavz 
+     real(pfdp) :: Lx, Ly, Lz
      real(pfdp) :: normfact
      real(pfdp), allocatable :: wsavex(:)          ! work space
      real(pfdp), allocatable :: wsavey(:)          ! work space
@@ -58,10 +59,11 @@ contains
       wk=>this%wk_3d
     end function get_wk_ptr_3d
     
-    subroutine fft_setup(this, grid_shape, dim)
+    subroutine fft_setup(this, grid_shape, dim, grid_size)
       class(pf_fft_t), intent(inout) :: this
-      integer,             intent(in   ) :: dim
-      integer,             intent(in   ) :: grid_shape(dim)    
+      integer,              intent(in   ) :: dim
+      integer,              intent(in   ) :: grid_shape(dim)
+      real(pfdp), optional, intent(in   ) :: grid_size(dim)    
       
       integer     :: nx,ny,nz
       
@@ -74,6 +76,8 @@ contains
       this%normfact=nx
       allocate(this%workhatx(nx))   !  complex transform
       allocate(this%wsavex(this%lensavx))
+      this%Lx = 1.0_pfdp
+      if(present(grid_size)) this%Lx = grid_size(1)
       !  Initialize FFT
       call ZFFTI( nx, this%wsavex )
       
@@ -85,6 +89,8 @@ contains
          this%normfact=nx*ny
          allocate(this%workhaty(ny))   !  complex transform
          allocate(this%wsavey(this%lensavy))
+         this%Ly = 1.0_pfdp
+         if(present(grid_size)) this%Ly = grid_size(2)
          !  Initialize FFT
          call ZFFTI( ny, this%wsavey)
          
@@ -96,6 +102,8 @@ contains
             this%normfact=nx*ny*nz             
             allocate(this%workhatz(nz))   !  complex transform
             allocate(this%wsavez(this%lensavz))
+            this%Lz = 1.0_pfdp
+            if(present(grid_size)) this%Lz = grid_size(3)
             !  Initialize FFT
             call ZFFTI( nz, this%wsavez)
          endif
@@ -240,9 +248,10 @@ contains
       complex(pfdp), intent(inout) :: lap(:)
       
       integer     :: i,nx
-      real(pfdp)  :: kx
+      real(pfdp)  :: kx, Lx
       
       nx=this%nx
+      Lx=this%Lx
       do i = 1, nx
          if (i <= nx/2+1) then
             kx = two_pi / Lx * dble(i-1)
@@ -258,9 +267,10 @@ contains
       complex(pfdp), intent(inout) :: ddx(:)
       
       integer     :: i,nx
-      real(pfdp)  :: kx
+      real(pfdp)  :: kx, Lx
       
       nx=this%nx
+      Lx=this%Lx
       do i = 1, nx
          if (i <= nx/2+1) then
             kx = two_pi / Lx * dble(i-1)
@@ -277,10 +287,12 @@ contains
       complex(pfdp), intent(inout) :: lap(:,:)
       
       integer     :: i,j,nx,ny
-      real(pfdp)  :: kx,ky
+      real(pfdp)  :: kx,ky,Lx,Ly
       
       nx=this%nx
       ny=this%ny
+      Lx=this%Lx
+      Ly=this%Ly
       
       do j = 1, ny
          if (j <= ny/2+1) then
@@ -306,10 +318,12 @@ contains
       integer, intent(in) :: dir
       
       integer     :: i,j,nx,ny
-      real(pfdp)  :: kx,ky
+      real(pfdp)  :: kx,ky,Lx,Ly
       
       nx=this%nx
       ny=this%ny
+      Lx=this%Lx
+      Ly=this%Ly
       
       do j = 1, ny
          if (j <= ny/2+1) then
@@ -338,11 +352,14 @@ contains
       complex(pfdp), intent(inout) :: lap(:,:,:)
       
       integer     :: i,j,k,nx,ny,nz
-      real(pfdp)  :: kx,ky,kz
+      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
       
       nx=this%nx
       ny=this%ny
       nz=this%nz
+      Lx=this%Lx
+      Ly=this%Ly
+      Lz=this%Lz
       do k = 1,nz
          if (k <= nz/2+1) then
             kz = two_pi / Lz * dble(k-1)
@@ -374,11 +391,14 @@ contains
       integer, intent(in) :: dir
       
       integer     :: i,j,k,nx,ny,nz
-      real(pfdp)  :: kx,ky,kz
+      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
       
       nx=this%nx
       ny=this%ny
       nz=this%nz       
+      Lx=this%Lx
+      Ly=this%Ly
+      Lz=this%Lz
       
       select case (dir)
       case (1)  
