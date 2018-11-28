@@ -10,9 +10,6 @@ module pf_mod_fftpackage
   implicit none
   
   include 'fftw3.f03'
-  real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
-  real(pfdp), parameter ::  Ly     = 1.0_pfdp    ! domain size
-  real(pfdp), parameter ::  Lz     = 1.0_pfdp    ! domain size    
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
   !>  Define the fft package
@@ -20,6 +17,7 @@ module pf_mod_fftpackage
      type(c_ptr) :: ffft, ifft                       !! fftw pointers
      integer ::  dim                                 !! spatial number of dimensions
      integer ::  nx,ny,nz                            !! grid sizes
+     real(pfdp) :: Lx, Ly, Lz                        !! domain size
      real(pfdp) :: normfact                          !! normalization factor
      complex(pfdp), pointer :: wk_1d(:)              !! work space
      complex(pfdp), pointer :: wk_2d(:,:)            !! work space
@@ -60,21 +58,30 @@ contains
   end function get_wk_ptr_3d
     
   !> Initialize the package
-  subroutine fft_setup(this, grid_shape, dim)
+  subroutine fft_setup(this, grid_shape, dim, grid_size))
     class(pf_fft_t), intent(inout) :: this
     integer,             intent(in   ) :: dim
     integer,             intent(in   ) :: grid_shape(dim)    
-    
-    integer     :: i,j,nx,ny,nz
+    real(pfdp), optional, intent(in   ) :: grid_size(dim)    
+
+    integer     :: nx,ny,nz
     real(pfdp)  :: kx,ky
     type(c_ptr) :: wk
-    
+
     this%dim=dim
     nx=grid_shape(1)
     this%nx = nx
+
+    ! Defaults for grid_size
+    this%Lx = 1.0_pfdp
+    this%Ly = 1.0_pfdp
+    this%Lz = 1.0_pfdp
     
+    if(present(grid_size)) this%Lx = grid_size(1)
+    if(present(grid_size)) this%Ly = grid_size(2)
+    if(present(grid_size)) this%Lz = grid_size(3)
+
     select case (dim)
-       
     case (1)            
        this%normfact=real(nx,pfdp)
        wk = fftw_alloc_complex(int(nx, c_size_t))
@@ -91,7 +98,7 @@ contains
        ! create in-place, complex fft plans
        wk = fftw_alloc_complex(int(nx*ny, c_size_t))
        call c_f_pointer(wk, this%wk_2d, [nx,ny])
-       
+
        this%ffft = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_FORWARD, FFTW_ESTIMATE)
        this%ifft = fftw_plan_dft_2d(nx,ny, &
@@ -108,7 +115,7 @@ contains
             this%wk_3d, this%wk_3d, FFTW_FORWARD, FFTW_ESTIMATE)
        this%ifft = fftw_plan_dft_3d(nx,ny,nz, &
             this%wk_3d, this%wk_3d, FFTW_BACKWARD, FFTW_ESTIMATE)
-       
+
     case DEFAULT
        print *,'Bad case for dim in fft_setup ', this%dim
        call exit(0)
@@ -212,10 +219,11 @@ contains
     
     integer     :: i,j,nx,ny
     real(pfdp)  :: kx,ky
-    
+
+
     nx=this%nx
     ny=this%ny
-    
+
     do j = 1, ny
        if (j <= ny/2+1) then
           ky = two_pi / Ly * dble(j-1)

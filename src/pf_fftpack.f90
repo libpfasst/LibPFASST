@@ -6,16 +6,14 @@ module pf_mod_fftpackage
   use pf_mod_dtype
   implicit none
   
-!   real(pfdp), parameter ::  Lx     = 1.0_pfdp    ! domain size
-!   real(pfdp), parameter ::  Ly     = 1.0_pfdp    ! domain size
-!   real(pfdp), parameter ::  Lz     = 1.0_pfdp    ! domain size
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
   type :: pf_fft_t
-     integer ::   nx,ny,nz,dim
-     integer ::   lensavx, lensavy, lensavz 
-     real(pfdp) :: Lx, Ly, Lz
-     real(pfdp) :: normfact
+     integer ::   nx,ny,nz                         !! grid sizes
+     integer ::   dim                              !! spatial dimension
+     integer ::   lensavx, lensavy, lensavz        !! workspace lengths
+     real(pfdp) :: Lx, Ly, Lz                      !! domain size
+     real(pfdp) :: normfact                        !! normalization factor
      real(pfdp), allocatable :: wsavex(:)          ! work space
      real(pfdp), allocatable :: wsavey(:)          ! work space
      real(pfdp), allocatable :: wsavez(:)          ! work space     
@@ -23,9 +21,9 @@ module pf_mod_fftpackage
      complex(pfdp), pointer :: workhaty(:)         ! work space
      complex(pfdp), pointer :: workhatz(:)         ! work space
      
-     complex(pfdp), pointer :: wk_1d(:)              ! work space
-     complex(pfdp), pointer :: wk_2d(:,:)              ! work space
-     complex(pfdp), pointer :: wk_3d(:,:,:)              ! work space                    
+     complex(pfdp), pointer :: wk_1d(:)            ! work space
+     complex(pfdp), pointer :: wk_2d(:,:)          ! work space
+     complex(pfdp), pointer :: wk_3d(:,:,:)        ! work space                    
    contains
      procedure :: fft_setup
      procedure :: fft_destroy
@@ -66,21 +64,20 @@ contains
       real(pfdp), optional, intent(in   ) :: grid_size(dim)    
       
       integer     :: nx,ny,nz
-      
       this%dim=dim
-      
-      !  FFT Storage
-      nx=grid_shape(1)       
+
+      !  FFT Storage parameters
+      nx=grid_shape(1)
       this%nx = nx
       this%lensavx = 4*nx + 15
       this%normfact=nx
+      
       allocate(this%workhatx(nx))   !  complex transform
       allocate(this%wsavex(this%lensavx))
       this%Lx = 1.0_pfdp
       if(present(grid_size)) this%Lx = grid_size(1)
       !  Initialize FFT
       call ZFFTI( nx, this%wsavex )
-      
       if (dim > 1) then
          !  FFT Storage
          ny=grid_shape(2)       
