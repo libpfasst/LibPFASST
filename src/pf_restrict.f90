@@ -12,7 +12,7 @@ contains
 
 
 
-  subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags)
+  subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags, mystep)
     !! Restrict (in time and space) fine level to coarse and set coarse level FAS correction.
     !!
     !! The coarse function values are re-evaluated after restriction.
@@ -23,7 +23,7 @@ contains
     real(pfdp),        intent(in)    :: t0            !!  time at beginning of step
     real(pfdp),        intent(in)    :: dt            !!  time step
     integer,           intent(in)    :: level_index   !! defines which level to restrict
-    integer, optional, intent(in)    :: flags    
+    integer, optional, intent(in)    :: flags, mystep    
 
     !>  Local variables
     class(pf_level_t), pointer :: c_lev_ptr    
@@ -41,9 +41,8 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-    
     step = pf%state%step+1
-    
+    if(present(mystep)) step = mystep
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
