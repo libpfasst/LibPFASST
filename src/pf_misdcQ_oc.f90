@@ -452,7 +452,7 @@ contains
           end do
         end do
       case default
-        print *, "misdcQ_oc_spreadq0 needs a flag", which
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
         stop
     end select
 

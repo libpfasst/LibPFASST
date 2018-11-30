@@ -21,7 +21,7 @@ module pf_mod_verlet
 
   !> Define sweeper type
   type, extends(pf_sweeper_t), abstract :: pf_verlet_t
-     integer :: whichQQ=1
+     integer :: whichQQ=3
      integer :: doLU
      real(pfdp) :: Htol, H0
 
@@ -343,7 +343,7 @@ contains
 !!$       end do
 !!$       this%QQmat = matmul(this%QQmat,this%Qmat)
     case default
-       write(*,*) 'bad case in verlet.f90, whichQQ = ',this%whichQQ
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%whichQQ)
     end select
 
    ! 0 to node

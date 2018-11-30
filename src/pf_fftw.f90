@@ -58,7 +58,7 @@ contains
   end function get_wk_ptr_3d
     
   !> Initialize the package
-  subroutine fft_setup(this, grid_shape, dim, grid_size))
+  subroutine fft_setup(this, grid_shape, dim, grid_size)
     class(pf_fft_t), intent(inout) :: this
     integer,             intent(in   ) :: dim
     integer,             intent(in   ) :: grid_shape(dim)    
@@ -115,10 +115,8 @@ contains
             this%wk_3d, this%wk_3d, FFTW_FORWARD, FFTW_ESTIMATE)
        this%ifft = fftw_plan_dft_3d(nx,ny,nz, &
             this%wk_3d, this%wk_3d, FFTW_BACKWARD, FFTW_ESTIMATE)
-
     case DEFAULT
-       print *,'Bad case for dim in fft_setup ', this%dim
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
   end subroutine fft_setup
 
@@ -135,12 +133,11 @@ contains
     case (3)            
        deallocate(this%wk_3d)
     case DEFAULT
-       print *,'Bad case for dim in fft_destroy ', this%dim
-       call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
   end subroutine fft_destroy
   
-  !>  Routine to take forewar FFT
+  !>  Routine to take foreward FFT
   subroutine fftf(this)
     class(pf_fft_t), intent(inout) :: this
     select case (this%dim)       
@@ -151,8 +148,7 @@ contains
     case (3)            
        call fftw_execute_dft(this%ffft, this%wk_3d, this%wk_3d)
     case DEFAULT
-       print *,'Bad case for dim in fftf ', this%dim
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)       
     end select
   end subroutine fftf
 
@@ -171,8 +167,7 @@ contains
        this%wk_3d=this%wk_3d/this%normfact
        call fftw_execute_dft(this%ifft, this%wk_3d, this%wk_3d)
     case DEFAULT
-       print *,'Bad case for dim in fftb ', this%dim
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
   end subroutine fftb
 
@@ -187,9 +182,9 @@ contains
     nx=this%nx
     do i = 1, nx
        if (i <= nx/2+1) then
-          kx = two_pi / Lx * dble(i-1)
+          kx = two_pi / this%Lx * dble(i-1)
        else
-          kx = two_pi / Lx * dble(-nx + i - 1)
+          kx = two_pi / this%Lx * dble(-nx + i - 1)
        end if
        lap(i) = -kx**2
     end do
@@ -204,9 +199,9 @@ contains
     nx=this%nx
     do i = 1, nx
        if (i <= nx/2+1) then
-          kx = two_pi / Lx * dble(i-1)
+          kx = two_pi /this%Lx * dble(i-1)
        else
-          kx = two_pi / Lx * dble(-nx + i - 1)
+          kx = two_pi / this%Lx * dble(-nx + i - 1)
        end if
        
        ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
@@ -226,15 +221,15 @@ contains
 
     do j = 1, ny
        if (j <= ny/2+1) then
-          ky = two_pi / Ly * dble(j-1)
+          ky = two_pi / this%Ly * dble(j-1)
        else
-          ky = two_pi / Ly * dble(-ny + j - 1)
+          ky = two_pi / this%Ly * dble(-ny + j - 1)
        end if
        do i = 1, nx
           if (i <= nx/2+1) then
-             kx = two_pi / Lx * dble(i-1)
+             kx = two_pi / this%Lx * dble(i-1)
           else
-             kx = two_pi / Lx * dble(-nx + i - 1)
+             kx = two_pi / this%Lx * dble(-nx + i - 1)
           end if
           
           lap(i,j) = -(kx**2+ky**2)
@@ -255,15 +250,15 @@ contains
     
     do j = 1, ny
        if (j <= ny/2+1) then
-          ky = two_pi / Ly * dble(j-1)
+          ky = two_pi / this%Ly * dble(j-1)
        else
-          ky = two_pi / Ly * dble(-ny + j - 1)
+          ky = two_pi / this%Ly * dble(-ny + j - 1)
        end if
        do i = 1, nx
           if (i <= nx/2+1) then
-             kx = two_pi / Lx * dble(i-1)
+             kx = two_pi / this%Lx * dble(i-1)
           else
-             kx = two_pi / Lx * dble(-nx + i - 1)
+             kx = two_pi / this%Lx * dble(-nx + i - 1)
           end if
           
           if (dir .eq. 1) then
@@ -287,21 +282,21 @@ contains
     nz=this%nz
     do k = 1,nz
        if (k <= nz/2+1) then
-          kz = two_pi / Lz * dble(k-1)
+          kz = two_pi / this%Lz * dble(k-1)
        else
-          kz = two_pi / Lz * dble(-nz + k - 1)
+          kz = two_pi / this%Lz * dble(-nz + k - 1)
        end if
        do j = 1, ny
           if (j <= ny/2+1) then
-             ky = two_pi / Ly * dble(j-1)
+             ky = two_pi / this%Ly * dble(j-1)
           else
-             ky = two_pi / Ly * dble(-ny + j - 1)
+             ky = two_pi / this%Ly * dble(-ny + j - 1)
           end if
           do i = 1, nx
              if (i <= nx/2+1) then
-                kx = two_pi / Lx * dble(i-1)
+                kx = two_pi / this%Lx * dble(i-1)
              else
-                kx = two_pi / Lx * dble(-nx + i - 1)
+                kx = two_pi / this%Lx * dble(-nx + i - 1)
              end if
              lap(i,j,k) = -(kx**2+ky**2+kz**2)
           end do
@@ -325,9 +320,9 @@ contains
     case (1)  
        do i = 1, nx
           if (i <= nx/2+1) then
-             kx = two_pi / Lx * dble(i-1)
+             kx = two_pi / this%Lx * dble(i-1)
           else
-             kx = two_pi / Lx * dble(-nx + i - 1)
+             kx = two_pi / this%Lx * dble(-nx + i - 1)
           end if
           deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*kx
        end do
@@ -335,9 +330,9 @@ contains
     case (2)
        do j = 1, ny
           if (j <= ny/2+1) then
-             ky = two_pi / Ly * dble(j-1)
+             ky = two_pi / this%Ly * dble(j-1)
           else
-             ky = two_pi / Ly * dble(-ny + j - 1)
+             ky = two_pi / this%Ly * dble(-ny + j - 1)
           end if
           deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*ky
        end do
@@ -345,15 +340,14 @@ contains
     case (3)
        do k = 1, nz
           if (k <= nz/2+1) then
-             kz = two_pi / Lz * dble(k-1)
+             kz = two_pi / this%Lz * dble(k-1)
           else
-             kz = two_pi / Lz * dble(-nz + k - 1)
+             kz = two_pi / this%Lz * dble(-nz + k - 1)
           end if
           deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*kz
        end do
     case DEFAULT
-       print *,'Bad case for dir in make_deriv_3d ', dir
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
     end select
   end subroutine make_deriv_3d
 

@@ -113,8 +113,7 @@ contains
       case (3)            
          allocate(this%wk_3d(nx,ny,nz))
       case DEFAULT
-         print *,'Bad case for dim in fft_setup ', this%dim
-         call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
     end subroutine fft_setup
     subroutine fft_destroy(this)
@@ -137,8 +136,7 @@ contains
       case (3)            
          deallocate(this%wk_3d)
       case DEFAULT
-         print *,'Bad case for dim in fft_destroy ', this%dim
-         call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
       
     end subroutine fft_destroy
@@ -185,8 +183,7 @@ contains
             end do
          end do
       case DEFAULT
-         print *,'Bad case for dim in fftf ', this%dim
-         call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
     end subroutine fftf
      
@@ -235,8 +232,7 @@ contains
             end do
          end do
       case DEFAULT
-         print *,'Bad case for dim in fftf ', this%dim
-         call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
     end subroutine fftb
     
@@ -407,7 +403,6 @@ contains
             end if
             deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*kx
          end do
-         
       case (2)
          do j = 1, ny
             if (j <= ny/2+1) then
@@ -417,7 +412,6 @@ contains
             end if
             deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*ky
          end do
-         
       case (3)
          do k = 1, nz
             if (k <= nz/2+1) then
@@ -428,10 +422,9 @@ contains
             deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*kz
          end do
       case DEFAULT
-         print *,'Bad case for dir in make_deriv_3d ', dir
-         call exit(0)
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
       end select
-      
+
     end subroutine make_deriv_3d
     
   end module pf_mod_fftpackage

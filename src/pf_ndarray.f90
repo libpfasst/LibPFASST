@@ -169,7 +169,7 @@ contains
     type is (ndarray)
        this%flatarray = src%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_copy
 
@@ -208,7 +208,7 @@ contains
     type is (ndarray)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_axpy
 

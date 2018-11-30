@@ -461,7 +461,7 @@ contains
     case (SDC_UNIFORM)
        write(un,*) 'qtype:', pf%qtype,'! Uniform  nodes are used'
     case default
-       call pf_stop(__FILE__,__LINE__,"Invalid qtype",pf%qtype)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',pf%qtype)
     end select
 
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'

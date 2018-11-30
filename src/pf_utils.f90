@@ -149,11 +149,14 @@ contains
     character(len=*), intent(in) :: msg
     integer, intent(in), optional :: N
 
-    print *,'Stopping in File: ', pf_file
+    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    print *,'Stopping in File: ', pf_file    
     print *,'Line number: ', Nline
     print *,msg
-    if (present(N))   print *,N
+    if (present(N))   print *,'value=',N
+    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     stop
+    
   end subroutine pf_stop
   
   

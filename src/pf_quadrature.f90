@@ -339,9 +339,7 @@ contains
        end do
 
     case default
-       print *,'qtype = ',qtype
-       stop "ERROR: Invalid qtype in sdc_quadrature.f90."
-
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',qtype)
     end select
 
   end subroutine sdc_qnodes

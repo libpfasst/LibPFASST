@@ -617,8 +617,7 @@ contains
           end do
         end do
       case default
-        print *, "imexQ_oc_spreadq0 needs a flag", which
-        stop
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
     
   end subroutine imexQ_oc_spreadq0
