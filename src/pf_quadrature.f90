@@ -7,6 +7,8 @@
 module pf_mod_quadrature
   use iso_c_binding
   use pf_mod_dtype
+  use pf_mod_utils
+  
   implicit none
 
   integer,  parameter :: qp = c_long_double   

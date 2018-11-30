@@ -4,6 +4,7 @@
 !>  Module for reading parameters for the problem
 module pf_mod_fftpackage
   use pf_mod_dtype
+  use pf_mod_utils
   implicit none
   
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp

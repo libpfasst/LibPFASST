@@ -7,6 +7,8 @@
 !!   > make fftw3
 module pf_mod_fftpackage
   use pf_mod_dtype
+  use pf_mod_utils
+  
   implicit none
   
   include 'fftw3.f03'

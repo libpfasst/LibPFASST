@@ -8,9 +8,6 @@ module pf_mod_utils
   use pf_mod_timer
   implicit none
 contains
-
-
-
   !
   !> Compute full residual at each node and measure it's size
   subroutine pf_residual(pf, lev, dt, flag)

@@ -21,6 +21,7 @@
 module pf_mod_ndarray
   use iso_c_binding
   use pf_mod_dtype
+  use pf_mod_utils  
   implicit none
 
   !>  Type to create and destroy N-dimenstional arrays
