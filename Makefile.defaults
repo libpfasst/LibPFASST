@@ -15,6 +15,8 @@ FFLAGS = -Ibuild -Jinclude -cpp
 
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -Wall -Wextra -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none
+else
+FFLAGS += -O3
 endif
 
 include $(wildcard $(LIBPFASST)/*.defs)
