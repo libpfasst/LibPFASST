@@ -113,12 +113,12 @@ contains
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
-       do m = 1, Nnodes-1
-         call lev%I(m)%setval(0.0_pfdp)
-         call this%I3(m)%setval(0.0_pfdp)
-
-         if( sweep_y ) then
-            !  Forward in y
+        if( sweep_y ) then
+        !  Forward in y
+          do m = 1, Nnodes-1
+            call lev%I(m)%setval(0.0_pfdp,1)
+            call this%I3(m)%setval(0.0_pfdp,1)
+            
             do n = 1, Nnodes
                call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1), 1)
                call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2), 1)
@@ -128,10 +128,15 @@ contains
             if (allocated(lev%tauQ)) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m),1)
             end if
-         end if
+          end do
+        end if
 
-         if( sweep_p ) then
-            !  Backward in p
+        if( sweep_p ) then
+        !  Backward in p
+          do m =  Nnodes-1,1,-1
+            call lev%I(m)%setval(0.0_pfdp,2)
+            call this%I3(m)%setval(0.0_pfdp,2)
+
             do n = Nnodes,1,-1
                call lev%I(m)%axpy(dt*this%QdiffE(Nnodes-m,Nnodes+1-n), lev%F(n,1), 2)
                call lev%I(m)%axpy(dt*this%QdiffI(Nnodes-m,Nnodes+1-n), lev%F(n,2), 2)
@@ -141,8 +146,8 @@ contains
             if (allocated(lev%tauQ)) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
             end if
-         end if
-       end do
+          end do
+        end if
 
        ! do the time-stepping
        if (k .eq. 1) then
@@ -165,7 +170,7 @@ contains
          do m = 1, lev%nnodes-1
             t = t + dt*this%dtsdc(m)
 
-            call this%rhs%setval(0.0_pfdp)
+            call this%rhs%setval(0.0_pfdp,1)
             do n = 1, m
                call this%rhs%axpy(dt*this%QtilE(m,n), lev%F(n,1), 1)
                call this%rhs%axpy(dt*this%QtilI(m,n), lev%F(n,2), 1)
@@ -196,7 +201,7 @@ contains
          t = tend
          do m = Nnodes-1, 1, -1
             t = t - dt*this%dtsdc(m)
-            call this%rhs%setval(0.0_pfdp)
+            call this%rhs%setval(0.0_pfdp,2)
             do n = Nnodes, m+1,-1
                call this%rhs%axpy(dt*this%QtilE(Nnodes-m,Nnodes-n+1), lev%F(n,1), 2)
                call this%rhs%axpy(dt*this%QtilI(Nnodes-m,Nnodes-n+1), lev%F(n,2), 2)
