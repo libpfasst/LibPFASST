@@ -104,10 +104,12 @@ contains
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
        allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes),stat=ierr)
-       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
+       if (ierr /= 0) &
+          call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
 
        allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes),stat=ierr)
-       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
+       if (ierr /= 0) &
+          call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
        
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels

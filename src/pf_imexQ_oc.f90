@@ -365,15 +365,16 @@ contains
 !     if(sweep_p) &
 !       call this%evaluate_all(lev, t0 + dt*lev%nodes, 2, step)
 
-    if( sweep_p .and. sweep_y ) then
-      call pf_residual(pf, lev, dt, 0)
-    else if( sweep_y ) then
-      call pf_residual(pf, lev, dt, 1)
-    else if (sweep_p ) then
-      call pf_residual(pf, lev, dt, 2)
-    else
-      stop "neither sweep on p nor on y : that should not happen"
-    end if
+!     if( sweep_p .and. sweep_y ) then
+!       call pf_residual(pf, lev, dt, 0)
+!     else if( sweep_y ) then
+!       call pf_residual(pf, lev, dt, 1)
+!     else if (sweep_p ) then
+!       call pf_residual(pf, lev, dt, 2)
+!     else
+!       stop "neither sweep on p nor on y : that should not happen"
+!     end if
+    call pf_residual(pf, lev, dt, which)
     ! done
     call call_hooks(pf, level_index, PF_POST_SWEEP)
 

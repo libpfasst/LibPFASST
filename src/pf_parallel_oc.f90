@@ -68,6 +68,8 @@ contains
     end if
     level_index = 1
     c_lev_p => pf%levels(1)
+    
+  if (pf%q0_style < 3) then
 
     ! Step 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
     !         (this is skipped if the fine initial conditions are already consistent)
@@ -116,12 +118,13 @@ contains
                 end if
              end if
              !  Do some sweeps
-             if( which == 0 .or. which == 1 ) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, pf%nsweeps_burn, 1)
+             if( which == 0 .or. which == 1 ) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, pf%nsweeps_burn, 1) ! was: 1 not which
              if( which == 2 )                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt, pf%nsweeps_burn, 2)
           end do
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
+        
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps
     if (pf%nlevels > 1) then
       pf%state%pstatus = PF_STATUS_ITERATING
@@ -149,7 +152,7 @@ contains
         call pf_recv(pf, c_lev_p, c_lev_p%index*100000+pf%rank, .true., dir)
  
         !  Do sweeps
-        if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 1) !which ! why only state?
+        if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 1) !1 ! why only state?
         if(which == 2)                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 2) !which
         !  Send forward/backward
         if (dir == 1) send_tag = c_lev_p%index*100000+pf%rank+1
@@ -174,10 +177,13 @@ contains
        end if
        !  Do sweeps on level unless we are at the finest level
        if (level_index < pf%nlevels) then
-          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, which)
+          if ((which == 0) .or. (which == 1)) call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, 1)
+          if (which == 2)                     call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, 2)
        end if
     end do
 
+  end if
+    
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
