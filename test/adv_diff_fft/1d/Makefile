@@ -44,6 +44,6 @@ build/%.o: %.f90
 ./build/hooks.o : src/hooks.f90 ./build/feval.o 
 ./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
 ./build/probin.o : src/probin.f90 
-
+main.exe : $(LIBPFASST)/lib/libpfasst.a 
 
 

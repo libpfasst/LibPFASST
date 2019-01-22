@@ -15,8 +15,9 @@ FSRC = src/feval.f90 \
        src/probin.f90 
 
 OBJ = $(subst src,build,$(FSRC:.f90=.o))
-LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst
-FFLAGS  +=  -I$(LIBPFASST)/include -I$(FFTW3)/include
+LDFLAGS += -L$(LIBPFASST)/lib -lpfasst
+FFLAGS  += -I$(LIBPFASST)/include 
+
 
 all: $(EXE)
 
@@ -44,6 +45,6 @@ build/%.o: %.f90
 ./build/hooks.o : src/hooks.f90 ./build/feval.o 
 ./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
 ./build/probin.o : src/probin.f90 
-
+main.exe : $(LIBPFASST)/lib/libpfasst.a 
 
 
