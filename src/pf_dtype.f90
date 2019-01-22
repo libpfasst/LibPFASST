@@ -27,9 +27,7 @@ module pf_mod_dtype
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
-  integer, parameter :: SDC_PROPER_NODES    = 2**8
-  integer, parameter :: SDC_COMPOSITE_NODES = 2**9
-  integer, parameter :: SDC_NO_LEFT         = 2**10
+  integer, parameter :: SDC_CHEBYSHEV       = 6
 
   !> States of operation
   integer, parameter :: PF_STATUS_ITERATING = 1
@@ -118,16 +116,20 @@ module pf_mod_dtype
 
   !>  The type to store quadrature matrices
   type :: pf_sdcmats_t
-     real(pfdp), allocatable :: qmat(:,:)
-     real(pfdp), allocatable :: qmatFE(:,:)
-     real(pfdp), allocatable :: qmatBE(:,:)
-     real(pfdp), allocatable :: qmatTrap(:,:)
-     real(pfdp), allocatable :: qmatVer(:,:)
-     real(pfdp), allocatable :: qmatLU(:,:)
-     real(pfdp), allocatable :: s0mat(:,:)
-     real(pfdp), allocatable :: qnodes(:)          
-     integer :: nnodes
-     integer :: qtype
+     integer :: nnodes                      !  Number of nodes
+     integer :: qtype                   !  Type of nodes
+     real(pfdp), allocatable :: qnodes(:)   !  The quadrature nodes       
+     real(pfdp), allocatable :: Qmat(:,:)   !  Collocation matrix
+     real(pfdp), allocatable :: QmatFE(:,:) !  Forward Euler matrix
+     real(pfdp), allocatable :: QmatBE(:,:) !  Backward Euler matrix
+     real(pfdp), allocatable :: QmatTrap(:,:) ! Trapezoid rule matrix
+     real(pfdp), allocatable :: QmatVer(:,:)  ! Verlet Matrix
+     real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat 
+     real(pfdp), allocatable :: s0mat(:,:)    !  deprecated
+
+     logical :: use_proper_nodes =  .false. !  If true use gauss nodes in coarsening
+     logical :: use_composite_nodes = .false. ! If true, finer nodes are composite
+     logical :: use_no_left_q = .false.       ! If true don't use left endpoint in rule
   end type pf_sdcmats_t
 
 
@@ -141,6 +143,7 @@ module pf_mod_dtype
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
+     
      !  Mandatory level parameter
      integer  :: mpibuflen    = -1   !! size of solution in pfdp units
 
@@ -238,6 +241,9 @@ module pf_mod_dtype
      !>  Optional parameters
      integer :: niters  = 5             !! number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
+     logical :: use_proper_nodes =  .false. 
+     logical :: use_composite_nodes = .false.
+     logical :: use_no_left_q = .false.         
      
      ! --  level dependent parameters
      integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels

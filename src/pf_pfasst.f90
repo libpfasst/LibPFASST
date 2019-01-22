@@ -174,18 +174,11 @@ contains
     allocate(lev%nflags(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
-    !> make quadrature matrices
-    if (btest(pf%qtype, 8)) then
-       nnodes0=pf%levels(1)%nnodes
-    else
-       nnodes0=pf%levels(pf%nlevels)%nnodes
-    end if
+
     !>  Allocate and compute all the matrices
     allocate(lev%sdcmats,stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
-
-
-    call pf_init_sdcmats(lev%sdcmats,pf%qtype, nnodes,nnodes0,lev%nflags)
+    call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
 
     lev%nodes = lev%sdcmats%qnodes
 
@@ -316,6 +309,7 @@ contains
     integer    ::  nsweeps_burn, q0_style, taui0
     logical    ::  Vcycle,Finterp, use_LUq
     logical    :: echo_timings, debug, save_results, use_rk_stepper
+    logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
     ! stuff for reading the command line
     integer, parameter :: un = 9
@@ -330,7 +324,7 @@ contains
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
     namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_results, use_rk_stepper
-
+    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes
 
     !> set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
@@ -358,6 +352,10 @@ contains
     nsteps_rk    = pf%nsteps_rk
     rk_pred      = pf%rk_pred
     use_rk_stepper= pf%use_rk_stepper
+    
+    use_no_left_q      = pf%use_no_left_q
+    use_composite_nodes= pf%use_composite_nodes
+    use_proper_nodes   = pf%use_proper_nodes
 
     !> open the file "fname" and read the pfasst namelist
     if (present(fname))  then
@@ -408,6 +406,10 @@ contains
     pf%use_rk_stepper=use_rk_stepper
     pf%nsteps_rk    = nsteps_rk    
     pf%rk_pred      = rk_pred
+
+    pf%use_no_left_q       = use_no_left_q
+    pf%use_composite_nodes = use_composite_nodes
+    pf%use_proper_nodes    = use_proper_nodes
 
     !>  Sanity check
     if (pf%nlevels < 1) then
@@ -462,10 +464,15 @@ contains
        write(un,*) 'qtype:',pf%qtype,'! Clenshaw Curtis nodes are used'
     case (SDC_UNIFORM)
        write(un,*) 'qtype:', pf%qtype,'! Uniform  nodes are used'
+    case (SDC_CHEBYSHEV)
+       write(un,*) 'qtype:', pf%qtype,'! Chebyshev  nodes are used'
     case default
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',pf%qtype)
     end select
 
+    if (pf%use_proper_nodes)  write(un,*) 'Using proper node nesting'
+    if (pf%use_composite_nodes)  write(un,*) 'Using composite node nesting'
+    if (pf%use_no_left_q)  write(un,*) ' Skipping left end point in quadruture rule '        
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
     
     write(un,*) 'mpibuflen:   ', pf%levels(1:pf%nlevels)%mpibuflen, '! size of data send between time steps'
