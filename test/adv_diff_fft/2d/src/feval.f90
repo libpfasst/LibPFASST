@@ -27,6 +27,8 @@ module feval
      complex(pfdp), allocatable :: lap(:,:)         ! Lapclacian operators
      complex(pfdp), allocatable :: ddx(:,:) ! First derivative operators
      complex(pfdp), allocatable :: ddy(:,:) ! First derivative operators
+     complex(pfdp), allocatable :: opE(:,:) ! Explicit part operator
+     complex(pfdp), allocatable :: opI(:,:) ! Implicit part operator
      
    contains
 
@@ -51,7 +53,8 @@ contains
 
   !>  Routine to set up sweeper variables and operators
   subroutine sweeper_setup(sweeper, grid_shape)
-    use probin, only:  imex_stat
+    use probin, only:  imex_stat,nu, a,b
+
     class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: grid_shape(3)
 
@@ -80,9 +83,28 @@ contains
     allocate(this%lap(nx,ny))
     allocate(this%ddx(nx,ny))
     allocate(this%ddy(nx,ny))
+    allocate(this%opE(nx,ny))
+    allocate(this%opI(nx,ny))
+
     call this%fft_tool%make_lap_2d(this%lap)
     call this%fft_tool%make_deriv_2d(this%ddx,1)
     call this%fft_tool%make_deriv_2d(this%ddy,2)
+    select case (imex_stat)
+       case (0)  ! Fully Explicit        
+          this%opE = -a*this%ddx-b*this%ddy + nu * this%lap
+          this%opI = 0.0_pfdp          
+       case (1)  ! Fully Implicit
+          this%opE = 0.0_pfdp
+          this%opI = -a*this%ddx-b*this%ddy + nu * this%lap 
+       case (2)  ! IMEX
+          this%opE = -a*this%ddx-b*this%ddy
+          this%opI =  nu * this%lap           
+       case DEFAULT
+          print *,'Bad case for imex_stat in f_eval ', imex_stat
+          call exit(0)
+       end select
+
+       
   end subroutine sweeper_setup
 
   !>  destroy the sweeper type
@@ -92,11 +114,11 @@ contains
     class(ad_sweeper_t), pointer :: this
     this => as_ad_sweeper(sweeper)    
 
-
-    deallocate(this%lap)
-    deallocate(this%ddx)
-    deallocate(this%ddy)
-    
+    deallocate(this%opE)
+    deallocate(this%opI)
+       deallocate(this%lap)
+       deallocate(this%ddx)
+       deallocate(this%ddy)    
     !    call this%imexQ_destroy(lev)
     
     call this%fft_tool%fft_destroy()
@@ -127,41 +149,19 @@ contains
     
     ! Take the fft of y (stored in fft%workhat)
     wk=yvec
-    call fft%fftf()            
 
     ! Apply spectral operators
     select case (piece)
     case (1)  ! Explicit piece
-       select case (imex_stat)
-       case (0)  ! Fully Explicit        
-          wk = (-a*this%ddx-b*this%ddy + nu * this%lap) *  wk
-       case (1)  ! Fully Implicit
-          print *,'Should not be in this case in feval'
-       case (2)  ! IMEX
-          wk = (-a*this%ddx-b*this%ddy) *  wk
-       case DEFAULT
-          print *,'Bad case for imex_stat in f_eval ', imex_stat
-          call exit(0)
-       end select
+       call fft%conv(this%opE)            
     case (2)  ! Implicit piece
-       select case (imex_stat)
-       case (0)  ! Fully Explicit        
-          print *,'Should not be in this case in feval'
-       case (1)  ! Fully Implicit
-          wk = (-a*this%ddx-b*this%ddy + nu * this%lap) *  wk
-       case (2)  ! IMEX
-          wk = (nu * this%lap) *  wk
-       case DEFAULT
-          print *,'Bad case for imex_stat in f_eval ', imex_stat
-          call exit(0)
-       end select
+       call fft%conv(this%opI)            
     case DEFAULT
       print *,'Bad case for piece in f_eval ', piece
       call exit(0)
     end select
 
-    !  Do the inverse fft
-    call fft%fftb()
+
     fvec=real(wk)
   end subroutine f_eval
 
@@ -190,17 +190,7 @@ contains
 
        ! Take the fft of y (stored in fft%workhat)
        wk=rhsvec
-       call fft%fftf()            
-
-       !  Apply spectral inverse operators
-       if (imex_stat .eq. 2) then
-          wk =  wk/ (1.0_pfdp - nu*dtq*this%lap)
-       else  ! fully implicit
-          wk =  wk/ (1.0_pfdp - dtq*(-a*this%ddx-b*this%ddy +nu*this%lap))
-       end if
-
-       
-       call fft%fftb()
+       call fft%conv(1.0_pfdp/(1.0_pfdp - dtq*this%opI))
        yvec=real(wk)
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq
