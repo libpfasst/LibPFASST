@@ -4,11 +4,12 @@
 !
 !
 !> Module to create quadrature matrices and accompanying routines
+
 module pf_mod_quadrature
-!  use iso_c_binding
   use pf_mod_dtype
   use pf_mod_utils
-  
+
+
   implicit none
 
   integer,  parameter :: qp = c_long_double   
@@ -21,8 +22,6 @@ module pf_mod_quadrature
      module procedure poly_eval
      module procedure poly_eval_complex
   end interface
-
-
   
 contains
   !>  Initialize the sdcmats type with the correct nodes and quadrature matrices
@@ -50,11 +49,11 @@ contains
 
      !  Allocate nodes and collocation matrices
      allocate(SDCmats%qnodes(nnodes),stat=ierr)
-     if (ierr /= 0) stop "allocate error qnodes"
+     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error qnodes")
      allocate(SDCmats%qmat(nnodes-1,nnodes),stat=ierr)
-     if (ierr /= 0) stop "allocate error qmat"
+     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmat")
      allocate(SDCmats%s0mat(nnodes-1,nnodes),stat=ierr)
-     if (ierr /= 0) stop "allocate error s0mat"
+     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error s0mat")
 
      !  Make the nodes and collocation matrices
      call pf_quadrature(SDCmats%qtype, nnodes, nnodes0, &
@@ -118,8 +117,7 @@ contains
     !  Check
     LUerror = maxval(abs(matmul(L,U)-transpose(Q(1:Nnodes-1,2:Nnodes))))
     if (LUerror .gt. 1e-14)  then
-       print *,'error in LU too high',LUerror
-       stop
+       call pf_stop(__FILE__,__LINE__,'error in LU too high')
     end if
 
     QLU = 0.0_pfdp
@@ -212,7 +210,8 @@ contains
     nodes  = real(qnodes, pfdp)
 
     if (all(nodes == 0.0d0)) then
-       stop 'ERROR: pf_quadrature: invalid SDC nnodes.'
+       call pf_stop(__FILE__,__LINE__,&
+            'ERROR: pf_quadrature: invalid SDC nnodes.')
     end if
 
   end subroutine pf_quadrature
@@ -225,15 +224,15 @@ contains
     nnodes=SDCmats%nnodes
 
     allocate(SDCmats%qmatFE(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error qmatFE"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatFE")
     allocate(SDCmats%qmatBE(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error qmatBE"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
     allocate(SDCmats%qmatTrap(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error qmatBE"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
     allocate(SDCmats%qmatVer(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error qmatBE"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
     allocate(SDCmats%qmatLU(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) stop "allocate error qmatLU"
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatLU")
     
     !  Make implicit Euler matrices
     SDCmats%qmatBE=0.0_pfdp
@@ -269,7 +268,8 @@ contains
 
 
   !> Subroutine to compute high precision quadrature nodes.
-  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes) 
+  subroutine sdc_qnodes(qnodes, flags, qtype, nnodes)
+
     integer ,       intent(in), value  :: nnodes          !!  Number of nodes
     integer ,       intent(in), value  :: qtype           !!  Type of nodes (see pf_dtype)
     real(pfqp),  intent(out)        :: qnodes(nnodes)  !!  The computed quadrature nodes

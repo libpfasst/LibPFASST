@@ -7,9 +7,10 @@ module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
   implicit none
+  
 contains
   !
-  !> Compute full residual at each node and measure it's size
+  !> Compute full residual at each node and measure its size
   subroutine pf_residual(pf, lev, dt, flag)
     type(pf_pfasst_t),  intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: lev
@@ -155,8 +156,6 @@ contains
     stop
     
   end subroutine pf_stop
-  
-  
-  
+
 
 end module pf_mod_utils

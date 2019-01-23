@@ -12,7 +12,7 @@ module probin
   real(pfdp), save :: nu     ! viscosity
   real(pfdp), save :: t00     ! initial time for exact solution
   real(pfdp), save :: sigma  ! initial condition parameter
-  integer,          save :: kfreq  ! initial condition parameter
+  real(pfdp), save :: kfreq  ! initial condition parameter
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
 
@@ -97,7 +97,7 @@ contains
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
     write(un,*) 'nx:     ',  nx(1:pf%nlevels), '! grid size per level'
     write(un,*) 'ny:     ',  ny(1:pf%nlevels), '! grid size per level'
-    write(un,*) 'a,b:  ',  a,b,c, '! advection constants'
+    write(un,*) 'a,b:  ',  a,b, '! advection constants'
     write(un,*) 'nu:     ', nu, '! diffusion constant'
     select case (imex_stat)
     case (0)  

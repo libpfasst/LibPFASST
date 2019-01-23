@@ -51,7 +51,7 @@ contains
 
   !>  Routine to set up sweeper variables and operators
   subroutine sweeper_setup(sweeper, grid_shape)
-    use probin, only:  imex_stat 
+    use probin, only:  imex_stat
     class(pf_sweeper_t), intent(inout) :: sweeper
     integer,             intent(in   ) :: grid_shape(3)
 

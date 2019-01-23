@@ -21,7 +21,7 @@ foo: $(FOBJ)
 ./build/pf_parallel.o : src/pf_parallel.f90 ./build/pf_results.o ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
 ./build/pf_parallel_oc.o : src/pf_parallel_oc.f90 ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
 ./build/pf_pfasst.o : src/pf_pfasst.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_utils.o ./build/pf_mpi.o ./build/pf_dtype.o 
-./build/pf_quadrature.o : src/pf_quadrature.f90 ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_quadrature.o : src/pf_quadrature.f90 ./build/pfasst.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_results.o : src/pf_results.f90 ./build/pf_dtype.o 
 ./build/pf_timer.o : src/pf_timer.f90 ./build/pf_dtype.o 
