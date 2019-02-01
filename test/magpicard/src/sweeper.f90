@@ -221,7 +221,7 @@ contains
    real(pfdp), intent(in) :: coefs(:)
    integer, intent(in) :: N
 
-   class(zndarray), pointer :: f1
+   class(zndarray), pointer :: f1,f2
    complex(pfdp),      pointer :: f1_array(:,:)
    integer :: i, j, k, nnodes, node_offset
    complex(pfdp) :: tmp(N,N,3)
@@ -251,7 +251,7 @@ contains
    end do
    !$omp end parallel do
 
-   nullify(f1)
+   nullify(f1,f2)
  end subroutine add_double_commutator_terms
 
  subroutine add_triple_commutator_terms(this, omega, f, nodes, this_node, qmat, dt, coef, N)
