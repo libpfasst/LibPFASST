@@ -42,8 +42,8 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-          allocate(pf%levels(l)%shape(1))
-          pf%levels(l)%shape(1) = nparticles
+          allocate(pf%levels(l)%shape(2))
+          pf%levels(l)%shape = nparticles
           pf%levels(l)%mpibuflen = nparticles * nparticles * 2
 
           allocate(magpicard_context::pf%levels(l)%ulevel)
@@ -65,11 +65,11 @@ contains
       call pf_pfasst_setup(pf)
 
       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
+      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)
 
-      call zndarray_build(dmat_t0, nparticles)
+      call zndarray_build(dmat_t0, [nparticles,nparticles])
       call initial(dmat_t0)  
-      call zndarray_build(dmat_tfinal,nparticles)
+      call zndarray_build(dmat_tfinal,[nparticles,nparticles])
 
 
       call mpi_barrier(MPI_COMM_WORLD, err)
@@ -86,8 +86,10 @@ contains
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       if(pf%rank == comm%nproc-1) then
-        call dmat_tfinal%write_to_disk('final_solution') !necessary for pfasst.py
-        if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
+         call dmat_tfinal%write_to_disk('sol_final') !necessary for pfasst.py
+         print *,'solution at end of run'
+         if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
+
       endif
 
       call zndarray_destroy(dmat_t0)

@@ -58,7 +58,8 @@ FSRC = src/pfasst.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
        src/pf_verlet.f90 \
-       src/pf_zndsysarray.f90
+       src/pf_zndsysarray.f90 \
+       src/pf_zndarray.f90       
        #       src/pf_amisdc.f90 \ 
 #       src/pf_amisdcQ.f90 \
 

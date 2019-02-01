@@ -9,7 +9,6 @@ module pf_mod_quadrature
   use pf_mod_dtype
   use pf_mod_utils
 
-
   implicit none
 
   integer,  parameter :: qp = c_long_double   
@@ -26,6 +25,7 @@ module pf_mod_quadrature
 contains
   !>  Initialize the sdcmats type with the correct nodes and quadrature matrices
   subroutine pf_init_sdcmats(pf,SDCmats,nnodes,nflags)
+    use pf_mod_utils
     type(pf_pfasst_t), intent(in) :: pf    !!  PFASST structure
      type(pf_sdcmats_t), intent(inout) :: SDCmats
      integer, intent(in) :: nnodes  ! Number of ndoes
@@ -49,7 +49,8 @@ contains
 
      !  Allocate nodes and collocation matrices
      allocate(SDCmats%qnodes(nnodes),stat=ierr)
-     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error qnodes")
+     if (ierr /= 0) call pf_stop(__FILE__, &
+          __LINE__,"allocate error qnodes")
      allocate(SDCmats%qmat(nnodes-1,nnodes),stat=ierr)
      if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmat")
      allocate(SDCmats%s0mat(nnodes-1,nnodes),stat=ierr)
