@@ -26,7 +26,7 @@ contains
     integer                   :: k               !!  Loop indices
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
-    integer :: which, dir, send_tag, burnin_sweeps 
+    integer :: which, dir, send_tag, burnin_sweeps, my_coarse_sweeps 
  
     which = 1                   ! standard: predict and sweep forward-in-time
     dir = 1                     ! for MPI communication, standard is forward-in-time
@@ -124,8 +124,15 @@ contains
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
+    if (pf%q0_style > 0) then
+      my_coarse_sweeps = pf%rank+1 ! for warm start do pipelining
+      if(which == 2) my_coarse_sweeps = pf%comm%nproc-pf%rank
+    else
+      my_coarse_sweeps = c_lev_p%nsweeps_pred
+    end if
         
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps
+    ! Modification: each processor does sweeps according to its rank
     if (pf%nlevels > 1) then
       pf%state%pstatus = PF_STATUS_ITERATING
       pf%state%status  = PF_STATUS_ITERATING
@@ -134,7 +141,7 @@ contains
       c_lev_p => pf%levels(level_index)
 
       if (pf%Pipeline_pred) then
-        do k = 1, c_lev_p%nsweeps_pred
+        do k = 1, my_coarse_sweeps !c_lev_p%nsweeps_pred
           pf%state%iter =-(pf%rank + 1) -k
 
           !  Get new initial conditions          
@@ -152,8 +159,10 @@ contains
         call pf_recv(pf, c_lev_p, c_lev_p%index*100000+pf%rank, .true., dir)
  
         !  Do sweeps
-        if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 1) !1 ! why only state?
-        if(which == 2)                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 2) !which
+!         if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 1) !1 ! why only state?
+        if(which == 0 .or. which == 1) call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, my_coarse_sweeps, which) !1 ! why only state?
+!         if(which == 2)                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred, 2) !which
+        if(which == 2)                 call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, my_coarse_sweeps, 2) !which
         !  Send forward/backward
         if (dir == 1) send_tag = c_lev_p%index*100000+pf%rank+1
         if (dir == 2) send_tag = c_lev_p%index*100000+pf%rank-1
@@ -177,8 +186,10 @@ contains
        end if
        !  Do sweeps on level unless we are at the finest level
        if (level_index < pf%nlevels) then
-          if ((which == 0) .or. (which == 1)) call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, 1)
-          if (which == 2)                     call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, 2)
+          if ((which == 0) .or. (which == 1)) &
+            call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, which) !which was 1
+          if (which == 2)                     &
+            call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred, 2)
        end if
     end do
 
