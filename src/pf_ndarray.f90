@@ -15,7 +15,7 @@
 !!   pf%levels(1)%shape = [ 3, 10 ]
 !!
 !! The helper routines array1, array2, array3, etc can be used to
-!! extract pointers to the encapsulated array from a C pointer without
+!! extract pointers to the encapsulated array without
 !! performing any copies.
 !!
 module pf_mod_ndarray
@@ -67,6 +67,16 @@ module pf_mod_ndarray
   end interface
 
 contains
+  function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
+    class(pf_encap_t), intent(in), target :: encap_polymorph
+    type(ndarray), pointer :: ndarray_obj
+    
+    select type(encap_polymorph)
+    type is (ndarray)
+       ndarray_obj => encap_polymorph
+    end select
+  end function cast_as_ndarray
+
   !>  Subroutine to allocate the array and set the size parameters
   subroutine ndarray_build(q, shape)
     class(pf_encap_t), intent(inout) :: q
@@ -135,7 +145,7 @@ contains
   !> Subroutine to destroy an array of arrays
   subroutine ndarray_destroy_array(this, x, n, level,  shape)
     class(ndarray_factory), intent(inout)              :: this
-    class(pf_encap_t),      intent(inout), allocatable :: x(:)
+    class(pf_encap_t),      intent(inout),allocatable :: x(:)
     integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
 
@@ -222,15 +232,6 @@ contains
   end subroutine ndarray_eprint
 
 
-  function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
-    class(pf_encap_t), intent(in), target :: encap_polymorph
-    type(ndarray), pointer :: ndarray_obj
-    
-    select type(encap_polymorph)
-    type is (ndarray)
-       ndarray_obj => encap_polymorph
-    end select
-  end function cast_as_ndarray
 
   !>  Helper function to return the array part
   function get_array1d(x,flags) result(r)

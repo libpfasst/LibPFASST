@@ -30,6 +30,8 @@ module pf_mod_fftpackage
      procedure :: fft_destroy
      procedure :: fftf
      procedure :: fftb
+     procedure, private :: conv_1d, conv_2d, conv_3d
+     generic :: conv => conv_1d, conv_2d, conv_3d
      procedure :: get_wk_ptr_1d
      procedure :: get_wk_ptr_2d
      procedure :: get_wk_ptr_3d
@@ -187,7 +189,7 @@ contains
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
     end subroutine fftf
-     
+    
     subroutine fftb(this)
       class(pf_fft_t), intent(inout) :: this
       
@@ -236,6 +238,40 @@ contains
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
       end select
     end subroutine fftb
+    
+    ! START private convolution procedures
+
+    subroutine conv_1d(this, g)
+        ! Variable Types
+        class(pf_fft_t), intent(inout) :: this
+        complex(pfdp), intent(in) :: g(:)
+        ! Compute Convolution
+        call fftf(this)
+        this%wk_1d = this%wk_1d * g
+        call fftb(this)
+    end subroutine conv_1d
+
+    subroutine conv_2d(this, g)
+        ! Variable Types
+        class(pf_fft_t), intent(inout) :: this
+        complex(pfdp), intent(in) :: g(:,:)
+        ! Compute Convolution
+        call fftf(this)
+        this%wk_2d = this%wk_2d * g
+        call fftb(this)
+    end subroutine conv_2d
+
+    subroutine conv_3d(this, g)
+        ! Variable Types
+        class(pf_fft_t), intent(inout) :: this
+        complex(pfdp), intent(in) :: g(:,:,:)
+        ! Compute Convolution
+        call fftf(this)
+        this%wk_3d = this%wk_3d * g
+        call fftb(this)
+    end subroutine conv_3d
+    
+    ! END private convolution procedures
     
     subroutine make_lap_1d(this, lap)
       class(pf_fft_t), intent(inout) :: this
