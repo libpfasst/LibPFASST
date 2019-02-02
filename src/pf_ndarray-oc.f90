@@ -18,6 +18,7 @@
 module pf_mod_ndarray_oc
   use iso_c_binding
   use pf_mod_dtype
+  use pf_mod_utils
   implicit none
 
   !>  Type to create and destroy N-dimenstional arrays for optimal control
@@ -79,8 +80,7 @@ contains
        q%dim   = size(shape)
        q%shape = shape
     class default
-        print *, "wrong class in ndarray_oc_build!"
-        stop
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_oc_build
 
@@ -130,7 +130,7 @@ contains
        deallocate(x%yflatarray)
        deallocate(x%shape)
     class default
-      stop "TYPE ERROR in ndarray_oc_destroy_single"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
     deallocate(x)
   end subroutine ndarray_oc_destroy_single
@@ -150,7 +150,7 @@ contains
           deallocate(x(i)%shape)
        end do
     class default
-      stop "TYPE ERROR in ndarray_oc_destroy_array"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
     deallocate(x)
   end subroutine ndarray_oc_destroy_array
@@ -176,7 +176,7 @@ contains
     case (2)
       this%pflatarray = val
     case default
-       stop "ERROR in ndarray_oc_setval: only 0, 1, 2 allowed as flags"
+       call pf_stop(__FILE__,__LINE__,'Select case error',which)
     end select
 
   end subroutine ndarray_oc_setval
@@ -203,10 +203,10 @@ contains
       case (2)
         this%pflatarray = src%pflatarray
       case default
-        stop "ERROR in ndarray_oc_copy: only 0, 1, 2 allowed as flags"
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
       end select
     class default
-      stop "TYPE ERROR in ndarray_oc_copy"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_oc_copy
 
@@ -231,7 +231,7 @@ contains
     case (2)
        z = this%pflatarray
     case default
-       stop "ERROR in ndarray_oc_pack: only 1, 2 allowed as flags"
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end subroutine ndarray_oc_pack
 
@@ -253,7 +253,7 @@ contains
     case (2)
        this%pflatarray = z 
     case default
-       stop "ERROR in ndarray_oc_upack: only 1, 2 allowed as flags"
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end subroutine ndarray_oc_unpack
   
@@ -277,7 +277,7 @@ contains
     case (2)
        norm = maxval(abs(this%pflatarray))  
     case default
-       stop "ERROR in ndarray_oc_norm: only 0, 1, 2 allowed as flags"
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end function ndarray_oc_norm
 
@@ -304,10 +304,10 @@ contains
       case (2)
         this%pflatarray = a * x%pflatarray + this%pflatarray
       case default
-        stop "ERROR in ndarray_oc_axpy: only 0, 1, 2 allowed as flags"
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
       end select
     class default
-      stop "TYPE ERROR in ndarray_oc_axpy"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select  
   end subroutine ndarray_oc_axpy
 
@@ -331,7 +331,7 @@ contains
     type is (ndarray_oc)
        ndarray_oc_obj => encap_polymorph
     class default
-      stop "TYPE ERROR in cast_as_ndarray_oc"
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function cast_as_ndarray_oc
 
@@ -354,10 +354,10 @@ contains
         case (2)
           r => x%pflatarray
        case default
-          stop "ERROR in get_array1d_oc: only 1, 2 allowed as flags"
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
        end select
     class default
-       stop "ERROR: get_array1d_oc type mismatch."
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array1d_oc
 
@@ -380,10 +380,10 @@ contains
         case (2)
           r(1:x%shape(1),1:x%shape(2)) => x%pflatarray
         case default
-          stop "ERROR in get_array2d_oc: only 1, 2 allowed as flags"
+          stop "ERROR in get_array1d_oc: only 1, 2 allowed as flags"
        end select
     class default
-       stop "ERROR: get_array2d_oc type mismatch."
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array2d_oc
   
@@ -403,10 +403,10 @@ contains
         case (2)
           r(1:x%shape(1),1:x%shape(2),1:x%shape(3)) => x%pflatarray
         case default
-          stop "ERROR in get_array2d_oc: only 1, 2 allowed as flags"
+          stop "ERROR in get_array1d_oc: only 1, 2 allowed as flags"
        end select
     class default
-       stop "ERROR: get_array2d_oc type mismatch."
+       call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array3d_oc
   

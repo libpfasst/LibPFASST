@@ -71,7 +71,6 @@ contains
 
        !>  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       print *,'calling setup',pf%levels(l)%shape
        call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
 
        !>  Set the size of the send/receive buffer
@@ -100,7 +99,7 @@ contains
     !> do the PFASST stepping
     call pf_pfasst_run(pf, y_0, dt, 0.d0, nsteps,y_end)
 
-    !>  wait for everyone to be done
+    !>  wait for everyone to b e done
     call mpi_barrier(pf%comm%comm, ierror)
     
     !>  deallocate initial condition and final solution

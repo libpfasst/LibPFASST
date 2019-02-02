@@ -7,12 +7,10 @@ module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
   implicit none
+  
 contains
-
-
-
   !
-  !> Compute full residual at each node and measure it's size
+  !> Compute full residual at each node and measure its size
   subroutine pf_residual(pf, lev, dt, flag)
     type(pf_pfasst_t),  intent(inout) :: pf
     class(pf_level_t),  intent(inout) :: lev
@@ -143,6 +141,21 @@ contains
     end do
   end subroutine pf_generic_spreadq0
 
+  subroutine pf_stop(pf_file,Nline,msg, N)
+    character(len=*), intent(in) :: pf_file
+    integer, intent(in):: Nline
+    character(len=*), intent(in) :: msg
+    integer, intent(in), optional :: N
+
+    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    print *,'Stopping in File: ', pf_file    
+    print *,'Line number: ', Nline
+    print *,msg
+    if (present(N))   print *,'value=',N
+    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    stop
+    
+  end subroutine pf_stop
 
 
 end module pf_mod_utils

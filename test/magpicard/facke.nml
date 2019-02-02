@@ -1,0 +1,29 @@
+&pf_params
+	nlevels = 1
+	niters = 20
+	nnodes = 3 
+	nsweeps_pred = 1 
+	nsweeps = 1 
+	qtype = 5 
+	echo_timings = .true.
+	abs_res_tol = 1e-13
+	rel_res_tol = 1e-13
+	pipeline_pred = .true.
+	pfasst_pred = .true.
+	vcycle = .false.
+/
+
+&params
+	Nprob=2   
+	fbase = "./output"
+	magnus_order = 3
+	tfin = 0.05
+	nsteps = 128
+	exptol = 1.d-15
+	nparticles = 20
+	save_solutions = .true.
+	toda_periodic = .true.
+	use_sdc = .false.
+	Znuc=0.1
+	E0=0.01
+/

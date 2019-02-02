@@ -35,8 +35,8 @@ contains
     write (this%fname_r, "(A13,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
     write (this%fname_e, "(A10,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
 
-    allocate(this%errors(niters_in, this%nblocks, nlevels_in), &
-         this%residuals(niters_in, this%nblocks, nlevels_in))
+    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nlevels_in))
+    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nlevels_in))
 
     this%errors = 0.0_pfdp
     this%residuals = 0.0_pfdp

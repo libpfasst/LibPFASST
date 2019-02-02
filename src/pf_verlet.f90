@@ -6,8 +6,13 @@
 !!
 !!  This is intended for Hamiltonian problems of the form
 !!
-!! $$   q'=p, p'=f(q) $$ 
+!! $$   q'=p, p'=f(q) $$
 !!
+!! or
+!!
+!! $$    x'=v, x''=f(x) $$
+!!
+!!  So p is not momentum here, but velocity
 module pf_mod_verlet
   use pf_mod_dtype
   use pf_mod_utils
@@ -16,31 +21,32 @@ module pf_mod_verlet
 
   !> Define sweeper type
   type, extends(pf_sweeper_t), abstract :: pf_verlet_t
-     integer :: whichQQ
+     integer :: whichQQ=3
      integer :: doLU
      real(pfdp) :: Htol, H0
 
      !  Matrices
-     real(pfdp), ALLOCATABLE :: QQmat(:,:)
-     real(pfdp), ALLOCATABLE :: Qmat(:,:)     
-     real(pfdp), ALLOCATABLE :: QQtil(:,:)
-     real(pfdp), ALLOCATABLE :: Qtil(:,:)     
-     real(pfdp), ALLOCATABLE :: QQLU(:,:)
-     real(pfdp), ALLOCATABLE :: DQQmat(:,:)
-     real(pfdp), ALLOCATABLE :: DQQtil(:,:)
-     real(pfdp), ALLOCATABLE :: DQtil(:,:)     
-     real(pfdp), ALLOCATABLE :: DQQLU(:,:)
-     real(pfdp), ALLOCATABLE :: bvec(:)
-     real(pfdp), ALLOCATABLE :: bbarvec(:)
-     real(pfdp), allocatable :: dtsdc(:)     !!  SDC step sizes
-     real(pfdp), allocatable :: tsdc(:)     !!  SDC step sizes     
+     real(pfdp), ALLOCATABLE :: Qmat(:,:)     !  Spectral matrix for v
+     real(pfdp), ALLOCATABLE :: QQmat(:,:)    !  Spectral matrix for x
+     real(pfdp), ALLOCATABLE :: Qver(:,:)     !  Verlet matrix for v (Trapezoid) 
+     real(pfdp), ALLOCATABLE :: QQver(:,:)    !  Verlet matrix for x
+     real(pfdp), ALLOCATABLE :: Qtil(:,:)     !  Approximate matrix for v
+     real(pfdp), ALLOCATABLE :: QQtil(:,:)    !  Approximate matrix for x
+     real(pfdp), ALLOCATABLE :: DQver(:,:)    !  Qmat-Qver 
+     real(pfdp), ALLOCATABLE :: DQQver(:,:)   !  QQmat-QQver 
+     real(pfdp), ALLOCATABLE :: DQtil(:,:)    !  Qmat-Qtil
+     real(pfdp), ALLOCATABLE :: DQQtil(:,:)   !  QQmat-QQtil
+     real(pfdp), ALLOCATABLE :: bvec(:)       !  Quadrature rule for v
+     real(pfdp), ALLOCATABLE :: bbarvec(:)    !  Quadrature rule for x
+     real(pfdp), allocatable :: dtsdc(:)      !  SDC step sizes
+     real(pfdp), allocatable :: tsdc(:)       !  SDC times
      logical :: iqend  !  Decide whether to set qend by another Picard
 
      class(pf_encap_t), allocatable :: rhs   !! holds rhs for implicit solve     
    contains
      procedure(pf_f_eval_p), deferred :: f_eval        !!  RHS function evaluations
      procedure(pf_f_comp_p), deferred :: f_comp        !!  Implicit solver
-     procedure(pf_f_eval_p), deferred :: hamiltonian   !!  Hamiltonian
+     procedure(pf_hamiltonian_p), deferred :: hamiltonian   !!  Hamiltonian
      !>  Set the generic functions
      procedure :: sweep      => verlet_sweep
      procedure :: initialize => verlet_initialize
@@ -56,7 +62,7 @@ module pf_mod_verlet
   interface
      !>  This is the interface for the routine to compute the RHS function values
      !>  Evaluate f_piece(y), where piece is one or two 
-     subroutine pf_f_eval_p(this,y, t, level_index, f, piece)
+     subroutine pf_f_eval_p(this,y, t, level_index, f)
        !>  Evaluate f_piece(y), where piece is one or two 
        import pf_verlet_t, pf_encap_t, pfdp
        class(pf_verlet_t),  intent(inout) :: this
@@ -64,7 +70,7 @@ module pf_mod_verlet
        real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
        integer,    intent(in   ) :: level_index     !!  Level index
        class(pf_encap_t), intent(inout) :: f        !!  RHS function value
-       integer,    intent(in   ) :: piece           !!  Which piece to evaluate
+!       integer,    intent(in   ) :: piece           !!  Which piece to evaluate
      end subroutine pf_f_eval_p
      !>  Solve the equation y - dtq*f_2(y) =rhs
      subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece)
@@ -80,7 +86,17 @@ module pf_mod_verlet
        class(pf_encap_t), intent(inout) :: f      !!  f_2 of solution y
        integer,    intent(in   ) :: piece         !!  Which piece to evaluate
      end subroutine pf_f_comp_p
-  end interface
+
+     function pf_hamiltonian_p(this,y, t, level_index) result(H)
+       import pf_verlet_t, pf_encap_t, pfdp
+       class(pf_verlet_t),  intent(inout) :: this
+       class(pf_encap_t), intent(inout) :: y      !!  Variable
+       real(pfdp),        intent(in   ) :: t      !!  Time of solve
+       integer,    intent(in   ) :: level_index   !!  Level index       
+       real(pfdp) :: H
+     end function pf_hamiltonian_p
+     
+end interface
 contains
 
   !-----------------------------------------------------------------------------
@@ -105,9 +121,8 @@ contains
     real(pfdp)  :: H
 
 
-    nnodes = Lev%nnodes
     lev => pf%levels(level_index)   !!  Assign level pointer
-
+    nnodes = lev%nnodes
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -116,8 +131,6 @@ contains
     !
 !    call this%hamiltonian(t0+dt, Lev%qend, encapctx%m,H)
 !    print *,'Ham=',H,this%Htol,this%H0
-
-
 !    if ((pf%state%iter > 1) .and. (abs(H-this%H0) < this%Htol)) then
 !       call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
 !          print *, 'Skipping SDC sweep'
@@ -127,20 +140,20 @@ contains
     !
     ! compute integrals and add fas correction
     !
-    dtsq = dt*dt    
+    dtsq = dt*dt
     do k = 1,nsweeps
 
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)
           if (pf%state%iter .eq. 1)  then  !  Do verlet on the first iteration
              do n = 1, nnodes
-                call lev%I(m)%axpy(dt*this%DQtil(m+1,n), lev%F(n,1),1)
-                call lev%I(m)%axpy(dtsq*this%DQQtil(m+1,n), lev%F(n,1),2)
+                call lev%I(m)%axpy(dt*this%DQver(m,n), lev%F(n,1),1)
+                call lev%I(m)%axpy(dtsq*this%DQQver(m,n), lev%F(n,1),2)
              end do
           else
              do n = 1, nnodes
-                call lev%I(m)%axpy(dt*this%DQtil(m+1,n), lev%F(n,1),1)
-                call lev%I(m)%axpy(dtsq*this%DQQLU(m+1,n), lev%F(n,1),2)
+                call lev%I(m)%axpy(dt*this%DQtil(m,n), lev%F(n,1),1)
+                call lev%I(m)%axpy(dtsq*this%DQQtil(m,n), lev%F(n,1),2)
              end do
           end if
           if (allocated(lev%tauQ)) then
@@ -150,25 +163,23 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1),1)
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
+          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
        end if
 
        t = t0
-       ! do the sub-stepping in sweep    
+       ! do the sub-stepping in sweep
        do m = 1, nnodes-1
           t = t + dt*this%dtsdc(m)
           dtmhalf = 0.5d0*dt*this%dtsdc(m)
-          
           call this%rhs%setval(0.0_pfdp)
           !  Lower triangular verlet to  new piece
           if (pf%state%iter .eq. 1)  then
              do n = 1, m
-                call this%rhs%axpy(dtsq*this%QQtil(m+1,n), lev%F(n,1), 2)  
+                call this%rhs%axpy(dtsq*this%QQver(m,n), lev%F(n,1), 2)  
              end do
           else
              do n = 1, m
-                call this%rhs%axpy(dtsq*this%QQLU(m+1,n), lev%F(n,1), 2)  
+                call this%rhs%axpy(dtsq*this%QQtil(m,n), lev%F(n,1), 2)  
              end do
           endif
           
@@ -181,20 +192,26 @@ contains
           !>  Add the dt*v_0
           call this%rhs%axpy(t-t0, lev%Q(1),12)
 
-          !  Update position term (trapezoid rule)
+          !  Update position term 
           call lev%Q(m+1)%copy(this%rhs,2)
           
           !  update function values
-          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1),2)  
-          
-          call this%rhs%setval(0.0_pfdp)          
+          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1))  
+
+          !  Now do the v peice
+          call this%rhs%setval(0.0_pfdp,1)          
           !  Lower triangular verlet to  new piece
-          do n = 1, m+1
-             call this%rhs%axpy(dt*this%Qtil(m+1,n), Lev%F(n,1), 1)  
-          end do
-       
+          if (pf%state%iter .eq. 1)  then
+             do n = 1, m+1
+                call this%rhs%axpy(dt*this%Qver(m,n), Lev%F(n,1), 1)  
+             end do
+          else
+             do n = 1, m+1
+                call this%rhs%axpy(dt*this%Qtil(m,n), Lev%F(n,1), 1)  
+             end do
+          end if
           call this%rhs%axpy(1.0_pfdp,Lev%I(m),1);
-          call this%rhs%axpy(1.0_pfdp, Lev%Q(1),1) !  Start m+1 with value from m
+          call this%rhs%axpy(1.0_pfdp, Lev%Q(1),1) !  Start m+1 with value from 1
           call lev%Q(m+1)%copy(this%rhs,1)
        end do  !!  End substep loop
 
@@ -238,26 +255,34 @@ contains
     class(pf_level_t), intent(inout) :: lev
 
     integer :: i,j,nnodes,ierr
+    real(pfdp),allocatable :: qtemp(:,:)
+    real(pfdp),allocatable :: qtemp2(:,:)
 
-    this%npieces = 2
+    this%npieces = 1
     nnodes = Lev%nnodes
     
-    allocate(this%Qmat(nnodes,nnodes),stat=ierr)  !  0  to node integral
+    allocate(this%Qmat(nnodes-1,nnodes),stat=ierr)  !  0  to node integral
     if (ierr /=0) stop "allocate fail in verlet_initialize for Qmat"
-    allocate(this%QQmat(nnodes,nnodes),stat=ierr)  !  0 to node double integral (like Qmat*Qmat)
+    allocate(this%QQmat(nnodes-1,nnodes),stat=ierr)  !  0 to node double integral (like Qmat*Qmat)
     if (ierr /=0) stop "allocate fail in verlet_initialize for QQmat"
 
 
-    allocate(this%Qtil(nnodes,nnodes),stat=ierr)  !  0  to node integral  approximation of Qmat (trap)
+    allocate(this%Qtil(nnodes-1,nnodes),stat=ierr)  !  0  to node integral  approximation of Qmat 
     if (ierr /=0) stop "allocate fail in verlet_initialize for Qtil"
     allocate(this%QQtil(nnodes-1,nnodes),stat=ierr)  !  0 to node QQmat  aproximation
     if (ierr /=0) stop "allocate fail in verlet_initialize for QQtil"
-    allocate(this%QQLU(nnodes-1,nnodes),stat=ierr)  !  0 to node QQLU  aproximation
-    if (ierr /=0) stop "allocate fail in verlet_initialize for QQLU"
+    allocate(this%Qver(nnodes-1,nnodes),stat=ierr)  !  0 to node verlet  aproximation (trap)
+    if (ierr /=0) stop "allocate fail in verlet_initialize for Qver"
+    allocate(this%QQver(nnodes-1,nnodes),stat=ierr)  !  0 to node verlet  aproximation
+    if (ierr /=0) stop "allocate fail in verlet_initialize for QQver"
 
     allocate(this%DQtil(nnodes-1,nnodes),stat=ierr)  !  0 to node Qmat-Qtil
     if (ierr /=0) stop "allocate fail in verlet_initialize for DQtil"
     allocate(this%DQQtil(nnodes-1,nnodes),stat=ierr)  !  node to node QQmat-QQtil
+    if (ierr /=0) stop "allocate fail in verlet_initialize for DQQtil"
+    allocate(this%DQver(nnodes-1,nnodes),stat=ierr)  !  0 to node Qmat-Qtil
+    if (ierr /=0) stop "allocate fail in verlet_initialize for DQtil"
+    allocate(this%DQQver(nnodes-1,nnodes),stat=ierr)  !  node to node QQmat-QQtil
     if (ierr /=0) stop "allocate fail in verlet_initialize for DQQtil"
 
     allocate(this%bvec(nnodes),stat=ierr)  !  Integration rule for v
@@ -278,37 +303,56 @@ contains
     this%Qmat=lev%sdcmats%qmat     !   I just use qmat now?
 
     !  The quadrature rule is the last row of Q
-    this%bvec=this%Qmat(nnodes,:);
+    this%bvec=this%Qmat(nnodes-1,:);
+
+    allocate(qtemp(nnodes,nnodes),stat=ierr)
+    allocate(qtemp2(nnodes,nnodes),stat=ierr)    
 
     !  form the QQ matrix depending on what you want
     select case (this%whichQQ)
     case (0)  !  Collocation (make it the product)
        print *,'Making QQ by collocation Q*Q'
-       this%QQmat = matmul(this%Qmat,this%Qmat)
+       print *,size(this%Qmat)
+       qtemp=0.0_pfdp
+       qtemp(2:nnodes,:)=lev%sdcmats%qmat
+       qtemp=matmul(qtemp,qtemp)
+       this%QQmat = qtemp(2:nnodes,:)
+       print *,shape(this%QQmat)
     case (1)  !  Make the pair like in Lobatto A/B pair
        print *,'Making QQ by collocation Lobatto pair'
+       qtemp=0.0_pfdp
+       qtemp(2:nnodes,:)=this%Qmat
+       qtemp2=0.0_pfdp
        do i = 1,nnodes
           do j = 1,nnodes
-             this%QQmat(i,j) =  this%bvec(j)*(1.0_pfdp-this%Qmat(j,i)/this%bvec(i))
+             qtemp2(i,j) =  this%bvec(j)*(1.0_pfdp-qtemp(j,i)/this%bvec(i))
           end do
        end do
-       this%QQmat = matmul(this%Qmat,this%QQmat)
+       
+       qtemp2 = matmul(qtemp,qtemp2)
+       this%QQmat =  0.0_pfdp
+       this%QQmat =  qtemp2(2:nnodes,:)       
+       this%bbarvec=this%QQmat(nnodes-1,:);           
     case (2)  !  Make the pair like in Lobatto B/A pair
-       print *,'Making QQ by collocation Lobatto pair'
-       do i = 1,nnodes
-          do j = 1,nnodes
-             this%QQmat(i,j) =  this%bvec(j)*(1.0_pfdp-this%Qmat(j,i)/this%bvec(i))
-          end do
-       end do
-       this%QQmat = matmul(this%QQmat,this%Qmat)
+       print *,'Error Making QQ by collocation Lobatto pair'
+
+!!$       do i = 1,nnodes
+!!$          do j = 1,nnodes
+!!$             this%QQmat(i,j) =  this%bvec(j)*(1.0_pfdp-this%Qmat(j,i)/this%bvec(i))
+!!$          end do
+!!$       end do
+!!$       this%QQmat = matmul(this%QQmat,this%Qmat)
     case default
-       write(*,*) 'bad case in verlet.f90, whichQQ = ',this%whichQQ
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%whichQQ)
     end select
 
-
    ! 0 to node
-   this%Qtil = 0.5_pfdp*(lev%sdcmats%qmatFE+lev%sdcmats%qmatBE)
-   this%QQtil = matmul(lev%sdcmats%qmatFE,this%Qtil) + 0.5_pfdp*lev%sdcmats%qmatFE*lev%sdcmats%qmatFE
+    this%Qver = lev%sdcmats%qmatTrap
+    qtemp=0.0_pfdp
+    qtemp(2:nnodes,:)=lev%sdcmats%qmatFE
+    qtemp2(2:nnodes,:)=lev%sdcmats%qmatTrap
+    qtemp=matmul(qtemp,qtemp2)
+    this%QQver = qtemp(2:nnodes,:) + 0.5_pfdp*lev%sdcmats%qmatFE*lev%sdcmats%qmatFE
 
    !  Get LU matrices if desired
 !    if (this%use_LUq .eq. 1) then 
@@ -318,14 +362,27 @@ contains
 !      this%QQLU=U
 !      print *, 'U from LU',this%QQLU
 !   else
-        this%QQLU=this%QQtil  !  Normal verlet all the time     
-!   end if
-!
-    !  Make differences
-    this%DQQtil = this%QQmat-this%QQtil
-    this%DQQLU = this%QQmat-this%QQLU
-    this%DQtil = this%Qmat-this%Qtil
+   this%Qtil=this%Qver  !  Normal verlet all the time
+   this%QQtil=this%QQver  !  Normal verlet all the time        
+   !   end if
+   this%Qver=0.0d0 !  Normal verlet all the time
+   this%QQver=0.0d0   !  Normal verlet all the time        
+   
+   this%Qtil=this%Qver  !  Normal verlet all the time
+   this%QQtil=this%QQver  !  Normal verlet all the time        
 
+   !
+    !  Make differences
+    this%DQtil = this%Qmat-this%Qtil
+    this%DQQtil = this%QQmat-this%QQtil
+    this%DQver = this%Qmat-this%Qver
+    this%DQQver = this%QQmat-this%QQver
+    deallocate(qtemp)
+    deallocate(qtemp2)
+
+    !>  Make space for rhs
+    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
+    
   end subroutine verlet_initialize
   
   !-----------------------------------------------------------------------------
@@ -345,8 +402,8 @@ contains
        call fintSDC(n)%setval(0.0_pfdp)
        call fintSDC(n)%axpy(dt*this%tsdc(n+1), qSDC(1), 12)  !  Add the dt*v_0 term
        do m = 1, lev%nnodes
-          call fintSDC(n)%axpy(dt*this%Qmat(n+1,m), fSDC(m,1),1)
-          call fintSDC(n)%axpy( dt*dt*this%QQmat(n+1,m), fSDC(m,1),2)
+          call fintSDC(n)%axpy(dt*this%Qmat(n,m), fSDC(m,1),1)
+          call fintSDC(n)%axpy( dt*dt*this%QQmat(n,m), fSDC(m,1),2)
        end do
     end do
 
@@ -364,7 +421,6 @@ contains
 
 
     call this%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
-    
 
     ! add tau 
     if (allocated(lev%tauQ)) then
@@ -418,11 +474,14 @@ contains
 
     deallocate(this%Qtil)
     deallocate(this%QQtil)
-    deallocate(this%QQLU)    
+    deallocate(this%Qver)
+    deallocate(this%QQver)
 
 
     deallocate(this%DQtil)
     deallocate(this%DQQtil)
+    deallocate(this%DQver)
+    deallocate(this%DQQver)
 
     deallocate(this%bvec)
     deallocate(this%bbarvec)
@@ -452,8 +511,7 @@ contains
     integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
 
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
+       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine verlet_evaluate
 
   !> Subroutine to evaluate the function values at all nodes

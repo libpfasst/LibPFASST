@@ -12,7 +12,7 @@ contains
 
 
 
-  subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags)
+  subroutine restrict_time_space_fas(pf, t0, dt, level_index, flags, mystep)
     !! Restrict (in time and space) fine level to coarse and set coarse level FAS correction.
     !!
     !! The coarse function values are re-evaluated after restriction.
@@ -23,7 +23,7 @@ contains
     real(pfdp),        intent(in)    :: t0            !!  time at beginning of step
     real(pfdp),        intent(in)    :: dt            !!  time step
     integer,           intent(in)    :: level_index   !! defines which level to restrict
-    integer, optional, intent(in)    :: flags    
+    integer, optional, intent(in)    :: flags, mystep    
 
     !>  Local variables
     class(pf_level_t), pointer :: c_lev_ptr    
@@ -41,9 +41,8 @@ contains
     f_lev_ptr => pf%levels(level_index);
     c_lev_ptr => pf%levels(level_index-1)
 
-    
     step = pf%state%step+1
-    
+    if(present(mystep)) step = mystep
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
@@ -144,9 +143,9 @@ contains
        ! when restricting '0 to node' integral terms, skip the first entry since it is zero
        if (present(flags)) then
           if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 1)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., flags=1)
           if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., 2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., flags=2)
        else
           call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
        end if
@@ -156,12 +155,13 @@ contains
        !  spatial restriction
        do m = 1, f_nnodes
           call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_encap_array(m), f_encap_array_c(m), f_time(m), flags)
-       end do! temporal restriction
+       end do
+       ! temporal restriction
        if (present(flags)) then
           if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 1)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., flags)
           if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., 2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true., flags=2)
         else
            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat, f_encap_array_c, .true.)
         end if

@@ -1,6 +1,6 @@
 module hooks
   use pf_mod_dtype
-  use factory
+  use mod_zmkpair
   use sweeper
 
   implicit none
@@ -13,15 +13,15 @@ contains
     type(pf_state_t),  intent(in   ) :: state
 
     class(imk_sweeper_t), pointer :: imk
-    type(zndarray) :: yexact
-    type(zndarray), pointer :: qend
+    type(zmkpair) :: yexact
+    type(zmkpair), pointer :: qend
     integer :: dim(2)
     real(pfdp) :: error
 
     imk => cast_as_imk_sweeper(level%ulevel%sweeper)
-    qend => cast_as_zndarray(level%qend)
+    qend => cast_as_zmkpair(level%qend)
     dim = shape(qend%array)
-    call zndarray_build(yexact, dim(1))
+    call zmkpair_build(yexact, dim(1))
 
     yexact%array = 0.0_pfdp
     call exact(yexact, state%t0+state%dt)
@@ -42,10 +42,10 @@ contains
     class(pf_level_t), intent(inout) :: level
     type(pf_state_t),  intent(in   ) :: state
 
-    type(zndarray), pointer :: r, q
+    type(zmkpair), pointer :: r, q
 
-    r => cast_as_zndarray(level%R(level%nnodes-1))
-    q => cast_as_zndarray(level%Q(level%nnodes-1))
+    r => cast_as_zmkpair(level%R(level%nnodes-1))
+    q => cast_as_zmkpair(level%Q(level%nnodes-1))
 
     print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%array))
@@ -66,11 +66,11 @@ contains
     class(pf_level_t), intent(inout) :: level
     type(pf_state_t),  intent(in   ) :: state
 
-    type(zndarray), pointer :: qend
+    type(zmkpair), pointer :: qend
     character(len=256) :: time, filename
     integer :: N,i,j,un
 
-    qend => cast_as_zndarray(level%qend)
+    qend => cast_as_zmkpair(level%qend)
     un = 200+pf%rank
     write(time, '(f10.5)') state%t0+state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &

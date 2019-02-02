@@ -39,10 +39,10 @@ build/%.o: %.f
 	@mkdir -p build
 	@mkdir -p include
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
+	$(FC)  -c $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC) $(F77FLAGS) -c $< $(OUTPUT_OPTION)
+	@$(FC)  -c $< $(OUTPUT_OPTION)
 endif
 
 .PHONY: clean depend
@@ -51,7 +51,8 @@ clean:
 	find . -name build | xargs rm -rf
 	find . -name '*.exe' | xargs rm -f
 	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
-	\rm include/*.mod
+	\rm -f include/*.mod
+	\rm -f lib/*.a
 
 
 #  We can use this to build a new dependency file if makedepf90 is installed  type "make depend"

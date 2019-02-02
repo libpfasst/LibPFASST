@@ -1,18 +1,29 @@
-!--------------------------------------------------------------------------------
-! Copyright (c) 2017, Brandon Krull.  All rights reserved.
-!--------------------------------------------------------------------------------
-! MODULE: factory
+!!  N-dimensional complex array encapsulation.
 !
-!> @author
-!> Brandon Krull, Berkeley Lab
+! This file is part of LIBPFASST.
 !
-! Description:
-!> This module defines the (previously encap) factory which defines
-!! the time-dependent Kohn-Sham equations or simpler model time-dependent problems
-module factory
-  use pf_mod_dtype
 
+!> N-dimensional complex array encapsulation.
+!!
+!! When a new solution is created by a PFASST level, this encapsulation
+!! uses the levels 'shape' attribute to create a new array with that
+!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! set appropriately.  For example, before calling pf_pfasst_run we can
+!! set the shape of the coarsest level by doing:
+!!
+!!   allocate(pf%levels(1)%shape(2))
+!!   pf%levels(1)%shape = [ 3, 10 ]
+!!
+!! The helper routines array1, array2, array3, etc can be used to
+!! extract pointers to the encapsulated array  without
+!! performing any copies.
+!!
+module pf_mod_zndarray
+  use iso_c_binding  
+  use pf_mod_dtype
+  use pf_mod_utils  
   implicit none
+
 
   type, extends(pf_factory_t) :: zndarray_factory
   contains
@@ -23,8 +34,9 @@ module factory
   end type zndarray_factory
 
   type, extends(pf_encap_t) :: zndarray
-    integer :: dim
-    complex(pfdp), allocatable :: array(:,:)
+     integer :: dim
+     integer,    allocatable :: shape(:)     
+    complex(pfdp), allocatable :: flatarray(:)
   contains
     procedure :: setval => zndarray_setval
     procedure :: copy => zndarray_copy
@@ -49,18 +61,22 @@ module factory
   end function cast_as_zndarray
 
   !> Allocates complex ndarray
-  subroutine zndarray_build(encap, dim)
-    class(pf_encap_t), intent(inout) :: encap
-    integer, intent(in) ::  dim
+  subroutine zndarray_build(q, shape)
+    class(pf_encap_t), intent(inout) :: q
+    integer,           intent(in   ) :: shape(:)
 
     type(zndarray), pointer :: zndarray_obj
 
-    zndarray_obj => cast_as_zndarray(encap)
+    select type (q)
+    class is (zndarray)
+       allocate(q%shape(size(shape)))
+       allocate(q%flatarray(product(shape)))
+       q%dim   = size(shape)
+       q%shape = shape
+       q%flatarray = cmplx(0.0, 0.0,pfdp)
+       
+    end select
 
-    allocate(zndarray_obj%array(dim, dim))
-
-    zndarray_obj%dim = dim
-    zndarray_obj%array(:,:) = cmplx(0.0, 0.0,pfdp)
 
     nullify(zndarray_obj)
   end subroutine zndarray_build
@@ -71,8 +87,8 @@ module factory
 
 
     zndarray_obj => cast_as_zndarray(encap)
-
-    deallocate(zndarray_obj%array)
+    deallocate(zndarray_obj%shape)
+    deallocate(zndarray_obj%flatarray)
     nullify(zndarray_obj)
 
   end subroutine zndarray_destroy
@@ -84,7 +100,7 @@ module factory
     integer, intent(in) :: level, shape(:)
 
     allocate(zndarray::x)
-    call zndarray_build(x, shape(1))
+    call zndarray_build(x, shape)
 
   end subroutine zndarray_create_single
 
@@ -97,36 +113,42 @@ module factory
 
     allocate(zndarray::x(n))
     do i = 1, n
-       call zndarray_build(x(i), shape(1))
+       call zndarray_build(x(i), shape)
     end do
 
   end subroutine zndarray_create_array
 
   subroutine zndarray_destroy_single(this, x, level,  shape)
     class(zndarray_factory), intent(inout) :: this
-    class(pf_encap_t), intent(inout) :: x
+    class(pf_encap_t), intent(inout), allocatable :: x
     integer, intent(in) :: level,  shape(:)
-    class(zndarray), pointer :: zndarray_obj
 
-    zndarray_obj => cast_as_zndarray(x)
-    deallocate(zndarray_obj%array)
+
+    select type (x)
+    class is (zndarray)
+       deallocate(x%shape)
+       deallocate(x%flatarray)
+    end select
+    deallocate(x)
 
   end subroutine zndarray_destroy_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
   subroutine zndarray_destroy_array(this, x, n, level,  shape)
-    class(zndarray_factory), intent(inout):: this
-    class(pf_encap_t), intent(inout), pointer :: x(:)
-    integer, intent(in) :: n, level, shape(:)
-    class(zndarray), pointer :: zndarray_obj
+    class(zndarray_factory), intent(inout)       :: this
+    class(pf_encap_t), intent(inout),allocatable :: x(:)
+    integer, intent(in)                          :: n, level, shape(:)
     integer :: i
 
-    do i = 1, n
-      zndarray_obj => cast_as_zndarray(x(i))
-      deallocate(zndarray_obj%array)
-    end do
-
-!    deallocate(x)
+    select type(x)
+    class is (zndarray)
+       do i = 1,n
+          deallocate(x(i)%shape)
+          deallocate(x(i)%flatarray)
+       end do
+    end select
+    deallocate(x)
+    
   end subroutine zndarray_destroy_array
 
 
@@ -138,7 +160,7 @@ module factory
     complex(pfdp) :: zval
 
     zval = cmplx(val, 0.0, pfdp)
-    this%array = zval
+    this%flatarray = zval
   end subroutine zndarray_setval
 
   !> Copy solution value.
@@ -150,7 +172,7 @@ module factory
 
     zndarray_src => cast_as_zndarray(src)
 
-    this%array =  zndarray_src%array
+    this%flatarray =  zndarray_src%flatarray
   end subroutine zndarray_copy
 
   !> Pack solution q into a flat array.
@@ -158,16 +180,11 @@ module factory
     class(zndarray), intent(in) :: this
     real(pfdp), intent(out) :: z(:)
     integer,     intent(in   ), optional :: flags
-    integer :: nx,ny,nxny,i,j,ij
-    nx=this%dim
-    ny=this%dim
-    nxny=nx*ny
-    do j = 1,ny
-       do i = 1,nx
-          ij = 2*((j-1)*nx + i)
-          z(ij-1) =  real(this%array(i,j))
-          z(ij) = aimag(this%array(i,j))
-       end do
+    integer :: i
+
+    do i = 1,product(this%shape)
+       z(2*i-1) = real(this%flatarray(i))
+       z(2*i)    = aimag(this%flatarray(i))
     end do
   end subroutine zndarray_pack
 
@@ -176,15 +193,10 @@ module factory
     class(zndarray), intent(inout) :: this
     real(pfdp), intent(in) :: z(:)
     integer,     intent(in   ), optional :: flags
-    integer :: nx,ny,nxny,i,j,ij
-    nx=this%dim
-    ny=this%dim
-    nxny=nx*ny
-    do j = 1,ny
-       do i = 1,nx
-          ij = 2*((j-1)*nx + i)
-          this%array(i,j) = cmplx(z(ij-1), z(ij), pfdp)
-      enddo
+    integer :: i
+
+    do i = 1,product(this%shape)
+       this%flatarray(i) = cmplx(z(2*i-1), z(2*i), pfdp)
     enddo
   end subroutine zndarray_unpack
 
@@ -194,7 +206,7 @@ module factory
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
 
-    norm = maxval(abs(this%array))
+    norm = maxval(abs(this%flatarray))
   end function zndarray_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
@@ -206,18 +218,14 @@ module factory
     class(zndarray), pointer :: zndarray_obj
 
     zndarray_obj => cast_as_zndarray(x)
-    this%array = a * zndarray_obj%array + this%array
+    this%flatarray = a * zndarray_obj%flatarray + this%flatarray
   end subroutine zndarray_axpy
 
   subroutine zndarray_eprint(this,flags)
     class(zndarray), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
-    integer :: this_shape(2), i
 
-    this_shape = shape(this%array)
-    do i = 1, this_shape(1)
-        print*, this%array(:,i)
-    end do
+    print*, this%flatarray(1:10)
   end subroutine zndarray_eprint
 
   subroutine write_to_disk(this, filename)
@@ -225,8 +233,43 @@ module factory
     character(len=*), intent(in) :: filename
 
     open(unit=1, file=trim(filename), form='unformatted')
-    write(1) this%array
+    write(1) this%flatarray
     close(1)
   end subroutine write_to_disk
 
-end module factory
+    !>  Helper function to return the array part
+  function get_array1d(x,flags) result(r)
+    class(pf_encap_t), target, intent(in) :: x
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:)
+    select type (x)
+    type is (zndarray)
+       r => x%flatarray
+    end select
+  end function get_array1d
+  
+
+  function get_array2d(x,flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:)
+
+    select type (x)
+    type is (zndarray)
+       r(1:x%shape(1),1:x%shape(2)) => x%flatarray
+    end select
+  end function get_array2d
+  
+
+  function get_array3d(x,flags) result(r)
+    class(pf_encap_t), intent(in) :: x
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:,:)
+
+    select type (x)
+    type is (zndarray)
+       r(1:x%shape(1),1:x%shape(2),1:x%shape(3)) => x%flatarray
+    end select
+  end function get_array3d
+
+end module pf_mod_zndarray

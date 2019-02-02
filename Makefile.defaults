@@ -14,12 +14,25 @@ MKVERBOSE = FALSE
 FFLAGS = -Ibuild -Jinclude -cpp 
 
 ifeq ($(DEBUG),TRUE)
-FFLAGS += -Wall -Wextra -fcheck=all   -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none
+FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
+else
+FFLAGS += -O3 -ffree-line-length-none
 endif
 
 include $(wildcard $(LIBPFASST)/*.defs)
 
 VPATHS = $(LIBPFASST)/src
+LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst
+
+NOFFTW=TRUE
+ifeq ($(NOFFTW),TRUE)
+F77SRC = src/dfftpack.o
+else
+FFTW=$(LIBPFASST)/fftw3
+FFLAGS  +=  -I$(FFTW)/include
+LDFLAGS += -L$(FFTW)/lib -lfftw3
+endif
+
 
 FSRC = src/pfasst.f90 \
        src/pf_dtype.f90 \
@@ -32,6 +45,7 @@ FSRC = src/pfasst.f90 \
        src/pf_interpolate.f90 \
        src/pf_magnus_picard.f90 \
        src/pf_misdcQ.f90 \
+       src/pf_misdcQ_oc.f90 \
        src/pf_ndarray.f90 \
        src/pf_ndarray-oc.f90 \
        src/pf_ndsysarray.f90 \
@@ -44,9 +58,16 @@ FSRC = src/pfasst.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
        src/pf_verlet.f90 \
-       src/pf_zndsysarray.f90
+       src/pf_zndsysarray.f90 \
+       src/pf_zndarray.f90       
        #       src/pf_amisdc.f90 \ 
 #       src/pf_amisdcQ.f90 \
+
+ifeq ($(NOFFTW),TRUE)
+FSRC+=src/pf_fftpack.f90
+else
+FSRC+=src/pf_fftw.f90
+endif
 
 ifdef NOMPI
   FFLAGS += -DNOMPI
@@ -58,7 +79,11 @@ ifdef OMP
   FFLAGS += -fopenmp
 endif
 
+
 OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+ifeq ($(NOFFTW),TRUE)
+OBJ  += $(subst src,build,$(F77SRC:.f=.o))
+endif
 
 
 	

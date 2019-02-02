@@ -20,5 +20,5 @@ all: $(EXE)
 $(BUILDDIR)/sweeper.o: $(BUILDDIR)/factory.o $(BUILDDIR)/utils.o
 $(BUILDDIR)/utils.o: $(BUILDDIR)/factory.o $(BUILDDIR)/probin.o
 $(BUILDDIR)/hooks.o: $(BUILDDIR)/factory.o $(BUILDDIR)/sweeper.o $(BUILDDIR)/utils.o $(FSRC)
-$(BUILDDIR)/main.o: $(LIBPFASST)/lib/libpfasst.a $(BUILDDIR)/factory.o \
-										$(BUILDDIR)/sweeper.o $(BUILDDIR)/probin.o $(BUILDDIR)/hooks.o
+$(BUILDDIR)/main.o:  $(BUILDDIR)/factory.o  $(BUILDDIR)/sweeper.o $(BUILDDIR)/probin.o $(BUILDDIR)/hooks.o
+main.exe : $(LIBPFASST)/lib/libpfasst.a 
