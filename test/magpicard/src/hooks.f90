@@ -1,6 +1,6 @@
 module hooks
   use pf_mod_dtype
-  use factory
+  use pf_mod_zndarray
   use sweeper
   implicit none
 

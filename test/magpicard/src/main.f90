@@ -13,10 +13,9 @@ contains
   subroutine rttddft()
       use pfasst     !< library module defining highest-level pfasst object
       use pf_mod_mpi !< library module for mpi-related business
+      use pf_mod_zndarray    !< library module containing solution type information
 
-      use probin     !< should be library module for reading/parsing problem parameters
-
-      use factory    !< prog-specified module containing solution type information
+      use probin     !< prog-specified module for reading/parsing problem parameters
       use sweeper    !< prog-specified module containing sweeper information
       use hooks      !< prog-specified module containing program hooks
 
@@ -89,6 +88,7 @@ contains
          call dmat_tfinal%write_to_disk('sol_final') !necessary for pfasst.py
          print *,'solution at end of run'
          if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
+          call dmat_tfinal%eprint() !only for debug purpose         
 
       endif
 

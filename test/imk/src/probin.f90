@@ -17,6 +17,10 @@ module probin
   real(pfdp), save :: Tfin            !  Final time of run
   real(pfdp), save :: alpha           !  energy of state A for 2x2 problem
   real(pfdp), save :: beta            !  energy of state B for 2x2 problem
+  real(pfdp), save :: Znuc            !  Single integral cst
+  real(pfdp), save :: E0              !  Double integral cst
+  real(pfdp), save :: Xmax            !  Max distance from origin
+  
   real(pfdp), save :: vab             !  coupling of states A, B for 2x2 problem
   real(pfdp), save :: exptol(PF_MAXLEVS)
   ! character(len=64), save :: basis(PF_MAXLEVS)
@@ -33,7 +37,7 @@ module probin
   namelist /params/ ndim, nfake,  nprob, nsteps, N, dt, Tfin
   namelist /params/ use_sdc, rk, mkrk
   namelist /params/ fbase, poutmod, exptol, save_solutions, nparticles, toda_periodic
-  namelist /params/ alpha, beta, vab, nterms, basis, molecule, exact_dir
+  namelist /params/ alpha, beta, vab, nterms, basis, molecule, exact_dir,E0,Znuc,Xmax
 
 contains
 
@@ -63,6 +67,9 @@ contains
     alpha = -1.0_pfdp
     beta  = -0.5_pfdp
     vab   = 0.25_pfdp
+    E0=0.2
+    Znuc=2.0
+    Xmax=1.0        
 
     basis = "sto3g"
     molecule = "H 0 0 0; H 0 0 1.414"

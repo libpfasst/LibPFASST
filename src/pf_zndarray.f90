@@ -18,7 +18,7 @@
 !! extract pointers to the encapsulated array  without
 !! performing any copies.
 !!
-module factory
+module pf_mod_zndarray
   use iso_c_binding  
   use pf_mod_dtype
   use pf_mod_utils  
@@ -272,4 +272,4 @@ module factory
     end select
   end function get_array3d
 
-end module factory
+end module pf_mod_zndarray

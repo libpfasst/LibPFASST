@@ -20,7 +20,7 @@ contains
 
       use probin     !< should be library module for reading/parsing problem parameters
 
-      use factory    !< prog-specified module containing solution type information
+      use mod_zmkpair    !< prog-specified module containing solution type information
       use sweeper    !< prog-specified module containing sweeper information
       use hooks      !< prog-specified module containing program hooks
       use utils
@@ -30,7 +30,7 @@ contains
       type(pf_pfasst_t)  :: pf          !< pfasst data structure
       type(pf_comm_t)    :: comm        !< mpi communicator
 
-      type(zndarray) :: q0, qend
+      type(zmkpair) :: q0, qend
 
       character(256) :: probin_fname       !<  file name for input
       integer    :: err, l
@@ -51,7 +51,7 @@ contains
           pf%levels(l)%shape(1) = nparticles
 
           allocate(imk_context::pf%levels(l)%ulevel)
-          allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
+          allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
 
 
 
@@ -76,8 +76,8 @@ contains
       !>  output the run options 
       call pf_print_options(pf,un_opt=6)
       
-      call zndarray_build(q0, pf%levels(pf%nlevels)%shape(1))
-      call zndarray_build(qend, pf%levels(pf%nlevels)%shape(1))
+      call zmkpair_build(q0, pf%levels(pf%nlevels)%shape(1))
+      call zmkpair_build(qend, pf%levels(pf%nlevels)%shape(1))
       call initial(q0)
 
       call mpi_barrier(MPI_COMM_WORLD, err)
@@ -95,10 +95,11 @@ contains
       if(pf%rank == comm%nproc-1) then
         call qend%write_to_disk('final_solution') !necessary for pfasst.py
         if (pf%debug) call qend%eprint() !only for debug purpose
+      call qend%eprint() !only for debug purpose        
       endif
 
-      call zndarray_destroy(q0)
-      call zndarray_destroy(qend)
+      call zmkpair_destroy(q0)
+      call zmkpair_destroy(qend)
 
       if(pf%rank == 0) print *,'destroying pf'
       call pf_pfasst_destroy(pf)

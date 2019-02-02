@@ -17,17 +17,16 @@
 /
 
 &PARAMS
+	nprob=1
 	fbase = "output"
 	nterms = 3 12
 	Tfin = 3.0
 	nsteps = 48
 	exptol = 1.d-15
 	nparticles = 11
-	nprob = 4
-	basis = ''
-	molecule = ''
-	exact_dir = ''
+
 	save_solutions = .true.
 	toda_periodic = .true.
 	use_sdc = .true.
+
 /

@@ -10,7 +10,7 @@
 module sweeper
   use pf_mod_dtype
   use pf_mod_magnus_picard
-  use factory
+  use pf_mod_zndarray
   use utils
 
   implicit none
@@ -108,16 +108,21 @@ contains
     integer, intent(in) :: level
     
     type(zndarray), pointer :: L, B
-    integer :: i,j,n,m,dhalf
+    complex(pfdp),      pointer :: L_array(:,:), B_array(:,:)
+    integer :: i,j,n,m,dhalf,Nmat
     real(pfdp) :: xi,xj,xn,xm,cst
 
     
     L => cast_as_zndarray(y)
     B => cast_as_zndarray(f)
+    L_array=>get_array2d(L)
+    B_array=>get_array2d(B)    
+    Nmat = L%shape(1)  !  Assume square matrix
+    
     if (nprob .eq. 1) then
-       call compute_F_toda(L,B,t,level)
+       call compute_F_toda(L_array,B_array,Nmat,t,level)
     else
-       call compute_Facke(L,B,t,level)
+       call compute_Facke(L_array,B_array,Nmat,t,level)
     endif
     nullify(L, B)
     

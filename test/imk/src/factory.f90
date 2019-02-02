@@ -9,132 +9,132 @@
 ! Description:
 !> This module defines the (previously encap) factory which defines
 !! the time-dependent Kohn-Sham equations or simpler model time-dependent problems
-module factory
+module mod_zmkpair
   use pf_mod_dtype
 
   implicit none
 
-  type, extends(pf_factory_t) :: zndarray_factory
+  type, extends(pf_factory_t) :: zmkpair_factory
   contains
-     procedure :: create_single => zndarray_create_single
-     procedure :: create_array => zndarray_create_array
-     procedure :: destroy_single => zndarray_destroy_single
-     procedure :: destroy_array => zndarray_destroy_array
-  end type zndarray_factory
+     procedure :: create_single => zmkpair_create_single
+     procedure :: create_array => zmkpair_create_array
+     procedure :: destroy_single => zmkpair_destroy_single
+     procedure :: destroy_array => zmkpair_destroy_array
+  end type zmkpair_factory
 
-  type, extends(pf_encap_t) :: zndarray
+  type, extends(pf_encap_t) :: zmkpair
     integer :: dim
     complex(pfdp), allocatable :: array(:,:), y(:,:)
   contains
-    procedure :: setval => zndarray_setval
-    procedure :: copy => zndarray_copy
-    procedure :: norm => zndarray_norm
-    procedure :: pack => zndarray_pack
-    procedure :: unpack => zndarray_unpack
-    procedure :: axpy => zndarray_axpy
-    procedure :: eprint => zndarray_eprint
+    procedure :: setval => zmkpair_setval
+    procedure :: copy => zmkpair_copy
+    procedure :: norm => zmkpair_norm
+    procedure :: pack => zmkpair_pack
+    procedure :: unpack => zmkpair_unpack
+    procedure :: axpy => zmkpair_axpy
+    procedure :: eprint => zmkpair_eprint
     procedure :: write_to_disk
-  end type zndarray
+  end type zmkpair
 
   contains
 
-  function cast_as_zndarray(encap_polymorph) result(zndarray_obj)
+  function cast_as_zmkpair(encap_polymorph) result(zmkpair_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
-    type(zndarray), pointer :: zndarray_obj
+    type(zmkpair), pointer :: zmkpair_obj
 
     select type(encap_polymorph)
-    type is (zndarray)
-       zndarray_obj => encap_polymorph
+    type is (zmkpair)
+       zmkpair_obj => encap_polymorph
     end select
-  end function cast_as_zndarray
+  end function cast_as_zmkpair
 
-  !> Allocates complex ndarray
-  subroutine zndarray_build(encap, dim)
+  !> Allocates complex mkpair
+  subroutine zmkpair_build(encap, dim)
     class(pf_encap_t), intent(inout) :: encap
     integer, intent(in) ::  dim
 
-    type(zndarray), pointer :: zndarray_obj
+    type(zmkpair), pointer :: zmkpair_obj
 
-    zndarray_obj => cast_as_zndarray(encap)
-    allocate(zndarray_obj%array(dim, dim))
-    allocate(zndarray_obj%y(dim, dim))
+    zmkpair_obj => cast_as_zmkpair(encap)
+    allocate(zmkpair_obj%array(dim, dim))
+    allocate(zmkpair_obj%y(dim, dim))
 
-    zndarray_obj%dim = dim
-    zndarray_obj%array(:,:) = cmplx(0.0, 0.0,pfdp)
-    zndarray_obj%y(:,:) = cmplx(0.0, 0.0,pfdp)
+    zmkpair_obj%dim = dim
+    zmkpair_obj%array(:,:) = cmplx(0.0, 0.0,pfdp)
+    zmkpair_obj%y(:,:) = cmplx(0.0, 0.0,pfdp)
 
-    nullify(zndarray_obj)
-  end subroutine zndarray_build
+    nullify(zmkpair_obj)
+  end subroutine zmkpair_build
 
-  subroutine zndarray_destroy(encap)
+  subroutine zmkpair_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
-    type(zndarray), pointer :: zndarray_obj
+    type(zmkpair), pointer :: zmkpair_obj
 
-    zndarray_obj => cast_as_zndarray(encap)
+    zmkpair_obj => cast_as_zmkpair(encap)
 
-    deallocate(zndarray_obj%array)
-    deallocate(zndarray_obj%y)
-    nullify(zndarray_obj)
+    deallocate(zmkpair_obj%array)
+    deallocate(zmkpair_obj%y)
+    nullify(zmkpair_obj)
 
-  end subroutine zndarray_destroy
+  end subroutine zmkpair_destroy
 
-  !> Wrapper routine for allocation of a single zndarray type array
-  subroutine zndarray_create_single(this, x, level, shape)
-    class(zndarray_factory), intent(inout) :: this
+  !> Wrapper routine for allocation of a single zmkpair type array
+  subroutine zmkpair_create_single(this, x, level, shape)
+    class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
     integer, intent(in) :: level, shape(:)
 
-    allocate(zndarray::x)
-    call zndarray_build(x, shape(1))
+    allocate(zmkpair::x)
+    call zmkpair_build(x, shape(1))
 
-  end subroutine zndarray_create_single
+  end subroutine zmkpair_create_single
 
-  !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_create_array(this, x, n, level, shape)
-    class(zndarray_factory), intent(inout) :: this
+  !> Wrapper routine for looped allocation of many zmkpair type arrays
+  subroutine zmkpair_create_array(this, x, n, level, shape)
+    class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x(:)
     integer, intent(in) :: n, level, shape(:)
     integer :: i
 
-    allocate(zndarray::x(n))
+    allocate(zmkpair::x(n))
     do i = 1, n
-       call zndarray_build(x(i), shape(1))
+       call zmkpair_build(x(i), shape(1))
     end do
 
-  end subroutine zndarray_create_array
+  end subroutine zmkpair_create_array
 
-  subroutine zndarray_destroy_single(this, x, level, shape)
-    class(zndarray_factory), intent(inout) :: this
+  subroutine zmkpair_destroy_single(this, x, level, shape)
+    class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: x
     integer, intent(in) :: level, shape(:)
-    class(zndarray), pointer :: zndarray_obj
+    class(zmkpair), pointer :: zmkpair_obj
 
-    zndarray_obj => cast_as_zndarray(x)
-    deallocate(zndarray_obj%array)
-    deallocate(zndarray_obj%y)
+    zmkpair_obj => cast_as_zmkpair(x)
+    deallocate(zmkpair_obj%array)
+    deallocate(zmkpair_obj%y)
 
-  end subroutine zndarray_destroy_single
+  end subroutine zmkpair_destroy_single
 
-  !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_destroy_array(this, x, n, level, shape)
-    class(zndarray_factory), intent(inout):: this
+  !> Wrapper routine for looped allocation of many zmkpair type arrays
+  subroutine zmkpair_destroy_array(this, x, n, level, shape)
+    class(zmkpair_factory), intent(inout):: this
     class(pf_encap_t), intent(inout), pointer :: x(:)
     integer, intent(in) :: n, level, shape(:)
-    class(zndarray), pointer :: zndarray_obj
+    class(zmkpair), pointer :: zmkpair_obj
     integer :: i
 
     do i = 1, n
-      zndarray_obj => cast_as_zndarray(x(i))
-      deallocate(zndarray_obj%array)
-      deallocate(zndarray_obj%y)
+      zmkpair_obj => cast_as_zmkpair(x(i))
+      deallocate(zmkpair_obj%array)
+      deallocate(zmkpair_obj%y)
     end do
 
 !    deallocate(x)
-  end subroutine zndarray_destroy_array
+  end subroutine zmkpair_destroy_array
 
   !> Set solution value.
-  subroutine zndarray_setval(this, val, flags)
-    class(zndarray), intent(inout) :: this
+  subroutine zmkpair_setval(this, val, flags)
+    class(zmkpair), intent(inout) :: this
     real(pfdp), intent(in) :: val
     integer, intent(in), optional :: flags
     complex(pfdp) :: zval
@@ -145,27 +145,27 @@ module factory
     else
        this%array =  zval
     endif
-  end subroutine zndarray_setval
+  end subroutine zmkpair_setval
 
   !> Copy solution value.
-  subroutine zndarray_copy(this, src, flags)
-    class(zndarray), intent(inout) :: this
+  subroutine zmkpair_copy(this, src, flags)
+    class(zmkpair), intent(inout) :: this
     class(pf_encap_t), intent(in) :: src
     integer, intent(in), optional :: flags
-    class(zndarray), pointer :: zndarray_src
+    class(zmkpair), pointer :: zmkpair_src
 
-    zndarray_src => cast_as_zndarray(src)
+    zmkpair_src => cast_as_zmkpair(src)
 
     if (present(flags)) then
-        this%y = zndarray_src%y
+        this%y = zmkpair_src%y
     else
-        this%array = zndarray_src%array
+        this%array = zmkpair_src%array
     endif
-  end subroutine zndarray_copy
+  end subroutine zmkpair_copy
 
   !> Pack solution q into a flat array.
-  subroutine zndarray_pack(this, z, flags)
-    class(zndarray), intent(in) :: this
+  subroutine zmkpair_pack(this, z, flags)
+    class(zmkpair), intent(in) :: this
     integer, intent(in), optional :: flags
     real(pfdp), intent(out) :: z(:)
     integer :: nx,ny,nxny,i,j,ij
@@ -179,11 +179,11 @@ module factory
           z(ij) = aimag(this%y(i,j))
        end do
     end do
-  end subroutine zndarray_pack
+  end subroutine zmkpair_pack
 
   ! Unpack solution from a flat array.
-  subroutine zndarray_unpack(this, z, flags)
-    class(zndarray), intent(inout) :: this
+  subroutine zmkpair_unpack(this, z, flags)
+    class(zmkpair), intent(inout) :: this
     integer, intent(in), optional :: flags
     real(pfdp), intent(in) :: z(:)
     integer :: nx,ny,nxny,i,j,ij
@@ -196,36 +196,36 @@ module factory
           this%y(i,j) = cmplx(z(ij-1), z(ij), pfdp)
       enddo
     enddo
-  end subroutine zndarray_unpack
+  end subroutine zmkpair_unpack
 
   ! Compute norm of solution
-  function zndarray_norm(this, flags) result (norm)
-    class(zndarray), intent(in) :: this
+  function zmkpair_norm(this, flags) result (norm)
+    class(zmkpair), intent(in) :: this
     integer, intent(in), optional :: flags
     real(pfdp) :: norm
     norm = maxval(abs(this%array))
-  end function zndarray_norm
+  end function zmkpair_norm
 
   ! Compute y = a x + y where a is a scalar and x and y are solutions.
-  subroutine zndarray_axpy(this, a, x, flags)
-    class(zndarray), intent(inout) :: this
+  subroutine zmkpair_axpy(this, a, x, flags)
+    class(zmkpair), intent(inout) :: this
     class(pf_encap_t), intent(in) :: x
     real(pfdp), intent(in) :: a
     integer, intent(in), optional :: flags
-    class(zndarray), pointer :: zndarray_obj
+    class(zmkpair), pointer :: zmkpair_obj
     integer :: this_shape(2), dim, i
 
-    zndarray_obj => cast_as_zndarray(x)
+    zmkpair_obj => cast_as_zmkpair(x)
     if (present(flags)) then
-       this%y = a * zndarray_obj%y + this%y
+       this%y = a * zmkpair_obj%y + this%y
     else
-       this%array = a * zndarray_obj%array + this%array
+       this%array = a * zmkpair_obj%array + this%array
     endif
 
-  end subroutine zndarray_axpy
+  end subroutine zmkpair_axpy
 
-  subroutine zndarray_eprint(this, flags)
-    class(zndarray), intent(inout) :: this
+  subroutine zmkpair_eprint(this, flags)
+    class(zmkpair), intent(inout) :: this
     integer, intent(in), optional :: flags
     integer :: this_shape(2), i, j, dim
 
@@ -239,12 +239,12 @@ module factory
     do i = 1, dim
        write(*, 100) real(this%y(i,i))
     end do
-    100 format (*(F14.11))
+    100 format (*(F18.14))
     call flush
-  end subroutine zndarray_eprint
+  end subroutine zmkpair_eprint
 
   subroutine write_to_disk(this, filename)
-    class(zndarray), intent(inout) :: this
+    class(zmkpair), intent(inout) :: this
     character(len=*), intent(in) :: filename
 
     open(unit=1, file=trim(filename), form='unformatted')
@@ -252,4 +252,5 @@ module factory
     close(1)
   end subroutine write_to_disk
 
-end module factory
+end module mod_zmkpair
+

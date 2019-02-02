@@ -10,7 +10,7 @@
 module sweeper
   use pf_mod_dtype
   use pf_mod_imk
-  use factory
+  use mod_zmkpair
   use utils
 
   implicit none
@@ -88,25 +88,18 @@ contains
     real(pfdp), intent(in) :: t
     integer, intent(in) :: level
 
-    type(zndarray), pointer :: y_p, A_p
+    type(zmkpair), pointer :: y_p, A_p
     integer :: i
 
-    y_p => cast_as_zndarray(y)
-    A_p => cast_as_zndarray(f)
+    y_p => cast_as_zmkpair(y)
+    A_p => cast_as_zmkpair(f)
 
-    do i = 1, this%dim
-       A_p%array(i,i) = 0.0_pfdp
-    enddo
-
-    do i = 1, this%dim-1
-       A_p%array(i, i+1) = -1.0_pfdp * y_p%y(i, i+1)
-       A_p%array(i+1, i) = y_p%y(i, i+1)
-    enddo
-
-    if (toda_periodic .eqv. .true.) then
-       A_p%array(1, this%dim) = y_p%y(1, this%dim)
-       A_p%array(this%dim, 1) = -1.0_pfdp * y_p%y(this%dim, 1)
+    if (nprob .eq. 1) then
+       call compute_F_toda(y_p%y,A_p%array,this%dim,t,level)
+    else
+       call compute_Facke(y_p%y,A_p%array,this%dim,t,level)
     endif
+
 
     nullify(y_p, A_p)
 
@@ -116,14 +109,14 @@ contains
       class(imk_sweeper_t), intent(inout) :: this
       class(pf_encap_t), intent(inout) :: a, f, omega
 
-      type(zndarray), pointer :: a_p, omega_p, f_p
+      type(zmkpair), pointer :: a_p, omega_p, f_p
       integer :: i
       real(pfdp) :: factor, cc
       complex(pfdp), allocatable :: D(:,:), C(:,:)
 
-      a_p => cast_as_zndarray(a)
-      f_p => cast_as_zndarray(f)
-      omega_p => cast_as_zndarray(omega)
+      a_p => cast_as_zmkpair(a)
+      f_p => cast_as_zmkpair(f)
+      omega_p => cast_as_zmkpair(omega)
 
       allocate(D(this%dim, this%dim), C(this%dim, this%dim))
       D = a_p%array
@@ -156,12 +149,12 @@ contains
     class(pf_encap_t), intent(inout) :: a, b, out
     integer, intent(in), optional :: flags
 
-    type(zndarray), pointer :: a_p, b_p, out_p
+    type(zmkpair), pointer :: a_p, b_p, out_p
     integer :: dim
 
-    a_p => cast_as_zndarray(a)
-    b_p => cast_as_zndarray(b)
-    out_p => cast_as_zndarray(out)
+    a_p => cast_as_zmkpair(a)
+    b_p => cast_as_zmkpair(b)
+    out_p => cast_as_zmkpair(out)
 
     dim = a_p%dim
 
@@ -198,12 +191,12 @@ contains
     class(pf_encap_t), intent(inout) :: q0
     class(pf_encap_t), intent(inout) :: q
     integer :: i, dim, nprob=1 !< size of dimensions of P, U
-    class(zndarray), pointer :: q0_p, q_p
+    class(zmkpair), pointer :: q0_p, q_p
     complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
     real(pfdp) :: exptol=1.0d-20
 
-    q0_p => cast_as_zndarray(q0)
-    q_p => cast_as_zndarray(q)
+    q0_p => cast_as_zmkpair(q0)
+    q_p => cast_as_zmkpair(q)
 
     dim = q0_p%dim
     allocate(tmp(dim, dim), time_ev_op(dim, dim))
@@ -374,9 +367,9 @@ contains
    real(pfdp),        intent(in   ) :: t
    integer, intent(in), optional :: flags
 
-   class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
+   class(zmkpair), pointer :: f, g
+   f => cast_as_zmkpair(qF)
+   g => cast_as_zmkpair(qG)
 
    g%array = f%array
    g%y = f%y
@@ -390,9 +383,9 @@ contains
    real(pfdp),        intent(in   ) :: t
    integer, intent(in), optional :: flags
 
-   class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
+   class(zmkpair), pointer :: f, g
+   f => cast_as_zmkpair(qF)
+   g => cast_as_zmkpair(qG)
 
    f%array = g%array
    f%y = g%y

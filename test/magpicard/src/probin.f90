@@ -41,7 +41,7 @@ module probin
   namelist /params/ Finterp, ndim, nfake, nnodes, nprob, nsteps, N, dt, Tfin
   namelist /params/ nsweeps,nsweeps_pred, use_sdc
   namelist /params/ fbase, poutmod, exptol, save_solutions, nparticles, toda_periodic
-  namelist /params/ alpha, beta, vab, magnus_order, basis, molecule, exact_dir,E0,Znuc
+  namelist /params/ alpha, beta, vab, magnus_order, basis, molecule, exact_dir,E0,Znuc,Xmax
 
 contains
 

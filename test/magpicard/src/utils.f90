@@ -1,7 +1,8 @@
 module utils
   use pf_mod_dtype
+  use pf_mod_zndarray
   use probin
-  use factory
+
 
   implicit none
 
@@ -18,39 +19,41 @@ module utils
 
     class(pf_encap_t), intent(inout) :: L
     class(zndarray), pointer :: L_p
-
+    complex(pfdp),      pointer :: L_array(:,:)
+    integer :: Nmat
+    
     L_p => cast_as_zndarray(L)
+    L_array=>get_array2d(L_p)
+    Nmat = L_p%shape(1) !  Assumes a square matrix
 
     select case(nprob)
     case (1)
-       call init_toda(L_p)
+       call init_toda(L_array,Nmat)
     case (2)
-       call init_Facke(L_p)
+       call init_Facke(L_array,Nmat)
     case default
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',nprob)
     end select
 
     nullify(L_p)
+    nullify(L_array)
   end subroutine initial
   
-  subroutine init_toda(L)
+  subroutine init_toda(L_array,Nmat)
     use probin, only:  toda_periodic
 
-    type(zndarray), intent(inout) :: L
+    complex(pfdp),  intent(inout),    pointer :: L_array(:,:)
+    integer, intent(in) :: Nmat
 
-    complex(pfdp), allocatable :: u(:,:) !> definition of initial state
-    complex(pfdp),      pointer :: L_array(:,:)
     real(pfdp), allocatable :: q(:), p(:)
-    real(pfdp) :: tol=1d-15, alpha_toda
-    integer :: Nmat, i
+    real(pfdp) :: alpha_toda
+    integer ::  i
 
-    Nmat = L%shape(1)  !  Assume square matrix
-    allocate(u(Nmat, Nmat), q(Nmat), p(Nmat))
+    allocate( q(Nmat), p(Nmat))
 
-    u = z0
+    L_array = z0
     q = 0.0_pfdp
     p = 0.0_pfdp
-    L_array=>get_array2d(L)
     
     ! See Zanna thesis on "On the Numerical Solution of Isospectral Flows"
     if (toda_periodic .eqv. .true.) then
@@ -69,42 +72,38 @@ module utils
        else
           p(i) = -4
        endif
-       u(i,i) = p(i) ! everyone gets a different initial momentum
+       L_array(i,i) = p(i) ! everyone gets a different initial momentum
     enddo
 
     do i = 1, Nmat-1
        alpha_toda = exp(-0.5_pfdp * (q(i+1) - q(i)))
        if (i == 1 .and. toda_periodic .eqv. .true.) then
-          u(i, Nmat) = alpha_toda
-          u(Nmat, i) = alpha_toda
+          L_array(i, Nmat) = alpha_toda
+          L_array(Nmat, i) = alpha_toda
        endif
-       u(i, i+1) = alpha_toda
-       u(i+1, i) = alpha_toda
+       L_array(i, i+1) = alpha_toda
+       L_array(i+1, i) = alpha_toda
     enddo
 
-    u(:,:) = 0.5_pfdp * u(:,:)
-    L_array = u
-    deallocate(u, q, p)
+    L_array(:,:) = 0.5_pfdp * L_array(:,:)
+
+    deallocate(q, p)
   end subroutine init_toda
 
   !>  Initial condition  for Facke
-  subroutine init_Facke(L)
+  subroutine init_Facke(L_array,Nmat)
     implicit none
+    complex(pfdp),  intent(inout),    pointer :: L_array(:,:)
+    integer, intent(in) :: Nmat
 
-    type(zndarray), intent(inout) :: L
 
-    complex(pfdp), allocatable :: u(:,:) !> definition of initial state
     real(pfdp), allocatable :: q(:), x(:)
     real(pfdp) :: dx,ip
-    integer :: Nmat, i
-    complex(pfdp),      pointer :: L_array(:,:)
+    integer ::  i
     
-    L_array=>get_array2d(L)
+    allocate( q(Nmat), x(Nmat))
 
-    Nmat = L%shape(1) !  Assumes a square matrix
-    allocate(u(Nmat, Nmat), q(Nmat), x(Nmat))
-
-    u = z0
+    L_array = z0
 
     dx=2.0_pfdp*Xmax/real(Nmat-1,pfdp)
     do i = 1, Nmat
@@ -119,28 +118,23 @@ module utils
 
     !  the matrix form of this is going to be the outer product of q with itself?
     do i=1,Nmat
-       u(:,i) = q*q(i)
+       L_array(:,i) = q*q(i)
     end do
     
-    L_array = u
-    deallocate( u, q, x)
+    deallocate(q, x)
 
   end subroutine init_Facke
   
   
-  subroutine compute_F_toda(L,B,t,level)
+  subroutine compute_F_toda(L_array,B_array,Nmat,t,level)
     use probin, only: toda_periodic
     ! RHS for Toda lattice problem
-    type(zndarray), intent(in) :: L
-    type(zndarray), intent(inout) :: B        
+    complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
+    integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
     integer, intent(in) :: level
-    complex(pfdp),      pointer :: L_array(:,:), B_array(:,:)
     
-    integer :: i,Nmat
-    L_array=>get_array2d(L)
-    B_array=>get_array2d(B)    
-    Nmat = L%shape(1)  !  Assume square matrix
+    integer :: i
 
 
     do i = 1, Nmat
@@ -160,23 +154,19 @@ module utils
   end subroutine compute_F_toda
   
   
-  subroutine compute_Facke(L,B,t,level)
+  subroutine compute_Facke(L_array,B_array,Nmat,t,level)
     use probin, only: Znuc,E0,Xmax
 
     !  RHS for fake Fock matrix example
-    type(zndarray), intent(in) :: L
-    type(zndarray), intent(inout) :: B        
+    complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
+    integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
     integer, intent(in) :: level
     
-    integer :: i,j,n,m,Nmat
+    integer :: i,j,n,m
     real(pfdp) :: xi,xj,xn,xm,cst,dx
     real(pfdp),allocatable :: x(:)
-    complex(pfdp),      pointer :: L_array(:,:), B_array(:,:)
-    L_array=>get_array2d(L)
-    B_array=>get_array2d(B)    
 
-    Nmat = L%shape(1)  !  Assume square matrix
     allocate(x(Nmat))
 
     dx=2.0_pfdp*Xmax/real(Nmat-1,pfdp)
