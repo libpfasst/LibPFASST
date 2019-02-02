@@ -55,7 +55,7 @@ contains
     ! Defaults
     ndim = 2
     nfake = 0
-    nprob = 3
+    nprob = 1  ! Default is toda
     nsteps = -1
     N = -1
     poutmod = 1
