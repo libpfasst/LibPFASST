@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Parameters and variables &#8212; LIBPFASST 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Sweepers" href="sweepers.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="sweepers.html" title="Sweepers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="parameters-and-variables">
+<h1>Parameters and variables<a class="headerlink" href="#parameters-and-variables" title="Permalink to this headline">¶</a></h1>
+<p>The libpfasst library has many parameters which control the
+behavior of the PFASST algorithm and can be changed by the
+user.  This section lists all the parameters and describes
+their function, location, and default values. Most of the
+parameters assume a default value that can be changed by
+specifying the value either in an input file or on the
+command line.  Some of the parameters must be changed from
+their default value or PFASST will not execute.</p>
+<p>Following these lists is an explanation of how to set
+parameters through input files or the command line, and
+how to choose certain parameters to acheive particular
+variants of PFASST.</p>
+<div class="section" id="types-of-parameters">
+<h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>libpfasst static parameters:  hard coded and cannot be changed at run time.</li>
+<li><code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time,
+the use of default values will result in program termination.</li>
+<li><code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time,
+the use of default values will result in default execution.</li>
+<li><code class="docutils literal"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time,
+the use of default values will result in default execution.</li>
+<li><code class="docutils literal"><span class="pre">pf_level_t</span></code> mandatory  parameters:   must be reassigned at run time,
+the use of default values will result in program termination.</li>
+<li>local mandatory parameters: must be passed in a call to <code class="docutils literal"><span class="pre">pf_run_pfasst</span></code>.</li>
+<li>local optional parameters: specified by the user application and
+unrelated to the workings of libpfasst.</li>
+</ul>
+</div>
+<div class="section" id="libfpasst-static-parameters">
+<h2>Libfpasst static parameters<a class="headerlink" href="#libfpasst-static-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The parameters at the top of the file <cite>src/pf_dtype.f90</cite> are all set
+at compile time and can&#8217;t be changed at runtime.  The only parameters
+here of interest to the user are</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">307</span><span class="p">)</span>  <span class="c">!!  Defines double precision type for all real and complex variables</span>
+<span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfqp</span> <span class="o">=</span> <span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">4931</span><span class="p">)</span> <span class="c">!!  Defines quad precision type for all real and complex variables</span>
+</pre></div>
+</div>
+<p>which controls the precision of all floating point numbers  using <code class="docutils literal"><span class="pre">pfdp</span></code> or <code class="docutils literal"><span class="pre">pfqp</span></code> in the declaration and assignment (this is highly encouraged).
+The <code class="docutils literal"><span class="pre">selected_real_kind</span></code> function is a Fortran intrinsic which is designed to allow for differing definition of precision for different compilers.</p>
+<p>In theory, one can run libpfasst in quad precision by changing the first line to</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">4931</span><span class="p">)</span>  <span class="c">!! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)</span>
+</pre></div>
+</div>
+<p>Since this will change the size of the data being passed by mpi, one then must also change the parameter</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">myMPI_Datatype</span><span class="o">=</span><span class="n">MPI_REAL8</span>
+</pre></div>
+</div>
+<p>The tutorial examples EX1_Dahlquist and  EX2_Dahlquist can be run in quad precision and will demonstrate quad precision in the residual and errors, but not all aspects of libpfasst will
+work as desired with quad precision.  For example, some of the Runge-Kutta coefficients are not known to quad precision.  Hence, quad precision should be used at your own risk.</p>
+</div>
+<div class="section" id="pfasst-mandatory-parameters">
+<h2>Pfasst mandatory parameters<a class="headerlink" href="#pfasst-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The first variable in the specification of <code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> in <cite>pf_dtype.f90</cite> is the only variable that is mandatory to set.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Mandatory parameters (must be set on command line or input file)</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nlevels</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c">!! number of pfasst levels</span>
+</pre></div>
+</div>
+<p>It can be set either on the command line, or more usually in an input file using the  <cite>PF_PARAMS</cite>  namelist (see below).</p>
+</div>
+<div class="section" id="pfasst-optional-parameters">
+<h2>Pfasst optional parameters<a class="headerlink" href="#pfasst-optional-parameters" title="Permalink to this headline">¶</a></h2>
+<p>All the remaining variables in the specification of <code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> in <cite>pf_dtype.f90</cite> are given default values as below:</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Optional parameters</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">!! number of PFASST iterations to do</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>  <span class="c">!! type of nodes</span>
+
+<span class="c">! --  level dependent parameters</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c">!!  number of sweeps at each levels</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span><span class="mi">1</span>   <span class="c">!!  number of sweeps during predictor</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>          <span class="c">!! number of nodes</span>
+
+<span class="c">! --  tolerances</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  absolute convergence tolerance</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">rel_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  relative convergence tolerance</span>
+
+<span class="c">! --  predictor options  (should be set before pfasst_run is called)</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">PFASST_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  true if the PFASST type predictor is used</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">pipeline_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_burn</span> <span class="o">=</span>  <span class="mi">1</span>       <span class="c">!!  number of sdc sweeps to perform during coarse level burn in</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">q0_style</span> <span class="o">=</span>  <span class="mi">0</span>           <span class="c">!!  q0 can take 3 values</span>
+                                   <span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
+                                   <span class="c">!!  1:  The q0 at each processor is valid</span>
+                                   <span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
+
+
+<span class="c">! --  run options  (should be set before pfasst_run is called)</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999999</span>     <span class="c">!! iteration cutoff for tau inclusion</span>
+
+
+<span class="c">!&gt; RK and Parareal options</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_rk_stepper</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!! decides if RK steps are used instead of the sweeps</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>  <span class="c">!! number of runge-kutta nodes</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">RK_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>        <span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
+
+<span class="c">! -- misc</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_results</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  If true, results are output</span>
+<span class="kt">logical</span>    <span class="kd">::</span> <span class="n">echo_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are output</span>
+</pre></div>
+</div>
+<p>These values can be changed as desired either on the command line or in an input file as described below.
+Except for the predictor parameters, the meaning  of most of the parameters should be clear from the context and from reading the
+description of the pfasst algorithm.  See the section on  the predictor for more discussion of the predictor parameters.</p>
+</div>
+<div class="section" id="level-mandatory-parameters">
+<h2>Level mandatory parameters<a class="headerlink" href="#level-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
+<p>There is one level parameter that must be set on each level by the user, namely mpibuflen, which gives the size of the
+solution that is communicated by MPI.  There is no way for libpfasst to know the value of this parameter, so the code
+will terminate if it is not set before the call to pfasst_setup in the user&#8217;s main.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!  Mandatory level parameter</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">mpibuflen</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! size of solution in pfdp units</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="level-optional-parameters">
+<h2>Level optional parameters<a class="headerlink" href="#level-optional-parameters" title="Permalink to this headline">¶</a></h2>
+<p>In the specification of <code class="docutils literal"><span class="pre">pf_level_t</span></code> in <cite>pf_dtype.f90</cite>, the first six parameters are assigned values in
+the subroutine <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code> located in <cite>pf_pfasst.f90</cite>.
+Except for the first, these can be changed per level as the levels are initialized in the users main routine</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
+
+   <span class="kt">integer</span>  <span class="kd">::</span> <span class="nb">index</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! level number (1 is the coarsest)</span>
+   <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nnodes</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc nodes</span>
+   <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsteps_rk</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of rk steps to perform</span>
+   <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc sweeps to perform</span>
+   <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps_pred</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>      <span class="c">!! number of coarse sdc sweeps to perform predictor in predictor</span>
+   <span class="kt">logical</span>     <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">!! interpolate functions instead of solutions</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="local-mandatory-parameters">
+<h2>Local mandatory parameters<a class="headerlink" href="#local-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
+<p>In the call to run pfasst</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tend</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The variables <code class="docutils literal"><span class="pre">q0</span></code>, <code class="docutils literal"><span class="pre">dt</span></code>, and <code class="docutils literal"><span class="pre">tend</span></code> must be included.  These correspond to the initial condition, the time step, and the end time of the run.</p>
+<p>The variable <code class="docutils literal"><span class="pre">nsteps</span></code> is optional, if it is not included, then <code class="docutils literal"><span class="pre">nsteps</span></code> is set to</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If it is included, then the value of <code class="docutils literal"><span class="pre">tend</span></code>  passed into the routine is ignored and the final time of the simulation will be <code class="docutils literal"><span class="pre">nsteps*dt</span></code></p>
+<p>The input paratmer <code class="docutils literal"><span class="pre">qend</span></code> is also optional and returns the final solution if desired.  Finally, an integer array <code class="docutils literal"><span class="pre">flags</span></code> can be passed if desired.</p>
+</div>
+<div class="section" id="file-input-for-user-variables">
+<h2>File input for user variables<a class="headerlink" href="#file-input-for-user-variables" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>The usual default input file for libpfasst examples is  <cite>probin.nml</cite> wherein the namelist
+PARAMS (defined locally in <cite>probin.f90</cite>) can be specified.
+Alternatively, a different input file can be specified on the command
+line by adding the file name directly after the executable.  The
+alternative input file must be specified first before any command line
+parameter specifications (see next section).  For a given application, there is no requirement that the program reads in any local parameters, and the style of <cite>probin.f90</cite> can be changed to anything else.
+It is necessary however to provide an input for pfasst variables described next.</div></blockquote>
+</div>
+<div class="section" id="file-input-for-pfasst-variables">
+<h2>File input for pfasst  variables<a class="headerlink" href="#file-input-for-pfasst-variables" title="Permalink to this headline">¶</a></h2>
+<p>The pfasst parameters are specified in a namelist <code class="docutils literal"><span class="pre">PF_PARAMS</span></code>
+defined in routine <code class="docutils literal"><span class="pre">pf_read_opts</span></code> in <cite>pf_pfasst.f90</cite>.  This
+routine is called from <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code> in <cite>pf_pfasst.f90</cite>
+(which is typically called when initializing PFASST).  If no file is
+specified in the call to <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code>, then no file is read.
+Typically the main routine specifies this input file (the default
+being probin.nml), and this file can be changed by specifying the
+value of</p>
+<blockquote>
+<div>pfasst_nml = &#8216;probin.nml&#8217;</div></blockquote>
+<p>either in the local input file  or the command line.</p>
+<p>This is not completely transparent, so consider some cases:</p>
+<ul class="simple">
+<li>I include an input file on the command line and it contains  a <code class="docutils literal"><span class="pre">PF_PARAMS</span></code> namelist: This is fine as long as <code class="docutils literal"><span class="pre">PF_PARAMS</span></code> has an <code class="docutils literal"><span class="pre">nlevels</span></code> entry</li>
+<li>I include no input file on the command line:  Then the input file <cite>probin.nml</cite> will be read for the namelist and two possibilities exist.
+* <cite>probin.nml</cite> has a <code class="docutils literal"><span class="pre">PF_PARAMS</span></code> namelist including an <code class="docutils literal"><span class="pre">nlevels</span></code> entry
+* <cite>probin.nml</cite> has  an assignment of a different <cite>pfasst_nml</cite> input file in which
+* <cite>probin.nml</cite> has  no namelist but  <code class="docutils literal"><span class="pre">nlevels</span></code> is specified on the command line</li>
+</ul>
+</div>
+<div class="section" id="command-line-input">
+<h2>Command line input<a class="headerlink" href="#command-line-input" title="Permalink to this headline">¶</a></h2>
+<p>All the variables in the namelist <code class="docutils literal"><span class="pre">PF_PARAMS</span></code> can be modified by
+simply specifying their value on the command line.  There is only one
+caveat to this in that any parameters must be specified after the
+(optional) input file specification.  For example</p>
+<div class="highlight-sh"><div class="highlight"><pre><span></span>mpirun -n <span class="m">20</span> main.exe  myinput.nml <span class="nv">niters</span><span class="o">=</span><span class="m">10</span>
+</pre></div>
+</div>
+<p>would set the input file to &#8220;myinput.nml&#8221; and then over-ride any
+specified value of niters with the value 10. Command line options
+over-ride input files.</p>
+</div>
+<div class="section" id="variables-for-the-predictor">
+<h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Permalink to this headline">¶</a></h2>
+<p>Warning:  This section may not be current due to an increase in the possible ways the predictor is called. The interested reader
+might look directly in the source code in the file <cite>src/pf_parallel.f90</cite></p>
+<p>The two variables <code class="docutils literal"><span class="pre">pipeline_pred</span></code> and <code class="docutils literal"><span class="pre">PFASST_pred</span></code> determine how the
+predictor works.  The different combinations of these variables and
+the parameter <code class="docutils literal"><span class="pre">Nsweeps_pred</span></code> create some subtle
+differences in how the predictor performs.</p>
+<p>Some cases:</p>
+<ol class="arabic simple">
+<li>If <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is false and <code class="docutils literal"><span class="pre">pipeline_pred</span></code> is false, then the predictor
+is a serial application of SDC with Nsweeps.  This can be done
+without communication wherein every processor mimics the behavior
+of the processors previous to it in time.</li>
+<li>If <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is false and <code class="docutils literal"><span class="pre">pipeline_pred</span></code> is true and <code class="docutils literal"><span class="pre">Nsweeps</span></code> is one,
+then the predictor is a serial application of SDC with 1 sweep.  As
+above, there is no communication necessary.</li>
+<li>If <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is false and <code class="docutils literal"><span class="pre">pipeline_pred</span></code> is true and <code class="docutils literal"><span class="pre">Nsweeps</span></code> is
+greater than one, then the predictor is a version of pipelined
+SDC. There is no communication necessary until the second sweep on
+the each processor is done.  After that, each processor must
+recieve a new initial value.</li>
+<li>If <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is true, and <code class="docutils literal"><span class="pre">Nsweeps</span></code> equals one, then it doesn&#8217;t
+matter what pipeline_pred is.  No communication is necessary, and we
+simply reuse the function values from the previous iteration in
+each SDC sweep.  Some care must be taken here as to how to
+interpret the variable t0 especially in light of time dependent
+boundary conditions.  Currently t0 does not change in these
+iterations, hence one should use caution using PFASST_pred = true
+with time dependent boundary conditions.</li>
+<li>If <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is true, and <code class="docutils literal"><span class="pre">Nsweeps</span></code> is greater than one and
+<code class="docutils literal"><span class="pre">pipeline_pred</span></code> is true, then the predictor will act like the normal
+<code class="docutils literal"><span class="pre">PFASST_pred</span></code> with <code class="docutils literal"><span class="pre">Nsweeps</span></code> equal one, but more iterations will be
+taken.  This choice is a bit strange.  No communication is needed
+until each processor is doing the P+1st iteration, then new initial
+data must be used and in all cases, previous f values are used in
+the SDCsweeps.  The caveat about t0 is still valid.</li>
+<li>Finally, if <code class="docutils literal"><span class="pre">PFASST_pred</span></code> is true, and <code class="docutils literal"><span class="pre">Nsweeps</span></code> is greater than one
+and <code class="docutils literal"><span class="pre">pipeline_pred</span></code> is false, then the predictor will act like the
+normal PFASST_pred with <code class="docutils literal"><span class="pre">Nsweeps</span></code> equals one, but additional
+iterations are taken before the initial conditions at each
+processor are reset.  This can be done without communication.  The
+caveat about t0 is still valid.</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Parameters and variables</a><ul>
+<li><a class="reference internal" href="#types-of-parameters">Types of parameters</a></li>
+<li><a class="reference internal" href="#libfpasst-static-parameters">Libfpasst static parameters</a></li>
+<li><a class="reference internal" href="#pfasst-mandatory-parameters">Pfasst mandatory parameters</a></li>
+<li><a class="reference internal" href="#pfasst-optional-parameters">Pfasst optional parameters</a></li>
+<li><a class="reference internal" href="#level-mandatory-parameters">Level mandatory parameters</a></li>
+<li><a class="reference internal" href="#level-optional-parameters">Level optional parameters</a></li>
+<li><a class="reference internal" href="#local-mandatory-parameters">Local mandatory parameters</a></li>
+<li><a class="reference internal" href="#file-input-for-user-variables">File input for user variables</a></li>
+<li><a class="reference internal" href="#file-input-for-pfasst-variables">File input for pfasst  variables</a></li>
+<li><a class="reference internal" href="#command-line-input">Command line input</a></li>
+<li><a class="reference internal" href="#variables-for-the-predictor">Variables for the predictor</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sweepers.html"
+                        title="next chapter">Sweepers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/parameters.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="sweepers.html" title="Sweepers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>
