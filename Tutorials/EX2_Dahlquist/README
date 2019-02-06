@@ -1,6 +1,0 @@
-Example program  calling libpfasst to solve the Dahlquist problem
-
-y' = lam1*y+lam2*y
-y(0)=1
-
-This version creates a local encapsulation.

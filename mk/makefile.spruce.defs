@@ -1,5 +1,0 @@
-#
-# Makefile definitions for spruce
-#
-
-FFLAGS += -Wall -g -pg -Wno-unused-dummy-argument

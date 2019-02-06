@@ -1,9 +1,0 @@
-#
-# JUQUEEN build settings for libpfasst.
-#
-
-# need: module load gcc
-
-FC = mpigfortran
-CC = mpigcc
-

@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Compiling &#8212; LIBPFASST 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Download" href="download.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="download.html" title="Download"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="compiling">
+<h1>Compiling<a class="headerlink" href="#compiling" title="Permalink to this headline">¶</a></h1>
+<p>Libpfasst comes with its own Makefiles, and it is possible that simply entering</p>
+<blockquote>
+<div><cite>~/libpfasst $ make</cite></div></blockquote>
+<p>in the directory /libpfasst will compile the code succesfully.  A successful make will build the file</p>
+<p>libpfasst/lib/libpfasst.a</p>
+<p>Before compiling, you will need an MPI library installed.  On Debian
+or Ubuntu machines, we recommend MPICH2:</p>
+<blockquote>
+<div><cite>$ sudo apt-get install mpich2 libmpich2-dev</cite></div></blockquote>
+<p>The user will probably have to adjust some flags in &#8216;Makefile.defaults&#8217;.</p>
+<p>The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.</p>
+<p>FC = mpif90</p>
+<p>CC = mpicc</p>
+<p>AR = ar rcs</p>
+<p>Some optional flags are</p>
+<p>DEBUG = FALSE</p>
+<p>which if made true will add many diagnostic flags to the build, and</p>
+<p>MKVERBOSE=FALSE</p>
+<p>which if made true will show more info in the build steps.  These can also both be changed on the command line as in</p>
+<blockquote>
+<div><cite>~/libpfasst $ make MKVERBOSE=TRUE DEBUG=TRUE</cite></div></blockquote>
+<p>There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and entering</p>
+<blockquote>
+<div><cite>~/libpfasst $ make depend</cite></div></blockquote>
+<p>Finally, enter</p>
+<blockquote>
+<div><cite>~/libpfasst $ make clean</cite></div></blockquote>
+<p>to remove all intermediate files and start from scratch.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="download.html"
+                        title="previous chapter">Download</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/compiling.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="download.html" title="Download"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>

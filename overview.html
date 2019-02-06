@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview &#8212; LIBPFASST 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The LIBPFASST library evolves systems of ODEs in time:</p>
+<div class="math">
+\[u'(t) = f(u(t), t).\]</div>
+<p>LIBPFASST comes with builtin sub-steppers for fully explicit, fully
+implicit, and implicit-explicit (IMEX) systems.</p>
+<p>The user provides:</p>
+<ol class="arabic simple">
+<li>Function evaluation routines: <span class="math">\(F(U, t)\)</span>.  These functions may
+depend on the PFASST level, which allows for multi-order and/or
+multi-physics operators.</li>
+<li>For implicit or IMEX schemes, a backward Euler solver: <span class="math">\(U -
+dt F(U) = RHS\)</span>.</li>
+<li>Spatial interpolation and restriction routines: <span class="math">\(R(U)\)</span> and
+<span class="math">\(P(U)\)</span>.</li>
+<li>Solution encapsulation routines to tell LIBPFASST how to manipulate
+solutions.  This enables LIBPFASST to interoperate nicely with
+other libraries that have particular ways of storing solutions (eg,
+BoxLib, PEPC, or PETSc).  In particular, this allows LIBPFASST to
+work with spatially distributed solutions.</li>
+</ol>
+<p>User interactions with LIBPFASST are typically marshaled through the
+<code class="docutils literal"><span class="pre">type(pf_pfasst_t)</span></code> class.  This class acts as the overall
+controller of the algorithm.  Implementing a ODE/PDE solver in
+LIBPFASST generally consists of the following steps:</p>
+<ol class="arabic simple">
+<li>Create an <code class="docutils literal"><span class="pre">type(pf_pfasst_t)</span></code> controller.</li>
+<li>Create an <code class="docutils literal"><span class="pre">type(pf_encap_t)</span></code> encapsulation object.  This
+may be level dependent.</li>
+<li>Create an <code class="docutils literal"><span class="pre">type(pf_comm_t)</span></code> communicator object.  This allows
+LIBPFASST to use MPI parallelization (independent of any spatial
+parallelization).</li>
+<li>Create an <code class="docutils literal"><span class="pre">type(pf_sweeper_t)</span></code> SDC sweeper.  Builtin
+sweepers include: explicit, implicit, or imex.  Custom sweepers can
+also be built.  This can also be level dependent.</li>
+<li>Add levels to the <code class="docutils literal"><span class="pre">type(pf_pfasst_t)</span></code> controller.  This
+includes telling LIBPFASST how many degrees-of-freedom are on each
+level, how many SDC nodes should be used on each level and their
+type, which interpolation and restriction routines to use, which
+encapsulation object to use etc.</li>
+<li>Add any desired hooks to the controller and set any controller
+options.</li>
+<li>Call the communicator&#8217;s and controller&#8217;s setup routines.</li>
+<li>Run.</li>
+<li>Tidy up.</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/overview.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>

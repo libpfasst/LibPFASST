@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &#8212; LIBPFASST 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="Parameters and variables" href="parameters.html" />
+    <link rel="prev" title="Compiling" href="compiling.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters and variables"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="compiling.html" title="Compiling"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The following material will walk the user through a couple of examples to demonstrate how to set up an application using libpfasst.</p>
+<div class="section" id="example-1">
+<h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
+<p>Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist.
+This example solves the  scalar model problem or Dahlquist equation</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}y'  = \lambda y\\y(0) = 1\end{aligned}\end{align} \]</div>
+<p>An implicit-explicit or IMEX  (also known as semi-implicit) splitting is used in this example, so the equation can be written</p>
+<div class="math">
+\[y'  = \lambda_1 y + \lambda_2 y\]</div>
+<p>Typing <cite>make</cite> in the directory should compile the example creating an exectuable called <cite>main.exe</cite>.  In the same directory, there are a few parameter files with the extension &#8216;.nml&#8217;.  You can run the example using one of these files, as in</p>
+<blockquote>
+<div><cite>$ ./main.exe sdc.nml</cite></div></blockquote>
+<p>Using your favorite editor, open the file sdc.nml.  There are two namelists here, &#8216;PF_PARAMS&#8217; and &#8216;PARAMS&#8217;.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.
+The &#8216;PF_PARAMS&#8217; variables are discussed below in the section <a class="reference internal" href="parameters.html"><span class="doc">Parameters</span></a>.
+Any parameter in either list can be overwritten by adding it to the command line, as in</p>
+<blockquote>
+<div><cite>$ ./main.exe sdc.nml lam1=3.0 niters=10</cite></div></blockquote>
+<p>The order of the command line parameters is not important except that they must come after the input file is specified.</p>
+<p>The main program is in <cite>src/main.f90</cite>, and this format can easily be adapted to handle a different application.
+The routine to read the local parameters (located in  <cite>src/probin.f90</cite>)  is called first</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; read problem parameters</span>
+<span class="k">call </span><span class="n">probin_init</span><span class="p">(</span><span class="n">probin_fname</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Most all of the changes needed to run a different example are contained in the block</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; loop over levels and set some level specific parameters</span>
+ <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+    <span class="c">!&gt;  Allocate the user specific level object</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">my_level_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">)</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
+
+    <span class="c">!&gt;  Allocate the shape array for level (here just one dimension)</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="nb">shape</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="nb">shape</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c">!&gt;  Add the sweeper to the level</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">my_sweeper_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">sweeper_setup</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="nb">shape</span><span class="p">)</span>
+
+    <span class="c">!&gt;  Set the size of the send/receive buffer</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">mpibuflen</span>  <span class="o">=</span> <span class="mi">1</span>
+ <span class="k">end do</span>
+</pre></div>
+</div>
+<p>The first line allocates the space for the <cite>user_level</cite>. In <cite>src/feval.f90</cite>, the local definition of the user level is given:</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  extend the generic level type by defining transfer operators</span>
+<span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_user_level_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">my_level_t</span>
+ <span class="k">contains</span>
+<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">restrict</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">interpolate</span>
+<span class="k">end type </span><span class="n">my_level_t</span>
+</pre></div>
+</div>
+<p>Here the routines to restrict and interpolate the solution in space are defined.  Since this is a scalar problem these routines are identity maps which can be seen by examining these routines at the bottom of   <cite>src/feval.f90</cite>.</p>
+<p>In the same file, the definition of the sweeper being used is found</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  extend the imex sweeper type with stuff we need to compute rhs</span>
+<span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_imexQ_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">my_sweeper_t</span>
+
+ <span class="k">contains</span>
+
+<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">f_eval</span>    <span class="c">!  Computes the advection and diffusion terms</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">f_comp</span>    <span class="c">!  Does implicit solves</span>
+
+<span class="k">end type </span><span class="n">my_sweeper_t</span>
+</pre></div>
+</div>
+<p>The IMEX sweeper needs
+functions to evaluate each term in the IMEX splitting and
+a routine to solve an implicit equation equivalent to a
+backward-Euler step.  These routines are in src/feval.f90 and are called
+&#8216;f_eval&#8217; and &#8216;f_comp&#8217;.</p>
+<p>In EX1, the data structure of the solution is one of the included types in libpfasst called <cite>ndarray</cite>.
+In the second line of the loop, the choice of the ndarray data structure is evident.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">allocate</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here the solution is a one-dimensional array of length 1, and the  two lines</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Allocate the shape array for level (here just one dimension)</span>
+<span class="k">allocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="nb">shape</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="nb">shape</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>allocate an integer array of the dimension of the ndarray, and then set the extent of each dimension.  Finally, the last line in the loop sets the total size of the problem on each level (again here it is a single variable).  This is used to control the size of the MPI buffers used to send and recieve the data.</p>
+<p>The subroutine call that actually does the PFASST algorithm is</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; do the PFASST stepping</span>
+<span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span><span class="n">y_end</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we are passing the initial condition and solution at the final time, and these are type <cite>ndarray</cite> declared at the beginning of the subroutine</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span><span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">y_0</span>      <span class="c">!&lt;  the initial condition</span>
+<span class="k">type</span><span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">y_end</span>    <span class="c">!&lt;  the solution at the final time</span>
+</pre></div>
+</div>
+<p>The initial condition is set by a call to the subroutine <cite>initial</cite> which is in <cite>src/feval.f90</cite></p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; compute initial condition</span>
+<span class="k">call </span><span class="n">initial</span><span class="p">(</span><span class="n">y_0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The file <cite>src/hooks.f90</cite> contains some output routines, and in the main routine, a hook is set to call one of these routines after every iteration.  See the section on hooks for more info</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
+<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-2">
+<h2>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h2>
+<p>A second example is provided in the directory <cite>Tutorials/EX2_Dahlquist</cite> which solves exactly the same problem as example EX1.  The main difference in EX2 is that the ndarray encapsulation type is not used.  Instead, a user defined encapsulation type is created to demonstrate what a user needs to provide for a new application that does not use ndarray.  The data type here is called <cite>scalar_encap</cite> which is evident in the lines in <cite>src/main.f90</cite></p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span><span class="p">(</span><span class="n">scalar_encap</span><span class="p">)</span> <span class="kd">::</span> <span class="n">y_0</span>      <span class="c">!&lt;  the initial condition</span>
+<span class="k">type</span><span class="p">(</span><span class="n">scalar_encap</span><span class="p">)</span> <span class="kd">::</span> <span class="n">y_end</span>    <span class="c">!&lt;  the solution at the final time</span>
+</pre></div>
+</div>
+<p>If you compare the src/main.f90 files for EX1 and EX2, you will see they are very similar.    The only important change is in the allocation of the encapsulation factory</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">allocate</span><span class="p">(</span><span class="n">scalar_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Examining the difference between the files <cite>src/probin.f90</cite> and <cite>src/hooks.f90</cite> from the two examples will show that they too are nearly identical.  The big difference here is contained in the file <cite>src/encap.f90</cite>.  It is here that the user defined data type <cite>scalar_encap</cite> is defined.  Recall in EX1, we used the intrinsic data type <cite>ndarray</cite>, hence the reader might want to compare the file <cite>src/encap.f90</cite> with <cite>libpfasst/src/pf_ndarray.f90</cite>.</p>
+<p>To create a new encapsulation of a data type for use by libpfasst, the user must provide the analog of the routines in <cite>src/encap.f90</cite>.
+First, routines to create and destroy the data type (both a single copy and an array) must be provided.
+The rhs of the following block defines the names of these user supplied routines</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Type to create and destroy the arrays</span>
+<span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_factory_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">scalar_factory</span>
+ <span class="k">contains</span>
+<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">create_single</span>  <span class="o">=&gt;</span> <span class="n">scalar_create_single</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">create_array</span>  <span class="o">=&gt;</span> <span class="n">scalar_create_array</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy_single</span> <span class="o">=&gt;</span> <span class="n">scalar_destroy_single</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy_array</span> <span class="o">=&gt;</span> <span class="n">scalar_destroy_array</span>
+<span class="k">end type </span><span class="n">scalar_factory</span>
+</pre></div>
+</div>
+<p>Second, the data type must be defined, and here it is simply a scalar</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Type to extend the abstract encap and set procedure pointers</span>
+<span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">scalar_encap</span>
+   <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">y</span>   <span class="c">!  The scalar value</span>
+</pre></div>
+</div>
+<p>Finally, seven routines that act on the data type must be provided.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">scalar_setval</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">scalar_copy</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">scalar_norm</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="nb">pack</span> <span class="o">=&gt;</span> <span class="n">scalar_pack</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="nb">unpack</span> <span class="o">=&gt;</span> <span class="n">scalar_unpack</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="n">axpy</span> <span class="o">=&gt;</span> <span class="n">scalar_axpy</span>
+<span class="k">procedure</span> <span class="kd">::</span> <span class="n">eprint</span> <span class="o">=&gt;</span> <span class="n">scalar_eprint</span>
+</pre></div>
+</div>
+<p>The rhs of these statements defines the names of the user supplied subroutines.  The reader can see the actual subroutines in the remainder of <cite>src/encap.f90</cite> (they are all quite trivial).</p>
+</div>
+<div class="section" id="advection-diffusion-example">
+<h2>Advection Diffusion Example<a class="headerlink" href="#advection-diffusion-example" title="Permalink to this headline">¶</a></h2>
+<p>For a more complicated example,  see the Example in test/adv_diff_fft  included in libpfasst
+for a simple PDE application of libpfasst.</p>
+<p>This example solves a 1d linear advection diffusion equation</p>
+<div class="math">
+\[u_t  = - v u_x + \nu u_{xx}.\]</div>
+<p>This PDE is set up to be solved in a way that is very similar to the EX1_Dahlquist example.
+This right hand side of the equation will be split into stiff terms handled implicitly
+(<span class="math">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math">\(-v u_x\)</span>),
+and an IMEX SDC substepper will be used to evolve the equation through time.</p>
+<p>The evaluation of the two rhs terms and the
+solution of  implicit equation (feval and fcomp) are both
+done in spectral space using the FFT.</p>
+<p>The routines to spatially interpolate and
+restrict solutions are in <cite>src/feval.f90</cite>.  It is assumed that the refinement ratio in space
+is always 2.  Restriction is pointwise, and interpolation is done in spectral space again with the FFT.</p>
+</div>
+<div class="section" id="steps-to-build-your-own-example">
+<h2>Steps to build your own example<a class="headerlink" href="#steps-to-build-your-own-example" title="Permalink to this headline">¶</a></h2>
+<p>The difficulting of using libpfasst to build a time parallelization scheme for a new application depends in large part on how different the application is to existing examples.  The key components of any example are</p>
+<ol class="arabic simple">
+<li>The data encapsulation type</li>
+<li>The function evaluations</li>
+<li>The sweeper type</li>
+<li>The interpolation and restriction operators</li>
+</ol>
+<p>In the simplest scenario, only the function evaluations would need to be changed.  This would be the case for example if the
+included <cite>ndarray</cite> data type is used along with one of the sweepers included in <cite>libpfasst</cite> and no interpolation and restriction is
+used.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#example-1">Example 1</a></li>
+<li><a class="reference internal" href="#example-2">Example 2</a></li>
+<li><a class="reference internal" href="#advection-diffusion-example">Advection Diffusion Example</a></li>
+<li><a class="reference internal" href="#steps-to-build-your-own-example">Steps to build your own example</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="compiling.html"
+                        title="previous chapter">Compiling</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="parameters.html"
+                        title="next chapter">Parameters and variables</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters and variables"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="compiling.html" title="Compiling"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>
