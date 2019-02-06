@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_quadrature &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_quadrature
+      <small>Subroutine</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.3% of total for procedures.">55 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_quadrature.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_quadrature.f90.html'>pf_quadrature.f90</a></li>
+    
+     <li><a href='../module/pf_mod_quadrature.html'>pf_mod_quadrature</a></li>
+    
+  
+     <li class="active">pf_quadrature</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_quadrature.html#src">pf_quadrature</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>
+public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat, proper, composite, no_left)
+    
+    
+   
+</h2>
+    
+  
+
+
+    
+    <p>Subroutine to create quadrature nodes and matrices</p>
+    
+
+    <h3>Arguments</h3>
+    
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-qtype%7E5"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>qtype</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nnodes%7E5"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nnodes</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nnodes0"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nnodes0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nodes%7E2"></span>real(kind=pfdp),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nodes</strong>(nnodes)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nflags%7E3"></span>integer,</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nflags</strong>(nnodes)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-smat"></span>real(kind=pfdp),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>smat</strong>(nnodes-1,nnodes)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-qmat"></span>real(kind=pfdp),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>qmat</strong>(nnodes-1,nnodes)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-proper"></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>proper</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-composite"></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>composite</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-no_left"></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>no_left</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+    
+    
+    
+    <br>
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~pf_quadrature~~CallsGraph Pages: 1 -->
+<svg id="procpf_quadratureCallsGraph" width="449pt" height="302pt"
+ viewBox="0.00 0.00 449.00 302.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_quadrature~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 298)">
+<title>proc~~pf_quadrature~~CallsGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-298 445,-298 445,4 -4,4"/>
+<!-- proc~pf_quadrature -->
+<g id="proc~~pf_quadrature~~CallsGraph_node1" class="node"><title>proc~pf_quadrature</title>
+<polygon fill="none" stroke="black" points="80,-221 0,-221 0,-197 80,-197 80,-221"/>
+<text text-anchor="middle" x="40" y="-206.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_quadrature</text>
+</g>
+<!-- proc~sdc_qnodes -->
+<g id="proc~~pf_quadrature~~CallsGraph_node2" class="node"><title>proc~sdc_qnodes</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node2"><a xlink:href=".././proc/sdc_qnodes.html" xlink:title="sdc_qnodes">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-221 116,-221 116,-197 186,-197 186,-221"/>
+<text text-anchor="middle" x="151" y="-206.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sdc_qnodes</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~sdc_qnodes -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge1" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~sdc_qnodes</title>
+<path fill="none" stroke="#000000" d="M80.0436,-209C88.382,-209 97.2465,-209 105.764,-209"/>
+<polygon fill="#000000" stroke="#000000" points="105.923,-212.5 115.923,-209 105.923,-205.5 105.923,-212.5"/>
+</g>
+<!-- proc~pf_stop -->
+<g id="proc~~pf_quadrature~~CallsGraph_node3" class="node"><title>proc~pf_stop</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node3"><a xlink:href=".././proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="289,-294 235,-294 235,-270 289,-270 289,-294"/>
+<text text-anchor="middle" x="262" y="-279.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~pf_stop -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge2" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M77.3285,-221.054C118.368,-234.672 184.729,-256.692 225.447,-270.203"/>
+<polygon fill="#000000" stroke="#000000" points="224.374,-273.534 234.967,-273.362 226.578,-266.891 224.374,-273.534"/>
+</g>
+<!-- proc~sdc_qmats -->
+<g id="proc~~pf_quadrature~~CallsGraph_node4" class="node"><title>proc~sdc_qmats</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node4"><a xlink:href=".././proc/sdc_qmats.html" xlink:title="sdc_qmats">
+<polygon fill="#d9534f" stroke="#d9534f" points="183,-105 119,-105 119,-81 183,-81 183,-105"/>
+<text text-anchor="middle" x="151" y="-90.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sdc_qmats</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~sdc_qmats -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge3" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~sdc_qmats</title>
+<path fill="none" stroke="#000000" d="M52.6649,-196.586C71.5136,-176.527 108.828,-136.816 131.384,-112.812"/>
+<polygon fill="#000000" stroke="#000000" points="134.122,-115.009 138.419,-105.325 129.021,-110.216 134.122,-115.009"/>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~pf_stop -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge5" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M166.844,-221.015C180.714,-232.001 202.199,-248.408 222,-261 223.951,-262.241 225.981,-263.479 228.046,-264.7"/>
+<polygon fill="#000000" stroke="#000000" points="226.749,-267.988 237.173,-269.88 230.204,-261.9 226.749,-267.988"/>
+</g>
+<!-- proc~poly_legendre -->
+<g id="proc~~pf_quadrature~~CallsGraph_node5" class="node"><title>proc~poly_legendre</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node5"><a xlink:href=".././proc/poly_legendre.html" xlink:title="poly_legendre">
+<polygon fill="#d9534f" stroke="#d9534f" points="302,-252 222,-252 222,-228 302,-228 302,-252"/>
+<text text-anchor="middle" x="262" y="-237.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_legendre</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_legendre -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge4" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_legendre</title>
+<path fill="none" stroke="#000000" d="M186.189,-218.724C194.445,-221.072 203.427,-223.626 212.208,-226.123"/>
+<polygon fill="#000000" stroke="#000000" points="211.413,-229.536 221.989,-228.905 213.328,-222.803 211.413,-229.536"/>
+</g>
+<!-- proc~poly_diff -->
+<g id="proc~~pf_quadrature~~CallsGraph_node6" class="node"><title>proc~poly_diff</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node6"><a xlink:href=".././proc/poly_diff.html" xlink:title="poly_diff">
+<polygon fill="#d9534f" stroke="#d9534f" points="289,-210 235,-210 235,-186 289,-186 289,-210"/>
+<text text-anchor="middle" x="262" y="-195.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_diff</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_diff -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge6" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_diff</title>
+<path fill="none" stroke="#000000" d="M186.189,-205.55C198.481,-204.309 212.381,-202.907 224.835,-201.65"/>
+<polygon fill="#000000" stroke="#000000" points="225.292,-205.121 234.89,-200.635 224.589,-198.157 225.292,-205.121"/>
+</g>
+<!-- proc~poly_roots -->
+<g id="proc~~pf_quadrature~~CallsGraph_node9" class="node"><title>proc~poly_roots</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node9"><a xlink:href=".././proc/poly_roots.html" xlink:title="poly_roots">
+<polygon fill="#d9534f" stroke="#d9534f" points="293,-168 231,-168 231,-144 293,-144 293,-168"/>
+<text text-anchor="middle" x="262" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_roots</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_roots -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge7" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_roots</title>
+<path fill="none" stroke="#000000" d="M176.734,-196.973C191.541,-189.774 210.576,-180.518 226.807,-172.626"/>
+<polygon fill="#000000" stroke="#000000" points="228.524,-175.683 235.987,-168.162 225.463,-169.388 228.524,-175.683"/>
+</g>
+<!-- proc~poly_int -->
+<g id="proc~~pf_quadrature~~CallsGraph_node7" class="node"><title>proc~poly_int</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node7"><a xlink:href=".././proc/poly_int.html" xlink:title="poly_int">
+<polygon fill="#d9534f" stroke="#d9534f" points="289,-126 235,-126 235,-102 289,-102 289,-126"/>
+<text text-anchor="middle" x="262" y="-111.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_int</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;proc~poly_int -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge10" class="edge"><title>proc~sdc_qmats&#45;&gt;proc~poly_int</title>
+<path fill="none" stroke="#000000" d="M183.235,-99.0178C196.269,-101.529 211.488,-104.461 224.99,-107.062"/>
+<polygon fill="#000000" stroke="#000000" points="224.434,-110.519 234.916,-108.975 225.758,-103.646 224.434,-110.519"/>
+</g>
+<!-- proc~not_proper -->
+<g id="proc~~pf_quadrature~~CallsGraph_node8" class="node"><title>proc~not_proper</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node8"><a xlink:href=".././proc/not_proper.html" xlink:title="not_proper">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294.5,-84 229.5,-84 229.5,-60 294.5,-60 294.5,-84"/>
+<text text-anchor="middle" x="262" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">not_proper</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;proc~not_proper -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge8" class="edge"><title>proc~sdc_qmats&#45;&gt;proc~not_proper</title>
+<path fill="none" stroke="#000000" d="M183.235,-86.9822C194.539,-84.8044 207.487,-82.3099 219.532,-79.9892"/>
+<polygon fill="#000000" stroke="#000000" points="220.225,-83.4202 229.382,-78.0915 218.901,-76.5466 220.225,-83.4202"/>
+</g>
+<!-- interface~poly_eval -->
+<g id="proc~~pf_quadrature~~CallsGraph_node10" class="node"><title>interface~poly_eval</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node10"><a xlink:href=".././interface/poly_eval.html" xlink:title="poly_eval">
+<polygon fill="#a7506f" stroke="#a7506f" points="291,-24 233,-24 233,-0 291,-0 291,-24"/>
+<text text-anchor="middle" x="262" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_eval</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;interface~poly_eval -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge9" class="edge"><title>proc~sdc_qmats&#45;&gt;interface~poly_eval</title>
+<path fill="none" stroke="#000000" d="M168.555,-80.6978C186.666,-67.2393 215.875,-45.5332 236.61,-30.1247"/>
+<polygon fill="#000000" stroke="#000000" points="238.708,-32.9264 244.647,-24.1525 234.533,-27.3079 238.708,-32.9264"/>
+</g>
+<!-- proc~qsort -->
+<g id="proc~~pf_quadrature~~CallsGraph_node11" class="node"><title>proc~qsort</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node11"><a xlink:href=".././proc/qsort.html" xlink:title="qsort">
+<polygon fill="#d9534f" stroke="#d9534f" points="416.5,-168 362.5,-168 362.5,-144 416.5,-144 416.5,-168"/>
+<text text-anchor="middle" x="389.5" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">qsort</text>
+</a>
+</g>
+</g>
+<!-- proc~poly_roots&#45;&gt;proc~qsort -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge11" class="edge"><title>proc~poly_roots&#45;&gt;proc~qsort</title>
+<path fill="none" stroke="#000000" d="M293.06,-156C310.722,-156 333.177,-156 351.868,-156"/>
+<polygon fill="#000000" stroke="#000000" points="352.092,-159.5 362.092,-156 352.092,-152.5 352.092,-159.5"/>
+</g>
+<!-- proc~poly_eval_complex -->
+<g id="proc~~pf_quadrature~~CallsGraph_node12" class="node"><title>proc~poly_eval_complex</title>
+<g id="a_proc~~pf_quadrature~~CallsGraph_node12"><a xlink:href=".././proc/poly_eval_complex.html" xlink:title="poly_eval_complex">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="441,-75 338,-75 338,-51 441,-51 441,-75"/>
+<text text-anchor="middle" x="389.5" y="-60.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_eval_complex</text>
+</a>
+</g>
+</g>
+<!-- proc~poly_roots&#45;&gt;proc~poly_eval_complex -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge12" class="edge"><title>proc~poly_roots&#45;&gt;proc~poly_eval_complex</title>
+<path fill="none" stroke="#000000" d="M287.37,-143.852C292.319,-141.116 297.412,-138.099 302,-135 325.933,-118.835 351.066,-97.3332 368.035,-82.047"/>
+<polygon fill="#000000" stroke="#000000" points="370.633,-84.4148 375.668,-75.0928 365.918,-79.2403 370.633,-84.4148"/>
+</g>
+<!-- interface~poly_eval&#45;&gt;interface~poly_eval -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge13" class="edge"><title>interface~poly_eval&#45;&gt;interface~poly_eval</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M243.812,-24.0139C237.461,-32.9717 243.523,-42 262,-42 273.259,-42 279.909,-38.6474 281.948,-34.0013"/>
+<polygon fill="#000000" stroke="#000000" points="285.371,-33.2545 280.188,-24.0139 278.477,-34.4696 285.371,-33.2545"/>
+</g>
+<!-- interface~poly_eval&#45;&gt;proc~poly_eval_complex -->
+<g id="proc~~pf_quadrature~~CallsGraph_edge14" class="edge"><title>interface~poly_eval&#45;&gt;proc~poly_eval_complex</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M291.165,-23.4454C308.273,-30.3978 330.37,-39.3774 349.184,-47.0231"/>
+<polygon fill="#000000" stroke="#000000" points="348.098,-50.3596 358.68,-50.8819 350.733,-43.8746 348.098,-50.3596"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~pf_quadrature~~CalledByGraph Pages: 1 -->
+<svg id="procpf_quadratureCalledByGraph" width="453pt" height="32pt"
+ viewBox="0.00 0.00 453.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_quadrature~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~pf_quadrature~~CalledByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 449,-28 449,4 -4,4"/>
+<!-- proc~pf_quadrature -->
+<g id="proc~~pf_quadrature~~CalledByGraph_node1" class="node"><title>proc~pf_quadrature</title>
+<polygon fill="none" stroke="black" points="445,-24 365,-24 365,-0 445,-0 445,-24"/>
+<text text-anchor="middle" x="405" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_quadrature</text>
+</g>
+<!-- proc~pf_init_sdcmats -->
+<g id="proc~~pf_quadrature~~CalledByGraph_node2" class="node"><title>proc~pf_init_sdcmats</title>
+<g id="a_proc~~pf_quadrature~~CalledByGraph_node2"><a xlink:href=".././proc/pf_init_sdcmats.html" xlink:title="pf_init_sdcmats">
+<polygon fill="#d9534f" stroke="#d9534f" points="329,-24 242,-24 242,-0 329,-0 329,-24"/>
+<text text-anchor="middle" x="285.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_init_sdcmats</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_init_sdcmats&#45;&gt;proc~pf_quadrature -->
+<g id="proc~~pf_quadrature~~CalledByGraph_edge1" class="edge"><title>proc~pf_init_sdcmats&#45;&gt;proc~pf_quadrature</title>
+<path fill="none" stroke="#000000" d="M329.253,-12C337.556,-12 346.321,-12 354.813,-12"/>
+<polygon fill="#000000" stroke="#000000" points="354.985,-15.5001 364.985,-12 354.985,-8.5001 354.985,-15.5001"/>
+</g>
+<!-- proc~pf_level_setup -->
+<g id="proc~~pf_quadrature~~CalledByGraph_node3" class="node"><title>proc~pf_level_setup</title>
+<g id="a_proc~~pf_quadrature~~CalledByGraph_node3"><a xlink:href=".././proc/pf_level_setup.html" xlink:title="pf_level_setup">
+<polygon fill="#d9534f" stroke="#d9534f" points="206,-24 124,-24 124,-0 206,-0 206,-24"/>
+<text text-anchor="middle" x="165" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_level_setup</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_level_setup&#45;&gt;proc~pf_init_sdcmats -->
+<g id="proc~~pf_quadrature~~CalledByGraph_edge2" class="edge"><title>proc~pf_level_setup&#45;&gt;proc~pf_init_sdcmats</title>
+<path fill="none" stroke="#000000" d="M206.119,-12C214.419,-12 223.281,-12 231.949,-12"/>
+<polygon fill="#000000" stroke="#000000" points="231.991,-15.5001 241.991,-12 231.991,-8.5001 231.991,-15.5001"/>
+</g>
+<!-- proc~pf_pfasst_setup -->
+<g id="proc~~pf_quadrature~~CalledByGraph_node4" class="node"><title>proc~pf_pfasst_setup</title>
+<g id="a_proc~~pf_quadrature~~CalledByGraph_node4"><a xlink:href=".././proc/pf_pfasst_setup.html" xlink:title="pf_pfasst_setup">
+<polygon fill="#d9534f" stroke="#d9534f" points="88,-24 7.10543e-15,-24 7.10543e-15,-0 88,-0 88,-24"/>
+<text text-anchor="middle" x="44" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_setup</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_pfasst_setup&#45;&gt;proc~pf_level_setup -->
+<g id="proc~~pf_quadrature~~CalledByGraph_edge3" class="edge"><title>proc~pf_pfasst_setup&#45;&gt;proc~pf_level_setup</title>
+<path fill="none" stroke="#000000" d="M88.2984,-12C96.5191,-12 105.186,-12 113.605,-12"/>
+<polygon fill="#000000" stroke="#000000" points="113.703,-15.5001 123.703,-12 113.703,-8.5001 113.703,-15.5001"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_quadrature.html#src">pf_quadrature</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_quadrature</span><span class="p">(</span><span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qmat</span><span class="p">,</span><span class="n">proper</span><span class="p">,</span><span class="n">composite</span><span class="p">,</span><span class="n">no_left</span><span class="p">)</span>
+    <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">qtype</span>   <span class="c">! Type of nodes</span>
+    <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">nnodes</span>  <span class="c">! Number of nodes on this level</span>
+    <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">nnodes0</span> <span class="c">! Number of node on base level (either finest or coarsest)</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  The nodes</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">smat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  node to node integration matrix</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">qmat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  O to node collocation matrix</span>
+    <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nflags</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>         <span class="c">!  Flags</span>
+    <span class="kt">logical</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">composite</span>  <span class="c">!  Use composite nodes</span>
+    <span class="kt">logical</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">proper</span>     <span class="c">!  Use proper nodes instead of node restriction</span>
+    <span class="kt">logical</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">no_left</span>    <span class="c">!  Don&#39;t use left hand end point</span>
+
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>  <span class="c">!  The size of the composite base rule</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">qnodes0</span><span class="p">(</span><span class="n">nnodes0</span><span class="p">)</span>  <span class="c">! quad precision base nodes</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">)</span> <span class="kd">::</span>  <span class="n">qnodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>   <span class="c">! quad precision nodes</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span>  <span class="n">qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span> <span class="n">smat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span><span class="n">qcomp0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">)</span>    
+    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">flags0</span><span class="p">(</span><span class="n">nnodes0</span><span class="p">)</span>
+
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">ri</span><span class="p">,</span><span class="n">rj</span><span class="p">,</span> <span class="n">refine</span><span class="p">,</span><span class="n">m</span>
+
+    <span class="n">qmat</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">smat</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">flags0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">nflags</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">composite</span><span class="p">)</span> <span class="k">then</span>
+
+       <span class="c">! nodes are given by repeating the coarsest set of nodes.  note</span>
+       <span class="c">! that in this case nnodes0 corresponds to the coarsest number</span>
+       <span class="c">! of nodes.</span>
+
+       <span class="n">refine</span> <span class="o">=</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nnodes0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+       <span class="k">call </span><span class="n">sdc_qnodes</span><span class="p">(</span><span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span>  <span class="c">!  Make coarsest level nodes</span>
+       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat0</span><span class="p">,</span> <span class="n">smat0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span> <span class="c">!  Make coarsest level qmat</span>
+
+       <span class="c">!  This block matrix will be used to fill in composite qmat</span>
+       <span class="k">do </span><span class="n">m</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span>
+          <span class="n">qcomp0</span><span class="p">(</span><span class="n">m</span><span class="p">,:)</span><span class="o">=</span><span class="n">qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,:)</span>  <span class="c">!  load each row with the integral over the whole composite step    </span>
+       <span class="k">end do</span>
+
+       <span class="c">!  Build big block matrix</span>
+       <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span> <span class="o">/</span> <span class="n">refine</span>
+       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">refine</span>
+          <span class="n">ri</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>  <span class="c">!  beginning of ith composite rule</span>
+          <span class="n">qnodes</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">((</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">qnodes0</span><span class="p">)</span>  <span class="c">!  Assigns endpoints of composites twice, but no biggie</span>
+          <span class="n">smat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">smat0</span>   <span class="c">! Make block diagonal smat</span>
+          <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">qmat0</span>  <span class="c">! Make block diagonal qmat</span>
+          <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span>          <span class="c">!   column blocks to left of diag</span>
+             <span class="n">rj</span><span class="o">=</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+             <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">qcomp0</span>
+          <span class="k">end do</span>
+<span class="k">       end do</span>
+
+<span class="k">    else if</span> <span class="p">(</span><span class="n">proper</span><span class="p">)</span> <span class="k">then</span>
+       <span class="c">! nodes are given by proper quadrature rules</span>
+       <span class="k">call </span><span class="n">sdc_qnodes</span><span class="p">(</span><span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
+    <span class="k">else</span>
+       <span class="c">! nodes are given by refining the finest set of nodes.  note</span>
+       <span class="c">! that in this case nnodes0 corresponds to the finest number of</span>
+       <span class="c">! nodes.</span>
+
+       <span class="n">refine</span> <span class="o">=</span> <span class="p">(</span><span class="n">nnodes0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">sdc_qnodes</span><span class="p">(</span><span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span>  <span class="c">!  Make finest nodes</span>
+
+       <span class="n">qnodes</span> <span class="o">=</span> <span class="n">qnodes0</span><span class="p">(</span><span class="kd">::</span><span class="n">refine</span><span class="p">)</span>
+       <span class="n">nflags</span> <span class="o">=</span> <span class="n">flags0</span><span class="p">(</span><span class="kd">::</span><span class="n">refine</span><span class="p">)</span>
+
+       <span class="k">if</span> <span class="p">(</span><span class="n">no_left</span><span class="p">)</span> <span class="n">nflags</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
+
+       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
+
+    <span class="k">end if</span>
+
+<span class="k">    </span><span class="n">nodes</span>  <span class="o">=</span> <span class="kt">real</span><span class="p">(</span><span class="n">qnodes</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="k">all</span><span class="p">(</span><span class="n">nodes</span> <span class="o">==</span> <span class="mf">0.0d0</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">       call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,&amp;</span>
+            <span class="s1">&#39;ERROR: pf_quadrature: invalid SDC nnodes.&#39;</span><span class="p">)</span>
+    <span class="k">end if</span>
+
+<span class="k">  end subroutine </span><span class="n">pf_quadrature</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

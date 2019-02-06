@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_mod_comm_mpi &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_mod_comm_mpi 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 2.4% of total for modules and submodules.">177 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_mpi.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_mpi.f90.html'>pf_mpi.f90</a></li>
+    
+  
+     <li class="active">pf_mod_comm_mpi</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
+  <div id="vars-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#variable-mympi_datatype">myMPI_Datatype</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_create">pf_mpi_create</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_setup">pf_mpi_setup</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_destroy">pf_mpi_destroy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_post">pf_mpi_post</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_send_status">pf_mpi_send_status</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_recv_status">pf_mpi_recv_status</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_send">pf_mpi_send</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_recv">pf_mpi_recv</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_wait">pf_mpi_wait</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_broadcast">pf_mpi_broadcast</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>Module to implement communication routines in  MPI.</p>
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></li>
+    
+    <li><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></li>
+    
+    <li><a href='../module/pf_mod_mpi.html'>pf_mod_mpi</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: module~~pf_mod_comm_mpi~~UsesGraph Pages: 1 -->
+<svg id="modulepf_mod_comm_mpiUsesGraph" width="461pt" height="112pt"
+ viewBox="0.00 0.00 461.00 112.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_comm_mpi~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 108)">
+<title>module~~pf_mod_comm_mpi~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-108 457,-108 457,4 -4,4"/>
+<!-- module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_node1" class="node"><title>module~pf_mod_comm_mpi</title>
+<polygon fill="none" stroke="black" points="453,-64 346,-64 346,-40 453,-40 453,-64"/>
+<text text-anchor="middle" x="399.5" y="-49.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_comm_mpi</text>
+</g>
+<!-- module~pf_mod_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_node2" class="node"><title>module~pf_mod_mpi</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsesGraph_node2"><a xlink:href=".././module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="306.5,-104 234.5,-104 234.5,-80 306.5,-80 306.5,-104"/>
+<text text-anchor="middle" x="270.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_edge1" class="edge"><title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M360.396,-64.0013C346.505,-68.3765 330.672,-73.3631 316.255,-77.9038"/>
+<polygon fill="#000000" stroke="#000000" points="315.029,-74.6206 306.542,-80.9631 317.132,-81.2973 315.029,-74.6206"/>
+</g>
+<!-- module~pf_mod_dtype -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_node3" class="node"><title>module~pf_mod_dtype</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsesGraph_node3"><a xlink:href=".././module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-44 114,-44 114,-20 195,-20 195,-44"/>
+<text text-anchor="middle" x="154.5" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_dtype</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_edge2" class="edge"><title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M345.773,-47.6603C304.08,-44.2288 246.278,-39.4714 205.35,-36.1029"/>
+<polygon fill="#000000" stroke="#000000" points="205.582,-32.6103 195.329,-35.2781 205.008,-39.5867 205.582,-32.6103"/>
+</g>
+<!-- module~pf_mod_timer -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_node4" class="node"><title>module~pf_mod_timer</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsesGraph_node4"><a xlink:href=".././module/pf_mod_timer.html" xlink:title="pf_mod_timer">
+<polygon fill="#337ab7" stroke="#337ab7" points="310,-24 231,-24 231,-0 310,-0 310,-24"/>
+<text text-anchor="middle" x="270.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_edge3" class="edge"><title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M360.396,-39.9987C347.579,-35.9618 333.109,-31.4045 319.624,-27.1571"/>
+<polygon fill="#000000" stroke="#000000" points="320.606,-23.797 310.016,-24.1311 318.503,-30.4736 320.606,-23.797"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_node5" class="node"><title>iso_c_binding</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-44 0,-44 0,-20 78,-20 78,-44"/>
+<text text-anchor="middle" x="39" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_edge4" class="edge"><title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.803,-32C105.623,-32 96.921,-32 88.4696,-32"/>
+<polygon fill="#000000" stroke="#000000" points="88.3369,-28.5001 78.3369,-32 88.3369,-35.5001 88.3369,-28.5001"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_comm_mpi~~UsesGraph_edge5" class="edge"><title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.905,-18.7711C222.641,-20.2209 213.799,-21.7722 205.183,-23.2837"/>
+<polygon fill="#000000" stroke="#000000" points="204.466,-19.8559 195.222,-25.0313 205.676,-26.7506 204.466,-19.8559"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="490pt" height="32pt"
+ viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node"><title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,-0 54,-0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node"><title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,-0 139.5,-0 139.5,-24"/>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,-0 222,-0 222,-24"/>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,-0 294,-0 294,-24"/>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,-0 366,-0 366,-24"/>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,-0 481.5,-0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  
+  
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: module~~pf_mod_comm_mpi~~UsedByGraph Pages: 1 -->
+<svg id="modulepf_mod_comm_mpiUsedByGraph" width="586pt" height="122pt"
+ viewBox="0.00 0.00 586.00 122.04" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 118.036)">
+<title>module~~pf_mod_comm_mpi~~UsedByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-118.036 582,-118.036 582,4 -4,4"/>
+<!-- module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node1" class="node"><title>module~pf_mod_comm_mpi</title>
+<polygon fill="none" stroke="black" points="107,-104 -7.10543e-15,-104 -7.10543e-15,-80 107,-80 107,-104"/>
+<text text-anchor="middle" x="53.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_comm_mpi</text>
+</g>
+<!-- module~pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node2" class="node"><title>module~pfasst</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsedByGraph_node2"><a xlink:href=".././module/pfasst.html" xlink:title="pfasst">
+<polygon fill="#337ab7" stroke="#337ab7" points="578,-104 524,-104 524,-80 578,-80 578,-104"/>
+<text text-anchor="middle" x="551" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pfasst</text>
+</a>
+</g>
+</g>
+<!-- module~pfasst&#45;&gt;module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge1" class="edge"><title>module~pfasst&#45;&gt;module~pf_mod_comm_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M303,-112C239.791,-107.475 167.6,-101.584 117.376,-97.3696"/>
+<polygon fill="#000000" stroke="#000000" points="117.577,-93.8742 107.319,-96.5234 116.99,-100.85 117.577,-93.8742"/>
+</g>
+<!-- module~pf_mod_pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node3" class="node"><title>module~pf_mod_pfasst</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsedByGraph_node3"><a xlink:href=".././module/pf_mod_pfasst.html" xlink:title="pf_mod_pfasst">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-84 143,-84 143,-60 226,-60 226,-84"/>
+<text text-anchor="middle" x="184.5" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_pfasst</text>
+</a>
+</g>
+</g>
+<!-- module~pfasst&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge3" class="edge"><title>module~pfasst&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M523.891,-96.953C479.103,-104.818 384.743,-118.627 305,-112"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M303,-112C273.285,-109.873 241.396,-98.3774 218.348,-88.2527"/>
+<polygon fill="#000000" stroke="#000000" points="219.596,-84.9755 209.044,-84.0287 216.702,-91.3494 219.596,-84.9755"/>
+</g>
+<!-- module~pf_mod_parallel -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node6" class="node"><title>module~pf_mod_parallel</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsedByGraph_node6"><a xlink:href=".././module/pf_mod_parallel.html" xlink:title="pf_mod_parallel">
+<polygon fill="#337ab7" stroke="#337ab7" points="479.5,-84 390.5,-84 390.5,-60 479.5,-60 479.5,-84"/>
+<text text-anchor="middle" x="435" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_parallel</text>
+</a>
+</g>
+</g>
+<!-- module~pfasst&#45;&gt;module~pf_mod_parallel -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge9" class="edge"><title>module~pfasst&#45;&gt;module~pf_mod_parallel</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M523.846,-87.4116C513.678,-85.6276 501.635,-83.5149 489.779,-81.4349"/>
+<polygon fill="#000000" stroke="#000000" points="490.363,-77.984 479.908,-79.7032 489.153,-84.8787 490.363,-77.984"/>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge2" class="edge"><title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M142.684,-78.3281C134.619,-79.5784 125.982,-80.9176 117.382,-82.2508"/>
+<polygon fill="#000000" stroke="#000000" points="116.687,-78.8167 107.341,-83.8075 117.76,-85.734 116.687,-78.8167"/>
+</g>
+<!-- module~pf_mod_parallel_oc -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node4" class="node"><title>module~pf_mod_parallel_oc</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsedByGraph_node4"><a xlink:href=".././module/pf_mod_parallel_oc.html" xlink:title="pf_mod_parallel_oc">
+<polygon fill="#337ab7" stroke="#337ab7" points="488,-24 382,-24 382,-0 488,-0 488,-24"/>
+<text text-anchor="middle" x="435" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_parallel_oc</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_parallel_oc&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge4" class="edge"><title>module~pf_mod_parallel_oc&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M381.75,-3.78107C346.884,-0.334579 300.543,0.261781 262,-13 239.117,-20.8734 217.728,-38.6128 203.418,-52.5965"/>
+<polygon fill="#000000" stroke="#000000" points="200.755,-50.3119 196.231,-59.8922 205.742,-55.2242 200.755,-50.3119"/>
+</g>
+<!-- module~pf_mod_comm -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_node5" class="node"><title>module~pf_mod_comm</title>
+<g id="a_module~~pf_mod_comm_mpi~~UsedByGraph_node5"><a xlink:href=".././module/pf_mod_comm.html" xlink:title="pf_mod_comm">
+<polygon fill="#337ab7" stroke="#337ab7" points="346,-46 262,-46 262,-22 346,-22 346,-46"/>
+<text text-anchor="middle" x="304" y="-31.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_comm</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_parallel_oc&#45;&gt;module~pf_mod_comm -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge7" class="edge"><title>module~pf_mod_parallel_oc&#45;&gt;module~pf_mod_comm</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M381.903,-20.8848C373.451,-22.3261 364.705,-23.8178 356.274,-25.2557"/>
+<polygon fill="#000000" stroke="#000000" points="355.456,-21.8446 346.186,-26.976 356.632,-28.7449 355.456,-21.8446"/>
+</g>
+<!-- module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge5" class="edge"><title>module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M265.822,-46.0234C255.214,-49.4542 243.516,-53.2374 232.407,-56.8299"/>
+<polygon fill="#000000" stroke="#000000" points="231.277,-53.517 222.839,-59.9244 233.431,-60.1773 231.277,-53.517"/>
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge6" class="edge"><title>module~pf_mod_parallel&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M390.43,-72C347.427,-72 281.709,-72 236.344,-72"/>
+<polygon fill="#000000" stroke="#000000" points="236.133,-68.5001 226.133,-72 236.133,-75.5001 236.133,-68.5001"/>
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_comm -->
+<g id="module~~pf_mod_comm_mpi~~UsedByGraph_edge8" class="edge"><title>module~pf_mod_parallel&#45;&gt;module~pf_mod_comm</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M393.184,-59.9766C381.302,-56.4765 368.175,-52.6096 355.76,-48.9526"/>
+<polygon fill="#000000" stroke="#000000" points="356.575,-45.544 345.994,-46.0756 354.597,-52.2588 356.575,-45.544"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="490pt" height="32pt"
+ viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node"><title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,-0 54,-0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node"><title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,-0 139.5,-0 139.5,-24"/>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,-0 222,-0 222,-24"/>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,-0 294,-0 294,-24"/>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,-0 366,-0 366,-24"/>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,-0 481.5,-0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+  </li>
+  
+      </ul>
+    </div>
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
+  <div id="vars-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#variable-mympi_datatype">myMPI_Datatype</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_create">pf_mpi_create</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_setup">pf_mpi_setup</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_destroy">pf_mpi_destroy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_post">pf_mpi_post</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_send_status">pf_mpi_send_status</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_recv_status">pf_mpi_recv_status</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_send">pf_mpi_send</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_recv">pf_mpi_recv</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_wait">pf_mpi_wait</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_comm_mpi.html#proc-pf_mpi_broadcast">pf_mpi_broadcast</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    <section>
+    <h2>Variables</h2>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-mympi_datatype"></span>integer,</td>
+  
+  <td>public,</td>
+  <td>parameter</td><td>::</td>
+  <td><strong>myMPI_Datatype</strong></td><td> =</td><td>MPI_REAL8</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+    </section>
+    <br>
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_create"></span><h3>
+public subroutine <a href='../proc/pf_mpi_create.html'>pf_mpi_create</a>(pf_comm, mpi_comm)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to create an MPI based PFASST communicator using the MPI communicator <em>mpi_comm</em>.
+ assign communicator</p><a href="../proc/pf_mpi_create.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_comm_t.html'>pf_comm_t</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf_comm</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>mpi_comm</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_setup"></span><h3>
+public subroutine <a href='../proc/pf_mpi_setup.html'>pf_mpi_setup</a>(pf_comm, pf, ierror)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to set up the PFASST communicator.
+ This should be called soon after adding levels to the PFASST controller 
+  set the rank</p><a href="../proc/pf_mpi_setup.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_comm_t.html'>pf_comm_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf_comm</strong></td><td><p>communicator </p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_destroy"></span><h3>
+public subroutine <a href='../proc/pf_mpi_destroy.html'>pf_mpi_destroy</a>(pf_comm)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to destroy the PFASST communicator.</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_comm_t.html'>pf_comm_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf_comm</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_post"></span><h3>
+public subroutine <a href='../proc/pf_mpi_post.html'>pf_mpi_post</a>(pf, level, tag, ierror, direction)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to post receive requests.</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level</strong></td><td><p>level to send from</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tag</strong></td><td><p>message tag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>direction</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_send_status"></span><h3>
+public subroutine <a href='../proc/pf_mpi_send_status.html'>pf_mpi_send_status</a>(pf, tag, istatus, ierror, direction)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to send convergence status information</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tag</strong></td><td><p>message tag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>istatus</strong></td><td><p>status flag to send</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>direction</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_recv_status"></span><h3>
+public subroutine <a href='../proc/pf_mpi_recv_status.html'>pf_mpi_recv_status</a>(pf, tag, istatus, ierror, direction)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to receive convergence status information</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tag</strong></td><td><p>message tag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>istatus</strong></td><td><p>status flag to receive</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>direction</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_send"></span><h3>
+public subroutine <a href='../proc/pf_mpi_send.html'>pf_mpi_send</a>(pf, level, tag, blocking, ierror, direction)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to send solutions</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level</strong></td><td><p>level to send from</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tag</strong></td><td><p>message tag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>blocking</strong></td><td><p>true if send is blocking</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>direction</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_recv"></span><h3>
+public subroutine <a href='../proc/pf_mpi_recv.html'>pf_mpi_recv</a>(pf, level, tag, blocking, ierror, direction)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to receive solutions
+ Note when blocking == .false. this is actually a wait because the
+ nonblocking receive  should have already been posted</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level</strong></td><td><p>level to recieve into</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tag</strong></td><td><p>message tag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>blocking</strong></td><td><p>true if receive is blocking</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>direction</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_wait"></span><h3>
+public subroutine <a href='../proc/pf_mpi_wait.html'>pf_mpi_wait</a>(pf, level, ierror)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level</strong></td><td><p>level on which to wait</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_mpi_broadcast"></span><h3>
+public subroutine <a href='../proc/pf_mpi_broadcast.html'>pf_mpi_broadcast</a>(pf, y, nvar, root, ierror)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>y</strong>(nvar)</td><td><p>data to broadcast</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td><p>size of data to broadcast</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>root</strong></td><td><p>rank of broadcaster</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ierror</strong></td><td><p>error flag</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

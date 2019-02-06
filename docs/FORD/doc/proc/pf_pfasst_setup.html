@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_pfasst_setup &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_pfasst_setup
+      <small>Subroutine</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.2% of total for procedures.">28 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_pfasst.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_pfasst.f90.html'>pf_pfasst.f90</a></li>
+    
+     <li><a href='../module/pf_mod_pfasst.html'>pf_mod_pfasst</a></li>
+    
+  
+     <li class="active">pf_pfasst_setup</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_pfasst_setup.html#src">pf_pfasst_setup</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>
+public subroutine pf_pfasst_setup(pf)
+    
+    
+   
+</h2>
+    
+  
+
+
+    
+    <p>Setup both the PFASST object and the comm object
+  loop over levels to set parameters
+  Loop over levels setting interpolation and restriction matrices (in time)</p>
+    
+
+    <h3>Arguments</h3>
+    
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-pf%7E43"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>Main pfasst structure</p></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+    
+    
+    
+    <br>
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~pf_pfasst_setup~~CallsGraph Pages: 1 -->
+<svg id="procpf_pfasst_setupCallsGraph" width="641pt" height="215pt"
+ viewBox="0.00 0.00 641.00 215.09" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_pfasst_setup~~CallsGraph" class="graph" transform="scale(0.712222 0.712222) rotate(0) translate(4 298)">
+<title>proc~~pf_pfasst_setup~~CallsGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-298 896,-298 896,4 -4,4"/>
+<!-- proc~pf_pfasst_setup -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node1" class="node"><title>proc~pf_pfasst_setup</title>
+<polygon fill="none" stroke="black" points="88,-232 7.10543e-15,-232 7.10543e-15,-208 88,-208 88,-232"/>
+<text text-anchor="middle" x="44" y="-217.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_pfasst_setup</text>
+</g>
+<!-- proc~pf_level_setup -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node2" class="node"><title>proc~pf_level_setup</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node2"><a xlink:href=".././proc/pf_level_setup.html" xlink:title="pf_level_setup">
+<polygon fill="#d9534f" stroke="#d9534f" points="239,-253 157,-253 157,-229 239,-229 239,-253"/>
+<text text-anchor="middle" x="198" y="-238.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_level_setup</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_pfasst_setup&#45;&gt;proc~pf_level_setup -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge1" class="edge"><title>proc~pf_pfasst_setup&#45;&gt;proc~pf_level_setup</title>
+<path fill="none" stroke="#000000" d="M88.1505,-225.962C106.452,-228.49 127.902,-231.454 146.899,-234.078"/>
+<polygon fill="#000000" stroke="#000000" points="146.486,-237.554 156.871,-235.456 147.444,-230.62 146.486,-237.554"/>
+</g>
+<!-- proc~pf_time_interpolation_matrix -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node3" class="node"><title>proc~pf_time_interpolation_matrix</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node3"><a xlink:href=".././proc/pf_time_interpolation_matrix.html" xlink:title="pf_time_interpolation_matrix">
+<polygon fill="#d9534f" stroke="#d9534f" points="272,-211 124,-211 124,-187 272,-187 272,-211"/>
+<text text-anchor="middle" x="198" y="-196.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_time_interpolation_matrix</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_pfasst_setup&#45;&gt;proc~pf_time_interpolation_matrix -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge2" class="edge"><title>proc~pf_pfasst_setup&#45;&gt;proc~pf_time_interpolation_matrix</title>
+<path fill="none" stroke="#000000" d="M88.1505,-214.038C96.2493,-212.92 104.964,-211.715 113.81,-210.493"/>
+<polygon fill="#000000" stroke="#000000" points="114.401,-213.945 123.828,-209.109 113.443,-207.011 114.401,-213.945"/>
+</g>
+<!-- proc~pf_init_sdcmats -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node4" class="node"><title>proc~pf_init_sdcmats</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node4"><a xlink:href=".././proc/pf_init_sdcmats.html" xlink:title="pf_init_sdcmats">
+<polygon fill="#d9534f" stroke="#d9534f" points="395,-253 308,-253 308,-229 395,-229 395,-253"/>
+<text text-anchor="middle" x="351.5" y="-238.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_init_sdcmats</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_level_setup&#45;&gt;proc~pf_init_sdcmats -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge3" class="edge"><title>proc~pf_level_setup&#45;&gt;proc~pf_init_sdcmats</title>
+<path fill="none" stroke="#000000" d="M239.201,-241C257.184,-241 278.622,-241 297.862,-241"/>
+<polygon fill="#000000" stroke="#000000" points="297.989,-244.5 307.989,-241 297.989,-237.5 297.989,-244.5"/>
+</g>
+<!-- proc~pf_make_matrices -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node5" class="node"><title>proc~pf_make_matrices</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node5"><a xlink:href=".././proc/pf_make_matrices.html" xlink:title="pf_make_matrices">
+<polygon fill="#d9534f" stroke="#d9534f" points="531,-284 431,-284 431,-260 531,-260 531,-284"/>
+<text text-anchor="middle" x="481" y="-269.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_make_matrices</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_init_sdcmats&#45;&gt;proc~pf_make_matrices -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge4" class="edge"><title>proc~pf_init_sdcmats&#45;&gt;proc~pf_make_matrices</title>
+<path fill="none" stroke="#000000" d="M395.31,-251.409C403.615,-253.428 412.453,-255.577 421.168,-257.696"/>
+<polygon fill="#000000" stroke="#000000" points="420.376,-261.105 430.92,-260.067 422.03,-254.303 420.376,-261.105"/>
+</g>
+<!-- proc~pf_quadrature -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node6" class="node"><title>proc~pf_quadrature</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node6"><a xlink:href=".././proc/pf_quadrature.html" xlink:title="pf_quadrature">
+<polygon fill="#d9534f" stroke="#d9534f" points="521,-223 441,-223 441,-199 521,-199 521,-223"/>
+<text text-anchor="middle" x="481" y="-208.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_quadrature</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_init_sdcmats&#45;&gt;proc~pf_quadrature -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge5" class="edge"><title>proc~pf_init_sdcmats&#45;&gt;proc~pf_quadrature</title>
+<path fill="none" stroke="#000000" d="M395.31,-230.927C406.725,-228.241 419.147,-225.318 430.872,-222.56"/>
+<polygon fill="#000000" stroke="#000000" points="432.02,-225.885 440.953,-220.188 430.417,-219.071 432.02,-225.885"/>
+</g>
+<!-- proc~myluq -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node9" class="node"><title>proc~myluq</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node9"><a xlink:href=".././proc/myluq.html" xlink:title="myLUq">
+<polygon fill="#d9534f" stroke="#d9534f" points="629,-294 575,-294 575,-270 629,-270 629,-294"/>
+<text text-anchor="middle" x="602" y="-279.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">myLUq</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_make_matrices&#45;&gt;proc~myluq -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge6" class="edge"><title>proc~pf_make_matrices&#45;&gt;proc~myluq</title>
+<path fill="none" stroke="#000000" d="M531.089,-276.125C542.325,-277.069 554.072,-278.056 564.66,-278.946"/>
+<polygon fill="#000000" stroke="#000000" points="564.542,-282.449 574.8,-279.798 565.128,-275.473 564.542,-282.449"/>
+</g>
+<!-- proc~sdc_qnodes -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node7" class="node"><title>proc~sdc_qnodes</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node7"><a xlink:href=".././proc/sdc_qnodes.html" xlink:title="sdc_qnodes">
+<polygon fill="#d9534f" stroke="#d9534f" points="637,-214 567,-214 567,-190 637,-190 637,-214"/>
+<text text-anchor="middle" x="602" y="-199.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sdc_qnodes</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~sdc_qnodes -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge7" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~sdc_qnodes</title>
+<path fill="none" stroke="#000000" d="M521.295,-208.028C532.71,-207.165 545.25,-206.216 556.937,-205.332"/>
+<polygon fill="#000000" stroke="#000000" points="557.23,-208.82 566.938,-204.576 556.702,-201.84 557.23,-208.82"/>
+</g>
+<!-- proc~pf_stop -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node8" class="node"><title>proc~pf_stop</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node8"><a xlink:href=".././proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="740,-294 686,-294 686,-270 740,-270 740,-294"/>
+<text text-anchor="middle" x="713" y="-279.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~pf_stop -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge8" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M521.016,-223.044C564.443,-236.45 634.035,-257.933 676.141,-270.931"/>
+<polygon fill="#000000" stroke="#000000" points="675.123,-274.279 685.711,-273.885 677.188,-267.591 675.123,-274.279"/>
+</g>
+<!-- proc~sdc_qmats -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node10" class="node"><title>proc~sdc_qmats</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node10"><a xlink:href=".././proc/sdc_qmats.html" xlink:title="sdc_qmats">
+<polygon fill="#d9534f" stroke="#d9534f" points="634,-105 570,-105 570,-81 634,-81 634,-105"/>
+<text text-anchor="middle" x="602" y="-90.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sdc_qmats</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_quadrature&#45;&gt;proc~sdc_qmats -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge9" class="edge"><title>proc~pf_quadrature&#45;&gt;proc~sdc_qmats</title>
+<path fill="none" stroke="#000000" d="M494.287,-198.816C514.863,-178.413 556.464,-137.162 581.208,-112.626"/>
+<polygon fill="#000000" stroke="#000000" points="583.965,-114.821 588.602,-105.294 579.036,-109.85 583.965,-114.821"/>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~pf_stop -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge11" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M619.488,-214.142C625.127,-218.417 631.418,-223.323 637,-228 653.637,-241.94 655.309,-248.425 673,-261 674.645,-262.17 676.363,-263.32 678.122,-264.443"/>
+<polygon fill="#000000" stroke="#000000" points="676.719,-267.681 687.102,-269.791 680.301,-261.667 676.719,-267.681"/>
+</g>
+<!-- proc~poly_legendre -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node11" class="node"><title>proc~poly_legendre</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node11"><a xlink:href=".././proc/poly_legendre.html" xlink:title="poly_legendre">
+<polygon fill="#d9534f" stroke="#d9534f" points="753,-252 673,-252 673,-228 753,-228 753,-252"/>
+<text text-anchor="middle" x="713" y="-237.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_legendre</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_legendre -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge10" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_legendre</title>
+<path fill="none" stroke="#000000" d="M637.189,-213.919C646.936,-217.317 657.694,-221.067 667.94,-224.64"/>
+<polygon fill="#000000" stroke="#000000" points="666.962,-228.005 677.557,-227.992 669.267,-221.396 666.962,-228.005"/>
+</g>
+<!-- proc~poly_diff -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node12" class="node"><title>proc~poly_diff</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node12"><a xlink:href=".././proc/poly_diff.html" xlink:title="poly_diff">
+<polygon fill="#d9534f" stroke="#d9534f" points="740,-210 686,-210 686,-186 740,-186 740,-210"/>
+<text text-anchor="middle" x="713" y="-195.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_diff</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_diff -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge12" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_diff</title>
+<path fill="none" stroke="#000000" d="M637.189,-200.745C649.481,-200.294 663.381,-199.784 675.835,-199.327"/>
+<polygon fill="#000000" stroke="#000000" points="676.025,-202.823 685.89,-198.958 675.768,-195.827 676.025,-202.823"/>
+</g>
+<!-- proc~poly_roots -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node15" class="node"><title>proc~poly_roots</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node15"><a xlink:href=".././proc/poly_roots.html" xlink:title="poly_roots">
+<polygon fill="#d9534f" stroke="#d9534f" points="744,-168 682,-168 682,-144 744,-144 744,-168"/>
+<text text-anchor="middle" x="713" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_roots</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qnodes&#45;&gt;proc~poly_roots -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge13" class="edge"><title>proc~sdc_qnodes&#45;&gt;proc~poly_roots</title>
+<path fill="none" stroke="#000000" d="M631.638,-189.914C644.656,-184.421 660.235,-177.846 674.197,-171.954"/>
+<polygon fill="#000000" stroke="#000000" points="675.7,-175.118 683.553,-168.005 672.979,-168.669 675.7,-175.118"/>
+</g>
+<!-- proc~myluq&#45;&gt;proc~pf_stop -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge14" class="edge"><title>proc~myluq&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M629.108,-282C643.027,-282 660.374,-282 675.596,-282"/>
+<polygon fill="#000000" stroke="#000000" points="675.727,-285.5 685.727,-282 675.727,-278.5 675.727,-285.5"/>
+</g>
+<!-- proc~poly_int -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node13" class="node"><title>proc~poly_int</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node13"><a xlink:href=".././proc/poly_int.html" xlink:title="poly_int">
+<polygon fill="#d9534f" stroke="#d9534f" points="740,-126 686,-126 686,-102 740,-102 740,-126"/>
+<text text-anchor="middle" x="713" y="-111.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_int</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;proc~poly_int -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge17" class="edge"><title>proc~sdc_qmats&#45;&gt;proc~poly_int</title>
+<path fill="none" stroke="#000000" d="M634.235,-99.0178C647.269,-101.529 662.488,-104.461 675.99,-107.062"/>
+<polygon fill="#000000" stroke="#000000" points="675.434,-110.519 685.916,-108.975 676.758,-103.646 675.434,-110.519"/>
+</g>
+<!-- proc~not_proper -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node14" class="node"><title>proc~not_proper</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node14"><a xlink:href=".././proc/not_proper.html" xlink:title="not_proper">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="745.5,-84 680.5,-84 680.5,-60 745.5,-60 745.5,-84"/>
+<text text-anchor="middle" x="713" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">not_proper</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;proc~not_proper -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge15" class="edge"><title>proc~sdc_qmats&#45;&gt;proc~not_proper</title>
+<path fill="none" stroke="#000000" d="M634.235,-86.9822C645.539,-84.8044 658.487,-82.3099 670.532,-79.9892"/>
+<polygon fill="#000000" stroke="#000000" points="671.225,-83.4202 680.382,-78.0915 669.901,-76.5466 671.225,-83.4202"/>
+</g>
+<!-- interface~poly_eval -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node16" class="node"><title>interface~poly_eval</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node16"><a xlink:href=".././interface/poly_eval.html" xlink:title="poly_eval">
+<polygon fill="#a7506f" stroke="#a7506f" points="742,-24 684,-24 684,-0 742,-0 742,-24"/>
+<text text-anchor="middle" x="713" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_eval</text>
+</a>
+</g>
+</g>
+<!-- proc~sdc_qmats&#45;&gt;interface~poly_eval -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge16" class="edge"><title>proc~sdc_qmats&#45;&gt;interface~poly_eval</title>
+<path fill="none" stroke="#000000" d="M619.555,-80.6978C637.666,-67.2393 666.875,-45.5332 687.61,-30.1247"/>
+<polygon fill="#000000" stroke="#000000" points="689.708,-32.9264 695.647,-24.1525 685.533,-27.3079 689.708,-32.9264"/>
+</g>
+<!-- proc~qsort -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node17" class="node"><title>proc~qsort</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node17"><a xlink:href=".././proc/qsort.html" xlink:title="qsort">
+<polygon fill="#d9534f" stroke="#d9534f" points="867.5,-168 813.5,-168 813.5,-144 867.5,-144 867.5,-168"/>
+<text text-anchor="middle" x="840.5" y="-153.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">qsort</text>
+</a>
+</g>
+</g>
+<!-- proc~poly_roots&#45;&gt;proc~qsort -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge18" class="edge"><title>proc~poly_roots&#45;&gt;proc~qsort</title>
+<path fill="none" stroke="#000000" d="M744.06,-156C761.722,-156 784.177,-156 802.868,-156"/>
+<polygon fill="#000000" stroke="#000000" points="803.092,-159.5 813.092,-156 803.092,-152.5 803.092,-159.5"/>
+</g>
+<!-- proc~poly_eval_complex -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_node18" class="node"><title>proc~poly_eval_complex</title>
+<g id="a_proc~~pf_pfasst_setup~~CallsGraph_node18"><a xlink:href=".././proc/poly_eval_complex.html" xlink:title="poly_eval_complex">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="892,-75 789,-75 789,-51 892,-51 892,-75"/>
+<text text-anchor="middle" x="840.5" y="-60.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">poly_eval_complex</text>
+</a>
+</g>
+</g>
+<!-- proc~poly_roots&#45;&gt;proc~poly_eval_complex -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge19" class="edge"><title>proc~poly_roots&#45;&gt;proc~poly_eval_complex</title>
+<path fill="none" stroke="#000000" d="M738.37,-143.852C743.319,-141.116 748.412,-138.099 753,-135 776.933,-118.835 802.066,-97.3332 819.035,-82.047"/>
+<polygon fill="#000000" stroke="#000000" points="821.633,-84.4148 826.668,-75.0928 816.918,-79.2403 821.633,-84.4148"/>
+</g>
+<!-- interface~poly_eval&#45;&gt;interface~poly_eval -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge20" class="edge"><title>interface~poly_eval&#45;&gt;interface~poly_eval</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M694.812,-24.0139C688.461,-32.9717 694.523,-42 713,-42 724.259,-42 730.909,-38.6474 732.948,-34.0013"/>
+<polygon fill="#000000" stroke="#000000" points="736.371,-33.2545 731.188,-24.0139 729.477,-34.4696 736.371,-33.2545"/>
+</g>
+<!-- interface~poly_eval&#45;&gt;proc~poly_eval_complex -->
+<g id="proc~~pf_pfasst_setup~~CallsGraph_edge21" class="edge"><title>interface~poly_eval&#45;&gt;proc~poly_eval_complex</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M742.165,-23.4454C759.273,-30.3978 781.37,-39.3774 800.184,-47.0231"/>
+<polygon fill="#000000" stroke="#000000" points="799.098,-50.3596 809.68,-50.8819 801.733,-43.8746 799.098,-50.3596"/>
+</g>
+</g>
+</svg>
+</div><script>var panprocpf_pfasst_setupCallsGraph = svgPanZoom('#procpf_pfasst_setupCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_pfasst_setup.html#src">pf_pfasst_setup</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_pfasst_setup</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>   <span class="c">!!  Main pfasst structure</span>
+
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev_fine</span><span class="p">,</span> <span class="n">lev_coarse</span>  <span class="c">!!  Pointers to level structures for brevity</span>
+    <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">l</span>                      <span class="c">!!  Level loop index</span>
+    <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">ierr</span>                   <span class="c">!!  error flag</span>
+
+    
+   <span class="c">!&gt;  loop over levels to set parameters</span>
+    <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+       <span class="k">call </span><span class="n">pf_level_setup</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">))</span>
+    <span class="k">end do</span>
+    <span class="c">!&gt;  Loop over levels setting interpolation and restriction matrices (in time)</span>
+    <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+       <span class="n">lev_fine</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">);</span> <span class="n">lev_coarse</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">tmat</span><span class="p">(</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">&amp;</span>
+          <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s2">&quot;allocate fail&quot;</span><span class="p">,</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span>
+
+       <span class="k">allocate</span><span class="p">(</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">&amp;</span>
+          <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s2">&quot;allocate fail&quot;</span><span class="p">,</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span>
+       
+       <span class="c">! with the RK stepper, no need to interpolate and restrict in time</span>
+       <span class="c">! we only copy the first node and last node betweem levels</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">use_rk_stepper</span> <span class="p">.</span><span class="n">eqv</span><span class="p">.</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span> <span class="k">then</span>
+<span class="k">          </span><span class="n">lev_fine</span><span class="p">%</span><span class="n">tmat</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+          <span class="n">lev_fine</span><span class="p">%</span><span class="n">rmat</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+
+          <span class="n">lev_fine</span><span class="p">%</span><span class="n">tmat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+          <span class="n">lev_fine</span><span class="p">%</span><span class="n">tmat</span><span class="p">(</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+
+          <span class="n">lev_fine</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+          <span class="n">lev_fine</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+       <span class="k">else</span>         <span class="c">! else compute the interpolation matrix</span>
+          <span class="k">call </span><span class="n">pf_time_interpolation_matrix</span><span class="p">(</span><span class="n">lev_fine</span><span class="p">%</span><span class="n">nodes</span><span class="p">,</span> <span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">lev_coarse</span><span class="p">%</span><span class="n">nodes</span><span class="p">,</span> <span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">lev_fine</span><span class="p">%</span><span class="n">tmat</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_time_interpolation_matrix</span><span class="p">(</span><span class="n">lev_coarse</span><span class="p">%</span><span class="n">nodes</span><span class="p">,</span> <span class="n">lev_coarse</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">lev_fine</span><span class="p">%</span><span class="n">nodes</span><span class="p">,</span> <span class="n">lev_fine</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">lev_fine</span><span class="p">%</span><span class="n">rmat</span><span class="p">)</span>
+       <span class="n">endif</span>
+    <span class="k">end do</span>
+
+<span class="k">  end subroutine </span><span class="n">pf_pfasst_setup</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

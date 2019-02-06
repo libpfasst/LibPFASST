@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_utils.f90 &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_utils.f90
+    <small>Source File</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 1.1% of total for source files.">103 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_utils.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+  
+     <li class="active">pf_utils.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_utils.html">pf_mod_utils</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pf_utils.f90.html#src">pf_utils.f90</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      <p>Useful subroutines that don't  fit in other modules</p>
+      <br>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: sourcefile~~pf_utils.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefilepf_utilsf90EfferentGraph" width="286pt" height="52pt"
+ viewBox="0.00 0.00 286.00 52.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 48)">
+<title>sourcefile~~pf_utils.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-48 282,-48 282,4 -4,4"/>
+<!-- sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_node1" class="node"><title>sourcefile~pf_utils.f90</title>
+<polygon fill="none" stroke="black" points="278,-24 214,-24 214,-0 278,-0 278,-24"/>
+<text text-anchor="middle" x="246" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_utils.f90</text>
+</g>
+<!-- sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_node2" class="node"><title>sourcefile~pf_timer.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/pf_timer.f90.html" xlink:title="pf_timer.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="178,-44 108,-44 108,-20 178,-20 178,-44"/>
+<text text-anchor="middle" x="143" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_timer.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_edge1" class="edge"><title>sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M213.873,-18.1639C205.707,-19.7807 196.746,-21.5553 188.044,-23.2785"/>
+<polygon fill="#000000" stroke="#000000" points="187.141,-19.8892 178.011,-25.2651 188.501,-26.7558 187.141,-19.8892"/>
+</g>
+<!-- sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_node3" class="node"><title>sourcefile~pf_dtype.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/pf_dtype.f90.html" xlink:title="pf_dtype.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="72,-24 0,-24 0,-0 72,-0 72,-24"/>
+<text text-anchor="middle" x="36" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_dtype.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_edge2" class="edge"><title>sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M213.979,-11.4406C202.656,-11.2618 189.749,-11.0877 178,-11 146.89,-10.7678 139.11,-10.7809 108,-11 99.6743,-11.0586 90.7997,-11.1559 82.2455,-11.2674"/>
+<polygon fill="#000000" stroke="#000000" points="81.9791,-7.77066 72.0285,-11.4088 82.076,-14.77 81.9791,-7.77066"/>
+</g>
+<!-- sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_utils.f90~~EfferentGraph_edge3" class="edge"><title>sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M107.91,-25.5066C99.7319,-23.9489 90.8721,-22.2613 82.2756,-20.6239"/>
+<polygon fill="#000000" stroke="#000000" points="82.8401,-17.1686 72.3618,-18.7356 81.5303,-24.045 82.8401,-17.1686"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="190pt" height="32pt"
+ viewBox="0.00 0.00 190.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 186,-28 186,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node"><title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="67,-24 0,-24 0,-0 67,-0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="182,-24 85,-24 85,-0 182,-0 182,-24"/>
+<text text-anchor="middle" x="133.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    
+      
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: sourcefile~~pf_utils.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefilepf_utilsf90AfferentGraph" width="641pt" height="774pt"
+ viewBox="0.00 0.00 641.00 774.27" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph" class="graph" transform="scale(0.901547 0.901547) rotate(0) translate(4 854.82)">
+<title>sourcefile~~pf_utils.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-854.82 707,-854.82 707,4 -4,4"/>
+<!-- sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node1" class="node"><title>sourcefile~pf_utils.f90</title>
+<polygon fill="none" stroke="black" points="64,-381 0,-381 0,-357 64,-357 64,-381"/>
+<text text-anchor="middle" x="32" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_utils.f90</text>
+</g>
+<!-- sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node2" class="node"><title>sourcefile~pf_imexq.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/pf_imexq.f90.html" xlink:title="pf_imexQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="337,-652 261,-652 261,-628 337,-628 337,-652"/>
+<text text-anchor="middle" x="299" y="-637.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge1" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M260.75,-647.924C216.971,-654.912 144.644,-658.856 100,-621 64.555,-590.945 42.869,-447.01 35.671,-391.191"/>
+<polygon fill="#000000" stroke="#000000" points="39.143,-390.748 34.4248,-381.262 32.1975,-391.62 39.143,-390.748"/>
+</g>
+<!-- sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node3" class="node"><title>sourcefile~pf_quadrature.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/pf_quadrature.f90.html" xlink:title="pf_quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="208.5,-692 110.5,-692 110.5,-668 208.5,-668 208.5,-692"/>
+<text text-anchor="middle" x="159.5" y="-677.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge23" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_quadrature.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M260.791,-650.825C245.774,-655.193 228.193,-660.307 211.983,-665.023"/>
+<polygon fill="#000000" stroke="#000000" points="210.726,-661.744 202.101,-667.898 212.681,-668.465 210.726,-661.744"/>
+</g>
+<!-- sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge2" class="edge"><title>sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M117.99,-667.946C111.208,-664.383 104.821,-659.82 100,-654 66.343,-613.364 43.2098,-451.184 35.6682,-391.336"/>
+<polygon fill="#000000" stroke="#000000" points="39.1035,-390.596 34.4057,-381.099 32.1561,-391.453 39.1035,-390.596"/>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node4" class="node"><title>sourcefile~pf_parallel_oc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/pf_parallel_oc.f90.html" xlink:title="pf_parallel_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="608,-782 511,-782 511,-758 608,-758 608,-782"/>
+<text text-anchor="middle" x="559.5" y="-767.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parallel_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge3" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M543.233,-782.215C527.24,-794.285 500.888,-812.184 475,-821 400.942,-846.22 375.238,-861.448 300,-840"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node5" class="node"><title>sourcefile~pf_interpolate.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/pf_interpolate.f90.html" xlink:title="pf_interpolate.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="475,-812 379,-812 379,-788 475,-788 475,-812"/>
+<text text-anchor="middle" x="427" y="-797.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_interpolate.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge25" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_interpolate.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M510.648,-781.001C502.387,-782.9 493.724,-784.891 485.245,-786.84"/>
+<polygon fill="#000000" stroke="#000000" points="484.372,-783.45 475.411,-789.101 485.94,-790.272 484.372,-783.45"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node13" class="node"><title>sourcefile~pf_pfasst.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/pf_pfasst.f90.html" xlink:title="pf_pfasst.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="336,-732 262,-732 262,-708 336,-708 336,-732"/>
+<text text-anchor="middle" x="299" y="-717.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge29" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M510.64,-763.592C474.34,-758.412 423.304,-750.443 379,-741 368.377,-738.736 357.044,-735.948 346.375,-733.153"/>
+<polygon fill="#000000" stroke="#000000" points="346.96,-729.686 336.395,-730.487 345.153,-736.449 346.96,-729.686"/>
+</g>
+<!-- sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node23" class="node"><title>sourcefile~pf_comm.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node23"><a xlink:href=".././sourcefile/pf_comm.f90.html" xlink:title="pf_comm.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="464.5,-732 389.5,-732 389.5,-708 464.5,-708 464.5,-732"/>
+<text text-anchor="middle" x="427" y="-717.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_comm.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge33" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_comm.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M526.91,-757.896C509.566,-751.251 487.853,-742.932 469.192,-735.783"/>
+<polygon fill="#000000" stroke="#000000" points="470.342,-732.475 459.752,-732.165 467.838,-739.012 470.342,-732.475"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge4" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M399.793,-812.08C368.751,-825.725 318.871,-845.38 300,-840"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M298,-840C219.996,-817.764 222.242,-772.601 160.5,-720"/>
+</g>
+<!-- sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node6" class="node"><title>sourcefile~pf_parallel.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/pf_parallel.f90.html" xlink:title="pf_parallel.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="599.5,-722 519.5,-722 519.5,-698 599.5,-698 599.5,-722"/>
+<text text-anchor="middle" x="559.5" y="-707.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parallel.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge5" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M522.989,-697.949C497.021,-690.097 460.76,-681.109 428,-680"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M426,-680C349.576,-677.413 330.433,-686.465 255,-699 212.557,-706.053 193.251,-747.902 160.5,-720"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M158.5,-720C137.916,-702.011 118.188,-721.408 100,-701 58.6716,-654.627 39.9248,-458.665 34.636,-391.611"/>
+<polygon fill="#000000" stroke="#000000" points="38.1017,-391.027 33.8515,-381.322 31.122,-391.559 38.1017,-391.027"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge26" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M540.9,-722.138C518.62,-737.503 480.043,-764.108 454.272,-781.882"/>
+<polygon fill="#000000" stroke="#000000" points="451.983,-779.208 445.738,-787.767 455.957,-784.971 451.983,-779.208"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge32" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M426,-680C392.588,-678.869 356.405,-691.976 331.422,-703.484"/>
+<polygon fill="#000000" stroke="#000000" points="329.608,-700.472 322.098,-707.945 332.629,-706.786 329.608,-700.472"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge34" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M519.346,-713C505.451,-714.065 489.665,-715.275 475.172,-716.385"/>
+<polygon fill="#000000" stroke="#000000" points="474.595,-712.919 464.892,-717.173 475.13,-719.899 474.595,-712.919"/>
+</g>
+<!-- sourcefile~pf_amisdc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node7" class="node"><title>sourcefile~pf_amisdc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/pf_amisdc.f90.html" xlink:title="pf_amisdc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="199,-402 120,-402 120,-378 199,-378 199,-402"/>
+<text text-anchor="middle" x="159.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_amisdc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_amisdc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge6" class="edge"><title>sourcefile~pf_amisdc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M119.822,-383.528C105.449,-381.123 89.0904,-378.386 74.4775,-375.94"/>
+<polygon fill="#000000" stroke="#000000" points="74.6394,-372.419 64.1989,-374.221 73.4841,-379.323 74.6394,-372.419"/>
+</g>
+<!-- sourcefile~pf_imk.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node8" class="node"><title>sourcefile~pf_imk.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/pf_imk.f90.html" xlink:title="pf_imk.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="190.5,-612 128.5,-612 128.5,-588 190.5,-588 190.5,-612"/>
+<text text-anchor="middle" x="159.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imk.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imk.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge7" class="edge"><title>sourcefile~pf_imk.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M128.455,-594.853C118.269,-591.766 107.567,-586.843 100,-579 48.6554,-525.783 36.6492,-433.258 33.8483,-391.085"/>
+<polygon fill="#000000" stroke="#000000" points="37.3403,-390.842 33.2965,-381.049 30.3509,-391.226 37.3403,-390.842"/>
+</g>
+<!-- sourcefile~pf_misdcq_oc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node9" class="node"><title>sourcefile~pf_misdcq_oc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/pf_misdcq_oc.f90.html" xlink:title="pf_misdcQ_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="209,-570 110,-570 110,-546 209,-546 209,-570"/>
+<text text-anchor="middle" x="159.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_misdcq_oc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge8" class="edge"><title>sourcefile~pf_misdcq_oc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M112.486,-545.908C107.929,-543.461 103.648,-540.523 100,-537 58.2187,-496.649 41.8359,-426.895 35.9616,-391.299"/>
+<polygon fill="#000000" stroke="#000000" points="39.3632,-390.385 34.4048,-381.022 32.4422,-391.433 39.3632,-390.385"/>
+</g>
+<!-- sourcefile~pf_misdcq.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node10" class="node"><title>sourcefile~pf_misdcq.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/pf_misdcq.f90.html" xlink:title="pf_misdcQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="200.5,-528 118.5,-528 118.5,-504 200.5,-504 200.5,-528"/>
+<text text-anchor="middle" x="159.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_misdcq.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge9" class="edge"><title>sourcefile~pf_misdcq.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.256,-506.039C111.686,-503.203 105.304,-499.59 100,-495 67.4404,-466.823 48.2097,-418.832 39.2168,-390.916"/>
+<polygon fill="#000000" stroke="#000000" points="42.5413,-389.819 36.2649,-381.283 35.8485,-391.87 42.5413,-389.819"/>
+</g>
+<!-- sourcefile~pf_magnus_picard.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node11" class="node"><title>sourcefile~pf_magnus_picard.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/pf_magnus_picard.f90.html" xlink:title="pf_magnus_picard.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="219,-486 100,-486 100,-462 219,-462 219,-486"/>
+<text text-anchor="middle" x="159.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_magnus_picard.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_magnus_picard.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge21" class="edge"><title>sourcefile~pf_magnus_picard.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M115.867,-461.879C110.28,-459.393 104.827,-456.454 100,-453 76.3803,-436.099 56.7083,-408.685 44.9189,-389.798"/>
+<polygon fill="#000000" stroke="#000000" points="47.801,-387.8 39.6373,-381.046 41.8079,-391.416 47.801,-387.8"/>
+</g>
+<!-- sourcefile~pf_misdc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node12" class="node"><title>sourcefile~pf_misdc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/pf_misdc.f90.html" xlink:title="pf_misdc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="196,-444 123,-444 123,-420 196,-420 196,-444"/>
+<text text-anchor="middle" x="159.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_misdc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge10" class="edge"><title>sourcefile~pf_misdc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M122.729,-420.541C115.1,-417.717 107.182,-414.49 100,-411 85.6917,-404.048 70.6094,-394.784 58.3852,-386.726"/>
+<polygon fill="#000000" stroke="#000000" points="60.2941,-383.792 50.0412,-381.122 56.3911,-389.603 60.2941,-383.792"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge11" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.732,-731.724C231.131,-739.148 188.029,-743.454 160.5,-720"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge24" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_quadrature.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.873,-709.49C246.718,-705.082 228.81,-699.872 212.294,-695.067"/>
+<polygon fill="#000000" stroke="#000000" points="212.807,-691.571 202.227,-692.139 210.851,-698.293 212.807,-691.571"/>
+</g>
+<!-- sourcefile~pf_verlet.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node14" class="node"><title>sourcefile~pf_verlet.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node14"><a xlink:href=".././sourcefile/pf_verlet.f90.html" xlink:title="pf_verlet.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="195.5,-360 123.5,-360 123.5,-336 195.5,-336 195.5,-360"/>
+<text text-anchor="middle" x="159.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_verlet.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_verlet.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge12" class="edge"><title>sourcefile~pf_verlet.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M123.207,-353.906C107.982,-356.453 90.0712,-359.45 74.2387,-362.1"/>
+<polygon fill="#000000" stroke="#000000" points="73.4689,-358.68 64.1837,-363.782 74.6243,-365.584 73.4689,-358.68"/>
+</g>
+<!-- sourcefile~pf_zndarray.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node15" class="node"><title>sourcefile~pf_zndarray.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node15"><a xlink:href=".././sourcefile/pf_zndarray.f90.html" xlink:title="pf_zndarray.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="203.5,-318 115.5,-318 115.5,-294 203.5,-294 203.5,-318"/>
+<text text-anchor="middle" x="159.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_zndarray.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_zndarray.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge13" class="edge"><title>sourcefile~pf_zndarray.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M121.179,-318.037C114.034,-320.721 106.697,-323.746 100,-327 85.6917,-333.952 70.6094,-343.216 58.3852,-351.274"/>
+<polygon fill="#000000" stroke="#000000" points="56.3911,-348.397 50.0412,-356.878 60.2941,-354.208 56.3911,-348.397"/>
+</g>
+<!-- sourcefile~pf_imex.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node16" class="node"><title>sourcefile~pf_imex.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node16"><a xlink:href=".././sourcefile/pf_imex.f90.html" xlink:title="pf_imex.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="193.5,-276 125.5,-276 125.5,-252 193.5,-252 193.5,-276"/>
+<text text-anchor="middle" x="159.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imex.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imex.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge14" class="edge"><title>sourcefile~pf_imex.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M125.354,-272.338C116.625,-275.458 107.547,-279.6 100,-285 76.3803,-301.901 56.7083,-329.315 44.9189,-348.202"/>
+<polygon fill="#000000" stroke="#000000" points="41.8079,-346.584 39.6373,-356.954 47.801,-350.2 41.8079,-346.584"/>
+</g>
+<!-- sourcefile~pf_imexq_oc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node17" class="node"><title>sourcefile~pf_imexq_oc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node17"><a xlink:href=".././sourcefile/pf_imexq_oc.f90.html" xlink:title="pf_imexQ_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="206.5,-234 112.5,-234 112.5,-210 206.5,-210 206.5,-234"/>
+<text text-anchor="middle" x="159.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq_oc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge15" class="edge"><title>sourcefile~pf_imexq_oc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.748,-234.051C108.798,-236.517 104.08,-239.469 100,-243 67.4404,-271.177 48.2097,-319.168 39.2168,-347.084"/>
+<polygon fill="#000000" stroke="#000000" points="35.8485,-346.13 36.2649,-356.717 42.5413,-348.181 35.8485,-346.13"/>
+</g>
+<!-- sourcefile~pf_ndarray&#45;oc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node18" class="node"><title>sourcefile~pf_ndarray&#45;oc.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node18"><a xlink:href=".././sourcefile/pf_ndarray-oc.f90.html" xlink:title="pf_ndarray&#45;oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="208,-192 111,-192 111,-168 208,-168 208,-192"/>
+<text text-anchor="middle" x="159.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_ndarray&#45;oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_ndarray&#45;oc.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge17" class="edge"><title>sourcefile~pf_ndarray&#45;oc.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M112.486,-192.092C107.929,-194.539 103.648,-197.477 100,-201 58.2187,-241.351 41.8359,-311.105 35.9616,-346.701"/>
+<polygon fill="#000000" stroke="#000000" points="32.4422,-346.567 34.4048,-356.978 39.3632,-347.615 32.4422,-346.567"/>
+</g>
+<!-- sourcefile~pf_fftpack.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node19" class="node"><title>sourcefile~pf_fftpack.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node19"><a xlink:href=".././sourcefile/pf_fftpack.f90.html" xlink:title="pf_fftpack.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="198,-150 121,-150 121,-126 198,-126 198,-150"/>
+<text text-anchor="middle" x="159.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fftpack.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_fftpack.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge18" class="edge"><title>sourcefile~pf_fftpack.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M120.852,-145.793C113.163,-148.85 105.694,-153.098 100,-159 48.6554,-212.217 36.6492,-304.742 33.8483,-346.915"/>
+<polygon fill="#000000" stroke="#000000" points="30.3509,-346.774 33.2965,-356.951 37.3403,-347.158 30.3509,-346.774"/>
+</g>
+<!-- sourcefile~pf_fftw.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node20" class="node"><title>sourcefile~pf_fftw.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node20"><a xlink:href=".././sourcefile/pf_fftw.f90.html" xlink:title="pf_fftw.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="190.5,-108 128.5,-108 128.5,-84 190.5,-84 190.5,-108"/>
+<text text-anchor="middle" x="159.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fftw.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_fftw.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge19" class="edge"><title>sourcefile~pf_fftw.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M128.241,-100.946C118.034,-104.012 107.373,-108.974 100,-117 39.1843,-183.204 32.4035,-298.331 32.4213,-346.646"/>
+<polygon fill="#000000" stroke="#000000" points="28.9244,-346.956 32.5323,-356.918 35.924,-346.88 28.9244,-346.956"/>
+</g>
+<!-- sourcefile~pf_rkstepper.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node21" class="node"><title>sourcefile~pf_rkstepper.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node21"><a xlink:href=".././sourcefile/pf_rkstepper.f90.html" xlink:title="pf_rkstepper.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="205,-66 114,-66 114,-42 205,-42 205,-66"/>
+<text text-anchor="middle" x="159.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_rkstepper.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_rkstepper.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge20" class="edge"><title>sourcefile~pf_rkstepper.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.929,-64.4451C108.702,-67.1832 103.865,-70.6389 100,-75 63.8012,-115.85 42.1204,-285.213 35.3235,-346.629"/>
+<polygon fill="#000000" stroke="#000000" points="31.8207,-346.467 34.2275,-356.785 38.7803,-347.218 31.8207,-346.467"/>
+</g>
+<!-- sourcefile~pf_ndarray.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node22" class="node"><title>sourcefile~pf_ndarray.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node22"><a xlink:href=".././sourcefile/pf_ndarray.f90.html" xlink:title="pf_ndarray.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="200.5,-24 118.5,-24 118.5,-0 200.5,-0 200.5,-24"/>
+<text text-anchor="middle" x="159.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_ndarray.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_ndarray.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge16" class="edge"><title>sourcefile~pf_ndarray.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.241,-20.2185C111.353,-23.2358 104.862,-27.3607 100,-33 58.879,-80.6978 39.9446,-279.372 34.6276,-346.629"/>
+<polygon fill="#000000" stroke="#000000" points="31.1128,-346.69 33.8398,-356.928 38.0924,-347.224 31.1128,-346.69"/>
+</g>
+<!-- sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge30" class="edge"><title>sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M389.217,-720C375.773,-720 360.391,-720 346.228,-720"/>
+<polygon fill="#000000" stroke="#000000" points="346.176,-716.5 336.176,-720 346.176,-723.5 346.176,-716.5"/>
+</g>
+<!-- sourcefile~pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node24" class="node"><title>sourcefile~pfasst.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node24"><a xlink:href=".././sourcefile/pfasst.f90.html" xlink:title="pfasst.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="703,-688 644,-688 644,-664 703,-664 703,-688"/>
+<text text-anchor="middle" x="673.5" y="-673.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pfasst.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge22" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M643.876,-666.754C598.204,-653.186 506.036,-630.661 428,-642"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M426,-642C400.084,-645.169 370.949,-644.949 347.228,-643.81"/>
+<polygon fill="#000000" stroke="#000000" points="347.258,-640.307 337.081,-643.253 346.874,-647.296 347.258,-640.307"/>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge27" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M643.948,-684.668C633.416,-687.865 621.164,-691.584 609.344,-695.172"/>
+<polygon fill="#000000" stroke="#000000" points="608.116,-691.887 599.564,-698.141 610.15,-698.585 608.116,-691.887"/>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge31" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M426,-642C382.825,-647.279 341.722,-679.605 318.785,-700.951"/>
+<polygon fill="#000000" stroke="#000000" points="316.25,-698.533 311.456,-707.981 321.096,-703.585 316.25,-698.533"/>
+</g>
+<!-- sourcefile~pf_amisdcq.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_node25" class="node"><title>sourcefile~pf_amisdcq.f90</title>
+<g id="a_sourcefile~~pf_utils.f90~~AfferentGraph_node25"><a xlink:href=".././sourcefile/pf_amisdcq.f90.html" xlink:title="pf_amisdcQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="343,-402 255,-402 255,-378 343,-378 343,-402"/>
+<text text-anchor="middle" x="299" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_amisdcQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_amisdcq.f90&#45;&gt;sourcefile~pf_amisdc.f90 -->
+<g id="sourcefile~~pf_utils.f90~~AfferentGraph_edge28" class="edge"><title>sourcefile~pf_amisdcq.f90&#45;&gt;sourcefile~pf_amisdc.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M254.871,-390C240.409,-390 224.182,-390 209.316,-390"/>
+<polygon fill="#000000" stroke="#000000" points="209.28,-386.5 199.28,-390 209.28,-393.5 209.28,-386.5"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefilepf_utilsf90AfferentGraph = svgPanZoom('#sourcefilepf_utilsf90AfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="190pt" height="32pt"
+ viewBox="0.00 0.00 190.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 186,-28 186,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node"><title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="67,-24 0,-24 0,-0 67,-0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="182,-24 85,-24 85,-0 182,-0 182,-24"/>
+<text text-anchor="middle" x="133.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+      
+      <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_utils.html">pf_mod_utils</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pf_utils.f90.html#src">pf_utils.f90</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a name="ln-1"></a><span class="c">!! Useful subroutines that don&#39;t  fit in other modules</span>
+<a name="ln-2"></a><span class="c">!</span>
+<a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
+<a name="ln-4"></a><span class="c">!</span>
+<a name="ln-5"></a><span class="c">!&gt; Module with useful subroutines that don&#39;t  fit in other modules</span>
+<a name="ln-6"></a><span class="k">module </span><span class="n">pf_mod_utils</span>
+<a name="ln-7"></a>  <span class="k">use </span><span class="n">pf_mod_dtype</span>
+<a name="ln-8"></a>  <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-9"></a>  <span class="k">implicit none</span>
+<a name="ln-10"></a><span class="k">  </span>
+<a name="ln-11"></a><span class="k">contains</span>
+<a name="ln-12"></a>  <span class="c">!</span>
+<a name="ln-13"></a>  <span class="c">!&gt; Compute full residual at each node and measure its size</span>
+<a name="ln-14"></a>  <span class="k">subroutine </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
+<a name="ln-15"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-16"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-17"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-18"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flag</span>
+<a name="ln-19"></a>
+<a name="ln-20"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">res_norms</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>    <span class="c">!!  Holds norms of residual</span>
+<a name="ln-21"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">sol_norms</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span>      <span class="c">!!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt</span>
+<a name="ln-22"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
+<a name="ln-23"></a>    
+<a name="ln-24"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TRESIDUAL</span><span class="p">)</span>
+<a name="ln-25"></a>
+<a name="ln-26"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">residual</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
+<a name="ln-27"></a>
+<a name="ln-28"></a>    <span class="c">! compute max residual norm</span>
+<a name="ln-29"></a>    <span class="n">sol_norms</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="c">! for adjoint</span>
+<a name="ln-30"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-31"></a>       <span class="n">res_norms</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+<a name="ln-32"></a>       <span class="n">sol_norms</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="c">! only the value at lev%nnodes is needed for forward integration, right? </span>
+<a name="ln-33"></a>    <span class="k">end do</span>
+<a name="ln-34"></a>
+<a name="ln-35"></a>    <span class="c">!    lev%residual = res_norms(lev%nnodes-1)</span>
+<a name="ln-36"></a>    <span class="n">m</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>  <span class="c">! for usual forward integration</span>
+<a name="ln-37"></a>    <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flag</span><span class="p">))</span> <span class="k">then</span>
+<a name="ln-38"></a><span class="k">      if</span><span class="p">(</span><span class="n">flag</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="ln-39"></a>    <span class="k">end if</span>
+<a name="ln-40"></a><span class="k">    </span><span class="n">lev</span><span class="p">%</span><span class="n">residual</span> <span class="o">=</span> <span class="nb">maxval</span><span class="p">(</span><span class="n">res_norms</span><span class="p">)</span>    
+<a name="ln-41"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sol_norms</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0d0</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-42"></a><span class="k">       </span><span class="n">lev</span><span class="p">%</span><span class="n">residual_rel</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">residual</span><span class="o">/</span><span class="n">sol_norms</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<a name="ln-43"></a>    <span class="k">else</span>
+<a name="ln-44"></a><span class="k">       </span><span class="n">lev</span><span class="p">%</span><span class="n">residual_rel</span> <span class="o">=</span> <span class="mf">0.0d0</span>
+<a name="ln-45"></a>    <span class="k">end if</span>
+<a name="ln-46"></a>
+<a name="ln-47"></a><span class="k">    call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TRESIDUAL</span><span class="p">)</span>
+<a name="ln-48"></a>
+<a name="ln-49"></a>  <span class="k">end subroutine </span><span class="n">pf_residual</span>
+<a name="ln-50"></a>
+<a name="ln-51"></a>  <span class="c">!</span>
+<a name="ln-52"></a>  <span class="c">!&gt; Generic residual</span>
+<a name="ln-53"></a>  <span class="c">!! Each sweeper can define its own residual, or use this generic one</span>
+<a name="ln-54"></a>  <span class="k">subroutine </span><span class="n">pf_generic_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-55"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_sweeper_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-56"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-57"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-58"></a>    <span class="kt">integer</span><span class="p">,</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>  <span class="kd">::</span> <span class="n">flags</span>
+<a name="ln-59"></a>
+<a name="ln-60"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
+<a name="ln-61"></a>    
+<a name="ln-62"></a>    <span class="c">!&gt;  Compute the integral of F</span>
+<a name="ln-63"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-64"></a>
+<a name="ln-65"></a>    <span class="c">!&gt; add tau if it exists</span>
+<a name="ln-66"></a>    <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
+<a name="ln-67"></a><span class="k">       do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-68"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-69"></a>       <span class="k">end do</span>
+<a name="ln-70"></a><span class="k">    end if</span>
+<a name="ln-71"></a>
+<a name="ln-72"></a>    <span class="c">!&gt; subtract out the solution value</span>
+<a name="ln-73"></a>    <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="k">then</span>
+<a name="ln-74"></a><span class="k">      do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
+<a name="ln-75"></a>        <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="k">then</span>
+<a name="ln-76"></a><span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+<a name="ln-77"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+<a name="ln-78"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+<a name="ln-79"></a>        <span class="k">end if</span>
+<a name="ln-80"></a><span class="k">        if</span><span class="p">(</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="k">then</span>
+<a name="ln-81"></a><span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<a name="ln-82"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<a name="ln-83"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<a name="ln-84"></a>        <span class="k">end if</span>
+<a name="ln-85"></a><span class="k">      end do</span>
+<a name="ln-86"></a><span class="k">    else</span>
+<a name="ln-87"></a><span class="k">      do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
+<a name="ln-88"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+<a name="ln-89"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-90"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-91"></a>      <span class="k">end do</span>
+<a name="ln-92"></a><span class="k">    end if</span>
+<a name="ln-93"></a>
+<a name="ln-94"></a><span class="k">  end subroutine </span><span class="n">pf_generic_residual</span>
+<a name="ln-95"></a>
+<a name="ln-96"></a>
+<a name="ln-97"></a>  <span class="c">!</span>
+<a name="ln-98"></a>  <span class="c">!&gt; Generic evaluate all</span>
+<a name="ln-99"></a>  <span class="c">!! Each sweeper can define its own evaluate_all or use this generic one</span>
+<a name="ln-100"></a>  <span class="k">subroutine </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+<a name="ln-101"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_sweeper_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-102"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-103"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t</span><span class="p">(:)</span>
+<a name="ln-104"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+<a name="ln-105"></a>
+<a name="ln-106"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
+<a name="ln-107"></a>        
+<a name="ln-108"></a><span class="c">!     which = 1</span>
+<a name="ln-109"></a><span class="c">!     if(present(flags)) which = flags</span>
+<a name="ln-110"></a>    
+<a name="ln-111"></a><span class="c">!     mystep = 1</span>
+<a name="ln-112"></a><span class="c">!     if(present(step)) mystep = step</span>
+<a name="ln-113"></a>    
+<a name="ln-114"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-115"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+<a name="ln-116"></a>    <span class="k">end do</span>
+<a name="ln-117"></a><span class="k">  end subroutine </span><span class="n">pf_generic_evaluate_all</span>
+<a name="ln-118"></a>
+<a name="ln-119"></a>  
+<a name="ln-120"></a>  <span class="c">!&gt; Generic routine to spread initial conditions</span>
+<a name="ln-121"></a>  <span class="c">!! Each sweeper can define its own spreadq0 or use this generic one</span>
+<a name="ln-122"></a>  <span class="k">subroutine </span><span class="n">pf_generic_spreadq0</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+<a name="ln-123"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_sweeper_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-124"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  Level on which to spread</span>
+<a name="ln-125"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>       <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span>    <span class="c">!!  time at beginning of interval</span>
+<a name="ln-126"></a>
+<a name="ln-127"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
+<a name="ln-128"></a>
+<a name="ln-129"></a>    <span class="c">!  Stick initial condition into first node slot</span>
+<a name="ln-130"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
+<a name="ln-131"></a>
+<a name="ln-132"></a>    <span class="c">!  Evaluate F at first spot</span>
+<a name="ln-133"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a name="ln-134"></a>
+<a name="ln-135"></a>    <span class="c">! Spread F and solution to all nodes</span>
+<a name="ln-136"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-137"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-138"></a>       <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">npieces</span>
+<a name="ln-139"></a>         <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
+<a name="ln-140"></a>       <span class="k">end do</span>
+<a name="ln-141"></a><span class="k">    end do</span>
+<a name="ln-142"></a><span class="k">  end subroutine </span><span class="n">pf_generic_spreadq0</span>
+<a name="ln-143"></a>
+<a name="ln-144"></a>  <span class="k">subroutine </span><span class="n">pf_stop</span><span class="p">(</span><span class="n">pf_file</span><span class="p">,</span><span class="n">Nline</span><span class="p">,</span><span class="n">msg</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+<a name="ln-145"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf_file</span>
+<a name="ln-146"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="kd">::</span> <span class="n">Nline</span>
+<a name="ln-147"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">msg</span>
+<a name="ln-148"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">N</span>
+<a name="ln-149"></a>
+<a name="ln-150"></a>    <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&#39;</span>
+<a name="ln-151"></a>    <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;Stopping in File: &#39;</span><span class="p">,</span> <span class="n">pf_file</span>    
+<a name="ln-152"></a>    <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;Line number: &#39;</span><span class="p">,</span> <span class="n">Nline</span>
+<a name="ln-153"></a>    <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="n">msg</span>
+<a name="ln-154"></a>    <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>   <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;value=&#39;</span><span class="p">,</span><span class="n">N</span>
+<a name="ln-155"></a>    <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!&#39;</span>
+<a name="ln-156"></a>    <span class="k">stop</span>
+<a name="ln-157"></a><span class="k">    </span>
+<a name="ln-158"></a><span class="k">  end subroutine </span><span class="n">pf_stop</span>
+<a name="ln-159"></a>
+<a name="ln-160"></a>
+<a name="ln-161"></a><span class="k">end module </span><span class="n">pf_mod_utils</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

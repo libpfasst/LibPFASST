@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pfasst.f90 &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pfasst.f90
+    <small>Source File</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.1% of total for source files.">9 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pfasst.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+  
+     <li class="active">pfasst.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pfasst.html">pfasst</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pfasst.f90.html#src">pfasst.f90</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      <p>Some convenient use statements</p>
+      <br>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: sourcefile~~pfasst.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefilepfasstf90EfferentGraph" width="641pt" height="402pt"
+ viewBox="0.00 0.00 641.00 402.01" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~pfasst.f90~~EfferentGraph" class="graph" transform="scale(0.723476 0.723476) rotate(0) translate(4 551.671)">
+<title>sourcefile~~pfasst.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-551.671 882,-551.671 882,4 -4,4"/>
+<!-- sourcefile~pfasst.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node1" class="node"><title>sourcefile~pfasst.f90</title>
+<polygon fill="none" stroke="black" points="878,-220 819,-220 819,-196 878,-196 878,-220"/>
+<text text-anchor="middle" x="848.5" y="-205.6" font-family="Helvetica,sans-Serif" font-size="10.50">pfasst.f90</text>
+</g>
+<!-- sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node2" class="node"><title>sourcefile~pf_imexq.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/pf_imexq.f90.html" xlink:title="pf_imexQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="544,-410 468,-410 468,-386 544,-386 544,-410"/>
+<text text-anchor="middle" x="506" y="-395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge1" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-398C603.523,-401.277 576.61,-401.593 554.31,-400.954"/>
+<polygon fill="#000000" stroke="#000000" points="554.212,-397.448 544.093,-400.587 553.961,-404.444 554.212,-397.448"/>
+</g>
+<!-- sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node3" class="node"><title>sourcefile~pf_hooks.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/pf_hooks.f90.html" xlink:title="pf_hooks.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="288,-334 214,-334 214,-310 288,-310 288,-334"/>
+<text text-anchor="middle" x="251" y="-319.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_hooks.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge2" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-398C620.216,-398.996 381.338,-322.44 374,-322"/>
+</g>
+<!-- sourcefile~pf_results.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node4" class="node"><title>sourcefile~pf_results.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node4"><a xlink:href=".././sourcefile/pf_results.f90.html" xlink:title="pf_results.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="667,-24 590,-24 590,-0 667,-0 667,-24"/>
+<text text-anchor="middle" x="628.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_results.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_results.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge3" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_results.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M843.313,-195.765C832.335,-165.7 799.658,-88.0333 744,-52"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M742,-52C722.246,-39.2114 697.89,-29.8992 676.897,-23.495"/>
+<polygon fill="#000000" stroke="#000000" points="677.788,-20.109 667.208,-20.6688 675.827,-26.829 677.788,-20.109"/>
+</g>
+<!-- sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node5" class="node"><title>sourcefile~pf_parallel.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node5"><a xlink:href=".././sourcefile/pf_parallel.f90.html" xlink:title="pf_parallel.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="783,-220 703,-220 703,-196 783,-196 783,-220"/>
+<text text-anchor="middle" x="743" y="-205.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parallel.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge4" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M818.944,-208C811.031,-208 802.206,-208 793.467,-208"/>
+<polygon fill="#000000" stroke="#000000" points="793.309,-204.5 783.309,-208 793.309,-211.5 793.309,-204.5"/>
+</g>
+<!-- sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node6" class="node"><title>sourcefile~pf_dtype.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node6"><a xlink:href=".././sourcefile/pf_dtype.f90.html" xlink:title="pf_dtype.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="72,-334 0,-334 0,-310 72,-310 72,-334"/>
+<text text-anchor="middle" x="36" y="-319.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_dtype.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge5" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-398C520.48,-413.062 525.805,-497.923 422,-528 303.175,-562.429 263.164,-547.238 144,-514"/>
+</g>
+<!-- sourcefile~pf_mpi.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node7" class="node"><title>sourcefile~pf_mpi.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node7"><a xlink:href=".././sourcefile/pf_mpi.f90.html" xlink:title="pf_mpi.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="282.5,-142 219.5,-142 219.5,-118 282.5,-118 282.5,-142"/>
+<text text-anchor="middle" x="251" y="-127.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mpi.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_mpi.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge6" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_mpi.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M742,-52C667.559,-3.80699 395.901,-83.5893 292.411,-116.667"/>
+<polygon fill="#000000" stroke="#000000" points="291.092,-113.414 282.645,-119.809 293.237,-120.078 291.092,-113.414"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node8" class="node"><title>sourcefile~pf_pfasst.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node8"><a xlink:href=".././sourcefile/pf_pfasst.f90.html" xlink:title="pf_pfasst.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="543,-330 469,-330 469,-306 543,-306 543,-330"/>
+<text text-anchor="middle" x="506" y="-315.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge7" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M841.576,-220.198C819.597,-263.506 738.338,-406.826 629.5,-398"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-398C587.338,-403.489 588.138,-365.856 554,-344 549.288,-340.983 544.203,-337.952 539.178,-335.08"/>
+<polygon fill="#000000" stroke="#000000" points="540.731,-331.938 530.294,-330.117 537.317,-338.049 540.731,-331.938"/>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge10" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M467.791,-400.965C441.447,-402.343 405.366,-402.772 374,-398"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-398C331.397,-391.823 292.835,-361.516 270.843,-341.091"/>
+<polygon fill="#000000" stroke="#000000" points="273.161,-338.464 263.518,-334.076 268.319,-343.52 273.161,-338.464"/>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge9" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250,-514C205.964,-497.258 189.379,-526.657 144,-514"/>
+</g>
+<!-- sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node9" class="node"><title>sourcefile~pf_quadrature.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node9"><a xlink:href=".././sourcefile/pf_quadrature.f90.html" xlink:title="pf_quadrature.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="422,-488 324,-488 324,-464 422,-464 422,-488"/>
+<text text-anchor="middle" x="373" y="-473.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_quadrature.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge12" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_quadrature.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M481.729,-410.153C474.058,-414.349 465.559,-419.204 458,-424 441.335,-434.574 438.712,-439.5 422,-450 417.185,-453.025 411.99,-456.06 406.859,-458.935"/>
+<polygon fill="#000000" stroke="#000000" points="404.878,-456.029 397.784,-463.899 408.237,-462.17 404.878,-456.029"/>
+</g>
+<!-- sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node11" class="node"><title>sourcefile~pf_timer.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node11"><a xlink:href=".././sourcefile/pf_timer.f90.html" xlink:title="pf_timer.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="178,-334 108,-334 108,-310 178,-310 178,-334"/>
+<text text-anchor="middle" x="143" y="-319.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_timer.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge8" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476.692,-410.038C469.997,-413.811 463.278,-418.467 458,-424 433.03,-450.175 451.73,-476.391 422,-497 359.595,-540.26 322.752,-541.566 252,-514"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250,-514C180.279,-487.492 155.192,-389.123 147.256,-344.396"/>
+<polygon fill="#000000" stroke="#000000" points="150.665,-343.557 145.591,-334.256 143.757,-344.691 150.665,-343.557"/>
+</g>
+<!-- sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node12" class="node"><title>sourcefile~pf_utils.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node12"><a xlink:href=".././sourcefile/pf_utils.f90.html" xlink:title="pf_utils.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="283,-410 219,-410 219,-386 283,-386 283,-410"/>
+<text text-anchor="middle" x="251" y="-395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_utils.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge11" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-398C346.012,-394.046 316.491,-393.99 293.232,-394.95"/>
+<polygon fill="#000000" stroke="#000000" points="292.838,-391.465 283.022,-395.452 293.182,-398.456 292.838,-391.465"/>
+</g>
+<!-- sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge14" class="edge"><title>sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M241.315,-334.429C233.767,-345.421 222.709,-361.998 214,-377 179.672,-436.135 209.863,-532.371 144,-514"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M142,-514C69.6512,-493.82 46.426,-390.302 39.5999,-344.198"/>
+<polygon fill="#000000" stroke="#000000" points="43.0354,-343.485 38.2275,-334.044 36.0985,-344.423 43.0354,-343.485"/>
+</g>
+<!-- sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge13" class="edge"><title>sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M213.817,-322C205.631,-322 196.847,-322 188.366,-322"/>
+<polygon fill="#000000" stroke="#000000" points="188.232,-318.5 178.232,-322 188.232,-325.5 188.232,-318.5"/>
+</g>
+<!-- sourcefile~pf_results.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge15" class="edge"><title>sourcefile~pf_results.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M589.773,-19.4278C555.405,-26.2274 503.26,-36.6274 458,-46 446.541,-48.3731 263.689,-89.4265 252,-90"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250,-90C202.899,-89.0352 185.836,-68.3381 144,-90"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M142,-90C63.1607,-130.822 43.3996,-250.355 38.5434,-299.995"/>
+<polygon fill="#000000" stroke="#000000" points="35.0534,-299.729 37.6783,-309.994 42.0273,-300.333 35.0534,-299.729"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge16" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M505,-208C446.843,-210.763 425.511,-180.862 374,-208"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_results.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge18" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_results.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M734.963,-195.739C716.259,-163.153 665.14,-74.092 641.627,-33.1271"/>
+<polygon fill="#000000" stroke="#000000" points="644.548,-31.1866 636.535,-24.256 638.477,-34.6713 644.548,-31.1866"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge20" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M702.929,-208.936C681.279,-209.219 653.885,-209.192 629.5,-208"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-208C579.274,-205.644 593.687,-155.499 554,-128 535.48,-115.168 528.271,-116.431 507,-109"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M505,-109C449.46,-89.5975 432.234,-98.362 374,-90"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-90C319.208,-82.4194 305.322,-91.0922 252,-90"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge22" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-208C575.195,-205.444 535.592,-263.948 517.624,-296.653"/>
+<polygon fill="#000000" stroke="#000000" points="514.326,-295.402 512.752,-305.879 520.516,-298.671 514.326,-295.402"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node10" class="node"><title>sourcefile~pf_interpolate.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node10"><a xlink:href=".././sourcefile/pf_interpolate.f90.html" xlink:title="pf_interpolate.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="554,-161 458,-161 458,-137 554,-137 554,-161"/>
+<text text-anchor="middle" x="506" y="-146.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_interpolate.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge24" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-208C590.572,-206.196 553.114,-183.948 529.979,-167.301"/>
+<polygon fill="#000000" stroke="#000000" points="531.956,-164.41 521.844,-161.25 527.778,-170.027 531.956,-164.41"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge19" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M627.5,-208C574.008,-205.386 560.495,-205.458 507,-208"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M505,-208C444.446,-210.877 434.591,-171.934 374,-170"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge17" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M505,-208C437.765,-211.194 425,-240.071 374,-284"/>
+</g>
+<!-- sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node13" class="node"><title>sourcefile~pf_comm.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node13"><a xlink:href=".././sourcefile/pf_comm.f90.html" xlink:title="pf_comm.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="666,-295 591,-295 591,-271 666,-271 666,-295"/>
+<text text-anchor="middle" x="628.5" y="-280.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_comm.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge21" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M723.925,-220.05C705.555,-232.296 676.902,-251.399 655.974,-265.351"/>
+<polygon fill="#000000" stroke="#000000" points="653.909,-262.521 647.53,-270.98 657.792,-268.345 653.909,-262.521"/>
+</g>
+<!-- sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_node14" class="node"><title>sourcefile~pf_restrict.f90</title>
+<g id="a_sourcefile~~pfasst.f90~~EfferentGraph_node14"><a xlink:href=".././sourcefile/pf_restrict.f90.html" xlink:title="pf_restrict.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="412,-142 334,-142 334,-118 412,-118 412,-142"/>
+<text text-anchor="middle" x="373" y="-127.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_restrict.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge23" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_restrict.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M505,-109C474.439,-98.3237 437.95,-105.7 411.253,-114.524"/>
+<polygon fill="#000000" stroke="#000000" points="409.806,-111.323 401.534,-117.942 412.129,-117.926 409.806,-111.323"/>
+</g>
+<!-- sourcefile~pf_mpi.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge26" class="edge"><title>sourcefile~pf_mpi.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.018,-117.895C202.704,-103.438 159.196,-82.1316 144,-90"/>
+</g>
+<!-- sourcefile~pf_mpi.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge25" class="edge"><title>sourcefile~pf_mpi.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M229.295,-142.037C223.799,-145.96 218.225,-150.691 214,-156 178.324,-200.829 157.864,-266.494 149.11,-300.226"/>
+<polygon fill="#000000" stroke="#000000" points="145.699,-299.439 146.675,-309.989 152.491,-301.133 145.699,-299.439"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge30" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M468.832,-320.858C442.513,-322.511 406.025,-323.919 374,-322"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-322C347.674,-320.542 320.524,-320.416 298.21,-320.71"/>
+<polygon fill="#000000" stroke="#000000" points="297.944,-317.214 288.003,-320.877 298.059,-324.213 297.944,-317.214"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge29" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M495.536,-330.109C477.687,-352.702 439.295,-400.072 422,-412 388.77,-434.918 291.107,-465.997 252,-476"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250,-476C201.614,-488.787 192.207,-527.446 144,-514"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_mpi.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge27" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_mpi.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M489.003,-305.922C453.155,-278.887 363.6,-211.514 288,-156 284.505,-153.433 280.807,-150.739 277.165,-148.098"/>
+<polygon fill="#000000" stroke="#000000" points="279.044,-145.137 268.889,-142.114 274.942,-150.81 279.044,-145.137"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_quadrature.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge28" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_quadrature.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M494.098,-330.078C484.004,-341.614 468.945,-359.75 458,-377 438.619,-407.545 447.086,-423.936 422,-450 419.006,-453.111 415.557,-455.939 411.91,-458.485"/>
+<polygon fill="#000000" stroke="#000000" points="409.812,-455.667 403.162,-463.916 413.504,-461.615 409.812,-455.667"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge31" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M468.751,-329.462C422.094,-344.215 341.259,-369.776 292.588,-385.166"/>
+<polygon fill="#000000" stroke="#000000" points="291.488,-381.843 283.009,-388.195 293.599,-388.517 291.488,-381.843"/>
+</g>
+<!-- sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge32" class="edge"><title>sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M323.725,-470.582C301.553,-469.466 275.11,-470.089 252,-476"/>
+</g>
+<!-- sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge33" class="edge"><title>sourcefile~pf_quadrature.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M353.513,-463.983C333.663,-451.081 301.924,-430.451 279.221,-415.693"/>
+<polygon fill="#000000" stroke="#000000" points="280.998,-412.674 270.706,-410.159 277.183,-418.543 280.998,-412.674"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge37" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M475.368,-161.108C448.487,-172.381 407.985,-190.095 374,-208"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-208C327.688,-231.345 288.089,-275.747 267.326,-301.71"/>
+<polygon fill="#000000" stroke="#000000" points="264.439,-299.721 261.028,-309.751 269.95,-304.037 264.439,-299.721"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge35" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M482.31,-136.922C451.032,-120.6 396.036,-93.1642 374,-90"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge34" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M457.984,-160.975C433.155,-166.169 402.086,-170.897 374,-170"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-170C318.694,-168.298 297.25,-141.771 252,-170"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_utils.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge36" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_utils.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M492.045,-161.032C482.499,-169.988 469.271,-182.585 458,-194 419.557,-232.935 415.456,-248.291 374,-284"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M372,-284C335.03,-315.845 294.308,-355.601 271.078,-378.762"/>
+<polygon fill="#000000" stroke="#000000" points="268.493,-376.397 263.901,-385.945 273.445,-381.345 268.493,-376.397"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge38" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_restrict.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M457.706,-142.141C446.143,-140.463 433.757,-138.667 422.154,-136.984"/>
+<polygon fill="#000000" stroke="#000000" points="422.598,-133.512 412.199,-135.54 421.593,-140.439 422.598,-133.512"/>
+</g>
+<!-- sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge39" class="edge"><title>sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M107.91,-322C99.8208,-322 91.0646,-322 82.556,-322"/>
+<polygon fill="#000000" stroke="#000000" points="82.3619,-318.5 72.3618,-322 82.3618,-325.5 82.3619,-318.5"/>
+</g>
+<!-- sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge41" class="edge"><title>sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M242.546,-410.411C223.21,-441.836 171.066,-521.549 144,-514"/>
+</g>
+<!-- sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge40" class="edge"><title>sourcefile~pf_utils.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M232.969,-385.789C215.738,-373.435 188.904,-354.195 169.209,-340.074"/>
+<polygon fill="#000000" stroke="#000000" points="171.155,-337.163 160.988,-334.18 167.076,-342.852 171.155,-337.163"/>
+</g>
+<!-- sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge42" class="edge"><title>sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M590.691,-293.691C578.786,-297.149 565.433,-301.028 552.95,-304.654"/>
+<polygon fill="#000000" stroke="#000000" points="551.796,-301.344 543.169,-307.494 553.749,-308.066 551.796,-301.344"/>
+</g>
+<!-- sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge45" class="edge"><title>sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M361.934,-142.398C351.855,-155.04 336.14,-175.387 324,-194 300.286,-230.358 276.27,-274.968 262.841,-300.775"/>
+<polygon fill="#000000" stroke="#000000" points="259.717,-299.197 258.236,-309.688 265.935,-302.411 259.717,-299.197"/>
+</g>
+<!-- sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge44" class="edge"><title>sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M351.434,-117.982C328.057,-105.563 288.41,-88.2136 252,-90"/>
+</g>
+<!-- sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pfasst.f90~~EfferentGraph_edge43" class="edge"><title>sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M333.775,-137.844C309.149,-144.043 277.153,-154.308 252,-170"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250,-170C199.784,-201.327 167,-266.126 152.527,-300.111"/>
+<polygon fill="#000000" stroke="#000000" points="149.192,-299.018 148.624,-309.597 155.665,-301.681 149.192,-299.018"/>
+</g>
+</g>
+</svg>
+</div><script>var pansourcefilepfasstf90EfferentGraph = svgPanZoom('#sourcefilepfasstf90EfferentGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="190pt" height="32pt"
+ viewBox="0.00 0.00 190.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 186,-28 186,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node"><title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="67,-24 0,-24 0,-0 67,-0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="182,-24 85,-24 85,-0 182,-0 182,-24"/>
+<text text-anchor="middle" x="133.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    
+      
+      <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pfasst.html">pfasst</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pfasst.f90.html#src">pfasst.f90</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a name="ln-1"></a><span class="c">!! Some convenient use statements</span>
+<a name="ln-2"></a><span class="c">!</span>
+<a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
+<a name="ln-4"></a><span class="c">!</span>
+<a name="ln-5"></a><span class="c">!&gt;  Module containing a collection of &quot;use&quot; statements to simplify</span>
+<a name="ln-6"></a><span class="c">!!  including the common main modules in writing applications that use libpfasst</span>
+<a name="ln-7"></a><span class="k">module </span><span class="n">pfasst</span>
+<a name="ln-8"></a>  <span class="k">use </span><span class="n">pf_mod_dtype</span>
+<a name="ln-9"></a>  <span class="k">use </span><span class="n">pf_mod_hooks</span>
+<a name="ln-10"></a>  <span class="k">use </span><span class="n">pf_mod_results</span>
+<a name="ln-11"></a>  <span class="k">use </span><span class="n">pf_mod_parallel</span>
+<a name="ln-12"></a>  <span class="k">use </span><span class="n">pf_mod_pfasst</span>
+<a name="ln-13"></a><span class="cp">#ifndef NOMPI</span>
+<a name="ln-14"></a>  <span class="k">use </span><span class="n">pf_mod_comm_mpi</span>
+<a name="ln-15"></a><span class="cp">#endif</span>
+<a name="ln-16"></a>  <span class="k">use </span><span class="n">pf_mod_imexQ</span>
+<a name="ln-17"></a>  
+<a name="ln-18"></a><span class="k">end module </span><span class="n">pfasst</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

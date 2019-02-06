@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_v_cycle_oc &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_v_cycle_oc
+      <small>Subroutine</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.4% of total for procedures.">58 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_parallel_oc.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_parallel_oc.f90.html'>pf_parallel_oc.f90</a></li>
+    
+     <li><a href='../module/pf_mod_parallel_oc.html'>pf_mod_parallel_oc</a></li>
+    
+  
+     <li class="active">pf_v_cycle_oc</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_v_cycle_oc.html#src">pf_v_cycle_oc</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>
+public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_index_f, flags)
+    
+    
+   
+</h2>
+    
+  
+
+
+    
+    <p>Post the nonblocking receives on the all the levels that will be recieving later
+    (for single level this will be skipped)
+ move from fine to coarse doing sweeps </p>
+    
+
+    <h3>Arguments</h3>
+    
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-pf%7E5"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-iteration"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>iteration</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-t0%7E4"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dt%7E6"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index_c"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index_c</strong></td><td><p>Coarsest level of V-cycle</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index_f"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index_f</strong></td><td><p>Finest level of V-cycle</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-flags%7E4"></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+    
+    
+    
+    <br>
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~pf_v_cycle_oc~~CallsGraph Pages: 1 -->
+<svg id="procpf_v_cycle_ocCallsGraph" width="466pt" height="353pt"
+ viewBox="0.00 0.00 466.00 353.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_v_cycle_oc~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 349)">
+<title>proc~~pf_v_cycle_oc~~CallsGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-349 462,-349 462,4 -4,4"/>
+<!-- proc~pf_v_cycle_oc -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node1" class="node"><title>proc~pf_v_cycle_oc</title>
+<polygon fill="none" stroke="black" points="80,-128 0,-128 0,-104 80,-104 80,-128"/>
+<text text-anchor="middle" x="40" y="-113.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_v_cycle_oc</text>
+</g>
+<!-- proc~restrict_time_space_fas -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node2" class="node"><title>proc~restrict_time_space_fas</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node2"><a xlink:href=".././proc/restrict_time_space_fas.html" xlink:title="restrict_time_space_fas">
+<polygon fill="#d9534f" stroke="#d9534f" points="242,-188 116,-188 116,-164 242,-164 242,-188"/>
+<text text-anchor="middle" x="179" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict_time_space_fas</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~restrict_time_space_fas -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge1" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~restrict_time_space_fas</title>
+<path fill="none" stroke="#000000" d="M67.2972,-128.143C81.6471,-134.713 99.7514,-142.912 116,-150 123.53,-153.285 131.606,-156.729 139.358,-159.996"/>
+<polygon fill="#000000" stroke="#000000" points="138.02,-163.23 148.596,-163.871 140.728,-156.775 138.02,-163.23"/>
+</g>
+<!-- proc~pf_post -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node3" class="node"><title>proc~pf_post</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node3"><a xlink:href=".././proc/pf_post.html" xlink:title="pf_post">
+<polygon fill="#d9534f" stroke="#d9534f" points="206,-108 152,-108 152,-84 206,-84 206,-108"/>
+<text text-anchor="middle" x="179" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_post</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_post -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge2" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_post</title>
+<path fill="none" stroke="#000000" d="M80.2587,-110.269C99.6059,-107.444 122.784,-104.061 141.713,-101.297"/>
+<polygon fill="#000000" stroke="#000000" points="142.351,-104.741 151.741,-99.8335 141.34,-97.8148 142.351,-104.741"/>
+</g>
+<!-- proc~pf_residual -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node4" class="node"><title>proc~pf_residual</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node4"><a xlink:href=".././proc/pf_residual.html" xlink:title="pf_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="344,-146 279,-146 279,-122 344,-122 344,-146"/>
+<text text-anchor="middle" x="311.5" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_residual</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge3" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M80.1876,-118.617C130.448,-121.974 217.253,-127.772 268.729,-131.21"/>
+<polygon fill="#000000" stroke="#000000" points="268.631,-134.711 278.842,-131.886 269.098,-127.727 268.631,-134.711"/>
+</g>
+<!-- proc~pf_send -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node5" class="node"><title>proc~pf_send</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node5"><a xlink:href=".././proc/pf_send.html" xlink:title="pf_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="206,-24 152,-24 152,-0 206,-0 206,-24"/>
+<text text-anchor="middle" x="179" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_send</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_send -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge4" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_send</title>
+<path fill="none" stroke="#000000" d="M48.9752,-103.772C61.2938,-85.8009 86.6212,-52.3021 116,-33 123.952,-27.7757 133.333,-23.7225 142.359,-20.6332"/>
+<polygon fill="#000000" stroke="#000000" points="143.424,-23.9674 151.929,-17.6494 141.34,-17.2847 143.424,-23.9674"/>
+</g>
+<!-- proc~pf_recv -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node6" class="node"><title>proc~pf_recv</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node6"><a xlink:href=".././proc/pf_recv.html" xlink:title="pf_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="206,-66 152,-66 152,-42 206,-42 206,-66"/>
+<text text-anchor="middle" x="179" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_recv -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge5" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_recv</title>
+<path fill="none" stroke="#000000" d="M60.8924,-103.886C75.7381,-95.1546 96.7034,-83.4657 116,-75 124.393,-71.3178 133.651,-67.8715 142.396,-64.8778"/>
+<polygon fill="#000000" stroke="#000000" points="143.588,-68.1703 151.979,-61.7018 141.385,-61.5258 143.588,-68.1703"/>
+</g>
+<!-- proc~interpolate_time_space -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node7" class="node"><title>proc~interpolate_time_space</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node7"><a xlink:href=".././proc/interpolate_time_space.html" xlink:title="interpolate_time_space">
+<polygon fill="#d9534f" stroke="#d9534f" points="241,-266 117,-266 117,-242 241,-242 241,-266"/>
+<text text-anchor="middle" x="179" y="-251.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpolate_time_space</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~interpolate_time_space -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge6" class="edge"><title>proc~pf_v_cycle_oc&#45;&gt;proc~interpolate_time_space</title>
+<path fill="none" stroke="#000000" d="M51.6387,-128.086C65.9184,-144.168 92.2425,-173.327 116,-197 128.96,-209.914 144.062,-223.821 156.117,-234.665"/>
+<polygon fill="#000000" stroke="#000000" points="154.124,-237.578 163.912,-241.634 158.789,-232.359 154.124,-237.578"/>
+</g>
+<!-- proc~restrict_sdc -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node8" class="node"><title>proc~restrict_sdc</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node8"><a xlink:href=".././proc/restrict_sdc.html" xlink:title="restrict_sdc">
+<polygon fill="#d9534f" stroke="#d9534f" points="345,-306 278,-306 278,-282 345,-282 345,-306"/>
+<text text-anchor="middle" x="311.5" y="-291.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict_sdc</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~restrict_sdc -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge8" class="edge"><title>proc~restrict_time_space_fas&#45;&gt;proc~restrict_sdc</title>
+<path fill="none" stroke="#000000" d="M193.474,-188.184C216.137,-208.675 262.055,-250.196 289.147,-274.692"/>
+<polygon fill="#000000" stroke="#000000" points="287.139,-277.595 296.904,-281.706 291.834,-272.403 287.139,-277.595"/>
+</g>
+<!-- proc~end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node9" class="node"><title>proc~end_timer</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node9"><a xlink:href=".././proc/end_timer.html" xlink:title="end_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="450,-218 389,-218 389,-194 450,-194 450,-218"/>
+<text text-anchor="middle" x="419.5" y="-203.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">end_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge10" class="edge"><title>proc~restrict_time_space_fas&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M229.101,-188.001C244.654,-191.403 261.971,-194.781 278,-197 311.706,-201.665 350.303,-203.918 378.503,-205.002"/>
+<polygon fill="#000000" stroke="#000000" points="378.653,-208.51 388.77,-205.364 378.899,-201.514 378.653,-208.51"/>
+</g>
+<!-- proc~call_hooks -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node11" class="node"><title>proc~call_hooks</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node11"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
+<polygon fill="#d9534f" stroke="#d9534f" points="343,-188 280,-188 280,-164 343,-164 343,-188"/>
+<text text-anchor="middle" x="311.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">call_hooks</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~call_hooks -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge7" class="edge"><title>proc~restrict_time_space_fas&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M242.192,-176C251.527,-176 260.945,-176 269.68,-176"/>
+<polygon fill="#000000" stroke="#000000" points="269.945,-179.5 279.945,-176 269.945,-172.5 269.945,-179.5"/>
+</g>
+<!-- proc~start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node14" class="node"><title>proc~start_timer</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node14"><a xlink:href=".././proc/start_timer.html" xlink:title="start_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="451.5,-156 387.5,-156 387.5,-132 451.5,-132 451.5,-156"/>
+<text text-anchor="middle" x="419.5" y="-141.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">start_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge9" class="edge"><title>proc~restrict_time_space_fas&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M193.329,-163.802C211.094,-148.458 244.233,-122.918 278,-113 306.571,-104.609 315.813,-107.097 345,-113 359.386,-115.91 374.459,-121.724 387.183,-127.538"/>
+<polygon fill="#000000" stroke="#000000" points="385.873,-130.791 396.405,-131.937 388.886,-124.473 385.873,-130.791"/>
+</g>
+<!-- proc~pf_residual&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge12" class="edge"><title>proc~pf_residual&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M331.473,-146.11C335.929,-148.996 340.646,-152.084 345,-155 361.137,-165.808 379.046,-178.225 393.146,-188.102"/>
+<polygon fill="#000000" stroke="#000000" points="391.188,-191.003 401.383,-193.886 395.21,-185.275 391.188,-191.003"/>
+</g>
+<!-- proc~pf_residual&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge11" class="edge"><title>proc~pf_residual&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M344.017,-136.973C354.376,-137.951 366.053,-139.052 377.036,-140.088"/>
+<polygon fill="#000000" stroke="#000000" points="377.003,-143.601 387.288,-141.055 377.661,-136.632 377.003,-143.601"/>
+</g>
+<!-- end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node10" class="node"><title>end_timer</title>
+<polygon fill="#777777" stroke="#777777" points="342,-24 281,-24 281,-0 342,-0 342,-24"/>
+<text text-anchor="middle" x="311.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">end_timer</text>
+</g>
+<!-- proc~pf_send&#45;&gt;end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge14" class="edge"><title>proc~pf_send&#45;&gt;end_timer</title>
+<path fill="none" stroke="#000000" d="M206.095,-12C224.548,-12 249.631,-12 270.586,-12"/>
+<polygon fill="#000000" stroke="#000000" points="270.802,-15.5001 280.802,-12 270.802,-8.5001 270.802,-15.5001"/>
+</g>
+<!-- start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node12" class="node"><title>start_timer</title>
+<polygon fill="#777777" stroke="#777777" points="343.5,-66 279.5,-66 279.5,-42 343.5,-42 343.5,-66"/>
+<text text-anchor="middle" x="311.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">start_timer</text>
+</g>
+<!-- proc~pf_send&#45;&gt;start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge13" class="edge"><title>proc~pf_send&#45;&gt;start_timer</title>
+<path fill="none" stroke="#000000" d="M206.095,-20.3984C224.331,-26.2675 249.042,-34.2206 269.846,-40.916"/>
+<polygon fill="#000000" stroke="#000000" points="268.803,-44.2571 279.395,-43.9891 270.948,-37.5937 268.803,-44.2571"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge16" class="edge"><title>proc~pf_recv&#45;&gt;end_timer</title>
+<path fill="none" stroke="#000000" d="M206.095,-45.6016C224.716,-39.6085 250.089,-31.4425 271.159,-24.6614"/>
+<polygon fill="#000000" stroke="#000000" points="272.355,-27.9534 280.802,-21.5579 270.211,-21.2899 272.355,-27.9534"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge15" class="edge"><title>proc~pf_recv&#45;&gt;start_timer</title>
+<path fill="none" stroke="#000000" d="M206.095,-54C224.166,-54 248.596,-54 269.28,-54"/>
+<polygon fill="#000000" stroke="#000000" points="269.395,-57.5001 279.395,-54 269.395,-50.5001 269.395,-57.5001"/>
+</g>
+<!-- proc~interpolate_time_space&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge20" class="edge"><title>proc~interpolate_time_space&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M193.349,-266.347C222.103,-291.375 291.609,-343.393 345,-315 379.691,-296.552 400.962,-253.625 411.175,-227.484"/>
+<polygon fill="#000000" stroke="#000000" points="414.475,-228.651 414.663,-218.058 407.91,-226.221 414.475,-228.651"/>
+</g>
+<!-- proc~interpolate_time_space&#45;&gt;proc~call_hooks -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge17" class="edge"><title>proc~interpolate_time_space&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M200.105,-241.983C221.882,-228.967 256.819,-208.085 281.551,-193.303"/>
+<polygon fill="#000000" stroke="#000000" points="283.37,-196.293 290.158,-188.159 279.778,-190.285 283.37,-196.293"/>
+</g>
+<!-- proc~pf_apply_mat -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_node13" class="node"><title>proc~pf_apply_mat</title>
+<g id="a_proc~~pf_v_cycle_oc~~CallsGraph_node13"><a xlink:href=".././proc/pf_apply_mat.html" xlink:title="pf_apply_mat">
+<polygon fill="#d9534f" stroke="#d9534f" points="458,-345 381,-345 381,-321 458,-321 458,-345"/>
+<text text-anchor="middle" x="419.5" y="-330.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_apply_mat</text>
+</a>
+</g>
+</g>
+<!-- proc~interpolate_time_space&#45;&gt;proc~pf_apply_mat -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge18" class="edge"><title>proc~interpolate_time_space&#45;&gt;proc~pf_apply_mat</title>
+<path fill="none" stroke="#000000" d="M189.897,-266.057C206.044,-284.662 240.081,-319.619 278,-333 307.575,-343.436 342.883,-343.389 370.705,-340.757"/>
+<polygon fill="#000000" stroke="#000000" points="371.412,-344.201 380.974,-339.638 370.654,-337.242 371.412,-344.201"/>
+</g>
+<!-- proc~interpolate_time_space&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge19" class="edge"><title>proc~interpolate_time_space&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M226.294,-241.95C260.212,-232.192 306.801,-216.823 345,-197 363.386,-187.459 382.303,-173.711 396.341,-162.609"/>
+<polygon fill="#000000" stroke="#000000" points="398.821,-165.104 404.402,-156.099 394.423,-159.658 398.821,-165.104"/>
+</g>
+<!-- proc~restrict_sdc&#45;&gt;proc~pf_apply_mat -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge21" class="edge"><title>proc~restrict_sdc&#45;&gt;proc~pf_apply_mat</title>
+<path fill="none" stroke="#000000" d="M345.168,-306.02C354.941,-309.615 365.801,-313.611 376.104,-317.401"/>
+<polygon fill="#000000" stroke="#000000" points="375.163,-320.785 385.757,-320.953 377.581,-314.215 375.163,-320.785"/>
+</g>
+<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge23" class="edge"><title>proc~call_hooks&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M343.16,-184.677C354.338,-187.841 367.138,-191.464 378.978,-194.814"/>
+<polygon fill="#000000" stroke="#000000" points="378.065,-198.194 388.64,-197.549 379.971,-191.458 378.065,-198.194"/>
+</g>
+<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_v_cycle_oc~~CallsGraph_edge22" class="edge"><title>proc~call_hooks&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M343.16,-166.744C353.847,-163.518 366.019,-159.843 377.415,-156.403"/>
+<polygon fill="#000000" stroke="#000000" points="378.612,-159.698 387.174,-153.457 376.589,-152.996 378.612,-159.698"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~pf_v_cycle_oc~~CalledByGraph Pages: 1 -->
+<svg id="procpf_v_cycle_ocCalledByGraph" width="228pt" height="32pt"
+ viewBox="0.00 0.00 228.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_v_cycle_oc~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~pf_v_cycle_oc~~CalledByGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 224,-28 224,4 -4,4"/>
+<!-- proc~pf_v_cycle_oc -->
+<g id="proc~~pf_v_cycle_oc~~CalledByGraph_node1" class="node"><title>proc~pf_v_cycle_oc</title>
+<polygon fill="none" stroke="black" points="220,-24 140,-24 140,-0 220,-0 220,-24"/>
+<text text-anchor="middle" x="180" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_v_cycle_oc</text>
+</g>
+<!-- proc~pf_pfasst_block_oc -->
+<g id="proc~~pf_v_cycle_oc~~CalledByGraph_node2" class="node"><title>proc~pf_pfasst_block_oc</title>
+<g id="a_proc~~pf_v_cycle_oc~~CalledByGraph_node2"><a xlink:href=".././proc/pf_pfasst_block_oc.html" xlink:title="pf_pfasst_block_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="104,-24 0,-24 0,-0 104,-0 104,-24"/>
+<text text-anchor="middle" x="52" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_block_oc</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc -->
+<g id="proc~~pf_v_cycle_oc~~CalledByGraph_edge1" class="edge"><title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc</title>
+<path fill="none" stroke="#000000" d="M104.249,-12C112.677,-12 121.396,-12 129.774,-12"/>
+<polygon fill="#000000" stroke="#000000" points="129.78,-15.5001 139.78,-12 129.78,-8.5001 129.78,-15.5001"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/pf_v_cycle_oc.html#src">pf_v_cycle_oc</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_v_cycle_oc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">iteration</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index_c</span><span class="p">,</span><span class="n">level_index_f</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+  <span class="c">! Execute a V-cycle between levels nfine and ncoarse</span>
+
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">iteration</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_c</span>  <span class="c">!! Coarsest level of V-cycle</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_f</span>  <span class="c">!! Finest level of V-cycle</span>
+    <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
+
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">which</span><span class="p">,</span> <span class="n">dir</span>
+
+    <span class="n">which</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
+    <span class="c">! send forward by default, even if sweeping on both components; send backwards if sweeping on p only</span>
+    <span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">which</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="n">dir</span> <span class="o">=</span> <span class="mi">2</span> <span class="c">!</span>
+
+<span class="c">!     !  For a single level, just get new initial conditions and return</span>
+<span class="c">!     if (pf%nlevels == 1) then</span>
+<span class="c">!        f_lev_p =&gt; pf%levels(1)</span>
+<span class="c">!        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)</span>
+<span class="c">!        return</span>
+<span class="c">!     end if</span>
+
+    <span class="c">!&gt;  Post the nonblocking receives on the all the levels that will be recieving later</span>
+    <span class="c">!&gt;    (for single level this will be skipped)</span>
+    <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">level_index_f</span>
+       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_post</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
+    <span class="k">end do</span>
+    
+<span class="c">!     !</span>
+<span class="c">!     ! down (fine to coarse)</span>
+<span class="c">!     !</span>
+<span class="c">!     do level_index = pf%nlevels-1, 2, -1</span>
+<span class="c">!       f_lev_p =&gt; pf%levels(level_index);</span>
+<span class="c">!       c_lev_p =&gt; pf%levels(level_index-1)</span>
+<span class="c">!       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)</span>
+<span class="c">!       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)</span>
+<span class="c">!       call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)</span>
+<span class="c">!       call save(c_lev_p, which)</span>
+<span class="c">!     end do</span>
+    <span class="c">!&gt; move from fine to coarse doing sweeps </span>
+    <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_f</span><span class="p">,</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
+       <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">restrict_time_space_fas</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">which</span><span class="p">)</span>
+       <span class="k">call save</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+    <span class="k">end do</span>
+
+<span class="c">!     !</span>
+<span class="c">!     ! bottom  (coarsest level)</span>
+<span class="c">!     !</span>
+<span class="c">!     level_index=1</span>
+<span class="c">!     f_lev_p =&gt; pf%levels(level_index)</span>
+<span class="c">!     if (pf%pipeline_pred) then</span>
+<span class="c">!        do j = 1, f_lev_p%nsweeps</span>
+<span class="c">!           call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .true., dir)</span>
+<span class="c">!           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1, which)</span>
+<span class="c">!           call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .false., dir)</span>
+<span class="c">!        end do</span>
+<span class="c">!     else</span>
+<span class="c">! !       if (which == 0) then</span>
+<span class="c">! !         call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)</span>
+<span class="c">! !         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 1)</span>
+<span class="c">! !         call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)</span>
+<span class="c">! !         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 2) ! this interferes with skipping y sweeps: have to check </span>
+<span class="c">! !                                                                                        ! state residual in case of which==1 in sweeper as well</span>
+<span class="c">! !       else</span>
+<span class="c">!         call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)</span>
+<span class="c">!         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)</span>
+<span class="c">!         call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)</span>
+<span class="c">! !       endif</span>
+<span class="c">!     endif</span>
+    <span class="c">! Do the coarsest level</span>
+    <span class="n">level_index</span><span class="o">=</span><span class="n">level_index_c</span>
+    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">pipeline_pred</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span>
+          <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="k">end do</span>
+<span class="k">    else</span>
+<span class="k">       call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+    <span class="n">endif</span>
+    
+<span class="c">!     !</span>
+<span class="c">!     ! up  (coarse to fine)</span>
+<span class="c">!     !</span>
+<span class="c">!     do level_index = 2, pf%nlevels</span>
+<span class="c">!       f_lev_p =&gt; pf%levels(level_index);</span>
+<span class="c">!       c_lev_p =&gt; pf%levels(level_index-1)</span>
+<span class="c">!       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)</span>
+<span class="c">!       call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false., dir)</span>
+<span class="c">! </span>
+<span class="c">!        if (pf%rank /= 0) then</span>
+<span class="c">!           ! interpolate increment to q0 -- the fine initial condition</span>
+<span class="c">!           ! needs the same increment that Q(1) got, but applied to the</span>
+<span class="c">!           ! new fine initial condition</span>
+<span class="c">!           if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)</span>
+<span class="c">!        end if</span>
+<span class="c">!        if (pf%rank /= pf%comm%nproc-1) then</span>
+<span class="c">!           if (which .eq. 2) call interpolate_qend(pf, f_lev_p, c_lev_p)</span>
+<span class="c">!        end if</span>
+<span class="c">! </span>
+<span class="c">!        if (level_index &lt; pf%nlevels) then</span>
+<span class="c">!           call call_hooks(pf, level_index, PF_PRE_SWEEP)</span>
+<span class="c">!           ! compute residual</span>
+<span class="c">!           ! do while residual &gt; tol and j &lt; nswps</span>
+<span class="c">!           ! assuming residual computed at end of sweep </span>
+<span class="c">!           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)</span>
+<span class="c">!        end if</span>
+<span class="c">!     end do</span>
+    
+    <span class="c">! Now move coarse to fine interpolating and sweeping</span>
+    <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">level_index_f</span>
+       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
+       <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">interpolate_time_space</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">which</span><span class="p">)</span>
+       
+       <span class="k">if</span> <span class="p">((</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span>  <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                        <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+       
+       <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       
+       <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
+          <span class="c">! interpolate increment to q0 -- the fine initial condition</span>
+          <span class="c">! needs the same increment that Q(1) got, but applied to the</span>
+          <span class="c">! new fine initial condition</span>
+          <span class="k">if</span> <span class="p">((</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span> <span class="k">call </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">end if</span>
+<span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">          if</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                       <span class="k">call </span><span class="n">interpolate_qend</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">)</span>
+       <span class="k">end if</span>
+
+       <span class="c">! don&#39;t sweep on the finest level since that is only done at beginning</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">level_index_f</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">          call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">else</span>  <span class="c">!  compute residual for diagnostics since we didn&#39;t sweep</span>
+          <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">end if</span>
+<span class="k">    end do</span>
+
+
+<span class="k">  end subroutine </span><span class="n">pf_v_cycle_oc</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

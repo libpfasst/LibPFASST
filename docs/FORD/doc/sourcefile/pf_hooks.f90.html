@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_hooks.f90 &ndash; libpfasst</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_hooks.f90
+    <small>Source File</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.7% of total for source files.">64 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_hooks.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+  
+     <li class="active">pf_hooks.f90</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-0">Modules</a></h3></div>
+  <div id="mods-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_hooks.html">pf_mod_hooks</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pf_hooks.f90.html#src">pf_hooks.f90</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    <div class="col-md-9" id='text'>
+      <p>Calling of user defined routines from various places in the pfasst algorithm</p>
+      <br>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">This file depends on</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: sourcefile~~pf_hooks.f90~~EfferentGraph Pages: 1 -->
+<svg id="sourcefilepf_hooksf90EfferentGraph" width="296pt" height="52pt"
+ viewBox="0.00 0.00 296.00 52.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 48)">
+<title>sourcefile~~pf_hooks.f90~~EfferentGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-48 292,-48 292,4 -4,4"/>
+<!-- sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_node1" class="node"><title>sourcefile~pf_hooks.f90</title>
+<polygon fill="none" stroke="black" points="288,-24 214,-24 214,-0 288,-0 288,-24"/>
+<text text-anchor="middle" x="251" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_hooks.f90</text>
+</g>
+<!-- sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_node2" class="node"><title>sourcefile~pf_timer.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~EfferentGraph_node2"><a xlink:href=".././sourcefile/pf_timer.f90.html" xlink:title="pf_timer.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="178,-44 108,-44 108,-20 178,-20 178,-44"/>
+<text text-anchor="middle" x="143" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_timer.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_timer.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_edge1" class="edge"><title>sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_timer.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M213.817,-18.8269C205.541,-20.3885 196.654,-22.0653 188.087,-23.6818"/>
+<polygon fill="#000000" stroke="#000000" points="187.41,-20.2476 178.232,-25.5411 188.708,-27.1263 187.41,-20.2476"/>
+</g>
+<!-- sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_node3" class="node"><title>sourcefile~pf_dtype.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~EfferentGraph_node3"><a xlink:href=".././sourcefile/pf_dtype.f90.html" xlink:title="pf_dtype.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="72,-24 0,-24 0,-0 72,-0 72,-24"/>
+<text text-anchor="middle" x="36" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_dtype.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_edge2" class="edge"><title>sourcefile~pf_hooks.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M213.742,-11.3982C202.307,-11.2348 189.626,-11.0807 178,-11 146.89,-10.784 139.11,-10.7809 108,-11 99.6743,-11.0586 90.7997,-11.1559 82.2455,-11.2674"/>
+<polygon fill="#000000" stroke="#000000" points="81.9791,-7.77066 72.0285,-11.4088 82.076,-14.77 81.9791,-7.77066"/>
+</g>
+<!-- sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~EfferentGraph_edge3" class="edge"><title>sourcefile~pf_timer.f90&#45;&gt;sourcefile~pf_dtype.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M107.91,-25.5066C99.7319,-23.9489 90.8721,-22.2613 82.2756,-20.6239"/>
+<polygon fill="#000000" stroke="#000000" points="82.8401,-17.1686 72.3618,-18.7356 81.5303,-24.045 82.8401,-17.1686"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="190pt" height="32pt"
+ viewBox="0.00 0.00 190.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 186,-28 186,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node"><title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="67,-24 0,-24 0,-0 67,-0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="182,-24 85,-24 85,-0 182,-0 182,-24"/>
+<text text-anchor="middle" x="133.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+    
+      
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Files dependent on this one</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: sourcefile~~pf_hooks.f90~~AfferentGraph Pages: 1 -->
+<svg id="sourcefilepf_hooksf90AfferentGraph" width="597pt" height="524pt"
+ viewBox="0.00 0.00 597.00 523.53" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 519.533)">
+<title>sourcefile~~pf_hooks.f90~~AfferentGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-519.533 593,-519.533 593,4 -4,4"/>
+<!-- sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node1" class="node"><title>sourcefile~pf_hooks.f90</title>
+<polygon fill="none" stroke="black" points="74,-255 0,-255 0,-231 74,-231 74,-255"/>
+<text text-anchor="middle" x="37" y="-240.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_hooks.f90</text>
+</g>
+<!-- sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node2" class="node"><title>sourcefile~pf_imexq.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node2"><a xlink:href=".././sourcefile/pf_imexq.f90.html" xlink:title="pf_imexQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="351,-276 275,-276 275,-252 351,-252 351,-276"/>
+<text text-anchor="middle" x="313" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge1" class="edge"><title>sourcefile~pf_imexq.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M290.324,-276.164C262.882,-290.149 213.939,-310.409 170.5,-304"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M168.5,-304C129.718,-298.278 89.5021,-276.693 64.1483,-260.817"/>
+<polygon fill="#000000" stroke="#000000" points="65.815,-257.727 55.5101,-255.266 62.0307,-263.616 65.815,-257.727"/>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node3" class="node"><title>sourcefile~pf_parallel_oc.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node3"><a xlink:href=".././sourcefile/pf_parallel_oc.f90.html" xlink:title="pf_parallel_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="494,-375 397,-375 397,-351 494,-351 494,-375"/>
+<text text-anchor="middle" x="445.5" y="-360.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parallel_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge2" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M426.513,-350.844C402.248,-335.419 357.085,-310.081 314,-304"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-304C249.728,-295.21 232.715,-313.179 170.5,-304"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node4" class="node"><title>sourcefile~pf_interpolate.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node4"><a xlink:href=".././sourcefile/pf_interpolate.f90.html" xlink:title="pf_interpolate.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="361,-356 265,-356 265,-332 361,-332 361,-356"/>
+<text text-anchor="middle" x="313" y="-341.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_interpolate.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge16" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_interpolate.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M396.648,-356.033C388.476,-354.843 379.913,-353.596 371.522,-352.375"/>
+<polygon fill="#000000" stroke="#000000" points="371.81,-348.88 361.411,-350.903 370.802,-355.807 371.81,-348.88"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node10" class="node"><title>sourcefile~pf_pfasst.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node10"><a xlink:href=".././sourcefile/pf_pfasst.f90.html" xlink:title="pf_pfasst.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="206.5,-455 132.5,-455 132.5,-431 206.5,-431 206.5,-455"/>
+<text text-anchor="middle" x="169.5" y="-440.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge19" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M396.634,-371.22C360.108,-378.078 308.787,-388.982 265,-403 244.671,-409.508 222.672,-418.686 205.018,-426.609"/>
+<polygon fill="#000000" stroke="#000000" points="203.344,-423.526 195.696,-430.857 206.247,-429.895 203.344,-423.526"/>
+</g>
+<!-- sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node12" class="node"><title>sourcefile~pf_restrict.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node12"><a xlink:href=".././sourcefile/pf_restrict.f90.html" xlink:title="pf_restrict.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="208.5,-356 130.5,-356 130.5,-332 208.5,-332 208.5,-356"/>
+<text text-anchor="middle" x="169.5" y="-341.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_restrict.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge23" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_restrict.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-304C292.732,-301.28 246.232,-315.985 211.767,-328.326"/>
+<polygon fill="#000000" stroke="#000000" points="210.154,-325.188 201.95,-331.893 212.544,-331.767 210.154,-325.188"/>
+</g>
+<!-- sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node16" class="node"><title>sourcefile~pf_comm.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node16"><a xlink:href=".././sourcefile/pf_comm.f90.html" xlink:title="pf_comm.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="350.5,-436 275.5,-436 275.5,-412 350.5,-412 350.5,-436"/>
+<text text-anchor="middle" x="313" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_comm.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge26" class="edge"><title>sourcefile~pf_parallel_oc.f90&#45;&gt;sourcefile~pf_comm.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M418.717,-375.052C398.788,-384.367 370.991,-397.361 349.044,-407.619"/>
+<polygon fill="#000000" stroke="#000000" points="347.306,-404.568 339.729,-411.973 350.27,-410.91 347.306,-404.568"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge3" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M285.426,-356.09C244.746,-372.649 165.879,-396.907 110,-365 72.5025,-343.589 52.5729,-294.163 43.7513,-265.22"/>
+<polygon fill="#000000" stroke="#000000" points="47.0106,-263.887 40.9007,-255.231 40.2793,-265.808 47.0106,-263.887"/>
+</g>
+<!-- sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge24" class="edge"><title>sourcefile~pf_interpolate.f90&#45;&gt;sourcefile~pf_restrict.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M264.883,-344C250.12,-344 233.806,-344 218.953,-344"/>
+<polygon fill="#000000" stroke="#000000" points="218.941,-340.5 208.941,-344 218.941,-347.5 218.941,-340.5"/>
+</g>
+<!-- sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node5" class="node"><title>sourcefile~pf_parallel.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node5"><a xlink:href=".././sourcefile/pf_parallel.f90.html" xlink:title="pf_parallel.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="485.5,-436 405.5,-436 405.5,-412 485.5,-412 485.5,-436"/>
+<text text-anchor="middle" x="445.5" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parallel.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge4" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-464C246.911,-465.899 228.164,-532.251 170.5,-502"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M168.5,-502C141.045,-487.597 128.882,-488.591 110,-464 62.5111,-402.154 45.6912,-307.759 40.298,-265.188"/>
+<polygon fill="#000000" stroke="#000000" points="43.7533,-264.602 39.1122,-255.077 36.801,-265.417 43.7533,-264.602"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge17" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_interpolate.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M424.68,-411.85C402.707,-398.38 367.091,-376.546 342.213,-361.296"/>
+<polygon fill="#000000" stroke="#000000" points="343.934,-358.245 333.579,-356.002 340.275,-364.213 343.934,-358.245"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge22" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-464C279.972,-464.935 244.287,-459.593 216.766,-454.065"/>
+<polygon fill="#000000" stroke="#000000" points="217.147,-450.569 206.642,-451.949 215.715,-457.421 217.147,-450.569"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_restrict.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge25" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_restrict.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M419.197,-436.19C393.4,-447.546 351.898,-462.894 314,-464"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-464C289.478,-464.657 283.578,-457.748 265,-445 232.138,-422.45 202.167,-386.688 185.15,-364.322"/>
+<polygon fill="#000000" stroke="#000000" points="187.866,-362.11 179.081,-356.186 182.255,-366.295 187.866,-362.11"/>
+</g>
+<!-- sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge27" class="edge"><title>sourcefile~pf_parallel.f90&#45;&gt;sourcefile~pf_comm.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M405.346,-424C391.451,-424 375.665,-424 361.172,-424"/>
+<polygon fill="#000000" stroke="#000000" points="360.892,-420.5 350.892,-424 360.892,-427.5 360.892,-420.5"/>
+</g>
+<!-- sourcefile~pf_imexq_oc.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node6" class="node"><title>sourcefile~pf_imexq_oc.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node6"><a xlink:href=".././sourcefile/pf_imexq_oc.f90.html" xlink:title="pf_imexQ_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="216.5,-276 122.5,-276 122.5,-252 216.5,-252 216.5,-276"/>
+<text text-anchor="middle" x="169.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imexq_oc.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge5" class="edge"><title>sourcefile~pf_imexq_oc.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M122.491,-256.596C110.107,-254.603 96.7087,-252.447 84.3092,-250.452"/>
+<polygon fill="#000000" stroke="#000000" points="84.6019,-246.954 74.1728,-248.821 83.4897,-253.865 84.6019,-246.954"/>
+</g>
+<!-- sourcefile~pf_imk.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node7" class="node"><title>sourcefile~pf_imk.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node7"><a xlink:href=".././sourcefile/pf_imk.f90.html" xlink:title="pf_imk.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="200.5,-234 138.5,-234 138.5,-210 200.5,-210 200.5,-234"/>
+<text text-anchor="middle" x="169.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imk.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_imk.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge6" class="edge"><title>sourcefile~pf_imk.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M138.233,-226.871C122.171,-229.455 102.094,-232.686 84.1351,-235.576"/>
+<polygon fill="#000000" stroke="#000000" points="83.4518,-232.141 74.1349,-237.185 84.564,-239.052 83.4518,-232.141"/>
+</g>
+<!-- sourcefile~pf_misdcq_oc.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node8" class="node"><title>sourcefile~pf_misdcq_oc.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node8"><a xlink:href=".././sourcefile/pf_misdcq_oc.f90.html" xlink:title="pf_misdcQ_oc.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="219,-192 120,-192 120,-168 219,-168 219,-192"/>
+<text text-anchor="middle" x="169.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_oc.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_misdcq_oc.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge7" class="edge"><title>sourcefile~pf_misdcq_oc.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M131.571,-192.092C124.322,-194.791 116.846,-197.808 110,-201 94.6551,-208.156 78.2972,-217.544 65.0575,-225.629"/>
+<polygon fill="#000000" stroke="#000000" points="63.0931,-222.729 56.4405,-230.974 66.7832,-228.677 63.0931,-222.729"/>
+</g>
+<!-- sourcefile~pf_misdcq.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node9" class="node"><title>sourcefile~pf_misdcq.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node9"><a xlink:href=".././sourcefile/pf_misdcq.f90.html" xlink:title="pf_misdcQ.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="210.5,-150 128.5,-150 128.5,-126 210.5,-126 210.5,-150"/>
+<text text-anchor="middle" x="169.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_misdcq.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge8" class="edge"><title>sourcefile~pf_misdcq.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M128.43,-149.233C121.983,-151.912 115.598,-155.142 110,-159 85.2636,-176.047 63.8774,-203.619 50.9812,-222.492"/>
+<polygon fill="#000000" stroke="#000000" points="47.9661,-220.706 45.3549,-230.974 53.7994,-224.575 47.9661,-220.706"/>
+</g>
+<!-- sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge9" class="edge"><title>sourcefile~pf_pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.06,-430.849C135.792,-422.756 120.569,-411.205 110,-398 76.6841,-356.376 54.6651,-296.82 44.4981,-265.012"/>
+<polygon fill="#000000" stroke="#000000" points="47.8087,-263.871 41.5053,-255.355 41.1224,-265.943 47.8087,-263.871"/>
+</g>
+<!-- sourcefile~pf_verlet.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node11" class="node"><title>sourcefile~pf_verlet.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node11"><a xlink:href=".././sourcefile/pf_verlet.f90.html" xlink:title="pf_verlet.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="205.5,-108 133.5,-108 133.5,-84 205.5,-84 205.5,-108"/>
+<text text-anchor="middle" x="169.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_verlet.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_verlet.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge10" class="edge"><title>sourcefile~pf_verlet.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M133.25,-104.147C125.011,-107.216 116.696,-111.382 110,-117 76.4574,-145.147 55.274,-193.149 45.1282,-221.075"/>
+<polygon fill="#000000" stroke="#000000" points="41.756,-220.116 41.7775,-230.711 48.3677,-222.415 41.756,-220.116"/>
+</g>
+<!-- sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge14" class="edge"><title>sourcefile~pf_restrict.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M135.415,-331.961C126.779,-328.117 117.732,-323.427 110,-318 87.8581,-302.458 66.9641,-279.408 53.4459,-262.968"/>
+<polygon fill="#000000" stroke="#000000" points="56.0739,-260.651 47.0816,-255.048 50.6174,-265.035 56.0739,-260.651"/>
+</g>
+<!-- sourcefile~pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node13" class="node"><title>sourcefile~pfasst.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node13"><a xlink:href=".././sourcefile/pfasst.f90.html" xlink:title="pfasst.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="589,-436 530,-436 530,-412 589,-412 589,-436"/>
+<text text-anchor="middle" x="559.5" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pfasst.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge12" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-502C249.115,-501.259 226.191,-531.216 170.5,-502"/>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge15" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_imexq.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M551.649,-411.872C541.221,-394.356 519.823,-361.901 494,-342 453.883,-311.083 399.634,-289.765 361.208,-277.326"/>
+<polygon fill="#000000" stroke="#000000" points="361.897,-273.874 351.308,-274.204 359.792,-280.549 361.897,-273.874"/>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge18" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_parallel.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M529.948,-424C519.522,-424 507.409,-424 495.699,-424"/>
+<polygon fill="#000000" stroke="#000000" points="495.564,-420.5 485.564,-424 495.564,-427.5 495.564,-420.5"/>
+</g>
+<!-- sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge21" class="edge"><title>sourcefile~pfasst.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M539.132,-436.118C498.543,-460.163 401.102,-510.86 314,-502"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M312,-502C268.721,-501.49 223.329,-477.821 195.972,-460.621"/>
+<polygon fill="#000000" stroke="#000000" points="197.711,-457.577 187.415,-455.079 193.906,-463.453 197.711,-457.577"/>
+</g>
+<!-- sourcefile~pf_rkstepper.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node14" class="node"><title>sourcefile~pf_rkstepper.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node14"><a xlink:href=".././sourcefile/pf_rkstepper.f90.html" xlink:title="pf_rkstepper.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="215,-66 124,-66 124,-42 215,-42 215,-66"/>
+<text text-anchor="middle" x="169.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_rkstepper.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_rkstepper.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge13" class="edge"><title>sourcefile~pf_rkstepper.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M123.748,-65.5744C118.739,-68.1247 114.007,-71.2275 110,-75 67.2625,-115.237 48.6947,-185.042 41.6818,-220.675"/>
+<polygon fill="#000000" stroke="#000000" points="38.1564,-220.496 39.7949,-230.963 45.0415,-221.759 38.1564,-220.496"/>
+</g>
+<!-- sourcefile~pf_magnus_picard.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_node15" class="node"><title>sourcefile~pf_magnus_picard.f90</title>
+<g id="a_sourcefile~~pf_hooks.f90~~AfferentGraph_node15"><a xlink:href=".././sourcefile/pf_magnus_picard.f90.html" xlink:title="pf_magnus_picard.f90">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="229,-24 110,-24 110,-0 229,-0 229,-24"/>
+<text text-anchor="middle" x="169.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_magnus_picard.f90</text>
+</a>
+</g>
+</g>
+<!-- sourcefile~pf_magnus_picard.f90&#45;&gt;sourcefile~pf_hooks.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge11" class="edge"><title>sourcefile~pf_magnus_picard.f90&#45;&gt;sourcefile~pf_hooks.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M122.022,-24.0733C117.606,-26.5223 113.485,-29.465 110,-33 57.7174,-86.0383 43.3405,-178.655 39.4335,-220.883"/>
+<polygon fill="#000000" stroke="#000000" points="35.9384,-220.682 38.6173,-230.932 42.9154,-221.248 35.9384,-220.682"/>
+</g>
+<!-- sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90 -->
+<g id="sourcefile~~pf_hooks.f90~~AfferentGraph_edge20" class="edge"><title>sourcefile~pf_comm.f90&#45;&gt;sourcefile~pf_pfasst.f90</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M275.192,-428.942C257.284,-431.347 235.573,-434.262 216.576,-436.813"/>
+<polygon fill="#000000" stroke="#000000" points="216.079,-433.348 206.634,-438.148 217.011,-440.286 216.079,-433.348"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="190pt" height="32pt"
+ viewBox="0.00 0.00 190.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 186,-28 186,4 -4,4"/>
+<!-- Source File -->
+<g id="node1" class="node"><title>Source File</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="67,-24 0,-24 0,-0 67,-0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Source File</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="182,-24 85,-24 85,-0 182,-0 182,-24"/>
+<text text-anchor="middle" x="133.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a file to a file which it depends on. A file
+    is dependent upon another if the latter must be compiled before the former
+    can be.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+      
+      <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#mods-1">Modules</a></h3></div>
+  <div id="mods-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_hooks.html">pf_mod_hooks</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../sourcefile/pf_hooks.f90.html#src">pf_hooks.f90</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    <section>
+      <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl"><pre><span></span><a name="ln-1"></a><span class="c">!! Calling of user defined routines from various places in the pfasst algorithm</span>
+<a name="ln-2"></a><span class="c">!</span>
+<a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
+<a name="ln-4"></a><span class="c">!</span>
+<a name="ln-5"></a><span class="c">!&gt;  Module for the calling of user defined routines from various places in the pfasst algorithm</span>
+<a name="ln-6"></a><span class="k">module </span><span class="n">pf_mod_hooks</span>
+<a name="ln-7"></a>  <span class="k">use </span><span class="n">pf_mod_dtype</span>
+<a name="ln-8"></a>  <span class="k">implicit none</span>
+<a name="ln-9"></a>
+<a name="ln-10"></a>  <span class="c">!&gt;  Define hook indices</span>
+<a name="ln-11"></a>  <span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="p">&amp;</span>
+<a name="ln-12"></a>       <span class="n">PF_PRE_PREDICTOR</span>     <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-13"></a>       <span class="n">PF_POST_PREDICTOR</span>    <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-14"></a>       <span class="n">PF_PRE_ITERATION</span>     <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-15"></a>       <span class="n">PF_POST_ITERATION</span>    <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-16"></a>       <span class="n">PF_PRE_SWEEP</span>         <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-17"></a>       <span class="n">PF_POST_SWEEP</span>        <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-18"></a>       <span class="n">PF_PRE_STEP</span>          <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-19"></a>       <span class="n">PF_POST_STEP</span>         <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-20"></a>       <span class="n">PF_PRE_INTERP_ALL</span>    <span class="o">=</span> <span class="mi">9</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-21"></a>       <span class="n">PF_POST_INTERP_ALL</span>   <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-22"></a>       <span class="n">PF_PRE_INTERP_Q0</span>     <span class="o">=</span> <span class="mi">11</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-23"></a>       <span class="n">PF_POST_INTERP_Q0</span>    <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-24"></a>       <span class="n">PF_PRE_RESTRICT_ALL</span>  <span class="o">=</span> <span class="mi">13</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-25"></a>       <span class="n">PF_POST_RESTRICT_ALL</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-26"></a>       <span class="n">PF_PRE_CONVERGENCE</span>   <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-27"></a>       <span class="n">PF_POST_CONVERGENCE</span>  <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-28"></a>       <span class="n">PF_MAX_HOOK</span>          <span class="o">=</span> <span class="mi">16</span>
+<a name="ln-29"></a>
+<a name="ln-30"></a>  <span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="p">&amp;</span>
+<a name="ln-31"></a>       <span class="n">PF_HOOK_LOG_ONE</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-32"></a>       <span class="n">PF_HOOK_LOG_ALL</span>  <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-33"></a>       <span class="n">PF_HOOK_LOG_LAST</span> <span class="o">=</span> <span class="n">PF_MAX_HOOK</span>
+<a name="ln-34"></a>
+<a name="ln-35"></a>  <span class="c">!&gt;  Define hook names</span>
+<a name="ln-36"></a>  <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">hook_names</span><span class="p">(</span><span class="n">PF_HOOK_LOG_LAST</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span> <span class="p">&amp;</span>
+<a name="ln-37"></a>       <span class="s1">&#39;pre-predictor      &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-38"></a>       <span class="s1">&#39;post-predictor     &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-39"></a>       <span class="s1">&#39;pre-iteration      &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-40"></a>       <span class="s1">&#39;post-iteration     &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-41"></a>       <span class="s1">&#39;pre-sweep          &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-42"></a>       <span class="s1">&#39;post-sweep         &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-43"></a>       <span class="s1">&#39;pre-step           &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-44"></a>       <span class="s1">&#39;post-step          &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-45"></a>       <span class="s1">&#39;pre-interp-all     &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-46"></a>       <span class="s1">&#39;post-interp-all    &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-47"></a>       <span class="s1">&#39;pre-interp-q0      &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-48"></a>       <span class="s1">&#39;post-interp-q0     &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-49"></a>       <span class="s1">&#39;pre-restrict-all   &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-50"></a>       <span class="s1">&#39;post-restrict-all  &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-51"></a>       <span class="s1">&#39;pre-convergence    &#39;</span><span class="p">,</span>  <span class="p">&amp;</span>
+<a name="ln-52"></a>       <span class="s1">&#39;post-convergence   &#39;</span> <span class="o">/</span><span class="p">)</span>
+<a name="ln-53"></a>
+<a name="ln-54"></a><span class="k">contains</span>
+<a name="ln-55"></a>
+<a name="ln-56"></a>  <span class="c">!&gt; Subroutine to add a procedure to the hook on the given level</span>
+<a name="ln-57"></a>  <span class="k">subroutine </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_ind</span><span class="p">,</span> <span class="n">hook</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+<a name="ln-58"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>            <span class="c">!! main pfasst structure</span>
+<a name="ln-59"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_ind</span>     <span class="c">!! which pfasst level to add hook</span>
+<a name="ln-60"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">hook</span>          <span class="c">!! which hook to add</span>
+<a name="ln-61"></a>    <span class="k">procedure</span><span class="p">(</span><span class="n">pf_hook_p</span><span class="p">)</span>             <span class="kd">::</span> <span class="n">proc</span>          <span class="c">!! precudre to call from hook</span>
+<a name="ln-62"></a>
+<a name="ln-63"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span>   <span class="c">!</span>
+<a name="ln-64"></a>
+<a name="ln-65"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
+<a name="ln-66"></a>       <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<a name="ln-67"></a>          <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<a name="ln-68"></a>          <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
+<a name="ln-69"></a>       <span class="k">end do</span>
+<a name="ln-70"></a><span class="k">    else</span>  <span class="c">! Do to just level level_ind</span>
+<a name="ln-71"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<a name="ln-72"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
+<a name="ln-73"></a>    <span class="k">end if</span>
+<a name="ln-74"></a>
+<a name="ln-75"></a><span class="k">  end subroutine </span><span class="n">pf_add_hook</span>
+<a name="ln-76"></a>
+<a name="ln-77"></a>  <span class="c">!&gt; Subroutine to call hooks associated with the hook and level</span>
+<a name="ln-78"></a>  <span class="k">subroutine </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_ind</span><span class="p">,</span> <span class="n">hook</span><span class="p">)</span>
+<a name="ln-79"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-80"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>         <span class="c">!! main pfasst structure</span>
+<a name="ln-81"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>            <span class="kd">::</span> <span class="n">level_ind</span>  <span class="c">!! which pfasst level to call hook</span>
+<a name="ln-82"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>            <span class="kd">::</span> <span class="n">hook</span>       <span class="c">!! which hook to call</span>
+<a name="ln-83"></a>
+<a name="ln-84"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>  <span class="c">!!  hook loop index</span>
+<a name="ln-85"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span>  <span class="c">!!  level loop index</span>
+<a name="ln-86"></a>
+<a name="ln-87"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">THOOKS</span><span class="p">)</span>
+<a name="ln-88"></a>
+<a name="ln-89"></a>    <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hook</span>
+<a name="ln-90"></a>
+<a name="ln-91"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
+<a name="ln-92"></a>       <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<a name="ln-93"></a>          <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-94"></a>             <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">)</span>
+<a name="ln-95"></a>          <span class="k">end do</span>
+<a name="ln-96"></a><span class="k">       end do</span>
+<a name="ln-97"></a><span class="k">    else</span>  <span class="c">! Do to just level level_ind</span>
+<a name="ln-98"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-99"></a>          <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_ind</span><span class="p">),</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">)</span>
+<a name="ln-100"></a>       <span class="k">end do</span>
+<a name="ln-101"></a><span class="k">    end if</span>
+<a name="ln-102"></a>
+<a name="ln-103"></a><span class="k">    call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">THOOKS</span><span class="p">)</span>
+<a name="ln-104"></a>  <span class="k">end subroutine </span><span class="n">call_hooks</span>
+<a name="ln-105"></a>
+<a name="ln-106"></a>  <span class="c">!&gt;  Subroutine defining log hook</span>
+<a name="ln-107"></a>  <span class="k">subroutine </span><span class="n">pf_logger_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+<a name="ln-108"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-109"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">level</span>
+<a name="ln-110"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_state_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">state</span>
+<a name="ln-111"></a>    
+<a name="ln-112"></a>    <span class="k">print</span> <span class="s1">&#39;(&quot;PF:: trank: &quot;,i4,&quot;, step: &quot;,i6,&quot;, iter: &quot;,i3,&quot;, level: &quot;,i2,&quot; location: &quot;,a)&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-113"></a>         <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="p">,</span> <span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">hook_names</span><span class="p">(</span><span class="n">state</span><span class="p">%</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-114"></a>  <span class="k">end subroutine </span><span class="n">pf_logger_hook</span>
+<a name="ln-115"></a>
+<a name="ln-116"></a>  <span class="c">!&gt;  Subroutine to add log hook</span>
+<a name="ln-117"></a>  <span class="k">subroutine </span><span class="n">pf_logger_attach</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
+<a name="ln-118"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-119"></a>    
+<a name="ln-120"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span>
+<a name="ln-121"></a>    
+<a name="ln-122"></a>    <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ONE</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-123"></a>       <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
+<a name="ln-124"></a>    <span class="k">end do</span>
+<a name="ln-125"></a><span class="k">    </span>
+<a name="ln-126"></a><span class="k">    do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<a name="ln-127"></a>       <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_LAST</span>
+<a name="ln-128"></a>          <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
+<a name="ln-129"></a>       <span class="k">end do</span>
+<a name="ln-130"></a><span class="k">    end do</span>
+<a name="ln-131"></a><span class="k">  end subroutine </span><span class="n">pf_logger_attach</span>
+<a name="ln-132"></a>
+<a name="ln-133"></a><span class="k">end module </span><span class="n">pf_mod_hooks</span>
+</pre></div>
+
+    </section>
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>
+All Types &ndash; libpfasst
+</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">libpfasst </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+      <div class="row">
+        <div class="col-lg-12" id='text'>
+			 <h1>Derived Types</h1>
+			 <table class="table table-striped nostretched">
+			 <thead>
+			 <tr><th>Type</th><th>Location</th><th>Extends</th><th>Description</th></tr>
+			 </thead><tbody>
+			 
+			   <tr><td><a href='../type/ndarray.html'>ndarray</a></td><td><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></td><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td><p>N-dimensional array type,  extends the abstract encap type</p></td></tr>
+			 
+			   <tr><td><a href='../type/ndarray_factory.html'>ndarray_factory</a></td><td><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></td><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td><p>Type to create and destroy N-dimenstional arrays</p></td></tr>
+			 
+			   <tr><td><a href='../type/ndarray_oc.html'>ndarray_oc</a></td><td><a href='../module/pf_mod_ndarray_oc.html'>pf_mod_ndarray_oc</a></td><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td><p>N-dimensional array type for optimal control,  extends the abstract encap type  </p></td></tr>
+			 
+			   <tr><td><a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a></td><td><a href='../module/pf_mod_ndarray_oc.html'>pf_mod_ndarray_oc</a></td><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td><p>Type to create and destroy N-dimenstional arrays for optimal control</p></td></tr>
+			 
+			   <tr><td><a href='../type/ndsysarray.html'>ndsysarray</a></td><td><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></td><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td><p>Type for system of  N-dimensional arrays,  extends the abstract encap type  </p></td></tr>
+			 
+			   <tr><td><a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a></td><td><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></td><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td><p>Type to create and destroy systems of N-dimensional arrays</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_amisdc_t.html'>pf_amisdc_t</a></td><td><a href='../module/pf_mod_amisdc.html'>pf_mod_amisdc</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Asynchronous multi-implicit sweeper type (old style)</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_amisdcq_t.html'>pf_amisdcQ_t</a></td><td><a href='../module/pf_mod_amisdcq.html'>pf_mod_amisdcQ</a></td><td><a href='../type/pf_amisdc_t.html'>pf_amisdc_t</a></td><td><p>Asynchronous multi-implicit sweeper type </p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_ark_t.html'>pf_ark_t</a></td><td><a href='../module/pf_mod_rkstepper.html'>pf_mod_rkstepper</a></td><td><a href='../type/pf_stepper_t.html'>pf_stepper_t</a></td><td><p>IMEX or additive or semi-implicit Runge-Kutta stepper  type</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_comm_t.html'>pf_comm_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>Data type to define the communicator</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The abstract data type of the solution (must be extended)</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>Abstract type for creation and destruction of objects</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_fft_t.html'>pf_fft_t</a></td><td><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></td><td>None</td><td><p>Define the fft package</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_fft_t%7E2.html'>pf_fft_t</a></td><td><a href='../module/pf_mod_fftpackage%7E2.html'>pf_mod_fftpackage</a></td><td>None</td><td></td></tr>
+			 
+			   <tr><td><a href='../type/pf_hook_t.html'>pf_hook_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>Abstract hook type: hooks call diagnostic routines from various places in code</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_imex_t.html'>pf_imex_t</a></td><td><a href='../module/pf_mod_imex.html'>pf_mod_imex</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>IMEX SDC sweeper type (old style), extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a></td><td><a href='../module/pf_mod_imexq_oc.html'>pf_mod_imexQ_oc</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>IMEX SDC sweeper type for optimal control, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_imexq_t.html'>pf_imexQ_t</a></td><td><a href='../module/pf_mod_imexq.html'>pf_mod_imexQ</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>IMEX SDC sweeper type, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_imk_t.html'>pf_imk_t</a></td><td><a href='../module/pf_mod_imk.html'>pf_mod_imk</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Implicit Munthe-Kaas Runge-Kutta sweeper type, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_level_t.html'>pf_level_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>Data type of a PFASST level</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a></td><td><a href='../module/pf_mod_magnus_picard.html'>pf_mod_magnus_picard</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Magnus Picard sweeper type, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_misdc_t.html'>pf_misdc_t</a></td><td><a href='../module/pf_mod_misdc.html'>pf_mod_misdc</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Multi-implicit SDC sweeper type (old style), extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_misdcq_oc_t.html'>pf_misdcQ_oc_t</a></td><td><a href='../module/pf_mod_misdcq_oc.html'>pf_mod_misdcQ_oc</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Multi-implicit SDC sweeper type for optimal control, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_misdcq_t.html'>pf_misdcQ_t</a></td><td><a href='../module/pf_mod_misdcq.html'>pf_mod_misdcQ</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Multi-implicit SDC sweeper type, extends abstract sweeper</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The main PFASST data type which includes pretty much everything</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_results_t.html'>pf_results_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>Type for storing results for later output</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_sdcmats_t.html'>pf_sdcmats_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The type to store quadrature matrices</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_state_t.html'>pf_state_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The type that holds the state of the system </p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_stepper_t.html'>pf_stepper_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The abstract time stepper type (must be extended)</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The abstract SDC sweeper type (must be extended)</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_user_level_t.html'>pf_user_level_t</a></td><td><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></td><td>None</td><td><p>The absract definition of level which is inherited  to include problem dependent stuff</p></td></tr>
+			 
+			   <tr><td><a href='../type/pf_verlet_t.html'>pf_verlet_t</a></td><td><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></td><td><a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a></td><td><p>Define sweeper type</p></td></tr>
+			 
+			   <tr><td><a href='../type/zndarray.html'>zndarray</a></td><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td></td></tr>
+			 
+			   <tr><td><a href='../type/zndarray_factory.html'>zndarray_factory</a></td><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td></td></tr>
+			 
+			   <tr><td><a href='../type/zndsysarray.html'>zndsysarray</a></td><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../type/pf_encap_t.html'>pf_encap_t</a></td><td><p>Type to extend the abstract encap and set procedure pointers</p></td></tr>
+			 
+			   <tr><td><a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a></td><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../type/pf_factory_t.html'>pf_factory_t</a></td><td><p>Type to create and destroy the arrays</p></td></tr>
+			 
+			 </tbody></table>
+             <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: type~~graph~~TypeGraph Pages: 1 -->
+<svg id="typegraphTypeGraph" width="685pt" height="1044pt"
+ viewBox="0.00 0.00 685.00 1044.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~graph~~TypeGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 1040)">
+<title>type~~graph~~TypeGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1040 681,-1040 681,4 -4,4"/>
+<!-- type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_node1" class="node"><title>type~pf_sweeper_t</title>
+<g id="a_type~~graph~~TypeGraph_node1"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-571 0,-571 0,-547 77,-547 77,-571"/>
+<text text-anchor="middle" x="38.5" y="-556.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_sweeper_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_fft_t~2 -->
+<g id="type~~graph~~TypeGraph_node2" class="node"><title>type~pf_fft_t~2</title>
+<g id="a_type~~graph~~TypeGraph_node2"><a xlink:href=".././type/pf_fft_t%7E2.html" xlink:title="pf_fft_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="671.5,-465 617.5,-465 617.5,-441 671.5,-441 671.5,-465"/>
+<text text-anchor="middle" x="644.5" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_results_t -->
+<g id="type~~graph~~TypeGraph_node3" class="node"><title>type~pf_results_t</title>
+<g id="a_type~~graph~~TypeGraph_node3"><a xlink:href=".././type/pf_results_t.html" xlink:title="pf_results_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="542.5,-507 474.5,-507 474.5,-483 542.5,-483 542.5,-507"/>
+<text text-anchor="middle" x="508.5" y="-492.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_results_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_fft_t -->
+<g id="type~~graph~~TypeGraph_node4" class="node"><title>type~pf_fft_t</title>
+<g id="a_type~~graph~~TypeGraph_node4"><a xlink:href=".././type/pf_fft_t.html" xlink:title="pf_fft_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="535.5,-192 481.5,-192 481.5,-168 535.5,-168 535.5,-192"/>
+<text text-anchor="middle" x="508.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t</text>
+</a>
+</g>
+</g>
+<!-- c_ptr -->
+<g id="type~~graph~~TypeGraph_node37" class="node"><title>c_ptr</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="322,-150 268,-150 268,-126 322,-126 322,-150"/>
+<text text-anchor="middle" x="295" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">c_ptr</text>
+</g>
+<!-- type~pf_fft_t&#45;&gt;c_ptr -->
+<g id="type~~graph~~TypeGraph_edge1" class="edge"><title>type~pf_fft_t&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M481.141,-174.766C443.495,-167.29 374.214,-153.532 331.908,-145.131"/>
+<polygon fill="#000000" stroke="#000000" points="332.517,-141.683 322.027,-143.168 331.153,-148.549 332.517,-141.683"/>
+<text text-anchor="middle" x="430.5" y="-171.4" font-family="Helvetica,sans-Serif" font-size="9.50">ffft, ifft</text>
+</g>
+<!-- type~pf_imexq_oc_t -->
+<g id="type~~graph~~TypeGraph_node5" class="node"><title>type~pf_imexq_oc_t</title>
+<g id="a_type~~graph~~TypeGraph_node5"><a xlink:href=".././type/pf_imexq_oc_t.html" xlink:title="pf_imexQ_oc_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="337.5,-612 252.5,-612 252.5,-588 337.5,-588 337.5,-612"/>
+<text text-anchor="middle" x="295" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ_oc_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imexq_oc_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge3" class="edge"><title>type~pf_imexq_oc_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M252.175,-591.884C235.252,-588.333 215.595,-583.866 198,-579 171.111,-571.564 166.343,-560.761 138.5,-559"/>
+</g>
+<!-- type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_node10" class="node"><title>type~pf_encap_t</title>
+<g id="a_type~~graph~~TypeGraph_node10"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="71.5,-720 5.5,-720 5.5,-696 71.5,-696 71.5,-720"/>
+<text text-anchor="middle" x="38.5" y="-705.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_encap_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imexq_oc_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge2" class="edge"><title>type~pf_imexq_oc_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M252.349,-601.904C210.039,-605.485 143.949,-615.74 95,-645 77.5523,-655.429 62.6444,-673.191 52.6867,-687.201"/>
+<polygon fill="#000000" stroke="#000000" points="49.6027,-685.513 46.8809,-695.752 55.394,-689.445 49.6027,-685.513"/>
+<text text-anchor="middle" x="137.5" y="-647.4" font-family="Helvetica,sans-Serif" font-size="9.50">rhs</text>
+</g>
+<!-- type~pf_imexq_t -->
+<g id="type~~graph~~TypeGraph_node6" class="node"><title>type~pf_imexq_t</title>
+<g id="a_type~~graph~~TypeGraph_node6"><a xlink:href=".././type/pf_imexq_t.html" xlink:title="pf_imexQ_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="328.5,-528 261.5,-528 261.5,-504 328.5,-504 328.5,-528"/>
+<text text-anchor="middle" x="295" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imexq_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge5" class="edge"><title>type~pf_imexq_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M261.205,-509.315C220.839,-502.542 150.791,-495.567 95,-515 80.7065,-519.979 67.3269,-530.342 57.287,-539.761"/>
+<polygon fill="#000000" stroke="#000000" points="54.6325,-537.465 49.9976,-546.992 59.5621,-542.434 54.6325,-537.465"/>
+</g>
+<!-- type~pf_imexq_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge4" class="edge"><title>type~pf_imexq_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.218,-520.446C242.291,-523.678 218.291,-528.928 198,-537 148.352,-556.749 131.419,-559.903 95,-599 71.0441,-624.717 54.8659,-662.741 46.4217,-686.41"/>
+<polygon fill="#000000" stroke="#000000" points="43.1046,-685.293 43.1809,-695.888 49.7281,-687.558 43.1046,-685.293"/>
+<text text-anchor="middle" x="137.5" y="-601.4" font-family="Helvetica,sans-Serif" font-size="9.50">rhs</text>
+</g>
+<!-- type~ndsysarray -->
+<g id="type~~graph~~TypeGraph_node7" class="node"><title>type~ndsysarray</title>
+<g id="a_type~~graph~~TypeGraph_node7"><a xlink:href=".././type/ndsysarray.html" xlink:title="ndsysarray">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="327.5,-780 262.5,-780 262.5,-756 327.5,-756 327.5,-780"/>
+<text text-anchor="middle" x="295" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndsysarray</text>
+</a>
+</g>
+</g>
+<!-- type~ndsysarray&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge6" class="edge"><title>type~ndsysarray&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" d="M262.32,-774.309C220.252,-782.437 149.907,-795.067 138.5,-791"/>
+<path fill="none" stroke="#000000" d="M136.5,-791C102.372,-778.831 72.2757,-748.358 54.979,-727.92"/>
+<polygon fill="#000000" stroke="#000000" points="57.6287,-725.631 48.5815,-720.118 52.2158,-730.07 57.6287,-725.631"/>
+</g>
+<!-- type~ndsysarray_factory -->
+<g id="type~~graph~~TypeGraph_node8" class="node"><title>type~ndsysarray_factory</title>
+<g id="a_type~~graph~~TypeGraph_node8"><a xlink:href=".././type/ndsysarray_factory.html" xlink:title="ndsysarray_factory">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="346.5,-192 243.5,-192 243.5,-168 346.5,-168 346.5,-192"/>
+<text text-anchor="middle" x="295" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndsysarray_factory</text>
+</a>
+</g>
+</g>
+<!-- type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_node16" class="node"><title>type~pf_factory_t</title>
+<g id="a_type~~graph~~TypeGraph_node16"><a xlink:href=".././type/pf_factory_t.html" xlink:title="pf_factory_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-171 4,-171 4,-147 73,-147 73,-171"/>
+<text text-anchor="middle" x="38.5" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_factory_t</text>
+</a>
+</g>
+</g>
+<!-- type~ndsysarray_factory&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge7" class="edge"><title>type~ndsysarray_factory&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" d="M243.105,-174.7C227.904,-171.611 211.663,-166.726 198,-159 164.475,-140.042 175.998,-87.211 138.5,-96"/>
+</g>
+<!-- type~pf_state_t -->
+<g id="type~~graph~~TypeGraph_node9" class="node"><title>type~pf_state_t</title>
+<g id="a_type~~graph~~TypeGraph_node9"><a xlink:href=".././type/pf_state_t.html" xlink:title="pf_state_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="538.5,-465 478.5,-465 478.5,-441 538.5,-441 538.5,-465"/>
+<text text-anchor="middle" x="508.5" y="-450.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_state_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_misdcq_oc_t -->
+<g id="type~~graph~~TypeGraph_node11" class="node"><title>type~pf_misdcq_oc_t</title>
+<g id="a_type~~graph~~TypeGraph_node11"><a xlink:href=".././type/pf_misdcq_oc_t.html" xlink:title="pf_misdcQ_oc_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="340,-486 250,-486 250,-462 340,-462 340,-486"/>
+<text text-anchor="middle" x="295" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_oc_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_misdcq_oc_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge9" class="edge"><title>type~pf_misdcq_oc_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M249.984,-464.549C204.9,-454.969 141.035,-441.722 138.5,-443"/>
+</g>
+<!-- type~pf_misdcq_oc_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge8" class="edge"><title>type~pf_misdcq_oc_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M249.63,-474.268C204.498,-477.003 135.589,-488.37 95,-530 89.3789,-535.765 58.9605,-640.125 45.6933,-686.313"/>
+<polygon fill="#000000" stroke="#000000" points="42.3152,-685.396 42.925,-695.973 49.0444,-687.324 42.3152,-685.396"/>
+<text text-anchor="middle" x="137.5" y="-532.4" font-family="Helvetica,sans-Serif" font-size="9.50">I3, rhs</text>
+</g>
+<!-- type~pf_imex_t -->
+<g id="type~~graph~~TypeGraph_node12" class="node"><title>type~pf_imex_t</title>
+<g id="a_type~~graph~~TypeGraph_node12"><a xlink:href=".././type/pf_imex_t.html" xlink:title="pf_imex_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="324.5,-402 265.5,-402 265.5,-378 324.5,-378 324.5,-402"/>
+<text text-anchor="middle" x="295" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imex_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imex_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge10" class="edge"><title>type~pf_imex_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M265.313,-393.147C245.711,-396.039 219.494,-401.391 198,-411 188.991,-415.028 188.527,-419.033 180,-424 162.471,-434.21 156.613,-433.867 138.5,-443"/>
+<path fill="none" stroke="#000000" d="M136.5,-443C119.119,-451.764 109.902,-444.476 95,-457 69.7052,-478.259 54.0502,-514.106 46.0599,-537.147"/>
+<polygon fill="#000000" stroke="#000000" points="42.7063,-536.142 42.9209,-546.735 49.3588,-538.32 42.7063,-536.142"/>
+</g>
+<!-- type~ndarray -->
+<g id="type~~graph~~TypeGraph_node13" class="node"><title>type~ndarray</title>
+<g id="a_type~~graph~~TypeGraph_node13"><a xlink:href=".././type/ndarray.html" xlink:title="ndarray">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="322,-1036 268,-1036 268,-1012 322,-1012 322,-1036"/>
+<text text-anchor="middle" x="295" y="-1021.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndarray</text>
+</a>
+</g>
+</g>
+<!-- type~ndarray&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge11" class="edge"><title>type~ndarray&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" d="M267.706,-1022.35C247.556,-1020.15 219.631,-1015 198,-1003 164.884,-984.624 168.793,-964.731 138.5,-942"/>
+</g>
+<!-- type~pf_pfasst_t -->
+<g id="type~~graph~~TypeGraph_node14" class="node"><title>type~pf_pfasst_t</title>
+<g id="a_type~~graph~~TypeGraph_node14"><a xlink:href=".././type/pf_pfasst_t.html" xlink:title="pf_pfasst_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="677,-423 612,-423 612,-399 677,-399 677,-423"/>
+<text text-anchor="middle" x="644.5" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_results_t -->
+<g id="type~~graph~~TypeGraph_edge14" class="edge"><title>type~pf_pfasst_t&#45;&gt;type~pf_results_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M624.545,-423.02C620.337,-425.857 615.954,-428.948 612,-432 603.527,-438.54 602.708,-441.776 594,-448 574.894,-461.656 568.531,-462.599 548,-474 545.647,-475.306 543.211,-476.652 540.758,-478.002"/>
+<polygon fill="#000000" stroke="#000000" points="539.013,-474.967 531.925,-482.842 542.377,-481.106 539.013,-474.967"/>
+<text text-anchor="middle" x="580" y="-466.4" font-family="Helvetica,sans-Serif" font-size="9.50">results</text>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_state_t -->
+<g id="type~~graph~~TypeGraph_edge12" class="edge"><title>type~pf_pfasst_t&#45;&gt;type~pf_state_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M611.744,-420.953C592.808,-426.888 568.623,-434.469 548.528,-440.767"/>
+<polygon fill="#000000" stroke="#000000" points="547.234,-437.505 538.739,-443.836 549.328,-444.184 547.234,-437.505"/>
+<text text-anchor="middle" x="580" y="-436.4" font-family="Helvetica,sans-Serif" font-size="9.50">state</text>
+</g>
+<!-- type~pf_comm_t -->
+<g id="type~~graph~~TypeGraph_node23" class="node"><title>type~pf_comm_t</title>
+<g id="a_type~~graph~~TypeGraph_node23"><a xlink:href=".././type/pf_comm_t.html" xlink:title="pf_comm_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="541.5,-150 475.5,-150 475.5,-126 541.5,-126 541.5,-150"/>
+<text text-anchor="middle" x="508.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_comm_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_comm_t -->
+<g id="type~~graph~~TypeGraph_edge13" class="edge"><title>type~pf_pfasst_t&#45;&gt;type~pf_comm_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M641.944,-398.972C636.319,-359.862 613.782,-234.481 548,-159 547.156,-158.031 546.256,-157.099 545.311,-156.203"/>
+<polygon fill="#000000" stroke="#000000" points="547.41,-153.402 537.369,-150.024 543.112,-158.927 547.41,-153.402"/>
+<text text-anchor="middle" x="580" y="-229.4" font-family="Helvetica,sans-Serif" font-size="9.50">comm</text>
+</g>
+<!-- type~pf_hook_t -->
+<g id="type~~graph~~TypeGraph_node26" class="node"><title>type~pf_hook_t</title>
+<g id="a_type~~graph~~TypeGraph_node26"><a xlink:href=".././type/pf_hook_t.html" xlink:title="pf_hook_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="538.5,-381 478.5,-381 478.5,-357 538.5,-357 538.5,-381"/>
+<text text-anchor="middle" x="508.5" y="-366.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_hook_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_hook_t -->
+<g id="type~~graph~~TypeGraph_edge16" class="edge"><title>type~pf_pfasst_t&#45;&gt;type~pf_hook_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M611.744,-401.047C592.808,-395.112 568.623,-387.531 548.528,-381.233"/>
+<polygon fill="#000000" stroke="#000000" points="549.328,-377.816 538.739,-378.164 547.234,-384.495 549.328,-377.816"/>
+<text text-anchor="middle" x="580" y="-396.4" font-family="Helvetica,sans-Serif" font-size="9.50">hooks</text>
+</g>
+<!-- type~pf_level_t -->
+<g id="type~~graph~~TypeGraph_node36" class="node"><title>type~pf_level_t</title>
+<g id="a_type~~graph~~TypeGraph_node36"><a xlink:href=".././type/pf_level_t.html" xlink:title="pf_level_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="537.5,-423 479.5,-423 479.5,-399 537.5,-399 537.5,-423"/>
+<text text-anchor="middle" x="508.5" y="-408.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_level_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_level_t -->
+<g id="type~~graph~~TypeGraph_edge15" class="edge"><title>type~pf_pfasst_t&#45;&gt;type~pf_level_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M611.744,-411C592.631,-411 568.17,-411 547.965,-411"/>
+<polygon fill="#000000" stroke="#000000" points="547.839,-407.5 537.839,-411 547.839,-414.5 547.839,-407.5"/>
+<text text-anchor="middle" x="580" y="-413.4" font-family="Helvetica,sans-Serif" font-size="9.50">levels</text>
+</g>
+<!-- type~pf_sdcmats_t -->
+<g id="type~~graph~~TypeGraph_node15" class="node"><title>type~pf_sdcmats_t</title>
+<g id="a_type~~graph~~TypeGraph_node15"><a xlink:href=".././type/pf_sdcmats_t.html" xlink:title="pf_sdcmats_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="333,-444 257,-444 257,-420 333,-420 333,-444"/>
+<text text-anchor="middle" x="295" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_sdcmats_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_amisdcq_t -->
+<g id="type~~graph~~TypeGraph_node17" class="node"><title>type~pf_amisdcq_t</title>
+<g id="a_type~~graph~~TypeGraph_node17"><a xlink:href=".././type/pf_amisdcq_t.html" xlink:title="pf_amisdcQ_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="548,-318 469,-318 469,-294 548,-294 548,-318"/>
+<text text-anchor="middle" x="508.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_amisdcQ_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_amisdc_t -->
+<g id="type~~graph~~TypeGraph_node27" class="node"><title>type~pf_amisdc_t</title>
+<g id="a_type~~graph~~TypeGraph_node27"><a xlink:href=".././type/pf_amisdc_t.html" xlink:title="pf_amisdc_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="330,-318 260,-318 260,-294 330,-294 330,-318"/>
+<text text-anchor="middle" x="295" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_amisdc_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_amisdcq_t&#45;&gt;type~pf_amisdc_t -->
+<g id="type~~graph~~TypeGraph_edge17" class="edge"><title>type~pf_amisdcq_t&#45;&gt;type~pf_amisdc_t</title>
+<path fill="none" stroke="#000000" d="M468.708,-306C432.409,-306 378.229,-306 340.258,-306"/>
+<polygon fill="#000000" stroke="#000000" points="340.007,-302.5 330.007,-306 340.007,-309.5 340.007,-302.5"/>
+</g>
+<!-- type~pf_misdcq_t -->
+<g id="type~~graph~~TypeGraph_node18" class="node"><title>type~pf_misdcq_t</title>
+<g id="a_type~~graph~~TypeGraph_node18"><a xlink:href=".././type/pf_misdcq_t.html" xlink:title="pf_misdcQ_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="331.5,-654 258.5,-654 258.5,-630 331.5,-630 331.5,-654"/>
+<text text-anchor="middle" x="295" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_misdcq_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge19" class="edge"><title>type~pf_misdcq_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M258.296,-640.091C217.22,-636.764 148.554,-627.686 95,-603 81.6068,-596.826 68.5811,-586.78 58.5182,-577.844"/>
+<polygon fill="#000000" stroke="#000000" points="60.8502,-575.233 51.1329,-571.011 56.0964,-580.371 60.8502,-575.233"/>
+</g>
+<!-- type~pf_misdcq_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge18" class="edge"><title>type~pf_misdcq_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M258.419,-646.142C218.044,-651.487 150.584,-662.385 95,-681 86.6747,-683.788 77.9932,-687.557 70.0362,-691.394"/>
+<polygon fill="#000000" stroke="#000000" points="68.4662,-688.266 61.0931,-695.874 71.6016,-694.525 68.4662,-688.266"/>
+<text text-anchor="middle" x="137.5" y="-683.4" font-family="Helvetica,sans-Serif" font-size="9.50">I3, rhs</text>
+</g>
+<!-- type~zndarray_factory -->
+<g id="type~~graph~~TypeGraph_node19" class="node"><title>type~zndarray_factory</title>
+<g id="a_type~~graph~~TypeGraph_node19"><a xlink:href=".././type/zndarray_factory.html" xlink:title="zndarray_factory">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="341.5,-24 248.5,-24 248.5,-0 341.5,-0 341.5,-24"/>
+<text text-anchor="middle" x="295" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">zndarray_factory</text>
+</a>
+</g>
+</g>
+<!-- type~zndarray_factory&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge20" class="edge"><title>type~zndarray_factory&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" d="M248.021,-16.3558C231.465,-19.3603 213.148,-24.4341 198,-33 164.475,-51.958 175.998,-87.211 138.5,-96"/>
+<path fill="none" stroke="#000000" d="M136.5,-96C106.661,-102.994 77.9234,-124.041 59.58,-139.899"/>
+<polygon fill="#000000" stroke="#000000" points="57.0387,-137.476 51.9168,-146.751 61.7044,-142.695 57.0387,-137.476"/>
+</g>
+<!-- type~ndarray_oc_factory -->
+<g id="type~~graph~~TypeGraph_node20" class="node"><title>type~ndarray_oc_factory</title>
+<g id="a_type~~graph~~TypeGraph_node20"><a xlink:href=".././type/ndarray_oc_factory.html" xlink:title="ndarray_oc_factory">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="347.5,-234 242.5,-234 242.5,-210 347.5,-210 347.5,-234"/>
+<text text-anchor="middle" x="295" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndarray_oc_factory</text>
+</a>
+</g>
+</g>
+<!-- type~ndarray_oc_factory&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge21" class="edge"><title>type~ndarray_oc_factory&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" d="M242.335,-218.752C226.932,-215.762 210.771,-210.416 198,-201 154.827,-169.17 190.723,-83.7595 138.5,-96"/>
+</g>
+<!-- type~ndarray_oc -->
+<g id="type~~graph~~TypeGraph_node21" class="node"><title>type~ndarray_oc</title>
+<g id="a_type~~graph~~TypeGraph_node21"><a xlink:href=".././type/ndarray_oc.html" xlink:title="ndarray_oc">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="328.5,-994 261.5,-994 261.5,-970 328.5,-970 328.5,-994"/>
+<text text-anchor="middle" x="295" y="-979.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndarray_oc</text>
+</a>
+</g>
+</g>
+<!-- type~ndarray_oc&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge22" class="edge"><title>type~ndarray_oc&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" d="M261.422,-980.77C227.621,-977.976 174.732,-969.187 138.5,-942"/>
+</g>
+<!-- type~zndsysarray -->
+<g id="type~~graph~~TypeGraph_node22" class="node"><title>type~zndsysarray</title>
+<g id="a_type~~graph~~TypeGraph_node22"><a xlink:href=".././type/zndsysarray.html" xlink:title="zndsysarray">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="330,-906 260,-906 260,-882 330,-882 330,-906"/>
+<text text-anchor="middle" x="295" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">zndsysarray</text>
+</a>
+</g>
+</g>
+<!-- type~zndsysarray&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge23" class="edge"><title>type~zndsysarray&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" d="M259.57,-902.526C241.182,-907.28 218.231,-913.535 198,-920 171.144,-928.583 161.051,-958.922 138.5,-942"/>
+<path fill="none" stroke="#000000" d="M136.5,-942C66.8115,-889.708 46.8916,-778.207 41.4463,-730.459"/>
+<polygon fill="#000000" stroke="#000000" points="44.9029,-729.857 40.3976,-720.268 37.9397,-730.573 44.9029,-729.857"/>
+</g>
+<!-- type~pf_comm_t&#45;&gt;c_ptr -->
+<g id="type~~graph~~TypeGraph_edge24" class="edge"><title>type~pf_comm_t&#45;&gt;c_ptr</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M475.378,-138C436.871,-138 372.507,-138 332.253,-138"/>
+<polygon fill="#000000" stroke="#000000" points="332.075,-134.5 322.075,-138 332.075,-141.5 332.075,-134.5"/>
+<text text-anchor="middle" x="430.5" y="-140.4" font-family="Helvetica,sans-Serif" font-size="9.50">pfs, pfpth</text>
+</g>
+<!-- type~pf_magpicard_t -->
+<g id="type~~graph~~TypeGraph_node24" class="node"><title>type~pf_magpicard_t</title>
+<g id="a_type~~graph~~TypeGraph_node24"><a xlink:href=".././type/pf_magpicard_t.html" xlink:title="pf_magpicard_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="338.5,-696 251.5,-696 251.5,-672 338.5,-672 338.5,-696"/>
+<text text-anchor="middle" x="295" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_magpicard_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_magpicard_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge26" class="edge"><title>type~pf_magpicard_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M251.299,-689.791C208.154,-693.348 141.409,-692.328 95,-661 67.3239,-642.318 52.2278,-605.112 45.0187,-581.173"/>
+<polygon fill="#000000" stroke="#000000" points="48.3014,-579.914 42.2445,-571.221 41.5585,-581.794 48.3014,-579.914"/>
+</g>
+<!-- type~pf_magpicard_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge25" class="edge"><title>type~pf_magpicard_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M251.402,-688.017C204.306,-692.458 128.896,-699.57 81.8851,-704.003"/>
+<polygon fill="#000000" stroke="#000000" points="81.3578,-700.537 71.7306,-704.961 82.015,-707.506 81.3578,-700.537"/>
+<text text-anchor="middle" x="137.5" y="-704.4" font-family="Helvetica,sans-Serif" font-size="9.50">omega, time_ev_op</text>
+</g>
+<!-- type~ndarray_factory -->
+<g id="type~~graph~~TypeGraph_node25" class="node"><title>type~ndarray_factory</title>
+<g id="a_type~~graph~~TypeGraph_node25"><a xlink:href=".././type/ndarray_factory.html" xlink:title="ndarray_factory">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="339,-108 251,-108 251,-84 339,-84 339,-108"/>
+<text text-anchor="middle" x="295" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ndarray_factory</text>
+</a>
+</g>
+</g>
+<!-- type~ndarray_factory&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge27" class="edge"><title>type~ndarray_factory&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" d="M250.825,-90.7683C219.277,-88.202 175.692,-87.2826 138.5,-96"/>
+</g>
+<!-- type~pf_amisdc_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge28" class="edge"><title>type~pf_amisdc_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M259.83,-301.818C209.65,-296.465 119.336,-290.086 95,-310 59.8861,-338.733 45.4283,-480.966 41.0546,-536.62"/>
+<polygon fill="#000000" stroke="#000000" points="37.5471,-536.591 40.2908,-546.824 44.5276,-537.113 37.5471,-536.591"/>
+</g>
+<!-- type~pf_ark_t -->
+<g id="type~~graph~~TypeGraph_node28" class="node"><title>type~pf_ark_t</title>
+<g id="a_type~~graph~~TypeGraph_node28"><a xlink:href=".././type/pf_ark_t.html" xlink:title="pf_ark_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="322,-276 268,-276 268,-252 322,-252 322,-276"/>
+<text text-anchor="middle" x="295" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_ark_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_stepper_t -->
+<g id="type~~graph~~TypeGraph_node32" class="node"><title>type~pf_stepper_t</title>
+<g id="a_type~~graph~~TypeGraph_node32"><a xlink:href=".././type/pf_stepper_t.html" xlink:title="pf_stepper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="75,-325 2,-325 2,-301 75,-301 75,-325"/>
+<text text-anchor="middle" x="38.5" y="-310.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stepper_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_ark_t&#45;&gt;type~pf_stepper_t -->
+<g id="type~~graph~~TypeGraph_edge29" class="edge"><title>type~pf_ark_t&#45;&gt;type~pf_stepper_t</title>
+<path fill="none" stroke="#000000" d="M267.893,-262.948C229.216,-262.144 154.822,-263.508 95,-282 84.8264,-285.145 74.4378,-290.323 65.4415,-295.554"/>
+<polygon fill="#000000" stroke="#000000" points="63.3398,-292.737 56.6377,-300.943 66.9941,-298.707 63.3398,-292.737"/>
+</g>
+<!-- type~pf_imk_t -->
+<g id="type~~graph~~TypeGraph_node29" class="node"><title>type~pf_imk_t</title>
+<g id="a_type~~graph~~TypeGraph_node29"><a xlink:href=".././type/pf_imk_t.html" xlink:title="pf_imk_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="322,-738 268,-738 268,-714 322,-714 322,-738"/>
+<text text-anchor="middle" x="295" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imk_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imk_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge31" class="edge"><title>type~pf_imk_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M267.74,-733.1C226.508,-742.565 146.03,-754.042 95,-716 83.7527,-707.615 57.6546,-621.687 45.692,-580.626"/>
+<polygon fill="#000000" stroke="#000000" points="49.0495,-579.637 42.9084,-571.003 42.3252,-581.582 49.0495,-579.637"/>
+</g>
+<!-- type~pf_imk_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge30" class="edge"><title>type~pf_imk_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M267.876,-731.319C244.859,-735.719 210.363,-741.618 180,-744 142.338,-746.955 131.225,-754.72 95,-744 83.027,-740.457 71.2137,-733.43 61.5839,-726.518"/>
+<polygon fill="#000000" stroke="#000000" points="63.491,-723.571 53.4121,-720.306 59.2545,-729.144 63.491,-723.571"/>
+<text text-anchor="middle" x="137.5" y="-751.4" font-family="Helvetica,sans-Serif" font-size="9.50">A</text>
+</g>
+<!-- type~pf_verlet_t -->
+<g id="type~~graph~~TypeGraph_node30" class="node"><title>type~pf_verlet_t</title>
+<g id="a_type~~graph~~TypeGraph_node30"><a xlink:href=".././type/pf_verlet_t.html" xlink:title="pf_verlet_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="326.5,-864 263.5,-864 263.5,-840 326.5,-840 326.5,-864"/>
+<text text-anchor="middle" x="295" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_verlet_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_verlet_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge33" class="edge"><title>type~pf_verlet_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M263.246,-848.08C217.93,-840.508 134.347,-819.306 95,-763 75.1167,-734.547 85.8827,-720.556 77,-687 67.0968,-649.589 54.1418,-606.472 46.3402,-581.043"/>
+<polygon fill="#000000" stroke="#000000" points="49.6263,-579.822 43.3361,-571.296 42.9368,-581.884 49.6263,-579.822"/>
+</g>
+<!-- type~pf_verlet_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge32" class="edge"><title>type~pf_verlet_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M263.432,-856.862C221.304,-861.819 144.954,-864.331 95,-828 62.8798,-804.639 48.825,-758.036 43.0886,-730.282"/>
+<polygon fill="#000000" stroke="#000000" points="46.5045,-729.508 41.2211,-720.325 39.6245,-730.799 46.5045,-729.508"/>
+<text text-anchor="middle" x="137.5" y="-859.4" font-family="Helvetica,sans-Serif" font-size="9.50">rhs</text>
+</g>
+<!-- type~pf_user_level_t -->
+<g id="type~~graph~~TypeGraph_node31" class="node"><title>type~pf_user_level_t</title>
+<g id="a_type~~graph~~TypeGraph_node31"><a xlink:href=".././type/pf_user_level_t.html" xlink:title="pf_user_level_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="337.5,-360 252.5,-360 252.5,-336 337.5,-336 337.5,-360"/>
+<text text-anchor="middle" x="295" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_user_level_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_user_level_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge34" class="edge"><title>type~pf_user_level_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M252.458,-351.663C207.37,-357.866 136.299,-374.504 95,-419 63.4763,-452.964 49,-507.004 43.0762,-537.042"/>
+<polygon fill="#000000" stroke="#000000" points="39.622,-536.474 41.2649,-546.941 46.5077,-537.734 39.622,-536.474"/>
+<text text-anchor="middle" x="137.5" y="-421.4" font-family="Helvetica,sans-Serif" font-size="9.50">sweeper</text>
+</g>
+<!-- type~pf_user_level_t&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge35" class="edge"><title>type~pf_user_level_t&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M252.357,-344.396C234.719,-341.513 214.482,-336.326 198,-327 132.005,-289.658 77.0235,-215.815 52.7943,-179.771"/>
+<polygon fill="#000000" stroke="#000000" points="55.4792,-177.485 47.0497,-171.067 49.6369,-181.341 55.4792,-177.485"/>
+<text text-anchor="middle" x="137.5" y="-316.4" font-family="Helvetica,sans-Serif" font-size="9.50">factory</text>
+</g>
+<!-- type~pf_user_level_t&#45;&gt;type~pf_stepper_t -->
+<g id="type~~graph~~TypeGraph_edge36" class="edge"><title>type~pf_user_level_t&#45;&gt;type~pf_stepper_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M252.132,-351.241C211.366,-353.253 147.98,-353.329 95,-340 85.9401,-337.721 76.6138,-333.862 68.2535,-329.764"/>
+<polygon fill="#000000" stroke="#000000" points="69.7779,-326.612 59.2905,-325.108 66.5507,-332.824 69.7779,-326.612"/>
+<text text-anchor="middle" x="137.5" y="-354.4" font-family="Helvetica,sans-Serif" font-size="9.50">stepper</text>
+</g>
+<!-- type~zndsysarray_factory -->
+<g id="type~~graph~~TypeGraph_node33" class="node"><title>type~zndsysarray_factory</title>
+<g id="a_type~~graph~~TypeGraph_node33"><a xlink:href=".././type/zndsysarray_factory.html" xlink:title="zndsysarray_factory">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="349.5,-66 240.5,-66 240.5,-42 349.5,-42 349.5,-66"/>
+<text text-anchor="middle" x="295" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">zndsysarray_factory</text>
+</a>
+</g>
+</g>
+<!-- type~zndsysarray_factory&#45;&gt;type~pf_factory_t -->
+<g id="type~~graph~~TypeGraph_edge37" class="edge"><title>type~zndsysarray_factory&#45;&gt;type~pf_factory_t</title>
+<path fill="none" stroke="#000000" d="M240.389,-64.4975C226.499,-67.5527 211.619,-71.1231 198,-75 171.028,-82.6778 165.803,-89.6004 138.5,-96"/>
+</g>
+<!-- type~pf_misdc_t -->
+<g id="type~~graph~~TypeGraph_node34" class="node"><title>type~pf_misdc_t</title>
+<g id="a_type~~graph~~TypeGraph_node34"><a xlink:href=".././type/pf_misdc_t.html" xlink:title="pf_misdc_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="327,-570 263,-570 263,-546 327,-546 327,-570"/>
+<text text-anchor="middle" x="295" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdc_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_misdc_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~graph~~TypeGraph_edge38" class="edge"><title>type~pf_misdc_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M262.986,-559.466C231.574,-560.654 181.609,-561.726 138.5,-559"/>
+<path fill="none" stroke="#000000" d="M136.5,-559C120.507,-557.989 103.002,-557.729 87.3178,-557.802"/>
+<polygon fill="#000000" stroke="#000000" points="87.2759,-554.302 77.3084,-557.894 87.34,-561.302 87.2759,-554.302"/>
+</g>
+<!-- type~zndarray -->
+<g id="type~~graph~~TypeGraph_node35" class="node"><title>type~zndarray</title>
+<g id="a_type~~graph~~TypeGraph_node35"><a xlink:href=".././type/zndarray.html" xlink:title="zndarray">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="322.5,-822 267.5,-822 267.5,-798 322.5,-798 322.5,-822"/>
+<text text-anchor="middle" x="295" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">zndarray</text>
+</a>
+</g>
+</g>
+<!-- type~zndarray&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge39" class="edge"><title>type~zndarray&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" d="M267.329,-810.257C235.694,-809.773 181.794,-806.437 138.5,-791"/>
+</g>
+<!-- type~pf_level_t&#45;&gt;type~pf_encap_t -->
+<g id="type~~graph~~TypeGraph_edge42" class="edge"><title>type~pf_level_t&#45;&gt;type~pf_encap_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M479.371,-422.258C475.385,-424.924 471.723,-428.144 469,-432 343.623,-609.577 549.652,-765.337 392,-915 371.457,-934.502 161.157,-959.001 138.5,-942"/>
+<text text-anchor="middle" x="295" y="-949.4" font-family="Helvetica,sans-Serif" font-size="9.50">Q, pQ, R, I, Fflt, tauQ, pFflt, q0, qend, F, pF</text>
+</g>
+<!-- type~pf_level_t&#45;&gt;type~pf_sdcmats_t -->
+<g id="type~~graph~~TypeGraph_edge41" class="edge"><title>type~pf_level_t&#45;&gt;type~pf_sdcmats_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M479.414,-413.789C444.639,-417.242 384.89,-423.174 343.064,-427.327"/>
+<polygon fill="#000000" stroke="#000000" points="342.713,-423.844 333.108,-428.316 343.405,-430.81 342.713,-423.844"/>
+<text text-anchor="middle" x="430.5" y="-422.4" font-family="Helvetica,sans-Serif" font-size="9.50">sdcmats</text>
+</g>
+<!-- type~pf_level_t&#45;&gt;type~pf_user_level_t -->
+<g id="type~~graph~~TypeGraph_edge40" class="edge"><title>type~pf_level_t&#45;&gt;type~pf_user_level_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M479.369,-399.575C456.195,-390.454 422.33,-377.789 392,-369 377.891,-364.911 362.413,-361.197 348.083,-358.069"/>
+<polygon fill="#000000" stroke="#000000" points="348.397,-354.557 337.887,-355.897 346.939,-361.404 348.397,-354.557"/>
+<text text-anchor="middle" x="430.5" y="-390.4" font-family="Helvetica,sans-Serif" font-size="9.50">ulevel</text>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="178pt" height="32pt"
+ viewBox="0.00 0.00 177.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 173.5,-28 173.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node"><title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,-0 54,-0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="169.5,-24 72.5,-24 72.5,-0 169.5,-0 169.5,-24"/>
+<text text-anchor="middle" x="121" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a derived type to the parent type which it
+    extends. Dashed arrows point from a derived type to the other
+    types it contains as a components, with a label listing the name(s) of
+    said component(s).
+    </p>
+    </div></div></div></div>
+        </div>
+      </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> libpfasst was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
