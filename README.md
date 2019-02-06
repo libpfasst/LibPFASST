@@ -24,9 +24,9 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 
 
 #  Documentation
-We are currently writing better documentation, examples, and a tutorial, at https://pfasst.bitbucket.io/index.html
+We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.rtfd.io
 
-libpfasst.rtfd.io
+
 
 There is new  FORD source file documentation  at
 https://pfasst.bitbucket.io/FORD/doc/index.html
