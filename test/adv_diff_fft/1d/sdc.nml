@@ -15,8 +15,8 @@
     !  These are internal pfasst variables that can be reset
     niters = 5   !  default is 5
  
-     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-     qtype   = 1   
+    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+    qtype   = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
      abs_res_tol = 0.d-13
