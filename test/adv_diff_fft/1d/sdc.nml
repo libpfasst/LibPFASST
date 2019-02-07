@@ -13,7 +13,7 @@
     nsweeps= 1 
 
     !  These are internal pfasst variables that can be reset
-    niters = 5   !  default is 5
+    niters = 25   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1   
@@ -26,6 +26,7 @@
      Pipeline_pred =  .true.
      PFASST_pred = .true.
 
+
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
      Vcycle=.false.
 /
@@ -36,10 +37,10 @@
 
     nx =  64
 
-    Tfin = 0.9
+    Tfin = 90.0
     nsteps = 32
 
-    nu=0.02
+    nu=0.0
     v=1.0
 
     imex_stat=2
