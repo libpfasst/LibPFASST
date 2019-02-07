@@ -1,10 +1,10 @@
 src_dir: ../../src
 output_dir: ./doc
 project_website: https://pfasst.lbl.gov
-project: libpfasst
+project: LibPFASST
 author:  Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon
 summary: The library for running PFASST
-project_bitbucket: https://bitbucket.org/berkeleylab/libpfasst/src/master/
+project_github: https://github.org/libpfasst/LibPFASST/
 graph: true
 search: true
 license: bsd
