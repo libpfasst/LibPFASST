@@ -1,0 +1,23 @@
+
+This directory contains the source for generating the LibPFASST documentation.  There are two different parts to it:
+
+1. Sphinx-based .rst files located in LibPFASST/docs/
+
+2. FORD (FORtran Documentation) code in FORD
+
+It is expected that the documentation files should only be updated on the gh-pages branch of LibPFASST.
+
+To update the documentation, one should checkout the gs-pages branch and make sure that the files there are the most up to date.
+In particular, the Fortan source code in src will need to be refreshed with 'git checkout master -- src'
+
+Then:
+
+1. 'make html' in LibPFASST/docs/
+2. 'ford libpfasst.md' in LibPFASST/docs/FORD
+
+Unfortunately the second step currently fails unless two include statements in the files src/pf_mpi.f90 and src/pf_fftw.f90 are commented out.  So do that and rerun 2.
+
+3.  commit the new files to the git repo  (on the gh-pages branch!)
+
+This should update the documentation page at
+https://libpfasst.github.io/LibPFASST/

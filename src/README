@@ -1,0 +1,17 @@
+Conventions
+===========
+
+Naming
+------
+
+* All PFASST related derived type names should begin with 'pf_' and
+  end with '_t'.
+
+* All PFASST related module names should begin with 'pf_mod_'.
+
+
+Modules
+-------
+
+Do not use module/global variables - use derived types as containers
+instead.
