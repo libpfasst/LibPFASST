@@ -24,12 +24,10 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 
 
 #  Documentation
-We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.rtfd.io
+We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.github.io/LibPFASST
 
 
 
-There is new  FORD source file documentation  at
-https://pfasst.bitbucket.io/FORD/doc/index.html
 
 
 
