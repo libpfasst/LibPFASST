@@ -7,6 +7,22 @@ written in Fortran (mostly F90, with some F03), but can be interfaced
 with C and C++ fairly easily.
 
 
+# Tests
+
+It is highly recommended to run tests before using libpfasst.
+
+Required software:
+	python2
+	python-pytest
+	python-pandas
+	python-tqdm
+
+Run tests with
+$ ./test/run_tests.sh
+
+
+
+
 Libpfasst Copyright (c) 2018, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy) and Sebastian Goetschel.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
