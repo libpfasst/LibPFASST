@@ -31,8 +31,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     real(pfdp),        allocatable :: nodes(:)   ! nodes
     real(pfdp),        allocatable :: eta(:)     ! normalized substeps (on interval [0, 1])
     class(pf_encap_t), allocatable :: b(:)       ! scratch space for computing nonlinear derivatives
+    class(pf_encap_t), allocatable :: f_old(:)   ! scratch space for storing nonlinear terms
     class(pf_encap_t), allocatable :: newF       ! scratch space for storing new function evaluations
-    LOGICAL :: use_phib = .FALSE.                ! if TRUE calls phib otherwise calls swpPhib and resPhib
+    LOGICAL :: use_phib = .TRUE.                ! if TRUE calls phib otherwise calls swpPhib and resPhib
 
     contains
 
@@ -241,6 +242,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! initialize temporary storage objects
         call lev%ulevel%factory%create_single(this%newF, lev%index, lev%shape)
         call lev%ulevel%factory%create_array(this%b, nnodes + 1, lev%index, lev%shape)
+        call lev%ulevel%factory%create_array(this%f_old, nnodes, lev%index, lev%shape)
 
     end subroutine exp_initialize
 
@@ -261,7 +263,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         ! local variables
         class(pf_level_t), pointer :: lev
-        integer                    :: m, nnodes, j, k
+        integer                    :: m, nnodes, j, k,i
         real(pfdp)                 :: t
 
         lev => pf%levels(level_index)
@@ -273,22 +275,26 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         do k = 1, nsweeps
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            t = t0 
+           do j = 2, nnodes
+              call this%f_old(j)%copy(lev%F(j,1))  ! Save old f
+           end do
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
-              call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
-              if (j > 1) then                                 ! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})
-                 call this%b(2)%axpy(real(-1.0, pfdp), lev%F(j,1))         ! add -\phi_1(tL) F_j^{[k]}
-                 call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
-                 call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
-              end if
+              call LocalDerivsAtNode(this, 1, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
+              call this%b(1)%copy(lev%Q(1))  ! add term \phi_0(tL) y_n
+
+              do i=1,j
+                 call this%b(2)%axpy(-this%eta(i), this%f_old(i))         ! add -\phi_1(tL) F_j^{[k]}
+                 call this%b(2)%axpy(this%eta(i), lev%F(i,1))          ! add \phi_1(tL) F_j^{[k+1]}
+              end do
+              
               
               ! compute phi products
               if (this%use_phib) then
-                 call this%phib(this%eta(j), dt, this%b, lev%Q(j+1))
+                 call this%phib(this%nodes(j+1), dt, this%b, lev%Q(j+1))
               else
-                 call this%swpPhib(j, dt, this%b, lev%Q(j+1))
+                 call this%swpPhib(j+1, dt, this%b, lev%Q(j+1))
               end if
 
 !!$              !  Now we have to add in the tauQ
@@ -298,12 +304,13 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 !                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
                  end if
               end if
+
+              call this%f_eval(lev%Q(j+1), t, lev%index, lev%F(j+1,1))                      ! eval last nonlinear term
 !!$
            end do
-           call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))                      ! eval last nonlinear term
-
-           call pf_residual(pf, lev, dt)
            call lev%qend%copy(lev%Q(lev%nnodes))
+           call pf_residual(pf, lev, dt)
+
            call call_hooks(pf, level_index, PF_POST_SWEEP)
            
         end do
@@ -341,22 +348,12 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         integer :: i, nnodes
 
         nnodes = lev%nnodes
-!!$        call LocalDerivsAtNode(this, 1, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
-!!$        call this%b(1)%setval(real(0.0, pfdp))
-!!$        call this%b(1)%axpy(real(1.0, pfdp), qSDC(1))
-!!$        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-!!$            if (this%use_phib) then
-!!$                call this%phib(this%nodes(i+1), dt, this%b, fintsdc(i))
-!!$            else
-!!$                call this%resPhib(i, dt, this%b, fintsdc(i))
-!!$             end if
-!!$        end do
+        call LocalDerivsAtNode(this, 1, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
+        call this%b(1)%setval(real(0.0, pfdp))
+        call this%b(1)%axpy(real(1.0, pfdp), qSDC(1))
         do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-           call LocalDerivsAtNode(this, i, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
-           !           call this%b(1)%copy(qSDC(i))
-           call this%b(1)%setval(0.0_pfdp)
-           if (this%use_phib) then
-                call this%phib(this%eta(i), dt, this%b, fintsdc(i))
+            if (this%use_phib) then
+                call this%phib(this%nodes(i+1), dt, this%b, fintsdc(i))
             else
                 call this%resPhib(i, dt, this%b, fintsdc(i))
              end if
@@ -438,9 +435,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         deallocate(this%w)
         deallocate(this%eta)
-        deallocate(this%b)
         deallocate(this%newF)
-
+        call lev%ulevel%factory%destroy_array(this%b, lev%index, lev%nnodes,  lev%shape)
+        call lev%ulevel%factory%destroy_array(this%f_old, lev%index, lev%nnodes,  lev%shape)        
     end subroutine exp_destroy
 
     ! =======================================================================

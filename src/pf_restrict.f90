@@ -125,11 +125,12 @@ contains
     integer, optional, intent(in)    :: flags    
 
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !!  fine solution restricted in space only
-    integer :: m
-    integer :: f_nnodes
+    integer :: m,j
+    integer :: f_nnodes,c_nnodes
 
 
     f_nnodes = f_lev_ptr%nnodes
+    c_nnodes = c_lev_ptr%nnodes
 
     !!  do the restriction
     if (IS_INTEGRAL) then   ! Restriction of integrals
@@ -147,7 +148,12 @@ contains
           if ((flags .eq. 0) .or. (flags .eq. 2)) &
             call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., flags=2)
        else
-          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
+!          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
+          do j=1,c_nnodes-1
+             call c_encap_array(j)%setval(0.0_pfdp)
+             call c_encap_array(j)%axpy(1.0_pfdp,f_encap_array_c(2*j-1))
+             call c_encap_array(j)%axpy(1.0_pfdp,f_encap_array_c(2*j))
+          end do
        end if
        call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
     else
