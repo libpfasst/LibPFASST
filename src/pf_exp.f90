@@ -31,8 +31,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     real(pfdp),        allocatable :: nodes(:)   ! nodes
     real(pfdp),        allocatable :: eta(:)     ! normalized substeps (on interval [0, 1])
     class(pf_encap_t), allocatable :: b(:)       ! scratch space for computing nonlinear derivatives
+    class(pf_encap_t), allocatable :: f_old(:)   ! scratch space for storing nonlinear terms
     class(pf_encap_t), allocatable :: newF       ! scratch space for storing new function evaluations
-    LOGICAL :: use_phib = .FALSE.                ! if TRUE calls phib otherwise calls swpPhib and resPhib
+    LOGICAL :: use_phib = .TRUE.                ! if TRUE calls phib otherwise calls swpPhib and resPhib
 
     contains
 
@@ -241,6 +242,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! initialize temporary storage objects
         call lev%ulevel%factory%create_single(this%newF, lev%index, lev%shape)
         call lev%ulevel%factory%create_array(this%b, nnodes + 1, lev%index, lev%shape)
+        call lev%ulevel%factory%create_array(this%f_old, nnodes, lev%index, lev%shape)
 
     end subroutine exp_initialize
 
@@ -272,15 +274,23 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! error sweeps
         do k = 1, nsweeps
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
+           do j = 1, nnodes
+              call this%f_old(j)%copy(lev%F(j,1))  ! Save old f
+           end do
+           
            t = t0 
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
+              !              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
+              call LocalDerivsAtNode(this, j, nnodes, this%f_old(:), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
               if (j > 1) then                                 ! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})
-                 call this%b(2)%axpy(real(-1.0, pfdp), lev%F(j,1))         ! add -\phi_1(tL) F_j^{[k]}
-                 call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
+                 call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
+              endif
+              
+              call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
+              if (j > 1) then                                 ! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})
                  call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
               end if
               
@@ -293,7 +303,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
 !!$              !  Now we have to add in the tauQ
               if (allocated(lev%tauQ)) then
-!                 call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
+                 call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
                  if (j > 1) then     ! The tau is not node to node
 !                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
                  end if
@@ -353,14 +363,31 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 !!$        end do
         do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
            call LocalDerivsAtNode(this, i, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
-           !           call this%b(1)%copy(qSDC(i))
-           call this%b(1)%setval(0.0_pfdp)
+           call this%b(1)%copy(qSDC(i))
+
+           
+           call fintsdc(i)%setval(0.0_pfdp)
            if (this%use_phib) then
                 call this%phib(this%eta(i), dt, this%b, fintsdc(i))
             else
                 call this%resPhib(i, dt, this%b, fintsdc(i))
              end if
+!             if (i > 1) then
+!                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
+!             end if
+             
+!             print *,'integrating',i,this%nodes(i+1),dt,this%eta(i)
+!          call fintsdc(i)%eprint()
         end do
+
+!        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
+!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(1))
+!        end do
+        
+             
+!             print *,'integrating',i,this%nodes(i+1),dt,this%eta(i)
+!          call fintsdc(i)%eprint()
+
 
 
     end subroutine exp_integrate
@@ -381,6 +408,10 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         if (allocated(lev%tauQ)) then
            do m = 1, lev%nnodes-1
               call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
+              if (m > 1) then
+            !     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
+              end if
+              
            end do
         end if
         
@@ -388,6 +419,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         do m = 1, lev%nnodes-1      
            call lev%R(m)%copy(lev%I(m))
            call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+!           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
         end do
 
 
@@ -438,9 +470,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         deallocate(this%w)
         deallocate(this%eta)
-        deallocate(this%b)
         deallocate(this%newF)
-
+        call lev%ulevel%factory%destroy_array(this%b, lev%index, lev%nnodes,  lev%shape)
+        call lev%ulevel%factory%destroy_array(this%f_old, lev%index, lev%nnodes,  lev%shape)        
     end subroutine exp_destroy
 
     ! =======================================================================

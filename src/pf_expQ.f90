@@ -275,18 +275,19 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         do k = 1, nsweeps
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            t = t0 
-           do j = 2, nnodes
+           do j = 1, nnodes
               call this%f_old(j)%copy(lev%F(j,1))  ! Save old f
            end do
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              call LocalDerivsAtNode(this, 1, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
+              call LocalDerivsAtNode(this, 1, nnodes, this%f_old(:), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
+!              call LocalDerivsAtNode(this, 1, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
               call this%b(1)%copy(lev%Q(1))  ! add term \phi_0(tL) y_n
 
               do i=1,j
-                 call this%b(2)%axpy(-this%eta(i), this%f_old(i))         ! add -\phi_1(tL) F_j^{[k]}
-                 call this%b(2)%axpy(this%eta(i), lev%F(i,1))          ! add \phi_1(tL) F_j^{[k+1]}
+!                 call this%b(2)%axpy(-this%eta(i), this%f_old(i))         ! add -\phi_1(tL) F_j^{[k]}
+!                 call this%b(2)%axpy(this%eta(i), lev%F(i,1))          ! add \phi_1(tL) F_j^{[k+1]}
               end do
               
               
@@ -297,16 +298,13 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
                  call this%swpPhib(j+1, dt, this%b, lev%Q(j+1))
               end if
 
-!!$              !  Now we have to add in the tauQ
+!              !  Now we have to add in the tauQ
               if (allocated(lev%tauQ)) then
-!                 call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
-                 if (j > 1) then     ! The tau is not node to node
-!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
-                 end if
+                 call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
               end if
 
               call this%f_eval(lev%Q(j+1), t, lev%index, lev%F(j+1,1))                      ! eval last nonlinear term
-!!$
+!
            end do
            call lev%qend%copy(lev%Q(lev%nnodes))
            call pf_residual(pf, lev, dt)

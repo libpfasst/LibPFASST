@@ -148,12 +148,7 @@ contains
           if ((flags .eq. 0) .or. (flags .eq. 2)) &
             call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true., flags=2)
        else
-!          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
-          do j=1,c_nnodes-1
-             call c_encap_array(j)%setval(0.0_pfdp)
-             call c_encap_array(j)%axpy(1.0_pfdp,f_encap_array_c(2*j-1))
-             call c_encap_array(j)%axpy(1.0_pfdp,f_encap_array_c(2*j))
-          end do
+          call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_ptr%rmat(2:,2:), f_encap_array_c, .true.)
        end if
        call c_lev_ptr%ulevel%factory%destroy_array(f_encap_array_c, f_nnodes-1, c_lev_ptr%index, c_lev_ptr%shape)
     else
