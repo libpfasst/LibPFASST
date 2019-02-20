@@ -6,7 +6,8 @@
 module pf_mod_pfasst
   use pf_mod_dtype
   use pf_mod_comm_mpi
-    use pf_mod_utils
+  use pf_mod_utils
+  use pf_mod_results
   
   implicit none
 contains
@@ -224,7 +225,7 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
     end do
     !>  deallocate pfasst pointer arrays
-    call pf%results%destroy(pf%results)
+!    call pf%destroy_results()
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -560,4 +561,31 @@ contains
   end subroutine pf_time_interpolation_matrix
 
 
+  !>  Subroutine to write out run parameters
+  subroutine pf_initialize_results(pf)
+  
+  type(pf_pfasst_t), intent(inout)           :: pf
+
+  integer :: lev_ind
+  ALLOCATE(pf%results(pf%nlevels))
+  do lev_ind = 1,pf%nlevels
+    call  initialize_results(pf%results(lev_ind),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(lev_ind),pf%rank,lev_ind)
+  end do
+  end subroutine pf_initialize_results
+  
+
+  !>  Subroutine to write out run parameters
+  subroutine pf_dump_results(pf)
+  
+  type(pf_pfasst_t), intent(inout)           :: pf
+
+  integer :: lev_ind
+
+  do lev_ind = 1,pf%nlevels
+    call  dump_results(pf%results(lev_ind))
+  end do
+  end subroutine pf_dump_results
+  
+    
+  
 end module pf_mod_pfasst

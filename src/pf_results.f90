@@ -11,17 +11,19 @@ module pf_mod_results
 
   
 contains
-    subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in)
+    subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind)
     class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nlevels_in,rank_in
-
+    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind
+    character(len = 24   ) :: fname  !!  output file name for residuals
+    
     if (rank_in == 0) then
-       open(unit=123, file='result-size.dat', form='formatted')
-       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nlevels_in
+       write (fname, "(A17,I0.3,A4)") 'dat/results_size_',lev_ind,'.dat'
+       open(unit=123, file=fname, form='formatted')
+       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nsweeps_in
        close(unit=123)
     end if
 
-
+    
     this%dump => dump_results
     this%destroy => destroy_results
 
@@ -29,14 +31,14 @@ contains
     this%nblocks=nsteps_in/nprocs_in
     this%niters=niters_in
     this%nprocs=nprocs_in
-    this%nlevels=nlevels_in
-    this%p_index=rank_in+100
+    this%nsweeps=nsweeps_in
+    this%rank=rank_in
+    this%level=lev_ind    
 
-    write (this%fname_r, "(A13,I0.3,A4)") 'dat/residual_',rank_in,'.dat'
-    write (this%fname_e, "(A10,I0.3,A4)") 'dat/errors_',rank_in,'.dat'
+    print *,'initialize results',niters_in, this%nblocks, nsweeps_in,lev_ind
 
-    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nlevels_in))
-    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nlevels_in))
+    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in))
+    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in))
 
     this%errors = 0.0_pfdp
     this%residuals = 0.0_pfdp
@@ -45,16 +47,22 @@ contains
   subroutine dump_results(this)
     type(pf_results_t), intent(inout) :: this
     integer :: i, j, k
+    character(len = 24   ) :: fname_r  !!  output file name for residuals
+    character(len = 21) :: fname_e     !!  output file name errors
     
-    open(unit=this%p_index, file=this%fname_r, form='formatted')
-    do k = 1, this%nlevels
-       do j = 1, this%nblocks
-          do i = 1 , this%niters
-             write(this%p_index, '(I4, I4, I4, e21.14)') i,j,k,this%residuals(i, j, k)
+
+    write (fname_r, "(A13,I0.3,A1,I0.3,A4)") 'dat/residual_',this%rank,'_',this%level,'.dat'
+    write (fname_e, "(A10,I0.3,A1,I0.3,A4)") 'dat/errors_',  this%rank,'_',this%level,'.dat'
+
+    open(100+this%rank, file=fname_r, form='formatted')
+    do j = 1, this%nblocks
+       do i = 1 , this%niters
+          do k = 1, this%nsweeps
+             write(100+this%rank, '(I4, I4, I4, e21.14)') j,i,k,this%residuals(i, j, k)
           end do
        end do
     enddo
-    close(this%p_index)
+    close(100+this%rank)
 
   end subroutine dump_results
 

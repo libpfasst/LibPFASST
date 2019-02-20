@@ -400,7 +400,6 @@ contains
     pf%state%proc    = pf%rank+1
     pf%state%t0      = pf%state%step * dt
     pf%state%iter    = -1
-    pf%state%cycle   = -1
 !     pf%state%itcnt   = 0
     pf%state%mysteps = 0
     pf%state%status  = PF_STATUS_PREDICTOR
@@ -414,6 +413,7 @@ contains
     did_post_step_hook = .false.
     
 !    call pf%results%initialize(nsteps, pf%niters, pf%comm%nproc, pf%nlevels)
+!    call pf_initialize_results(pf)   !  This one is the correct way
     
 !     do k = 1, 666666666 
 ! 
@@ -525,7 +525,8 @@ contains
 !     pf%state%iter = -1
 !     call end_timer(pf, TTOTAL)
            
-    k = 1 ! always one block
+    k = 1 ! always one block  TO DO:  fix this
+    pf%state%pfblock = k
     do j = 1, pf%niters
       call start_timer(pf, TITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
@@ -538,7 +539,6 @@ contains
 
       !  Check for convergence
       call pf_check_convergence_oc(pf, send_tag=1111*k+j, flags=dir)
-      if (pf%save_results) pf%results%residuals(pf%state%iter, k, pf%nlevels) = pf%levels(pf%nlevels)%residual
 
       call call_hooks(pf, -1, PF_POST_ITERATION)
       call end_timer(pf, TITERATION)  
@@ -550,7 +550,8 @@ contains
     pf%state%itcnt = pf%state%itcnt + pf%state%iter
     call call_hooks(pf, -1, PF_POST_STEP)
     
-    if (pf%save_results) call pf%results%dump(pf%results)
+    if (pf%save_results) call pf_dump_results(pf)
+
     
     call end_timer(pf, TTOTAL)
   end subroutine pf_pfasst_block_oc

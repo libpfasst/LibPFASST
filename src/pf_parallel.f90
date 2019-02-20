@@ -58,7 +58,7 @@ contains
     pf%state%nsteps = nsteps_loc
 
     !>  Allocate stuff for holding results
-    call initialize_results(pf%results,nsteps_loc, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
+    call pf_initialize_results(pf)
 
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
@@ -69,7 +69,7 @@ contains
        call pf_block_run(pf, q0, dt,  nsteps_loc,flags=flags)             
     end if
 
-    if (pf%save_results) call pf%results%dump(pf%results)
+    if (pf%save_results) call pf_dump_results(pf)
 
 
     !  What we would like to do is check for
@@ -391,7 +391,8 @@ contains
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
-
+       pf%state%pfblock = k
+       
        if (k > 1) then
           if (nproc > 1)  then
              call lev_p%qend%pack(lev_p%send)    !!  Pack away your last solution
@@ -425,7 +426,6 @@ contains
 
           !  Check for convergence
           call pf_check_convergence_block(pf, send_tag=1111*k+j)
-          if (pf%save_results) pf%results%residuals(pf%state%iter, k, lev_p%index) = lev_p%residual
 
 !          print *,pf%rank, ' post res'
           call call_hooks(pf, -1, PF_POST_ITERATION)
@@ -514,6 +514,7 @@ contains
        if (level_index < level_index_f) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
        else  !  compute residual for diagnostics since we didn't sweep
+          pf%state%sweep=1
           call pf_residual(pf, f_lev_p, dt)
        end if
     end do

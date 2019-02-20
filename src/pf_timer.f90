@@ -109,9 +109,9 @@ contains
 
     if (pf%echo_timings) then
        write(601+pf%rank, '("timer:",a16,", rank: ",i3,", step: ",i4, ", level: ", i3,' &
-            // '", iter: ",i3,", cycle: ",i3,", time (rate ",i12,"Hz): ",i18,i18,i18,i18)') &
+            // '", iter: ",i3,", time (rate ",i12,"Hz): ",i18,i18,i18,i18)') &
             timer_names(timer), pf%rank, &
-            pf%state%step, pf%state%level, pf%state%iter, pf%state%cycle, rate, &
+            pf%state%step, pf%state%level, pf%state%iter, rate, &
             t-pf%timers(timer), t-pf%timers(TTOTAL), pf%timers(timer), t
        call flush(601+pf%rank)
     end if
