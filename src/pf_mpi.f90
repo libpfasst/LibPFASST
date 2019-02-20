@@ -9,7 +9,7 @@ end module pf_mod_mpi
 !> Module to implement communication routines in  MPI.
 module pf_mod_comm_mpi
   use pf_mod_dtype
-  use pf_mod_timer
+
   use pf_mod_mpi, only: MPI_REAL16, MPI_REAL8
   implicit none
   !  For normal double precision

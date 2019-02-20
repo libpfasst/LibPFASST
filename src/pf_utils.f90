@@ -44,7 +44,7 @@ contains
        lev%residual_rel = 0.0d0
     end if
 
-    if (pf%save_results .and. pf%state%iter>0)  then
+    if (pf%save_residuals .and. pf%state%iter>0)  then
        pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
     end if
 

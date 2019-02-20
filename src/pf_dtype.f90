@@ -276,8 +276,10 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_results = .false.  !!  If true, results are output
-     logical    :: echo_timings  = .false.    !!  If true, timings are output
+     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
+     logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
+     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
      integer :: rank    = -1            !! rank of current processor
 
@@ -292,8 +294,8 @@ module pf_mod_dtype
      integer,  allocatable :: nhooks(:,:)   !!  Holds the number hooks
 
      !> timing variables
-     integer :: timers(100)   = 0
-     integer :: runtimes(100) = 0
+     double precision :: timers(100)   = 0.0d0
+     double precision :: runtimes(100) = 0.0d0
 
      !> output directory
      character(512) :: outdir

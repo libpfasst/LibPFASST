@@ -23,12 +23,12 @@ foo: $(FOBJ)
 ./build/pf_pfasst.o : src/pf_pfasst.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_results.o ./build/pf_utils.o ./build/pf_mpi.o ./build/pf_dtype.o 
 ./build/pf_quadrature.o : src/pf_quadrature.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
-./build/pf_results.o : src/pf_results.f90 ./build/pf_dtype.o 
+./build/pf_results.o : src/pf_results.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_rkstepper.o : src/pf_rkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_timer.o : src/pf_timer.f90 ./build/pf_dtype.o 
+./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_dtype.o 
 ./build/pf_utils.o : src/pf_utils.f90 ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_verlet.o : src/pf_verlet.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_zndsysarray.o : src/pf_zndsysarray.f90 ./build/pf_dtype.o 
 ./build/pf_zndarray.o : src/pf_zndarray.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_fftpack.o : src/pf_fftpack.f90 ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_mpi.o : src/pf_mpi.f90 ./build/pf_timer.o ./build/pf_dtype.o 
+./build/pf_mpi.o : src/pf_mpi.f90 ./build/pf_dtype.o 

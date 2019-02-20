@@ -309,7 +309,8 @@ contains
     logical    :: PFASST_pred, RK_pred, pipeline_pred
     integer    ::  nsweeps_burn, q0_style, taui0
     logical    ::  Vcycle,Finterp, use_LUq
-    logical    :: echo_timings, debug, save_results, use_rk_stepper
+    logical    :: debug, use_rk_stepper
+    logical    :: save_timings,echo_timings, save_residuals, save_errors
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
     ! stuff for reading the command line
@@ -324,7 +325,7 @@ contains
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_results, use_rk_stepper
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_timings,save_residuals, save_errors, use_rk_stepper
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes
 
     !> set local variables to pf_pfasst defaults
@@ -347,8 +348,11 @@ contains
     taui0        = pf%taui0
     outdir       = pf%outdir
     debug        = pf%debug
-    save_results = pf%save_results
+    save_residuals = pf%save_residuals
+    save_errors = pf%save_errors
+    save_timings = pf%save_timings
     echo_timings = pf%echo_timings
+
 
     nsteps_rk    = pf%nsteps_rk
     rk_pred      = pf%rk_pred
@@ -398,11 +402,12 @@ contains
     pf%use_LUq      = use_LUq
     pf%taui0        = taui0
 
-    pf%echo_timings = echo_timings
     pf%outdir       = outdir
     pf%debug        = debug
-    pf%save_results = save_results
     pf%echo_timings = echo_timings
+    pf%save_residuals = save_residuals
+    pf%save_timings = save_timings
+    pf%save_errors = save_errors
 
     pf%use_rk_stepper=use_rk_stepper
     pf%nsteps_rk    = nsteps_rk    
@@ -576,15 +581,29 @@ contains
 
   !>  Subroutine to write out run parameters
   subroutine pf_dump_results(pf)
+    
+    type(pf_pfasst_t), intent(inout)           :: pf
+    
+    integer :: lev_ind
+    
+    if (pf%save_residuals) then
+       do lev_ind = 1,pf%nlevels
+          call  dump_results(pf%results(lev_ind))
+       end do
+    end if
+    
+    if (pf%save_errors) then
+       do lev_ind = 1,pf%nlevels
+!          call  dump_errors(pf%results(lev_ind))
+       end do
+    end if
+    
+    if (pf%save_timings) then
+       call  dump_timings(pf)
+    end if
   
-  type(pf_pfasst_t), intent(inout)           :: pf
 
-  integer :: lev_ind
-
-  do lev_ind = 1,pf%nlevels
-    call  dump_results(pf%results(lev_ind))
-  end do
-  end subroutine pf_dump_results
+end subroutine pf_dump_results
   
     
   

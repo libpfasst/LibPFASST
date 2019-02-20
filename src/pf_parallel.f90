@@ -69,7 +69,7 @@ contains
        call pf_block_run(pf, q0, dt,  nsteps_loc,flags=flags)             
     end if
 
-    if (pf%save_results) call pf_dump_results(pf)
+    call pf_dump_results(pf)
 
 
     !  What we would like to do is check for
