@@ -96,7 +96,6 @@ program main
 
   pf%debug = .false.
   
-  pf%save_results = .false.
   
   !
 !   ! run
@@ -114,7 +113,6 @@ program main
      nsteps = comm%nproc
   end if
 
-  call initialize_results(pf%results, nsteps, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
   
   if (warmstart .eq. 1) then
     predict = .false.
