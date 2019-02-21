@@ -105,6 +105,7 @@ contains
     call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !!  Loop over sweeps
+       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
 
        ! compute integrals and add fas correction

@@ -80,6 +80,7 @@ contains
 
     !> add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_STEP, echo_error)
 
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)

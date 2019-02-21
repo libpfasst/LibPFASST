@@ -39,7 +39,7 @@ module pf_mod_dtype
     real(pfdp) :: t0  !!  Time at beginning of this time step
     real(pfdp) :: dt  !!  Time step size
     integer :: nsteps   !! total number of time steps
-    integer :: cycle    !! deprecated?
+    integer :: pfblock  !! pfasst block being worked on
     integer :: iter     !! current iteration number
     integer :: step     !! current time step number assigned to processor
     integer :: level    !! which level is currently being operated on
@@ -48,7 +48,7 @@ module pf_mod_dtype
     integer :: sweep    !! sweep number
     integer :: status   !! status (iterating, converged etc)
     integer :: pstatus  !! previous rank's status
-    integer :: itcnt    !! iteration counter
+    integer :: itcnt    !! total iterations by this processor
     integer :: skippedy !! skipped sweeps for state (for mixed integration)
     integer :: mysteps  !! steps I did
   end type pf_state_t
@@ -221,19 +221,18 @@ module pf_mod_dtype
      integer :: nsteps
      integer :: niters
      integer :: nprocs
-     integer :: nlevels
      integer :: p_index
      integer :: nblocks
+     integer :: nsweeps
+     integer :: rank
+     integer :: level
      
-     character(len = 20   ) :: fname_r  !!  output file name for residuals
-     character(len = 18) :: fname_e     !!  output file name errors
      
-!     procedure(pf_init_results_p), pointer, nopass :: initialize_results
      procedure(pf_results_p), pointer, nopass :: dump 
      procedure(pf_results_p), pointer, nopass :: destroy 
   end type pf_results_t
 
-  !>  The main PFASST data type which includes pretty much everything
+  !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
      !>  Mandatory parameters (must be set on command line or input file)
      integer :: nlevels = -1             !! number of pfasst levels
@@ -277,8 +276,10 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_results = .false.  !!  If true, results are output
-     logical    :: echo_timings  = .false.    !!  If true, timings are output
+     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
+     logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
+     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
      integer :: rank    = -1            !! rank of current processor
 
@@ -286,15 +287,15 @@ module pf_mod_dtype
      type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm proc is
      type(pf_level_t), allocatable :: levels(:) !! Holds the levels
      type(pf_comm_t),  pointer :: comm    !! Points to communicator
-     type(pf_results_t) :: results
+     type(pf_results_t),allocatable :: results(:)   !!  Hold results for each level
 
      !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !!  Holds the hooks
      integer,  allocatable :: nhooks(:,:)   !!  Holds the number hooks
 
      !> timing variables
-     integer :: timers(100)   = 0
-     integer :: runtimes(100) = 0
+     double precision :: timers(100)   = 0.0d0
+     double precision :: runtimes(100) = 0.0d0
 
      !> output directory
      character(512) :: outdir
