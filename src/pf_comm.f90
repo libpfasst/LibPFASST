@@ -17,6 +17,9 @@ contains
     integer, optional, intent(in)    :: direction
     integer                          :: dir
     integer ::  ierror , source
+
+
+    if (pf%comm%nproc .eq. 1) return
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -25,12 +28,13 @@ contains
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
        source=pf%rank-1
+       call pf%comm%post(pf, level, tag, ierror, source)
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
          .and. dir == 2) then
        source=pf%rank+1
+       call pf%comm%post(pf, level, tag, ierror, source)
     end if
 
-    call pf%comm%post(pf, level, tag, ierror, source)
     
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during post', ierror
@@ -47,6 +51,8 @@ contains
     integer ::  dir
     integer ::  istatus
     integer ::  ierror,dest
+
+    if (pf%comm%nproc .eq. 1) return
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -83,6 +89,8 @@ contains
     integer, optional, intent(in)    :: direction
     integer ::  dir
     integer ::  ierror, istatus,source
+
+    if (pf%comm%nproc .eq. 1) return
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -124,7 +132,9 @@ contains
     logical,           intent(in)    :: blocking
     integer, optional, intent(in)    :: direction
     integer                          :: dir, ierror,dest
-    
+
+    if (pf%comm%nproc .eq. 1) return
+
     dir = 1 ! default: send forward
     if(present(direction)) dir = direction
 
@@ -167,7 +177,9 @@ contains
     logical,           intent(in)    :: blocking
     integer, optional, intent(in)    :: direction
     integer                          :: dir, ierror,source
-    
+
+    if (pf%comm%nproc .eq. 1) return
+
     dir = 1 ! default: send forward
     if(present(direction)) dir = direction
 
@@ -217,6 +229,9 @@ contains
     integer,           intent(in)    :: nvar, root
     real(pfdp)  ,      intent(in)    :: y(nvar)
     integer :: ierror
+
+    if (pf%comm%nproc .eq. 1) return
+    
     call start_timer(pf, TBROADCAST)
     if(pf%debug) print *,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
