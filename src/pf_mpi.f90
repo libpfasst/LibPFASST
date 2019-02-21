@@ -72,20 +72,14 @@ contains
   end subroutine pf_mpi_destroy
 
   !>  Subroutine to post receive requests.
-  subroutine pf_mpi_post(pf, level, tag, ierror, direction)
+  subroutine pf_mpi_post(pf, level, tag, ierror, source)
 
     type(pf_pfasst_t), intent(in   ) :: pf
     class(pf_level_t), intent(inout) :: level   !!  level to send from
     integer,           intent(in   ) :: tag     !!  message tag
     integer,           intent(inout) :: ierror  !!  error flag
-    integer, optional, intent(in)    :: direction
-    integer                          :: dir, source
+    integer,           intent(in)    :: source
 
-    dir = 1 ! default 1: send forward; set to 2 for send backwards
-    if(present(direction)) dir = direction
-
-    if(dir==1) source = modulo(pf%rank-1, pf%comm%nproc)
-    if(dir==2) source = modulo(pf%rank+1, pf%comm%nproc)
 
     call mpi_irecv(level%recv, level%mpibuflen, myMPI_Datatype, &
                    source, tag, pf%comm%comm, pf%comm%recvreq(level%index), ierror)
@@ -94,28 +88,19 @@ contains
 
 
   !> Subroutine to send convergence status information
-  subroutine pf_mpi_send_status(pf, tag,istatus,ierror, direction)
+  subroutine pf_mpi_send_status(pf, tag,istatus,ierror, dest)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE, MPI_REQUEST_NULL
 
     type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
     integer,           intent(in)    :: tag       !!  message tag
     integer,           intent(in) :: istatus      !!  status flag to send
     integer,           intent(inout) :: ierror    !!  error flag
-    integer, optional, intent(in)    :: direction
-    integer                          :: dest
-    integer    ::  stat(MPI_STATUS_SIZE), dir
+    integer,            intent(in)    :: dest
+    integer    ::  stat(MPI_STATUS_SIZE)
 
     integer :: message
     message = istatus
     
-    dir = 1 ! default 1: send forward; set to 2 for send backwards
-    if(present(direction)) dir = direction
-    
-    if( dir == 2) then
-       dest = modulo(pf%rank-1, pf%comm%nproc) 
-    else
-       dest = modulo(pf%rank+1, pf%comm%nproc) 
-    end if
 
     if (pf%comm%statreq /= -66) then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'waiting in send_status with statreq',pf%comm%statreq
@@ -129,27 +114,17 @@ contains
   end subroutine pf_mpi_send_status
 
   !> Subroutine to receive convergence status information
-  subroutine pf_mpi_recv_status(pf, tag,istatus,ierror, direction)
+  subroutine pf_mpi_recv_status(pf, tag,istatus,ierror, source)
     use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
     integer,           intent(in)    :: tag       !!  message tag
     integer,           intent(inout) :: istatus   !!  status flag to receive
     integer,           intent(inout) :: ierror    !!  error flag
-    integer, optional, intent(in)    :: direction
-    integer                          :: source
-    integer    ::  stat(MPI_STATUS_SIZE), dir
+    integer,           intent(in)    :: source
+    integer    ::  stat(MPI_STATUS_SIZE)
 
     integer :: message
-
-    dir = 1 ! default 1: send forward; set to 2 for send backwards
-    if(present(direction)) dir = direction
-    
-    if(dir == 2) then
-       source = modulo(pf%rank+1, pf%comm%nproc) 
-    else
-       source = modulo(pf%rank-1, pf%comm%nproc) 
-    end if
 
     ! Get the message
     call mpi_recv(message, 1, MPI_INTEGER,source, tag, pf%comm%comm, stat, ierror)
@@ -159,7 +134,7 @@ contains
 
 
   !> Subroutine to send solutions
-  subroutine pf_mpi_send(pf, level, tag, blocking,ierror, direction)
+  subroutine pf_mpi_send(pf, level, tag, blocking,ierror, dest)
     use pf_mod_mpi, only:  MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf       !!  main pfasst structure
@@ -167,43 +142,16 @@ contains
     integer,           intent(in   ) :: tag      !!  message tag
     logical,           intent(in   ) :: blocking !!  true if send is blocking
     integer,           intent(inout) :: ierror   !!  error flag
-    integer, optional, intent(in)    :: direction
-    integer                          :: dest, dir
+    integer,           intent(in)    :: dest
+
     integer ::  stat(MPI_STATUS_SIZE)
 
-    dir = 1 ! default 1: send forward; set to 2 for send backwards
-    if(present(direction)) dir = direction
-    
-    if(dir == 2) then
-       dest = modulo(pf%rank-1, pf%comm%nproc) 
-    else
-       dest = modulo(pf%rank+1, pf%comm%nproc) 
-    end if
     
     if (blocking) then
-      if(dir == 2) then
-          call level%q0%pack(level%send, 2)
-       else
-          if(present(direction)) then
-            call level%qend%pack(level%send, 1)
-          else 
-            call level%qend%pack(level%send)
-          end if
-       end if       
        call mpi_send(level%send, level%mpibuflen, myMPI_Datatype, &
                      dest, tag, pf%comm%comm, stat, ierror)
     else
        call mpi_wait(pf%comm%sendreq(level%index), stat, ierror)
-!        call level%qend%pack(level%send)
-       if(dir == 2) then
-          call level%q0%pack(level%send, 2)
-       else
-          if(present(direction)) then
-             call level%qend%pack(level%send, 1)
-          else
-            call level%qend%pack(level%send)
-          end if
-       end if
        call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
@@ -212,25 +160,17 @@ contains
   !> Subroutine to receive solutions
   !! Note when blocking == .false. this is actually a wait because the
   !! nonblocking receive  should have already been posted
-  subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, direction)
+  subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, source)
     use pf_mod_mpi, only:  MPI_STATUS_SIZE
     type(pf_pfasst_t), intent(inout) :: pf     !!  main pfasst structure
     class(pf_level_t), intent(inout) :: level  !!  level to recieve into
     integer,           intent(in   ) :: tag    !!  message tag
     logical,           intent(in   ) :: blocking  !!  true if receive is blocking
     integer,           intent(inout) :: ierror  !!  error flag
-    integer, optional, intent(in)    :: direction
-    integer                          :: source, dir
+    integer,           intent(in)    :: source
     integer ::  stat(MPI_STATUS_SIZE)
 
-    dir = 1 ! default 1: send forward; set to 2 for send backwards
-    if(present(direction)) dir = direction
     
-    if(dir == 2) then
-       source = modulo(pf%rank+1, pf%comm%nproc) 
-    else
-       source = modulo(pf%rank-1, pf%comm%nproc) 
-    end if
     
     if (blocking) then
        call mpi_recv(level%recv, level%mpibuflen, myMPI_Datatype, &

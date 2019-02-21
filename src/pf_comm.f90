@@ -16,7 +16,7 @@ contains
     integer,           intent(in)    :: tag
     integer, optional, intent(in)    :: direction
     integer                          :: dir
-    integer ::  ierror 
+    integer ::  ierror , source
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -24,11 +24,13 @@ contains
     ierror = 0
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
-       call pf%comm%post(pf, level, tag, ierror, dir)
+       source=pf%rank-1
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
-                                  .and. dir == 2) then
-       call pf%comm%post(pf, level, tag, ierror, dir)
+         .and. dir == 2) then
+       source=pf%rank+1
     end if
+
+    call pf%comm%post(pf, level, tag, ierror, source)
     
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during post', ierror
@@ -44,7 +46,7 @@ contains
     integer, optional, intent(in)    :: direction
     integer ::  dir
     integer ::  istatus
-    integer ::  ierror
+    integer ::  ierror,dest
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -55,17 +57,17 @@ contains
     ierror = 0
     istatus = pf%state%status
     if (dir == 1) then
-       if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag 
-       call pf%comm%send_status(pf, tag, istatus, ierror, dir)
-       if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status' 
+       dest=pf%rank+1       
     elseif (dir == 2) then
-       if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'backwards with tag =', tag 
-       call pf%comm%send_status(pf, tag, istatus, ierror, dir)
-       if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status'
+       dest=pf%rank-1
     else
        print *, pf%rank, 'warning: bad dir during send_status', dir
       stop "pf_parallel:pf_send_status"
     end if
+
+    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag 
+    call pf%comm%send_status(pf, tag, istatus, ierror, dest)
+    if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status'
     
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during send_status', ierror
@@ -80,7 +82,7 @@ contains
     integer,           intent(in)    :: tag
     integer, optional, intent(in)    :: direction
     integer ::  dir
-    integer ::  ierror, istatus
+    integer ::  ierror, istatus,source
     
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
@@ -92,24 +94,27 @@ contains
     if (pf%debug) print*, 'DEBUG --',pf%rank, 'begin recv_status with pstatus=',pf%state%pstatus, ' tag=',tag
     ierror = 0
     if (dir == 1) then
-       call pf%comm%recv_status(pf, tag, istatus, ierror, dir)
-       if (pf%debug) print *, 'DEBUG --', pf%rank, 'status recvd = ', istatus 
-       if (ierror .eq. 0) pf%state%pstatus = istatus
+       source=pf%rank-1
     elseif (dir == 2) then
-       if (pf%debug) print*, pf%rank, 'my status = ', pf%state%status
-       if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag  
-       call pf%comm%recv_status(pf, tag, istatus, ierror, dir)
-       if (pf%debug) print *, pf%rank, 'status recvd = ', istatus 
-       if (ierror .eq. 0) pf%state%pstatus = istatus
+       source=pf%rank+1       
     else
       print *, pf%rank, 'warning: bad dir in recv_status', dir
       stop "pf_parallel_oc:pf_recv_status"
-    end if
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag       
-    if (ierror .ne. 0) then
+   end if
+   
+   if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag  
+
+   call pf%comm%recv_status(pf, tag, istatus, ierror, source)
+
+   if (ierror .eq. 0) then
+      pf%state%pstatus = istatus
+   else
       print *, pf%rank, 'warning: error during recv_status', ierror
       stop "pf_parallel_oc:pf_recv_status"
     endif    
+   
+   if (pf%debug) print *, pf%rank, 'status recvd = ', istatus 
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag       
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
@@ -118,24 +123,38 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     integer, optional, intent(in)    :: direction
-    integer                          :: dir, ierror
+    integer                          :: dir, ierror,dest
     
     dir = 1 ! default: send forward
     if(present(direction)) dir = direction
+
+    if(pf%rank /= 0 .and. dir == 2) then
+       call level%q0%pack(level%send, 2)
+    elseif(pf%rank /= pf%comm%nproc-1) then
+       if(present(direction)) then
+          call level%qend%pack(level%send, 1)
+       else
+          call level%qend%pack(level%send)
+       end if
+    else
+       return
+    end if
 
     ierror = 0
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
     if (pf%rank /= pf%comm%nproc-1  .and. dir == 1 ) then
-       call pf%comm%send(pf, level, tag, blocking, ierror, dir)
+       dest=pf%rank+1
     elseif (pf%rank /= 0 .and. dir == 2 ) then
-       !print *, pf%rank, 'sending backward',tag,blocking,pf%rank
-       call pf%comm%send(pf, level, tag, blocking, ierror, dir)
+       dest=pf%rank-1
     end if
+
+    call pf%comm%send(pf, level, tag, blocking, ierror, dest)   
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during send', ierror
       stop "pf_parallel:pf_send"
    endif
+
    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking                  
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
@@ -147,7 +166,7 @@ contains
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
     integer, optional, intent(in)    :: direction
-    integer                          :: dir, ierror
+    integer                          :: dir, ierror,source
     
     dir = 1 ! default: send forward
     if(present(direction)) dir = direction
@@ -157,7 +176,9 @@ contains
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin recv, tag=',tag,blocking, "pf%state%pstatus=",pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
-       call pf%comm%recv(pf, level,tag, blocking, ierror, dir)
+       source=pf%rank-1
+       call pf%comm%recv(pf, level,tag, blocking, ierror, source)
+       
        if (ierror .eq. 0) then
           if (present(direction)) then
              call level%q0%unpack(level%recv, 1)
@@ -167,7 +188,9 @@ contains
         end if
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                      .and. dir == 2) then
-       call pf%comm%recv(pf, level, tag, blocking, ierror, dir)
+       source=pf%rank+1
+       call pf%comm%recv(pf, level,tag, blocking, ierror, source)
+
        if (ierror .eq. 0) then 
          if (present(direction)) then
            call level%qend%unpack(level%recv, 2)
@@ -177,6 +200,7 @@ contains
   
        end if
     end if
+
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv, tag=',tag,blocking    
     if(ierror .ne. 0) then
       print *, pf%rank, 'warning: mpi error during receive', ierror
