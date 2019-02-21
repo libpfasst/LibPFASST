@@ -43,6 +43,7 @@ module pf_mod_dtype
     integer :: iter     !! current iteration number
     integer :: step     !! current time step number assigned to processor
     integer :: level    !! which level is currently being operated on
+    integer :: finest_level    !! the current finest level (for variable depth V cycles)
     integer :: hook     !! which hook
     integer :: proc     !! which processor
     integer :: sweep    !! sweep number

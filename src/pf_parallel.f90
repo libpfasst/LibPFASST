@@ -258,20 +258,21 @@ contains
   
 
   !> Subroutine to test residuals to determine if the current processor has converged.
-  subroutine pf_check_residual(pf, residual_converged)
+  subroutine pf_check_residual(pf, levind,residual_converged)
     type(pf_pfasst_t), intent(inout) :: pf
+    integer, intent(in)              :: levind
     logical,           intent(out)   :: residual_converged  !! Return true if residual is below tolerances
     
     residual_converged = .false.
 
     ! Check to see if relative tolerance is met
-    if (pf%levels(pf%nlevels)%residual_rel < pf%rel_res_tol) then
-       if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(pf%nlevels)%residual_rel
+    if (pf%levels(levind)%residual_rel < pf%rel_res_tol) then
+       if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(levind)%residual_rel
        residual_converged = .true.
     end if
     ! Check to see if relative tolerance is met       
-    if   (pf%levels(pf%nlevels)%residual     < pf%abs_res_tol)  then
-       if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(pf%nlevels)%residual
+    if   (pf%levels(levind)%residual     < pf%abs_res_tol)  then
+       if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(levind)%residual
        residual_converged = .true.
     end if
 
@@ -281,8 +282,9 @@ contains
   !> to update the next processor on the status
   !> Note that if the previous processor hasn't converged yet
   !> (pstatus), the current processor can't be converged yet either
-  subroutine pf_check_convergence_block(pf, send_tag)
+  subroutine pf_check_convergence_block(pf, levind,send_tag)
     type(pf_pfasst_t), intent(inout) :: pf
+    integer, intent(in)              :: levind
     integer,           intent(in)    :: send_tag  !! identifier for status send and receive
 
     logical           :: residual_converged, converged
@@ -298,7 +300,7 @@ contains
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
 
     !> Check to see if tolerances are met
-    call pf_check_residual(pf, residual_converged)
+    call pf_check_residual(pf, levind,residual_converged)
 
 
     !>  Until I hear the previous processor is done, recieve it's status
@@ -348,7 +350,8 @@ contains
     integer                   :: j, k
     integer                   :: nblocks !!  The number of blocks of steps to do
     integer                   :: nproc   !!  The number of processors being used
-    integer                   :: level_index_c !!  Coarsest leve in V-cycle
+    integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
+    integer                   :: level_max_depth !!  Finest level in V-cycle
 
 
     call start_timer(pf, TTOTAL)
@@ -422,10 +425,11 @@ contains
           pf%state%iter = j
 
           !  Do a v_cycle
-          call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,pf%nlevels)
+          level_max_depth = pf%nlevels-1
+          call pf_v_cycle(pf, k, pf%state%t0, dt,level_index_c,level_max_depth)
 
           !  Check for convergence
-          call pf_check_convergence_block(pf, send_tag=1111*k+j)
+          call pf_check_convergence_block(pf, level_max_depth,send_tag=1111*k+j)
 
 !          print *,pf%rank, ' post res'
           call call_hooks(pf, -1, PF_POST_ITERATION)

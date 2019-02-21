@@ -121,8 +121,8 @@ contains
                 call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
              end do
           end if
-          if (allocated(lev%tauQ)) then
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+          if (level_index < pf%state%finest_level) then
+             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
        !  Recompute the first function value if this is first sweep

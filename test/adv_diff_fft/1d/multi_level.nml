@@ -30,7 +30,7 @@
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  16 32 64
+    nx =  16 32 32
     nu = 0.02
     v=1.0
 
