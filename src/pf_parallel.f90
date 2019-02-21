@@ -153,7 +153,7 @@ contains
        do level_index = pf%nlevels, 2, -1
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
-          call pf_residual(pf, f_lev_p, dt)  
+          call pf_residual(pf, f_lev_p%index, dt)  
           call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0)          
           call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
           call save(c_lev_p)
@@ -395,6 +395,7 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
+       pf%state%finest_level = 2
        
        if (k > 1) then
           if (nproc > 1)  then
@@ -519,7 +520,7 @@ contains
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
        else  !  compute residual for diagnostics since we didn't sweep
           pf%state%sweep=1
-          call pf_residual(pf, f_lev_p, dt)
+          call pf_residual(pf, f_lev_p%index, dt)
        end if
     end do
 

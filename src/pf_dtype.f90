@@ -364,10 +364,11 @@ module pf_mod_dtype
        integer, optional,   intent(in)    :: flags
      end subroutine pf_integrate_p
 
-     subroutine pf_residual_p(this, lev, dt, flags)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_residual_p(this, pf, levind, dt, flags)
+       import pf_pfasst_t,pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: Lev
+       type(pf_pfasst_t),   intent(inout) :: pf
+       integer,              intent(in)    :: levind
        real(pfdp),          intent(in)    :: dt !!  Time step size
        integer, optional,   intent(in)    :: flags
      end subroutine pf_residual_p

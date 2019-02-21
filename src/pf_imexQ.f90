@@ -165,7 +165,7 @@ contains
 
           
        end do  !!  End substep loop
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -260,12 +260,13 @@ contains
   end subroutine imexQ_integrate
 
   !> Subroutine to compute  Residual
-  subroutine imexQ_residual(this, lev, dt, flags)
+  subroutine imexQ_residual(this, pf, levind, dt, flags)
     class(pf_imexQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t),   intent(inout) :: pf
+    integer,              intent(in)    :: levind
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
-    call pf_generic_residual(this, lev, dt)
+    call pf_generic_residual(this, pf,levind, dt)
   end subroutine imexQ_residual
 
   

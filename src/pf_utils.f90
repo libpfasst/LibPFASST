@@ -11,19 +11,21 @@ module pf_mod_utils
 contains
   !
   !> Compute full residual at each node and measure its size
-  subroutine pf_residual(pf, lev, dt, flag)
-    type(pf_pfasst_t),  intent(inout) :: pf
-    class(pf_level_t),  intent(inout) :: lev
+  subroutine pf_residual(pf, levind, dt, flag)
+    type(pf_pfasst_t), target,  intent(inout) :: pf
+    integer,            intent(in) :: levind
     real(pfdp),         intent(in)    :: dt
     integer, optional,  intent(in)    :: flag
 
-    real(pfdp) :: res_norms(lev%nnodes-1)    !!  Holds norms of residual
-    real(pfdp) :: sol_norms(lev%nnodes)      !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
+    real(pfdp) :: res_norms(pf%levels(levind)%nnodes-1)    !!  Holds norms of residual
+    real(pfdp) :: sol_norms(pf%levels(levind)%nnodes)      !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
     integer :: m
+    type(pf_level_t), pointer   :: lev
     
     call start_timer(pf, TRESIDUAL)
 
-    call lev%ulevel%sweeper%residual(lev, dt, flag)
+    lev => pf%levels(levind)
+    call lev%ulevel%sweeper%residual(pf,levind, dt, flag)
 
     ! compute max residual norm
     sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint
@@ -57,19 +59,23 @@ contains
   !! Each sweeper can define its own residual, or use this generic one
   !! This routine is in the "Q" form, so the residual approximates
   !! R(m)=y(t_n) + \int_{t_n}^t_m f(y,s) ds - y(t_m)
-  subroutine pf_generic_residual(this, lev, dt, flags)
+  subroutine pf_generic_residual(this, pf,levind, dt, flags)
     class(pf_sweeper_t), intent(in)  :: this
-    class(pf_level_t),  intent(inout) :: lev
+    type(pf_pfasst_t), target,  intent(inout) :: pf
+    integer,              intent(in)    :: levind
     real(pfdp),        intent(in)    :: dt
     integer,  intent(in), optional  :: flags
 
     integer :: m
+    type(pf_level_t), pointer :: lev
+
+    lev=>pf%levels(levind)
     
     !>  Compute the integral of F from t_n to t_m at each node
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
 
     !> add tau if it exists
-    if (allocated(lev%tauQ)) then
+    if (lev%index < pf%state%finest_level) then    
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
        end do

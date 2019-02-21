@@ -57,7 +57,7 @@ contains
        do level_index = pf%nlevels, 2, -1
           f_lev_p => pf%levels(level_index);
           c_lev_p => pf%levels(level_index-1)
-          call pf_residual(pf, f_lev_p, dt, which)  
+          call pf_residual(pf, f_lev_p%index, dt, which)  
           if( (which == 0) .or. (which == 1)) &
                call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0, flags=1)
           if( (which == 0) .or. (which == 2)) &
@@ -702,7 +702,7 @@ contains
        if (level_index < level_index_f) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
        else  !  compute residual for diagnostics since we didn't sweep
-          call pf_residual(pf, f_lev_p, dt, which)
+          call pf_residual(pf, f_lev_p%index, dt, which)
        end if
     end do
 
