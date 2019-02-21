@@ -138,26 +138,24 @@ contains
     dir = 1 ! default: send forward
     if(present(direction)) dir = direction
 
-    if(pf%rank /= 0 .and. dir == 2) then
+    if(pf%rank == 0 .and. dir == 2) return
+    if(pf%rank == pf%comm%nproc-1 .and. dir == 1) return
+    
+    if(dir == 2) then
        call level%q0%pack(level%send, 2)
-    elseif(pf%rank /= pf%comm%nproc-1) then
-       if(present(direction)) then
+       dest=pf%rank-1
+    else
+       dest=pf%rank+1
+       if(present(direction)) then  !  This is for the imk sweeper where the presence of a flag matters
           call level%qend%pack(level%send, 1)
        else
           call level%qend%pack(level%send)
        end if
-    else
-       return
     end if
 
     ierror = 0
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
-    if (pf%rank /= pf%comm%nproc-1  .and. dir == 1 ) then
-       dest=pf%rank+1
-    elseif (pf%rank /= 0 .and. dir == 2 ) then
-       dest=pf%rank-1
-    end if
 
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)   
     if (ierror /= 0) then
