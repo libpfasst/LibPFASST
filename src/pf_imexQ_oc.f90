@@ -127,7 +127,7 @@ contains
        end do
        if ( maxval(abs(norms_y)) < pf%abs_res_tol ) then
          sweep_y = .false.
-         if (level_index == pf%nlevels) pf%state%skippedy = pf%state%skippedy + 1
+         if (level_index == pf%state%finest_level) pf%state%skippedy = pf%state%skippedy + 1
        end if
        deallocate(norms_y)
        !if ( maxval(abs(norms_p)) < pf%abs_res_tol ) sweep_p = .false.
