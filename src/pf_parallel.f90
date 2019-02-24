@@ -156,7 +156,7 @@ contains
           call pf_residual(pf, f_lev_p%index, dt)
           call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%q0, c_lev_p%q0, t0)
           call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
-          call save(c_lev_p)
+          call save(pf,c_lev_p)
        end do  !  level_index = pf%state%finest_level, 2, -1
     else
       level_index = 1
@@ -483,7 +483,7 @@ contains
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
        call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, level_index)
-       call save(c_lev_p)
+       call save(pf,c_lev_p)
     end do
 
 

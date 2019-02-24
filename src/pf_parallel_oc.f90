@@ -63,7 +63,7 @@ contains
           if( (which == 0) .or. (which == 2)) &
                call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_lev_p%qend, c_lev_p%qend, t0+dt, flags=2)
           call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)  !  Restrict
-          call save(c_lev_p, which)
+          call save(pf, c_lev_p, which)
        end do  !  level_index = pf%state%finest_level, 2, -1
     end if
     level_index = 1
@@ -308,56 +308,6 @@ contains
     end if
 
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
-
-    !!! old code below
-    ! Check to see if tolerances are met
-!     residual1 = pf%levels(pf%nlevels)%residual
-!     if (pf%state%status == PF_STATUS_ITERATING .and. residual > 0.0d0) then
-!        if ( (abs(1.0_pfdp - abs(residual1/residual)) < pf%rel_res_tol) .or. &
-!             (abs(residual1)                          < pf%abs_res_tol) ) then
-!           pf%state%status = PF_STATUS_CONVERGED
-!        end if
-!     end if
-!
-!     !->why? how to do that more cleanly?
-!     if (pf%state%status == PF_STATUS_ITERATING .and. residual >= 0.0d0) then
-!                 ! if do_mixed, adjoint on last time step will be constant zero, so residual will be zero
-!                 ! need to stop in that case as well, but not in the very first iteration
-!       if( abs(residual1) < pf%abs_res_tol ) then
-!           pf%state%status = PF_STATUS_CONVERGED
-!       end if
-!     end if
-!     !!-
-!
-!     residual = residual1
-!
-!     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
-!     if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, 1+k, dir)
-!
-!     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 1) &
-!          pf%state%status = PF_STATUS_ITERATING
-!     if (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 2) &
-!          pf%state%status = PF_STATUS_ITERATING
-!
-! !     if (pf%state%status .ne. PF_STATUS_CONVERGED)
-!     call pf_send_status(pf, 1+k, dir)
-!     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
-!
-!     ! XXX: this ain't so pretty, perhaps we should use the
-!     ! 'nmoved' thinger to break this cycle if everyone is
-!     ! done...
-!
-!     if (pf%state%status == PF_STATUS_CONVERGED) then
-!        converged = .true.
-!        return
-!     end if
-!
-!     if (0 == pf%comm%nproc) then
-!        pf%state%status = PF_STATUS_PREDICTOR
-!        converged = .true.
-!        return
-!     end if
-
   end subroutine pf_check_convergence_oc
 
 
@@ -414,121 +364,25 @@ contains
     residual = -1
     did_post_step_hook = .false.
 
-!    call pf%results%initialize(nsteps, pf%niters, pf%comm%nproc, pf%nlevels)
-!    call pf_initialize_results(pf)   !  This one is the correct way
-
-!     do k = 1, 666666666
-!
-!        qbroadcast = .false.
-!
-!        if (pf%state%status == PF_STATUS_CONVERGED .and. .not. did_post_step_hook) then
-!          call call_hooks(pf, -1, PF_POST_STEP)
-!          did_post_step_hook = .true.
-!          pf%state%itcnt = pf%state%itcnt + pf%state%iter
-!          pf%state%mysteps = pf%state%mysteps + 1
-!          exit
-!        end if
-!
-!        ! jump to next block if we've reached the max iteration count
-!        if (pf%state%iter >= pf%niters) then
-! !           print *, pf%rank, 'pf%state%iter >= pf%niters'
-!           if (.not. did_post_step_hook) then
-!             call call_hooks(pf, -1, PF_POST_STEP)
-!             pf%state%itcnt = pf%state%itcnt + pf%state%iter
-!             pf%state%mysteps = pf%state%mysteps + 1
-!           end if
-!           did_post_step_hook = .false.
-!
-!           pf%state%step = pf%state%step + pf%comm%nproc
-!           pf%state%t0   = pf%state%step * dt
-!
-!           if (pf%state%step >= pf%state%nsteps) exit  ! for optimal control this exit should always happen
-!
-!           pf%state%status = PF_STATUS_PREDICTOR
-!           !pf%state%block  = pf%state%block + 1
-!           residual = -1
-!           qbroadcast = .true.
-!        end if
-!
-!        if (k > 1 .and. qbroadcast) then
-!           if (pf%comm%nproc > 1) then
-!              stop "broadcast not supported"
-!              !fine_lev_p => pf%levels(pf%nlevels)
-!              !call pf%comm%wait(pf, pf%nlevels)
-!              !call fine_lev_p%encap%pack(fine_lev_p%send, fine_lev_p%qend)
-!              !call pf_broadcast(pf, fine_lev_p%send, fine_lev_p%nvars, pf%comm%nproc-1)
-!              !call fine_lev_p%encap%unpack(fine_lev_p%q0,fine_lev_p%send)
-!           else
-!              stop "we should not be here I guess"
-!              ! for sequential optimal control, we need to save the Q(m) values for state solution
-!              ! and load them when solving the adjoint
-!              ! additionally, state solution is needed for objective, adjoint for gradient
-!
-!              !print *, 'copying initial/terminal value'
-!              fine_lev_p => pf%levels(pf%nlevels)
-!              if ((which .eq. 0) .or. (which .eq. 1)) call fine_lev_p%q0%copy(fine_lev_p%qend, 1)
-!              if (which .eq. 2) call fine_lev_p%qend%copy(fine_lev_p%q0, 2)
-!           end if
-!        end if
 
 !       if (pf%state%status == PF_STATUS_PREDICTOR) then
 !         !print *, 'pf%state%status == PF_STATUS_PREDICTOR', pf%state%t0, dt, which
         if (predict) then
           !print *, 'calling predictor'
            call pf_predictor_oc(pf, pf%state%t0, dt, pred_flags)
-        else
-           pf%state%iter = 0
-           pf%state%status  = PF_STATUS_ITERATING
-           pf%state%pstatus = PF_STATUS_ITERATING
         end if
 !       end if
         call call_hooks(pf, -1, PF_POST_ITERATION)
 
-!       pf%state%iter  = pf%state%iter + 1
-!
-! !       exit! just do predictor
-!
-!       call start_timer(pf, TITERATION)
-!       call call_hooks(pf, -1, PF_PRE_ITERATION)
-!
-!       if (pf%state%status /= PF_STATUS_CONVERGED) then
-!           fine_lev_p => pf%levels(pf%nlevels)
-!           call fine_lev_p%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, fine_lev_p%nsweeps, which)
-!        end if
-!
-!       ! check convergence  (should always be not converged)
-!       call pf_check_convergence_oc(pf, k,  residual, converged, dir)
-!
-!       if (pf%state%step >= pf%state%nsteps) exit
-!
-!       if (.not. converged) then
-!         !   non-blocking receive at all but the coarsest level
-!         do l = 2, pf%nlevels
-!           fine_lev_p => pf%levels(l)
-!           call pf_post(pf, fine_lev_p, fine_lev_p%index*10000+k, dir)
-!         end do
-!
-!         if (pf%state%status /= PF_STATUS_CONVERGED) then
-!           fine_lev_p => pf%levels(pf%nlevels)
-!           call pf_send(pf, fine_lev_p, fine_lev_p%index*10000+k, .false., dir)
-!           if (pf%nlevels > 1) then
-!             coarse_lev_p => pf%levels(pf%nlevels-1)
-!             call restrict_time_space_fas(pf, pf%state%t0, dt, pf%nlevels, flags=which)
-!             call save(coarse_lev_p, which)
-!           end if
-!         end if
-!
-!         call pf_v_cycle_oc(pf, k, pf%state%t0, dt, which)
-!         call call_hooks(pf, -1, PF_POST_ITERATION)
-!         call end_timer(pf, TITERATION)
-!       end if
-!     end do  !  Niter loop
-!
-!     pf%state%iter = -1
-!     call end_timer(pf, TTOTAL)
 
-    k = 1 ! always one block  TO DO:  fix this
-    pf%state%pfblock = k
+    pf%state%iter = 0
+    pf%state%status  = PF_STATUS_ITERATING
+    pf%state%pstatus = PF_STATUS_ITERATING
+
+
+    k = 1 !
+    !pf%state%pfblock = k ! has to be set in pf_optimization_flex to current step
+                          ! this is relevant for save_residuals
     do j = 1, pf%niters
       call start_timer(pf, TITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
@@ -577,12 +431,6 @@ contains
     dir = 1
     if(which == 2) dir = 2 !
 
-!     !  For a single level, just get new initial conditions and return
-!     if (pf%nlevels == 1) then
-!        f_lev_p => pf%levels(1)
-!        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
-!        return
-!     end if
 
     !>  Post the nonblocking receives on the all the levels that will be recieving later
     !>    (for single level this will be skipped)
@@ -591,17 +439,6 @@ contains
        call pf_post(pf, f_lev_p, f_lev_p%index*10000+iteration, dir)
     end do
 
-!     !
-!     ! down (fine to coarse)
-!     !
-!     do level_index = pf%nlevels-1, 2, -1
-!       f_lev_p => pf%levels(level_index);
-!       c_lev_p => pf%levels(level_index-1)
-!       call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
-!       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-!       call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)
-!       call save(c_lev_p, which)
-!     end do
     !> move from fine to coarse doing sweeps
     do level_index = level_index_f, level_index_c+1, -1
        f_lev_p => pf%levels(level_index);
@@ -609,34 +446,10 @@ contains
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
        call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
        call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)
-       call save(c_lev_p, which)
+       call save(pf, c_lev_p, which)
     end do
 
-!     !
-!     ! bottom  (coarsest level)
-!     !
-!     level_index=1
-!     f_lev_p => pf%levels(level_index)
-!     if (pf%pipeline_pred) then
-!        do j = 1, f_lev_p%nsweeps
-!           call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .true., dir)
-!           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1, which)
-!           call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration+j, .false., dir)
-!        end do
-!     else
-! !       if (which == 0) then
-! !         call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
-! !         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 1)
-! !         call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-! !         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, 2) ! this interferes with skipping y sweeps: have to check
-! !                                                                                        ! state residual in case of which==1 in sweeper as well
-! !       else
-!         call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
-!         call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
-!         call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-! !       endif
-!     endif
-    ! Do the coarsest level
+    !> Do the coarsest level
     level_index=level_index_c
     f_lev_p => pf%levels(level_index)
     if (pf%pipeline_pred) then
@@ -651,35 +464,8 @@ contains
        call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
     endif
 
-!     !
-!     ! up  (coarse to fine)
-!     !
-!     do level_index = 2, pf%nlevels
-!       f_lev_p => pf%levels(level_index);
-!       c_lev_p => pf%levels(level_index-1)
-!       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp, flags=which)
-!       call pf_recv(pf, f_lev_p, level_index*10000+iteration, .false., dir)
-!
-!        if (pf%rank /= 0) then
-!           ! interpolate increment to q0 -- the fine initial condition
-!           ! needs the same increment that Q(1) got, but applied to the
-!           ! new fine initial condition
-!           if ((which .eq. 0) .or. (which .eq. 1)) call interpolate_q0(pf, f_lev_p, c_lev_p, flags=1)
-!        end if
-!        if (pf%rank /= pf%comm%nproc-1) then
-!           if (which .eq. 2) call interpolate_qend(pf, f_lev_p, c_lev_p)
-!        end if
-!
-!        if (level_index < pf%nlevels) then
-!           call call_hooks(pf, level_index, PF_PRE_SWEEP)
-!           ! compute residual
-!           ! do while residual > tol and j < nswps
-!           ! assuming residual computed at end of sweep
-!           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
-!        end if
-!     end do
 
-    ! Now move coarse to fine interpolating and sweeping
+    !> Now move coarse to fine interpolating and sweeping
     do level_index = level_index_c+1,level_index_f
        f_lev_p => pf%levels(level_index);
        c_lev_p => pf%levels(level_index-1)
