@@ -2,13 +2,13 @@
 Overview
 ========
 
-The LIBPFASST library evolves systems of ODEs in time:
+The LibPFASST library evolves systems of ODEs in time:
 
 .. math::
 
    u'(t) = f(u(t), t).
 
-LIBPFASST comes with builtin sub-steppers for fully explicit, fully
+LibPFASST comes with builtin sub-steppers for fully explicit, fully
 implicit, and implicit-explicit (IMEX) systems.
 
 The user provides:
@@ -23,17 +23,17 @@ The user provides:
 #. Spatial interpolation and restriction routines: :math:`R(U)` and
    :math:`P(U)`.
 
-#. Solution encapsulation routines to tell LIBPFASST how to manipulate
-   solutions.  This enables LIBPFASST to interoperate nicely with
+#. Solution encapsulation routines to tell LibPFASST how to manipulate
+   solutions.  This enables LibPFASST to interoperate nicely with
    other libraries that have particular ways of storing solutions (eg,
-   BoxLib, PEPC, or PETSc).  In particular, this allows LIBPFASST to
+   BoxLib, PEPC, or PETSc).  In particular, this allows LibPFASST to
    work with spatially distributed solutions.
 
 
-User interactions with LIBPFASST are typically marshaled through the
+User interactions with LibPFASST are typically marshaled through the
 ``type(pf_pfasst_t)`` class.  This class acts as the overall
 controller of the algorithm.  Implementing a ODE/PDE solver in
-LIBPFASST generally consists of the following steps:
+LibPFASST generally consists of the following steps:
 
 #. Create an ``type(pf_pfasst_t)`` controller.
 
@@ -41,7 +41,7 @@ LIBPFASST generally consists of the following steps:
    may be level dependent.
 
 #. Create an ``type(pf_comm_t)`` communicator object.  This allows
-   LIBPFASST to use MPI parallelization (independent of any spatial
+   LibPFASST to use MPI parallelization (independent of any spatial
    parallelization).
 
 #. Create an ``type(pf_sweeper_t)`` SDC sweeper.  Builtin
@@ -49,7 +49,7 @@ LIBPFASST generally consists of the following steps:
    also be built.  This can also be level dependent.
 
 #. Add levels to the ``type(pf_pfasst_t)`` controller.  This
-   includes telling LIBPFASST how many degrees-of-freedom are on each
+   includes telling LibPFASST how many degrees-of-freedom are on each
    level, how many SDC nodes should be used on each level and their
    type, which interpolation and restriction routines to use, which
    encapsulation object to use etc.

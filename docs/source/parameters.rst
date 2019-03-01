@@ -2,7 +2,7 @@
 Parameters and variables
 ========================
 
-The libpfasst library has many parameters which control the
+The LibPFASST library has many parameters which control the
 behavior of the PFASST algorithm and can be changed by the
 user.  This section lists all the parameters and describes
 their function, location, and default values. Most of the
@@ -19,7 +19,7 @@ variants of PFASST.
 Types of parameters
 -------------------
 
-* libpfasst static parameters:  are hard coded and cannot be changed at run time
+* LibPFASST static parameters:  are hard coded and cannot be changed at run time
 * ``pf_pfasst_t`` mandatory parameters: must be reassigned at run time
   the use of default values will result in program termination.
 * ``pf_pfasst_t`` optional parameters: can be reassigned at run time,
@@ -30,7 +30,7 @@ Types of parameters
   the use of default values will result in default execution.
 * local mandatory parameters: must be passed in a call to ``pf_run_pfasst``
 * local optional parameters: specified by the user application and
-  unrelated to the workings of libpfasst
+  unrelated to the workings of LibPFASST
 
 
 libfpasst static parameters

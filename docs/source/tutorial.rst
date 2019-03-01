@@ -1,7 +1,8 @@
 Tutorial
 ========
 
-The following material will walk the user through a couple of examples to demonstrate how to set up an application using libpfasst.
+The following material will walk the user through a couple of examples to demonstrate how to set up an application using
+LibPFASST.
 
 
 Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist
@@ -38,7 +39,7 @@ backward-Euler step.  These routines are in ``src/feval.f90`` and are called
 ``f_eval`` and ``f_comp``.
 
   
-Please see the `adv_diff_fft`_ example included in LIBPFASST for a simple PDE application of LIBPFASST.
+Please see the `adv_diff_fft`_ example included in LibPFASST for a simple PDE application of LibPFASST.
 
 This example solves a 1d linear advection diffusion equation
 
@@ -61,22 +62,22 @@ will be performed per iteration on the coarsest levels.  This helps
 reduce the total number of PFASST iterations required.
 
 The solution :math:`u` will be stored in a flat Fortran array, and
-hence this application will use LIBPFASSTs built in ``ndarray``
-encapsulation.  Note that LIBPFASST doesn't impose any particular
-storage format on your solver -- instead, you must tell LIBPFASST how
+hence this application will use LibPFASSTs built in ``ndarray``
+encapsulation.  Note that LibPFASST doesn't impose any particular
+storage format on your solver -- instead, you must tell LibPFASST how
 to perform a few basic operations on your solution (eg, how to create
 solutions, perform ``y <- y + a x``, etc).  Various hooks are added to
 echo the error (on the finest level) and residual (on all levels)
 throughout the algorithm.  These hooks are in ``src/hooks.f90``.
 
 Note that the ``feval_create_workspace`` routine is specific to the
-problem being solved (ie, not part of LIBPFASST, but part of the user
+problem being solved (ie, not part of LibPFASST, but part of the user
 code).  It creates FFTW plans, creates a complex workspace for use
 with FFTW (so that we can avoid allocating and deallocating these
 workspaces during each call to the function evaluation routines), and
 pre-computes various spectral operators.
 
-LIBPFASST allows you, the user, to attach an arbitrary C pointer to
+LibPFASST allows you, the user, to attach an arbitrary C pointer to
 each PFASST level.  This is called a context (typically called
 ``levelctx`` in the source) pointer (as in, "for the problem I'm
 solving I have a specific context that I will be working in").  Your
@@ -90,5 +91,4 @@ C pointers are used because they provide a lot of flexibility.  The
 drawback to this is that we loose the ability for the compiler to do
 type checking for us.
 
-.. _`mpi_advection`: https://bitbucket.org/memmett/libpfasst/src/master/examples/mpi-advection/src
 

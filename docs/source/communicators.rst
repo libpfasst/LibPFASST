@@ -1,7 +1,7 @@
-LIBPFASST communicators
+LibPFASST communicators
 =======================
 
-LIBPFASST includes several (time) communicators:
+LibPFASST includes several (time) communicators:
 
 * MPI
 * fake
@@ -13,7 +13,7 @@ tests across many 'fake' cores can be performed on one core).
 
 The number time steps taken |N| should be an integer multiple of the
 number of PFASST processors |P| used.  If more time steps are taken
-then PFASST processors used, the default behaviour of LIBPFASST is to
+then PFASST processors used, the default behaviour of LibPFASST is to
 operate in |BLOCK| mode.
 
 In |BLOCK| mode, |P| time steps are taken at a time.  Once these |P|

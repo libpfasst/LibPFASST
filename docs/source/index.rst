@@ -1,13 +1,13 @@
-.. LIBPFASST documentation master file, created by
+.. LibPFASST documentation master file, created by
    sphinx-quickstart on Tue Jul 10 15:22:48 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
    
 =======================
-LIBPFASST User's Guide
+LibPFASST User's Guide
 =======================
 
-LIBPFASST is a Fortran implementation of the PFASST algorithm.
+LibPFASST is a Fortran implementation of the PFASST algorithm.
 
 
 
@@ -20,7 +20,7 @@ LIBPFASST is a Fortran implementation of the PFASST algorithm.
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
 * :doc:`Parameters <parameters>` - getting started and basic usage.
 .. * :doc:`Overview <overview>` - design and interface overview.
-.. * :doc:`Reference <reference>` - information about the internals of LIBPFASST..* :doc:`FORD <parameters>` - Source documentation created by FORD
+.. * :doc:`Reference <reference>` - information about the internals of LibPFASST..* :doc:`FORD <parameters>` - Source documentation created by FORD
 
 Contents
 ========
