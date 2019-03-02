@@ -1,7 +1,7 @@
 
-# Libpfasst
+# LibPFASST
 
-Libpfasst is a lightweight implementation of the Parallel Full
+LibPFASST is a lightweight implementation of the Parallel Full
 Approximation Scheme in Space and Time (PFASST) algorithm.  It is
 written in Fortran (mostly F90, with some F03), but can be interfaced
 with C and C++ fairly easily.
