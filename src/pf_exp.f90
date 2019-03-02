@@ -33,7 +33,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     class(pf_encap_t), allocatable :: b(:)       ! scratch space for computing nonlinear derivatives
     class(pf_encap_t), allocatable :: f_old(:)   ! scratch space for storing nonlinear terms
     class(pf_encap_t), allocatable :: newF       ! scratch space for storing new function evaluations
-    LOGICAL :: use_phib = .TRUE.                ! if TRUE calls phib otherwise calls swpPhib and resPhib
+    LOGICAL :: use_phib=.true.                  ! if TRUE calls phib otherwise calls swpPhib and resPhib (reset in derived sweeper)
 
     contains
 
@@ -223,7 +223,6 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! local variables
         integer :: i, nnodes
         real(pfdp), allocatable :: q(:)
-
         nnodes = lev%nnodes
         allocate(this%eta(nnodes - 1))
         allocate(this%nodes(nnodes))
@@ -368,20 +367,21 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            
            call fintsdc(i)%setval(0.0_pfdp)
            if (this%use_phib) then
-                call this%phib(this%eta(i), dt, this%b, fintsdc(i))
+              call this%phib(this%eta(i), dt, this%b, fintsdc(i))
             else
-                call this%resPhib(i, dt, this%b, fintsdc(i))
+                call this%swpPhib(i, dt, this%b, fintsdc(i))
              end if
-!             if (i > 1) then
+             if (i > 1) then
 !                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
-!             end if
+             end if
+
              
 !             print *,'integrating',i,this%nodes(i+1),dt,this%eta(i)
 !          call fintsdc(i)%eprint()
         end do
 
 !        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(1))
+!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
 !        end do
         
              
