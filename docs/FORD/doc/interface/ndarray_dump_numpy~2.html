@@ -128,21 +128,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">16 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_ndarray-oc.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_ndarray.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_ndarray-oc.f90.html'>pf_ndarray-oc.f90</a></li>
+     <li><a href='../sourcefile/pf_ndarray.f90.html'>pf_ndarray.f90</a></li>
     
-     <li><a href='../module/pf_mod_ndarray_oc.html'>pf_mod_ndarray_oc</a></li>
+     <li><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></li>
     
   
      <li class="active">ndarray_dump_numpy</li>
@@ -197,13 +197,18 @@
     <div class="col-md-9" id='text'>
     
     
-      <h2>interface <br>
-      
-public subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
+      <h2>interface</h2>
+      <p>Interfaces to output routines in pf_numpy.c</p>
+      <br>
+    
+     
+    
+      <h2>
+public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
     
     
    
-</h2>    
+</h2>
     
 
     
@@ -273,7 +278,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E12"></span>integer(kind=c_int),</td>
+  <td><span class="anchor" id="variable-dim%7E13"></span>integer,</td>
   <td>intent(in),</td>
   <td></td>
   
@@ -288,7 +293,22 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E33"></span>integer(kind=c_int),</td>
+  <td><span class="anchor" id="variable-mpibuflen%7E4"></span>integer,</td>
+  <td>intent(in),</td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>mpibuflen</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-shape%7E24"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -303,27 +323,12 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-nvars"></span>integer(kind=c_int),</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>nvars</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-array%7E4"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-array%7E4"></span>real(kind=c_double),</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>array</strong>(nvars)</td><td></td>
+  <td><strong>array</strong>(mpibuflen)</td><td></td>
   
 </tr>
 
@@ -332,6 +337,9 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, ar
 
     
     
+    
+    <h3>Description</h3>
+    <p>Subroutine to write an the array to a file</p>
     
     <br>
 

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">15 statements</a>
+    title=" 0.1% of total for procedures.">16 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E11"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E77"></span>type(pf_pfasst_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
   
 <tr>
   
-  <td><span class="anchor" id="variable-y"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-y%7E35"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nvar"></span>integer,</td>
+  <td><span class="anchor" id="variable-nvar%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
   
 <tr>
   
-  <td><span class="anchor" id="variable-root"></span>integer,</td>
+  <td><span class="anchor" id="variable-root%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -562,7 +562,10 @@ public subroutine pf_broadcast(pf, y, nvar, root)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nvar</span><span class="p">,</span> <span class="n">root</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="p">,</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">y</span><span class="p">(</span><span class="n">nvar</span><span class="p">)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ierror</span>
-    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TBROADCAST</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
+<span class="k">    </span>
+<span class="k">    call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TBROADCAST</span><span class="p">)</span>
     <span class="k">if</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;beginning broadcast&#39;</span>
     <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nvar</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>

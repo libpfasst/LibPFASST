@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">42 statements</a>
+    title=" 0.1% of total for procedures.">16 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
+public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, dest)
     
     
    
@@ -335,7 +335,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E68"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E13"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -350,7 +350,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E48"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-level%7E22"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -365,7 +365,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tag%7E14"></span>integer,</td>
+  <td><span class="anchor" id="variable-tag%7E4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -380,7 +380,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-blocking%7E5"></span>logical,</td>
+  <td><span class="anchor" id="variable-blocking"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -395,7 +395,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-ierror%7E12"></span>integer,</td>
+  <td><span class="anchor" id="variable-ierror%7E5"></span>integer,</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -410,12 +410,12 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-direction%7E14"></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
+  <td><span class="anchor" id="variable-dest%7E2"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
   
   <td></td><td>::</td>
-  <td><strong>direction</strong></td><td></td>
+  <td><strong>dest</strong></td><td></td>
   
 </tr>
 
@@ -597,7 +597,7 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_mpi_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span><span class="n">ierror</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_mpi_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span><span class="n">ierror</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
     <span class="k">use </span><span class="n">pf_mod_mpi</span><span class="p">,</span> <span class="n">only</span><span class="p">:</span>  <span class="n">MPI_STATUS_SIZE</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>       <span class="c">!!  main pfasst structure</span>
@@ -605,44 +605,17 @@ public subroutine pf_mpi_send(pf, level, tag, blocking, ierror, direction)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">tag</span>      <span class="c">!!  message tag</span>
     <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">blocking</span> <span class="c">!!  true if send is blocking</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">ierror</span>   <span class="c">!!  error flag</span>
-    <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">direction</span>
-    <span class="kt">integer</span>                          <span class="kd">::</span> <span class="n">dest</span><span class="p">,</span> <span class="n">dir</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dest</span>
+
     <span class="kt">integer</span> <span class="kd">::</span>  <span class="nb">stat</span><span class="p">(</span><span class="n">MPI_STATUS_SIZE</span><span class="p">)</span>
 
-    <span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">! default 1: send forward; set to 2 for send backwards</span>
-    <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="n">dir</span> <span class="o">=</span> <span class="n">direction</span>
     
-    <span class="k">if</span><span class="p">(</span><span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">       </span><span class="n">dest</span> <span class="o">=</span> <span class="nb">modulo</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">)</span> 
-    <span class="k">else</span>
-<span class="k">       </span><span class="n">dest</span> <span class="o">=</span> <span class="nb">modulo</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">)</span> 
-    <span class="k">end if</span>
-<span class="k">    </span>
-<span class="k">    if</span> <span class="p">(</span><span class="n">blocking</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">      if</span><span class="p">(</span><span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">          call </span><span class="n">level</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-       <span class="k">else</span>
-<span class="k">          if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="k">then</span>
-<span class="k">            call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">else </span>
-<span class="k">            call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>
-          <span class="k">end if</span>
-<span class="k">       end if       </span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">blocking</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       call </span><span class="n">mpi_send</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">myMPI_Datatype</span><span class="p">,</span> <span class="p">&amp;</span>
                      <span class="n">dest</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">comm</span><span class="p">,</span> <span class="nb">stat</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
     <span class="k">else</span>
 <span class="k">       call </span><span class="n">mpi_wait</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">sendreq</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="nb">index</span><span class="p">),</span> <span class="nb">stat</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
-<span class="c">!        call level%qend%pack(level%send)</span>
-       <span class="k">if</span><span class="p">(</span><span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">          call </span><span class="n">level</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-       <span class="k">else</span>
-<span class="k">          if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="k">then</span>
-<span class="k">             call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">else</span>
-<span class="k">            call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>
-          <span class="k">end if</span>
-<span class="k">       end if</span>
-<span class="k">       call </span><span class="n">mpi_isend</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">myMPI_Datatype</span><span class="p">,</span> <span class="p">&amp;</span>
+       <span class="k">call </span><span class="n">mpi_isend</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">myMPI_Datatype</span><span class="p">,</span> <span class="p">&amp;</span>
                       <span class="n">dest</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">comm</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">sendreq</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="nb">index</span><span class="p">),</span> <span class="n">ierror</span><span class="p">)</span>
     <span class="k">end if</span>
 <span class="k">  end subroutine </span><span class="n">pf_mpi_send</span>

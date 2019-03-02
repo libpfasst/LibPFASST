@@ -8,7 +8,7 @@ This directory contains the source for generating the LibPFASST documentation.  
 It is expected that the documentation files should only be updated on the gh-pages branch of LibPFASST.
 
 To update the documentation, one should checkout the gs-pages branch and make sure that the files there are the most up to date.
-In particular, the Fortan source code in src will need to be refreshed with 'git checkout master -- src'
+In particular, the Fortran source code in src will need to be refreshed with 'git checkout master -- src'
 
 Then:
 

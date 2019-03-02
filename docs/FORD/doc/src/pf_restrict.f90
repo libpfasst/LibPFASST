@@ -125,11 +125,12 @@ contains
     integer, optional, intent(in)    :: flags    
 
     class(pf_encap_t), allocatable :: f_encap_array_c(:)  !!  fine solution restricted in space only
-    integer :: m
-    integer :: f_nnodes
+    integer :: m,j
+    integer :: f_nnodes,c_nnodes
 
 
     f_nnodes = f_lev_ptr%nnodes
+    c_nnodes = c_lev_ptr%nnodes
 
     !!  do the restriction
     if (IS_INTEGRAL) then   ! Restriction of integrals

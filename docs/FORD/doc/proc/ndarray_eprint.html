@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.0% of total for procedures.">5 statements</a>
+    title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine ndarray_eprint(this, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E187"></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E142"></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndarray_eprint(this, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E107"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E67"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -325,7 +325,11 @@ public subroutine ndarray_eprint(this, flags)
     <span class="k">class</span><span class="p">(</span><span class="n">ndarray</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="c">!  Just print the first few values</span>
-    <span class="k">print</span> <span class="o">*</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       print</span> <span class="o">*</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
+    <span class="k">else</span>
+<span class="k">       print</span> <span class="o">*</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">endif</span>
   <span class="k">end subroutine </span><span class="n">ndarray_eprint</span>
 </pre></div>
 

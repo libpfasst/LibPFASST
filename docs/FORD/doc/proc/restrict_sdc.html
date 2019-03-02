@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">38 statements</a>
+    title=" 0.2% of total for procedures.">39 statements</a>
      </li> 
      
      
@@ -322,7 +322,7 @@ public subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_arra
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E43"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E2"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -699,11 +699,12 @@ public subroutine restrict_sdc(f_lev_ptr, c_lev_ptr, f_encap_array, c_encap_arra
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>    
 
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">f_encap_array_c</span><span class="p">(:)</span>  <span class="c">!!  fine solution restricted in space only</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">f_nnodes</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span><span class="p">,</span><span class="n">j</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">f_nnodes</span><span class="p">,</span><span class="n">c_nnodes</span>
 
 
     <span class="n">f_nnodes</span> <span class="o">=</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
+    <span class="n">c_nnodes</span> <span class="o">=</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
 
     <span class="c">!!  do the restriction</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">IS_INTEGRAL</span><span class="p">)</span> <span class="k">then</span>   <span class="c">! Restriction of integrals</span>

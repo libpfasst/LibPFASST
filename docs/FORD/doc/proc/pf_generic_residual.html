@@ -211,7 +211,9 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
     
     <p>Generic residual
  Each sweeper can define its own residual, or use this generic one
-  Compute the integral of F</p>
+ This routine is in the "Q" form, so the residual approximates
+ R(m)=y(t_n) + \int_{t_n}^t_m f(y,s) ds - y(t_m)
+  Compute the integral of F from t_n to t_m at each node</p>
 <p>add tau if it exists
  subtract out the solution value</p>
     
@@ -234,7 +236,7 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E36"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E198"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -249,7 +251,7 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E26"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-lev%7E63"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -264,7 +266,7 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E21"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E38"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -279,7 +281,7 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E19"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E104"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -319,29 +321,29 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
 <polygon fill="none" stroke="black" points="234,-108 128,-108 128,-84 234,-84 234,-108"/>
 <text text-anchor="middle" x="181" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_generic_residual</text>
 </g>
-<!-- proc~misdc_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_node2" class="node"><title>proc~misdc_residual</title>
-<g id="a_proc~~pf_generic_residual~~CalledByGraph_node2"><a xlink:href=".././proc/misdc_residual.html" xlink:title="misdc_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="88,-192 4,-192 4,-168 88,-168 88,-192"/>
-<text text-anchor="middle" x="46" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">misdc_residual</text>
-</a>
-</g>
-</g>
-<!-- proc~misdc_residual&#45;&gt;proc~pf_generic_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_edge1" class="edge"><title>proc~misdc_residual&#45;&gt;proc~pf_generic_residual</title>
-<path fill="none" stroke="#000000" d="M75.0182,-167.904C80.7369,-165.164 86.641,-162.133 92,-159 114.93,-145.596 139.369,-127.786 156.659,-114.523"/>
-<polygon fill="#000000" stroke="#000000" points="159.247,-116.944 165.002,-108.048 154.956,-111.413 159.247,-116.944"/>
-</g>
 <!-- proc~imexq_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_node3" class="node"><title>proc~imexq_residual</title>
-<g id="a_proc~~pf_generic_residual~~CalledByGraph_node3"><a xlink:href=".././proc/imexq_residual.html" xlink:title="imexQ_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="89.5,-150 2.5,-150 2.5,-126 89.5,-126 89.5,-150"/>
-<text text-anchor="middle" x="46" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">imexQ_residual</text>
+<g id="proc~~pf_generic_residual~~CalledByGraph_node2" class="node"><title>proc~imexq_residual</title>
+<g id="a_proc~~pf_generic_residual~~CalledByGraph_node2"><a xlink:href=".././proc/imexq_residual.html" xlink:title="imexQ_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="89.5,-192 2.5,-192 2.5,-168 89.5,-168 89.5,-192"/>
+<text text-anchor="middle" x="46" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">imexQ_residual</text>
 </a>
 </g>
 </g>
 <!-- proc~imexq_residual&#45;&gt;proc~pf_generic_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_edge3" class="edge"><title>proc~imexq_residual&#45;&gt;proc~pf_generic_residual</title>
+<g id="proc~~pf_generic_residual~~CalledByGraph_edge1" class="edge"><title>proc~imexq_residual&#45;&gt;proc~pf_generic_residual</title>
+<path fill="none" stroke="#000000" d="M75.0182,-167.904C80.7369,-165.164 86.641,-162.133 92,-159 114.93,-145.596 139.369,-127.786 156.659,-114.523"/>
+<polygon fill="#000000" stroke="#000000" points="159.247,-116.944 165.002,-108.048 154.956,-111.413 159.247,-116.944"/>
+</g>
+<!-- proc~misdc_residual -->
+<g id="proc~~pf_generic_residual~~CalledByGraph_node3" class="node"><title>proc~misdc_residual</title>
+<g id="a_proc~~pf_generic_residual~~CalledByGraph_node3"><a xlink:href=".././proc/misdc_residual.html" xlink:title="misdc_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="88,-150 4,-150 4,-126 88,-126 88,-150"/>
+<text text-anchor="middle" x="46" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">misdc_residual</text>
+</a>
+</g>
+</g>
+<!-- proc~misdc_residual&#45;&gt;proc~pf_generic_residual -->
+<g id="proc~~pf_generic_residual~~CalledByGraph_edge3" class="edge"><title>proc~misdc_residual&#45;&gt;proc~pf_generic_residual</title>
 <path fill="none" stroke="#000000" d="M85.1125,-125.964C99.7209,-121.351 116.579,-116.028 131.997,-111.159"/>
 <polygon fill="#000000" stroke="#000000" points="133.4,-114.386 141.882,-108.037 131.292,-107.711 133.4,-114.386"/>
 </g>
@@ -509,7 +511,7 @@ public subroutine pf_generic_residual(this, lev, dt, flags)
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
     
-    <span class="c">!&gt;  Compute the integral of F</span>
+    <span class="c">!&gt;  Compute the integral of F from t_n to t_m at each node</span>
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
 
     <span class="c">!&gt; add tau if it exists</span>

@@ -128,21 +128,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">22 statements</a>
+    title=" 0.2% of total for procedures.">26 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_rkstepper.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_misdcQ_oc.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_rkstepper.f90.html'>pf_rkstepper.f90</a></li>
+     <li><a href='../sourcefile/pf_misdcq_oc.f90.html'>pf_misdcQ_oc.f90</a></li>
     
-     <li><a href='../module/pf_mod_rkstepper.html'>pf_mod_rkstepper</a></li>
+     <li><a href='../module/pf_mod_misdcq_oc.html'>pf_mod_misdcQ_oc</a></li>
     
   
      <li class="active">pf_f_comp_p</li>
@@ -199,7 +199,7 @@
     
       <h2>interface <br>
       
-public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
+public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags)
     
     
    
@@ -228,7 +228,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E240"></span>class(<a href='../type/pf_ark_t.html'>pf_ark_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E268"></span>class(<a href='../type/pf_misdcq_oc_t.html'>pf_misdcQ_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,12 +243,12 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-y%7E27"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-y%7E34"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>y</strong></td><td></td>
+  <td><strong>y</strong></td><td><p>Solution of implicit solve</p></td>
   
 </tr>
 
@@ -258,12 +258,12 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E48"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E56"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>t</strong></td><td></td>
+  <td><strong>t</strong></td><td><p>Time of solve</p></td>
   
 </tr>
 
@@ -278,7 +278,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dtq</strong></td><td></td>
+  <td><strong>dtq</strong></td><td><p>dt*quadrature weight</p></td>
   
 </tr>
 
@@ -293,7 +293,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>rhs</strong></td><td></td>
+  <td><strong>rhs</strong></td><td><p>RHS for solve</p></td>
   
 </tr>
 
@@ -303,12 +303,12 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E26"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E28"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level_index</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>Level index</p></td>
   
 </tr>
 
@@ -323,7 +323,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>f</strong></td><td></td>
+  <td><strong>f</strong></td><td><p>f_n of solution y</p></td>
   
 </tr>
 
@@ -338,7 +338,22 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>piece</strong></td><td></td>
+  <td><strong>piece</strong></td><td><p>Which piece to evaluate</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-flags%7E142"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td><p>forward or backward</p></td>
   
 </tr>
 
@@ -347,6 +362,9 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
 
     
     
+    
+    <h3>Description</h3>
+    <p>Solve the equation <script type="math/tex">y - dtq*f_n(y) =rhs </script> where n is given by the argument piece</p>
     
     <br>
 

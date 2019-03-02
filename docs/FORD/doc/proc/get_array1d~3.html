@@ -126,21 +126,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">10 statements</a>
+    title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_ndsysarray.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_ndarray.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_ndsysarray.f90.html'>pf_ndsysarray.f90</a></li>
+     <li><a href='../sourcefile/pf_ndarray.f90.html'>pf_ndarray.f90</a></li>
     
-     <li><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></li>
+     <li><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></li>
     
   
      <li class="active">get_array1d</li>
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public function get_array1d(x, n, flags) result(r)
+public function get_array1d(x, flags) result(r)
     
     
    
@@ -230,7 +230,7 @@ public function get_array1d(x, n, flags) result(r)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E24"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-x%7E28"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in),</td>
   <td></td>
   
@@ -245,22 +245,7 @@ public function get_array1d(x, n, flags) result(r)
   
 <tr>
   
-  <td><span class="anchor" id="variable-n%7E16"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>n</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-flags%7E89"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E59"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -279,7 +264,7 @@ public function get_array1d(x, n, flags) result(r)
     
     
     
-   <h3>Return Value <small><span class="anchor" id="variable-r%7E7"></span>real(kind=pfdp),
+   <h3>Return Value <small><span class="anchor" id="variable-r%7E10"></span>real(kind=pfdp),
   pointer,(:)</small></h3>
     
     
@@ -345,14 +330,13 @@ public function get_array1d(x, n, flags) result(r)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">get_array1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span>
-    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">n</span>
+    <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">get_array1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">r</span><span class="p">(:)</span>
     <span class="k">select type</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">ndsysarray</span><span class="p">)</span>
-       <span class="n">r</span> <span class="o">=&gt;</span> <span class="n">x</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="n">x</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>
+       <span class="n">r</span> <span class="o">=&gt;</span> <span class="n">x</span><span class="p">%</span><span class="n">flatarray</span>
     <span class="k">end select</span>
 <span class="k">  end function </span><span class="n">get_array1d</span>
 </pre></div>

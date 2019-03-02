@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.0% of total for derived types.</p>Including implementation: 17 statements,  0.4% of total for derived types.">17 statements</a>
+    title="<p> 2.7% of total for derived types.</p>Including implementation: 17 statements,  0.4% of total for derived types.">17 statements</a>
      </li> 
      
      
@@ -171,13 +171,13 @@
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-t0%7E2">t0</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-t0">t0</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-dt%7E2">dt</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-dt">dt</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps">nsteps</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-cycle">cycle</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-pfblock">pfblock</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-iter">iter</a>
       
@@ -189,7 +189,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-proc">proc</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E5">sweep</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E7">sweep</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-status">status</a>
       
@@ -330,13 +330,13 @@
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-t0%7E2">t0</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-t0">t0</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-dt%7E2">dt</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-dt">dt</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps">nsteps</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-cycle">cycle</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-pfblock">pfblock</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-iter">iter</a>
       
@@ -348,7 +348,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-proc">proc</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E5">sweep</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E7">sweep</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-status">status</a>
       
@@ -414,7 +414,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0"></span>real(kind=pfdp),</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -428,7 +428,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt"></span>real(kind=pfdp),</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -456,11 +456,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-cycle"></span>integer,</td>
+  <td><span class="anchor" id="variable-pfblock"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>cycle</strong></td><td></td><td></td><td><p>deprecated?</p></td>
+  <td><strong>pfblock</strong></td><td></td><td></td><td><p>pfasst block being worked on</p></td>
   
 </tr>
 
@@ -540,7 +540,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-sweep%7E5"></span>integer,</td>
+  <td><span class="anchor" id="variable-sweep%7E7"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -586,7 +586,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>itcnt</strong></td><td></td><td></td><td><p>iteration counter</p></td>
+  <td><strong>itcnt</strong></td><td></td><td></td><td><p>total iterations by this processor</p></td>
   
 </tr>
 
@@ -638,7 +638,7 @@
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">t0</span>  <span class="c">!!  Time at beginning of this time step</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>  <span class="c">!!  Time step size</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps</span>   <span class="c">!! total number of time steps</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="k">cycle</span>    <span class="c">!! deprecated?</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">pfblock</span>  <span class="c">!! pfasst block being worked on</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">iter</span>     <span class="c">!! current iteration number</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">step</span>     <span class="c">!! current time step number assigned to processor</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level</span>    <span class="c">!! which level is currently being operated on</span>
@@ -647,7 +647,7 @@
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">sweep</span>    <span class="c">!! sweep number</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">status</span>   <span class="c">!! status (iterating, converged etc)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">pstatus</span>  <span class="c">!! previous rank&#39;s status</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">itcnt</span>    <span class="c">!! iteration counter</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">itcnt</span>    <span class="c">!! total iterations by this processor</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">skippedy</span> <span class="c">!! skipped sweeps for state (for mixed integration)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">mysteps</span>  <span class="c">!! steps I did</span>
   <span class="k">end type </span><span class="n">pf_state_t</span>

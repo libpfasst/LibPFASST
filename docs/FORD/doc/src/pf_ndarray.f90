@@ -228,7 +228,11 @@ contains
     class(ndarray), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
     !  Just print the first few values
-    print *, this%flatarray(1:10)
+    if (product(this%shape) < 10) then
+       print *, this%flatarray
+    else
+       print *, this%flatarray(1:10)
+    endif
   end subroutine ndarray_eprint
 
 

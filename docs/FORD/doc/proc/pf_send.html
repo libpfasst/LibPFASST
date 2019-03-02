@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">24 statements</a>
+    title=" 0.2% of total for procedures.">34 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E9"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E75"></span>type(pf_pfasst_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E3"></span>class(pf_level_t),</td>
+  <td><span class="anchor" id="variable-level%7E52"></span>class(pf_level_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tag%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-tag%7E14"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-blocking"></span>logical,</td>
+  <td><span class="anchor" id="variable-blocking%7E5"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -653,24 +653,38 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">tag</span>
     <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">blocking</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">direction</span>
-    <span class="kt">integer</span>                          <span class="kd">::</span> <span class="n">dir</span><span class="p">,</span> <span class="n">ierror</span>
-    
-    <span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">! default: send forward</span>
+    <span class="kt">integer</span>                          <span class="kd">::</span> <span class="n">dir</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span><span class="n">dest</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
+
+<span class="k">    </span><span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">! default: send forward</span>
     <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="n">dir</span> <span class="o">=</span> <span class="n">direction</span>
 
-    <span class="n">ierror</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">return</span>
+<span class="k">    if</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">==</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
+<span class="k">    </span>
+<span class="k">    if</span><span class="p">(</span><span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       call </span><span class="n">level</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+       <span class="n">dest</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span>
+    <span class="k">else</span>
+<span class="k">       </span><span class="n">dest</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
+       <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="k">then</span>  <span class="c">!  This is for the imk sweeper where the presence of a flag matters</span>
+          <span class="k">call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+       <span class="k">else</span>
+<span class="k">          call </span><span class="n">level</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>
+       <span class="k">end if</span>
+<span class="k">    end if</span>
+
+<span class="k">    </span><span class="n">ierror</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TSEND</span> <span class="o">+</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;begin send, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span><span class="p">,</span><span class="s1">&#39; pf%state%status =&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span>  <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">)</span> <span class="k">then</span>
-<span class="k">       call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
-    <span class="n">elseif</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="mi">0</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">)</span> <span class="k">then</span>
-       <span class="c">!print *, pf%rank, &#39;sending backward&#39;,tag,blocking,pf%rank</span>
-       <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
-    <span class="k">end if</span>
-<span class="k">    if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
+
+    <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>   
+    <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;warning: error during send&#39;</span><span class="p">,</span> <span class="n">ierror</span>
       <span class="k">stop</span> <span class="s2">&quot;pf_parallel:pf_send&quot;</span>
    <span class="n">endif</span>
+
    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;end send, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span>                  
     <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TSEND</span> <span class="o">+</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">pf_send</span>

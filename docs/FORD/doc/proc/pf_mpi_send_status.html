@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">25 statements</a>
+    title=" 0.1% of total for procedures.">17 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
+public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, dest)
     
     
    
@@ -335,7 +335,7 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E66"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E11"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -350,7 +350,7 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tag%7E12"></span>integer,</td>
+  <td><span class="anchor" id="variable-tag%7E2"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -365,7 +365,7 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-istatus%7E3"></span>integer,</td>
+  <td><span class="anchor" id="variable-istatus"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -380,7 +380,7 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-ierror%7E10"></span>integer,</td>
+  <td><span class="anchor" id="variable-ierror%7E3"></span>integer,</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -395,12 +395,12 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-direction%7E12"></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
+  <td><span class="anchor" id="variable-dest"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
   
   <td></td><td>::</td>
-  <td><strong>direction</strong></td><td></td>
+  <td><strong>dest</strong></td><td></td>
   
 </tr>
 
@@ -572,30 +572,21 @@ public subroutine pf_mpi_send_status(pf, tag, istatus, ierror, direction)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_mpi_send_status</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span><span class="n">istatus</span><span class="p">,</span><span class="n">ierror</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_mpi_send_status</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span><span class="n">istatus</span><span class="p">,</span><span class="n">ierror</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
     <span class="k">use </span><span class="n">pf_mod_mpi</span><span class="p">,</span> <span class="n">only</span><span class="p">:</span> <span class="n">MPI_INTEGER</span><span class="p">,</span> <span class="n">MPI_STATUS_SIZE</span><span class="p">,</span> <span class="n">MPI_REQUEST_NULL</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>        <span class="c">!!  main pfasst structure</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">tag</span>       <span class="c">!!  message tag</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">istatus</span>      <span class="c">!!  status flag to send</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">ierror</span>    <span class="c">!!  error flag</span>
-    <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">direction</span>
-    <span class="kt">integer</span>                          <span class="kd">::</span> <span class="n">dest</span>
-    <span class="kt">integer</span>    <span class="kd">::</span>  <span class="nb">stat</span><span class="p">(</span><span class="n">MPI_STATUS_SIZE</span><span class="p">),</span> <span class="n">dir</span>
+    <span class="kt">integer</span><span class="p">,</span>            <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dest</span>
+    <span class="kt">integer</span>    <span class="kd">::</span>  <span class="nb">stat</span><span class="p">(</span><span class="n">MPI_STATUS_SIZE</span><span class="p">)</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">message</span>
     <span class="n">message</span> <span class="o">=</span> <span class="n">istatus</span>
     
-    <span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">! default 1: send forward; set to 2 for send backwards</span>
-    <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="n">dir</span> <span class="o">=</span> <span class="n">direction</span>
-    
-    <span class="k">if</span><span class="p">(</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">       </span><span class="n">dest</span> <span class="o">=</span> <span class="nb">modulo</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">)</span> 
-    <span class="k">else</span>
-<span class="k">       </span><span class="n">dest</span> <span class="o">=</span> <span class="nb">modulo</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">)</span> 
-    <span class="k">end if</span>
 
-<span class="k">    if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">statreq</span> <span class="o">/=</span> <span class="o">-</span><span class="mi">66</span><span class="p">)</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">statreq</span> <span class="o">/=</span> <span class="o">-</span><span class="mi">66</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;waiting in send_status with statreq&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">statreq</span>
        <span class="k">call </span><span class="n">mpi_wait</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">statreq</span><span class="p">,</span> <span class="nb">stat</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
        <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;done waiting in send_status&#39;</span>
