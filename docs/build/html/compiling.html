@@ -55,11 +55,8 @@
             
   <div class="section" id="compiling">
 <h1>Compiling<a class="headerlink" href="#compiling" title="Permalink to this headline">¶</a></h1>
-<p>Libpfasst comes with its own Makefiles, and it is possible that simply entering</p>
-<blockquote>
-<div><cite>~/libpfasst $ make</cite></div></blockquote>
-<p>in the directory /libpfasst will compile the code succesfully.  A successful make will build the file</p>
-<p>libpfasst/lib/libpfasst.a</p>
+<p>LibPFASST comes with its own Makefiles, and it is possible that simply typing &#8216;make&#8217; in the directory /LibPFASST will compile the code succesfully.  A successful make will build the file</p>
+<p>LibPFASST/lib/libpfasst.a</p>
 <p>Before compiling, you will need an MPI library installed.  On Debian
 or Ubuntu machines, we recommend MPICH2:</p>
 <blockquote>
@@ -75,13 +72,11 @@ or Ubuntu machines, we recommend MPICH2:</p>
 <p>MKVERBOSE=FALSE</p>
 <p>which if made true will show more info in the build steps.  These can also both be changed on the command line as in</p>
 <blockquote>
-<div><cite>~/libpfasst $ make MKVERBOSE=TRUE DEBUG=TRUE</cite></div></blockquote>
-<p>There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and entering</p>
-<blockquote>
-<div><cite>~/libpfasst $ make depend</cite></div></blockquote>
-<p>Finally, enter</p>
-<blockquote>
-<div><cite>~/libpfasst $ make clean</cite></div></blockquote>
+<div>make MKVERBOSE=TRUE DEBUG=TRUE</div></blockquote>
+<p>There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing</p>
+<p>make depend</p>
+<p>Finally, one can type</p>
+<p>make clean</p>
 <p>to remove all intermediate files and start from scratch.</p>
 </div>
 

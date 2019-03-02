@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LIBPFASST communicators &#8212; LIBPFASST 1.1 documentation</title>
+    <title>LibPFASST communicators &#8212; LIBPFASST 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -46,8 +46,8 @@
           <div class="body" role="main">
             
   <div class="section" id="libpfasst-communicators">
-<h1>LIBPFASST communicators<a class="headerlink" href="#libpfasst-communicators" title="Permalink to this headline">¶</a></h1>
-<p>LIBPFASST includes several (time) communicators:</p>
+<h1>LibPFASST communicators<a class="headerlink" href="#libpfasst-communicators" title="Permalink to this headline">¶</a></h1>
+<p>LibPFASST includes several (time) communicators:</p>
 <ul class="simple">
 <li>MPI</li>
 <li>fake</li>
@@ -57,7 +57,7 @@ The fake communicator is used for convergence testing (convergence
 tests across many &#8216;fake&#8217; cores can be performed on one core).</p>
 <p>The number time steps taken <span class="math">\(N\)</span> should be an integer multiple of the
 number of PFASST processors <span class="math">\(P\)</span> used.  If more time steps are taken
-then PFASST processors used, the default behaviour of LIBPFASST is to
+then PFASST processors used, the default behaviour of LibPFASST is to
 operate in <code class="docutils literal"><span class="pre">PF_WINDOW_BLOCK</span></code> mode.</p>
 <p>In <code class="docutils literal"><span class="pre">PF_WINDOW_BLOCK</span></code> mode, <span class="math">\(P\)</span> time steps are taken at a time.  Once these <span class="math">\(P\)</span>
 steps are completed, the final solution on the last time processor is
@@ -125,7 +125,7 @@ behaviour of PFASST in <code class="docutils literal"><span class="pre">PF_WINDO
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">LIBPFASST communicators</a><ul>
+<li><a class="reference internal" href="#">LibPFASST communicators</a><ul>
 <li><a class="reference internal" href="#mpi">MPI</a></li>
 <li><a class="reference internal" href="#fake">fake</a></li>
 </ul>

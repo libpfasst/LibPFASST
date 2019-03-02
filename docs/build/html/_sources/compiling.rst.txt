@@ -1,13 +1,9 @@
 Compiling
 =========
 
-Libpfasst comes with its own Makefiles, and it is possible that simply entering
+LibPFASST comes with its own Makefiles, and it is possible that simply typing 'make' in the directory /LibPFASST will compile the code succesfully.  A successful make will build the file
 
-   `~/libpfasst $ make`
-
-in the directory /libpfasst will compile the code succesfully.  A successful make will build the file
-
-libpfasst/lib/libpfasst.a  
+LibPFASST/lib/libpfasst.a  
 
 Before compiling, you will need an MPI library installed.  On Debian
 or Ubuntu machines, we recommend MPICH2:
@@ -34,15 +30,15 @@ MKVERBOSE=FALSE
 
 which if made true will show more info in the build steps.  These can also both be changed on the command line as in
 
-   `~/libpfasst $ make MKVERBOSE=TRUE DEBUG=TRUE`
+ make MKVERBOSE=TRUE DEBUG=TRUE
 
-There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and entering
+There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
 
-   `~/libpfasst $ make depend`
+make depend
 
-Finally, enter
+Finally, one can type
 
-   `~/libpfasst $ make clean`
+make clean
 
 to remove all intermediate files and start from scratch.
 
