@@ -44,6 +44,10 @@ contains
        lev%residual_rel = 0.0d0
     end if
 
+    if (pf%save_residuals .and. pf%state%iter>0)  then
+       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
+    end if
+
     call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
@@ -51,6 +55,8 @@ contains
   !
   !> Generic residual
   !! Each sweeper can define its own residual, or use this generic one
+  !! This routine is in the "Q" form, so the residual approximates
+  !! R(m)=y(t_n) + \int_{t_n}^t_m f(y,s) ds - y(t_m)
   subroutine pf_generic_residual(this, lev, dt, flags)
     class(pf_sweeper_t), intent(in)  :: this
     class(pf_level_t),  intent(inout) :: lev
@@ -59,7 +65,7 @@ contains
 
     integer :: m
     
-    !>  Compute the integral of F
+    !>  Compute the integral of F from t_n to t_m at each node
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
 
     !> add tau if it exists

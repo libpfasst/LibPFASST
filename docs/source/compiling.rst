@@ -1,13 +1,9 @@
 Compiling
 =========
 
-Libpfasst comes with its own Makefiles, and it is possible that simply entering
+LibPFASST comes with its own Makefiles, and it is possible that simply typing 'make' in the directory /LibPFASST will compile the code succesfully.  A successful make will build the file
 
-   `~/libpfasst $ make`
-
-in the directory /libpfasst will compile the code succesfully.  A successful make will build the file
-
-libpfasst/lib/libpfasst.a  
+LibPFASST/lib/libpfasst.a  
 
 Before compiling, you will need an MPI library installed.  On Debian
 or Ubuntu machines, we recommend MPICH2:

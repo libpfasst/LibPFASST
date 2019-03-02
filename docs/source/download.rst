@@ -1,11 +1,11 @@
 Download
 ========
 
-You can obtain a copy of libpfasst through the
+You can obtain a copy of LibPFASST through the
 
 `PFASST@lbl.gov project page`_
 
-or directly from the Lawrence Berkeley Lab `bitbucket repo`_.
+or directly from `github`_.
 
 In either case, you will get the source code for the library, Makefiles, and tutorials.
 
@@ -16,7 +16,7 @@ In either case, you will get the source code for the library, Makefiles, and tut
 
 
 .. _`PFASST@lbl.gov project page`: https://pfasst.lbl.gov
-.. _`bitbucket.org`: https://bitbucket.org/berkeleylab/libpfasst/src/master/
+.. _`github`: https://github.com/libpfasst/LibPFASST
 
 
 

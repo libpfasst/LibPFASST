@@ -1,7 +1,8 @@
 Tutorial
 ========
 
-The following material will walk the user through a couple of examples to demonstrate how to set up an application using libpfasst.
+The following material will walk the user through a couple of examples to demonstrate how to set up an application using
+LibPFASST.
 
 Example 1
 ---------
@@ -95,8 +96,6 @@ functions to evaluate each term in the IMEX splitting and
 a routine to solve an implicit equation equivalent to a
 backward-Euler step.  These routines are in src/feval.f90 and are called
 'f_eval' and 'f_comp'.
-  
-
 		
 In EX1, the data structure of the solution is one of the included types in libpfasst called `ndarray`.
 In the second line of the loop, the choice of the ndarray data structure is evident.
@@ -217,6 +216,7 @@ This example solves a 1d linear advection diffusion equation
 This PDE is set up to be solved in a way that is very similar to the EX1_Dahlquist example.  
 This right hand side of the equation will be split into stiff terms handled implicitly
 (:math:`\nu u_{xx}`) and non-stiff terms handled explicitly (:math:`-v u_x`),
+
 and an IMEX SDC substepper will be used to evolve the equation through time.
 
 The evaluation of the two rhs terms and the
@@ -241,4 +241,5 @@ The difficulting of using libpfasst to build a time parallelization scheme for a
 In the simplest scenario, only the function evaluations would need to be changed.  This would be the case for example if the
 included `ndarray` data type is used along with one of the sweepers included in `libpfasst` and no interpolation and restriction is
 used.  
+
 
