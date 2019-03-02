@@ -7,7 +7,7 @@ You can obtain a copy of LibPFASST through the
 
 or directly from `github`_.
 
-In either case, you will get the source code for the library, Makefiles, tutorials, and the files from which the documentation is made.
+In either case, you will get the source code for the library, Makefiles, and tutorials.
 
 
 

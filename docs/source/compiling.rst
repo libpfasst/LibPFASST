@@ -30,15 +30,15 @@ MKVERBOSE=FALSE
 
 which if made true will show more info in the build steps.  These can also both be changed on the command line as in
 
- make MKVERBOSE=TRUE DEBUG=TRUE
+   `~/libpfasst $ make MKVERBOSE=TRUE DEBUG=TRUE`
 
-There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
+There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and entering
 
-make depend
+   `~/libpfasst $ make depend`
 
-Finally, one can type
+Finally, enter
 
-make clean
+   `~/libpfasst $ make clean`
 
 to remove all intermediate files and start from scratch.
 
