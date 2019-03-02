@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>exp_sweep &ndash; LibPFASST</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>exp_sweep
+      <small>Subroutine</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.3% of total for procedures.">51 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_exp.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_exp.f90.html'>pf_exp.f90</a></li>
+    
+     <li><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></li>
+    
+  
+     <li class="active">exp_sweep</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/exp_sweep.html#src">exp_sweep</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>
+public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
+    
+    
+   
+</h2>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></li>
+    
+    <li><a href='../module/pf_mod_hooks.html'>pf_mod_hooks</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~exp_sweep~~UsesGraph Pages: 1 -->
+<svg id="procexp_sweepUsesGraph" width="425pt" height="74pt"
+ viewBox="0.00 0.00 425.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~exp_sweep~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>proc~~exp_sweep~~UsesGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-70 421,-70 421,4 -4,4"/>
+<!-- proc~exp_sweep -->
+<g id="proc~~exp_sweep~~UsesGraph_node1" class="node"><title>proc~exp_sweep</title>
+<polygon fill="none" stroke="black" points="417,-45 350,-45 350,-21 417,-21 417,-45"/>
+<text text-anchor="middle" x="383.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">exp_sweep</text>
+</g>
+<!-- module~pf_mod_hooks -->
+<g id="proc~~exp_sweep~~UsesGraph_node2" class="node"><title>module~pf_mod_hooks</title>
+<g id="a_proc~~exp_sweep~~UsesGraph_node2"><a xlink:href=".././module/pf_mod_hooks.html" xlink:title="pf_mod_hooks">
+<polygon fill="#337ab7" stroke="#337ab7" points="314,-66 231,-66 231,-42 314,-42 314,-66"/>
+<text text-anchor="middle" x="272.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_hooks</text>
+</a>
+</g>
+</g>
+<!-- proc~exp_sweep&#45;&gt;module~pf_mod_hooks -->
+<g id="proc~~exp_sweep~~UsesGraph_edge1" class="edge"><title>proc~exp_sweep&#45;&gt;module~pf_mod_hooks</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M349.796,-39.3007C341.774,-40.8464 332.996,-42.5374 324.343,-44.2046"/>
+<polygon fill="#000000" stroke="#000000" points="323.451,-40.812 314.293,-46.1407 324.775,-47.6856 323.451,-40.812"/>
+</g>
+<!-- module~pf_mod_timer -->
+<g id="proc~~exp_sweep~~UsesGraph_node3" class="node"><title>module~pf_mod_timer</title>
+<g id="a_proc~~exp_sweep~~UsesGraph_node3"><a xlink:href=".././module/pf_mod_timer.html" xlink:title="pf_mod_timer">
+<polygon fill="#337ab7" stroke="#337ab7" points="312,-24 233,-24 233,-0 312,-0 312,-24"/>
+<text text-anchor="middle" x="272.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~exp_sweep&#45;&gt;module~pf_mod_timer -->
+<g id="proc~~exp_sweep~~UsesGraph_edge2" class="edge"><title>proc~exp_sweep&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M349.796,-26.6993C341.139,-25.0313 331.602,-23.1941 322.291,-21.4001"/>
+<polygon fill="#000000" stroke="#000000" points="322.809,-17.9356 312.327,-19.4805 321.485,-24.8092 322.809,-17.9356"/>
+</g>
+<!-- module~pf_mod_dtype -->
+<g id="proc~~exp_sweep~~UsesGraph_node5" class="node"><title>module~pf_mod_dtype</title>
+<g id="a_proc~~exp_sweep~~UsesGraph_node5"><a xlink:href=".././module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-66 114,-66 114,-42 195,-42 195,-66"/>
+<text text-anchor="middle" x="154.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_dtype</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype -->
+<g id="proc~~exp_sweep~~UsesGraph_edge3" class="edge"><title>module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.929,-54C222.661,-54 213.872,-54 205.325,-54"/>
+<polygon fill="#000000" stroke="#000000" points="205.071,-50.5001 195.071,-54 205.071,-57.5001 205.071,-50.5001"/>
+</g>
+<!-- module~pf_mod_mpi -->
+<g id="proc~~exp_sweep~~UsesGraph_node4" class="node"><title>module~pf_mod_mpi</title>
+<g id="a_proc~~exp_sweep~~UsesGraph_node4"><a xlink:href=".././module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="190.5,-24 118.5,-24 118.5,-0 190.5,-0 190.5,-24"/>
+<text text-anchor="middle" x="154.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
+<g id="proc~~exp_sweep~~UsesGraph_edge4" class="edge"><title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M232.874,-12C222.691,-12 211.608,-12 201.096,-12"/>
+<polygon fill="#000000" stroke="#000000" points="200.828,-8.5001 190.828,-12 200.828,-15.5001 200.828,-8.5001"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
+<g id="proc~~exp_sweep~~UsesGraph_edge5" class="edge"><title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M238.259,-24.0355C225.882,-28.5169 211.653,-33.6688 198.523,-38.4227"/>
+<polygon fill="#000000" stroke="#000000" points="196.957,-35.2673 188.746,-41.9627 199.34,-41.8492 196.957,-35.2673"/>
+</g>
+<!-- iso_c_binding -->
+<g id="proc~~exp_sweep~~UsesGraph_node6" class="node"><title>iso_c_binding</title>
+<g id="a_proc~~exp_sweep~~UsesGraph_node6"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-66 0,-66 0,-42 78,-42 78,-66"/>
+<text text-anchor="middle" x="39" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
+<g id="proc~~exp_sweep~~UsesGraph_edge6" class="edge"><title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.803,-54C105.623,-54 96.921,-54 88.4696,-54"/>
+<polygon fill="#000000" stroke="#000000" points="88.3369,-50.5001 78.3369,-54 88.3369,-57.5001 88.3369,-50.5001"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="490pt" height="32pt"
+ viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node"><title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,-0 54,-0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node"><title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,-0 139.5,-0 139.5,-24"/>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,-0 222,-0 222,-24"/>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,-0 294,-0 294,-24"/>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,-0 366,-0 366,-24"/>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,-0 481.5,-0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+
+    
+    <p>$              !  Now we have to add in the tauQ
+$</p>
+    
+
+    <h3>Arguments</h3>
+    
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-this%7E56"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-pf%7E3"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E2"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td><p>which level to sweep on</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-t0%7E4"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t0</strong></td><td><p>Time at beginning of time step</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dt%7E5"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td><p>time step size</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nsweeps%7E4"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nsweeps</strong></td><td><p>number of sweeps to do</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-flags%7E28"></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+    
+    
+    
+    <br>
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: proc~~exp_sweep~~CallsGraph Pages: 1 -->
+<svg id="procexp_sweepCallsGraph" width="414pt" height="116pt"
+ viewBox="0.00 0.00 414.00 116.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~exp_sweep~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 112)">
+<title>proc~~exp_sweep~~CallsGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-112 410,-112 410,4 -4,4"/>
+<!-- proc~exp_sweep -->
+<g id="proc~~exp_sweep~~CallsGraph_node1" class="node"><title>proc~exp_sweep</title>
+<polygon fill="none" stroke="black" points="67,-66 0,-66 0,-42 67,-42 67,-66"/>
+<text text-anchor="middle" x="33.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50">exp_sweep</text>
+</g>
+<!-- proc~call_hooks -->
+<g id="proc~~exp_sweep~~CallsGraph_node2" class="node"><title>proc~call_hooks</title>
+<g id="a_proc~~exp_sweep~~CallsGraph_node2"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
+<polygon fill="#d9534f" stroke="#d9534f" points="186,-66 123,-66 123,-42 186,-42 186,-66"/>
+<text text-anchor="middle" x="154.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">call_hooks</text>
+</a>
+</g>
+</g>
+<!-- proc~exp_sweep&#45;&gt;proc~call_hooks -->
+<g id="proc~~exp_sweep~~CallsGraph_edge1" class="edge"><title>proc~exp_sweep&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M67.0173,-54C80.9718,-54 97.4386,-54 112.239,-54"/>
+<polygon fill="#000000" stroke="#000000" points="112.661,-57.5001 122.661,-54 112.661,-50.5001 112.661,-57.5001"/>
+</g>
+<!-- proc~localderivsatnode -->
+<g id="proc~~exp_sweep~~CallsGraph_node3" class="node"><title>proc~localderivsatnode</title>
+<g id="a_proc~~exp_sweep~~CallsGraph_node3"><a xlink:href=".././proc/localderivsatnode.html" xlink:title="LocalDerivsAtNode">
+<polygon fill="#d9534f" stroke="#d9534f" points="206,-24 103,-24 103,-0 206,-0 206,-24"/>
+<text text-anchor="middle" x="154.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LocalDerivsAtNode</text>
+</a>
+</g>
+</g>
+<!-- proc~exp_sweep&#45;&gt;proc~localderivsatnode -->
+<g id="proc~~exp_sweep~~CallsGraph_edge2" class="edge"><title>proc~exp_sweep&#45;&gt;proc~localderivsatnode</title>
+<path fill="none" stroke="#000000" d="M67.0173,-42.5233C80.2127,-37.8661 95.6544,-32.4161 109.809,-27.4203"/>
+<polygon fill="#000000" stroke="#000000" points="111.095,-30.6783 119.36,-24.0496 108.765,-24.0774 111.095,-30.6783"/>
+</g>
+<!-- proc~pf_residual -->
+<g id="proc~~exp_sweep~~CallsGraph_node4" class="node"><title>proc~pf_residual</title>
+<g id="a_proc~~exp_sweep~~CallsGraph_node4"><a xlink:href=".././proc/pf_residual.html" xlink:title="pf_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="187,-108 122,-108 122,-84 187,-84 187,-108"/>
+<text text-anchor="middle" x="154.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_residual</text>
+</a>
+</g>
+</g>
+<!-- proc~exp_sweep&#45;&gt;proc~pf_residual -->
+<g id="proc~~exp_sweep~~CallsGraph_edge3" class="edge"><title>proc~exp_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M67.0173,-65.4767C81.017,-70.4178 97.5452,-76.2512 112.382,-81.4879"/>
+<polygon fill="#000000" stroke="#000000" points="111.25,-84.7997 121.845,-84.8275 113.58,-78.1988 111.25,-84.7997"/>
+</g>
+<!-- proc~start_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_node5" class="node"><title>proc~start_timer</title>
+<g id="a_proc~~exp_sweep~~CallsGraph_node5"><a xlink:href=".././proc/start_timer.html" xlink:title="start_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="306,-108 242,-108 242,-84 306,-84 306,-108"/>
+<text text-anchor="middle" x="274" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">start_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_edge4" class="edge"><title>proc~call_hooks&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M186.065,-64.9254C200.121,-69.9498 216.999,-75.9825 232.128,-81.3904"/>
+<polygon fill="#000000" stroke="#000000" points="231.175,-84.7668 241.77,-84.837 233.532,-78.1752 231.175,-84.7668"/>
+</g>
+<!-- proc~end_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_node6" class="node"><title>proc~end_timer</title>
+<g id="a_proc~~exp_sweep~~CallsGraph_node6"><a xlink:href=".././proc/end_timer.html" xlink:title="end_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="304.5,-66 243.5,-66 243.5,-42 304.5,-42 304.5,-66"/>
+<text text-anchor="middle" x="274" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">end_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_edge5" class="edge"><title>proc~call_hooks&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M186.065,-54C200.429,-54 217.74,-54 233.12,-54"/>
+<polygon fill="#000000" stroke="#000000" points="233.4,-57.5001 243.4,-54 233.4,-50.5001 233.4,-57.5001"/>
+</g>
+<!-- proc~pf_residual&#45;&gt;proc~start_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_edge6" class="edge"><title>proc~pf_residual&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M187.297,-96C200.97,-96 217.129,-96 231.71,-96"/>
+<polygon fill="#000000" stroke="#000000" points="231.99,-99.5001 241.99,-96 231.99,-92.5001 231.99,-99.5001"/>
+</g>
+<!-- proc~pf_residual&#45;&gt;proc~end_timer -->
+<g id="proc~~exp_sweep~~CallsGraph_edge7" class="edge"><title>proc~pf_residual&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M187.297,-84.6342C201.57,-79.5325 218.552,-73.4622 233.62,-68.0762"/>
+<polygon fill="#000000" stroke="#000000" points="234.959,-71.3144 243.198,-64.6527 232.603,-64.7229 234.959,-71.3144"/>
+</g>
+<!-- mpi_wtime -->
+<g id="proc~~exp_sweep~~CallsGraph_node7" class="node"><title>mpi_wtime</title>
+<polygon fill="#777777" stroke="#777777" points="406,-87 342,-87 342,-63 406,-63 406,-87"/>
+<text text-anchor="middle" x="374" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_wtime</text>
+</g>
+<!-- proc~start_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~exp_sweep~~CallsGraph_edge8" class="edge"><title>proc~start_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M306.008,-89.3555C314.23,-87.5936 323.237,-85.6635 331.905,-83.8061"/>
+<polygon fill="#000000" stroke="#000000" points="332.813,-87.1911 341.858,-81.6734 331.346,-80.3464 332.813,-87.1911"/>
+</g>
+<!-- proc~end_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~exp_sweep~~CallsGraph_edge9" class="edge"><title>proc~end_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M304.669,-60.3577C313.183,-62.1821 322.624,-64.2051 331.703,-66.1507"/>
+<polygon fill="#000000" stroke="#000000" points="331.22,-69.6265 341.731,-68.2995 332.687,-62.7819 331.22,-69.6265"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.38.0 (20140413.2041)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="560pt" height="32pt"
+ viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,-0 64,-0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,-0 136,-0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,-0 209.5,-0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,-0 364,-0 364,-24"/>
+<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,-0 436,-0 436,-24"/>
+<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="551.5,-24 454.5,-24 454.5,-0 551.5,-0 551.5,-24"/>
+<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/exp_sweep.html#src">exp_sweep</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_sweep</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+
+        <span class="k">use </span><span class="n">pf_mod_timer</span>
+        <span class="k">use </span><span class="n">pf_mod_hooks</span>
+
+        <span class="c">! arguments</span>
+        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+        <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>   <span class="c">!!  PFASST structure</span>
+        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  which level to sweep on</span>
+        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span>           <span class="c">!!  Time at beginning of time step</span>
+        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  time step size</span>
+        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
+        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
+
+        <span class="c">! local variables</span>
+        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+        <span class="kt">integer</span>                    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
+        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                 <span class="kd">::</span> <span class="n">t</span>
+
+        <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>  
+        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
+
+        <span class="c">! error sweeps</span>
+        <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nsweeps</span>
+           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_PRE_SWEEP</span><span class="p">)</span>      <span class="c">! NOTE: ensure that lev%F has been properly initialized here</span>
+           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
+           <span class="k">end do</span>
+<span class="k">           </span>
+<span class="k">           </span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> 
+           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
+              <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+              <span class="c">! form b vectors</span>
+              <span class="c">!              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral</span>
+              <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(:),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! phi expansion for exponential picard integral              </span>
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c">! add term \phi_0(tL) y_n</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
+                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
+              <span class="n">endif</span>
+              
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
+                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
+              <span class="k">end if</span>
+              
+              <span class="c">! compute phi products</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+              <span class="k">else</span>
+<span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+              <span class="k">end if</span>
+
+<span class="c">!!$              !  Now we have to add in the tauQ</span>
+              <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">                 call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                 <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>     <span class="c">! The tau is not node to node</span>
+<span class="c">!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       </span>
+                 <span class="k">end if</span>
+<span class="k">              end if</span>
+<span class="c">!!$</span>
+           <span class="k">end do</span>
+<span class="k">           call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>                      <span class="c">! eval last nonlinear term</span>
+
+           <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
+           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_POST_SWEEP</span><span class="p">)</span>
+           
+        <span class="k">end do</span>
+<span class="k">    end subroutine </span><span class="n">exp_sweep</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
