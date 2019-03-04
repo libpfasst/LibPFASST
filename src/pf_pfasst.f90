@@ -28,7 +28,7 @@ contains
     integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
-    pf%outdir = ""
+    pf%outdir = "dat/"
 
     !> gather some input from a file and command line
     read_cmd = .true.
@@ -223,9 +223,13 @@ contains
     !>  destroy all levels
     do l = 1, pf%nlevels
        call pf_level_destroy(pf%levels(l),pf%nlevels)
+
     end do
+    !>   deallocate results data
+    call pf_destroy_results(pf)
+    
     !>  deallocate pfasst pointer arrays
-!    call pf%destroy_results()
+
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -289,7 +293,8 @@ contains
 
     if (allocated(lev%rmat)) then
        deallocate(lev%rmat)
-   end if
+    end if
+
   end subroutine pf_level_destroy
 
   !>  Subroutine to read pfasst options from file and command line
@@ -315,18 +320,18 @@ contains
     
     ! stuff for reading the command line
     integer, parameter :: un = 9
-    integer            :: i, ios
-    character(len=32)  :: arg
+    integer            :: i, ios,stat
+    character(len=128)  :: arg
     character(len=255) :: istring  ! stores command line argument
     character(len=255) :: message  ! use for i/o error messages
-    character(len=512) :: outdir
+    character(len=3) :: outdir
 
     
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
     namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_timings,save_residuals, save_errors, use_rk_stepper
-    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes
+    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
 
     !> set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
@@ -368,21 +373,23 @@ contains
        read(unit=un, nml=pf_params)
        close(unit=un)
     end if
-
+    print *,'before',outdir
     !> overwrite parameters defined on  command line
     if (read_cmd) then
        i = 0
        do
-          call get_command_argument(i, arg)
+          call get_command_argument(i, arg,status=stat)
+          print *,'get command',stat,arg,len_trim(arg)
           if (len_trim(arg) == 0) exit
           if (i > 0) then
              istring="&pf_params " // trim(arg) // " /"
+             print *,istring
              read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
           end if
           i = i+1
        end do
     end if
-
+    print *,'after',outdir
     !> re-assign the pfasst internals
     pf%nlevels      = nlevels
     pf%niters       = niters
@@ -516,6 +523,7 @@ contains
 
     if (pf%debug) write(un,*) 'Debug mode is on '
 
+    write(un,*) 'Output directory ', pf%outdir    
     write(un,*) ''
 
     if (present(show_mats_opt)) show_mats=show_mats_opt
@@ -574,10 +582,10 @@ contains
   integer :: lev_ind
   ALLOCATE(pf%results(pf%nlevels))
   do lev_ind = 1,pf%nlevels
-    call  initialize_results(pf%results(lev_ind),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(lev_ind),pf%rank,lev_ind)
+    call  initialize_results(pf%results(lev_ind),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(lev_ind),pf%rank,lev_ind,pf%outdir)
   end do
   end subroutine pf_initialize_results
-  
+
 
   !>  Subroutine to write out run parameters
   subroutine pf_dump_results(pf)
@@ -604,6 +612,20 @@ contains
   
 
 end subroutine pf_dump_results
+
+!>  Subroutine to destroy the results
+  subroutine pf_destroy_results(pf)
+    
+    type(pf_pfasst_t), intent(inout)           :: pf
+    
+    integer :: lev_ind
+    
+       do lev_ind = 1,pf%nlevels
+          call  destroy_results(pf%results(lev_ind))
+       end do
+  
+
+end subroutine pf_destroy_results
   
     
   
