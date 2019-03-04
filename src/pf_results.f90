@@ -87,8 +87,8 @@ contains
     character(len = 50   ) :: datpath  !!  directory path
     integer :: istat,j, istream
 
-    datpath = trim(pf%outdir) // '/runtimes'
-    print *, datpath
+    datpath = trim(pf%outdir) // 'runtimes'
+
     istat= system('mkdir -p '// trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 

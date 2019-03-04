@@ -19,6 +19,11 @@ def make_sdc():
     nsteps = 32
     for nodes in range(3, 9):
         for imex_status in [0, 2]:
+            if imex_status == 0:
+                nsteps = 512
+            else:
+                nsteps = 32
+                
             sdc.append((nodes, imex_status, mpi_tasks, nml, nsteps))
 
     return sdc

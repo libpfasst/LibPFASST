@@ -272,6 +272,8 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         ! error sweeps
         do k = 1, nsweeps
+           pf%state%sweep=k                  
+           
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            do j = 1, nnodes
               call this%f_old(j)%copy(lev%F(j,1))  ! Save old f

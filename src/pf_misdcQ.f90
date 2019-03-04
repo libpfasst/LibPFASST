@@ -86,6 +86,7 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
 
     do k = 1,nsweeps   !!  Loop over sweeps
+       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)    
 
        ! compute integrals and add fas correction

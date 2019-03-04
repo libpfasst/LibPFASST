@@ -225,8 +225,6 @@ contains
        call pf_level_destroy(pf%levels(l),pf%nlevels)
 
     end do
-    !>   deallocate results data
-    call pf_destroy_results(pf)
     
     !>  deallocate pfasst pointer arrays
 
@@ -324,7 +322,7 @@ contains
     character(len=128)  :: arg
     character(len=255) :: istring  ! stores command line argument
     character(len=255) :: message  ! use for i/o error messages
-    character(len=3) :: outdir
+    character(len=255) :: outdir
 
     
     !> define the namelist for reading
@@ -373,23 +371,21 @@ contains
        read(unit=un, nml=pf_params)
        close(unit=un)
     end if
-    print *,'before',outdir
+
     !> overwrite parameters defined on  command line
     if (read_cmd) then
        i = 0
        do
           call get_command_argument(i, arg,status=stat)
-          print *,'get command',stat,arg,len_trim(arg)
           if (len_trim(arg) == 0) exit
           if (i > 0) then
              istring="&pf_params " // trim(arg) // " /"
-             print *,istring
              read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
           end if
           i = i+1
        end do
     end if
-    print *,'after',outdir
+
     !> re-assign the pfasst internals
     pf%nlevels      = nlevels
     pf%niters       = niters

@@ -110,6 +110,7 @@ contains
     tend = t0+dt
 
     do k = 1,nsweeps
+       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
