@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Output &#8212; LIBPFASST 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="prev" title="Parameters and variables" href="parameters.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters and variables"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="output">
+<h1>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h1>
+<p>There are two main ways to produce output automatically from LibPFASST, namely through the setting of hooks and the output of the results module.</p>
+<div class="section" id="hooks">
+<h2>hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
+<p>The first output possibility is through the use of the what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in &#8220;LibPFASST/Tutorials/EX1_Dahlquist/src/main.f90&#8221;  a hook is added by the statement.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
+<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will force a call to  the user-supplied subroutine &#8220;echo_error&#8221; (supplied locally in the file &#8220;hooks.f90&#8221;) after every PFASST iteration.      The second parameter specifies the level on which the hooks should be called with the value -1 indicating all levels.  See the file
+&#8220;LibPFASST/src/pf_hooks.f90&#8221; for a list of hook locations.</p>
+</div>
+<div class="section" id="results">
+<h2>results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
+<p>LibPFASST contains the module &#8220;pf_mod_results&#8221; which is used to collect information about the run during a call to library.
+The destination of the output can be changed from default direct &#8220;dat/&#8221; to an arbitrary path by specifying the variable &#8220;outdir&#8221; in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\&#8221;my_outdir\&#8221;.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
+then output to the directory &#8220;my_outdir/residuals&#8221; after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, echo_timings prints timings to  stdout while the code is running.</p>
+<p>Note that for the library supplied data encapsulations there is a subroutine called &#8220;eprint&#8221; which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine could be modified for an additional avenue for output from any place in the code.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Output</a><ul>
+<li><a class="reference internal" href="#hooks">hooks</a></li>
+<li><a class="reference internal" href="#results">results</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="parameters.html"
+                        title="previous chapter">Parameters and variables</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/output.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="parameters.html" title="Parameters and variables"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+    </div>
+  </body>
+</html>
