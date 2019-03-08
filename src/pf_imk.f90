@@ -258,7 +258,7 @@ contains
     call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !!  Loop over sweeps
-
+       pf%state%sweep=k
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)

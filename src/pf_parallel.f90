@@ -71,6 +71,8 @@ contains
 
     call pf_dump_results(pf)
 
+    !>   deallocate results data
+    call pf_destroy_results(pf)
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC

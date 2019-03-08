@@ -550,7 +550,7 @@ contains
     pf%state%itcnt = pf%state%itcnt + pf%state%iter
     call call_hooks(pf, -1, PF_POST_STEP)
     
-    call pf_dump_results(pf)
+!    call pf_dump_results(pf)
 
     
     call end_timer(pf, TTOTAL)

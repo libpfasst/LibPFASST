@@ -94,6 +94,7 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1, nsweeps
+       pf%state%sweep=k       
        ! Copy values into residual
        do m = 1, nnodes-1
           call lev%R(m)%copy(lev%Q(m+1))
