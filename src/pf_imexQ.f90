@@ -13,7 +13,7 @@
 !!     implicit:  Make false if there is no implicit piece
 !!
 !!
-!!  The user needs to supply the feval and fcomp routines for a given example   
+!!  The user needs to supply the feval and fcomp routines for a given example
 module pf_mod_imexQ
   use pf_mod_dtype
   use pf_mod_utils
@@ -51,9 +51,9 @@ module pf_mod_imexQ
 
   interface
      !>  This is the interface for the routine to compute the RHS function values
-     !>  Evaluate f_piece(y), where piece is one or two 
+     !>  Evaluate f_piece(y), where piece is one or two
      subroutine pf_f_eval_p(this,y, t, level_index, f, piece)
-       !>  Evaluate f_piece(y), where piece is one or two 
+       !>  Evaluate f_piece(y), where piece is one or two
        import pf_imexQ_t, pf_encap_t, pfdp
        class(pf_imexQ_t),  intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
@@ -68,7 +68,7 @@ module pf_mod_imexQ
        class(pf_imexQ_t),  intent(inout) :: this
 
 
-       class(pf_encap_t), intent(inout) :: y      !!  Solution of implicit solve 
+       class(pf_encap_t), intent(inout) :: y      !!  Solution of implicit solve
        real(pfdp),        intent(in   ) :: t      !!  Time of solve
        real(pfdp),        intent(in   ) :: dtq    !!  dt*quadrature weight
        class(pf_encap_t), intent(in   ) :: rhs    !!  RHS for solve
@@ -92,21 +92,21 @@ contains
     real(pfdp),        intent(in   ) :: t0           !!  Time at beginning of time step
     real(pfdp),        intent(in   ) :: dt           !!  time step size
     integer,           intent(in)    :: nsweeps      !!  number of sweeps to do
-    integer, optional, intent(in   ) :: flags    
+    integer, optional, intent(in   ) :: flags
 
     !>  Local variables
     class(pf_level_t), pointer :: lev    !!  points to current level
 
     integer     :: m, n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
-    
+
     lev => pf%levels(level_index)   !!  Assign level pointer
 
 !    call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !!  Loop over sweeps
        pf%state%sweep=k
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -121,8 +121,8 @@ contains
                 call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
              end do
           end if
-          if (allocated(lev%tauQ)) then
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+          if (level_index < pf%state%finest_level) then
+             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
        !  Recompute the first function value if this is first sweep
@@ -133,7 +133,7 @@ contains
           if (this%implicit) &
                call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
        end if
-       
+
        t = t0
        ! do the sub-stepping in sweep
        do m = 1, lev%nnodes-1  !!  Loop over substeps
@@ -163,9 +163,9 @@ contains
           if (this%explicit) &
                call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1),1)
 
-          
+
        end do  !!  End substep loop
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -188,13 +188,13 @@ contains
     allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
     if (ierr /=0) stop "allocate fail in imexQ_initialize for QdiffE"
     allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)
-    if (ierr /=0) stop "allocate fail in imexQ_initialize for QdiffI"    
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QdiffI"
     allocate(this%QtilE(nnodes-1,nnodes),stat=ierr)
-    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilE"    
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilE"
     allocate(this%QtilI(nnodes-1,nnodes),stat=ierr)
-    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilI"    
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for QtilI"
     allocate(this%dtsdc(nnodes-1),stat=ierr)
-    if (ierr /=0) stop "allocate fail in imexQ_initialize for dtsdc"    
+    if (ierr /=0) stop "allocate fail in imexQ_initialize for dtsdc"
 
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
@@ -203,9 +203,9 @@ contains
     this%dtsdc = lev%sdcmats%qnodes(2:nnodes) - lev%sdcmats%qnodes(1:nnodes-1)
 
     ! Implicit matrix
-    if (this%use_LUq) then 
+    if (this%use_LUq) then
        this%QtilI = lev%sdcmats%qmatLU
-    else 
+    else
        this%QtilI =  lev%sdcmats%qmatBE
     end if
 
@@ -244,7 +244,7 @@ contains
     class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !!  RHS Function values
     real(pfdp),        intent(in   ) :: dt           !!  Time step
     class(pf_encap_t), intent(inout) :: fintSDC(:)   !!  Integral from t_n to t_m
-    integer, optional, intent(in   ) :: flags    
+    integer, optional, intent(in   ) :: flags
 
     integer :: n, m
 
@@ -260,15 +260,16 @@ contains
   end subroutine imexQ_integrate
 
   !> Subroutine to compute  Residual
-  subroutine imexQ_residual(this, lev, dt, flags)
+  subroutine imexQ_residual(this, pf, level_index, dt, flags)
     class(pf_imexQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t),target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
-    call pf_generic_residual(this, lev, dt)
+    call pf_generic_residual(this, pf, level_index, dt)
   end subroutine imexQ_residual
 
-  
+
   subroutine imexQ_spreadq0(this, lev, t0, flags, step)
     class(pf_imexQ_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev

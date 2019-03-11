@@ -101,6 +101,8 @@ contains
     do l = 1, pf%nlevels
        call pf_level_setup(pf, pf%levels(l))
     end do
+    !>  set default finest level
+    pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)

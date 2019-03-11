@@ -11,7 +11,7 @@ DEBUG = FALSE
 MKVERBOSE = FALSE
 
 #  Set some compiler flags
-FFLAGS = -Ibuild -Jinclude -cpp 
+FFLAGS = -Ibuild -Jinclude -cpp
 
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
@@ -60,8 +60,8 @@ FSRC = src/pfasst.f90 \
        src/pf_utils.f90 \
        src/pf_verlet.f90 \
        src/pf_zndsysarray.f90 \
-       src/pf_zndarray.f90       
-       #       src/pf_amisdc.f90 \ 
+       src/pf_zndarray.f90
+       #       src/pf_amisdc.f90 \
 #       src/pf_amisdcQ.f90 \
 
 ifeq ($(NOFFTW),TRUE)
@@ -87,7 +87,7 @@ OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif
 
 
-	
+
 
 
 

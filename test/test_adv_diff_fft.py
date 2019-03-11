@@ -23,7 +23,7 @@ def make_sdc():
                 nsteps = 512
             else:
                 nsteps = 32
-                
+
             sdc.append((nodes, imex_status, mpi_tasks, nml, nsteps))
 
     return sdc
@@ -36,7 +36,7 @@ def make_mlsdc():
     nodes = '[2 3 5]'
     for imex_status in [0, 2]:
         if imex_status == 0:
-            nsteps = 256
+            nsteps = 512
         else:
             nsteps = 32
 
@@ -52,7 +52,7 @@ def make_pfasst():
     nodes = '[2 3 5]'
     for imex_status in [0, 2]:
         if imex_status == 0:
-            nsteps = 256
+            nsteps = 512
         else:
             nsteps = 32
 
@@ -106,4 +106,4 @@ def test_advdiff(nodes, imex_status, mpi_tasks, nml,nsteps):
         lasterr = max([x.error for x in err if x.step == maxstep and x.iter == maxiter])
 
         assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)   # This decides if the test was successful
-
+        

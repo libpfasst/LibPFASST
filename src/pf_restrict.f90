@@ -79,7 +79,7 @@ contains
       call f_lev_ptr%ulevel%sweeper%integrate(f_lev_ptr, f_lev_ptr%Q, &
         f_lev_ptr%F, dt, f_lev_ptr%I, flags)
        !  put tau in on fine level
-       if (allocated(f_lev_ptr%tauQ)) then
+      if (level_index < pf%state%finest_level) then
           do m = 1, f_lev_ptr%nnodes-1
              call f_lev_ptr%I(m)%axpy(1.0_pfdp, f_lev_ptr%tauQ(m), flags)
           end do
