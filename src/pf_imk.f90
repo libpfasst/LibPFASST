@@ -125,12 +125,13 @@ contains
     !>  Local variables
     class(pf_level_t), pointer :: lev    !!  points to current level
 
+    integer     :: level_index   !!  Level to work on
     integer     :: m        !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
 
     t = t0 + dt
-
-    lev => pf%levels(1)
+    level_index=1
+    lev => pf%levels(level_index)
     do m = 1, 5
        call lev%Q(m)%setval(0.0_pfdp)
     end do
@@ -173,7 +174,7 @@ contains
     call this%commutator_p(this%A(4), lev%Q(4), lev%F(1,1), flags=2)
     call this%commutator_p(this%A(5), lev%Q(5), lev%F(1,1), flags=2)
 
-    call pf_residual(pf, lev, dt)
+    call pf_residual(pf, level_index, dt)
     call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
 
     call call_hooks(pf, 1, PF_POST_SWEEP)
@@ -192,10 +193,12 @@ contains
     !>  Local variables
     class(pf_level_t), pointer :: lev    !!  points to current level
 
+    integer     :: level_index !!  Level we are working on
     integer     :: m        !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
 
-    lev => pf%levels(1)
+    level_index=1
+    lev => pf%levels(level_index)
 
     t = t0 + dt
     do m = 1, 5
@@ -230,7 +233,7 @@ contains
 
     call this%propagate(lev%q0, lev%Q(5))
 
-    call pf_residual(pf, lev, dt)
+    call pf_residual(pf, level_index, dt)
     call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
 
     call call_hooks(pf, 1, PF_POST_SWEEP)
@@ -258,6 +261,8 @@ contains
     call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !!  Loop over sweeps
+       pf%state%sweep=k
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -293,7 +298,7 @@ contains
           call this%evaluate(lev, t, m+1)
        end do  !!  End substep loop
 
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
 
     end do  !  End loop on sweeps
@@ -466,17 +471,21 @@ contains
     end if
   end subroutine imk_evaluate_all
 
-  subroutine imk_residual(this, lev, dt, flags)
+  subroutine imk_residual(this, pf,level_index, dt, flags)
     class(pf_imk_t),   intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt
     integer, optional,   intent(in)    :: flags
     integer :: m
 
+    type(pf_level_t), pointer :: lev
+
+    lev => pf%levels(level_index)   !!  Assign level pointer    
     call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
 
     ! add tau (which is 'node to node')
-    if (allocated(lev%tauQ)) then
+    if (level_index < pf%nlevels) then
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
        end do

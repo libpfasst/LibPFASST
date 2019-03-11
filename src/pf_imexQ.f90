@@ -262,7 +262,7 @@ contains
   !> Subroutine to compute  Residual
   subroutine imexQ_residual(this, pf, level_index, dt, flags)
     class(pf_imexQ_t),  intent(inout) :: this
-    type(pf_pfasst_t),   intent(inout) :: pf
+    type(pf_pfasst_t),target,  intent(inout) :: pf
     integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags

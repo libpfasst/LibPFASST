@@ -529,15 +529,15 @@ contains
 
   subroutine imexQ_oc_residual(this, pf, level_index, dt, flags)
     class(pf_imexQ_oc_t),      intent(inout) :: this
-    type(pf_pfasst_t),         intent(inout)   :: pf
+    type(pf_pfasst_t),  target,intent(inout)   :: pf
     integer,                   intent(in)     :: level_index
     real(pfdp),                intent(in)     :: dt
     integer,         optional, intent(in)     :: flags
 
     integer :: m, which
-    !class(pf_level_t), pointer  :: lev
+    class(pf_level_t), pointer  :: lev
 
-    !lev => pf%levels(level_index)
+    lev => pf%levels(level_index)
 
     which = 0
     if(present(flags)) then
@@ -549,26 +549,26 @@ contains
 !     print *, "IMEXQ_OC RESIDUAL ", which
 
 
-    call this%integrate(pf%levels(level_index), pf%levels(level_index)%Q, pf%levels(level_index)%F, dt, pf%levels(level_index)%I, which)
+    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
 
     ! add tau (which is 'node to node')
     if (level_index < pf%state%finest_level) then
-       do m = 1, pf%levels(level_index)%nnodes-1
-          call pf%levels(level_index)%I(m)%axpy(1.0_pfdp, pf%levels(level_index)%tauQ(m), which)
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
        end do
     end if
 
     ! subtract out Q
     do m = 1, pf%levels(level_index)%nnodes-1
        if( (which .eq. 0) .or. (which .eq. 1) ) then
-          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 1)
-          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp, pf%levels(level_index)%Q(1), 1)
-          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m+1), 1)
+          call lev%R(m)%copy(lev%I(m), 1)
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
        end if
        if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 2)
-          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp,  pf%levels(level_index)%Q(pf%levels(level_index)%nnodes), 2)
-          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m), 2)
+          call lev%R(m)%copy(lev%I(m), 2)
+          call lev%R(m)%axpy(1.0_pfdp,  lev%Q(lev%nnodes), 2)
+          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
        end if
     end do
 

@@ -86,10 +86,10 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
 
     do k = 1,nsweeps   !!  Loop over sweeps
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+       pf%state%sweep=k
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
-       
        do m = 1, lev%nnodes-1
           
           call lev%I(m)%setval(0.0_pfdp)
@@ -101,7 +101,7 @@ contains
              call this%I3(m)%axpy(dt*this%QtilI(m,n),     lev%F(n,3))
              !  Note we have to leave off the -dt*Qtil here and put it in after f2comp
           end do
-          if (allocated(lev%tauQ)) then
+          if (level_index < pf%state%finest_level) then
              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
@@ -143,7 +143,7 @@ contains
           call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2),2)
        end do
        
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
        
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -255,12 +255,13 @@ contains
   end subroutine misdcQ_evaluate_all
 
   !> Subroutine to compute  Residual
-  subroutine misdcQ_residual(this, lev, dt, flags)
+  subroutine misdcQ_residual(this, pf, level_index, dt, flags)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
-    call pf_generic_residual(this, lev, dt)
+    call pf_generic_residual(this, pf,level_index, dt)
   end subroutine misdcQ_residual
 
   subroutine misdcQ_spreadq0(this, lev, t0, flags, step)

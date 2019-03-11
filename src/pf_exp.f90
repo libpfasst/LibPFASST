@@ -302,7 +302,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               end if
 
 !!$              !  Now we have to add in the tauQ
-              if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                  call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
                  if (j > 1) then     ! The tau is not node to node
 !                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
@@ -393,7 +393,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     end subroutine exp_integrate
 
     ! RESIDUAL: compute  residual (generic) ====================================
-    subroutine exp_residual(this, lev, dt, flags)
+    subroutine exp_residual(this, pf, level_index, dt, flags)
 
         class(pf_exp_t),  intent(inout)  :: this
         class(pf_level_t), intent(inout) :: lev  !!  Current level
@@ -405,7 +405,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
         
         !> add tau if it exists
-        if (allocated(lev%tauQ)) then
+        if (level_index < pf%state%finest_level) then
            do m = 1, lev%nnodes-1
               call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
               if (m > 1) then

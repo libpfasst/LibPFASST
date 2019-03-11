@@ -362,7 +362,7 @@ contains
     pf%state%t0      = pf%state%step * dt
 
     ! set finest level to visit in the following run
-    pf%state%finest_level = pf%nlevels-1
+    pf%state%finest_level = pf%nlevels
 
     !  pointer to finest  level to start
     lev_p => pf%levels(pf%state%finest_level)
@@ -397,7 +397,7 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
-       pf%state%finest_level = 2
+!       pf%state%finest_level = 3
 
        if (k > 1) then
           if (nproc > 1)  then

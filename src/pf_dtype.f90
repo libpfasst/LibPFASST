@@ -367,7 +367,7 @@ module pf_mod_dtype
      subroutine pf_residual_p(this, pf, level_index, dt, flags)
        import pf_pfasst_t,pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       type(pf_pfasst_t),   intent(inout) :: pf
+       type(pf_pfasst_t),  target,  intent(inout) :: pf
        integer,              intent(in)    :: level_index
        real(pfdp),          intent(in)    :: dt !!  Time step size
        integer, optional,   intent(in)    :: flags
