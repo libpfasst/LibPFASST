@@ -28,8 +28,8 @@ module pf_mod_imexQ
      real(pfdp), allocatable :: QdiffE(:,:)  !!  qmat-QtilE
      real(pfdp), allocatable :: QdiffI(:,:)  !!  qmat-QtilI
 
-     logical                 :: explicit = .true. !!  True if there is an explicit piece
-     logical                 :: implicit = .true. !!  True if there an implicit piece
+     logical                 :: explicit = .true. !!  True if there is an explicit piece (reset in derived sweeper)
+     logical                 :: implicit = .true. !!  True if there an implicit piece (reset in derived sweeper)
 
 
      class(pf_encap_t), allocatable :: rhs   !! holds rhs for implicit solve
@@ -102,7 +102,7 @@ contains
 
     lev => pf%levels(level_index)   !!  Assign level pointer
 
-    call start_timer(pf, TLEVEL+lev%index-1)
+!    call start_timer(pf, TLEVEL+lev%index-1)
 
     do k = 1,nsweeps   !!  Loop over sweeps
        pf%state%sweep=k
@@ -171,7 +171,7 @@ contains
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
 
-    call end_timer(pf, TLEVEL+lev%index-1)
+!    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imexQ_sweep
 
   !> Subroutine to initialize matrices and space for sweeper

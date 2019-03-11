@@ -218,7 +218,7 @@ module pf_mod_dtype
   !>  Type for storing results for later output
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
      integer :: nsteps
      integer :: niters
      integer :: nprocs
@@ -228,9 +228,11 @@ module pf_mod_dtype
      integer :: rank
      integer :: level
 
+     character(len=512) :: datpath
+     
+     procedure(pf_results_p), pointer, nopass :: dump 
+     procedure(pf_results_p), pointer, nopass :: destroy 
 
-     procedure(pf_results_p), pointer, nopass :: dump
-     procedure(pf_results_p), pointer, nopass :: destroy
   end type pf_results_t
 
   !>  The main PFASST data type which includes pretty much everythingl
@@ -277,8 +279,8 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
+     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .true.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
      logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
@@ -299,7 +301,7 @@ module pf_mod_dtype
      double precision :: runtimes(100) = 0.0d0
 
      !> output directory
-     character(512) :: outdir
+     character(len=255) :: outdir
 
   end type pf_pfasst_t
 

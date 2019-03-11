@@ -16,6 +16,8 @@
      PFASST_pred = .false.
 
      echo_timings = .false.
+     save_residuals = .false.
+     save_timings = .false.
 
 /
 

@@ -297,7 +297,8 @@ contains
     real(pfdp), intent(out) :: yex(:)
 
     integer    :: nx, i, ii, k,nbox
-    real(pfdp) :: tol, x, t0,Dx, omega
+    real(pfdp) :: tol, t0,Dx, omega
+    real(pfdp), allocatable ::  x
 
     nx = size(yex)
     Dx = 1.0d0/dble(nx)
@@ -311,11 +312,11 @@ contains
        end do
     else  !  Use periodic image of Gaussians
        yex=0
-       if (nu .gt. 0) then
+       if (nu .gt. 0.0) then
           nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0))  !  Decide how many periodic images
           do k = -nbox,nbox
              do i = 1, nx
-                x = (i-1)*Dx-0.5d0 - t*v + dble(k)
+                x = dble(i-1-nx/2)/dble(nx) - t*v  + dble(k)
                 yex(i) = yex(i) + sqrt(t00)/sqrt(t00+t)*exp(-x*x/(4.0*nu*(t00+t)))
              end do
           end do
@@ -323,13 +324,14 @@ contains
           nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
           do k = -nbox,nbox
              do i = 1, nx
-                x = i*Dx-0.5d0 - t*v + dble(k)
+                x = dble(i-1-nx/2)/dble(nx) - t*v  + dble(k)
                 yex(i) = yex(i) + exp(-x*x)
              end do
           end do
        end if  ! nbox
 
     end if
+
   end subroutine exact
 
 
