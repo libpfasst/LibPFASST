@@ -94,6 +94,7 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1, nsweeps
+       pf%state%sweep=k
        ! Copy values into residual
        do m = 1, nnodes-1
           call lev%R(m)%copy(lev%Q(m+1))
@@ -132,7 +133,7 @@ contains
        end do
        !$omp end parallel do
 
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
@@ -210,13 +211,15 @@ contains
     call pf_generic_evaluate_all(this, lev, t)
   end subroutine magpicard_evaluate_all
 
-  subroutine magpicard_residual(this, lev, dt, flags)
+  subroutine magpicard_residual(this, pf,level_index, dt, flags)
     class(pf_magpicard_t), intent(inout) :: this
-    class(pf_level_t),    intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),           intent(in   ) :: dt
     integer, optional, intent(in   ) :: flags
     integer :: m
-
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
     do m = 1, lev%nnodes-1
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do

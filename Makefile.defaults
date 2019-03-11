@@ -43,6 +43,7 @@ FSRC = src/pfasst.f90 \
        src/pf_imexQ_oc.f90 \
        src/pf_imk.f90 \
        src/pf_interpolate.f90 \
+       src/pf_magnus_picard.f90 \
        src/pf_misdcQ.f90 \
        src/pf_misdcQ_oc.f90 \
        src/pf_ndarray.f90 \
@@ -57,6 +58,7 @@ FSRC = src/pfasst.f90 \
        src/pf_rkstepper.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
+       src/pf_verlet.f90 \
        src/pf_zndsysarray.f90 \
        src/pf_zndarray.f90
        #       src/pf_amisdc.f90 \
