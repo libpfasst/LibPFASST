@@ -7,11 +7,12 @@ if ! [ -x "$(command -v pytest)" ]; then
 fi
 
 
-# Get path to PFASSE root directory
+# Get path to PFASS root directory
 PFASSTDIR="$(dirname $0)/.."
 
 # Convert to absolute path
 PFASSTDIR="$(realpath $PFASSTDIR)"
+PFASSTDIR=.
 
 TESTDIR="$PFASSTDIR/test"
 
