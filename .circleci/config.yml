@@ -5,6 +5,9 @@ jobs:
             - image: brandonkrull/libpfasst
         steps:
             - checkout
+            - run:
+                name: env_links
+                command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
             - run: # Modify the commands below to build your repository.
                 name: make_and_test
-                command: ./test/run_tests.sh
+                command: OMP=y make && cd test/magpicard && OMP=y make  && cd ../imk && OMP=y make && cd ../nagumo && make && cd ../adv_diff_fft/1d && make && cd ../2d/ && make && cd ../../.. && pytest
