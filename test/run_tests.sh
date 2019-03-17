@@ -29,8 +29,6 @@ test -h "pf" || ln -s "$PFASSTDIR/pf"
 cd "$TESTDIR/imk"
 test -h "pf" || ln -s "$PFASSTDIR/pf"
 
-
-
 cd "$PFASSTDIR"
 OMP=y make -j || exit 1
 
