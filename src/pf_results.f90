@@ -10,9 +10,9 @@ module pf_mod_results
 
   
 contains
-    subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind,datpath)
+    subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index,datpath)
     class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind
+    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index
     character(len=*), intent(in) :: datpath
 
     character(len = 50   ) :: fname  !!  output file name for residuals
@@ -25,7 +25,7 @@ contains
     
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
 
-    write (fname, "(A17,I0.1,A4)") 'residuals_size_L',lev_ind,'.dat'
+    write (fname, "(A17,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
     fullname = trim(this%datpath) // trim(fname)
     
     if (rank_in == 0) then
@@ -43,7 +43,7 @@ contains
     this%nprocs=nprocs_in
     this%nsweeps=nsweeps_in
     this%rank=rank_in
-    this%level=lev_ind    
+    this%level=level_index    
     
     if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in))
     if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in))

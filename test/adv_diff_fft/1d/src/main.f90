@@ -59,19 +59,16 @@ contains
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
-       allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
-       !>  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1) = nx(l)
+       !>  Allocate the user specific data factory
+       allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
 
+       !>  Set the size of the data on this level (here just one)
+       call pf_level_set_size(pf,l,[nx(l)])
 
-       !>  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = nx(l)
     end do
 
     !>  Set up some pfasst stuff
@@ -79,8 +76,8 @@ contains
 
 
     !> add some hooks for output
+    call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
-    call pf_add_hook(pf, -1, PF_POST_STEP, echo_error)
 
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
@@ -105,11 +102,6 @@ contains
     call ndarray_destroy(y_0)
     call ndarray_destroy(y_end)
 
-    !> deallocate sweeper stuff
-    do l = 1, pf%nlevels
-       call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
-    end do
-    
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)
 

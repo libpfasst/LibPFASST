@@ -146,7 +146,7 @@ contains
     f_lev_p => pf%levels(pf%state%finest_level)
 
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
-       call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0)
+       call f_lev_p%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0)
     endif
     !!
     !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
@@ -195,7 +195,7 @@ contains
                 call c_lev_p%q0%copy(c_lev_p%qend,flags=0)
                 ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
                 if (.not. pf%PFASST_pred) then
-                   call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k)
+                   call c_lev_p%ulevel%sweeper%spreadq0(pf,level_index, t0k)
                 end if
              end if
              !  Do some sweeps

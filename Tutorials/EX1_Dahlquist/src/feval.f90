@@ -7,7 +7,7 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imexQ
+  use pf_mod_imex_sweeper
 
 
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
@@ -20,13 +20,15 @@ module feval
   end type my_level_t
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
-  type, extends(pf_imexQ_t) :: my_sweeper_t
+  type, extends(pf_imex_sweeper_t) :: my_sweeper_t
 
    contains
 
      procedure :: f_eval    !  Computes the advection and diffusion terms
      procedure :: f_comp    !  Does implicit solves 
 
+     procedure :: initialize !  Overwrites imex sweeper initialize
+     procedure :: destroy    !  Overwrites imex sweeper destroy
   end type my_sweeper_t
 
 contains
@@ -44,25 +46,30 @@ contains
   end function as_my_sweeper
 
   !>  Routine to set up sweeper variables and operators
-  subroutine sweeper_setup(sweeper, grid_shape)
-    class(pf_sweeper_t), intent(inout) :: sweeper
-    integer,             intent(in   ) :: grid_shape(1)
+  subroutine initialize(this, pf,level_index)
+    class(my_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf
+    integer, intent(in) :: level_index
 
-    class(my_sweeper_t), pointer :: this
-    this => as_my_sweeper(sweeper)
+    !>  Call the imex sweeper initialization
+    call this%imex_initialize(pf,level_index)
 
     !>  Set variables for explicit and implicit parts
     this%implicit=.TRUE.
     this%explicit=.TRUE.
 
-  end subroutine sweeper_setup
+  end subroutine initialize
 
   !>  destroy the sweeper type
-  subroutine destroy(this, lev)
+  subroutine destroy(this, pf,level_index)
     class(my_sweeper_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)   :: lev
+    type(pf_pfasst_t), intent(inout), target :: pf
+    integer, intent(in) :: level_index
 
-    call this%imexQ_destroy(lev)
+    !>  Call the imex sweeper destroy
+    call this%imex_destroy(pf,level_index)
+
+    !  Nothing to do 
 
   end subroutine destroy
 

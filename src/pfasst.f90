@@ -13,7 +13,6 @@ module pfasst
 #ifndef NOMPI
   use pf_mod_comm_mpi
 #endif
-  use pf_mod_imexQ
   
 end module pfasst
 

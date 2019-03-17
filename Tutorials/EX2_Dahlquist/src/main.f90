@@ -62,19 +62,15 @@ contains
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
        allocate(my_level_t::pf%levels(l)%ulevel)
-       allocate(scalar_factory::pf%levels(l)%ulevel%factory)
 
-       !>  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1) = 1
+       !>  Allocate the user specific data constructor
+       allocate(scalar_factory::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
        allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
 
-
-       !>  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = 1
+       !>  Set the size of the data on this level (here just one)
+       call pf_level_set_size(pf,l,[1])
     end do
 
     !>  Set up some pfasst stuff
@@ -97,7 +93,6 @@ contains
 
     !>  wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
-
     
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)

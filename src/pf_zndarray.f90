@@ -118,11 +118,9 @@ module pf_mod_zndarray
 
   end subroutine zndarray_create_array
 
-  subroutine zndarray_destroy_single(this, x, level,  shape)
+  subroutine zndarray_destroy_single(this, x)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
-    integer, intent(in) :: level,  shape(:)
-
 
     select type (x)
     class is (zndarray)
@@ -134,15 +132,14 @@ module pf_mod_zndarray
   end subroutine zndarray_destroy_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_destroy_array(this, x, n, level,  shape)
+  subroutine zndarray_destroy_array(this, x)
     class(zndarray_factory), intent(inout)       :: this
     class(pf_encap_t), intent(inout),allocatable :: x(:)
-    integer, intent(in)                          :: n, level, shape(:)
     integer :: i
 
     select type(x)
     class is (zndarray)
-       do i = 1,n
+       do i = 1,size(x)
           deallocate(x(i)%shape)
           deallocate(x(i)%flatarray)
        end do

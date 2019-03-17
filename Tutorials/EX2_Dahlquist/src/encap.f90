@@ -63,23 +63,22 @@ contains
   end subroutine scalar_destroy
 
   !> Subroutine to destroy an single array
-  subroutine scalar_destroy_single(this, x, level, shape)
+  subroutine scalar_destroy_single(this, x)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
 
     deallocate(x)
   end subroutine scalar_destroy_single
 
 
   !> Subroutine to destroy an array of arrays
-  subroutine scalar_destroy_array(this, x, n, level,  shape)
+  subroutine scalar_destroy_array(this, x)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
 
     deallocate(x)
+
   end subroutine scalar_destroy_array
 
 

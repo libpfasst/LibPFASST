@@ -214,15 +214,20 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     !      b        pf_encap_t(:)     stores vectors b for computing phi products
     ! =================================================================================
 
-    subroutine exp_initialize(this, lev)
-
+    subroutine exp_initialize(this, pf,level_index)
+      
         ! arguments
         class(pf_exp_t),   intent(inout) :: this
-        class(pf_level_t), intent(inout) :: lev
+        type(pf_pfasst_t), target, intent(inout) :: pf
+        integer,              intent(in)    :: level_index
 
+        
         ! local variables
         integer :: i, nnodes
         real(pfdp), allocatable :: q(:)
+
+        type(pf_level_t), pointer :: lev
+        lev => pf%levels(level_index)
         nnodes = lev%nnodes
         allocate(this%eta(nnodes - 1))
         allocate(this%nodes(nnodes))
@@ -261,42 +266,37 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         integer, optional, intent(in)    :: flags
 
         ! local variables
-        class(pf_level_t), pointer :: lev
+        type(pf_level_t), pointer :: lev
         integer                    :: m, nnodes, j, k
         real(pfdp)                 :: t
 
         lev => pf%levels(level_index)
         nnodes = lev%nnodes
         call start_timer(pf, TLEVEL+lev%index-1)        
-        call lev%Q(1)%copy(lev%q0)  
-        call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))      ! compute F_j^{[k+1]}
-
         ! error sweeps
         do k = 1, nsweeps
-
            pf%state%sweep=k                  
 
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            do j = 1, nnodes
               call this%f_old(j)%copy(lev%F(j,1))  ! Save old f
            end do
-           
+           if (k .eq. 1) then
+              call lev%Q(1)%copy(lev%q0)  
+              call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))      ! compute F_j^{[k+1]}
+           end if
            t = t0 
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              !              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral
               call LocalDerivsAtNode(this, j, nnodes, this%f_old(:), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
-              if (j > 1) then                                 ! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})
-                 call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
-              endif
-              
+
+              call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
               call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
-              if (j > 1) then                                 ! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})
-                 call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
-              end if
-              
+              call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
+
+
               ! compute phi products
               if (this%use_phib) then
                  call this%phib(this%eta(j), dt, this%b, lev%Q(j+1))
@@ -304,22 +304,22 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
                  call this%swpPhib(j, dt, this%b, lev%Q(j+1))
               end if
 
-!!$              !  Now we have to add in the tauQ
-            if (level_index < pf%state%finest_level) then
-                 call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
-                 if (j > 1) then     ! The tau is not node to node
-!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
+              !  Now we have to add in the tauQ
+              if (level_index < pf%state%finest_level) then
+                call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
+                 if (j > 1) then     ! The tau is not node to node, so subtract out
+                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
                  end if
               end if
-!!$
-           end do
-           call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))                      ! eval last nonlinear term
+
+           end do  !  Substepping over nodes
+           call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))   ! eval last nonlinear term
 
            call pf_residual(pf, level_index, dt)
            call lev%qend%copy(lev%Q(lev%nnodes))
            call call_hooks(pf, level_index, PF_POST_SWEEP)
            
-        end do
+        end do  !  Sweeps
     end subroutine exp_sweep
 
     ! =================================================================================
@@ -341,29 +341,24 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     !     thus incorrectly adding the term y_n
     ! =================================================================================
 
-    subroutine exp_integrate(this, lev, qSDC, fSDC, dt, fintsdc, flags)
+    subroutine exp_integrate(this, pf,level_index, qSDC, fSDC, dt, fintsdc, flags)
         ! parameters
         class(pf_exp_t),   intent(inout) :: this
-        class(pf_level_t), intent(in   ) :: lev          !!  Current level
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
         class(pf_encap_t), intent(in   ) :: qSDC(:)      !!  Solution values
         class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !!  RHS Function values
         real(pfdp),        intent(in   ) :: dt           !!  Time step
         class(pf_encap_t), intent(inout) :: fintsdc(:)   !!  Integral from t_n to t_m
         integer, optional, intent(in   ) :: flags
+
         ! local variables
         integer :: i, nnodes
+        type(pf_level_t), pointer :: lev
+        lev => pf%levels(level_index)   !!  Assign level pointer
 
         nnodes = lev%nnodes
-!!$        call LocalDerivsAtNode(this, 1, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
-!!$        call this%b(1)%setval(real(0.0, pfdp))
-!!$        call this%b(1)%axpy(real(1.0, pfdp), qSDC(1))
-!!$        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-!!$            if (this%use_phib) then
-!!$                call this%phib(this%nodes(i+1), dt, this%b, fintsdc(i))
-!!$            else
-!!$                call this%resPhib(i, dt, this%b, fintsdc(i))
-!!$             end if
-!!$        end do
+
         do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
            call LocalDerivsAtNode(this, i, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
            call this%b(1)%copy(qSDC(i))
@@ -375,25 +370,12 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
             else
                 call this%swpPhib(i, dt, this%b, fintsdc(i))
              end if
+             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
              if (i > 1) then
-!                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
+                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
              end if
-
-             
-!             print *,'integrating',i,this%nodes(i+1),dt,this%eta(i)
-!          call fintsdc(i)%eprint()
         end do
-
-!        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
-!        end do
-        
              
-!             print *,'integrating',i,this%nodes(i+1),dt,this%eta(i)
-!          call fintsdc(i)%eprint()
-
-
-
     end subroutine exp_integrate
 
     ! RESIDUAL: compute  residual (generic) ====================================
@@ -407,82 +389,91 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       
       integer :: m
       type(pf_level_t), pointer :: lev
-    
-
       lev => pf%levels(level_index)   !!  Assign level pointer
 
       !>  Compute the integral of F from t_n to t_m at each node
-      call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
-      
+      call lev%ulevel%sweeper%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I, flags)
+
       !> add tau if it exists
       if (level_index < pf%state%finest_level) then
          do m = 1, lev%nnodes-1
             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
-            if (m > 1) then
-               !     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
-            end if
-            
          end do
       end if
-      
+
       !> subtract out the solution value
       do m = 1, lev%nnodes-1      
          call lev%R(m)%copy(lev%I(m))
          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
-         !           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+         call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
       end do
       
 
     end subroutine exp_residual
 
     ! SPREADQ: spread solution (generic) ======================================
-    subroutine exp_spreadq0(this, lev, t0, flags, step)
+    subroutine exp_spreadq0(this, pf,level_index, t0, flags, step)
+      class(pf_exp_t),  intent(inout)  :: this
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
+      real(pfdp),        intent(in   ) :: t0
+      integer, optional,   intent(in)  :: flags, step
 
-        class(pf_exp_t),  intent(inout)  :: this
-        class(pf_level_t), intent(inout) :: lev
-        real(pfdp),        intent(in   ) :: t0
-        integer, optional,   intent(in)  :: flags, step
-
-        call pf_generic_spreadq0(this, lev, t0)
-
+      type(pf_level_t), pointer :: lev
+      lev => pf%levels(level_index)   !!  Assign level pointer
+      
+      call pf_generic_spreadq0(this, pf,level_index, t0)
+      
     end subroutine exp_spreadq0
 
     ! EVALUATE: evaluate the nonlinear term at node m ========================
-    subroutine exp_evaluate(this, lev, t, m, flags, step)
-        ! arguments
-        class(pf_exp_t),   intent(inout) :: this
-        class(pf_level_t), intent(inout) :: lev  !!  Current level
-        real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
-        integer,           intent(in   ) :: m    !!  Node at which to evaluate
-        integer, intent(in), optional    :: flags, step
+    subroutine exp_evaluate(this, pf,level_index, t, m, flags, step)
+      ! arguments
+      class(pf_exp_t),   intent(inout) :: this
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
+      real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
+      integer,           intent(in   ) :: m    !!  Node at which to evaluate
+      integer, intent(in), optional    :: flags, step
 
-        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+      type(pf_level_t), pointer :: lev
+      lev => pf%levels(level_index)   !!  Assign level pointer
+      call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
 
     end subroutine exp_evaluate
 
     ! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================
-    subroutine exp_evaluate_all(this, lev, t, flags, step)
-        ! arguments
-        class(pf_exp_t),  intent(inout)  :: this
-        class(pf_level_t), intent(inout) :: lev   !!  Current level
-        real(pfdp),        intent(in   ) :: t(:)     !!  Array of times at each node
-        integer, intent(in), optional    :: flags, step
+    subroutine exp_evaluate_all(this, pf,level_index, t, flags, step)
+      ! arguments
+      class(pf_exp_t),  intent(inout)  :: this
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
+      real(pfdp),        intent(in   ) :: t(:)     !!  Array of times at each node
+      integer, intent(in), optional    :: flags, step
 
-        call pf_generic_evaluate_all(this, lev, t)
+      type(pf_level_t), pointer :: lev
+      lev => pf%levels(level_index)   !!  Assign level pointer
+
+      call pf_generic_evaluate_all(this,pf, level_index, t)
 
     end subroutine exp_evaluate_all
 
     ! DEALLOCATE: deallocate sweeper variables
-    subroutine exp_destroy(this, lev)
-        ! arguments
-        class(pf_exp_t),   intent(inout) :: this
-        class(pf_level_t), intent(inout) :: lev   !!  Current level
+    subroutine exp_destroy(this, pf,level_index)
+      ! arguments
+      class(pf_exp_t),   intent(inout) :: this
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
+
+      type(pf_level_t), pointer :: lev
+      lev => pf%levels(level_index)   !!  Assign level pointer
+
 
         deallocate(this%w)
         deallocate(this%eta)
         deallocate(this%newF)
-        call lev%ulevel%factory%destroy_array(this%b, lev%index, lev%nnodes,  lev%shape)
-        call lev%ulevel%factory%destroy_array(this%f_old, lev%index, lev%nnodes,  lev%shape)        
+        call lev%ulevel%factory%destroy_array(this%b)
+        call lev%ulevel%factory%destroy_array(this%f_old)
     end subroutine exp_destroy
 
     ! =======================================================================
@@ -522,7 +513,8 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
                 call N_deriv(j)%axpy(this%w(i, k, j), N_eval(k))
             end do
         end do
-    end
+      end subroutine LocalDerivsAtNode
+      
 
     ! =======================================================================
     ! WEIGHTS   Compute coefficients for finite difference approximation for
@@ -577,6 +569,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
                     do k=mn,2,-1
                         W(i,k) = c1*(real(k-1,pfdp)*W(i-1,k-1) - c5*W(i-1,k))/c2;
                     enddo
+
                     W(i,1) = -c1*c5*W(i-1,1)/c2;
                 endif
                 do k=mn,2,-1

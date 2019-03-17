@@ -33,7 +33,6 @@ contains
 
     !> set defaults
     nsteps  = -1
-    nsteps_rk  = -1
 
     lam1       = 1.0_pfdp
     lam2       = -2.0_pfdp

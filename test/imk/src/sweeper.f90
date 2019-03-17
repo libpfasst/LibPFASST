@@ -36,7 +36,6 @@ module sweeper
      procedure :: dexpinv
      procedure :: propagate => propagate_solution
      procedure :: commutator_p
-     procedure :: destroy => destroy_imk_sweeper
   end type imk_sweeper_t
 
 contains
@@ -349,13 +348,13 @@ contains
   end function compute_inf_norm
 
  !> array of ctx data deallocation
- subroutine destroy_imk_sweeper(this, lev)
-   class(imk_sweeper_t), intent(inout) :: this
-   class(pf_level_t),   intent(inout) :: lev
+ subroutine destroy_imk_sweeper(this)
+   class(pf_sweeper_t), intent(inout) :: this
    integer :: io
 
-   deallocate(this%commutator)
-   call this%imk_destroy(lev)
+   class(imk_sweeper_t), pointer :: sweeper
+   sweeper => cast_as_imk_sweeper(this)
+   deallocate(sweeper%commutator)
 
  end subroutine destroy_imk_sweeper
 

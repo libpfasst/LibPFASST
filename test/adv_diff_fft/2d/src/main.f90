@@ -61,17 +61,12 @@ contains
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
-       !>  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(2))
-       pf%levels(l)%shape = [nx(l),ny(l)]
-
        !>  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, pf%levels(l)%shape)
 
+       !>  Set the size of the data on this level (here just one)
+       call pf_level_set_size(pf,l,[nx(l),ny(l)])
 
-       !>  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = nx(l)*ny(l)
     end do
 
     !>  Set up some pfasst stuff
@@ -104,11 +99,6 @@ contains
     call ndarray_destroy(y_0)
     call ndarray_destroy(y_end)
 
-    !> deallocate sweeper stuff
-    do l = 1, pf%nlevels
-       call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
-    end do
-    
     !>  deallocate pfasst structure
     call pf_pfasst_destroy(pf)
 

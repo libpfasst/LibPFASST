@@ -47,19 +47,15 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-          allocate(pf%levels(l)%shape(1))
-          pf%levels(l)%shape(1) = nparticles
-
           allocate(imk_context::pf%levels(l)%ulevel)
           allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
-
-
 
           allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
           call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
                l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
 
+          call pf_level_set_size(pf,l,[nparticles])
           pf%levels(l)%mpibuflen = nparticles * nparticles * 2
       end do
 
@@ -101,6 +97,11 @@ contains
       call zmkpair_destroy(q0)
       call zmkpair_destroy(qend)
 
+      !> deallocate local sweeper stuff
+      do l = 1, pf%nlevels
+         call destroy_imk_sweeper(pf%levels(l)%ulevel%sweeper)
+      end do
+      
       if(pf%rank == 0) print *,'destroying pf'
       call pf_pfasst_destroy(pf)
 
