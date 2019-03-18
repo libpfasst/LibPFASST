@@ -239,7 +239,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         allocate(this%w(nnodes - 1, nnodes, nnodes))
         do i = 1, nnodes - 1
             q = this%nodes - this%nodes(i);
-            call weights(this, real(0.0, pfdp), q, nnodes - 1, this%W(i, :, :));
+            call weights(this, real(0.0, pfdp), q, nnodes - 1, this%W(i,:,:))
         end do
         ! set number of rhs components
         this%npieces = 1
@@ -359,8 +359,13 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         nnodes = lev%nnodes
 
+        do i = 1, nnodes
+           call this%f_old(i)%copy(fSDC(i,1))  ! Save old f
+        end do
+        
         do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-           call LocalDerivsAtNode(this, i, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives
+           call LocalDerivsAtNode(this, i, nnodes, this%f_old, this%b(2:nnodes+1)) ! compute derivatives
+           
            call this%b(1)%copy(qSDC(i))
 
            
@@ -543,43 +548,47 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! Arguments
         class(pf_exp_t),  intent(inout)  :: this
         real(pfdp), intent(in)    :: z
-        real(pfdp), intent(in)    :: x(:)
+        real(pfdp), intent(inout)    :: x(:)
         integer,    intent(in)    :: m
-        real(pfdp), intent(out)   :: W(size(x),m+1)
+        real(pfdp), intent(out)   :: W(m+1,m+1)
 
         ! Variable Declarations
         real(pfdp) :: c1, c2, c3, c4, c5
-        integer  :: i,j,k,n,mn
+        integer  :: ii,i,j,k,n,mn
 
-        c1 = 1.0_pfdp
-        c4 = x(1) - z
-        W  = 0.0_pfdp
-        W(1,1) = 1.0_pfdp
-
-        n = size(x)
-        do i=2,n
-            mn = min(i,m+1)
-            c2 = 1.0_pfdp
-            c5 = c4
-            c4 = x(i) - z
-            do j=1,i-1
-                c3 = x(i) - x(j)
-                c2 = c2*c3;
-                if(j == i-1) then
+        !        do ii = 1, m
+!        x = this%nodes - this%nodes(ii);
+           
+           c1 = 1.0_pfdp
+           c4 = x(1) - z
+           W  = 0.0_pfdp
+           W(1,1) = 1.0_pfdp
+           
+           n = size(x)
+           do i=2,n
+              mn = min(i,m+1)
+              c2 = 1.0_pfdp
+              c5 = c4
+              c4 = x(i) - z
+              do j=1,i-1
+                 c3 = x(i) - x(j)
+                 c2 = c2*c3;
+                 if(j == i-1) then
                     do k=mn,2,-1
-                        W(i,k) = c1*(real(k-1,pfdp)*W(i-1,k-1) - c5*W(i-1,k))/c2;
+                       W(i,k) = c1*(real(k-1,pfdp)*W(i-1,k-1) - c5*W(i-1,k))/c2;
                     enddo
-
+                    
                     W(i,1) = -c1*c5*W(i-1,1)/c2;
-                endif
-                do k=mn,2,-1
+                 endif
+                 do k=mn,2,-1
                     W(j,k) = (c4*W(j,k) - real(k-1,pfdp)*W(j,k-1))/c3;
-                enddo
-                W(j,1) = c4*W(j,1)/c3;
-            enddo
-            c1 = c2;
-        enddo
-
+                 enddo
+                 W(j,1) = c4*W(j,1)/c3;
+              enddo
+              c1 = c2;
+           enddo
+!        end do
+        
 end subroutine weights
 
 end module pf_mod_exp
