@@ -111,8 +111,25 @@ contains
           call lev%I(m)%setval(0.0_pfdp)
        end do
        !  Add terms from prefious iteration
-       if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
-       if (this%implicit) call pf_apply_mat(lev%I, dt, this%QdiffI, lev%F(:,2), .false.)
+!       if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
+!       if (this%implicit) call pf_apply_mat(lev%I, dt, this%QdiffI, lev%F(:,2), .false.)
+       ! compute integrals and add fas correction
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%setval(0.0_pfdp)
+          if (this%explicit) then
+             do n = 1, lev%nnodes
+                call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
+             end do
+          end if
+          if (this%implicit) then
+             do n = 1, lev%nnodes
+                call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
+             end do
+          end if
+          if (allocated(lev%tauQ)) then
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+          end if
+       end do
 
        !  Add the tau FAS correction
        if (level_index < pf%state%finest_level) then
@@ -125,6 +142,7 @@ contains
        end if
        
        !  Recompute the first function value if this is first sweep
+       print *,this%explicit,this%implicit
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
           if (this%explicit) &
