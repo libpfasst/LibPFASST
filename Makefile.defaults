@@ -7,7 +7,7 @@ CC = mpicc
 
 AR = ar rcs
 
-DEBUG = FALSE
+DEBUG = TRUE
 MKVERBOSE = FALSE
 
 #  Set some compiler flags
