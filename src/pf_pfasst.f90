@@ -95,7 +95,7 @@ contains
     allocate(pf%levels(level_index)%shape(size(shape_in)))
     pf%levels(level_index)%shape = shape_in
     pf%levels(level_index)%mpibuflen = product(shape_in)
-    print *,'set length',shape_in,pf%levels(level_index)%mpibuflen
+    print *,'level set size',shape_in,pf%levels(level_index)%mpibuflen
     
   end subroutine pf_level_set_size
   

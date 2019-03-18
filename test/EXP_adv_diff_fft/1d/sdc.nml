@@ -19,7 +19,10 @@
      nnodes =  5
 
      nsweeps_pred= 1 
-     nsweeps= 1 
+     nsweeps= 1
+     save_residuals=.false.
+     save_timings=.false.
+     
 /
 
 !  Now define the local variables you need

@@ -26,6 +26,10 @@
 
      !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
      Vcycle=.TRUE.
+
+     save_residuals=.false.
+     save_timings=.false.
+
 /
 
 !  Now define the local variables you need
