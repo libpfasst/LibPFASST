@@ -287,11 +287,19 @@ contains
     
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
+       do m = 1, lev%nnodes
+          if (this%explicit) &
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,1))
+          if (this%implicit) &
+               call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,2))
+       end do
     end do
+       
 
-    if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
-    if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
+!    if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
+!    if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
   end subroutine imex_integrate
+
 
   !> Subroutine to compute  Residual
   subroutine imex_residual(this, pf, level_index, dt, flags)
