@@ -603,7 +603,7 @@ contains
   integer :: level_index
   ALLOCATE(pf%results(pf%nlevels))
   do level_index = 1,pf%nlevels
-    call  initialize_results(pf%results(level_index),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(level_index),pf%rank,level_index,pf%outdir)
+     call  initialize_results(pf%results(level_index),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(level_index),pf%rank,level_index,pf%outdir,pf%save_residuals)
   end do
   end subroutine pf_initialize_results
 
@@ -623,7 +623,7 @@ contains
     
     if (pf%save_errors) then
        do level_index = 1,pf%nlevels
-!          call  dump_errors(pf%results(level_index))
+          call  dump_errors(pf%results(level_index))
        end do
     end if
     

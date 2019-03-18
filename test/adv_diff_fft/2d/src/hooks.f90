@@ -30,7 +30,7 @@ contains
     
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
          state%step+1, state%iter,level%index, maxerr,level%residual
-    call flush
+    call flush(6)
     call ndarray_destroy(y_exact)    
   end subroutine echo_error
 
@@ -42,7 +42,7 @@ contains
 
     print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i3.3," level: ",i1.1," resid: ",es18.10e4)', &
          state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, level%residual
-    call flush
+    call flush(6)
   end subroutine echo_residual
 
 end module hooks

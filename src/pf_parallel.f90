@@ -399,7 +399,7 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
-!       pf%state%finest_level = 3
+
 
        if (k > 1) then
           if (nproc > 1)  then

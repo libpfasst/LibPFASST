@@ -225,7 +225,7 @@ module pf_mod_dtype
      integer :: rank
      integer :: level
 
-     character(len=512) :: datpath
+     character(len=128) :: datpath
      
      procedure(pf_results_p), pointer, nopass :: dump 
      procedure(pf_results_p), pointer, nopass :: destroy 
