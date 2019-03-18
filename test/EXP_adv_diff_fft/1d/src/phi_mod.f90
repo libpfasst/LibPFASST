@@ -10,7 +10,7 @@ module phi_mod
     use pf_mod_dtype, only:  pfdp
     implicit none
     real(pfdp), parameter :: PI = 3.1415926535897932_pfdp
-    complex(pfdp), parameter :: II = complex(0.0_pfdp,1.0_pfdp)
+    complex(pfdp), parameter :: II = cmplx(0.0_pfdp,1.0_pfdp)
      
     ! Cauchy Integral Settings
     real(pfdp),   parameter :: c_tol = 1.0_pfdp         ! Smallest Lambda for contour integral
@@ -179,7 +179,7 @@ module phi_mod
                 enddo
                 ! remove imaginary roundoff if L(i) is real
                 if(aimag(Li) == 0.0_pfdp) then
-                  P(:,i) = REALPART(P(:,i))
+                  P(:,i) = REAL(P(:,i))
                 endif
             end if
         end do
