@@ -29,7 +29,9 @@
      Vcycle=.TRUE.
 
 
-     use_Sform=.true.
+     save_residuals=.false.
+     save_timings=.false.
+     use_Sform=.false.
 /
 
 !  Now define the local variables you need
