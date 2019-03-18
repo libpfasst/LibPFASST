@@ -289,7 +289,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              call LocalDerivsAtNode(this, j, nnodes, this%f_old, this%b(2:nnodes+1))  ! phi expansion for exponential picard integral              
+              call LocalDerivsAtNode(this, j, nnodes, this%f_old, this%b)  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
               print *,'axpy 1'
               call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
@@ -367,7 +367,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         end do
         
         do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-           call LocalDerivsAtNode(this, i, nnodes, this%f_old, this%b(2:nnodes+1)) ! compute derivatives
+           call LocalDerivsAtNode(this, i, nnodes, this%f_old, this%b) ! compute derivatives
            
            call this%b(1)%copy(qSDC(i))
 
@@ -520,11 +520,11 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         integer :: j, k
 
         ! form nonlinear derivative vectors b
+        print *,'axpy 10',nnodes,size(N_deriv),size(N_eval)
         do j = 1, nnodes                                                ! loop over derivatives j = 1 ... n
-            call N_deriv(j)%setval(real(0.0, pfdp))
+            call N_deriv(j+1)%setval(real(0.0, pfdp))
             do k = 1, nnodes                                            ! look over nodes k = 1 ... n
-               print *,'axpy 10'
-                call N_deriv(j)%axpy(this%w(i, k, j), N_eval(k))
+                call N_deriv(j+1)%axpy(this%w(i, k, j), N_eval(k))
             end do
         end do
       end subroutine LocalDerivsAtNode
