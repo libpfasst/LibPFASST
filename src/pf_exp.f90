@@ -289,7 +289,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            do j = 1, nnodes - 1
               t = t0 + dt * this%eta(j)
               ! form b vectors
-              call LocalDerivsAtNode(this, j, nnodes, this%f_old(:), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral              
+              call LocalDerivsAtNode(this, j, nnodes, this%f_old, this%b(2:nnodes+1))  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
 
               call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
