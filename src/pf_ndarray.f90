@@ -249,7 +249,7 @@ contains
   
 
   function get_array2d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:)
 
@@ -261,7 +261,7 @@ contains
   
 
   function get_array3d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:,:)
 

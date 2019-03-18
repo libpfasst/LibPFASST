@@ -247,7 +247,7 @@ module pf_mod_zndarray
   
 
   function get_array2d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     complex(pfdp), pointer :: r(:,:)
 
@@ -259,7 +259,7 @@ module pf_mod_zndarray
   
 
   function get_array3d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     complex(pfdp), pointer :: r(:,:,:)
 
