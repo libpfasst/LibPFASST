@@ -361,7 +361,7 @@ contains
 
   
   function get_array2d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:)
     integer                :: which
@@ -386,7 +386,7 @@ contains
   end function get_array2d_oc
   
   function get_array3d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:,:)
     integer                :: which

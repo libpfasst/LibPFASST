@@ -20,19 +20,19 @@ contains
     integer :: istat
     
     !  Set up the directory to dump results
-    istat= system('mkdir -p ' // trim(datpath))
-    this%datpath= trim(datpath) // '/'
-    
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
-
-    write (fname, "(A17,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
-    fullname = trim(this%datpath) // trim(fname)
-    
-    if (rank_in == 0) then
-       open(unit=123, file=trim(fullname), form='formatted')
-       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nsweeps_in
-       close(unit=123)
-    end if
+!    istat= system('mkdir -p ' // trim(datpath))
+!!$    this%datpath= trim(datpath) // '/'
+!!$    
+!!$    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
+!!$
+!!$    write (fname, "(A17,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
+!!$    fullname = trim(this%datpath) // trim(fname)
+!!$    
+!!$    if (rank_in == 0) then
+!!$       open(unit=123, file=trim(fullname), form='formatted')
+!!$       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nsweeps_in
+!!$       close(unit=123)
+!!$    end if
     
     this%dump => dump_results
     this%destroy => destroy_results
@@ -61,7 +61,7 @@ contains
 
     
     datpath = trim(this%datpath) // 'residuals'
-    istat= system('mkdir -p ' // trim(datpath))
+!    istat= system('mkdir -p ' // trim(datpath))
     
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_results")
 
@@ -89,7 +89,7 @@ contains
 
     datpath = trim(pf%outdir) // 'runtimes'
 
-    istat= system('mkdir -p '// trim(datpath))
+!    istat= system('mkdir -p '// trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 
     write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.dat'    
