@@ -279,8 +279,8 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .true.    !!  If true, timings are saved and  output
+     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
      logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
