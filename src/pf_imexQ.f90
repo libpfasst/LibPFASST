@@ -132,15 +132,15 @@ contains
        end do
 
        !  Add the tau FAS correction
-       if (level_index < pf%state%finest_level) then
-          do m = 1, lev%nnodes-1
-             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
-             if (m>1 .and. pf%use_Sform) then
-                call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1))
-             end if
-          end do
-       end if
-       
+!!$       if (level_index < pf%state%finest_level) then
+!!$          do m = 1, lev%nnodes-1
+!!$             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
+!!$             if (m>1 .and. pf%use_Sform) then
+!!$                call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1))
+!!$             end if
+!!$          end do
+!!$       end if
+!!$       
        !  Recompute the first function value if this is first sweep
        print *,this%explicit,this%implicit
        if (k .eq. 1) then
