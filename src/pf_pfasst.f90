@@ -170,11 +170,9 @@ contains
     lev%residual = -1.0_pfdp
 
 
-    !> (re)allocate tauQ (may to need create/destroy tauQ dynamically  when doing AMR)
+    !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
        call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%shape)
-    else if ((lev%index >= pf%nlevels) .and. (allocated(lev%tauQ))) then
-       deallocate(lev%tauQ)
     end if
 
     !> skip the rest if we're already allocated
