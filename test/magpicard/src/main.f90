@@ -41,16 +41,15 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-          allocate(pf%levels(l)%shape(2))
-          pf%levels(l)%shape = nparticles
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
+
 
           allocate(magpicard_context::pf%levels(l)%ulevel)
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, &
-               l, pf%qtype, pf%debug)
+          call pf_level_set_size(pf,l,[nparticles,nparticles])          
+          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
+
 
           if (pf%qtype == 5) then
             pf%levels(l)%nnodes = nnodes(l)+2
@@ -88,8 +87,7 @@ contains
          call dmat_tfinal%write_to_disk('sol_final') !necessary for pfasst.py
          print *,'solution at end of run'
          if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
-          call dmat_tfinal%eprint() !only for debug purpose         
-
+!         call dmat_tfinal%eprint() !only for debug purpose         
       endif
 
       call zndarray_destroy(dmat_t0)

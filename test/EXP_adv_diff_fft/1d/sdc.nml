@@ -1,0 +1,42 @@
+!
+!  Test parameters for a single level example
+!
+
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 1
+
+    !  These are internal pfasst variables that can be reset
+    niters = 10   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1   
+   
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1.d-12
+     rel_res_tol = 1.d-12
+
+     nnodes =  5
+
+     nsweeps_pred= 1 
+     nsweeps= 1
+     save_residuals=.false.
+     save_timings=.false.
+     
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+    nx =  32
+    nu = 0.02
+    v=1.0
+
+    Tfin = 1.0
+    nsteps = 32
+    nprob = 1
+
+    ! controls splitting (1 treats u_xx exponentially and u_x implicitly, 2 treats u_xx and u_x exponentially)
+    splitting = 1
+
+/

@@ -28,7 +28,7 @@ contains
     integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
-    pf%outdir = ""
+    pf%outdir = "dat/"
 
     !> gather some input from a file and command line
     read_cmd = .true.
@@ -47,7 +47,6 @@ contains
     !>  Set up the mpi communicator
     call pf_mpi_setup(pf%comm, pf,ierr) 
     if (ierr /=0 )  call pf_stop(__FILE__,__LINE__,"ERROR: mpi_setup failed")
-    
 
     if (pf%rank < 0) then
        call pf_stop(__FILE__,__LINE__,&
@@ -87,6 +86,19 @@ contains
 
   end subroutine pf_pfasst_create
 
+  !> Setup both the PFASST object and the comm object
+  subroutine pf_level_set_size(pf,level_index,shape_in)
+    type(pf_pfasst_t), intent(inout) :: pf   !!  Main pfasst structure
+    integer, intent(in)  ::  level_index
+    integer, intent(in)  ::  shape_in(:)
+
+    allocate(pf%levels(level_index)%shape(size(shape_in)))
+    pf%levels(level_index)%shape = shape_in
+    pf%levels(level_index)%mpibuflen = product(shape_in)
+    print *,'level set size',shape_in,pf%levels(level_index)%mpibuflen
+    
+  end subroutine pf_level_set_size
+  
 
   !> Setup both the PFASST object and the comm object
   subroutine pf_pfasst_setup(pf)
@@ -99,8 +111,10 @@ contains
     
    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
-       call pf_level_setup(pf, pf%levels(l))
+       call pf_level_setup(pf, l)
     end do
+    !>  set default finest level
+    pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
        lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
@@ -134,14 +148,18 @@ contains
   !> Setup (allocate) PFASST level
   !! If the level is already setup, calling this again will allocate
   !! (or deallocate) tauQ appropriately.
-  subroutine pf_level_setup(pf, lev)
+  subroutine pf_level_setup(pf, level_index)
     use pf_mod_quadrature
-    type(pf_pfasst_t), intent(in   )         :: pf   !!  Main pfasst structure
-    class(pf_level_t), intent(inout), target :: lev  !!  Level to set up
+    type(pf_pfasst_t), intent(inout),target :: pf   !!  Main pfasst structure
+    integer,           intent(in)    :: level_index  !!  level to set up
+
+    class(pf_level_t),  pointer :: lev  !!  Level to set up
 
     integer :: mpibuflen, nnodes, npieces, nnodes0
     integer :: i,ierr
 
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
     !> do some sanity checks
     mpibuflen  = lev%mpibuflen
     if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',mpibuflen)
@@ -152,11 +170,9 @@ contains
     lev%residual = -1.0_pfdp
 
 
-    !> (re)allocate tauQ (may to need create/destroy tauQ dynamically  when doing AMR)
+    !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
        call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%shape)
-    else if ((lev%index >= pf%nlevels) .and. (allocated(lev%tauQ))) then
-       deallocate(lev%tauQ)
     end if
 
     !> skip the rest if we're already allocated
@@ -185,7 +201,7 @@ contains
 
     !>  initialize sweeper
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
-    call lev%ulevel%sweeper%initialize(lev)
+    call lev%ulevel%sweeper%initialize(pf,level_index)
 
     
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
@@ -222,10 +238,12 @@ contains
 
     !>  destroy all levels
     do l = 1, pf%nlevels
-       call pf_level_destroy(pf%levels(l),pf%nlevels)
+       call pf_level_destroy(pf,l)
+
     end do
+    
     !>  deallocate pfasst pointer arrays
-!    call pf%destroy_results()
+
     deallocate(pf%levels)
     deallocate(pf%hooks)
     deallocate(pf%nhooks)
@@ -236,13 +254,14 @@ contains
 
 
   !> Deallocate PFASST level
-  subroutine pf_level_destroy(lev,nlevels)
+  subroutine pf_level_destroy(pf,level_index)
     use pf_mod_quadrature
-    class(pf_level_t), intent(inout) :: lev      !!  level to destroy
-    integer                          :: nlevels  !!  number of pfasst levels
-
+    type(pf_pfasst_t), intent(inout),target :: pf  !!  Main pfasst structure    
+    integer, intent(in)              :: level_index
 
     integer                          :: npieces  !!  local copy of number of function pieces
+    class(pf_level_t), pointer :: lev    !!  points to current level    
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     if (.not. lev%allocated) return
 
@@ -260,23 +279,23 @@ contains
     !> deallocate solution and function storage
     npieces = lev%ulevel%sweeper%npieces
 
-    if ((lev%index < nlevels) .and. allocated(lev%tauQ)) then
-       call lev%ulevel%factory%destroy_array(lev%tauQ, lev%nnodes-1, lev%index,   lev%shape)
+    if ((lev%index < pf%nlevels) .and. allocated(lev%tauQ)) then
+       call lev%ulevel%factory%destroy_array(lev%tauQ)
     end if
 
-    call lev%ulevel%factory%destroy_array(lev%Q, lev%nnodes, lev%index,   lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%Fflt, lev%nnodes*npieces, lev%index,   lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%I, lev%nnodes-1, lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%R, lev%nnodes-1, lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_array(lev%pFflt, lev%nnodes*npieces, lev%index, lev%shape)
-    if (lev%index < nlevels) then
-       call lev%ulevel%factory%destroy_array(lev%pQ, lev%nnodes, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_array(lev%Q)
+    call lev%ulevel%factory%destroy_array(lev%Fflt)
+    call lev%ulevel%factory%destroy_array(lev%I)
+    call lev%ulevel%factory%destroy_array(lev%R)
+    call lev%ulevel%factory%destroy_array(lev%pFflt)
+    if (lev%index < pf%nlevels) then
+       call lev%ulevel%factory%destroy_array(lev%pQ)
     end if
-    call lev%ulevel%factory%destroy_single(lev%qend, lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_single(lev%q0, lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_single(lev%qend)
+    call lev%ulevel%factory%destroy_single(lev%q0)
 
     !> destroy the sweeper 
-    call lev%ulevel%sweeper%destroy(lev)
+    call lev%ulevel%sweeper%destroy(pf,level_index)
 
     !> deallocate misc. arrays
     if (allocated(lev%shape)) then
@@ -289,7 +308,8 @@ contains
 
     if (allocated(lev%rmat)) then
        deallocate(lev%rmat)
-   end if
+    end if
+
   end subroutine pf_level_destroy
 
   !>  Subroutine to read pfasst options from file and command line
@@ -308,25 +328,25 @@ contains
     real(pfdp) :: abs_res_tol, rel_res_tol
     logical    :: PFASST_pred, RK_pred, pipeline_pred
     integer    ::  nsweeps_burn, q0_style, taui0
-    logical    ::  Vcycle,Finterp, use_LUq
+    logical    ::  Vcycle,Finterp, use_LUq, use_Sform
     logical    :: debug, use_rk_stepper
     logical    :: save_timings,echo_timings, save_residuals, save_errors
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
     ! stuff for reading the command line
     integer, parameter :: un = 9
-    integer            :: i, ios
-    character(len=32)  :: arg
+    integer            :: i, ios,stat
+    character(len=128)  :: arg
     character(len=255) :: istring  ! stores command line argument
     character(len=255) :: message  ! use for i/o error messages
-    character(len=512) :: outdir
+    character(len=255) :: outdir
 
     
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, echo_timings, debug, save_timings,save_residuals, save_errors, use_rk_stepper
-    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, echo_timings, debug, save_timings,save_residuals, save_errors, use_rk_stepper
+    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
 
     !> set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
@@ -345,6 +365,7 @@ contains
     Vcycle       = pf%Vcycle
     Finterp      = pf%Finterp
     use_LUq      = pf%use_LUq
+    use_Sform    = pf%use_Sform
     taui0        = pf%taui0
     outdir       = pf%outdir
     debug        = pf%debug
@@ -373,7 +394,7 @@ contains
     if (read_cmd) then
        i = 0
        do
-          call get_command_argument(i, arg)
+          call get_command_argument(i, arg,status=stat)
           if (len_trim(arg) == 0) exit
           if (i > 0) then
              istring="&pf_params " // trim(arg) // " /"
@@ -400,6 +421,7 @@ contains
     pf%Vcycle       = Vcycle
     pf%Finterp      = Finterp
     pf%use_LUq      = use_LUq
+    pf%use_Sform    = use_Sform
     pf%taui0        = taui0
 
     pf%outdir       = outdir
@@ -492,6 +514,11 @@ contains
     else
        write(un,*) 'Implicit matrix is backward Euler  '
     end if
+    if (pf%use_Sform) then
+       write(un,*) 'The Smat form of stepping is being done'
+    else
+       write(un,*) 'The Qmat form of stepping is being done'       
+    end if
     if (pf%Vcycle) then
        write(un,*) 'V-cycling is on'
     else
@@ -516,6 +543,7 @@ contains
 
     if (pf%debug) write(un,*) 'Debug mode is on '
 
+    write(un,*) 'Output directory ', pf%outdir    
     write(un,*) ''
 
     if (present(show_mats_opt)) show_mats=show_mats_opt
@@ -545,22 +573,21 @@ contains
     real(pfdp), intent(out) :: tmat(0:f_nnodes-1,0:c_nnodes-1)  !!  Interpolation matrix to compute
     
     integer    :: i, j, k
-    real(pfdp) :: xi, num, den
+    real(pfqp) :: xi, num, den
     
     do i = 0, f_nnodes-1
-       xi = f_nodes(i)
+       xi = real(f_nodes(i), pfqp)
        
        do j = 0, c_nnodes-1
-          den = 1.0_pfdp
-          num = 1.0_pfdp
+          den = 1.0_pfqp
+          num = 1.0_pfqp
           
           do k = 0, c_nnodes-1
              if (k == j) cycle
-             den = den * (c_nodes(j) - c_nodes(k))
-             num = num * (xi        - c_nodes(k))
+             den = den * real(c_nodes(j) - c_nodes(k),pfqp)
+             num = num * real(xi        - c_nodes(k),pfqp)
           end do
-          
-          tmat(i, j) = num/den
+          tmat(i, j) = real(num/den,pfdp)
        end do
     end do
   end subroutine pf_time_interpolation_matrix
@@ -571,30 +598,30 @@ contains
   
   type(pf_pfasst_t), intent(inout)           :: pf
 
-  integer :: lev_ind
+  integer :: level_index
   ALLOCATE(pf%results(pf%nlevels))
-  do lev_ind = 1,pf%nlevels
-    call  initialize_results(pf%results(lev_ind),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(lev_ind),pf%rank,lev_ind)
+  do level_index = 1,pf%nlevels
+     call  initialize_results(pf%results(level_index),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(level_index),pf%rank,level_index,pf%outdir,pf%save_residuals)
   end do
   end subroutine pf_initialize_results
-  
+
 
   !>  Subroutine to write out run parameters
   subroutine pf_dump_results(pf)
     
     type(pf_pfasst_t), intent(inout)           :: pf
     
-    integer :: lev_ind
+    integer :: level_index
     
     if (pf%save_residuals) then
-       do lev_ind = 1,pf%nlevels
-          call  dump_results(pf%results(lev_ind))
+       do level_index = 1,pf%nlevels
+          call  dump_results(pf%results(level_index))
        end do
     end if
     
     if (pf%save_errors) then
-       do lev_ind = 1,pf%nlevels
-!          call  dump_errors(pf%results(lev_ind))
+       do level_index = 1,pf%nlevels
+          call  dump_errors(pf%results(level_index))
        end do
     end if
     
@@ -604,6 +631,20 @@ contains
   
 
 end subroutine pf_dump_results
+
+!>  Subroutine to destroy the results
+  subroutine pf_destroy_results(pf)
+    
+    type(pf_pfasst_t), intent(inout)           :: pf
+    
+    integer :: level_index
+    
+       do level_index = 1,pf%nlevels
+          call  destroy_results(pf%results(level_index))
+       end do
+  
+
+end subroutine pf_destroy_results
   
     
   

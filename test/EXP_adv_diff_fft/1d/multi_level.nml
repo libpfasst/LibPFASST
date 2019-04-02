@@ -1,3 +1,4 @@
+
 !
 !  Test parameters for multi-level imex
 !
@@ -6,12 +7,11 @@
 &PF_PARAMS
     nlevels  = 2   !  must be set
 
-    niters = 50   !  default is 5
-    nnodes =     3 5 
+    niters = 32   !  default is 5
+    nnodes =    3 5 
 
-    use_proper_nodes=.false.
-    nsweeps_pred= 1 1
-    nsweeps= 1 1 
+    nsweeps_pred= 1 1 1
+    nsweeps= 1 1 1
     
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
     qtype  = 1   
@@ -20,7 +20,6 @@
      abs_res_tol = 1.d-12
      rel_res_tol = 1.d-12
 
-
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
      pipeline_pred =  .false.
      PFASST_pred = .true.
@@ -28,23 +27,24 @@
      !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
      Vcycle=.TRUE.
 
-
      save_residuals=.false.
      save_timings=.false.
-     use_Sform=.false.
+
 /
 
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  16 32 32
+    nx =  16 32 
     nu = 0.02
     v=1.0
 
     Tfin = 1.0
     nsteps = 32
 
-    imex_stat=2
     nprob = 1
+
+! controls splitting (1 treats u_xx exponentially and u_x implicitly, 2 treats u_xx and u_x exponentially)
+    splitting = 1
 
 /

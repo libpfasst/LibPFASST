@@ -3,7 +3,7 @@ module feval
   use pf_mod_ndarray_oc
   use pf_mod_restrict
   use pf_mod_imexQ_oc
-  use pf_mod_misdcQ_oc
+!  use pf_mod_misdcQ_oc
   use probin
   use solutions
   use pf_mod_fftpackage
@@ -28,6 +28,8 @@ module feval
 
      procedure :: f_eval
      procedure :: f_comp
+     procedure :: initialize
+     procedure :: destroy
   end type ad_sweeper_t
 
 contains
@@ -83,7 +85,6 @@ contains
          fvec => get_array1d_oc(f, 1)
          if (do_imex .eq. 1) then
             yvec  => get_array1d_oc(y, 1)
-!             print *, yvec
             fvec = this%u(idx, :) - (1.0_pfdp/3.0_pfdp*yvec*yvec-1.0_pfdp)*yvec
          else
             fvec = this%u(idx, :)
@@ -277,24 +278,36 @@ contains
     !work%ydesired = 0
   end subroutine sweeper_setup
 
-
-  subroutine sweeper_destroy(sweeper)
-    class(pf_sweeper_t), intent(inout) :: sweeper
-
-    class(ad_sweeper_t), pointer :: this
-    this => as_ad_sweeper(sweeper) 
+  subroutine initialize(this, pf,level_index)
+    class(ad_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout),target :: pf
+    integer,             intent(in)    :: level_index
     
-    deallocate(this%ddx)
-    deallocate(this%lap)
+    integer  :: nx, nnodes
+    nx=pf%levels(level_index)%shape(1)
+    nnodes=pf%levels(level_index)%nnodes
 
-
-    deallocate(this%u)
-    deallocate(this%ydesired)
-
-    call this%fft_tool%fft_destroy()
-    deallocate(this%fft_tool)  
+    !  Call the imex sweeper initialize
+    call this%imexQ_oc_initialize(pf,level_index)    
     
-  end subroutine sweeper_destroy
+    this%use_LUq = .true.
+
+    allocate(this%fft_tool)
+    call this%fft_tool%fft_setup([nx],1,[sizex])
+
+    ! create operators
+    allocate(this%ddx(nx))
+    allocate(this%lap(nx))
+    call this%fft_tool%make_lap_1d(this%lap)
+    call this%fft_tool%make_deriv_1d(this%ddx) 
+
+    ! allocate control and desired state
+    allocate(this%u(nnodes,nx))
+    allocate(this%ydesired(nnodes,nx))
+    !work%u = 0
+    !work%ydesired = 0
+  end subroutine initialize
+  
 
 
   subroutine initialize_oc(s, t0, dt, nodes, nvars, alpha)
@@ -315,6 +328,26 @@ contains
     end do
     sweeper%alpha = alpha
   end subroutine initialize_oc
+
+  subroutine destroy(this,pf,level_index)
+    class(ad_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
+    !> Destroy imex sweeper
+    call this%imexQ_oc_destroy(pf,level_index)
+
+    !> Destroy local stuff
+    deallocate(this%ddx)
+    deallocate(this%lap)
+
+    deallocate(this%u)
+    deallocate(this%ydesired)
+
+    call this%fft_tool%fft_destroy()
+    deallocate(this%fft_tool)  
+    
+  end subroutine destroy
 
 
 
@@ -642,9 +675,9 @@ contains
       allocate(tG(pf%levels(l-1)%nnodes))
       tF = pf%state%t0 + pf%state%dt*pf%levels(l)%nodes
       tG = pf%state%t0 + pf%state%dt*pf%levels(l-1)%nodes
-      call restrict_sdc(pf%levels(l), pf%levels(l-1), pf%levels(l)%Q, pf%levels(l-1)%Q, .false. ,tF, which)
+      call restrict_ts(pf%levels(l), pf%levels(l-1), pf%levels(l)%Q, pf%levels(l-1)%Q,tF, which)
 
-        call pf%levels(l-1)%ulevel%sweeper%evaluate_all(pf%levels(l-1), tG, which)
+        call pf%levels(l-1)%ulevel%sweeper%evaluate_all(pf,l-1, tG, which)
       deallocate(tF)
       deallocate(tG)
     end do

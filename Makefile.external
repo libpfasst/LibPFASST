@@ -1,8 +1,7 @@
 #
 # fftw3
 #
-
-FFTW3 = fftw-3.3.3
+FFTW3 = fftw-3.3.8
 FFTW3_CONFIG = --enable-openmp --enable-threads   --enable-sse2 # --enable-shared  --enable-long-double
 
 fftw3: $(FFTW3).tar.gz
@@ -12,7 +11,7 @@ fftw3: $(FFTW3).tar.gz
 	cd $(FFTW3) && make install
 
 $(FFTW3).tar.gz:
-	wget http://www.fftw.org/$(FFTW3).tar.gz
+	wget http://fftw.org/$(FFTW3).tar.gz
 
 
 #

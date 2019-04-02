@@ -1,17 +1,17 @@
-FOBJ=./build/pfasst.o ./build/pf_comm.o ./build/pf_dtype.o ./build/pf_exp.o ./build/pf_hooks.o ./build/pf_imexQ.o ./build/pf_imexQ_oc.o ./build/pf_imk.o ./build/pf_interpolate.o ./build/pf_magnus_picard.o ./build/pf_misdcQ.o ./build/pf_misdcQ_oc.o ./build/pf_ndarray.o ./build/pf_ndarray-oc.o ./build/pf_ndsysarray.o ./build/pf_parallel.o ./build/pf_parallel_oc.o ./build/pf_pfasst.o ./build/pf_quadrature.o ./build/pf_restrict.o ./build/pf_results.o ./build/pf_rkstepper.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_verlet.o ./build/pf_zndsysarray.o ./build/pf_zndarray.o ./build/pf_fftpack.o ./build/pf_mpi.o 
+FOBJ=./build/pfasst.o ./build/pf_comm.o ./build/pf_dtype.o ./build/pf_hooks.o ./build/pf_exp.o ./build/pf_imexQ.o ./build/pf_imexQ_oc.o ./build/pf_imk.o ./build/pf_interpolate.o ./build/pf_magnus_picard.o ./build/pf_misdcQ.o ./build/pf_misdcQ_oc.o ./build/pf_ndarray.o ./build/pf_ndarray-oc.o ./build/pf_ndsysarray.o ./build/pf_parallel.o ./build/pf_parallel_oc.o ./build/pf_pfasst.o ./build/pf_quadrature.o ./build/pf_restrict.o ./build/pf_results.o ./build/pf_rkstepper.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_verlet.o ./build/pf_zndsysarray.o ./build/pf_zndarray.o ./build/pf_fftpack.o ./build/pf_mpi.o 
 
 foo: $(FOBJ)
 	$(FC) -o $@ $(FFLAGS) $(LDFLAGS) $(FOBJ) $(LIBS)
 
-./build/pfasst.o : src/pfasst.f90 ./build/pf_imexQ.o ./build/pf_mpi.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_results.o ./build/pf_hooks.o ./build/pf_dtype.o 
+./build/pfasst.o : src/pfasst.f90 ./build/pf_mpi.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_results.o ./build/pf_hooks.o ./build/pf_dtype.o 
 ./build/pf_comm.o : src/pf_comm.f90 ./build/pf_pfasst.o 
 ./build/pf_dtype.o : src/pf_dtype.f90 
-./build/pf_exp.o : src/pf_exp.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_hooks.o : src/pf_hooks.f90 ./build/pf_timer.o ./build/pf_dtype.o 
+./build/pf_exp.o : src/pf_exp.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imexQ.o : src/pf_imexQ.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imexQ_oc.o : src/pf_imexQ_oc.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imk.o : src/pf_imk.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_interpolate.o : src/pf_interpolate.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_restrict.o ./build/pf_dtype.o 
+./build/pf_interpolate.o : src/pf_interpolate.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_magnus_picard.o : src/pf_magnus_picard.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_misdcQ.o : src/pf_misdcQ.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_misdcQ_oc.o : src/pf_misdcQ_oc.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
@@ -22,7 +22,7 @@ foo: $(FOBJ)
 ./build/pf_parallel_oc.o : src/pf_parallel_oc.f90 ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
 ./build/pf_pfasst.o : src/pf_pfasst.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_results.o ./build/pf_utils.o ./build/pf_mpi.o ./build/pf_dtype.o 
 ./build/pf_quadrature.o : src/pf_quadrature.f90 ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
+./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_results.o : src/pf_results.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_rkstepper.o : src/pf_rkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_dtype.o 

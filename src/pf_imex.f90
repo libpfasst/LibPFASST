@@ -22,7 +22,7 @@ module pf_mod_imex
      procedure :: spreadq0     => imex_spreadq0
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy      => imex_destroy
-     procedure :: imex_destroy
+!     procedure :: imex_destroy
   end type pf_imex_t
 
   interface
@@ -145,7 +145,8 @@ contains
   subroutine imex_destroy(this, lev)
     class(pf_imex_t),  intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev
-    
+
+    print *,'destroy imex'
     deallocate(this%SdiffE)
     deallocate(this%SdiffI)
   end subroutine imex_destroy

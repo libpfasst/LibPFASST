@@ -8,7 +8,7 @@ module pf_mod_comm
 
   implicit none
 contains
-  
+
   !>  Subroutine to post a receive request for a new initial condition to be received after doing some work
   subroutine pf_post(pf, level, tag, direction)
     type(pf_pfasst_t), intent(in)    :: pf
@@ -20,7 +20,7 @@ contains
 
 
     if (pf%comm%nproc .eq. 1) return
-    
+
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
     if (pf%debug) print*,'DEBUG --', pf%rank, 'is beginning pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
@@ -35,14 +35,14 @@ contains
        call pf%comm%post(pf, level, tag, ierror, source)
     end if
 
-    
+
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during post', ierror
       stop "pf_parallel:pf_post"
    endif
-   if (pf%debug) print*,'DEBUG --', pf%rank, 'is leaving pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag     
+   if (pf%debug) print*,'DEBUG --', pf%rank, 'is leaving pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
   end subroutine pf_post
-  
+
   !>  Subroutine to send this processor's convergence status to the next processor
   subroutine pf_send_status(pf, tag, direction)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -53,7 +53,7 @@ contains
     integer ::  ierror,dest
 
     if (pf%comm%nproc .eq. 1) return
-    
+
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
 
@@ -63,7 +63,7 @@ contains
     ierror = 0
     istatus = pf%state%status
     if (dir == 1) then
-       dest=pf%rank+1       
+       dest=pf%rank+1
     elseif (dir == 2) then
        dest=pf%rank-1
     else
@@ -71,17 +71,17 @@ contains
       stop "pf_parallel:pf_send_status"
     end if
 
-    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag 
+    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag
     call pf%comm%send_status(pf, tag, istatus, ierror, dest)
     if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status'
-    
+
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during send_status', ierror
       stop "pf_parallel:pf_send_status"
     endif
-    
+
   end subroutine pf_send_status
-  
+
   !>  Subroutine to receive the convergence status from the previous processor
   subroutine pf_recv_status(pf, tag, direction)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -91,26 +91,26 @@ contains
     integer ::  ierror, istatus,source
 
     if (pf%comm%nproc .eq. 1) return
-    
+
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
 
     !  Return if this is the first processor
     if (pf%rank == 0 .and. dir == 1) return
     if (pf%rank == pf%comm%nproc-1 .and. dir == 2) return
-    
+
     if (pf%debug) print*, 'DEBUG --',pf%rank, 'begin recv_status with pstatus=',pf%state%pstatus, ' tag=',tag
     ierror = 0
     if (dir == 1) then
        source=pf%rank-1
     elseif (dir == 2) then
-       source=pf%rank+1       
+       source=pf%rank+1
     else
       print *, pf%rank, 'warning: bad dir in recv_status', dir
       stop "pf_parallel_oc:pf_recv_status"
    end if
-   
-   if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag  
+
+   if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag
 
    call pf%comm%recv_status(pf, tag, istatus, ierror, source)
 
@@ -119,10 +119,10 @@ contains
    else
       print *, pf%rank, 'warning: error during recv_status', ierror
       stop "pf_parallel_oc:pf_recv_status"
-    endif    
-   
-   if (pf%debug) print *, pf%rank, 'status recvd = ', istatus 
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag       
+    endif
+
+   if (pf%debug) print *, pf%rank, 'status recvd = ', istatus
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
@@ -140,7 +140,7 @@ contains
 
     if(pf%rank == 0 .and. dir == 2) return
     if(pf%rank == pf%comm%nproc-1 .and. dir == 1) return
-    
+
     if(dir == 2) then
        call level%q0%pack(level%send, 2)
        dest=pf%rank-1
@@ -157,16 +157,16 @@ contains
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
 
-    call pf%comm%send(pf, level, tag, blocking, ierror, dest)   
+    call pf%comm%send(pf, level, tag, blocking, ierror, dest)
     if (ierror /= 0) then
       print *, pf%rank, 'warning: error during send', ierror
       stop "pf_parallel:pf_send"
    endif
 
-   if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking                  
+   if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking
     call end_timer(pf, TSEND + level%index - 1)
   end subroutine pf_send
-  
+
   !>  Subroutine to recieve the solution from the previous processor
   subroutine pf_recv(pf, level, tag, blocking, direction)
     type(pf_pfasst_t), intent(inout) :: pf
@@ -188,11 +188,11 @@ contains
                                   .and. dir == 1) then
        source=pf%rank-1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-       
+
        if (ierror .eq. 0) then
           if (present(direction)) then
              call level%q0%unpack(level%recv, 1)
-          else 
+          else
              call level%q0%unpack(level%recv)
           end if
         end if
@@ -201,22 +201,22 @@ contains
        source=pf%rank+1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
 
-       if (ierror .eq. 0) then 
+       if (ierror .eq. 0) then
          if (present(direction)) then
            call level%qend%unpack(level%recv, 2)
          else
            call level%qend%unpack(level%recv)
         end if
-  
+
        end if
     end if
 
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv, tag=',tag,blocking    
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv, tag=',tag,blocking
     if(ierror .ne. 0) then
       print *, pf%rank, 'warning: mpi error during receive', ierror
-      stop "pf_parallel:pf_recv"     
+      stop "pf_parallel:pf_recv"
     end if
-    
+
     call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
 
@@ -229,7 +229,7 @@ contains
     integer :: ierror
 
     if (pf%comm%nproc .eq. 1) return
-    
+
     call start_timer(pf, TBROADCAST)
     if(pf%debug) print *,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
@@ -242,14 +242,16 @@ contains
   end subroutine pf_broadcast
 
   !> Save current solution and function value so that future corrections can be computed
-  subroutine save(lev, flags)
+  subroutine save(pf, lev, flags)
+    type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t), intent(inout) :: lev  !!  Level to save on
     integer, optional, intent(in)   :: flags !!  which component to save (state/adjoint)
     integer :: m, p
-    
+
 
     if (lev%Finterp) then
-       if (allocated(lev%pFflt)) then
+       !if (allocated(lev%pFflt)) then
+       if(lev%index < pf%state%finest_level) then
           do m = 1, lev%nnodes
              do p = 1,size(lev%F(1,:))
                 call lev%pF(m,p)%copy(lev%F(m,p), flags)
@@ -258,12 +260,13 @@ contains
           end do
        end if
     else
-       if (allocated(lev%pQ)) then
+       !if (allocated(lev%pQ)) then
+       if(lev%index < pf%state%finest_level) then
           do m = 1, lev%nnodes
              call lev%pQ(m)%copy(lev%Q(m), flags)
           end do
        end if
     end if
   end subroutine save
-  
+
 end module pf_mod_comm

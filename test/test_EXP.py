@@ -7,8 +7,8 @@ import pytest
 
 
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'step', 'iter', 'level', 'error' ])   # This is what is scraped from the output
-EXE = 'test/adv_diff_fft/1d/main.exe'                                                        # The name of the executable to run
-NMLFILE = 'test/adv_diff_fft/1d/{}.nml'                                                      # The name of the input files
+EXE = 'test/EXP_adv_diff_fft/1d/main.exe'                                                        # The name of the executable to run
+NMLFILE = 'test/EXP_adv_diff_fft/1d/{}.nml'                                                      # The name of the input files
 TOL = 1e-5                                                                               # The error tolerance that must be met for a successful test
 
 """make tests from the sdc.nml input file."""

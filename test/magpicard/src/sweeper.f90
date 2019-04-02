@@ -39,7 +39,8 @@ module sweeper
      procedure :: compute_omega
      ! procedure :: compute_time_ev_ops
      procedure :: propagate_solution
-     procedure :: destroy => destroy_magpicard_sweeper
+     procedure :: destroy
+     procedure :: initialize
   end type magpicard_sweeper_t
 
 contains
@@ -58,22 +59,23 @@ contains
 
   end function cast_as_magpicard_sweeper
 
-  subroutine initialize_magpicard_sweeper(this, level, qtype, debug)
+  subroutine initialize_magpicard_sweeper(this,pf, level_index)
     use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
     class(pf_sweeper_t), intent(inout) :: this
-    integer, intent(in) :: level, qtype
-    logical, intent(in) :: debug
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer, intent(in) :: level_index
+
 
     class(magpicard_sweeper_t), pointer :: magpicard !< context data containing integrals, etc
     integer :: coefs=9
 
     magpicard => cast_as_magpicard_sweeper(this)
 
-    magpicard%qtype = qtype
+    magpicard%qtype = pf%qtype
     magpicard%dt = dt
-    magpicard%magnus_order = magnus_order(level)
+    magpicard%magnus_order = magnus_order(level_index)
     magpicard%exp_iterations = 0
-    magpicard%debug = debug
+    magpicard%debug = pf%debug
     magpicard%dim = nparticles
 
     ! inouts necessary for the base class structure
@@ -95,6 +97,42 @@ contains
 
     nullify(magpicard)
   end subroutine initialize_magpicard_sweeper
+
+    subroutine initialize(this,pf, level_index)
+    use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
+    class(magpicard_sweeper_t), intent(inout) :: this
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer, intent(in) :: level_index
+
+
+    integer :: ncoefs=9
+
+    this%qtype = pf%qtype
+    this%dt = dt
+    this%magnus_order = magnus_order(level_index)
+    this%exp_iterations = 0
+    this%debug = pf%debug
+    this%dim = nparticles
+
+    ! inouts necessary for the base class structure
+    call this%magpicard_initialize(pf,level_index)
+
+    allocate(this%commutator(nparticles, nparticles), &
+         this%commutators(this%dim, this%dim, ncoefs))
+
+    this%commutators(:,:,:) = z0
+    this%commutator = z0
+
+    this%indices(1,1) = 1
+    this%indices(1,2) = 2
+
+    this%indices(2,1) = 1
+    this%indices(2,2) = 3
+
+    this%indices(3,1) = 2
+    this%indices(3,2) = 3
+
+  end subroutine initialize
 
 
   subroutine compute_B(this, y, t, level, f)
@@ -464,15 +502,20 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
  end function compute_inf_norm
 
- !> array of ctx data deallocation
- subroutine destroy_magpicard_sweeper(this, lev)
+
+ !> Destroy sweeper (called from base sweeper destroy from pf_pfasst_destroy)
+  subroutine destroy(this,pf,level_index)
    class(magpicard_sweeper_t), intent(inout) :: this
-   class(pf_level_t),   intent(inout) :: lev
-   integer :: io
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+   integer,              intent(in)    :: level_index
 
-   call this%magpicard_destroy(lev)
+   !>  Destroy the magpicard sweeper
+   call this%magpicard_destroy(pf,level_index)
 
- end subroutine destroy_magpicard_sweeper
+   !>  Destroy local variables
+   deallocate(this%commutators)
+
+ end subroutine destroy
 
  subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
    class(magpicard_context), intent(inout) :: this

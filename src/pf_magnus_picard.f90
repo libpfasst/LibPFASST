@@ -27,8 +27,9 @@ module pf_mod_magnus_picard
      procedure(pf_compute_single_commutators_p), deferred :: compute_single_commutators
      procedure(pf_compute_omega_p), deferred :: compute_omega
      procedure(pf_propagate_solution_p), deferred :: propagate_solution
-     procedure(pf_destroy_magpicard_p), deferred :: destroy
-     procedure :: magpicard_destroy
+     procedure :: destroy   => magpicard_destroy
+     procedure :: magpicard_destroy     
+     procedure :: magpicard_initialize
   end type pf_magpicard_t
 
   interface
@@ -61,11 +62,6 @@ module pf_mod_magnus_picard
        class(pf_encap_t), intent(inout) :: sol_tn
        integer, intent(in) :: level
      end subroutine pf_propagate_solution_p
-     subroutine pf_destroy_magpicard_p(this, Lev)
-       import pf_magpicard_t, pf_level_t
-       class(pf_magpicard_t), intent(inout) :: this
-       class(pf_level_t), intent(inout) :: Lev
-     end subroutine pf_destroy_magpicard_p
   end interface
 contains
 
@@ -94,6 +90,8 @@ contains
 
     call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1, nsweeps
+       pf%state%sweep=k       
+
        ! Copy values into residual
        do m = 1, nnodes-1
           call lev%R(m)%copy(lev%Q(m+1))
@@ -110,7 +108,7 @@ contains
 
        !$omp barrier
 
-       call magpicard_integrate(this, lev, lev%Q, lev%F, dt, lev%I)
+       call magpicard_integrate(this, pf,level_index, lev%Q, lev%F, dt, lev%I)
 
        if (this%magnus_order > 1 .and. nnodes > 2) then
           call start_timer(pf, TAUX)
@@ -132,7 +130,7 @@ contains
        end do
        !$omp end parallel do
 
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
@@ -142,11 +140,14 @@ contains
 
   end subroutine magpicard_sweep
 
-  subroutine magpicard_initialize(this, lev)
+  subroutine magpicard_initialize(this, pf,level_index)
     class(pf_magpicard_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
 
     integer :: m, nnodes
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%commutator_coefs = 0.0_pfdp
     this%npieces = 1
@@ -172,15 +173,18 @@ contains
 
   !> Compute SDC integral
   !>  fintSDC = \int_{t_n}^{t_m} fSDC dt
-  subroutine magpicard_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+  subroutine magpicard_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_magpicard_t), intent(inout) :: this
-    class(pf_level_t), intent(in   ) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, optional, intent(in   ) :: flags
     
     integer :: j, m
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
@@ -191,32 +195,41 @@ contains
   end subroutine magpicard_integrate
 
   ! Evaluate function values
-  subroutine magpicard_evaluate(this, lev, t, m, flags, step)
+  subroutine magpicard_evaluate(this, pf,level_index, t, m, flags, step)
     use pf_mod_dtype
     class(pf_magpicard_t), intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),           intent(in   ) :: t
     integer,              intent(in   ) :: m
-    class(pf_level_t),    intent(inout) :: lev
     integer, optional, intent(in   ) :: flags, step
 
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
     call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine magpicard_evaluate
 
-  subroutine magpicard_evaluate_all(this, lev, t, flags, step)
+  subroutine magpicard_evaluate_all(this, pf,level_index, t, flags, step)
     class(pf_magpicard_t), intent(inout) :: this
-    class(pf_level_t),    intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),           intent(in   ) :: t(:)
     integer, optional, intent(in   ) :: flags, step
-    call pf_generic_evaluate_all(this, lev, t)
+
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    call pf_generic_evaluate_all(this, pf,level_index, t)
   end subroutine magpicard_evaluate_all
 
-  subroutine magpicard_residual(this, lev, dt, flags)
+  subroutine magpicard_residual(this, pf,level_index, dt, flags)
     class(pf_magpicard_t), intent(inout) :: this
-    class(pf_level_t),    intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),           intent(in   ) :: dt
     integer, optional, intent(in   ) :: flags
     integer :: m
-
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
     do m = 1, lev%nnodes-1
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
@@ -224,25 +237,32 @@ contains
     lev%residual = lev%R(lev%nnodes-1)%norm()
   end subroutine magpicard_residual
 
-  subroutine magpicard_spreadq0(this, lev, t0, flags, step)
+  subroutine magpicard_spreadq0(this, pf,level_index, t0, flags, step)
     class(pf_magpicard_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: t0
     integer, optional, intent(in   ) :: flags, step
-    call pf_generic_spreadq0(this, lev, t0)
+
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
+    call pf_generic_spreadq0(this,pf,level_index,  t0)
   end subroutine magpicard_spreadq0
 
   ! Destroy the matrices
-  subroutine magpicard_destroy(this, lev)
-      class(pf_magpicard_t),  intent(inout) :: this
-      class(pf_level_t),    intent(inout) :: lev
+  subroutine magpicard_destroy(this, pf,level_index)
+    class(pf_magpicard_t),  intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
 
-      deallocate(this%dtsdc, this%commutators)
-
-      call lev%ulevel%factory%destroy_array(this%omega, lev%nnodes-1, &
-           lev%index,  lev%shape)
-      call lev%ulevel%factory%destroy_array(this%time_ev_op, lev%nnodes-1, &
-           lev%index,  lev%shape)
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
+    deallocate(this%dtsdc)
+    
+    call lev%ulevel%factory%destroy_array(this%omega)
+    call lev%ulevel%factory%destroy_array(this%time_ev_op)
 
   end subroutine magpicard_destroy
 

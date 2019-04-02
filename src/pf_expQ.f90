@@ -274,6 +274,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         ! error sweeps
         do k = 1, nsweeps
+           pf%state%sweep=k                  
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            t = t0 
            do j = 1, nnodes
@@ -439,8 +440,8 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         deallocate(this%w)
         deallocate(this%eta)
         deallocate(this%newF)
-        call lev%ulevel%factory%destroy_array(this%b, lev%index, lev%nnodes,  lev%shape)
-        call lev%ulevel%factory%destroy_array(this%f_old, lev%index, lev%nnodes,  lev%shape)        
+        call lev%ulevel%factory%destroy_array(this%b, lev%nnodes)
+        call lev%ulevel%factory%destroy_array(this%f_old, lev%nnodes)        
     end subroutine exp_destroy
 
     ! =======================================================================

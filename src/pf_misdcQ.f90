@@ -34,6 +34,7 @@ module pf_mod_misdcQ
      procedure :: evaluate   => misdcQ_evaluate
      procedure :: destroy      => misdcQ_destroy
      procedure :: misdcQ_destroy
+     procedure :: misdcQ_initialize
   end type pf_misdcQ_t
 
   interface
@@ -77,19 +78,18 @@ contains
     integer,          intent(in) :: nsweeps       !!  number of sweeps to do
     integer, optional, intent(in   ) :: flags    
     !>  Local variables    
-    class(pf_level_t), pointer:: lev
     integer                        :: m, n,k
     real(pfdp)                     :: t
+    type(pf_level_t), pointer:: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
-    lev => pf%levels(level_index)   !!  Assign level pointer
-
     do k = 1,nsweeps   !!  Loop over sweeps
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+       pf%state%sweep=k
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
-       
        do m = 1, lev%nnodes-1
           
           call lev%I(m)%setval(0.0_pfdp)
@@ -101,7 +101,7 @@ contains
              call this%I3(m)%axpy(dt*this%QtilI(m,n),     lev%F(n,3))
              !  Note we have to leave off the -dt*Qtil here and put it in after f2comp
           end do
-          if (allocated(lev%tauQ)) then
+          if (level_index < pf%state%finest_level) then
              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
           end if
        end do
@@ -143,7 +143,7 @@ contains
           call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2),2)
        end do
        
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
        
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -153,12 +153,13 @@ contains
   end subroutine misdcQ_sweep
      
   ! Initialize matrices
-  subroutine misdcQ_initialize(this, lev)
+  subroutine misdcQ_initialize(this, pf,level_index)
     class(pf_misdcQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
-
-    real(pfdp) :: dsdc(lev%nnodes-1)
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index    
     integer    :: m, n, nnodes
+    type(pf_level_t), pointer:: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%npieces = 3
 
@@ -195,9 +196,13 @@ contains
 
   end subroutine misdcQ_initialize
 
-  subroutine misdcQ_destroy(this, lev)
+  subroutine misdcQ_destroy(this,pf,level_index)
     class(pf_misdcQ_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
+    type(pf_level_t), pointer:: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
     
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -206,21 +211,24 @@ contains
     deallocate(this%dtsdc)
 
 
-    call lev%ulevel%factory%destroy_array(this%I3,lev%nnodes-1,lev%index,lev%shape)
-    call lev%ulevel%factory%destroy_single(this%rhs, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_array(this%I3)
+    call lev%ulevel%factory%destroy_single(this%rhs)
   end subroutine misdcQ_destroy
 
   ! Compute SDC integral
-  subroutine misdcQ_integrate(this, lev, qSDC, fSDC, dt, fintSDC,flags)
+  subroutine misdcQ_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC,flags)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t),  intent(in)    :: lev
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     class(pf_encap_t), intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in)    :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, optional, intent(in   ) :: flags    
 
     integer :: n, m, p
-
+    type(pf_level_t), pointer:: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
        do m = 1, lev%nnodes
@@ -232,43 +240,49 @@ contains
   end subroutine misdcQ_integrate
 
   !> Subroutine to evaluate function value at node m
-  subroutine misdcQ_evaluate(this, lev, t, m, flags, step)
-
+  subroutine misdcQ_evaluate(this, pf,level_index, t, m, flags, step)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
     integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
 
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,3),3)       
+    type(pf_level_t), pointer:: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
+    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,3),3)       
   end subroutine misdcQ_evaluate
 
   !> Subroutine to evaluate the function values at all nodes
-  subroutine misdcQ_evaluate_all(this, lev, t, flags, step)
+  subroutine misdcQ_evaluate_all(this, pf,level_index, t, flags, step)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev   !!  Current level
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t(:)  !!  Array of times at each node
     integer, intent(in), optional   :: flags, step
-    call pf_generic_evaluate_all(this, lev, t)
+    call pf_generic_evaluate_all(this,pf, level_index, t)
   end subroutine misdcQ_evaluate_all
 
   !> Subroutine to compute  Residual
-  subroutine misdcQ_residual(this, lev, dt, flags)
+  subroutine misdcQ_residual(this, pf, level_index, dt, flags)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
-    call pf_generic_residual(this, lev, dt)
+    call pf_generic_residual(this, pf,level_index, dt)
   end subroutine misdcQ_residual
 
-  subroutine misdcQ_spreadq0(this, lev, t0, flags, step)
+  subroutine misdcQ_spreadq0(this, pf,level_index, t0, flags, step)
     class(pf_misdcQ_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t0
     integer, optional,   intent(in)    :: flags, step
-    call pf_generic_spreadq0(this, lev, t0)
+    call pf_generic_spreadq0(this,pf, level_index, t0)
   end subroutine misdcQ_spreadq0
 
 end module pf_mod_misdcQ

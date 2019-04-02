@@ -21,7 +21,7 @@ module pf_mod_verlet
 
   !> Define sweeper type
   type, extends(pf_sweeper_t), abstract :: pf_verlet_t
-     integer :: whichQQ=3
+     integer :: whichQQ=0
      integer :: doLU
      real(pfdp) :: Htol, H0
 
@@ -56,7 +56,6 @@ module pf_mod_verlet
      procedure :: spreadq0   => verlet_spreadq0
      procedure :: evaluate_all => verlet_evaluate_all
      procedure :: destroy   => verlet_destroy
-     procedure :: verlet_destroy
   end type pf_verlet_t
 
   interface
@@ -100,7 +99,7 @@ end interface
 contains
 
   !-----------------------------------------------------------------------------
-  !> Perform one SDC sweep on level lev_index and set qend appropriately
+  !> Perform one SDC sweep on level level_index and set qend appropriately
   subroutine verlet_sweep(this, pf, level_index, t0, dt,nsweeps, flags)  
     use pf_mod_timer
     use pf_mod_hooks
@@ -142,7 +141,7 @@ contains
     !
     dtsq = dt*dt
     do k = 1,nsweeps
-
+       pf%state%sweep=k
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)
           if (pf%state%iter .eq. 1)  then  !  Do verlet on the first iteration
@@ -156,7 +155,7 @@ contains
                 call lev%I(m)%axpy(dtsq*this%DQQtil(m,n), lev%F(n,1),2)
              end do
           end if
-          if (allocated(lev%tauQ)) then
+          if (level_index < pf%state%finest_level) then
              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))  
           end if
        end do
@@ -236,7 +235,7 @@ contains
 !          call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
 !       end if
        
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
        
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -250,13 +249,16 @@ contains
 
   !-----------------------------------------------------------------------------
   !> Initialize integration matrices
-  subroutine verlet_initialize(this,lev)
+  subroutine verlet_initialize(this,pf,level_index)
     class(pf_verlet_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
 
     integer :: i,j,nnodes,ierr
     real(pfdp),allocatable :: qtemp(:,:)
     real(pfdp),allocatable :: qtemp2(:,:)
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%npieces = 1
     nnodes = Lev%nnodes
@@ -387,9 +389,10 @@ contains
   
   !-----------------------------------------------------------------------------
   !> Integrate (t_n to node)
-  subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC,flags)
+  subroutine verlet_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC,flags)
     class(pf_verlet_t), intent(inout) :: this
-    class(pf_level_t), intent(in   ) :: lev          !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     class(pf_encap_t), intent(in   ) :: qSDC(:)      !!  Solution values
     class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !!  RHS Function values
     real(pfdp),        intent(in   ) :: dt           !!  Time step
@@ -397,6 +400,8 @@ contains
     integer, optional, intent(in   ) :: flags    
 
     integer :: n, m
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
@@ -411,19 +416,21 @@ contains
   end subroutine verlet_integrate
   !-----------------------------------------------------------------------------
   !> Compute residual (t_n to node)
-  subroutine verlet_residual(this, lev, dt, flags)
+  subroutine verlet_residual(this,pf, level_index, dt, flags)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
 
     integer :: n, m
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
-
-    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
+    call this%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I, flags)
 
     ! add tau 
-    if (allocated(lev%tauQ)) then
+    if (level_index < pf%state%finest_level) then
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
        end do
@@ -464,10 +471,14 @@ contains
 
   !-----------------------------------------------------------------------------
   !> Destroy Verlet sweeper matrices
-  subroutine verlet_destroy(this,lev)
+  subroutine verlet_destroy(this,pf,level_index)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev   !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
 
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
     deallocate(this%Qmat)
     deallocate(this%QQmat)
 
@@ -490,37 +501,51 @@ contains
     deallocate(this%tsdc)    
 
 
-    call lev%ulevel%factory%destroy_single(this%rhs, lev%index,  lev%shape)    
+    call lev%ulevel%factory%destroy_single(this%rhs)    
   end subroutine verlet_destroy
 
   !> Spread the intial data for Verlet sweepers
-  subroutine verlet_spreadq0(this, lev, t0, flags, step)
+  subroutine verlet_spreadq0(this,pf,level_index,  t0, flags, step)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t0
     integer, optional,   intent(in)    :: flags, step
-    call pf_generic_spreadq0(this, lev, t0)
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
+    call pf_generic_spreadq0(this,pf,level_index, t0)
   end subroutine verlet_spreadq0
 
   !> Subroutine to evaluate function value at node m
-  subroutine verlet_evaluate(this, lev, t, m, flags, step)
-
+  subroutine verlet_evaluate(this, pf,level_index, t, m, flags, step)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    
     real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
     integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine verlet_evaluate
 
   !> Subroutine to evaluate the function values at all nodes
-  subroutine verlet_evaluate_all(this, lev, t, flags, step)
+  subroutine verlet_evaluate_all(this,pf,level_index,  t, flags, step)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev   !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t(:)  !!  Array of times at each node
     integer, intent(in), optional   :: flags, step
-    call pf_generic_evaluate_all(this, lev, t)
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
+    call pf_generic_evaluate_all(this,pf,level_index, t)
   end subroutine verlet_evaluate_all
   
 

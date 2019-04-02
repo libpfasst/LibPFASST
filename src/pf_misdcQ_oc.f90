@@ -34,6 +34,7 @@ module pf_mod_misdcQ_oc
      procedure :: evaluate     => misdcQ_oc_evaluate
      procedure :: destroy      => misdcQ_oc_destroy
      procedure :: misdcQ_oc_destroy
+     procedure :: misdcQ_oc_initialize
   end type pf_misdcQ_oc_t
 
   interface
@@ -88,8 +89,6 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
-
-    
     step = pf%state%step+1
 
     which = 0
@@ -110,6 +109,7 @@ contains
     tend = t0+dt
 
     do k = 1,nsweeps
+       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
@@ -125,7 +125,7 @@ contains
                call lev%I(m)%axpy(dt*lev%sdcmats%qmat(m,n), lev%F(n,3), 1)
                call this%I3(m)%axpy(dt*this%QtilI(m,n), lev%F(n,3), 1)
             end do
-            if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m),1)
             end if
           end do
@@ -143,7 +143,7 @@ contains
                call lev%I(m)%axpy(dt*lev%sdcmats%qmat(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
                call this%I3(m)%axpy(dt*this%QtilI(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
             end do
-            if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
             end if
           end do
@@ -193,7 +193,7 @@ contains
             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, 1, m+1, step)
             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
          end do
-         !call pf_residual(pf, lev, dt, 1)
+         !call pf_residual(pf, level_index, dt, 1)
          call lev%qend%copy(lev%Q(lev%nnodes), 1)
        end if ! sweep_y
 
@@ -225,16 +225,16 @@ contains
             call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
             call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, 2, m, step)
          end do
-         !call pf_residual(pf, lev, dt, 2)
+         !call pf_residual(pf, level_index, dt, 2)
          call lev%q0%copy(lev%Q(1), 2)
        end if  ! sweep_p
 
        if( sweep_p .and. sweep_y ) then
-         call pf_residual(pf, lev, dt, 0)
+         call pf_residual(pf, level_index, dt, 0)
        else if( sweep_y ) then
-         call pf_residual(pf, lev, dt, 1)
+         call pf_residual(pf, level_index, dt, 1)
        else if (sweep_p ) then
-         call pf_residual(pf, lev, dt, 2)
+         call pf_residual(pf, level_index, dt, 2)
        else
          stop "neither sweep on p nor on y : that should not happen"
        end if
@@ -244,12 +244,14 @@ contains
   end subroutine misdcQ_oc_sweep
 
   ! Initialize matrices
-  subroutine misdcQ_oc_initialize(this, lev)
+  subroutine misdcQ_oc_initialize(this, pf,level_index)
     class(pf_misdcQ_oc_t), intent(inout) :: this
-    class(pf_level_t),      intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
 
-    real(pfdp) :: dsdc(lev%nnodes-1)
     integer    :: m,n, nnodes
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%npieces = 3
 
@@ -262,8 +264,6 @@ contains
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
 
-    !>  Array of substep sizes
-    dsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)
     ! Implicit matrix
     if (this%use_LUq) then
        ! Get the LU
@@ -286,9 +286,13 @@ contains
 
   end subroutine misdcQ_oc_initialize
 
-  subroutine misdcQ_oc_destroy(this, lev)
+  subroutine misdcQ_oc_destroy(this, pf,level_index)
     class(pf_misdcQ_oc_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -297,20 +301,23 @@ contains
     deallocate(this%dtsdc)
 
 
-    call lev%ulevel%factory%destroy_array(this%I3,lev%nnodes-1,lev%index,lev%shape)
-    call lev%ulevel%factory%destroy_single(this%rhs, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_array(this%I3)
+    call lev%ulevel%factory%destroy_single(this%rhs)
   end subroutine misdcQ_oc_destroy
 
   ! Compute SDC integral
-  subroutine misdcQ_oc_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+  subroutine misdcQ_oc_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
-    class(pf_level_t),       intent(in)    :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     class(pf_encap_t),      intent(in)    :: qSDC(:), fSDC(:, :)
     real(pfdp),             intent(in)    :: dt
     class(pf_encap_t),       intent(inout) :: fintSDC(:)
     integer,      optional, intent(in)    :: flags
 
     integer :: n, m, p, which
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     which = 0
     if(present(flags)) which = flags
@@ -338,14 +345,19 @@ contains
   end subroutine misdcQ_oc_integrate
 
   ! Evaluate function values
-  subroutine misdcQ_oc_evaluate(this, lev, t, m, flags, step)
+  subroutine misdcQ_oc_evaluate(this, pf,level_index, t, m, flags, step)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),             intent(in   ) :: t
     integer,                intent(in   ) :: m
-    class(pf_level_t),       intent(inout) :: lev
     integer,      optional, intent(in   ) :: flags, step
 
     integer  :: which, mystep
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
+    
     which = 0
     if (present(flags)) which = flags
 
@@ -358,67 +370,80 @@ contains
   end subroutine misdcQ_oc_evaluate
 
 
-  subroutine misdcQ_oc_evaluate_all(this, lev, t, flags, step)
+  subroutine misdcQ_oc_evaluate_all(this, pf,level_index, t, flags, step)
     !! Evaluate all function values
     class(pf_misdcQ_oc_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t(:)
     integer, intent(in), optional   :: flags, step
-!     call pf_generic_evaluate_all(this, lev, t, flags, step)
+
     integer :: m
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     if (.not.present(flags)) stop "MISDCQ_OC EVAL_ALL WITHOUT FLAGS"
     if (.not.present(step)) stop "MISDCQ_OC EVAL_ALL WITHOUT step"
 
 
     do m = 1, lev%nnodes
-      call this%evaluate(lev, t(m), m, flags, step)
+      call this%evaluate(pf,level_index, t(m), m, flags, step)
     end do
   end subroutine misdcQ_oc_evaluate_all
 
-  subroutine misdcQ_oc_residual(this, lev, dt, flags)
+  subroutine misdcQ_oc_residual(this, pf, level_index, dt, flags)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
-    class(pf_level_t),       intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),             intent(in)    :: dt
     integer,      optional, intent(in)    :: flags
 
     integer :: m, n, which
-
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
     which = 0
     if(present(flags)) which = flags
 
-    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
+    call this%integrate(pf,level_index, pf%levels(level_index)%Q, pf%levels(level_index)%F, dt, &
+         pf%levels(level_index)%I, which)
 
+    
     ! add tau (which is 'node to node')
-    if (allocated(lev%tauQ)) then
-       do m = 1, lev%nnodes-1
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
+    if (level_index < pf%state%finest_level) then
+       do m = 1, pf%levels(level_index)%nnodes-1
+          call pf%levels(level_index)%I(m)%axpy(1.0_pfdp, pf%levels(level_index)%tauQ(m), which)
        end do
     end if
 
     ! subtract out Q
-    do m = 1, lev%nnodes-1
+    do m = 1, pf%levels(level_index)%nnodes-1
        if( (which .eq. 0) .or. (which .eq. 1) ) then
-          call lev%R(m)%copy(lev%I(m), 1)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
-          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
+          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 1)
+          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp, pf%levels(level_index)%Q(1), 1)
+          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m+1), 1)
        end if
        if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call lev%R(m)%copy(lev%I(m), 2)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
-          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
+          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 2)
+          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp, pf%levels(level_index)%Q(pf%levels(level_index)%nnodes), 2)
+          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m), 2)
        end if
     end do
 
   end subroutine misdcQ_oc_residual
 
-  subroutine misdcQ_oc_spreadq0(this, lev, t0, flags, step)
+  subroutine misdcQ_oc_spreadq0(this, pf,level_index, t0, flags, step)
     class(pf_misdcQ_oc_t), intent(inout) :: this
-    class(pf_level_t),     intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),            intent(in   ) :: t0
     integer,     optional, intent(in)    :: flags, step
 
     integer :: m, p, which, mystep
+    type(pf_level_t), pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
+
     which = 3
     if(present(flags)) which = flags
     if (.not.present(flags)) stop "IMEXQ_OC SPREADQ0 WITHOUT FLAGS"
@@ -436,7 +461,7 @@ contains
         !  Stick initial condition into first node slot
         call lev%Q(1)%copy(lev%q0, 1)
         !  Evaluate F at first spot
-        call lev%ulevel%sweeper%evaluate(lev, t0, 1, 1, mystep)
+        call lev%ulevel%sweeper%evaluate(pf,level_index, t0, 1, 1, mystep)
         ! Spread F and solution to all nodes
         do m = 2, lev%nnodes
           call lev%Q(m)%copy(lev%Q(1), 1)
@@ -448,7 +473,7 @@ contains
         !  Stick terminal condition into last node slot
         call lev%Q(lev%nnodes)%copy(lev%qend, 2)
         !  Evaluate F at first spot
-        call lev%ulevel%sweeper%evaluate(lev, t0, lev%nnodes, 2, mystep)
+        call lev%ulevel%sweeper%evaluate(pf,level_index, t0, lev%nnodes, 2, mystep)
         ! Spread F and solution to all nodes
         do m = lev%nnodes-1, 1, -1
           call lev%Q(m)%copy(lev%Q(lev%nnodes), 2)
