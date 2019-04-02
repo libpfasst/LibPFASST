@@ -77,7 +77,7 @@ contains
     if (lev%index < pf%state%finest_level) then    
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
-          if (m>1 .and. pf%use_Sform) call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
+!          if (m>1 .and. pf%use_Sform) call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
        end do
     end if
 

@@ -111,25 +111,25 @@ contains
           call lev%I(m)%setval(0.0_pfdp)
        end do
        !  Add terms from prefious iteration
-!       if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
-!       if (this%implicit) call pf_apply_mat(lev%I, dt, this%QdiffI, lev%F(:,2), .false.)
+       if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
+       if (this%implicit) call pf_apply_mat(lev%I, dt, this%QdiffI, lev%F(:,2), .false.)
        ! compute integrals and add fas correction
-       do m = 1, lev%nnodes-1
-          call lev%I(m)%setval(0.0_pfdp)
-          if (this%explicit) then
-             do n = 1, lev%nnodes
-                call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
-             end do
-          end if
-          if (this%implicit) then
-             do n = 1, lev%nnodes
-                call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
-             end do
-          end if
+!!$       do m = 1, lev%nnodes-1
+!!$          call lev%I(m)%setval(0.0_pfdp)
+!!$          if (this%explicit) then
+!!$             do n = 1, lev%nnodes
+!!$                call lev%I(m)%axpy(dt*this%QdiffE(m,n), lev%F(n,1))
+!!$             end do
+!!$          end if
+!!$          if (this%implicit) then
+!!$             do n = 1, lev%nnodes
+!!$                call lev%I(m)%axpy(dt*this%QdiffI(m,n), lev%F(n,2))
+!!$             end do
+!!$          end if
 !          if (allocated(lev%tauQ)) then
 !          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))
 !          end if
-       end do
+!       end do
 
        !  Add the tau FAS correction
        if (level_index < pf%state%finest_level) then
@@ -209,6 +209,7 @@ contains
     this%npieces = 2
 
     nnodes = lev%nnodes
+    print *,'nnodes',nnodes
     allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
     if (ierr /=0) stop "allocate fail in imex_initialize for QdiffE"
     allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)
@@ -240,10 +241,10 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     if (pf%use_Sform) then
-          this%QdiffE(2:nnodes-1,:) = this%QdiffE(2:nnodes-1,:)- this%QdiffE(1:nnodes,:)
-          this%QdiffI(2:nnodes-1,:) = this%QdiffI(2:nnodes-1,:)- this%QdiffI(1:nnodes,:)
-          this%QtilE(2:nnodes-1,:) = this%QtilE(2:nnodes-1,:)- this%QtilE(1:nnodes,:)
-          this%QtilI(2:nnodes-1,:) = this%QtilI(2:nnodes-1,:)- this%QtilI(1:nnodes,:)
+          this%QdiffE(2:nnodes-1,:) = this%QdiffE(2:nnodes-1,:)- this%QdiffE(1:nnodes-2,:)
+          this%QdiffI(2:nnodes-1,:) = this%QdiffI(2:nnodes-1,:)- this%QdiffI(1:nnodes-2,:)
+          this%QtilE(2:nnodes-1,:) = this%QtilE(2:nnodes-1,:)- this%QtilE(1:nnodes-2,:)
+          this%QtilI(2:nnodes-1,:) = this%QtilI(2:nnodes-1,:)- this%QtilI(1:nnodes-2,:)
     end if
     !>  Make space for rhs
     call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
