@@ -12,7 +12,6 @@ PFASSTDIR="$(dirname $0)/.."
 
 # Convert to absolute path
 PFASSTDIR="$(realpath $PFASSTDIR)"
-PFASSTDIR=.
 
 TESTDIR="$PFASSTDIR/test"
 
@@ -31,10 +30,10 @@ cd "$TESTDIR/imk"
 test -h "pf" || ln -s "$PFASSTDIR/pf"
 
 cd "$PFASSTDIR"
-OMP=y make -j || exit 1
+make -j || exit 1
 
 cd "$TESTDIR/magpicard"
-OMP=y make -j || exit 1
+make -j || exit 1
 
 cd "$TESTDIR/imk"
 OMP=y make -j || exit 1

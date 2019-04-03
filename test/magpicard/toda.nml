@@ -1,6 +1,6 @@
 &pf_params
 	nlevels = 1
-	niters = 8
+	niters = 20
 	nnodes = 3
 	nsweeps_pred = 1
 	nsweeps = 1
@@ -15,13 +15,13 @@
 
 &params
 	Nprob=1   
-	fbase = "./output"
+	fbase = "output"
 	magnus_order = 3
 	tfin = 10.0
 	nsteps = 128
 	exptol = 1.d-15
 	nparticles = 11
-	save_solutions = .true.
+	save_solutions = .false.
 	toda_periodic = .true.
 	use_sdc = .true.
 /
