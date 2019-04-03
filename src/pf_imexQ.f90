@@ -142,7 +142,6 @@ contains
        end if
        
        !  Recompute the first function value if this is first sweep
-       print *,this%explicit,this%implicit
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
           if (this%explicit) &

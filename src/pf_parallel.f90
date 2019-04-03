@@ -135,6 +135,7 @@ contains
     integer                   :: k               !!  Loop indices
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
+    pf%state%iter = -1          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)

@@ -76,8 +76,8 @@ contains
 
 
     !> add some hooks for output
-    call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_error)
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_SWEEP, pf_echo_residual)
 
     !>  output the run options 
     call pf_print_options(pf,un_opt=6)
