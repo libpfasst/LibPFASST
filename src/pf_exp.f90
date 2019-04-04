@@ -291,10 +291,10 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               ! form b vectors
               call LocalDerivsAtNode(this, j, nnodes, this%f_old, this%b)  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
-              print *,'axpy 1'
+
               call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
               call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
-              print *,'axpy 2'
+
               call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
 
 
@@ -307,10 +307,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
               !  Now we have to add in the tauQ
               if (level_index < pf%state%finest_level) then
-                 print *,'axpy 3'
+
                  call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
                  if (j > 1) then     ! The tau is not node to node, so subtract out
-                    print *,'axpy 4'
                     call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
                  end if
               end if
@@ -378,10 +377,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
             else
                 call this%swpPhib(i, dt, this%b, fintsdc(i))
              end if
-              print *,'axpy 5'             
+
              call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
              if (i > 1) then
-                print *,'axpy 6'
                 call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
              end if
         end do
@@ -407,7 +405,6 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       !> add tau if it exists
       if (level_index < pf%state%finest_level) then
          do m = 1, lev%nnodes-1
-            print *,'axpy 7'
             call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
          end do
       end if
@@ -415,9 +412,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       !> subtract out the solution value
       do m = 1, lev%nnodes-1      
          call lev%R(m)%copy(lev%I(m))
-         print *,'axpy 8'
          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
-         print *,'axpy 9'
          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
       end do
       
@@ -520,7 +515,6 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         integer :: j, k
 
         ! form nonlinear derivative vectors b
-        print *,'axpy 10',nnodes,size(N_deriv),size(N_eval)
         do j = 1, nnodes                                                ! loop over derivatives j = 1 ... n
             call N_deriv(j+1)%setval(real(0.0, pfdp))
             do k = 1, nnodes                                            ! look over nodes k = 1 ... n
