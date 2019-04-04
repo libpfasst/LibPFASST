@@ -23,7 +23,7 @@ module utils
     integer :: Nmat
     
     L_p => cast_as_zndarray(L)
-    L_array=>get_array2d(L_p)
+    L_array=>get_array2d(L)
     Nmat = L_p%shape(1) !  Assumes a square matrix
 
     select case(nprob)
@@ -35,7 +35,7 @@ module utils
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',nprob)
     end select
 
-    nullify(L_p)
+!    nullify(L_p)
     nullify(L_array)
   end subroutine initial
   

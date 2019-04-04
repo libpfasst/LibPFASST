@@ -77,7 +77,6 @@ contains
     if (lev%index < pf%state%finest_level) then    
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
-          if (m>1 .and. pf%use_Sform) call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
        end do
     end if
 
@@ -105,6 +104,17 @@ contains
 
   end subroutine pf_generic_residual
 
+  !>  Output the current residual in the solution
+  subroutine pf_echo_residual(pf, level, state)
+    type(pf_pfasst_t), intent(inout) :: pf
+    class(pf_level_t), intent(inout) :: level
+    type(pf_state_t),  intent(in   ) :: state
+
+    print '("resid: time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
+         state%t0+state%dt,state%step+1, pf%rank, state%iter,level%index,level%residual    
+    
+    call flush(6)
+  end subroutine pf_echo_residual
 
   !
   !> Generic evaluate all

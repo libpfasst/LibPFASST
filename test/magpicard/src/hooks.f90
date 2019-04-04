@@ -45,8 +45,13 @@ contains
 
     r => cast_as_zndarray(level%R(level%nnodes-1))
 
-    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
-         state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%flatarray))
+!    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
+!         state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%flatarray))
+!    print '("resid:  step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",f18.10)', &
+!         state%step+1, state%iter, level%index, maxval(abs(r%flatarray))
+    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7)', &
+         state%step+1, state%iter,level%index,maxval(abs(r%flatarray))
+    
     call flush()
   end subroutine echo_residual
 
@@ -59,15 +64,29 @@ contains
 
     type(zndarray), pointer :: qend,Fend
     character(len=256) :: time, filename
-
+    integer :: un
+    complex(pfdp),      pointer :: q_array(:,:)
     qend => cast_as_zndarray(level%qend)
+    q_array=>get_array2d(level%qend)    
+    un = 200+pf%rank
+    write(time, '(f10.5)') state%t0+state%dt
+    write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
+         pf%rank, state%step+1, state%iter, level%index
+    open(unit=un, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
+    write(un) q_array
+    
+    close(un)
+
     !    write(time, '(f10.5)') state%t0+state%dt
 !    write(time, '(i5.5)') int(1000*(state%t0+state%dt)+0.49)    
 !    write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
  !        pf%rank, state%step+1, state%iter, level%index
+    ! open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
+
+    
     write(filename, '("step_",i5.5)') &
           state%step+1
-    ! open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
+
     open(unit=20, file=trim(fbase)//'/P/'//trim(adjustl(filename)), form='formatted')    
     write(20,*) real(qend%flatarray)
     write(20,*) ' '
