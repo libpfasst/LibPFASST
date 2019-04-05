@@ -6,7 +6,7 @@ EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 
-FSRC = probin.f90 factory.f90 sweeper.f90 main.f90 hooks.f90 utils.f90
+FSRC = probin.f90 factory.f90 sweeper.f90 level.f90 main.f90 hooks.f90 utils.f90
 
 OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
 
@@ -17,8 +17,9 @@ VPATHS = src
 include $(LIBPFASST)/Makefile.rules
 all: $(EXE)
 
-$(BUILDDIR)/sweeper.o: $(BUILDDIR)/factory.o $(BUILDDIR)/utils.o
-$(BUILDDIR)/utils.o: $(BUILDDIR)/factory.o $(BUILDDIR)/probin.o
-$(BUILDDIR)/hooks.o: $(BUILDDIR)/factory.o $(BUILDDIR)/sweeper.o $(BUILDDIR)/utils.o $(FSRC)
-$(BUILDDIR)/main.o:  $(BUILDDIR)/factory.o  $(BUILDDIR)/sweeper.o $(BUILDDIR)/probin.o $(BUILDDIR)/hooks.o
+$(BUILDDIR)/sweeper.o: src/sweeper.f90 $(BUILDDIR)/factory.o $(BUILDDIR)/utils.o
+$(BUILDDIR)/level.o: src/level.f90 
+$(BUILDDIR)/utils.o: src/utils.f90 $(BUILDDIR)/factory.o $(BUILDDIR)/probin.o
+$(BUILDDIR)/hooks.o: src/hooks.f90 $(BUILDDIR)/factory.o $(BUILDDIR)/sweeper.o $(BUILDDIR)/utils.o $(FSRC)
+$(BUILDDIR)/main.o:  src/main.f90 $(BUILDDIR)/factory.o  $(BUILDDIR)/sweeper.o $(BUILDDIR)/probin.o $(BUILDDIR)/hooks.o $(BUILDDIR)/level.o
 main.exe : $(LIBPFASST)/lib/libpfasst.a 

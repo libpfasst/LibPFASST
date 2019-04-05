@@ -22,6 +22,7 @@ contains
 
       use mod_zmkpair    !< prog-specified module containing solution type information
       use sweeper    !< prog-specified module containing sweeper information
+      use pf_my_level    !< prog-specified module level
       use hooks      !< prog-specified module containing program hooks
       use utils
 
@@ -33,7 +34,7 @@ contains
       type(zmkpair) :: q0, qend
 
       character(256) :: probin_fname       !<  file name for input
-      integer    :: err, l
+      integer    :: err, l,mpibuflen
       real(pfdp) :: start, finish
 
       probin_fname = "probin.nml"
@@ -55,8 +56,8 @@ contains
           call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
                l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
 
-          call pf_level_set_size(pf,l,[nparticles])
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
+          mpibuflen = nparticles * nparticles * 2
+          call pf_level_set_size(pf,l,[nparticles],mpibuflen)
       end do
 
       if(pf%rank == 0) print *,'Initializing mpi and pfasst...'

@@ -19,7 +19,6 @@ module sweeper
        pi = 3.141592653589793_pfdp, &
        two_pi = 6.2831853071795862_pfdp
 
-
   external :: zgemm
 
   type, extends(pf_user_level_t) :: magpicard_context
@@ -185,8 +184,6 @@ contains
     do i = 1, 3
        j = this%indices(i, 1) + node_offset
        k = this%indices(i, 2) + node_offset
-!       f1_array =>get_array2d(f(j,1))
-!       f2_array =>get_array2d(f(k,1))
         f1 => cast_as_zndarray(f(j,1))
        f2 => cast_as_zndarray(f(k,1))
        f1_array =>get_array2d(f1)
@@ -508,35 +505,35 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
  end subroutine destroy
 
- subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
-   class(magpicard_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
+ 
+  subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
+    class(magpicard_context), intent(inout) :: this
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
+    real(pfdp),        intent(in   ) :: t
    integer,           intent(in   ), optional :: flags
 
    class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
-
-   g%flatarray = f%flatarray
- end subroutine restrict
-
- subroutine interpolate(this, levelF, levelG, qF, qG, t,flags)
-   class(magpicard_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer,           intent(in   ), optional :: flags
-
-   class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
+   f => cast_as_zndarray(f_vec)
+   g => cast_as_zndarray(c_vec)
 
    f%flatarray = g%flatarray
  end subroutine interpolate
+
+
+ subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
+   class(magpicard_context), intent(inout) :: this
+   class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+   class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
+   real(pfdp),        intent(in   ) :: t
+   integer,           intent(in   ), optional :: flags
+
+   class(zndarray), pointer :: f, g
+   f => cast_as_zndarray(f_vec)
+   g => cast_as_zndarray(c_vec)
+
+   g%flatarray = f%flatarray
+ end subroutine restrict
 
  subroutine initialize_as_identity_real(matrix)
    real(pfdp), intent(inout) :: matrix(:,:)

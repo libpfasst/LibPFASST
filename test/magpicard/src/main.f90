@@ -28,7 +28,8 @@ contains
 
       character(256) :: probin_fname       !<  file name for input
       integer    :: err, l
-      real(pfdp) :: start, finish
+      integer    :: mpibuflen       !<  Local variable for mpi buffer length
+      real(pfdp) :: start, finish   !<  Timing variabls
 
       probin_fname = "probin.nml"
       if (command_argument_count() >= 1) &
@@ -41,16 +42,16 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-
-
+          !  Allocate level structures
           allocate(magpicard_context::pf%levels(l)%ulevel)
           allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          call pf_level_set_size(pf,l,[nparticles,nparticles])          
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
+          !  Set level size
+          mpibuflen = nparticles * nparticles * 2
+          call pf_level_set_size(pf,l,[nparticles,nparticles],mpibuflen)          
 
-
+          !  If Gauss nodes are use, include endpoints in count
           if (pf%qtype == 5) then
             pf%levels(l)%nnodes = nnodes(l)+2
           else
@@ -66,8 +67,11 @@ contains
       call pf_add_hook(pf, -1, PF_POST_SWEEP, pf_echo_residual)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)
 
+      !  Get initial condition
       call zndarray_build(dmat_t0, [nparticles,nparticles])
-      call initial(dmat_t0)  
+      call initial(dmat_t0)
+
+      !  Allocate space for end solution
       call zndarray_build(dmat_tfinal,[nparticles,nparticles])
 
 
@@ -85,7 +89,7 @@ contains
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       if(pf%rank == comm%nproc-1) then
-         call dmat_tfinal%write_to_disk('sol_final') !necessary for pfasst.py
+         call dmat_tfinal%write_to_disk('final_solution') !necessary for pfasst.py
          print *,'solution at end of run'
          if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
          call dmat_tfinal%eprint() !only for debug purpose         

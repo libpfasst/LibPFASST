@@ -19,14 +19,7 @@ module sweeper
        pi = 3.141592653589793_pfdp, &
        two_pi = 6.2831853071795862_pfdp
 
-
   external :: zgemm
-
-  type, extends(pf_user_level_t) :: imk_context
-   contains
-     procedure :: restrict => restrict
-     procedure :: interpolate => interpolate
-  end type imk_context
 
   type, extends(pf_imk_t) :: imk_sweeper_t
      integer :: dim
@@ -358,37 +351,6 @@ contains
 
  end subroutine destroy_imk_sweeper
 
- subroutine restrict(this, levelF, levelG, qF, qG, t, flags)
-   class(imk_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer, intent(in), optional :: flags
-
-   class(zmkpair), pointer :: f, g
-   f => cast_as_zmkpair(qF)
-   g => cast_as_zmkpair(qG)
-
-   g%array = f%array
-   g%y = f%y
- end subroutine restrict
-
- subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
-   class(imk_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer, intent(in), optional :: flags
-
-   class(zmkpair), pointer :: f, g
-   f => cast_as_zmkpair(qF)
-   g => cast_as_zmkpair(qG)
-
-   f%array = g%array
-   f%y = g%y
- end subroutine interpolate
 
  subroutine initialize_as_identity_real(matrix,dim)
    integer, intent(in)  :: dim
