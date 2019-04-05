@@ -9,9 +9,10 @@ FFTW=TRUE
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = src/sweeper.f90 \
+FSRC = src/main.f90 \
+       src/sweeper.f90 \
+       src/level.f90 \
        src/hooks.f90 \
-       src/main.f90 \
        src/probin.f90 \
        src/phi_mod.f90
 
@@ -41,11 +42,13 @@ build/%.o: %.f90
 #
 # dependencies
 #
-./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/phi_mod.o
-./build/hooks.o : src/hooks.f90 ./build/sweeper.o
-./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/sweeper.o ./build/phi_mod.o
-./build/probin.o : src/probin.f90
-./build/phi_mod.o : src/phi_mod.f90
+./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/level.o ./build/sweeper.o 
+./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/phi_mod.o 
+./build/level.o : src/level.f90 ./build/phi_mod.o 
+./build/hooks.o : src/hooks.f90 ./build/sweeper.o 
+./build/probin.o : src/probin.f90 
+./build/phi_mod.o : src/phi_mod.f90 
+
 main.exe : $(LIBPFASST)/lib/libpfasst.a 
 
 

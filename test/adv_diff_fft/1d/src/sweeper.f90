@@ -4,7 +4,7 @@
 !
 !> Sweeper and RHS routines for 1-D advection/diffusion example.
 !>     u_t + v*u_x = nu*u_xx
-module feval
+module pf_my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_imex_sweeper
@@ -254,4 +254,4 @@ contains
   end subroutine exact
 
 
-end module feval
+end module pf_my_sweeper

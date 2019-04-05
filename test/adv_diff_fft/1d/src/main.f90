@@ -26,8 +26,8 @@ contains
   !>  This subroutine implements pfasst to solve the advection diffusion equation
   subroutine run_pfasst()  
     use pfasst  !< This module has include statements for the main pfasst routines
-    use feval   !< Local module for function evaluations
-    use pf_my_level   !< Local module for the levels
+    use pf_my_sweeper  !< Local module for sweeper and function evaluations
+    use pf_my_level    !< Local module for the levels
     use hooks   !< Local module for diagnostics and i/o
     use probin  !< Local module reading/parsing problem parameters
 

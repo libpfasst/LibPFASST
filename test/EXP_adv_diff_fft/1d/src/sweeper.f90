@@ -1,4 +1,4 @@
-! MODULE: exp_sweeper_ad
+! MODULE: pf_my_sweeper_ad
 ! !> @author
 !> Tommaso Buvoli
 !
@@ -7,7 +7,7 @@
 ! Description!
 ! Exponential Sweeper for 1-D advection/diffusion example: u_t + v*u_x = nu*u_xx
 
-module exp_sweeper_ad
+module pf_my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_exp
@@ -15,12 +15,6 @@ module exp_sweeper_ad
   use pf_mod_fftpackage
   implicit none
 
-  !>  extend the generic level type by defining transfer operators
-  type, extends(pf_user_level_t) :: ad_level_t
-   contains
-     procedure :: restrict
-     procedure :: interpolate
-  end type ad_level_t
 
   !>  extend the exponential sweeper
   type, extends(pf_exp_t) :: ad_sweeper_t
@@ -300,81 +294,6 @@ contains
 
       end subroutine applyPhi
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  These are the transfer functions that must be  provided for the level
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
-    class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelF
-    class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF,qG
-    real(pfdp),        intent(in   ) :: t
-    integer, intent(in), optional :: flags
-
-
-    integer :: nvarF, nvarG, xrat
-    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
-    real(pfdp),         pointer :: yvec_f(:), yvec_c(:)
-    complex(pfdp),         pointer ::  wk_f(:),wk_c(:)    
-    type(pf_fft_t),     pointer :: fft_f,fft_c
-
-
-
-    sweeper_c => as_ad_sweeper(levelG%ulevel%sweeper)
-    sweeper_f => as_ad_sweeper(levelF%ulevel%sweeper)
-    fft_c => sweeper_c%fft_tool
-    fft_f => sweeper_f%fft_tool    
-
-    yvec_f => get_array1d(qF) 
-    yvec_c => get_array1d(qG)
-
-    nvarF = size(yvec_f)
-    nvarG = size(yvec_c)
-    xrat  = nvarF / nvarG
-
-    if (xrat == 1) then
-       yvec_f = yvec_c
-       return
-    endif
-    wk_f => fft_f%get_wk_ptr_1d()
-    wk_c => fft_c%get_wk_ptr_1d()
-    wk_c=yvec_c
-    call fft_c%fftf()    
-    wk_f = 0.0d0
-    wk_f(1:nvarG/2) = wk_c(1:nvarG/2)
-    wk_f(nvarF-nvarG/2+2:nvarF) = wk_c(nvarG/2+2:nvarG)
-
-    wk_f=wk_f*2.0_pfdp
-
-    call fft_f%fftb()
-    yvec_f=real(wk_f)
-  end subroutine interpolate
-
-  !>  Restrict from fine level to coarse
-  subroutine restrict(this, levelf, levelG, qF, qG, t, flags)
-    class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelf  !<  fine level
-    class(pf_level_t), intent(inout) :: levelG  !<  coarse level
-    class(pf_encap_t), intent(inout) :: qF    !<  fine solution
-    class(pf_encap_t), intent(inout) :: qG    !<  coarse solution
-    real(pfdp),        intent(in   ) :: t      !<  time of solution
-    integer, intent(in), optional :: flags
-
-
-    real(pfdp), pointer :: yvec_f(:), yvec_c(:)  
-
-    integer :: irat
-
-    yvec_f => get_array1d(qF)
-    yvec_c => get_array1d(qG)
-
-    irat  = size(yvec_f)/size(yvec_c)
-
-    yvec_c = yvec_f(::irat)
-  end subroutine restrict
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>  Here are some extra routines which are problem dependent  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -427,4 +346,6 @@ contains
   end subroutine exact
 
 
-end module exp_sweeper_ad
+end module pf_my_sweeper
+
+
