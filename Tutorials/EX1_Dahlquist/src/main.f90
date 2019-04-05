@@ -13,24 +13,24 @@ program main
 
   integer ::  ierror
 
-  !> initialize MPI
+  !> Initialize MPI
   call mpi_init(ierror)
   if (ierror /= 0) &
        stop "ERROR: Can't initialize MPI."
 
-  !> call the  solver 
+  !> Call the  solver 
   call run_pfasst()
 
-  !> close mpi
+  !> Close mpi
   call mpi_finalize(ierror)
 
 contains
   !>  This subroutine setups and calls libpfasst 
   subroutine run_pfasst()  
-    use pfasst  !<  This module has include statements for the main pfasst routines
-    use feval   !<  Local module for function evaluations
-    use hooks   !<  Local module for diagnostics and i/o
-    use probin  !< Local module reading/parsing problem parameters
+    use pfasst        !<  This module has include statements for the main pfasst routines
+    use pf_my_sweeper !<  Local module for sweeper
+    use pf_my_level   !<  Local module for level
+    use probin        !< Local module reading/parsing problem parameters
 
     implicit none
 
@@ -43,21 +43,21 @@ contains
 
     integer           ::  l   !  loop variable over levels
 
-    !> set the name of the input file
+    !> Set the name of the input file
     probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
     if (command_argument_count() >= 1) &
          call get_command_argument(1, value=probin_fname)
     
-    !> read problem parameters
+    !> Read problem parameters
     call probin_init(probin_fname)
 
-    !>  set up communicator
+    !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
-    !>  create the pfasst structure
+    !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-    !> loop over levels and set some level specific parameters
+    !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
        allocate(my_level_t::pf%levels(l)%ulevel)
@@ -65,44 +65,41 @@ contains
        !>  Allocate the user specific data constructor
        allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
 
-       !>  Add the sweeper to the level
+       !>  Allocate the sweeper at this level
        allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
-
     end do
 
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
     !> add some hooks for output
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
 
-    !>  output the run options 
+    !>  Output the run options 
     call pf_print_options(pf,un_opt=6)
 
-    !>  output local parameters
+    !>  Output local parameters
     call print_loc_options(pf,un_opt=6)
     
-    !> allocate initial and final solutions
+    !>  Allocate initial consdition
     call ndarray_build(y_0, [ 1 ])
-    call ndarray_build(y_end, [ 1 ])    
 
-    !> compute initial condition
-    call initial(y_0)
+    !> Set the initial condition 
+    call y_0%setval(1.0_pfdp)
 
-    !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
+    !> Do the PFASST time stepping
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps)
     
-    !>  wait for everyone to be done
+    !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
 
-    !>  deallocate initial condition and final solution
+    !>  Deallocate initial condition and final solution
     call ndarray_destroy(y_0)
-    call ndarray_destroy(y_end)
     
-    !>  deallocate pfasst structure
+    !>  Deallocate pfasst structure
     call pf_pfasst_destroy(pf)
 
   end subroutine run_pfasst

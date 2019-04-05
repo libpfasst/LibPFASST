@@ -421,11 +421,11 @@ module pf_mod_dtype
      end subroutine pf_destroy_stepper_p
 
      !> transfer interfaces used for restriction and interpolation
-     subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t, flags)
+     subroutine pf_transfer_p(this, f_lev, c_lev, f_vec, c_vec, t, flags)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
        class(pf_user_level_t), intent(inout) :: this
-       class(pf_level_t), intent(inout)      :: levelF, levelG
-       class(pf_encap_t),   intent(inout)    :: qF, qG
+       class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+       class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
        real(pfdp),          intent(in)       :: t
        integer, optional,   intent(in)       :: flags
      end subroutine pf_transfer_p

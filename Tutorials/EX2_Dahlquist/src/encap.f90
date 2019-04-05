@@ -32,6 +32,9 @@ module encap
   end type scalar_encap
 
 contains
+
+  !>  The following are the base subroutines that encapsulation factories need to provide
+  
   !>  Subroutine to allocate the array and set the size parameters
   subroutine scalar_create_single(this, x, level, shape)
     class(scalar_factory), intent(inout)              :: this
@@ -83,9 +86,8 @@ contains
 
 
   !>  The following are the base subroutines that all encapsulations must provide
-  !!
-  
-  !> Subroutine to set array to a scalare  value.
+
+  !> Subroutine to set array to a scalar  value.
   subroutine scalar_setval(this, val, flags)
     class(scalar_encap), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
@@ -123,7 +125,7 @@ contains
     this%y = z(1)
   end subroutine scalar_unpack
 
-  !> Subroutine to define the norm of the array (here the max norm)
+  !> Subroutine to define the norm of the array (here the abs value)
   function scalar_norm(this, flags) result (norm)
     class(scalar_encap), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
@@ -150,7 +152,7 @@ contains
   subroutine scalar_eprint(this,flags)
     class(scalar_encap), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
-    !  Just print the first few values
+    !  Print the  value
     print *, this%y
   end subroutine scalar_eprint
 
@@ -165,7 +167,6 @@ contains
        scalar_obj => encap_polymorph
     end select
   end function cast_as_scalar
-
 
 
 end module encap

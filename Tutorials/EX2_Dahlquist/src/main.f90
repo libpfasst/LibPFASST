@@ -13,52 +13,53 @@ program main
 
   integer ::  ierror
 
-  !> initialize MPI
+  !> Initialize MPI
   call mpi_init(ierror)
   if (ierror /= 0) &
        stop "ERROR: Can't initialize MPI."
 
-  !> call the  solver 
+  !> Call the  solver 
   call run_pfasst()
 
-  !> close mpi
+  !> Close mpi
   call mpi_finalize(ierror)
 
 contains
-  !>  This subroutine setups and calls libpfasst 
+  !>  This subroutine set ups and calls libpfasst 
   subroutine run_pfasst()  
-    use pfasst  !<  This module has include statements for the main pfasst routines
-    use feval   !<  Local module for function evaluations
-    use hooks   !<  Local module for diagnostics and i/o
-    use probin  !< Local module reading/parsing problem parameters
-    use encap  !< Local module defining the encapsulation
+    use pfasst            !< This module has include statements for the main pfasst routines
+    use pf_my_sweeper     !< Local module for sweeper
+    use pf_my_level       !< Local module for level
+    use hooks             !< Local module for diagnostics and i/o
+    use probin            !< Local module reading/parsing problem parameters
+    use encap             !< Local module defining the encapsulation
 
     implicit none
 
     !>  Local variables
-    type(pf_pfasst_t) :: pf       !<  the main pfasst structure
-    type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
+    type(pf_pfasst_t) :: pf        !<  the main pfasst structure
+    type(pf_comm_t)   :: comm      !<  the communicator (here it is mpi)
     type(scalar_encap) :: y_0      !<  the initial condition
     type(scalar_encap) :: y_end    !<  the solution at the final time
     character(256)    :: probin_fname   !<  file name for input parameters
 
     integer           ::  l   !  loop variable over levels
 
-    !> set the name of the input file
+    !> Set the name of the input file
     probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
     if (command_argument_count() >= 1) &
          call get_command_argument(1, value=probin_fname)
     
-    !> read problem parameters
+    !> Read problem parameters
     call probin_init(probin_fname)
 
-    !>  set up communicator
+    !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
-    !>  create the pfasst structure
+    !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-    !> loop over levels and set some level specific parameters
+    !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
        allocate(my_level_t::pf%levels(l)%ulevel)
@@ -76,7 +77,7 @@ contains
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    !> add some hooks for output
+    !>  Add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !>  output the run options 
@@ -85,16 +86,16 @@ contains
     !>  Output local parameters
     call print_loc_options(pf,un_opt=6)
     
-    !> compute initial condition
-    y_0%y=1.0_pfdp
+    !> Set the initial condition
+    call y_0%setval(1.0_pfdp)
 
-    !> do the PFASST stepping
-    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
+    !> Do the PFASST time stepping
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps)
 
-    !>  wait for everyone to be done
+    !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
     
-    !>  deallocate pfasst structure
+    !>  Deallocate pfasst structure
     call pf_pfasst_destroy(pf)
 
   end subroutine run_pfasst

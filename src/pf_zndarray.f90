@@ -229,8 +229,12 @@ module pf_mod_zndarray
     class(zndarray), intent(inout) :: this
     character(len=*), intent(in) :: filename
 
+    complex(pfdp),      pointer :: z_array(:,:)    
     open(unit=1, file=trim(filename), form='unformatted')
+
     write(1) this%flatarray
+    !z_array=>get_array2d(this)
+    !write(1) z_array
     close(1)
   end subroutine write_to_disk
 

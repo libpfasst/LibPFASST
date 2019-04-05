@@ -204,6 +204,10 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
     this%npieces = 2
 
+    !  The default is to use both pieces, but can be overriddent in local sweeper
+    this%explicit=.TRUE.
+    this%implicit=.TRUE.
+    
     nnodes = lev%nnodes
     allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
     if (ierr /=0) stop "allocate fail in imex_initialize for QdiffE"

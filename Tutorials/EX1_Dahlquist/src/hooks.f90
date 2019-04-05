@@ -5,12 +5,13 @@
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray
+  use pf_my_sweeper
   implicit none
 contains
 
   !>  Output the error and residual in the solution
   subroutine echo_error(pf, level, state)
-    use feval, only: exact
+    use pf_my_sweeper, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t), intent(inout) :: level
     type(pf_state_t),  intent(in   ) :: state

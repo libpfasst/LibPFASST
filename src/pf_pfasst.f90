@@ -86,15 +86,24 @@ contains
 
   end subroutine pf_pfasst_create
 
-  !> Setup both the PFASST object and the comm object
-  subroutine pf_level_set_size(pf,level_index,shape_in)
+  !> Helper routine to set the size and mpi buffer length
+  subroutine pf_level_set_size(pf,level_index,shape_in,buflen_in)
     type(pf_pfasst_t), intent(inout) :: pf   !!  Main pfasst structure
     integer, intent(in)  ::  level_index
     integer, intent(in)  ::  shape_in(:)
+    integer, intent(in),optional  ::  buflen_in
 
+    integer ::  buflen_local
+
+    ! Allocate and set shape array for the level
     allocate(pf%levels(level_index)%shape(size(shape_in)))
     pf%levels(level_index)%shape = shape_in
-    pf%levels(level_index)%mpibuflen = product(shape_in)
+
+    !  Set the size of mpi buffer
+    buflen_local= product(shape_in)
+    if (present(buflen_in))     buflen_local= buflen_in
+    
+    pf%levels(level_index)%mpibuflen = buflen_local
 
     
   end subroutine pf_level_set_size
