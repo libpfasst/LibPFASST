@@ -211,11 +211,10 @@ contains
 !>  These are the transfer functions that must be  provided for the level
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
+  subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelF
-    class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF,qG
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
     real(pfdp),        intent(in   ) :: t
     integer, intent(in), optional :: flags
 
@@ -226,11 +225,11 @@ contains
     complex(pfdp),         pointer ::  wk_f(:,:),wk_c(:,:)    
     type(pf_fft_t),     pointer :: fft_f,fft_c
 
-    sweeper_c => as_ad_sweeper(levelG%ulevel%sweeper)
-    sweeper_f => as_ad_sweeper(levelF%ulevel%sweeper)
+    sweeper_c => as_ad_sweeper(c_lev%ulevel%sweeper)
+    sweeper_f => as_ad_sweeper(f_lev%ulevel%sweeper)
 
-    yvec_f => get_array2d(qF) 
-    yvec_c => get_array2d(qG)
+    yvec_f => get_array2d(f_vec) 
+    yvec_c => get_array2d(c_vec)
 
     nx_f=size(yvec_f,1)
     ny_f=size(yvec_f,2)
@@ -281,20 +280,18 @@ contains
   end subroutine interpolate
 
   !>  Restrict from fine level to coarse
-  subroutine restrict(this, levelf, levelG, qF, qG, t, flags)
+  subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelf  !<  fine level
-    class(pf_level_t), intent(inout) :: levelG  !<  coarse level
-    class(pf_encap_t), intent(inout) :: qF    !<  fine solution
-    class(pf_encap_t), intent(inout) :: qG    !<  coarse solution
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
     real(pfdp),        intent(in   ) :: t      !<  time of solution
     integer, intent(in), optional :: flags
 
 
     real(pfdp), pointer :: yvec_f(:,:), yvec_c(:,:)  
     integer      :: irat,jrat
-    yvec_f => get_array2d(qF)
-    yvec_c => get_array2d(qG)
+    yvec_f => get_array2d(f_vec)
+    yvec_c => get_array2d(c_vec)
 
     irat  = size(yvec_f,1)/size(yvec_c,1)
     jrat  = size(yvec_f,2)/size(yvec_c,2)
