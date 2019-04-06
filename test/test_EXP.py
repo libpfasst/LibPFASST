@@ -9,7 +9,7 @@ import pytest
 ErrorTuple = collections.namedtuple('ErrorTuple', [ 'step', 'iter', 'level', 'error' ])   # This is what is scraped from the output
 EXE = 'test/EXP_adv_diff_fft/1d/main.exe'                                                        # The name of the executable to run
 NMLFILE = 'test/EXP_adv_diff_fft/1d/{}.nml'                                                      # The name of the input files
-TOL = 1e-5                                                                               # The error tolerance that must be met for a successful test
+TOL = 1e-4                                                                               # The error tolerance that must be met for a successful test
 
 """make tests from the sdc.nml input file."""
 def make_sdc():
@@ -17,14 +17,13 @@ def make_sdc():
     nml = NMLFILE.format('sdc')
     mpi_tasks = 1
     nsteps = 32
+    nu = 0.02
     for nodes in range(3, 9):
-        for imex_status in [0, 2]:
-            if imex_status == 0:
-                nsteps = 512
-            else:
-                nsteps = 32
-
-            sdc.append((nodes, imex_status, mpi_tasks, nml, nsteps))
+        for splitting in [1, 3]:
+            if splitting==3:
+                nu=0.001
+                
+            sdc.append((nodes,nu, splitting, mpi_tasks, nml, nsteps))
 
     return sdc
 
@@ -33,14 +32,13 @@ def make_mlsdc():
     mlsdc = []
     nml = NMLFILE.format('multi_level')
     mpi_tasks = 1
-    nodes = '[2 3 5]'
-    for imex_status in [0, 2]:
-        if imex_status == 0:
-            nsteps = 512
-        else:
-            nsteps = 32
-
-        mlsdc.append((nodes, imex_status, mpi_tasks, nml,nsteps))
+    nodes = '[3 5 9]'
+    nsteps = 32
+    nu = 0.02
+    for splitting in [1, 3]:
+        if splitting==3:
+            nu = 0.001
+        mlsdc.append((nodes,nu, splitting, mpi_tasks, nml,nsteps))
 
     return mlsdc
 
@@ -50,13 +48,12 @@ def make_pfasst():
     nml = NMLFILE.format('multi_level')
     mpi_tasks = 4
     nodes = '[2 3 5]'
-    for imex_status in [0, 2]:
-        if imex_status == 0:
-            nsteps = 512
-        else:
-            nsteps = 32
-
-        pfasst.append((nodes, imex_status, mpi_tasks, nml,nsteps))
+    nsteps = 32
+    nu = 0.02
+    for splitting in [1, 3]:
+        if splitting==3:
+            nu = 0.001
+        pfasst.append((nodes, nu,splitting, mpi_tasks, nml,nsteps))
 
     return pfasst
 
@@ -83,10 +80,10 @@ tests.extend(make_mlsdc())
 tests.extend(make_pfasst())
 
 """pytest command to call the following routing with the different parameters loaded into tests """
-@pytest.mark.parametrize('nodes, imex_status, mpi_tasks, nml, nsteps',
+@pytest.mark.parametrize('nodes, nu, splitting, mpi_tasks, nml, nsteps',
                           tests)
-def test_advdiff(nodes, imex_status, mpi_tasks, nml,nsteps):
-    command = 'mpirun -np {} {} {} nnodes={} imex_stat={} nsteps={}'.format(mpi_tasks, EXE, nml, nodes, imex_status,nsteps)
+def test_advdiff(nodes, nu, splitting, mpi_tasks, nml,nsteps):
+    command = 'mpirun -np {} {} {} nnodes={} nu={} splitting={} nsteps={} '.format(mpi_tasks, EXE, nml, nodes, nu, splitting, nsteps)
 
     print command
     output = subprocess.check_output(command.split())   #  This will run all the tests
@@ -94,7 +91,7 @@ def test_advdiff(nodes, imex_status, mpi_tasks, nml,nsteps):
     try:
         err = errors(output)   # Try to read the output for error statistics
     except ValueError:
-        if imex_status == 0:
+        if splitting == 0:
             assert True, \
                 'Expected poor convergence behavior\nunable to parse output\n {}'.format(line)
         else:
