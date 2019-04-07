@@ -46,8 +46,8 @@ contains
     !!         If we are doing multiple levels, then we need to coarsen to fine level
     f_lev_p => pf%levels(pf%state%finest_level)
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
-       if( (which == 0) .or. (which == 1)) call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0, 1, pf%state%step+1)
-       if( (which == 0) .or. (which == 2)) call f_lev_p%ulevel%sweeper%spreadq0(f_lev_p, t0+dt, 2, pf%state%step+1)
+       if( (which == 0) .or. (which == 1)) call f_lev_p%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0, 1, pf%state%step+1)
+       if( (which == 0) .or. (which == 2)) call f_lev_p%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0+dt, 2, pf%state%step+1)
     endif
 
 
@@ -112,9 +112,9 @@ contains
                 if (which == 2) call c_lev_p%qend%copy(c_lev_p%q0, 2)
                 ! If we are doing PFASST_pred, we use the old values at nodes, otherwise spread q0
                 if (.not. pf%PFASST_pred) then
-                   if( (which == 0) .or. (which == 1)) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k, 1, pf%state%step+1)
-!                    if( (which == 0) .or. (which == 2)) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k+dt, 2, pf%state%step+1)
-                   if( which == 2) call c_lev_p%ulevel%sweeper%spreadq0(c_lev_p, t0k+dt, 2, pf%state%step+1)
+                   if( (which == 0) .or. (which == 1)) call c_lev_p%ulevel%sweeper%spreadq0(pf,level_index, t0k, 1, pf%state%step+1)
+!                    if( (which == 0) .or. (which == 2)) call c_lev_p%ulevel%sweeper%spreadq0(pf,level_index, t0k+dt, 2, pf%state%step+1)
+                   if( which == 2) call c_lev_p%ulevel%sweeper%spreadq0(pf,level_index, t0k+dt, 2, pf%state%step+1)
                 end if
              end if
              !  Do some sweeps

@@ -13,7 +13,6 @@
 	PFASST_pred = .true.
 	vcycle = .true.
         debug = .false.
-	save_results=.true.
 /
 
 &PARAMS

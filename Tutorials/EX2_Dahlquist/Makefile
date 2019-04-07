@@ -7,9 +7,10 @@ LIBPFASST ?= ../..
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = src/feval.f90 \
+FSRC = src/main.f90 \
+       src/sweeper.f90 \
+       src/level.f90 \
        src/hooks.f90 \
-       src/main.f90 \
        src/encap.f90 \
        src/probin.f90 
 
@@ -41,8 +42,9 @@ build/%.o: %.f90
 # dependencies
 #
 main.exe : $(LIBPFASST)/lib/libpfasst.a 
-build/feval.o : src/feval.f90 ./build/probin.o ./build/encap.o 
-build/hooks.o : src/hooks.f90 ./build/feval.o ./build/encap.o 
-build/main.o : src/main.f90 ./build/encap.o ./build/probin.o ./build/hooks.o ./build/feval.o 
+build/sweeper.o : src/sweeper.f90 ./build/probin.o 
+build/level.o : src/level.f90 ./build/probin.o 
+build/hooks.o : src/hooks.f90 ./build/sweeper.o ./build/encap.o 
+build/main.o : src/main.f90 ./build/encap.o ./build/probin.o ./build/hooks.o ./build/sweeper.o ./build/level.o 
 build/encap.o : src/encap.f90 
 build/probin.o : src/probin.f90 

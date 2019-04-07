@@ -1,37 +1,32 @@
 !
-!  Test parameters for a single level example
+!  Test parameters for multi-level imex
 !
 
+!  These are internal pfasst variables that must be set
 &PF_PARAMS
-   !  These are internal pfasst variables that must be set
-    nlevels  = 1
+    nlevels  = 3   !  must be set
 
-    !  These are internal pfasst variables that can be reset
-    niters = 8   !  default is 5
- 
-     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-     qtype   = 1   
-   
+    niters = 25   !  default is 5
+    nnodes =    2  3  5
+
+    nsweeps_pred= 1 1 
+    nsweeps= 1 1 1
+    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
-     rel_res_tol = 1.d-12
+     abs_res_tol = 1.d-14
+     rel_res_tol = 1.d-14
 
-     nnodes =  5
-
-     nsweeps_pred= 1 
-     nsweeps= 1 
+     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
+     Vcycle=.TRUE.
 /
 
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  64
-    nu = 0.02
-    v=1.0
-
     Tfin = 1.0
-    nsteps = 64
+    nsteps = 32
 
-    imex_stat=2
+    lam1=1.0
+    lam2=-2.0
 
 /

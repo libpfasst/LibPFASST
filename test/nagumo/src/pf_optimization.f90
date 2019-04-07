@@ -5,6 +5,7 @@ module pf_mod_optimization
   use pf_mod_mpi
   use pf_mod_ndarray_oc
   use pf_mod_parallel_oc
+  use pf_my_level
   use feval
   use probin, only: solve_y
   use solutions

@@ -1,31 +1,23 @@
 !
 ! This file is part of LIBPFASST.
 !
-!
-!> Sweeper and RHS routines for 1-D advection/diffusion example.
-!>     u_t + v*u_x = nu*u_xx
-module feval
+!> Sweeper and RHS specification for Dahlquist example.
+!>     u_t = lam1*u + lam2*u
+module pf_my_sweeper
   use pf_mod_dtype
   use encap
-  use pf_mod_imexQ
-
-
-  real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
-
-  !>  extend the generic level type by defining transfer operators
-  type, extends(pf_user_level_t) :: my_level_t
-   contains
-     procedure :: restrict
-     procedure :: interpolate
-  end type my_level_t
+  use pf_mod_imex_sweeper
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
-  type, extends(pf_imexQ_t) :: my_sweeper_t
+  type, extends(pf_imex_sweeper_t) :: my_sweeper_t
 
    contains
 
      procedure :: f_eval    !  Computes the advection and diffusion terms
      procedure :: f_comp    !  Does implicit solves 
+
+     procedure :: initialize !  Overwrites imex sweeper initialize
+     procedure :: destroy    !  Overwrites imex sweeper destroy
 
   end type my_sweeper_t
 
@@ -43,26 +35,32 @@ contains
     end select
   end function as_my_sweeper
 
+
   !>  Routine to set up sweeper variables and operators
-  subroutine sweeper_setup(sweeper, grid_shape)
-    class(pf_sweeper_t), intent(inout) :: sweeper
-    integer,             intent(in   ) :: grid_shape(1)
+  subroutine initialize(this, pf,level_index)
+    class(my_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf
+    integer, intent(in) :: level_index
 
-    class(my_sweeper_t), pointer :: this
-    this => as_my_sweeper(sweeper)
+    !>  Call the imex sweeper initialization
+    call this%imex_initialize(pf,level_index)
 
-    !>  Set variables for explicit and implicit parts
+    !>  Set variables for explicit and implicit parts (just to show you can)
     this%implicit=.TRUE.
     this%explicit=.TRUE.
 
-  end subroutine sweeper_setup
+  end subroutine initialize
 
   !>  destroy the sweeper type
-  subroutine destroy(this, lev)
+  subroutine destroy(this, pf,level_index)
     class(my_sweeper_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)   :: lev
+    type(pf_pfasst_t), intent(inout), target :: pf
+    integer, intent(in) :: level_index
 
-    call this%imexQ_destroy(lev)
+    !>  Call the imex sweeper destroy
+    call this%imex_destroy(pf,level_index)
+
+    !  Nothing to do 
 
   end subroutine destroy
 
@@ -80,6 +78,7 @@ contains
     integer,             intent(in   ) :: piece
     
     class(scalar_encap), pointer :: y_encap, f_encap
+    
     y_encap => cast_as_scalar(y)
     f_encap => cast_as_scalar(f)
 
@@ -109,6 +108,7 @@ contains
     integer,             intent(in   ) :: piece
 
     class(scalar_encap), pointer :: y_encap, f_encap, rhs_encap
+
     y_encap => cast_as_scalar(y)
     f_encap => cast_as_scalar(f)
     rhs_encap => cast_as_scalar(rhs)
@@ -127,48 +127,9 @@ contains
     end if
   end subroutine f_comp
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  These are the transfer functions that must be  provided for the level
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
-    class(my_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelF
-    class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF,qG
-    real(pfdp),        intent(in   ) :: t
-    integer, intent(in), optional :: flags
-
-
-    class(scalar_encap), pointer :: y_encap_f, y_encap_c
-
-    y_encap_f => cast_as_scalar(qF)
-    y_encap_c => cast_as_scalar(qG)
-
-    y_encap_f%y=y_encap_c%y
-  end subroutine interpolate
-
-  !>  Restrict from fine level to coarse
-  subroutine restrict(this, levelf, levelG, qF, qG, t, flags)
-    class(my_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelf  !<  fine level
-    class(pf_level_t), intent(inout) :: levelG  !<  coarse level
-    class(pf_encap_t), intent(inout) :: qF    !<  fine solution
-    class(pf_encap_t), intent(inout) :: qG    !<  coarse solution
-    real(pfdp),        intent(in   ) :: t      !<  time of solution
-    integer, intent(in), optional :: flags
-
-    class(scalar_encap), pointer :: y_encap_f, y_encap_c
-
-    y_encap_f => cast_as_scalar(qF)
-    y_encap_c => cast_as_scalar(qG)
-
-    y_encap_c%y = y_encap_f%y
-  end subroutine restrict
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  Here are some extra routines which are problem dependent  
+!>  Here are some extra routines to help out
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
   subroutine initial(y_0)
@@ -187,4 +148,5 @@ contains
   end subroutine exact
 
 
-end module feval
+end module pf_my_sweeper
+

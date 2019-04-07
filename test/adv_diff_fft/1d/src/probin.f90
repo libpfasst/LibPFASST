@@ -117,6 +117,7 @@ contains
        print *,'Bad case for nprob in probin ', nprob
        call exit(0)
     end select
+    
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml
     write(un,*) '=================================================='
   end subroutine print_loc_options

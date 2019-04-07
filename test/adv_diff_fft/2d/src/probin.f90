@@ -22,7 +22,7 @@ module probin
   integer, save :: nsteps          ! number of time steps
   integer, save :: nsteps_rk       ! number of time steps for rk
   integer, save :: imex_stat       ! type of imex splitting
-
+  
   character(len=32), save :: pfasst_nml
 
   character(len=64), save :: output ! directory name for output

@@ -35,6 +35,7 @@ module pf_mod_imexQ_oc
      procedure :: spreadq0     => imexQ_oc_spreadq0
      procedure :: destroy      => imexQ_oc_destroy
      procedure :: imexQ_oc_destroy
+     procedure :: imexQ_oc_initialize
   end type pf_imexQ_oc_t
 
   interface
@@ -84,7 +85,7 @@ contains
     integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
     integer, optional, intent(in   ) :: flags
 
-    class(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !!  points to current level
 
     ! indicate if sweep on both (0, default; might skip y or p if tolerance satisfied), just y (1), just p (2)
 
@@ -386,13 +387,17 @@ contains
 
 
   ! Evaluate function values
-  subroutine imexQ_oc_evaluate(this, lev, t, m, flags, step)
+  subroutine imexQ_oc_evaluate(this, pf,level_index, t, m, flags, step)
     class(pf_imexQ_oc_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t
     integer,           intent(in   ) :: m
     integer, intent(in), optional   :: flags, step
+
     integer                         :: which, mystep
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     which = 0
     if (present(flags)) which = flags
@@ -414,31 +419,38 @@ contains
   end subroutine imexQ_oc_evaluate
 
 
-  subroutine imexQ_oc_evaluate_all(this, lev, t, flags, step)
+  subroutine imexQ_oc_evaluate_all(this, pf,level_index, t, flags, step)
     !! Evaluate all function values
     class(pf_imexQ_oc_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
     real(pfdp),        intent(in   ) :: t(:)
     integer, intent(in), optional   :: flags, step
 !     call pf_generic_evaluate_all(this, lev, t, flags, step)
     integer :: m
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     if (.not.present(flags)) stop "IMEXQ_OC EVAL_ALL WITHOUT FLAGS"
     if (.not.present(step)) stop "IMEXQ_OC EVAL_ALL WITHOUT step"
 
 
     do m = 1, lev%nnodes
-      call this%evaluate(lev, t(m), m, flags, step)
+      call this%evaluate(pf,level_index, t(m), m, flags, step)
     end do
   end subroutine imexQ_oc_evaluate_all
 
 
   ! Initialize matrices
-  subroutine imexQ_oc_initialize(this, lev)
+  subroutine imexQ_oc_initialize(this, pf,level_index)
     class(pf_imexQ_oc_t), intent(inout) :: this
-    class(pf_level_t),    intent(inout) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
 
     integer    ::  Nnodes
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%npieces = 2
 
@@ -475,15 +487,19 @@ contains
 
 
   ! Compute SDC integral
-  subroutine imexQ_oc_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+  subroutine imexQ_oc_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_imexQ_oc_t), intent(inout) :: this
-    class(pf_level_t), intent(in   ) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :) !qSDC unused?
     real(pfdp),       intent(in)     :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, intent(in), optional    :: flags
 
     integer :: n, m, Nnodes, which
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
     Nnodes=lev%nnodes
 
     which = 0
@@ -526,8 +542,6 @@ contains
     end do
   end subroutine imexQ_oc_integrate
 
-
-
   subroutine imexQ_oc_residual(this, pf, level_index, dt, flags)
     class(pf_imexQ_oc_t),      intent(inout) :: this
     type(pf_pfasst_t),  target,intent(inout)   :: pf
@@ -536,8 +550,7 @@ contains
     integer,         optional, intent(in)     :: flags
 
     integer :: m, which
-    class(pf_level_t), pointer  :: lev
-
+    type(pf_level_t), pointer  :: lev
     lev => pf%levels(level_index)
 
     which = 0
@@ -550,7 +563,7 @@ contains
 !     print *, "IMEXQ_OC RESIDUAL ", which
 
 
-    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
+    call this%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I, which)
 
     ! add tau (which is 'node to node')
     if (level_index < pf%state%finest_level) then
@@ -575,13 +588,17 @@ contains
 
   end subroutine imexQ_oc_residual
 
-  subroutine imexQ_oc_spreadq0(this, lev, t0, flags, step)
+  subroutine imexQ_oc_spreadq0(this, pf,level_index, t0, flags, step)
     class(pf_imexQ_oc_t),  intent(inout) :: this
-    class(pf_level_t),     intent(inout) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
     real(pfdp),            intent(in   ) :: t0
     integer,     optional, intent(in)    :: flags, step
 
     integer :: m, p, which, mystep
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
     which = 3
     if(present(flags)) which = flags
     if (.not.present(flags)) stop "IMEXQ_OC SPREADQ0 WITHOUT FLAGS"
@@ -602,7 +619,7 @@ contains
         !  Stick initial condition into first node slot
         call lev%Q(1)%copy(lev%q0, 1)
         !  Evaluate F at first spot
-        call lev%ulevel%sweeper%evaluate(lev, t0, 1, 1, mystep)
+        call lev%ulevel%sweeper%evaluate(pf,level_index, t0, 1, 1, mystep)
         ! Spread F and solution to all nodes
         do m = 2, lev%nnodes
           call lev%Q(m)%copy(lev%Q(1), 1)
@@ -614,7 +631,7 @@ contains
         !  Stick terminal condition into last node slot
         call lev%Q(lev%nnodes)%copy(lev%qend, 2)
         !  Evaluate F at first spot
-        call lev%ulevel%sweeper%evaluate(lev, t0, lev%nnodes, 2, mystep)
+        call lev%ulevel%sweeper%evaluate(pf,level_index, t0, lev%nnodes, 2, mystep)
         ! Spread F and solution to all nodes
         do m = lev%nnodes-1, 1, -1
           call lev%Q(m)%copy(lev%Q(lev%nnodes), 2)
@@ -628,10 +645,14 @@ contains
 
   end subroutine imexQ_oc_spreadq0
 
-  subroutine imexQ_oc_destroy(this, lev)
+  subroutine imexQ_oc_destroy(this, pf,level_index)
     !!  deallocate
     class(pf_imexQ_oc_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    type(pf_level_t), pointer  :: lev    !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
 
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -639,7 +660,7 @@ contains
     deallocate(this%QtilI)
     deallocate(this%dtsdc)
 
-    call lev%ulevel%factory%destroy_single(this%rhs, lev%index, lev%shape)
+    call lev%ulevel%factory%destroy_single(this%rhs)
   end subroutine imexQ_oc_destroy
 
 end module pf_mod_imexQ_oc

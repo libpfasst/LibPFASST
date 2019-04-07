@@ -103,10 +103,9 @@ module mod_zmkpair
 
   end subroutine zmkpair_create_array
 
-  subroutine zmkpair_destroy_single(this, x, level, shape)
+  subroutine zmkpair_destroy_single(this, x)
     class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: x
-    integer, intent(in) :: level, shape(:)
     class(zmkpair), pointer :: zmkpair_obj
 
     zmkpair_obj => cast_as_zmkpair(x)
@@ -116,14 +115,13 @@ module mod_zmkpair
   end subroutine zmkpair_destroy_single
 
   !> Wrapper routine for looped allocation of many zmkpair type arrays
-  subroutine zmkpair_destroy_array(this, x, n, level, shape)
+  subroutine zmkpair_destroy_array(this, x)
     class(zmkpair_factory), intent(inout):: this
     class(pf_encap_t), intent(inout), pointer :: x(:)
-    integer, intent(in) :: n, level, shape(:)
     class(zmkpair), pointer :: zmkpair_obj
     integer :: i
 
-    do i = 1, n
+    do i = 1, size(x)
       zmkpair_obj => cast_as_zmkpair(x(i))
       deallocate(zmkpair_obj%array)
       deallocate(zmkpair_obj%y)

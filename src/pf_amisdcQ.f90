@@ -22,6 +22,7 @@ module pf_mod_amisdcQ
      procedure :: sweep_coupled_implicit_terms
      procedure :: sweep_decoupled_implicit_terms
      procedure :: amisdcQ_destroy
+     procedure :: amisdcQ_initialize
   end type pf_amisdcQ_t
 
 contains
@@ -122,12 +123,12 @@ contains
 
     call lev%qend%copy(lev%Q(lev%nnodes))
 
-    call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)
-    call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)
-    call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)
-    call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)
-    call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)
-    call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)
+    call lev%ulevel%factory%destroy_array(S2)
+    call lev%ulevel%factory%destroy_array(S3)
+    call lev%ulevel%factory%destroy_single(rhsA)
+    call lev%ulevel%factory%destroy_single(rhsB)
+    call lev%ulevel%factory%destroy_single(QA)
+    call lev%ulevel%factory%destroy_single(QB)
 
     call end_timer(pf, TLEVEL+lev%index-1)
 

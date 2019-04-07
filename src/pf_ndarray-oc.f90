@@ -119,10 +119,9 @@ contains
   end subroutine ndarray_oc_destroy
 
     !> Subroutine to destroy an single array
-  subroutine ndarray_oc_destroy_single(this, x, level, shape)
+  subroutine ndarray_oc_destroy_single(this, x)
     class(ndarray_oc_factory), intent(inout)              :: this
     class(pf_encap_t),         intent(inout), allocatable :: x
-    integer,                   intent(in   )              :: level, shape(:)
     
     select type (x)
     class is (ndarray_oc)
@@ -136,15 +135,14 @@ contains
   end subroutine ndarray_oc_destroy_single
   
     !> Subroutine to destroy an array of arrays
-  subroutine ndarray_oc_destroy_array(this, x, n, level, shape)
+  subroutine ndarray_oc_destroy_array(this, x)
     class(ndarray_oc_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
     
     select type(x)
     class is (ndarray_oc)
-       do i = 1,n
+       do i = 1,size(x)
           deallocate(x(i)%pflatarray)
           deallocate(x(i)%yflatarray)
           deallocate(x(i)%shape)
@@ -363,7 +361,7 @@ contains
 
   
   function get_array2d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:)
     integer                :: which
@@ -388,7 +386,7 @@ contains
   end function get_array2d_oc
   
   function get_array3d_oc(x, flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,     intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:,:)
     integer                :: which

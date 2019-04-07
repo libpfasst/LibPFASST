@@ -4,7 +4,8 @@ program main
   use pf_mod_ndarray_oc
 
   use pf_mod_optimization
-  use feval
+  use pf_my_level
+  use feval  
   use hooks
   use probin
   use solutions
@@ -70,25 +71,16 @@ program main
   pf%echo_timings = .false.
        
   do l = 1, pf%nlevels
-!        pf%levels(l)%nsweeps = nsweeps(l)
-!        pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
-
-       pf%levels(l)%nnodes = nnodes(l)
-
        !  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_oc_factory::pf%levels(l)%ulevel%factory)
 
        !  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, nvars(l), nnodes(l))
 
-       !  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1) = nvars(l)
-       !  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = nvars(l)
-  end do
+       ! Set the size of the data on this level
+       call pf_level_set_size(pf,l,[nvars(l)])
+    end do
 
   call pf_pfasst_setup(pf)
  
@@ -441,10 +433,6 @@ program main
 
 !   print *, pf%rank, "destroy q1"
   call ndarray_oc_destroy(q1)
-  
-  do l = 1, pf%nlevels
-    call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
-  end do
   
 !   print *, pf%rank, "destroy pf"
   call pf_pfasst_destroy(pf)

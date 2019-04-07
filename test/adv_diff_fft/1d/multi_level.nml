@@ -6,18 +6,20 @@
 &PF_PARAMS
     nlevels  = 3   !  must be set
 
-    niters = 15   !  default is 5
-    nnodes =    5 5   5
+    niters = 50   !  default is 5
+    nnodes =     3 5 9
 
+    use_proper_nodes=.false.
     nsweeps_pred= 1 1 1
-    nsweeps= 2 2 1
+    nsweeps= 1 1 1
     
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
     qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-13
-     rel_res_tol = 1.d-13
+     abs_res_tol = 1.d-12
+     rel_res_tol = 1.d-12
+
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
      pipeline_pred =  .false.
@@ -27,18 +29,20 @@
      Vcycle=.TRUE.
 
 
-
+     save_residuals=.false.
+     save_timings=.false.
+     use_Sform=.true.
 /
 
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  16 32 32
+    nx =  16 32 64
     nu = 0.02
     v=1.0
 
-    Tfin = 0.9
-    nsteps = 32
+    Tfin = 1.0
+    nsteps = 8
 
     imex_stat=2
     nprob = 1

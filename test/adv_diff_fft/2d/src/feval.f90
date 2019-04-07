@@ -7,7 +7,7 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imexQ
+  use pf_mod_imex_sweeper
   use pf_mod_fftpackage
   implicit none
 
@@ -21,7 +21,7 @@ module feval
   end type ad_level_t
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
-  type, extends(pf_imexQ_t) :: ad_sweeper_t
+  type, extends(pf_imex_sweeper_t) :: ad_sweeper_t
      integer ::     nx,ny
      type(pf_fft_t), pointer :: fft_tool
      complex(pfdp), allocatable :: lap(:,:)         ! Lapclacian operators
@@ -34,6 +34,8 @@ module feval
 
      procedure :: f_eval    !  Computes the advection and diffusion terms
      procedure :: f_comp    !  Does implicit solves 
+     procedure :: destroy     !  Will be called from base sweeper destroy
+     procedure :: initialize  !  Will be called from base sweeper initialize
 
   end type ad_sweeper_t
 
@@ -51,20 +53,21 @@ contains
     end select
   end function as_ad_sweeper
 
-  !>  Routine to set up sweeper variables and operators
-  subroutine sweeper_setup(sweeper, grid_shape)
-    use probin, only:  imex_stat,nu, a,b
+  !>  Routine to initialize variables (called from base sweeper initialize)
+  subroutine initialize(this, pf,level_index)
+    use probin, only:  imex_stat,nu,a,b
+    class(ad_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout),target :: pf
+    integer,             intent(in)    :: level_index
 
-    class(pf_sweeper_t), intent(inout) :: sweeper
-    integer,             intent(in   ) :: grid_shape(3)
 
-    class(ad_sweeper_t), pointer :: this
     integer     :: i,nx,ny
 
-    nx=grid_shape(1)
-    ny=grid_shape(2)
-    this => as_ad_sweeper(sweeper)
-
+    nx=pf%levels(level_index)%shape(1)
+    ny=pf%levels(level_index)%shape(2)
+    
+    !  Call the imex sweeper initialize
+    call this%imex_initialize(pf,level_index)
     !>  Set variables for explicit and implicit parts
     if (imex_stat .eq. 0 ) then
        this%explicit=.TRUE.
@@ -76,6 +79,7 @@ contains
        this%implicit=.TRUE.
        this%explicit=.TRUE.
     end if
+    
 
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx,ny],2)
@@ -90,40 +94,42 @@ contains
     call this%fft_tool%make_deriv_2d(this%ddx,1)
     call this%fft_tool%make_deriv_2d(this%ddy,2)
     select case (imex_stat)
-       case (0)  ! Fully Explicit        
-          this%opE = -a*this%ddx-b*this%ddy + nu * this%lap
-          this%opI = 0.0_pfdp          
-       case (1)  ! Fully Implicit
-          this%opE = 0.0_pfdp
-          this%opI = -a*this%ddx-b*this%ddy + nu * this%lap 
-       case (2)  ! IMEX
-          this%opE = -a*this%ddx-b*this%ddy
-          this%opI =  nu * this%lap           
-       case DEFAULT
-          print *,'Bad case for imex_stat in f_eval ', imex_stat
-          call exit(0)
-       end select
+    case (0)  ! Fully Explicit        
+       this%opE = -a*this%ddx-b*this%ddy + nu * this%lap
+       this%opI = 0.0_pfdp          
+    case (1)  ! Fully Implicit
+       this%opE = 0.0_pfdp
+       this%opI = -a*this%ddx-b*this%ddy + nu * this%lap 
+    case (2)  ! IMEX
+       this%opE = -a*this%ddx-b*this%ddy
+       this%opI =  nu * this%lap           
+    case DEFAULT
+       print *,'Bad case for imex_stat in f_eval ', imex_stat
+       call exit(0)
+    end select
 
-       
-  end subroutine sweeper_setup
+    deallocate(this%lap)
+    deallocate(this%ddx)
+    deallocate(this%ddy)    
 
-  !>  destroy the sweeper type
-  subroutine sweeper_destroy(sweeper)
-    class(pf_sweeper_t), intent(inout) :: sweeper
+  end subroutine initialize
+
+  !>  Destroy sweeper (called from base sweeper destroy)
+  subroutine destroy(this,pf,level_index)
+    class(ad_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
     
-    class(ad_sweeper_t), pointer :: this
-    this => as_ad_sweeper(sweeper)    
+    call this%imex_destroy(pf,level_index)
 
     deallocate(this%opE)
     deallocate(this%opI)
-       deallocate(this%lap)
-       deallocate(this%ddx)
-       deallocate(this%ddy)    
-    !    call this%imexQ_destroy(lev)
     
     call this%fft_tool%fft_destroy()
-    deallocate(this%fft_tool)    
-  end subroutine sweeper_destroy
+    deallocate(this%fft_tool)
+
+  end subroutine destroy
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! These routines must be provided for the sweeper
@@ -147,10 +153,10 @@ contains
     fft => this%fft_tool
     wk => fft%get_wk_ptr_2d()
     
-    ! Take the fft of y (stored in fft%workhat)
+    ! Load the solution into the FFT
     wk=yvec
 
-    ! Apply spectral operators
+    ! Apply spectral operators using the FFT convolution function
     select case (piece)
     case (1)  ! Explicit piece
        call fft%conv(this%opE)            
@@ -188,13 +194,13 @@ contains
        rhsvec => get_array2d(rhs)
        fvec => get_array2d(f)
 
-       ! Take the fft of y (stored in fft%workhat)
+       ! Apply the inverse opeator with the FFT convolution
        wk=rhsvec
        call fft%conv(1.0_pfdp/(1.0_pfdp - dtq*this%opI))
+
        yvec=real(wk)
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq
-
     else
        print *,'Bad piece in f_comp ',piece
        call exit(0)
@@ -205,11 +211,10 @@ contains
 !>  These are the transfer functions that must be  provided for the level
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
+  subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelF
-    class(pf_level_t), intent(inout) :: levelG
-    class(pf_encap_t), intent(inout) :: qF,qG
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
     real(pfdp),        intent(in   ) :: t
     integer, intent(in), optional :: flags
 
@@ -220,11 +225,11 @@ contains
     complex(pfdp),         pointer ::  wk_f(:,:),wk_c(:,:)    
     type(pf_fft_t),     pointer :: fft_f,fft_c
 
-    sweeper_c => as_ad_sweeper(levelG%ulevel%sweeper)
-    sweeper_f => as_ad_sweeper(levelF%ulevel%sweeper)
+    sweeper_c => as_ad_sweeper(c_lev%ulevel%sweeper)
+    sweeper_f => as_ad_sweeper(f_lev%ulevel%sweeper)
 
-    yvec_f => get_array2d(qF) 
-    yvec_c => get_array2d(qG)
+    yvec_f => get_array2d(f_vec) 
+    yvec_c => get_array2d(c_vec)
 
     nx_f=size(yvec_f,1)
     ny_f=size(yvec_f,2)
@@ -275,20 +280,18 @@ contains
   end subroutine interpolate
 
   !>  Restrict from fine level to coarse
-  subroutine restrict(this, levelf, levelG, qF, qG, t, flags)
+  subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: levelf  !<  fine level
-    class(pf_level_t), intent(inout) :: levelG  !<  coarse level
-    class(pf_encap_t), intent(inout) :: qF    !<  fine solution
-    class(pf_encap_t), intent(inout) :: qG    !<  coarse solution
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
     real(pfdp),        intent(in   ) :: t      !<  time of solution
     integer, intent(in), optional :: flags
 
 
     real(pfdp), pointer :: yvec_f(:,:), yvec_c(:,:)  
     integer      :: irat,jrat
-    yvec_f => get_array2d(qF)
-    yvec_c => get_array2d(qG)
+    yvec_f => get_array2d(f_vec)
+    yvec_c => get_array2d(c_vec)
 
     irat  = size(yvec_f,1)/size(yvec_c,1)
     jrat  = size(yvec_f,2)/size(yvec_c,2)

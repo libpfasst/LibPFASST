@@ -126,10 +126,9 @@ contains
   end subroutine zndsysarray_destroy
 
   !> Subroutine to destroy an single array
-  subroutine zndsysarray_destroy_single(this, x, level, shape)
+  subroutine zndsysarray_destroy_single(this, x)
     class(zndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
 
     select type (x)
     class is (zndsysarray)
@@ -141,15 +140,14 @@ contains
 
 
   !> Subroutine to destroy an array of arrays
-  subroutine zndsysarray_destroy_array(this, x, n, level,  shape)
+  subroutine zndsysarray_destroy_array(this, x)
     class(zndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
 
     select type(x)
     class is (zndsysarray)
-       do i = 1,n
+       do i = 1,size(x)
           deallocate(x(i)%arr_shape)
           deallocate(x(i)%flatarray)
        end do
