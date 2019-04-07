@@ -71,7 +71,7 @@ module pf_mod_dtype
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
      procedure(pf_spreadq0_p),     deferred :: spreadq0
-     procedure(pf_destroy_p),      deferred :: destroy
+     procedure(pf_destroy_sweeper_p),      deferred :: destroy
   end type pf_sweeper_t
 
   !>  The abstract time stepper type (must be extended)
@@ -126,7 +126,7 @@ module pf_mod_dtype
      real(pfdp), allocatable :: QmatTrap(:,:) ! Trapezoid rule matrix
      real(pfdp), allocatable :: QmatVer(:,:)  ! Verlet Matrix
      real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat
-     real(pfdp), allocatable :: s0mat(:,:)    !  deprecated
+     real(pfdp), allocatable :: Smat(:,:)    !  The node to node version of Qmat
 
      logical :: use_proper_nodes =  .false. !  If true use gauss nodes in coarsening
      logical :: use_composite_nodes = .false. ! If true, finer nodes are composite
@@ -144,11 +144,8 @@ module pf_mod_dtype
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
-
      !  Mandatory level parameter
      integer  :: mpibuflen    = -1   !! size of solution in pfdp units
-
-
 
      !  Diagnostics
      real(pfdp)  :: error            !! holds the user defined error
@@ -202,8 +199,8 @@ module pf_mod_dtype
      integer :: statreq                 ! status send request
 
      ! fakie, needs modernization
-     type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
-     type(c_ptr), pointer :: pfpth(:,:)
+     !type(c_ptr), pointer :: pfs(:)     ! pfasst objects (indexed by rank)
+     !type(c_ptr), pointer :: pfpth(:,:)
 
      !> Procedure interfaces
      procedure(pf_post_p),        pointer, nopass :: post
@@ -228,7 +225,7 @@ module pf_mod_dtype
      integer :: rank
      integer :: level
 
-     character(len=512) :: datpath
+     character(len=128) :: datpath
      
      procedure(pf_results_p), pointer, nopass :: dump 
      procedure(pf_results_p), pointer, nopass :: destroy 
@@ -267,10 +264,13 @@ module pf_mod_dtype
 
 
      ! --  run options  (should be set before pfasst_run is called)
-     logical :: Vcycle = .true.         !!  decides if Vcycles are done
+     logical :: Vcycle = .true.      !!  decides if Vcycles are done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
-     integer :: taui0 = -999999     !! iteration cutoff for tau inclusion
+     logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
+     integer :: taui0 = -999999      !! iteration cutoff for tau inclusion
+
+
 
      !> RK and Parareal options
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
@@ -279,8 +279,8 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .true.    !!  If true, timings are saved and  output
+     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
      logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
@@ -318,48 +318,54 @@ module pf_mod_dtype
 
      !> SDC sweeper subroutines
      subroutine pf_sweep_p(this, pf, level_index, t0, dt, nsweeps, flags)
-       import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
+       import pf_sweeper_t,pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
-       real(pfdp),          intent(in)    :: dt
-       real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
+       real(pfdp),          intent(in)    :: t0
+       real(pfdp),          intent(in)    :: dt
        integer,             intent(in)    :: nsweeps
        integer, optional,   intent(in)    :: flags
      end subroutine pf_sweep_p
 
-     subroutine pf_evaluate_p(this, lev, t, m, flags, step)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_evaluate_p(this, pf, level_index, t, m, flags, step)
+       import pf_sweeper_t,pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: lev
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
        real(pfdp),          intent(in)    :: t
        integer,             intent(in)    :: m
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_evaluate_p
 
-     subroutine pf_evaluate_all_p(this, lev, t, flags, step)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_evaluate_all_p(this, pf, level_index, t, flags, step)
+       import pf_sweeper_t, pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: lev
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
        real(pfdp),          intent(in)    :: t(:)
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_evaluate_all_p
 
-     subroutine pf_initialize_p(this, lev)
-       import pf_sweeper_t, pf_level_t
+     subroutine pf_initialize_p(this, pf, level_index)
+       import pf_sweeper_t, pf_pfasst_t
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: lev
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
      end subroutine pf_initialize_p
 
-     subroutine pf_destroy_sweeper_p(this)
-       import pf_sweeper_t
+     subroutine pf_destroy_sweeper_p(this,pf,level_index)
+       import pf_sweeper_t, pf_pfasst_t
        class(pf_sweeper_t), intent(inout) :: this
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
      end subroutine pf_destroy_sweeper_p
 
-     subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC, flags)
-       import pf_sweeper_t, pf_level_t, pf_encap_t, pfdp
+     subroutine pf_integrate_p(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
+       import pf_sweeper_t, pf_pfasst_t, pf_encap_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(in)    :: lev
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
        class(pf_encap_t),   intent(in)    :: qSDC(:), fSDC(:, :)
        real(pfdp),          intent(in)    :: dt !!  Time step size
        class(pf_encap_t),   intent(inout) :: fintSDC(:)
@@ -367,7 +373,7 @@ module pf_mod_dtype
      end subroutine pf_integrate_p
 
      subroutine pf_residual_p(this, pf, level_index, dt, flags)
-       import pf_pfasst_t,pf_sweeper_t, pf_level_t, pfdp
+       import  pf_sweeper_t,pf_pfasst_t,  pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),  target,  intent(inout) :: pf
        integer,              intent(in)    :: level_index
@@ -375,18 +381,20 @@ module pf_mod_dtype
        integer, optional,   intent(in)    :: flags
      end subroutine pf_residual_p
 
-     subroutine pf_spreadq0_p(this, lev, t0, flags, step)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_spreadq0_p(this, pf, level_index, t0, flags, step)
+       import pf_sweeper_t, pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: Lev
+       type(pf_pfasst_t),  target,  intent(inout) :: pf
+       integer,              intent(in)    :: level_index
        real(pfdp),          intent(in)    :: t0 !!  Time at beginning of step; if flags == 2, time at end of step
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
 
-     subroutine pf_destroy_p(this, lev)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_destroy_p(this, pf,level_index)
+       import pf_sweeper_t,pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: Lev
+       type(pf_pfasst_t),  target,  intent(inout) :: pf
+       integer,              intent(in)    :: level_index
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
@@ -413,11 +421,11 @@ module pf_mod_dtype
      end subroutine pf_destroy_stepper_p
 
      !> transfer interfaces used for restriction and interpolation
-     subroutine pf_transfer_p(this, levelF, levelG, qF, qG, t, flags)
+     subroutine pf_transfer_p(this, f_lev, c_lev, f_vec, c_vec, t, flags)
        import pf_user_level_t, pf_level_t, pf_encap_t, pfdp
        class(pf_user_level_t), intent(inout) :: this
-       class(pf_level_t), intent(inout)      :: levelF, levelG
-       class(pf_encap_t),   intent(inout)    :: qF, qG
+       class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+       class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
        real(pfdp),          intent(in)       :: t
        integer, optional,   intent(in)       :: flags
      end subroutine pf_transfer_p
@@ -437,18 +445,16 @@ module pf_mod_dtype
        integer,      intent(in   )              :: n, level, shape(:)
      end subroutine pf_encap_create_array_p
 
-     subroutine pf_encap_destroy_single_p(this, x, level,  shape)
+     subroutine pf_encap_destroy_single_p(this, x)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,      intent(in   )              :: level,  shape(:)
      end subroutine pf_encap_destroy_single_p
 
-     subroutine pf_encap_destroy_array_p(this, x, n, level,   shape)
+     subroutine pf_encap_destroy_array_p(this, x)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,      intent(in   )              :: n, level,  shape(:)
      end subroutine pf_encap_destroy_array_p
 
      subroutine pf_encap_setval_p(this, val, flags)

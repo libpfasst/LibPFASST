@@ -128,10 +128,9 @@ contains
   end subroutine ndarray_destroy
 
   !> Subroutine to destroy an single array
-  subroutine ndarray_destroy_single(this, x, level, shape)
+  subroutine ndarray_destroy_single(this, x)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
 
     select type (x)
     class is (ndarray)
@@ -143,15 +142,14 @@ contains
 
 
   !> Subroutine to destroy an array of arrays
-  subroutine ndarray_destroy_array(this, x, n, level,  shape)
+  subroutine ndarray_destroy_array(this, x)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout),allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
     integer                                            :: i
 
     select type(x)
     class is (ndarray)
-       do i = 1,n
+       do i = 1,size(x)
           deallocate(x(i)%shape)
           deallocate(x(i)%flatarray)
        end do
@@ -215,6 +213,7 @@ contains
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
+
     select type(x)
     type is (ndarray)
        this%flatarray = a * x%flatarray + this%flatarray
@@ -250,7 +249,7 @@ contains
   
 
   function get_array2d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:)
 
@@ -262,7 +261,7 @@ contains
   
 
   function get_array3d(x,flags) result(r)
-    class(pf_encap_t), intent(in) :: x
+    class(pf_encap_t), intent(in),target :: x
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:,:,:)
 

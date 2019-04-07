@@ -11,7 +11,7 @@ module pf_mod_fftpackage
   
   implicit none
   
-!  include 'fftw3.f03'
+  include 'fftw3.f03'
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
   !>  Define the fft package
