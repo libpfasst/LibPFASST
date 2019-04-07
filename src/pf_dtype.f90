@@ -10,7 +10,7 @@ module pf_mod_dtype
   !>  static pfasst paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
   !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
-  
+
   integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variables
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
@@ -18,7 +18,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: THREE  = 3.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
 
-  integer, parameter :: PF_MAXLEVS = 4  
+  integer, parameter :: PF_MAXLEVS = 4
   integer, parameter :: PF_MAX_HOOKS = 32
 
   !> Quadrature node varieties
@@ -34,7 +34,7 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
-  !>  The type that holds the state of the system 
+  !>  The type that holds the state of the system
   type, bind(c) :: pf_state_t
     real(pfdp) :: t0  !!  Time at beginning of this time step
     real(pfdp) :: dt  !!  Time step size
@@ -43,6 +43,7 @@ module pf_mod_dtype
     integer :: iter     !! current iteration number
     integer :: step     !! current time step number assigned to processor
     integer :: level    !! which level is currently being operated on
+    integer :: finest_level    !! the current finest level (for variable depth V cycles)
     integer :: hook     !! which hook
     integer :: proc     !! which processor
     integer :: sweep    !! sweep number
@@ -69,7 +70,7 @@ module pf_mod_dtype
      procedure(pf_integrate_p),    deferred :: integrate
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
-     procedure(pf_spreadq0_p),     deferred :: spreadq0 
+     procedure(pf_spreadq0_p),     deferred :: spreadq0
      procedure(pf_destroy_p),      deferred :: destroy
   end type pf_sweeper_t
 
@@ -118,13 +119,13 @@ module pf_mod_dtype
   type :: pf_sdcmats_t
      integer :: nnodes                      !  Number of nodes
      integer :: qtype                   !  Type of nodes
-     real(pfdp), allocatable :: qnodes(:)   !  The quadrature nodes       
+     real(pfdp), allocatable :: qnodes(:)   !  The quadrature nodes
      real(pfdp), allocatable :: Qmat(:,:)   !  Collocation matrix
      real(pfdp), allocatable :: QmatFE(:,:) !  Forward Euler matrix
      real(pfdp), allocatable :: QmatBE(:,:) !  Backward Euler matrix
      real(pfdp), allocatable :: QmatTrap(:,:) ! Trapezoid rule matrix
      real(pfdp), allocatable :: QmatVer(:,:)  ! Verlet Matrix
-     real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat 
+     real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat
      real(pfdp), allocatable :: s0mat(:,:)    !  deprecated
 
      logical :: use_proper_nodes =  .false. !  If true use gauss nodes in coarsening
@@ -143,7 +144,7 @@ module pf_mod_dtype
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
-     
+
      !  Mandatory level parameter
      integer  :: mpibuflen    = -1   !! size of solution in pfdp units
 
@@ -176,7 +177,7 @@ module pf_mod_dtype
           Fflt(:),  &           !! functions values at sdc nodes (flat)
           tauQ(:),  &           !! fas correction in Q form
           pFflt(:), &           !! functions at sdc nodes, previous sweep (flat)
-          q0,       &           !! initial condition 
+          q0,       &           !! initial condition
           qend                  !! solution at end time
 
      !>  Function  storage
@@ -217,7 +218,7 @@ module pf_mod_dtype
   !>  Type for storing results for later output
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
      integer :: nsteps
      integer :: niters
      integer :: nprocs
@@ -226,10 +227,12 @@ module pf_mod_dtype
      integer :: nsweeps
      integer :: rank
      integer :: level
-     
+
+     character(len=512) :: datpath
      
      procedure(pf_results_p), pointer, nopass :: dump 
      procedure(pf_results_p), pointer, nopass :: destroy 
+
   end type pf_results_t
 
   !>  The main PFASST data type which includes pretty much everythingl
@@ -240,10 +243,10 @@ module pf_mod_dtype
      !>  Optional parameters
      integer :: niters  = 5             !! number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
-     logical :: use_proper_nodes =  .false. 
+     logical :: use_proper_nodes =  .false.
      logical :: use_composite_nodes = .false.
-     logical :: use_no_left_q = .false.         
-     
+     logical :: use_no_left_q = .false.
+
      ! --  level dependent parameters
      integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
      integer :: nsweeps_pred(PF_MAXLEVS) =1   !!  number of sweeps during predictor
@@ -266,7 +269,7 @@ module pf_mod_dtype
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
-     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used 
+     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      integer :: taui0 = -999999     !! iteration cutoff for tau inclusion
 
      !> RK and Parareal options
@@ -276,8 +279,8 @@ module pf_mod_dtype
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
-     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
+     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
+     logical :: save_timings  = .true.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
      logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
@@ -298,7 +301,7 @@ module pf_mod_dtype
      double precision :: runtimes(100) = 0.0d0
 
      !> output directory
-     character(512) :: outdir
+     character(len=255) :: outdir
 
   end type pf_pfasst_t
 
@@ -312,7 +315,7 @@ module pf_mod_dtype
        class(pf_level_t), intent(inout) :: level
        type(pf_state_t),  intent(in)    :: state
      end subroutine pf_hook_p
-     
+
      !> SDC sweeper subroutines
      subroutine pf_sweep_p(this, pf, level_index, t0, dt, nsweeps, flags)
        import pf_pfasst_t, pf_sweeper_t, pf_level_t, pfdp
@@ -363,10 +366,11 @@ module pf_mod_dtype
        integer, optional,   intent(in)    :: flags
      end subroutine pf_integrate_p
 
-     subroutine pf_residual_p(this, lev, dt, flags)
-       import pf_sweeper_t, pf_level_t, pfdp
+     subroutine pf_residual_p(this, pf, level_index, dt, flags)
+       import pf_pfasst_t,pf_sweeper_t, pf_level_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: Lev
+       type(pf_pfasst_t),  target,  intent(inout) :: pf
+       integer,              intent(in)    :: level_index
        real(pfdp),          intent(in)    :: dt !!  Time step size
        integer, optional,   intent(in)    :: flags
      end subroutine pf_residual_p
@@ -565,9 +569,9 @@ module pf_mod_dtype
        type(pf_results_t), intent(inout) :: this
 
      end subroutine pf_results_p
-     
 
-     
+
+
     end interface
-  
+
 end module pf_mod_dtype

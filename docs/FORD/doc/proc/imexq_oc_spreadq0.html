@@ -243,7 +243,7 @@ public subroutine imexQ_oc_spreadq0(this, lev, t0, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E27"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-lev%7E24"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -471,7 +471,7 @@ public subroutine imexQ_oc_spreadq0(this, lev, t0, flags, step)
 
 <span class="c">!     print *, &quot;IMEXQ_OC SPREADQ0&quot;, which</span>
 
-    
+
     <span class="n">mystep</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>  <span class="k">then</span>
 <span class="k">      </span><span class="n">mystep</span> <span class="o">=</span> <span class="n">step</span> <span class="c">!needed for sequential version</span>
@@ -479,7 +479,7 @@ public subroutine imexQ_oc_spreadq0(this, lev, t0, flags, step)
 <span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="s2">&quot;step not present in spreadq0&quot;</span><span class="p">,</span> <span class="n">which</span>
       <span class="k">stop</span>
 <span class="k">    end if</span>
-<span class="k">    </span>
+
 <span class="k">    select case</span><span class="p">(</span><span class="n">which</span><span class="p">)</span>
       <span class="k">case</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="c">!  Stick initial condition into first node slot</span>
@@ -508,7 +508,7 @@ public subroutine imexQ_oc_spreadq0(this, lev, t0, flags, step)
 <span class="k">      case </span><span class="n">default</span>
          <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">which</span><span class="p">)</span>
     <span class="k">end select</span>
-<span class="k">    </span>
+
 <span class="k">  end subroutine </span><span class="n">imexQ_oc_spreadq0</span>
 </pre></div>
 

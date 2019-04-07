@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.3% of total for derived types.</p>Including implementation: 140 statements,  3.1% of total for derived types.">21 statements</a>
+    title="<p> 3.3% of total for derived types.</p>Including implementation: 144 statements,  3.1% of total for derived types.">21 statements</a>
      </li> 
      
      
@@ -1185,12 +1185,20 @@ public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate
           
     
     <h3>
-public subroutine <a href='../proc/magpicard_residual.html'>magpicard_residual</a>(this, lev, dt, flags)
+public subroutine <a href='../proc/magpicard_residual.html'>magpicard_residual</a>(this, pf, level_index, dt, flags)
     
     
    
 </h3>
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1226,12 +1234,27 @@ public subroutine <a href='../proc/magpicard_residual.html'>magpicard_residual</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

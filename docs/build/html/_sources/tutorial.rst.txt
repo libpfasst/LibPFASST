@@ -62,7 +62,7 @@ will be performed per iteration on the coarsest levels.  This helps
 reduce the total number of PFASST iterations required.
 
 The solution :math:`u` will be stored in a flat Fortran array, and
-hence this application will use LibPFASSTs built in ``ndarray``
+hence this application will use LibPFASST's built in ``ndarray``
 encapsulation.  Note that LibPFASST doesn't impose any particular
 storage format on your solver -- instead, you must tell LibPFASST how
 to perform a few basic operations on your solution (eg, how to create
@@ -70,25 +70,5 @@ solutions, perform ``y <- y + a x``, etc).  Various hooks are added to
 echo the error (on the finest level) and residual (on all levels)
 throughout the algorithm.  These hooks are in ``src/hooks.f90``.
 
-Note that the ``feval_create_workspace`` routine is specific to the
-problem being solved (ie, not part of LibPFASST, but part of the user
-code).  It creates FFTW plans, creates a complex workspace for use
-with FFTW (so that we can avoid allocating and deallocating these
-workspaces during each call to the function evaluation routines), and
-pre-computes various spectral operators.
-
-LibPFASST allows you, the user, to attach an arbitrary C pointer to
-each PFASST level.  This is called a context (typically called
-``levelctx`` in the source) pointer (as in, "for the problem I'm
-solving I have a specific context that I will be working in").  Your
-context pointer gets passed to your function evaluation routines and
-to your transfer routines.  In most of the examples this context
-pointer is used to hold FFTW plans etc as described above.  Note that
-each level gets its own context because each level has a different
-number of degrees-of-freedom (``nvars``).
-
-C pointers are used because they provide a lot of flexibility.  The
-drawback to this is that we loose the ability for the compiler to do
-type checking for us.
 
 

@@ -236,7 +236,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E21"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E24"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -550,18 +550,18 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     
     <span class="c">! stuff for reading the command line</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">un</span> <span class="o">=</span> <span class="mi">9</span>
-    <span class="kt">integer</span>            <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">ios</span>
-    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">arg</span>
+    <span class="kt">integer</span>            <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">ios</span><span class="p">,</span><span class="nb">stat</span>
+<span class="nb">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">arg</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">istring</span>  <span class="c">! stores command line argument</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">message</span>  <span class="c">! use for i/o error messages</span>
-    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
+    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
 
     
     <span class="c">!&gt; define the namelist for reading</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">niters</span><span class="p">,</span> <span class="n">nlevels</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">nsweeps_pred</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nsteps_rk</span><span class="p">,</span> <span class="n">abs_res_tol</span><span class="p">,</span> <span class="n">rel_res_tol</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">PFASST_pred</span><span class="p">,</span> <span class="n">RK_pred</span><span class="p">,</span> <span class="n">pipeline_pred</span><span class="p">,</span> <span class="n">nsweeps_burn</span><span class="p">,</span> <span class="n">q0_style</span><span class="p">,</span> <span class="n">taui0</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">Vcycle</span><span class="p">,</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">use_LUq</span><span class="p">,</span> <span class="n">echo_timings</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">save_timings</span><span class="p">,</span><span class="n">save_residuals</span><span class="p">,</span> <span class="n">save_errors</span><span class="p">,</span> <span class="n">use_rk_stepper</span>
-    <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">use_no_left_q</span><span class="p">,</span><span class="n">use_composite_nodes</span><span class="p">,</span><span class="n">use_proper_nodes</span>
+    <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">use_no_left_q</span><span class="p">,</span><span class="n">use_composite_nodes</span><span class="p">,</span><span class="n">use_proper_nodes</span><span class="p">,</span> <span class="n">outdir</span>
 
     <span class="c">!&gt; set local variables to pf_pfasst defaults</span>
     <span class="n">nlevels</span>      <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
@@ -608,7 +608,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     <span class="k">if</span> <span class="p">(</span><span class="n">read_cmd</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
        <span class="k">do</span>
-<span class="k">          call </span><span class="nb">get_command_argument</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+<span class="k">          call </span><span class="nb">get_command_argument</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="nb">stat</span><span class="p">)</span>
           <span class="k">if</span> <span class="p">(</span><span class="nb">len_trim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">exit</span>
 <span class="k">          if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">             </span><span class="n">istring</span><span class="o">=</span><span class="s2">&quot;&amp;pf_params &quot;</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">//</span> <span class="s2">&quot; /&quot;</span>

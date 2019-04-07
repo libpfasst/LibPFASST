@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.6% of total for modules and submodules.">363 statements</a>
+    title=" 4.6% of total for modules and submodules.">367 statements</a>
      </li> 
      
      
@@ -536,7 +536,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
 
 
 
-<p>Evaluae f_piece(y), where piece is one or two </p>
+<p>Evaluae f_piece(y), where piece is one or two</p>
     
     <h4>Arguments</h4>
     
@@ -766,7 +766,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>y</strong></td><td><p>Solution of implicit solve </p></td>
+  <td><strong>y</strong></td><td><p>Solution of implicit solve</p></td>
   
 </tr>
 
@@ -1733,7 +1733,7 @@ public subroutine <a href='../proc/imexq_oc_integrate.html'>imexQ_oc_integrate</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-imexq_oc_residual"></span><h3>
-public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>(this, lev, dt, flags)
+public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>(this, pf, level_index, dt, flags)
     
     
    
@@ -1776,12 +1776,27 @@ public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

@@ -900,7 +900,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>use_LUq</strong></td><td> =</td><td>.true.</td><td><p>True if LU type implicit matrix is used </p></td>
+  <td><strong>use_LUq</strong></td><td> =</td><td>.true.</td><td><p>True if LU type implicit matrix is used</p></td>
   
 </tr>
 
@@ -985,7 +985,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>save_residuals</strong></td><td> =</td><td>.false.</td><td><p>If true, residuals are saved and output</p></td>
+  <td><strong>save_residuals</strong></td><td> =</td><td>.true.</td><td><p>If true, residuals are saved and output</p></td>
   
 </tr>
 
@@ -999,7 +999,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>save_timings</strong></td><td> =</td><td>.false.</td><td><p>If true, timings are saved and  output</p></td>
+  <td><strong>save_timings</strong></td><td> =</td><td>.true.</td><td><p>If true, timings are saved and  output</p></td>
   
 </tr>
 
@@ -1165,7 +1165,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-outdir"></span>character(len=512),</td>
+  <td><span class="anchor" id="variable-outdir"></span>character(len=255),</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1196,10 +1196,10 @@
      <span class="c">!&gt;  Optional parameters</span>
      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">!! number of PFASST iterations to do</span>
      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>  <span class="c">!! type of nodes</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span> 
+     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_composite_nodes</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_no_left_q</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         
-     
+     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_no_left_q</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+
      <span class="c">! --  level dependent parameters</span>
      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c">!!  number of sweeps at each levels</span>
      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span><span class="mi">1</span>   <span class="c">!!  number of sweeps during predictor</span>
@@ -1222,7 +1222,7 @@
      <span class="c">! --  run options  (should be set before pfasst_run is called)</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used </span>
+     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999999</span>     <span class="c">!! iteration cutoff for tau inclusion</span>
 
      <span class="c">!&gt; RK and Parareal options</span>
@@ -1232,8 +1232,8 @@
 
      <span class="c">! -- misc</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  If true, residuals are saved and output</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are saved and  output</span>
+     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!!  If true, residuals are saved and output</span>
+     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  If true, timings are saved and  output</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">echo_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are  output to screen</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, errors  are saved and output</span>
 
@@ -1254,7 +1254,7 @@
      <span class="kt">double precision</span> <span class="kd">::</span> <span class="n">runtimes</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0d0</span>
 
      <span class="c">!&gt; output directory</span>
-     <span class="kt">character</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
+     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
 
   <span class="k">end type </span><span class="n">pf_pfasst_t</span>
 </pre></div>

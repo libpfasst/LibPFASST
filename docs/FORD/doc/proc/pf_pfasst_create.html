@@ -370,7 +370,7 @@ public subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E17"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E20"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -656,7 +656,7 @@ public subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span>                     <span class="c">!!  Loop variable for levels</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">nlevels</span><span class="p">))</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span> <span class="o">=</span> <span class="n">nlevels</span>
 
-    <span class="n">pf</span><span class="p">%</span><span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;dat/&quot;</span>
 
     <span class="c">!&gt; gather some input from a file and command line</span>
     <span class="n">read_cmd</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>

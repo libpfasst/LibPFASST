@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">21 statements</a>
+    title=" 0.1% of total for procedures.">23 statements</a>
      </li> 
      
      
@@ -435,20 +435,21 @@ $        end do</p>
            
            <span class="k">call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="k">              call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
             <span class="k">else</span>
-<span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">resPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
              <span class="k">end if</span>
-<span class="c">!             if (i &gt; 1) then</span>
+<span class="k">             if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="c">!                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))</span>
-<span class="c">!             end if</span>
+             <span class="k">end if</span>
+
              
 <span class="c">!             print *,&#39;integrating&#39;,i,this%nodes(i+1),dt,this%eta(i)</span>
 <span class="c">!          call fintsdc(i)%eprint()</span>
         <span class="k">end do</span>
 
 <span class="c">!        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
-<span class="c">!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(1))</span>
+<span class="c">!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))</span>
 <span class="c">!        end do</span>
         
              

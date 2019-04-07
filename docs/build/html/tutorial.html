@@ -92,31 +92,13 @@ restrict solutions are in <code class="docutils literal"><span class="pre">src/t
 will be performed per iteration on the coarsest levels.  This helps
 reduce the total number of PFASST iterations required.</p>
 <p>The solution <span class="math">\(u\)</span> will be stored in a flat Fortran array, and
-hence this application will use LibPFASSTs built in <code class="docutils literal"><span class="pre">ndarray</span></code>
+hence this application will use LibPFASST&#8217;s built in <code class="docutils literal"><span class="pre">ndarray</span></code>
 encapsulation.  Note that LibPFASST doesn&#8217;t impose any particular
 storage format on your solver &#8211; instead, you must tell LibPFASST how
 to perform a few basic operations on your solution (eg, how to create
 solutions, perform <code class="docutils literal"><span class="pre">y</span> <span class="pre">&lt;-</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">a</span> <span class="pre">x</span></code>, etc).  Various hooks are added to
 echo the error (on the finest level) and residual (on all levels)
 throughout the algorithm.  These hooks are in <code class="docutils literal"><span class="pre">src/hooks.f90</span></code>.</p>
-<p>Note that the <code class="docutils literal"><span class="pre">feval_create_workspace</span></code> routine is specific to the
-problem being solved (ie, not part of LibPFASST, but part of the user
-code).  It creates FFTW plans, creates a complex workspace for use
-with FFTW (so that we can avoid allocating and deallocating these
-workspaces during each call to the function evaluation routines), and
-pre-computes various spectral operators.</p>
-<p>LibPFASST allows you, the user, to attach an arbitrary C pointer to
-each PFASST level.  This is called a context (typically called
-<code class="docutils literal"><span class="pre">levelctx</span></code> in the source) pointer (as in, &#8220;for the problem I&#8217;m
-solving I have a specific context that I will be working in&#8221;).  Your
-context pointer gets passed to your function evaluation routines and
-to your transfer routines.  In most of the examples this context
-pointer is used to hold FFTW plans etc as described above.  Note that
-each level gets its own context because each level has a different
-number of degrees-of-freedom (<code class="docutils literal"><span class="pre">nvars</span></code>).</p>
-<p>C pointers are used because they provide a lot of flexibility.  The
-drawback to this is that we loose the ability for the compiler to do
-type checking for us.</p>
 </div>
 
 

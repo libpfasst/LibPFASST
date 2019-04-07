@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.4% of total for procedures.">63 statements</a>
+    title=" 0.4% of total for procedures.">65 statements</a>
      </li> 
      
      
@@ -239,7 +239,7 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E69"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E79"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -979,12 +979,13 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">nsteps</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">qend</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span><span class="p">(:)</span>
-    
+
     <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev_p</span>  <span class="c">!!  pointer to the one level we are operating on</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">nblocks</span> <span class="c">!!  The number of blocks of steps to do</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">nproc</span>   <span class="c">!!  The number of processors being used</span>
-    <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">level_index_c</span> <span class="c">!!  Coarsest leve in V-cycle</span>
+    <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">level_index_c</span> <span class="c">!!  Coarsest level in V (Lambda)-cycle</span>
+    <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">level_max_depth</span> <span class="c">!!  Finest level in V-cycle</span>
 
 
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TTOTAL</span><span class="p">)</span>
@@ -994,23 +995,25 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span>    <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span>      <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span> <span class="o">*</span> <span class="n">dt</span>
 
+    <span class="c">! set finest level to visit in the following run</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
 
     <span class="c">!  pointer to finest  level to start</span>
-    <span class="n">lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">)</span>
+    <span class="n">lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
 
     <span class="c">!  Stick the initial condition into q0 (will happen on all processors)</span>
-    <span class="k">call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>    
+    <span class="k">call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-    
+
     <span class="n">nproc</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span>
     <span class="n">nblocks</span> <span class="o">=</span> <span class="n">nsteps</span><span class="o">/</span><span class="n">nproc</span>
 
     <span class="c">!  Decide what the coarsest level in the V-cycle is</span>
     <span class="n">level_index_c</span><span class="o">=</span><span class="mi">1</span>
-    <span class="k">if</span> <span class="p">(.</span><span class="nb">not</span><span class="p">.</span> <span class="n">pf</span><span class="p">%</span><span class="n">Vcycle</span><span class="p">)</span>     <span class="n">level_index_c</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+    <span class="k">if</span> <span class="p">(.</span><span class="nb">not</span><span class="p">.</span> <span class="n">pf</span><span class="p">%</span><span class="n">Vcycle</span><span class="p">)</span>     <span class="n">level_index_c</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span>
 
     <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nblocks</span>   <span class="c">!  Loop over blocks of time steps</span>
-       <span class="c">! print *,&#39;Starting  step=&#39;,pf%state%step,&#39;  block k=&#39;,k      </span>
+       <span class="c">! print *,&#39;Starting  step=&#39;,pf%state%step,&#39;  block k=&#39;,k</span>
        <span class="c">! Each block will consist of</span>
        <span class="c">!  1.  predictor</span>
        <span class="c">!  2.  Vcycle until max iterations, or tolerances met</span>
@@ -1028,7 +1031,8 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">=</span> <span class="n">PF_STATUS_PREDICTOR</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">statreq</span>  <span class="o">=</span> <span class="o">-</span><span class="mi">66</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pfblock</span> <span class="o">=</span> <span class="n">k</span>
-       
+<span class="c">!       pf%state%finest_level = 3</span>
+
        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          if</span> <span class="p">(</span><span class="n">nproc</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>  <span class="k">then</span>
 <span class="k">             call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">lev_p</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>    <span class="c">!!  Pack away your last solution</span>
@@ -1041,7 +1045,7 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
           <span class="c">!&gt;  Update the step and t0 variables for new block</span>
           <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span> <span class="o">+</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span>
           <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span>   <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span> <span class="o">*</span> <span class="n">dt</span>
-       <span class="k">end if</span>    
+       <span class="k">end if</span>
 
        <span class="c">!&gt; Call the predictor to get an initial guess on all levels and all processors</span>
        <span class="k">call </span><span class="n">pf_predictor</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
@@ -1049,7 +1053,7 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
        <span class="c">!&gt;  Start the loops over SDC sweeps</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span> <span class="o">=</span> <span class="mi">0</span>
        <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">)</span>
-       
+
        <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TITERATION</span><span class="p">)</span>
        <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">niters</span>
 
@@ -1058,10 +1062,10 @@ public subroutine pf_block_run(pf, q0, dt, nsteps, qend, flags)
           <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span> <span class="o">=</span> <span class="n">j</span>
 
           <span class="c">!  Do a v_cycle</span>
-          <span class="k">call </span><span class="n">pf_v_cycle</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span><span class="n">level_index_c</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_v_cycle</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index_c</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
 
           <span class="c">!  Check for convergence</span>
-          <span class="k">call </span><span class="n">pf_check_convergence_block</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">send_tag</span><span class="o">=</span><span class="mi">1111</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_check_convergence_block</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">,</span> <span class="n">send_tag</span><span class="o">=</span><span class="mi">1111</span><span class="o">*</span><span class="n">k</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>
 
 <span class="c">!          print *,pf%rank, &#39; post res&#39;</span>
           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">)</span>

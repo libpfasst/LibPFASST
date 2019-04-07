@@ -270,7 +270,7 @@ public subroutine pf_predictor(pf, t0, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E66"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E76"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -854,23 +854,23 @@ public subroutine pf_predictor(pf, t0, dt, flags)
     <span class="c">!!</span>
     <span class="c">!! Step 1. Getting the  initial condition on the finest level at each processor</span>
     <span class="c">!!         If we are doing multiple levels, then we need to coarsen to fine level</span>
-    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">)</span>
-    
+    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">q0_style</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>  <span class="c">!  Spread q0 to all the nodes</span>
        <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">spreadq0</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
     <span class="n">endif</span>
     <span class="c">!!</span>
     <span class="c">!!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do coarsen  in predictor&#39;</span>    
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then  </span>
-<span class="k">       do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do coarsen  in predictor&#39;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
           <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
           <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-          <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>  
-          <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>          
+          <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
           <span class="k">call </span><span class="n">restrict_time_space_fas</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">)</span>  <span class="c">!  Restrict</span>
-          <span class="k">call save</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">)</span>
-       <span class="k">end do</span>  <span class="c">!  level_index = pf%nlevels, 2, -1</span>
+          <span class="k">call save</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">c_lev_p</span><span class="p">)</span>
+       <span class="k">end do</span>  <span class="c">!  level_index = pf%state%finest_level, 2, -1</span>
     <span class="k">else</span>
 <span class="k">      </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">1</span>
       <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -881,7 +881,7 @@ public subroutine pf_predictor(pf, t0, dt, flags)
     <span class="c">!!         (this is skipped if the fine initial conditions are already consistent)</span>
     <span class="c">!! The first processor does nothing, the second does one set of sweeps, the third two, etc</span>
     <span class="c">!! Hence, this is skipped completely if nprocs=1</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do burnin  in predictor&#39;</span>    
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do burnin  in predictor&#39;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">q0_style</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>  <span class="c">!  The coarse level needs burn in</span>
        <span class="c">!! If RK_pred is true, just do some RK_steps</span>
        <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">RK_pred</span><span class="p">)</span> <span class="k">then</span>  <span class="c">!  Use Runge-Kutta to get the coarse initial data</span>
@@ -917,17 +917,17 @@ public subroutine pf_predictor(pf, t0, dt, flags)
 
     <span class="c">!!</span>
     <span class="c">!! Step 4: Now we have everyone burned in, so do some coarse sweeps</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do sweeps  in predictor&#39;</span><span class="p">,</span> <span class="s1">&#39;Pipeline_pred&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">Pipeline_pred</span>    
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;do sweeps  in predictor&#39;</span><span class="p">,</span> <span class="s1">&#39;Pipeline_pred&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">Pipeline_pred</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">Pipeline_pred</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nsweeps_pred</span>
              <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span> <span class="o">=-</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span><span class="n">k</span>
-             
+
              <span class="c">!  Get new initial conditions</span>
              <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">110000</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="n">k</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span>
-          
+
              <span class="c">!  Do a sweep</span>
              <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
              <span class="c">!  Send forward</span>
@@ -936,26 +936,26 @@ public subroutine pf_predictor(pf, t0, dt, flags)
        <span class="k">else</span>  <span class="c">!  Don&#39;t pipeline</span>
           <span class="c">!  Get new initial conditions</span>
           <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">110000</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span>
-          
+
           <span class="c">!  Do a sweeps</span>
           <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nsweeps_pred</span><span class="p">)</span>
           <span class="c">!  Send forward</span>
           <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span>  <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">110000</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.)</span>
        <span class="n">endif</span>  <span class="c">! (Pipeline_pred .eq. .true) then</span>
     <span class="k">end if</span>
-<span class="k">    </span>
+
 <span class="k">    if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;returning to fine level in predictor&#39;</span>
     <span class="c">!!</span>
     <span class="c">!!  Step 5:  Return to fine level sweeping on any level in between coarsest and finest</span>
-    <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>  <span class="c">!  Will do nothing with one level</span>
+    <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span>  <span class="c">!  Will do nothing with one level</span>
        <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
        <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
        <span class="k">call </span><span class="n">interpolate_time_space</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">Finterp</span><span class="p">)</span>
        <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
        <span class="k">call </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span><span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-       
+
        <span class="c">!  Do a sweep on level unless we are at the finest level</span>
-       <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">)</span> <span class="k">then</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps_pred</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">    end do</span>
@@ -966,7 +966,7 @@ public subroutine pf_predictor(pf, t0, dt, flags)
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span>   <span class="o">=</span> <span class="mi">0</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;ending predictor&#39;</span>    
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;ending predictor&#39;</span>
   <span class="k">end subroutine </span><span class="n">pf_predictor</span>
 </pre></div>
 

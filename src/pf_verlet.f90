@@ -142,7 +142,7 @@ contains
     !
     dtsq = dt*dt
     do k = 1,nsweeps
-
+       pf%state%sweep=k
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)
           if (pf%state%iter .eq. 1)  then  !  Do verlet on the first iteration
@@ -156,7 +156,7 @@ contains
                 call lev%I(m)%axpy(dtsq*this%DQQtil(m,n), lev%F(n,1),2)
              end do
           end if
-          if (allocated(lev%tauQ)) then
+          if (level_index < pf%state%finest_level) then
              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m))  
           end if
        end do
@@ -236,7 +236,7 @@ contains
 !          call Lev%encap%copy(Lev%qend, Lev%Q(nnodes))
 !       end if
        
-       call pf_residual(pf, lev, dt)
+       call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
        
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -411,19 +411,22 @@ contains
   end subroutine verlet_integrate
   !-----------------------------------------------------------------------------
   !> Compute residual (t_n to node)
-  subroutine verlet_residual(this, lev, dt, flags)
+  subroutine verlet_residual(this,pf, level_index, dt, flags)
     class(pf_verlet_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev  !!  Current level
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
     real(pfdp),        intent(in   ) :: dt   !!  Time step
     integer, intent(in), optional   :: flags
 
+    type(pf_level_t),    pointer :: lev
     integer :: n, m
 
-
+    lev => pf%levels(level_index)   !!  Assign level pointer
     call this%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
 
     ! add tau 
-    if (allocated(lev%tauQ)) then
+    if (level_index < pf%state%finest_level) then
        do m = 1, lev%nnodes-1
           call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
        end do

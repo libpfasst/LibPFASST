@@ -230,7 +230,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E77"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E88"></span>type(pf_pfasst_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -564,7 +564,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ierror</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
-<span class="k">    </span>
+
 <span class="k">    call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TBROADCAST</span><span class="p">)</span>
     <span class="k">if</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;beginning broadcast&#39;</span>
     <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nvar</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>

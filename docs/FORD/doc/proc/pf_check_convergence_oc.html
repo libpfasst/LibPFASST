@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">45 statements</a>
+    title=" 0.3% of total for procedures.">46 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine pf_check_convergence_oc(pf, send_tag, flags)
+public subroutine pf_check_convergence_oc(pf, level_index, send_tag, flags)
     
     
    
@@ -218,8 +218,7 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
 <p>Check to see if tolerances are met</p>
 <p>Until I hear the previous processor is done, recieve it's status</p>
 <p>Check to see if I am converged
- Assign status and send it forward
-! old code below</p>
+ Assign status and send it forward</p>
     
 
     <h3>Arguments</h3>
@@ -240,12 +239,27 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E51"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E57"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
   <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E25"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -599,8 +613,9 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_check_convergence_oc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">send_tag</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_check_convergence_oc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">send_tag</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">send_tag</span>
 <span class="c">!     real(pfdp),        intent(inout) :: residual</span>
 <span class="c">!     integer,           intent(in)    :: k</span>
@@ -609,24 +624,24 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
 <span class="c">!     real(pfdp)     :: residual1</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">dir</span><span class="p">,</span> <span class="n">which</span>
     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">residual_converged</span><span class="p">,</span> <span class="n">converged</span>
-    
+
     <span class="n">converged</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
 
-    
+
     <span class="c">! shortcut for fixed block mode</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">abs_res_tol</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">pf</span><span class="p">%</span><span class="n">rel_res_tol</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span>  <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="k">return</span>
 <span class="k">    end if</span>
-    
+
     <span class="c">! in first sweep: always continue</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span>  <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="k">return</span>
 <span class="k">    end if</span>
-<span class="k">    </span>
+
 <span class="k">    </span><span class="n">which</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
     <span class="c">! send forward by default, even if sweeping on both components; send backwards if sweeping on p only</span>
@@ -634,10 +649,10 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
     <span class="k">if</span><span class="p">(</span><span class="n">which</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="n">dir</span> <span class="o">=</span> <span class="mi">2</span>
 
     <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">PF_PRE_CONVERGENCE</span><span class="p">)</span>
-    
+
     <span class="c">!&gt; Check to see if tolerances are met</span>
-    <span class="k">call </span><span class="n">pf_check_residual_oc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">residual_converged</span><span class="p">)</span>
-    
+    <span class="k">call </span><span class="n">pf_check_residual_oc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">residual_converged</span><span class="p">)</span>
+
     <span class="c">!&gt;  Until I hear the previous processor is done, recieve it&#39;s status</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span> <span class="o">/=</span> <span class="n">PF_STATUS_CONVERGED</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_recv_status</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">send_tag</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
 
@@ -667,58 +682,8 @@ public subroutine pf_check_convergence_oc(pf, send_tag, flags)
        <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span> <span class="o">=</span> <span class="n">PF_STATUS_ITERATING</span>
        <span class="k">call </span><span class="n">pf_send_status</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">send_tag</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
     <span class="k">end if</span>
-<span class="k">    </span>
-<span class="k">    call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_CONVERGENCE</span><span class="p">)</span>
-    
-    <span class="c">!!! old code below</span>
-    <span class="c">! Check to see if tolerances are met   </span>
-<span class="c">!     residual1 = pf%levels(pf%nlevels)%residual</span>
-<span class="c">!     if (pf%state%status == PF_STATUS_ITERATING .and. residual &gt; 0.0d0) then</span>
-<span class="c">!        if ( (abs(1.0_pfdp - abs(residual1/residual)) &lt; pf%rel_res_tol) .or. &amp;</span>
-<span class="c">!             (abs(residual1)                          &lt; pf%abs_res_tol) ) then</span>
-<span class="c">!           pf%state%status = PF_STATUS_CONVERGED</span>
-<span class="c">!        end if</span>
-<span class="c">!     end if</span>
-<span class="c">!         </span>
-<span class="c">!     !-&gt;why? how to do that more cleanly?</span>
-<span class="c">!     if (pf%state%status == PF_STATUS_ITERATING .and. residual &gt;= 0.0d0) then    </span>
-<span class="c">!                 ! if do_mixed, adjoint on last time step will be constant zero, so residual will be zero</span>
-<span class="c">!                 ! need to stop in that case as well, but not in the very first iteration</span>
-<span class="c">!       if( abs(residual1) &lt; pf%abs_res_tol ) then</span>
-<span class="c">!           pf%state%status = PF_STATUS_CONVERGED</span>
-<span class="c">!       end if</span>
-<span class="c">!     end if</span>
-<span class="c">!     !!-</span>
-<span class="c">!     </span>
-<span class="c">!     residual = residual1</span>
-<span class="c">! </span>
-<span class="c">!     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)</span>
-<span class="c">!     if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, 1+k, dir)</span>
-<span class="c">! </span>
-<span class="c">!     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 1) &amp;</span>
-<span class="c">!          pf%state%status = PF_STATUS_ITERATING</span>
-<span class="c">!     if (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING .and. dir == 2) &amp;</span>
-<span class="c">!          pf%state%status = PF_STATUS_ITERATING</span>
-<span class="c">!          </span>
-<span class="c">! !     if (pf%state%status .ne. PF_STATUS_CONVERGED) </span>
-<span class="c">!     call pf_send_status(pf, 1+k, dir)</span>
-<span class="c">!     call call_hooks(pf, 1, PF_POST_CONVERGENCE)</span>
-<span class="c">! </span>
-<span class="c">!     ! XXX: this ain&#39;t so pretty, perhaps we should use the</span>
-<span class="c">!     ! &#39;nmoved&#39; thinger to break this cycle if everyone is</span>
-<span class="c">!     ! done...</span>
-<span class="c">! </span>
-<span class="c">!     if (pf%state%status == PF_STATUS_CONVERGED) then</span>
-<span class="c">!        converged = .true.</span>
-<span class="c">!        return</span>
-<span class="c">!     end if</span>
-<span class="c">! </span>
-<span class="c">!     if (0 == pf%comm%nproc) then</span>
-<span class="c">!        pf%state%status = PF_STATUS_PREDICTOR</span>
-<span class="c">!        converged = .true.</span>
-<span class="c">!        return</span>
-<span class="c">!     end if</span>
 
+<span class="k">    call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_CONVERGENCE</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">pf_check_convergence_oc</span>
 </pre></div>
 

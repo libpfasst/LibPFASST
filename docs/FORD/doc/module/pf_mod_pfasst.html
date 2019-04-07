@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.3% of total for modules and submodules.">425 statements</a>
+    title=" 5.4% of total for modules and submodules.">434 statements</a>
      </li> 
      
      
@@ -199,6 +199,8 @@
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_initialize_results">pf_initialize_results</a>
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_dump_results">pf_dump_results</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_destroy_results">pf_destroy_results</a>
       
     </div>
   </div>
@@ -641,6 +643,8 @@
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_dump_results">pf_dump_results</a>
       
+      <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_destroy_results">pf_destroy_results</a>
+      
     </div>
   </div>
 </div>
@@ -818,6 +822,7 @@ public subroutine <a href='../proc/pf_pfasst_setup.html'>pf_pfasst_setup</a>(pf)
 
 <p>Setup both the PFASST object and the comm object
   loop over levels to set parameters
+  set default finest level
   Loop over levels setting interpolation and restriction matrices (in time)</p>
     
     <h4>Arguments</h4>
@@ -1462,6 +1467,65 @@ public subroutine <a href='../proc/pf_dump_results.html'>pf_dump_results</a>(pf)
 
 
 <p>Subroutine to write out run parameters</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_destroy_results"></span><h3>
+public subroutine <a href='../proc/pf_destroy_results.html'>pf_destroy_results</a>(pf)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to destroy the results</p>
     
     <h4>Arguments</h4>
     

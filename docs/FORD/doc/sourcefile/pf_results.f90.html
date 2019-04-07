@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.8% of total for source files.">74 statements</a>
+    title=" 0.9% of total for source files.">83 statements</a>
      </li> 
      
      
@@ -547,103 +547,112 @@
 <a name="ln-9"></a>  <span class="k">implicit none</span>
 <a name="ln-10"></a>
 <a name="ln-11"></a><span class="k">  </span>
-<a name="ln-12"></a>
-<a name="ln-13"></a><span class="k">  </span>
-<a name="ln-14"></a><span class="k">contains</span>
-<a name="ln-15"></a><span class="k">    subroutine </span><span class="n">initialize_results</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">,</span><span class="n">rank_in</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">)</span>
-<a name="ln-16"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-17"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">,</span><span class="n">rank_in</span><span class="p">,</span><span class="n">lev_ind</span>
-<a name="ln-18"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">25</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for residuals</span>
-<a name="ln-19"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span>
-<a name="ln-20"></a>    
-<a name="ln-21"></a>    <span class="c">!  Set up the directory to dump results</span>
-<a name="ln-22"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p dat&#39;</span><span class="p">)</span>
-<a name="ln-23"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in initialize_results&quot;</span><span class="p">)</span>
-<a name="ln-24"></a>
-<a name="ln-25"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">rank_in</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-26"></a><span class="k">       write</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;(A20,I0.1,A4)&quot;</span><span class="p">)</span> <span class="s1">&#39;dat/residuals_size_L&#39;</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>
-<a name="ln-27"></a>       <span class="k">open</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
-<a name="ln-28"></a>       <span class="k">write</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span><span class="s1">&#39;(I5, I5, I5, I5)&#39;</span><span class="p">)</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span>
-<a name="ln-29"></a>       <span class="k">close</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-<a name="ln-30"></a>    <span class="k">end if</span>
-<a name="ln-31"></a>
-<a name="ln-32"></a><span class="k">    </span>
-<a name="ln-33"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">dump</span> <span class="o">=&gt;</span> <span class="n">dump_results</span>
-<a name="ln-34"></a>    <span class="n">this</span><span class="p">%</span><span class="n">destroy</span> <span class="o">=&gt;</span> <span class="n">destroy_results</span>
-<a name="ln-35"></a>
-<a name="ln-36"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nsteps</span><span class="o">=</span><span class="n">nsteps_in</span>
-<a name="ln-37"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="o">=</span><span class="n">nsteps_in</span><span class="o">/</span><span class="n">nprocs_in</span>
-<a name="ln-38"></a>    <span class="n">this</span><span class="p">%</span><span class="n">niters</span><span class="o">=</span><span class="n">niters_in</span>
-<a name="ln-39"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nprocs</span><span class="o">=</span><span class="n">nprocs_in</span>
-<a name="ln-40"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nsweeps</span><span class="o">=</span><span class="n">nsweeps_in</span>
-<a name="ln-41"></a>    <span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">=</span><span class="n">rank_in</span>
-<a name="ln-42"></a>    <span class="n">this</span><span class="p">%</span><span class="n">level</span><span class="o">=</span><span class="n">lev_ind</span>    
-<a name="ln-43"></a>
-<a name="ln-44"></a>    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
-<a name="ln-45"></a>    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
-<a name="ln-46"></a>
-<a name="ln-47"></a>    <span class="n">this</span><span class="p">%</span><span class="n">errors</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-48"></a>    <span class="n">this</span><span class="p">%</span><span class="n">residuals</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-49"></a>  <span class="k">end subroutine </span><span class="n">initialize_results</span>
+<a name="ln-12"></a><span class="k">contains</span>
+<a name="ln-13"></a><span class="k">    subroutine </span><span class="n">initialize_results</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">,</span><span class="n">rank_in</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">,</span><span class="n">datpath</span><span class="p">)</span>
+<a name="ln-14"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-15"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">,</span><span class="n">rank_in</span><span class="p">,</span><span class="n">lev_ind</span>
+<a name="ln-16"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">datpath</span>
+<a name="ln-17"></a>
+<a name="ln-18"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for residuals</span>
+<a name="ln-19"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">100</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fullname</span>  <span class="c">!!  output file name for residuals</span>
+<a name="ln-20"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span>
+<a name="ln-21"></a>    
+<a name="ln-22"></a>    <span class="c">!  Set up the directory to dump results</span>
+<a name="ln-23"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">))</span>
+<a name="ln-24"></a>    <span class="n">this</span><span class="p">%</span><span class="n">datpath</span><span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">)</span> <span class="o">//</span> <span class="s1">&#39;/&#39;</span>
+<a name="ln-25"></a>    
+<a name="ln-26"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in initialize_results&quot;</span><span class="p">)</span>
+<a name="ln-27"></a>
+<a name="ln-28"></a>    <span class="k">write</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;(A17,I0.1,A4)&quot;</span><span class="p">)</span> <span class="s1">&#39;residuals_size_L&#39;</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>
+<a name="ln-29"></a>    <span class="n">fullname</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">datpath</span><span class="p">)</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+<a name="ln-30"></a>    
+<a name="ln-31"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">rank_in</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-32"></a><span class="k">       open</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="nb">trim</span><span class="p">(</span><span class="n">fullname</span><span class="p">),</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
+<a name="ln-33"></a>       <span class="k">write</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span><span class="s1">&#39;(I5, I5, I5, I5)&#39;</span><span class="p">)</span> <span class="n">nsteps_in</span><span class="p">,</span> <span class="n">niters_in</span><span class="p">,</span> <span class="n">nprocs_in</span><span class="p">,</span> <span class="n">nsweeps_in</span>
+<a name="ln-34"></a>       <span class="k">close</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<a name="ln-35"></a>    <span class="k">end if</span>
+<a name="ln-36"></a><span class="k">    </span>
+<a name="ln-37"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">dump</span> <span class="o">=&gt;</span> <span class="n">dump_results</span>
+<a name="ln-38"></a>    <span class="n">this</span><span class="p">%</span><span class="n">destroy</span> <span class="o">=&gt;</span> <span class="n">destroy_results</span>
+<a name="ln-39"></a>
+<a name="ln-40"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nsteps</span><span class="o">=</span><span class="n">nsteps_in</span>
+<a name="ln-41"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="o">=</span><span class="n">nsteps_in</span><span class="o">/</span><span class="n">nprocs_in</span>
+<a name="ln-42"></a>    <span class="n">this</span><span class="p">%</span><span class="n">niters</span><span class="o">=</span><span class="n">niters_in</span>
+<a name="ln-43"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nprocs</span><span class="o">=</span><span class="n">nprocs_in</span>
+<a name="ln-44"></a>    <span class="n">this</span><span class="p">%</span><span class="n">nsweeps</span><span class="o">=</span><span class="n">nsweeps_in</span>
+<a name="ln-45"></a>    <span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">=</span><span class="n">rank_in</span>
+<a name="ln-46"></a>    <span class="n">this</span><span class="p">%</span><span class="n">level</span><span class="o">=</span><span class="n">lev_ind</span>    
+<a name="ln-47"></a>    
+<a name="ln-48"></a>    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
+<a name="ln-49"></a>    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
 <a name="ln-50"></a>
-<a name="ln-51"></a>  <span class="k">subroutine </span><span class="n">dump_results</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
-<a name="ln-52"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-53"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
-<a name="ln-54"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">32</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname_r</span>  <span class="c">!!  output file name for residuals</span>
-<a name="ln-55"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">25</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname_t</span>  <span class="c">!!  output file name for runtimes</span>
-<a name="ln-56"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">21</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fname_e</span>     <span class="c">!!  output file name errors</span>
-<a name="ln-57"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span>
-<a name="ln-58"></a>    
-<a name="ln-59"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p dat/residuals&#39;</span><span class="p">)</span>
-<a name="ln-60"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in initialize_results&quot;</span><span class="p">)</span>
+<a name="ln-51"></a>    <span class="n">this</span><span class="p">%</span><span class="n">errors</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-52"></a>    <span class="n">this</span><span class="p">%</span><span class="n">residuals</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-53"></a>  <span class="k">end subroutine </span><span class="n">initialize_results</span>
+<a name="ln-54"></a>
+<a name="ln-55"></a>  <span class="k">subroutine </span><span class="n">dump_results</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a name="ln-56"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-57"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">istat</span>
+<a name="ln-58"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for residuals</span>
+<a name="ln-59"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">100</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fullname</span>  <span class="c">!!  output file name for residuals</span>
+<a name="ln-60"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">datpath</span>  <span class="c">!!  directory path</span>
 <a name="ln-61"></a>
-<a name="ln-62"></a>    <span class="k">write</span> <span class="p">(</span><span class="n">fname_r</span><span class="p">,</span> <span class="s2">&quot;(A19,I0.3,A5,I0.1,A4)&quot;</span><span class="p">)</span> <span class="s1">&#39;dat/residuals/Proc_&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="s1">&#39;_Lev_&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">level</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>
-<a name="ln-63"></a><span class="c">!    write (fname_e, &quot;(A10,I0.3,A1,I0.3,A4)&quot;) &#39;dat/errors_&#39;,  this%rank,&#39;_&#39;,this%level,&#39;.dat&#39;</span>
-<a name="ln-64"></a>
-<a name="ln-65"></a>    <span class="c">!  output residuals</span>
-<a name="ln-66"></a>    <span class="k">open</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="n">fname_r</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
-<a name="ln-67"></a>    <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span>
-<a name="ln-68"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">niters</span>
-<a name="ln-69"></a>          <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nsweeps</span>
-<a name="ln-70"></a>             <span class="k">write</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;(I4, I4, I4, e21.14)&#39;</span><span class="p">)</span> <span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-<a name="ln-71"></a>          <span class="k">end do</span>
-<a name="ln-72"></a><span class="k">       end do</span>
-<a name="ln-73"></a><span class="k">    </span><span class="n">enddo</span>
-<a name="ln-74"></a>    <span class="k">close</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">)</span>
-<a name="ln-75"></a>
-<a name="ln-76"></a>  <span class="k">end subroutine </span><span class="n">dump_results</span>
-<a name="ln-77"></a>
-<a name="ln-78"></a>    <span class="k">subroutine </span><span class="n">dump_timings</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
-<a name="ln-79"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-80"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">25</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for runtimes</span>
-<a name="ln-81"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">istream</span>
-<a name="ln-82"></a>    
-<a name="ln-83"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p dat/runtimes&#39;</span><span class="p">)</span>
-<a name="ln-84"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in dump_timings&quot;</span><span class="p">)</span>
-<a name="ln-85"></a>
-<a name="ln-86"></a>    <span class="k">write</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;(A18,I0.3,A4)&quot;</span><span class="p">)</span>         <span class="s1">&#39;dat/runtimes/Proc_&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>    
-<a name="ln-87"></a>
-<a name="ln-88"></a>    <span class="n">istream</span> <span class="o">=</span> <span class="mi">200</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="c">!  Use processor dependent file number</span>
-<a name="ln-89"></a>    <span class="c">!  output timings</span>
-<a name="ln-90"></a>    <span class="k">open</span><span class="p">(</span><span class="n">istream</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="n">fname</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
-<a name="ln-91"></a>    <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span>
-<a name="ln-92"></a>       <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">runtimes</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0d0</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-93"></a><span class="k">          write</span><span class="p">(</span><span class="n">istream</span><span class="p">,</span> <span class="s1">&#39;(a16,  f23.8)&#39;</span><span class="p">)</span> <span class="n">timer_names</span><span class="p">(</span><span class="n">j</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">runtimes</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-<a name="ln-94"></a>       <span class="k">end if</span>
-<a name="ln-95"></a><span class="k">    end do</span>
-<a name="ln-96"></a><span class="k">       </span>
-<a name="ln-97"></a><span class="k">    close</span><span class="p">(</span><span class="n">istream</span><span class="p">)</span>
-<a name="ln-98"></a>
-<a name="ln-99"></a>  <span class="k">end subroutine </span><span class="n">dump_timings</span>
-<a name="ln-100"></a>
-<a name="ln-101"></a>  <span class="k">subroutine </span><span class="n">destroy_results</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
-<a name="ln-102"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-103"></a>
-<a name="ln-104"></a>    <span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span>  <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">)</span>
-<a name="ln-105"></a>    <span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span>  <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">)</span>
-<a name="ln-106"></a>  <span class="k">end subroutine </span><span class="n">destroy_results</span>
+<a name="ln-62"></a>    
+<a name="ln-63"></a>    <span class="n">datpath</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">datpath</span><span class="p">)</span> <span class="o">//</span> <span class="s1">&#39;residuals&#39;</span>
+<a name="ln-64"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">))</span>
+<a name="ln-65"></a>    
+<a name="ln-66"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in dump_results&quot;</span><span class="p">)</span>
+<a name="ln-67"></a>
+<a name="ln-68"></a>    <span class="k">write</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;(A6,I0.3,A5,I0.1,A4)&quot;</span><span class="p">)</span> <span class="s1">&#39;/Proc_&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="s1">&#39;_Lev_&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">level</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>
+<a name="ln-69"></a>    <span class="n">fullname</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">)</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+<a name="ln-70"></a>    <span class="c">!  output residuals</span>
+<a name="ln-71"></a>    <span class="k">open</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="nb">trim</span><span class="p">(</span><span class="n">fullname</span><span class="p">),</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
+<a name="ln-72"></a>    <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span>
+<a name="ln-73"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">niters</span>
+<a name="ln-74"></a>          <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nsweeps</span>
+<a name="ln-75"></a>             <span class="k">write</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;(I4, I4, I4, e21.14)&#39;</span><span class="p">)</span> <span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<a name="ln-76"></a>          <span class="k">end do</span>
+<a name="ln-77"></a><span class="k">       end do</span>
+<a name="ln-78"></a><span class="k">    </span><span class="n">enddo</span>
+<a name="ln-79"></a>    <span class="k">close</span><span class="p">(</span><span class="mi">100</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="p">)</span>
+<a name="ln-80"></a>
+<a name="ln-81"></a>  <span class="k">end subroutine </span><span class="n">dump_results</span>
+<a name="ln-82"></a>
+<a name="ln-83"></a>    <span class="k">subroutine </span><span class="n">dump_timings</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
+<a name="ln-84"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-85"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">25</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for runtimes</span>
+<a name="ln-86"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fullname</span>  <span class="c">!!  output file name for runtimes</span>
+<a name="ln-87"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">datpath</span>  <span class="c">!!  directory path</span>
+<a name="ln-88"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">istream</span>
+<a name="ln-89"></a>
+<a name="ln-90"></a>    <span class="n">datpath</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">outdir</span><span class="p">)</span> <span class="o">//</span> <span class="s1">&#39;runtimes&#39;</span>
+<a name="ln-91"></a>
+<a name="ln-92"></a>    <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span><span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">))</span>
+<a name="ln-93"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in dump_timings&quot;</span><span class="p">)</span>
+<a name="ln-94"></a>
+<a name="ln-95"></a>    <span class="k">write</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;(A6,I0.3,A4)&quot;</span><span class="p">)</span>  <span class="s1">&#39;/Proc_&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="s1">&#39;.dat&#39;</span>    
+<a name="ln-96"></a>    <span class="n">fullname</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">)</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+<a name="ln-97"></a>    <span class="n">istream</span> <span class="o">=</span> <span class="mi">200</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="c">!  Use processor dependent file number</span>
+<a name="ln-98"></a>    <span class="c">!  output timings</span>
+<a name="ln-99"></a>    <span class="k">open</span><span class="p">(</span><span class="n">istream</span><span class="p">,</span> <span class="k">file</span><span class="o">=</span><span class="nb">trim</span><span class="p">(</span><span class="n">fullname</span><span class="p">),</span> <span class="n">form</span><span class="o">=</span><span class="s1">&#39;formatted&#39;</span><span class="p">)</span>
+<a name="ln-100"></a>    <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span>
+<a name="ln-101"></a>       <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">runtimes</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0d0</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-102"></a><span class="k">          write</span><span class="p">(</span><span class="n">istream</span><span class="p">,</span> <span class="s1">&#39;(a16,  f23.8)&#39;</span><span class="p">)</span> <span class="n">timer_names</span><span class="p">(</span><span class="n">j</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">runtimes</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+<a name="ln-103"></a>       <span class="k">end if</span>
+<a name="ln-104"></a><span class="k">    end do</span>
+<a name="ln-105"></a><span class="k">       </span>
+<a name="ln-106"></a><span class="k">    close</span><span class="p">(</span><span class="n">istream</span><span class="p">)</span>
 <a name="ln-107"></a>
-<a name="ln-108"></a><span class="k">end module </span><span class="n">pf_mod_results</span>
+<a name="ln-108"></a>  <span class="k">end subroutine </span><span class="n">dump_timings</span>
+<a name="ln-109"></a>
+<a name="ln-110"></a>  <span class="k">subroutine </span><span class="n">destroy_results</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
+<a name="ln-111"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-112"></a>
+<a name="ln-113"></a>    <span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span>  <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">)</span>
+<a name="ln-114"></a>    <span class="k">if</span><span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span>  <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">)</span>
+<a name="ln-115"></a>  <span class="k">end subroutine </span><span class="n">destroy_results</span>
+<a name="ln-116"></a>
+<a name="ln-117"></a><span class="k">end module </span><span class="n">pf_mod_results</span>
 </pre></div>
 
     </section>

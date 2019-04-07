@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 4.1% of total for derived types.</p>Including implementation: 239 statements,  5.3% of total for derived types.">26 statements</a>
+    title="<p> 4.1% of total for derived types.</p>Including implementation: 244 statements,  5.3% of total for derived types.">26 statements</a>
      </li> 
      
      
@@ -595,7 +595,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>use_phib</strong></td><td> =</td><td>.TRUE.</td><td></td>
+  <td><strong>use_phib</strong></td><td> =</td><td>.true.</td><td></td>
   
 </tr>
 
@@ -2252,7 +2252,7 @@ public subroutine <a href='../proc/exp_initialize%7E2.html'>exp_initialize</a>(t
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">b</span><span class="p">(:)</span>       <span class="c">! scratch space for computing nonlinear derivatives</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">f_old</span><span class="p">(:)</span>   <span class="c">! scratch space for storing nonlinear terms</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">newF</span>       <span class="c">! scratch space for storing new function evaluations</span>
-    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span> <span class="o">=</span> <span class="p">.</span><span class="n">TRUE</span><span class="p">.</span>                <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib</span>
+    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>                   <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib (set in derived sweeper)</span>
 
     <span class="k">contains</span>
 

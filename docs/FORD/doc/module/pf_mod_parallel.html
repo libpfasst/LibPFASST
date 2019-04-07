@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.7% of total for modules and submodules.">293 statements</a>
+    title=" 3.7% of total for modules and submodules.">298 statements</a>
      </li> 
      
      
@@ -210,7 +210,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>Module of routines to run  PFASST </p>
+    <p>Module of routines to run  PFASST</p>
       <br>
     
   
@@ -777,7 +777,7 @@ public subroutine <a href='../proc/pf_pfasst_run.html'>pf_pfasst_run</a>(pf, q0,
   Set the number of time steps to do
   The user can either pass in the number of time steps or
   pass in the time step size and length of run
-  Allocate stuff for holding results</p>
+  Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1018,7 +1018,7 @@ public subroutine <a href='../proc/pf_predictor.html'>pf_predictor</a>(pf, t0, d
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_check_residual"></span><h3>
-public subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>(pf, residual_converged)
+public subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>(pf, level_index, residual_converged)
     
     
    
@@ -1069,6 +1069,21 @@ public subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>
   
 <tr>
   
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
   <td><span class="anchor" ></span>logical,</td>
   <td>intent(out)</td>
   <td></td>
@@ -1092,7 +1107,7 @@ public subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_check_convergence_block"></span><h3>
-public subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_convergence_block</a>(pf, send_tag)
+public subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_convergence_block</a>(pf, level_index, send_tag)
     
     
    
@@ -1138,6 +1153,21 @@ public subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_con
   
   <td></td><td>::</td>
   <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1327,7 +1357,7 @@ public subroutine <a href='../proc/pf_v_cycle.html'>pf_v_cycle</a>(pf, iteration
 
 
 
-<p>Execute a V-cycle between levels nfine and ncoarse  </p><a href="../proc/pf_v_cycle.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Execute a V-cycle between levels nfine and ncoarse</p><a href="../proc/pf_v_cycle.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     

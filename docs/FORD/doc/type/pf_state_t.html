@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.7% of total for derived types.</p>Including implementation: 17 statements,  0.4% of total for derived types.">17 statements</a>
+    title="<p> 2.8% of total for derived types.</p>Including implementation: 18 statements,  0.4% of total for derived types.">18 statements</a>
      </li> 
      
      
@@ -185,6 +185,8 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-level">level</a>
       
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-finest_level">finest_level</a>
+      
       <a class="list-group-item" href="../type/pf_state_t.html#variable-hook">hook</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-proc">proc</a>
@@ -239,7 +241,7 @@
     
     <div class="col-md-9" id='text'>
       <h2>type, public, bind(c) :: pf_state_t</h2>
-    <p>The type that holds the state of the system </p>
+    <p>The type that holds the state of the system</p>
     <br>
     
     
@@ -343,6 +345,8 @@
       <a class="list-group-item" href="../type/pf_state_t.html#variable-step">step</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-level">level</a>
+      
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-finest_level">finest_level</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-hook">hook</a>
       
@@ -512,6 +516,20 @@
   
 <tr>
   
+  <td><span class="anchor" id="variable-finest_level"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>finest_level</strong></td><td></td><td></td><td><p>the current finest level (for variable depth V cycles)</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
   <td><span class="anchor" id="variable-hook"></span>integer,</td>
   
   <td>public</td>
@@ -642,6 +660,7 @@
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">iter</span>     <span class="c">!! current iteration number</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">step</span>     <span class="c">!! current time step number assigned to processor</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level</span>    <span class="c">!! which level is currently being operated on</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">finest_level</span>    <span class="c">!! the current finest level (for variable depth V cycles)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">hook</span>     <span class="c">!! which hook</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">proc</span>     <span class="c">!! which processor</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">sweep</span>    <span class="c">!! sweep number</span>

@@ -230,7 +230,7 @@ public subroutine pf_post(pf, level, tag, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E72"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E83"></span>type(pf_pfasst_t),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -507,7 +507,7 @@ public subroutine pf_post(pf, level, tag, direction)
 
 
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
-<span class="k">    </span>
+
 <span class="k">    </span><span class="n">dir</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">! default 1: send forward; set to 2 for send backwards</span>
     <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span> <span class="n">dir</span> <span class="o">=</span> <span class="n">direction</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span><span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;is beginning pf_post, state%pstatus=&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span><span class="p">,</span> <span class="s1">&#39;with tag =&#39;</span><span class="p">,</span> <span class="n">tag</span>
@@ -522,12 +522,12 @@ public subroutine pf_post(pf, level, tag, direction)
        <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">post</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
     <span class="k">end if</span>
 
-<span class="k">    </span>
+
 <span class="k">    if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;warning: error during post&#39;</span><span class="p">,</span> <span class="n">ierror</span>
       <span class="k">stop</span> <span class="s2">&quot;pf_parallel:pf_post&quot;</span>
    <span class="n">endif</span>
-   <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span><span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;is leaving pf_post, state%pstatus=&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span><span class="p">,</span> <span class="s1">&#39;with tag =&#39;</span><span class="p">,</span> <span class="n">tag</span>     
+   <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span><span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;is leaving pf_post, state%pstatus=&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pstatus</span><span class="p">,</span> <span class="s1">&#39;with tag =&#39;</span><span class="p">,</span> <span class="n">tag</span>
   <span class="k">end subroutine </span><span class="n">pf_post</span>
 </pre></div>
 

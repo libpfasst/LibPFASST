@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.5% of total for derived types.</p>Including implementation: 341 statements,  7.5% of total for derived types.">22 statements</a>
+    title="<p> 3.5% of total for derived types.</p>Including implementation: 345 statements,  7.5% of total for derived types.">22 statements</a>
      </li> 
      
      
@@ -650,7 +650,7 @@ subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, step)
 
 
 
-<p>Evaluae f_piece(y), where piece is one or two </p>
+<p>Evaluae f_piece(y), where piece is one or two</p>
     
     <h4>Arguments</h4>
     
@@ -886,7 +886,7 @@ subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>y</strong></td><td><p>Solution of implicit solve </p></td>
+  <td><strong>y</strong></td><td><p>Solution of implicit solve</p></td>
   
 </tr>
 
@@ -1573,7 +1573,7 @@ public subroutine <a href='../proc/imexq_oc_integrate.html'>imexQ_oc_integrate</
           
     
     <h3>
-public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>(this, lev, dt, flags)
+public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>(this, pf, level_index, dt, flags)
     
     
    
@@ -1614,12 +1614,27 @@ public subroutine <a href='../proc/imexq_oc_residual.html'>imexQ_oc_residual</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2115,7 +2130,7 @@ public subroutine <a href='../proc/imexq_oc_destroy.html'>imexQ_oc_destroy</a>(t
      <span class="kt">logical</span>                 <span class="kd">::</span> <span class="k">implicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="c">!!  Is there an implicit piece</span>
 
      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">rhs</span>   <span class="c">!! holds rhs for implicit solve</span>
-     
+
   <span class="k">contains</span>
 <span class="k">     procedure</span><span class="p">(</span><span class="n">pf_f_eval_p</span><span class="p">),</span> <span class="k">deferred</span> <span class="kd">::</span> <span class="n">f_eval</span>   <span class="c">!!  RHS function evaluations</span>
      <span class="k">procedure</span><span class="p">(</span><span class="n">pf_f_comp_p</span><span class="p">),</span> <span class="k">deferred</span> <span class="kd">::</span> <span class="n">f_comp</span>   <span class="c">!!  Implicit solver</span>

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 4.1% of total for derived types.</p>Including implementation: 248 statements,  5.5% of total for derived types.">26 statements</a>
+    title="<p> 4.1% of total for derived types.</p>Including implementation: 255 statements,  5.6% of total for derived types.">26 statements</a>
      </li> 
      
      
@@ -595,7 +595,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>use_phib</strong></td><td> =</td><td>.TRUE.</td><td></td>
+  <td><strong>use_phib</strong></td><td> =</td><td>.true.</td><td></td>
   
 </tr>
 
@@ -1676,7 +1676,7 @@ $        end do</p>
           
     
     <h3>
-public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, lev, dt, flags)
+public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, pf, level_index, dt, flags)
     
     
    
@@ -1689,7 +1689,7 @@ public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, lev
 
 
 
-<p>Compute the integral of F from t_n to t_m at each node</p><a href="../proc/exp_residual.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Assign level pointer</p><a href="../proc/exp_residual.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1725,12 +1725,27 @@ public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, lev
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1745,7 +1760,7 @@ public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, lev
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dt</strong></td><td><p>Time step</p></td>
+  <td><strong>dt</strong></td><td></td>
   
 </tr>
 
@@ -2278,7 +2293,7 @@ public subroutine <a href='../proc/exp_initialize.html'>exp_initialize</a>(this,
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">b</span><span class="p">(:)</span>       <span class="c">! scratch space for computing nonlinear derivatives</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">f_old</span><span class="p">(:)</span>   <span class="c">! scratch space for storing nonlinear terms</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">newF</span>       <span class="c">! scratch space for storing new function evaluations</span>
-    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span> <span class="o">=</span> <span class="p">.</span><span class="n">TRUE</span><span class="p">.</span>                <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib</span>
+    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>                  <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib (reset in derived sweeper)</span>
 
     <span class="k">contains</span>
 

@@ -328,7 +328,6 @@ public subroutine exp_initialize(this, lev)
         <span class="c">! local variables</span>
         <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
         <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">q</span><span class="p">(:)</span>
-
         <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>

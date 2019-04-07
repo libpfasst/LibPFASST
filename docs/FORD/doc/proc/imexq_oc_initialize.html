@@ -245,7 +245,7 @@ public subroutine imexQ_oc_initialize(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E24"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-lev%7E22"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -323,10 +323,10 @@ public subroutine imexQ_oc_initialize(this, lev)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">imexQ_oc_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_imexQ_oc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  
-    
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+
     <span class="kt">integer</span>    <span class="kd">::</span>  <span class="n">Nnodes</span>
-    
+
     <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">2</span>
 
     <span class="n">Nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
@@ -334,17 +334,17 @@ public subroutine imexQ_oc_initialize(this, lev)
     <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">(</span><span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">Nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
     <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">Nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
     <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">Nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-    
+
     <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
     <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
 
     <span class="n">this</span><span class="p">%</span><span class="n">dtsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">Nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c">! Implicit matrix</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq</span><span class="p">)</span> <span class="k">then</span> 
+    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq</span><span class="p">)</span> <span class="k">then</span>
        <span class="c">! Get the LU</span>
        <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qmatLU</span>
-    <span class="k">else </span>
+    <span class="k">else</span>
 <span class="k">       </span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span>  <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qmatBE</span>
     <span class="k">end if</span>
 
@@ -356,7 +356,7 @@ public subroutine imexQ_oc_initialize(this, lev)
 
     <span class="c">!!  Make space for rhs</span>
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    
+
   <span class="k">end subroutine </span><span class="n">imexQ_oc_initialize</span>
 </pre></div>
 

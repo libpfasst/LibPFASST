@@ -88,8 +88,6 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
-
-    
     step = pf%state%step+1
 
     which = 0
@@ -110,6 +108,7 @@ contains
     tend = t0+dt
 
     do k = 1,nsweeps
+       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
        ! compute integrals and add fas correction
@@ -125,7 +124,7 @@ contains
                call lev%I(m)%axpy(dt*lev%sdcmats%qmat(m,n), lev%F(n,3), 1)
                call this%I3(m)%axpy(dt*this%QtilI(m,n), lev%F(n,3), 1)
             end do
-            if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m),1)
             end if
           end do
@@ -143,7 +142,7 @@ contains
                call lev%I(m)%axpy(dt*lev%sdcmats%qmat(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
                call this%I3(m)%axpy(dt*this%QtilI(Nnodes-m,Nnodes+1-n), lev%F(n,3), 2)
             end do
-            if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), 2)
             end if
           end do
@@ -193,7 +192,7 @@ contains
             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, 1, m+1, step)
             call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
          end do
-         !call pf_residual(pf, lev, dt, 1)
+         !call pf_residual(pf, level_index, dt, 1)
          call lev%qend%copy(lev%Q(lev%nnodes), 1)
        end if ! sweep_y
 
@@ -225,16 +224,16 @@ contains
             call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
             call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, 2, m, step)
          end do
-         !call pf_residual(pf, lev, dt, 2)
+         !call pf_residual(pf, level_index, dt, 2)
          call lev%q0%copy(lev%Q(1), 2)
        end if  ! sweep_p
 
        if( sweep_p .and. sweep_y ) then
-         call pf_residual(pf, lev, dt, 0)
+         call pf_residual(pf, level_index, dt, 0)
        else if( sweep_y ) then
-         call pf_residual(pf, lev, dt, 1)
+         call pf_residual(pf, level_index, dt, 1)
        else if (sweep_p ) then
-         call pf_residual(pf, lev, dt, 2)
+         call pf_residual(pf, level_index, dt, 2)
        else
          stop "neither sweep on p nor on y : that should not happen"
        end if
@@ -376,37 +375,42 @@ contains
     end do
   end subroutine misdcQ_oc_evaluate_all
 
-  subroutine misdcQ_oc_residual(this, lev, dt, flags)
+  subroutine misdcQ_oc_residual(this, pf, level_index, dt, flags)
     class(pf_misdcQ_oc_t),  intent(inout) :: this
-    class(pf_level_t),       intent(inout) :: lev
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+
     real(pfdp),             intent(in)    :: dt
     integer,      optional, intent(in)    :: flags
 
     integer :: m, n, which
-
+    type(pf_level_t), pointer :: lev
+    
     which = 0
     if(present(flags)) which = flags
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    call this%integrate(pf%levels(level_index), pf%levels(level_index)%Q, pf%levels(level_index)%F, dt, &
+         pf%levels(level_index)%I, which)
 
-    call this%integrate(lev, lev%Q, lev%F, dt, lev%I, which)
-
+    
     ! add tau (which is 'node to node')
-    if (allocated(lev%tauQ)) then
-       do m = 1, lev%nnodes-1
-          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), which)
+    if (level_index < pf%state%finest_level) then
+       do m = 1, pf%levels(level_index)%nnodes-1
+          call pf%levels(level_index)%I(m)%axpy(1.0_pfdp, pf%levels(level_index)%tauQ(m), which)
        end do
     end if
 
     ! subtract out Q
-    do m = 1, lev%nnodes-1
+    do m = 1, pf%levels(level_index)%nnodes-1
        if( (which .eq. 0) .or. (which .eq. 1) ) then
-          call lev%R(m)%copy(lev%I(m), 1)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
-          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
+          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 1)
+          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp, pf%levels(level_index)%Q(1), 1)
+          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m+1), 1)
        end if
        if( (which .eq. 0) .or. (which .eq. 2) ) then
-          call lev%R(m)%copy(lev%I(m), 2)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(lev%nnodes), 2)
-          call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m), 2)
+          call pf%levels(level_index)%R(m)%copy(pf%levels(level_index)%I(m), 2)
+          call pf%levels(level_index)%R(m)%axpy(1.0_pfdp, pf%levels(level_index)%Q(pf%levels(level_index)%nnodes), 2)
+          call pf%levels(level_index)%R(m)%axpy(-1.0_pfdp, pf%levels(level_index)%Q(m), 2)
        end if
     end do
 

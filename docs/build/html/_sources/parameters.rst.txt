@@ -78,7 +78,9 @@ default values as below:
      logical :: Pipeline_G =  .false.
      logical :: PFASST_pred = .false.
 
-     logical :: echo_timings  = .false.
+     logical :: save_residuals = .false.   !!  If true, residuals are saved and output
+     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
+     logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
 
 
 These value can be changed as desired.

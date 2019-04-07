@@ -230,7 +230,7 @@ public subroutine pf_initialize_results(pf)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E23"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E26"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -499,7 +499,7 @@ public subroutine pf_initialize_results(pf)
   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">lev_ind</span>
   <span class="k">ALLOCATE</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">))</span>
   <span class="k">do </span><span class="n">lev_ind</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-    <span class="k">call  </span><span class="n">initialize_results</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">lev_ind</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">niters</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">(</span><span class="n">lev_ind</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">)</span>
+    <span class="k">call  </span><span class="n">initialize_results</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">lev_ind</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">niters</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">(</span><span class="n">lev_ind</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span><span class="n">lev_ind</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">outdir</span><span class="p">)</span>
   <span class="k">end do</span>
 <span class="k">  end subroutine </span><span class="n">pf_initialize_results</span>
 </pre></div>

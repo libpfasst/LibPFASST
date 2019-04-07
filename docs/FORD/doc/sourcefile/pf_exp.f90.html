@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.7% of total for source files.">258 statements</a>
+    title=" 2.7% of total for source files.">265 statements</a>
      </li> 
      
      
@@ -449,7 +449,7 @@
 <a name="ln-33"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">b</span><span class="p">(:)</span>       <span class="c">! scratch space for computing nonlinear derivatives</span>
 <a name="ln-34"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">f_old</span><span class="p">(:)</span>   <span class="c">! scratch space for storing nonlinear terms</span>
 <a name="ln-35"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">newF</span>       <span class="c">! scratch space for storing new function evaluations</span>
-<a name="ln-36"></a>    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span> <span class="o">=</span> <span class="p">.</span><span class="n">TRUE</span><span class="p">.</span>                <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib</span>
+<a name="ln-36"></a>    <span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">use_phib</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>                  <span class="c">! if TRUE calls phib otherwise calls swpPhib and resPhib (reset in derived sweeper)</span>
 <a name="ln-37"></a>
 <a name="ln-38"></a>    <span class="k">contains</span>
 <a name="ln-39"></a>
@@ -639,363 +639,373 @@
 <a name="ln-223"></a>        <span class="c">! local variables</span>
 <a name="ln-224"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
 <a name="ln-225"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">q</span><span class="p">(:)</span>
-<a name="ln-226"></a>
-<a name="ln-227"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-228"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
-<a name="ln-229"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
-<a name="ln-230"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
-<a name="ln-231"></a>        <span class="c">! set nodes and substeps</span>
-<a name="ln-232"></a>        <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qnodes</span>
-<a name="ln-233"></a>        <span class="n">this</span><span class="p">%</span><span class="n">eta</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span> <span class="p">:</span> <span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span> <span class="p">:</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c">! substeps</span>
-<a name="ln-234"></a>        <span class="c">! compute weights</span>
-<a name="ln-235"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">))</span>
-<a name="ln-236"></a>        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
-<a name="ln-237"></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
-<a name="ln-238"></a>            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:));</span>
-<a name="ln-239"></a>        <span class="k">end do</span>
-<a name="ln-240"></a>        <span class="c">! set number of rhs components</span>
-<a name="ln-241"></a>        <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>
-<a name="ln-242"></a>        <span class="c">! initialize temporary storage objects</span>
-<a name="ln-243"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-244"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-245"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-246"></a>
-<a name="ln-247"></a>    <span class="k">end subroutine </span><span class="n">exp_initialize</span>
-<a name="ln-248"></a>
-<a name="ln-249"></a>    <span class="c">! SWEEP: exponential sweep subroutine ===============================================</span>
-<a name="ln-250"></a>    <span class="k">subroutine </span><span class="n">exp_sweep</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-<a name="ln-251"></a>
-<a name="ln-252"></a>        <span class="k">use </span><span class="n">pf_mod_timer</span>
-<a name="ln-253"></a>        <span class="k">use </span><span class="n">pf_mod_hooks</span>
-<a name="ln-254"></a>
-<a name="ln-255"></a>        <span class="c">! arguments</span>
-<a name="ln-256"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-257"></a>        <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>   <span class="c">!!  PFASST structure</span>
-<a name="ln-258"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  which level to sweep on</span>
-<a name="ln-259"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span>           <span class="c">!!  Time at beginning of time step</span>
-<a name="ln-260"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  time step size</span>
-<a name="ln-261"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
-<a name="ln-262"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
-<a name="ln-263"></a>
-<a name="ln-264"></a>        <span class="c">! local variables</span>
-<a name="ln-265"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-266"></a>        <span class="kt">integer</span>                    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
-<a name="ln-267"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                 <span class="kd">::</span> <span class="n">t</span>
-<a name="ln-268"></a>
-<a name="ln-269"></a>        <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
-<a name="ln-270"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-226"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-227"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+<a name="ln-228"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
+<a name="ln-229"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
+<a name="ln-230"></a>        <span class="c">! set nodes and substeps</span>
+<a name="ln-231"></a>        <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qnodes</span>
+<a name="ln-232"></a>        <span class="n">this</span><span class="p">%</span><span class="n">eta</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span> <span class="p">:</span> <span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span> <span class="p">:</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="c">! substeps</span>
+<a name="ln-233"></a>        <span class="c">! compute weights</span>
+<a name="ln-234"></a>        <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">))</span>
+<a name="ln-235"></a>        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
+<a name="ln-236"></a>            <span class="n">q</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<a name="ln-237"></a>            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:));</span>
+<a name="ln-238"></a>        <span class="k">end do</span>
+<a name="ln-239"></a>        <span class="c">! set number of rhs components</span>
+<a name="ln-240"></a>        <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="ln-241"></a>        <span class="c">! initialize temporary storage objects</span>
+<a name="ln-242"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-243"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-244"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-245"></a>
+<a name="ln-246"></a>    <span class="k">end subroutine </span><span class="n">exp_initialize</span>
+<a name="ln-247"></a>
+<a name="ln-248"></a>    <span class="c">! SWEEP: exponential sweep subroutine ===============================================</span>
+<a name="ln-249"></a>    <span class="k">subroutine </span><span class="n">exp_sweep</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-250"></a>
+<a name="ln-251"></a>        <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-252"></a>        <span class="k">use </span><span class="n">pf_mod_hooks</span>
+<a name="ln-253"></a>
+<a name="ln-254"></a>        <span class="c">! arguments</span>
+<a name="ln-255"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-256"></a>        <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>   <span class="c">!!  PFASST structure</span>
+<a name="ln-257"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  which level to sweep on</span>
+<a name="ln-258"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span>           <span class="c">!!  Time at beginning of time step</span>
+<a name="ln-259"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  time step size</span>
+<a name="ln-260"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
+<a name="ln-261"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
+<a name="ln-262"></a>
+<a name="ln-263"></a>        <span class="c">! local variables</span>
+<a name="ln-264"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-265"></a>        <span class="kt">integer</span>                    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
+<a name="ln-266"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                 <span class="kd">::</span> <span class="n">t</span>
+<a name="ln-267"></a>
+<a name="ln-268"></a>        <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+<a name="ln-269"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-270"></a>        <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>        
 <a name="ln-271"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>  
 <a name="ln-272"></a>        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
 <a name="ln-273"></a>
 <a name="ln-274"></a>        <span class="c">! error sweeps</span>
 <a name="ln-275"></a>        <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nsweeps</span>
-<a name="ln-276"></a>           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_PRE_SWEEP</span><span class="p">)</span>      <span class="c">! NOTE: ensure that lev%F has been properly initialized here</span>
-<a name="ln-277"></a>           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
-<a name="ln-278"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
-<a name="ln-279"></a>           <span class="k">end do</span>
-<a name="ln-280"></a><span class="k">           </span>
-<a name="ln-281"></a><span class="k">           </span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> 
-<a name="ln-282"></a>           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
-<a name="ln-283"></a>              <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-<a name="ln-284"></a>              <span class="c">! form b vectors</span>
-<a name="ln-285"></a>              <span class="c">!              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral</span>
-<a name="ln-286"></a>              <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(:),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! phi expansion for exponential picard integral              </span>
-<a name="ln-287"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c">! add term \phi_0(tL) y_n</span>
-<a name="ln-288"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
-<a name="ln-289"></a>                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
-<a name="ln-290"></a>              <span class="n">endif</span>
-<a name="ln-291"></a>              
-<a name="ln-292"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
-<a name="ln-293"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
-<a name="ln-294"></a>                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
-<a name="ln-295"></a>              <span class="k">end if</span>
-<a name="ln-296"></a>              
-<a name="ln-297"></a>              <span class="c">! compute phi products</span>
-<a name="ln-298"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-299"></a><span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-300"></a>              <span class="k">else</span>
-<a name="ln-301"></a><span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-302"></a>              <span class="k">end if</span>
-<a name="ln-303"></a>
-<a name="ln-304"></a><span class="c">!!$              !  Now we have to add in the tauQ</span>
-<a name="ln-305"></a>              <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
-<a name="ln-306"></a><span class="k">                 call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
-<a name="ln-307"></a>                 <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>     <span class="c">! The tau is not node to node</span>
-<a name="ln-308"></a><span class="c">!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       </span>
-<a name="ln-309"></a>                 <span class="k">end if</span>
-<a name="ln-310"></a><span class="k">              end if</span>
-<a name="ln-311"></a><span class="c">!!$</span>
-<a name="ln-312"></a>           <span class="k">end do</span>
-<a name="ln-313"></a><span class="k">           call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>                      <span class="c">! eval last nonlinear term</span>
-<a name="ln-314"></a>
-<a name="ln-315"></a>           <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-316"></a>           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
-<a name="ln-317"></a>           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_POST_SWEEP</span><span class="p">)</span>
-<a name="ln-318"></a>           
-<a name="ln-319"></a>        <span class="k">end do</span>
-<a name="ln-320"></a><span class="k">    end subroutine </span><span class="n">exp_sweep</span>
-<a name="ln-321"></a>
-<a name="ln-322"></a>    <span class="c">! =================================================================================</span>
-<a name="ln-323"></a>    <span class="c">! INTEGRATE: computes the integrals for the exponential Picard residual</span>
-<a name="ln-324"></a>    <span class="c">!</span>
-<a name="ln-325"></a>    <span class="c">!         r_j = A_j - B_j</span>
-<a name="ln-326"></a>    <span class="c">!</span>
-<a name="ln-327"></a>    <span class="c">!     where</span>
-<a name="ln-328"></a>    <span class="c">!</span>
-<a name="ln-329"></a>    <span class="c">!         A_j = \left[ \exp(t h L) y(t_n) - \int_{t_n}^{t_{n,j}} \exp(L(t - t_n)) P(t) dt \right]</span>
-<a name="ln-330"></a>    <span class="c">!         B_j = y(t_{n,j})</span>
+<a name="ln-276"></a>
+<a name="ln-277"></a>           <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="o">=</span><span class="n">k</span>                  
+<a name="ln-278"></a>
+<a name="ln-279"></a>           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_PRE_SWEEP</span><span class="p">)</span>      <span class="c">! NOTE: ensure that lev%F has been properly initialized here</span>
+<a name="ln-280"></a>           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
+<a name="ln-281"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
+<a name="ln-282"></a>           <span class="k">end do</span>
+<a name="ln-283"></a><span class="k">           </span>
+<a name="ln-284"></a><span class="k">           </span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> 
+<a name="ln-285"></a>           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
+<a name="ln-286"></a>              <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+<a name="ln-287"></a>              <span class="c">! form b vectors</span>
+<a name="ln-288"></a>              <span class="c">!              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral</span>
+<a name="ln-289"></a>              <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(:),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! phi expansion for exponential picard integral              </span>
+<a name="ln-290"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c">! add term \phi_0(tL) y_n</span>
+<a name="ln-291"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
+<a name="ln-292"></a>                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
+<a name="ln-293"></a>              <span class="n">endif</span>
+<a name="ln-294"></a>              
+<a name="ln-295"></a>              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
+<a name="ln-296"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
+<a name="ln-297"></a>                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
+<a name="ln-298"></a>              <span class="k">end if</span>
+<a name="ln-299"></a>              
+<a name="ln-300"></a>              <span class="c">! compute phi products</span>
+<a name="ln-301"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-302"></a><span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-303"></a>              <span class="k">else</span>
+<a name="ln-304"></a><span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-305"></a>              <span class="k">end if</span>
+<a name="ln-306"></a>
+<a name="ln-307"></a><span class="c">!!$              !  Now we have to add in the tauQ</span>
+<a name="ln-308"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-309"></a><span class="k">                 call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+<a name="ln-310"></a>                 <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>     <span class="c">! The tau is not node to node</span>
+<a name="ln-311"></a><span class="c">!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       </span>
+<a name="ln-312"></a>                 <span class="k">end if</span>
+<a name="ln-313"></a><span class="k">              end if</span>
+<a name="ln-314"></a><span class="c">!!$</span>
+<a name="ln-315"></a>           <span class="k">end do</span>
+<a name="ln-316"></a><span class="k">           call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>                      <span class="c">! eval last nonlinear term</span>
+<a name="ln-317"></a>
+<a name="ln-318"></a>           <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-319"></a>           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
+<a name="ln-320"></a>           <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_POST_SWEEP</span><span class="p">)</span>
+<a name="ln-321"></a>           
+<a name="ln-322"></a>        <span class="k">end do</span>
+<a name="ln-323"></a><span class="k">    end subroutine </span><span class="n">exp_sweep</span>
+<a name="ln-324"></a>
+<a name="ln-325"></a>    <span class="c">! =================================================================================</span>
+<a name="ln-326"></a>    <span class="c">! INTEGRATE: computes the integrals for the exponential Picard residual</span>
+<a name="ln-327"></a>    <span class="c">!</span>
+<a name="ln-328"></a>    <span class="c">!         r_j = A_j - B_j</span>
+<a name="ln-329"></a>    <span class="c">!</span>
+<a name="ln-330"></a>    <span class="c">!     where</span>
 <a name="ln-331"></a>    <span class="c">!</span>
-<a name="ln-332"></a>    <span class="c">!     NOTE: This procedure computes the expression \hat{r}_j = A_j - y(t_n). The</span>
-<a name="ln-333"></a>    <span class="c">!     term y(t_n) is subtracted from result since the generic calling function</span>
-<a name="ln-334"></a>    <span class="c">!     compute the residual as</span>
-<a name="ln-335"></a>    <span class="c">!</span>
-<a name="ln-336"></a>    <span class="c">!        r_j = y(t_n) + exp_integrate() - y(t_{n,j})</span>
-<a name="ln-337"></a>    <span class="c">!</span>
-<a name="ln-338"></a>    <span class="c">!     thus incorrectly adding the term y_n</span>
-<a name="ln-339"></a>    <span class="c">! =================================================================================</span>
-<a name="ln-340"></a>
-<a name="ln-341"></a>    <span class="k">subroutine </span><span class="n">exp_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-<a name="ln-342"></a>        <span class="c">! parameters</span>
-<a name="ln-343"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-344"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>          <span class="c">!!  Current level</span>
-<a name="ln-345"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:)</span>      <span class="c">!!  Solution values</span>
-<a name="ln-346"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>   <span class="c">!!  RHS Function values</span>
-<a name="ln-347"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
-<a name="ln-348"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintsdc</span><span class="p">(:)</span>   <span class="c">!!  Integral from t_n to t_m</span>
-<a name="ln-349"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
-<a name="ln-350"></a>        <span class="c">! local variables</span>
-<a name="ln-351"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
-<a name="ln-352"></a>
-<a name="ln-353"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-354"></a><span class="c">!!$        call LocalDerivsAtNode(this, 1, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives</span>
-<a name="ln-355"></a><span class="c">!!$        call this%b(1)%setval(real(0.0, pfdp))</span>
-<a name="ln-356"></a><span class="c">!!$        call this%b(1)%axpy(real(1.0, pfdp), qSDC(1))</span>
-<a name="ln-357"></a><span class="c">!!$        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
-<a name="ln-358"></a><span class="c">!!$            if (this%use_phib) then</span>
-<a name="ln-359"></a><span class="c">!!$                call this%phib(this%nodes(i+1), dt, this%b, fintsdc(i))</span>
-<a name="ln-360"></a><span class="c">!!$            else</span>
-<a name="ln-361"></a><span class="c">!!$                call this%resPhib(i, dt, this%b, fintsdc(i))</span>
-<a name="ln-362"></a><span class="c">!!$             end if</span>
-<a name="ln-363"></a><span class="c">!!$        end do</span>
-<a name="ln-364"></a>        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span> <span class="c">! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
-<a name="ln-365"></a>           <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="c">! compute derivatives</span>
-<a name="ln-366"></a>           <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-<a name="ln-367"></a>
-<a name="ln-368"></a>           
-<a name="ln-369"></a>           <span class="k">call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-370"></a>           <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-371"></a><span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-<a name="ln-372"></a>            <span class="k">else</span>
-<a name="ln-373"></a><span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">resPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-<a name="ln-374"></a>             <span class="k">end if</span>
-<a name="ln-375"></a><span class="c">!             if (i &gt; 1) then</span>
-<a name="ln-376"></a><span class="c">!                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))</span>
-<a name="ln-377"></a><span class="c">!             end if</span>
-<a name="ln-378"></a>             
-<a name="ln-379"></a><span class="c">!             print *,&#39;integrating&#39;,i,this%nodes(i+1),dt,this%eta(i)</span>
-<a name="ln-380"></a><span class="c">!          call fintsdc(i)%eprint()</span>
-<a name="ln-381"></a>        <span class="k">end do</span>
-<a name="ln-382"></a>
-<a name="ln-383"></a><span class="c">!        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
-<a name="ln-384"></a><span class="c">!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(1))</span>
-<a name="ln-385"></a><span class="c">!        end do</span>
-<a name="ln-386"></a>        
-<a name="ln-387"></a>             
-<a name="ln-388"></a><span class="c">!             print *,&#39;integrating&#39;,i,this%nodes(i+1),dt,this%eta(i)</span>
-<a name="ln-389"></a><span class="c">!          call fintsdc(i)%eprint()</span>
-<a name="ln-390"></a>
-<a name="ln-391"></a>
-<a name="ln-392"></a>
-<a name="ln-393"></a>    <span class="k">end subroutine </span><span class="n">exp_integrate</span>
+<a name="ln-332"></a>    <span class="c">!         A_j = \left[ \exp(t h L) y(t_n) - \int_{t_n}^{t_{n,j}} \exp(L(t - t_n)) P(t) dt \right]</span>
+<a name="ln-333"></a>    <span class="c">!         B_j = y(t_{n,j})</span>
+<a name="ln-334"></a>    <span class="c">!</span>
+<a name="ln-335"></a>    <span class="c">!     NOTE: This procedure computes the expression \hat{r}_j = A_j - y(t_n). The</span>
+<a name="ln-336"></a>    <span class="c">!     term y(t_n) is subtracted from result since the generic calling function</span>
+<a name="ln-337"></a>    <span class="c">!     compute the residual as</span>
+<a name="ln-338"></a>    <span class="c">!</span>
+<a name="ln-339"></a>    <span class="c">!        r_j = y(t_n) + exp_integrate() - y(t_{n,j})</span>
+<a name="ln-340"></a>    <span class="c">!</span>
+<a name="ln-341"></a>    <span class="c">!     thus incorrectly adding the term y_n</span>
+<a name="ln-342"></a>    <span class="c">! =================================================================================</span>
+<a name="ln-343"></a>
+<a name="ln-344"></a>    <span class="k">subroutine </span><span class="n">exp_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-345"></a>        <span class="c">! parameters</span>
+<a name="ln-346"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-347"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>          <span class="c">!!  Current level</span>
+<a name="ln-348"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:)</span>      <span class="c">!!  Solution values</span>
+<a name="ln-349"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>   <span class="c">!!  RHS Function values</span>
+<a name="ln-350"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
+<a name="ln-351"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintsdc</span><span class="p">(:)</span>   <span class="c">!!  Integral from t_n to t_m</span>
+<a name="ln-352"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
+<a name="ln-353"></a>        <span class="c">! local variables</span>
+<a name="ln-354"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
+<a name="ln-355"></a>
+<a name="ln-356"></a>        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-357"></a><span class="c">!!$        call LocalDerivsAtNode(this, 1, nnodes, fSDC(:,1), this%b(2:nnodes+1)) ! compute derivatives</span>
+<a name="ln-358"></a><span class="c">!!$        call this%b(1)%setval(real(0.0, pfdp))</span>
+<a name="ln-359"></a><span class="c">!!$        call this%b(1)%axpy(real(1.0, pfdp), qSDC(1))</span>
+<a name="ln-360"></a><span class="c">!!$        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
+<a name="ln-361"></a><span class="c">!!$            if (this%use_phib) then</span>
+<a name="ln-362"></a><span class="c">!!$                call this%phib(this%nodes(i+1), dt, this%b, fintsdc(i))</span>
+<a name="ln-363"></a><span class="c">!!$            else</span>
+<a name="ln-364"></a><span class="c">!!$                call this%resPhib(i, dt, this%b, fintsdc(i))</span>
+<a name="ln-365"></a><span class="c">!!$             end if</span>
+<a name="ln-366"></a><span class="c">!!$        end do</span>
+<a name="ln-367"></a>        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span> <span class="c">! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
+<a name="ln-368"></a>           <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">(:,</span><span class="mi">1</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="c">! compute derivatives</span>
+<a name="ln-369"></a>           <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<a name="ln-370"></a>
+<a name="ln-371"></a>           
+<a name="ln-372"></a>           <span class="k">call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-373"></a>           <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-374"></a><span class="k">              call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<a name="ln-375"></a>            <span class="k">else</span>
+<a name="ln-376"></a><span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<a name="ln-377"></a>             <span class="k">end if</span>
+<a name="ln-378"></a><span class="k">             if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-379"></a><span class="c">!                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))</span>
+<a name="ln-380"></a>             <span class="k">end if</span>
+<a name="ln-381"></a>
+<a name="ln-382"></a>             
+<a name="ln-383"></a><span class="c">!             print *,&#39;integrating&#39;,i,this%nodes(i+1),dt,this%eta(i)</span>
+<a name="ln-384"></a><span class="c">!          call fintsdc(i)%eprint()</span>
+<a name="ln-385"></a>        <span class="k">end do</span>
+<a name="ln-386"></a>
+<a name="ln-387"></a><span class="c">!        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
+<a name="ln-388"></a><span class="c">!             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))</span>
+<a name="ln-389"></a><span class="c">!        end do</span>
+<a name="ln-390"></a>        
+<a name="ln-391"></a>             
+<a name="ln-392"></a><span class="c">!             print *,&#39;integrating&#39;,i,this%nodes(i+1),dt,this%eta(i)</span>
+<a name="ln-393"></a><span class="c">!          call fintsdc(i)%eprint()</span>
 <a name="ln-394"></a>
-<a name="ln-395"></a>    <span class="c">! RESIDUAL: compute  residual (generic) ====================================</span>
-<a name="ln-396"></a>    <span class="k">subroutine </span><span class="n">exp_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-<a name="ln-397"></a>
-<a name="ln-398"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-399"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  Current level</span>
-<a name="ln-400"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>   <span class="c">!!  Time step</span>
-<a name="ln-401"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span>
-<a name="ln-402"></a>
-<a name="ln-403"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
-<a name="ln-404"></a>        <span class="c">!&gt;  Compute the integral of F from t_n to t_m at each node</span>
-<a name="ln-405"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-<a name="ln-406"></a>        
-<a name="ln-407"></a>        <span class="c">!&gt; add tau if it exists</span>
-<a name="ln-408"></a>        <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
-<a name="ln-409"></a><span class="k">           do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-410"></a>              <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-<a name="ln-411"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-412"></a>            <span class="c">!     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)</span>
-<a name="ln-413"></a>              <span class="k">end if</span>
-<a name="ln-414"></a><span class="k">              </span>
-<a name="ln-415"></a><span class="k">           end do</span>
-<a name="ln-416"></a><span class="k">        end if</span>
-<a name="ln-417"></a>        
-<a name="ln-418"></a>        <span class="c">!&gt; subtract out the solution value</span>
-<a name="ln-419"></a>        <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
-<a name="ln-420"></a>           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
-<a name="ln-421"></a>           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-422"></a><span class="c">!           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))</span>
-<a name="ln-423"></a>        <span class="k">end do</span>
-<a name="ln-424"></a>
-<a name="ln-425"></a>
-<a name="ln-426"></a><span class="k">    end subroutine </span><span class="n">exp_residual</span>
-<a name="ln-427"></a>
-<a name="ln-428"></a>    <span class="c">! SPREADQ: spread solution (generic) ======================================</span>
-<a name="ln-429"></a>    <span class="k">subroutine </span><span class="n">exp_spreadq0</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-<a name="ln-430"></a>
-<a name="ln-431"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-432"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-433"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t0</span>
-<a name="ln-434"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span>   <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+<a name="ln-395"></a>
+<a name="ln-396"></a>
+<a name="ln-397"></a>    <span class="k">end subroutine </span><span class="n">exp_integrate</span>
+<a name="ln-398"></a>
+<a name="ln-399"></a>    <span class="c">! RESIDUAL: compute  residual (generic) ====================================</span>
+<a name="ln-400"></a>    <span class="k">subroutine </span><span class="n">exp_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-401"></a>      
+<a name="ln-402"></a>      <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-403"></a>      <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-404"></a>      <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
+<a name="ln-405"></a>      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-406"></a>      <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span>
+<a name="ln-407"></a>      
+<a name="ln-408"></a>      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
+<a name="ln-409"></a>      <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-410"></a>    
+<a name="ln-411"></a>
+<a name="ln-412"></a>      <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-413"></a>
+<a name="ln-414"></a>      <span class="c">!&gt;  Compute the integral of F from t_n to t_m at each node</span>
+<a name="ln-415"></a>      <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-416"></a>      
+<a name="ln-417"></a>      <span class="c">!&gt; add tau if it exists</span>
+<a name="ln-418"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-419"></a><span class="k">         do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-420"></a>            <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+<a name="ln-421"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-422"></a>               <span class="c">!     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)</span>
+<a name="ln-423"></a>            <span class="k">end if</span>
+<a name="ln-424"></a><span class="k">            </span>
+<a name="ln-425"></a><span class="k">         end do</span>
+<a name="ln-426"></a><span class="k">      end if</span>
+<a name="ln-427"></a>      
+<a name="ln-428"></a>      <span class="c">!&gt; subtract out the solution value</span>
+<a name="ln-429"></a>      <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
+<a name="ln-430"></a>         <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+<a name="ln-431"></a>         <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-432"></a>         <span class="c">!           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))</span>
+<a name="ln-433"></a>      <span class="k">end do</span>
+<a name="ln-434"></a><span class="k">      </span>
 <a name="ln-435"></a>
-<a name="ln-436"></a>        <span class="k">call </span><span class="n">pf_generic_spreadq0</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+<a name="ln-436"></a><span class="k">    end subroutine </span><span class="n">exp_residual</span>
 <a name="ln-437"></a>
-<a name="ln-438"></a>    <span class="k">end subroutine </span><span class="n">exp_spreadq0</span>
-<a name="ln-439"></a>
-<a name="ln-440"></a>    <span class="c">! EVALUATE: evaluate the nonlinear term at node m ========================</span>
-<a name="ln-441"></a>    <span class="k">subroutine </span><span class="n">exp_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-<a name="ln-442"></a>        <span class="c">! arguments</span>
-<a name="ln-443"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-444"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  Current level</span>
-<a name="ln-445"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span>    <span class="c">!!  Time at which to evaluate</span>
-<a name="ln-446"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">m</span>    <span class="c">!!  Node at which to evaluate</span>
-<a name="ln-447"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
-<a name="ln-448"></a>
-<a name="ln-449"></a>        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-450"></a>
-<a name="ln-451"></a>    <span class="k">end subroutine </span><span class="n">exp_evaluate</span>
-<a name="ln-452"></a>
-<a name="ln-453"></a>    <span class="c">! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================</span>
-<a name="ln-454"></a>    <span class="k">subroutine </span><span class="n">exp_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-<a name="ln-455"></a>        <span class="c">! arguments</span>
-<a name="ln-456"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-457"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>   <span class="c">!!  Current level</span>
-<a name="ln-458"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span><span class="p">(:)</span>     <span class="c">!!  Array of times at each node</span>
-<a name="ln-459"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+<a name="ln-438"></a>    <span class="c">! SPREADQ: spread solution (generic) ======================================</span>
+<a name="ln-439"></a>    <span class="k">subroutine </span><span class="n">exp_spreadq0</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+<a name="ln-440"></a>
+<a name="ln-441"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-442"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-443"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t0</span>
+<a name="ln-444"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span>   <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+<a name="ln-445"></a>
+<a name="ln-446"></a>        <span class="k">call </span><span class="n">pf_generic_spreadq0</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+<a name="ln-447"></a>
+<a name="ln-448"></a>    <span class="k">end subroutine </span><span class="n">exp_spreadq0</span>
+<a name="ln-449"></a>
+<a name="ln-450"></a>    <span class="c">! EVALUATE: evaluate the nonlinear term at node m ========================</span>
+<a name="ln-451"></a>    <span class="k">subroutine </span><span class="n">exp_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+<a name="ln-452"></a>        <span class="c">! arguments</span>
+<a name="ln-453"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-454"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  Current level</span>
+<a name="ln-455"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span>    <span class="c">!!  Time at which to evaluate</span>
+<a name="ln-456"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">m</span>    <span class="c">!!  Node at which to evaluate</span>
+<a name="ln-457"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+<a name="ln-458"></a>
+<a name="ln-459"></a>        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 <a name="ln-460"></a>
-<a name="ln-461"></a>        <span class="k">call </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a name="ln-461"></a>    <span class="k">end subroutine </span><span class="n">exp_evaluate</span>
 <a name="ln-462"></a>
-<a name="ln-463"></a>    <span class="k">end subroutine </span><span class="n">exp_evaluate_all</span>
-<a name="ln-464"></a>
-<a name="ln-465"></a>    <span class="c">! DEALLOCATE: deallocate sweeper variables</span>
-<a name="ln-466"></a>    <span class="k">subroutine </span><span class="n">exp_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-<a name="ln-467"></a>        <span class="c">! arguments</span>
-<a name="ln-468"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-469"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>   <span class="c">!!  Current level</span>
+<a name="ln-463"></a>    <span class="c">! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================</span>
+<a name="ln-464"></a>    <span class="k">subroutine </span><span class="n">exp_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+<a name="ln-465"></a>        <span class="c">! arguments</span>
+<a name="ln-466"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-467"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>   <span class="c">!!  Current level</span>
+<a name="ln-468"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span><span class="p">(:)</span>     <span class="c">!!  Array of times at each node</span>
+<a name="ln-469"></a>        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
 <a name="ln-470"></a>
-<a name="ln-471"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">)</span>
-<a name="ln-472"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">)</span>
-<a name="ln-473"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">)</span>
-<a name="ln-474"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-475"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>        
-<a name="ln-476"></a>    <span class="k">end subroutine </span><span class="n">exp_destroy</span>
-<a name="ln-477"></a>
-<a name="ln-478"></a>    <span class="c">! =======================================================================</span>
-<a name="ln-479"></a>    <span class="c">! LocalDerivsAtNode: approximate the local derivative vector </span>
-<a name="ln-480"></a>    <span class="c">!           at the substep t_{n,i} for the nonlinear function N(y(t)) </span>
-<a name="ln-481"></a>    <span class="c">!           using the terms N(y{n,i}). Local coordinates coorespond to </span>
-<a name="ln-482"></a>    <span class="c">!           s = h t.</span>
-<a name="ln-483"></a>    <span class="c">! Arguments</span>
-<a name="ln-484"></a>    <span class="c">!</span>
-<a name="ln-485"></a>    <span class="c">!   i       (input) INTEGER</span>
-<a name="ln-486"></a>    <span class="c">!           index of the substep for which we want to approximate derivatives</span>
-<a name="ln-487"></a>    <span class="c">!</span>
-<a name="ln-488"></a>    <span class="c">!   nnodes  (input) INTEGER</span>
-<a name="ln-489"></a>    <span class="c">!           number of nodes</span>
-<a name="ln-490"></a>    <span class="c">!</span>
-<a name="ln-491"></a>    <span class="c">!   N_eval  (input) pf_encap_t(:)</span>
-<a name="ln-492"></a>    <span class="c">!           Nonlinear function evaluations; N_eval(i) contains N(y_{n,i})</span>
-<a name="ln-493"></a>    <span class="c">!</span>
-<a name="ln-494"></a>    <span class="c">!   N_deriv (output) pf_encap_t(:)</span>
-<a name="ln-495"></a>    <span class="c">!           N_deriv(i) approximates \frac{d^{i-1}}{dt^{i-1}} N(y(t)) </span>
-<a name="ln-496"></a>    <span class="c">! =======================================================================</span>
-<a name="ln-497"></a>
-<a name="ln-498"></a>    <span class="k">subroutine </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">N_eval</span><span class="p">,</span> <span class="n">N_deriv</span><span class="p">)</span>
-<a name="ln-499"></a>        <span class="c">! arguments</span>
-<a name="ln-500"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-501"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">i</span>
-<a name="ln-502"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nnodes</span>
-<a name="ln-503"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">N_eval</span><span class="p">(:)</span>
-<a name="ln-504"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">N_deriv</span><span class="p">(:)</span>
-<a name="ln-505"></a>        <span class="c">! local variables</span>
-<a name="ln-506"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
+<a name="ln-471"></a>        <span class="k">call </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a name="ln-472"></a>
+<a name="ln-473"></a>    <span class="k">end subroutine </span><span class="n">exp_evaluate_all</span>
+<a name="ln-474"></a>
+<a name="ln-475"></a>    <span class="c">! DEALLOCATE: deallocate sweeper variables</span>
+<a name="ln-476"></a>    <span class="k">subroutine </span><span class="n">exp_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+<a name="ln-477"></a>        <span class="c">! arguments</span>
+<a name="ln-478"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-479"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>   <span class="c">!!  Current level</span>
+<a name="ln-480"></a>
+<a name="ln-481"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">)</span>
+<a name="ln-482"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">)</span>
+<a name="ln-483"></a>        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">)</span>
+<a name="ln-484"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-485"></a>        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>        
+<a name="ln-486"></a>    <span class="k">end subroutine </span><span class="n">exp_destroy</span>
+<a name="ln-487"></a>
+<a name="ln-488"></a>    <span class="c">! =======================================================================</span>
+<a name="ln-489"></a>    <span class="c">! LocalDerivsAtNode: approximate the local derivative vector </span>
+<a name="ln-490"></a>    <span class="c">!           at the substep t_{n,i} for the nonlinear function N(y(t)) </span>
+<a name="ln-491"></a>    <span class="c">!           using the terms N(y{n,i}). Local coordinates coorespond to </span>
+<a name="ln-492"></a>    <span class="c">!           s = h t.</span>
+<a name="ln-493"></a>    <span class="c">! Arguments</span>
+<a name="ln-494"></a>    <span class="c">!</span>
+<a name="ln-495"></a>    <span class="c">!   i       (input) INTEGER</span>
+<a name="ln-496"></a>    <span class="c">!           index of the substep for which we want to approximate derivatives</span>
+<a name="ln-497"></a>    <span class="c">!</span>
+<a name="ln-498"></a>    <span class="c">!   nnodes  (input) INTEGER</span>
+<a name="ln-499"></a>    <span class="c">!           number of nodes</span>
+<a name="ln-500"></a>    <span class="c">!</span>
+<a name="ln-501"></a>    <span class="c">!   N_eval  (input) pf_encap_t(:)</span>
+<a name="ln-502"></a>    <span class="c">!           Nonlinear function evaluations; N_eval(i) contains N(y_{n,i})</span>
+<a name="ln-503"></a>    <span class="c">!</span>
+<a name="ln-504"></a>    <span class="c">!   N_deriv (output) pf_encap_t(:)</span>
+<a name="ln-505"></a>    <span class="c">!           N_deriv(i) approximates \frac{d^{i-1}}{dt^{i-1}} N(y(t)) </span>
+<a name="ln-506"></a>    <span class="c">! =======================================================================</span>
 <a name="ln-507"></a>
-<a name="ln-508"></a>        <span class="c">! form nonlinear derivative vectors b</span>
-<a name="ln-509"></a>        <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                                <span class="c">! loop over derivatives j = 1 ... n</span>
-<a name="ln-510"></a>            <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">))</span>
-<a name="ln-511"></a>            <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                            <span class="c">! look over nodes k = 1 ... n</span>
-<a name="ln-512"></a>                <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">N_eval</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
-<a name="ln-513"></a>            <span class="k">end do</span>
-<a name="ln-514"></a><span class="k">        end do</span>
-<a name="ln-515"></a><span class="k">    end</span>
-<a name="ln-516"></a>
-<a name="ln-517"></a>    <span class="c">! =======================================================================</span>
-<a name="ln-518"></a>    <span class="c">! WEIGHTS   Compute coefficients for finite difference approximation for</span>
-<a name="ln-519"></a>    <span class="c">!           the derivatives 1 to m at point z assuming data is known at</span>
-<a name="ln-520"></a>    <span class="c">!           points in array x. Based on the program &quot;weights&quot; in</span>
-<a name="ln-521"></a>    <span class="c">!           B. Fornberg, &quot;Calculation of weights in finite difference</span>
-<a name="ln-522"></a>    <span class="c">!           formulas&quot;, SIAM Review 40 (1998), pp. 685-691.</span>
-<a name="ln-523"></a>    <span class="c">! Arguments</span>
-<a name="ln-524"></a>    <span class="c">!</span>
-<a name="ln-525"></a>    <span class="c">!   z   (input) DOUBLE</span>
-<a name="ln-526"></a>    <span class="c">!       location where approximations are to be accurate</span>
-<a name="ln-527"></a>    <span class="c">!</span>
-<a name="ln-528"></a>    <span class="c">!   x   (input) DOUBLE Array</span>
-<a name="ln-529"></a>    <span class="c">!       array containing interpolation points</span>
-<a name="ln-530"></a>    <span class="c">!</span>
-<a name="ln-531"></a>    <span class="c">!   m   (input) INTEGER</span>
-<a name="ln-532"></a>    <span class="c">!       highest derivative for which weights are sought</span>
-<a name="ln-533"></a>    <span class="c">!</span>
-<a name="ln-534"></a>    <span class="c">!   W   (output) DOUBLE array, dimension(size(x),m+1)</span>
-<a name="ln-535"></a>    <span class="c">!       matrix that gives weights at grid locations x for</span>
-<a name="ln-536"></a>    <span class="c">!       derivative of order j&lt;=m are found in c(:,j)</span>
-<a name="ln-537"></a>    <span class="c">! =======================================================================</span>
-<a name="ln-538"></a>
-<a name="ln-539"></a>    <span class="k">subroutine </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
-<a name="ln-540"></a>
-<a name="ln-541"></a>        <span class="c">! Arguments</span>
-<a name="ln-542"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-543"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">z</span>
-<a name="ln-544"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">x</span><span class="p">(:)</span>
-<a name="ln-545"></a>        <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">m</span>
-<a name="ln-546"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>   <span class="kd">::</span> <span class="n">W</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-547"></a>
-<a name="ln-548"></a>        <span class="c">! Variable Declarations</span>
-<a name="ln-549"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">,</span> <span class="n">c4</span><span class="p">,</span> <span class="n">c5</span>
-<a name="ln-550"></a>        <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">mn</span>
-<a name="ln-551"></a>
-<a name="ln-552"></a>        <span class="n">c1</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
-<a name="ln-553"></a>        <span class="n">c4</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">z</span>
-<a name="ln-554"></a>        <span class="n">W</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-555"></a>        <span class="n">W</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
-<a name="ln-556"></a>
-<a name="ln-557"></a>        <span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<a name="ln-558"></a>        <span class="k">do </span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span>
-<a name="ln-559"></a>            <span class="n">mn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-560"></a>            <span class="n">c2</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
-<a name="ln-561"></a>            <span class="n">c5</span> <span class="o">=</span> <span class="n">c4</span>
-<a name="ln-562"></a>            <span class="n">c4</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">z</span>
-<a name="ln-563"></a>            <span class="k">do </span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-564"></a>                <span class="n">c3</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-<a name="ln-565"></a>                <span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span><span class="o">*</span><span class="n">c3</span><span class="p">;</span>
-<a name="ln-566"></a>                <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<a name="ln-567"></a><span class="k">                    do </span><span class="n">k</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-568"></a>                        <span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">c5</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="p">))</span><span class="o">/</span><span class="n">c2</span><span class="p">;</span>
-<a name="ln-569"></a>                    <span class="n">enddo</span>
-<a name="ln-570"></a>                    <span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">c1</span><span class="o">*</span><span class="n">c5</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">c2</span><span class="p">;</span>
-<a name="ln-571"></a>                <span class="n">endif</span>
-<a name="ln-572"></a>                <span class="k">do </span><span class="n">k</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-573"></a>                    <span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">c4</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">c3</span><span class="p">;</span>
-<a name="ln-574"></a>                <span class="n">enddo</span>
-<a name="ln-575"></a>                <span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">c4</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">c3</span><span class="p">;</span>
-<a name="ln-576"></a>            <span class="n">enddo</span>
-<a name="ln-577"></a>            <span class="n">c1</span> <span class="o">=</span> <span class="n">c2</span><span class="p">;</span>
-<a name="ln-578"></a>        <span class="n">enddo</span>
-<a name="ln-579"></a>
-<a name="ln-580"></a><span class="k">end subroutine </span><span class="n">weights</span>
-<a name="ln-581"></a>
-<a name="ln-582"></a><span class="k">end module </span><span class="n">pf_mod_exp</span>
+<a name="ln-508"></a>    <span class="k">subroutine </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">N_eval</span><span class="p">,</span> <span class="n">N_deriv</span><span class="p">)</span>
+<a name="ln-509"></a>        <span class="c">! arguments</span>
+<a name="ln-510"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-511"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">i</span>
+<a name="ln-512"></a>        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nnodes</span>
+<a name="ln-513"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">N_eval</span><span class="p">(:)</span>
+<a name="ln-514"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">N_deriv</span><span class="p">(:)</span>
+<a name="ln-515"></a>        <span class="c">! local variables</span>
+<a name="ln-516"></a>        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
+<a name="ln-517"></a>
+<a name="ln-518"></a>        <span class="c">! form nonlinear derivative vectors b</span>
+<a name="ln-519"></a>        <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                                <span class="c">! loop over derivatives j = 1 ... n</span>
+<a name="ln-520"></a>            <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">))</span>
+<a name="ln-521"></a>            <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                            <span class="c">! look over nodes k = 1 ... n</span>
+<a name="ln-522"></a>                <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">N_eval</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+<a name="ln-523"></a>            <span class="k">end do</span>
+<a name="ln-524"></a><span class="k">        end do</span>
+<a name="ln-525"></a><span class="k">    end</span>
+<a name="ln-526"></a>
+<a name="ln-527"></a>    <span class="c">! =======================================================================</span>
+<a name="ln-528"></a>    <span class="c">! WEIGHTS   Compute coefficients for finite difference approximation for</span>
+<a name="ln-529"></a>    <span class="c">!           the derivatives 1 to m at point z assuming data is known at</span>
+<a name="ln-530"></a>    <span class="c">!           points in array x. Based on the program &quot;weights&quot; in</span>
+<a name="ln-531"></a>    <span class="c">!           B. Fornberg, &quot;Calculation of weights in finite difference</span>
+<a name="ln-532"></a>    <span class="c">!           formulas&quot;, SIAM Review 40 (1998), pp. 685-691.</span>
+<a name="ln-533"></a>    <span class="c">! Arguments</span>
+<a name="ln-534"></a>    <span class="c">!</span>
+<a name="ln-535"></a>    <span class="c">!   z   (input) DOUBLE</span>
+<a name="ln-536"></a>    <span class="c">!       location where approximations are to be accurate</span>
+<a name="ln-537"></a>    <span class="c">!</span>
+<a name="ln-538"></a>    <span class="c">!   x   (input) DOUBLE Array</span>
+<a name="ln-539"></a>    <span class="c">!       array containing interpolation points</span>
+<a name="ln-540"></a>    <span class="c">!</span>
+<a name="ln-541"></a>    <span class="c">!   m   (input) INTEGER</span>
+<a name="ln-542"></a>    <span class="c">!       highest derivative for which weights are sought</span>
+<a name="ln-543"></a>    <span class="c">!</span>
+<a name="ln-544"></a>    <span class="c">!   W   (output) DOUBLE array, dimension(size(x),m+1)</span>
+<a name="ln-545"></a>    <span class="c">!       matrix that gives weights at grid locations x for</span>
+<a name="ln-546"></a>    <span class="c">!       derivative of order j&lt;=m are found in c(:,j)</span>
+<a name="ln-547"></a>    <span class="c">! =======================================================================</span>
+<a name="ln-548"></a>
+<a name="ln-549"></a>    <span class="k">subroutine </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+<a name="ln-550"></a>
+<a name="ln-551"></a>        <span class="c">! Arguments</span>
+<a name="ln-552"></a>        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-553"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">z</span>
+<a name="ln-554"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">x</span><span class="p">(:)</span>
+<a name="ln-555"></a>        <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">m</span>
+<a name="ln-556"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>   <span class="kd">::</span> <span class="n">W</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-557"></a>
+<a name="ln-558"></a>        <span class="c">! Variable Declarations</span>
+<a name="ln-559"></a>        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">,</span> <span class="n">c4</span><span class="p">,</span> <span class="n">c5</span>
+<a name="ln-560"></a>        <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">mn</span>
+<a name="ln-561"></a>
+<a name="ln-562"></a>        <span class="n">c1</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+<a name="ln-563"></a>        <span class="n">c4</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">z</span>
+<a name="ln-564"></a>        <span class="n">W</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-565"></a>        <span class="n">W</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+<a name="ln-566"></a>
+<a name="ln-567"></a>        <span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<a name="ln-568"></a>        <span class="k">do </span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span>
+<a name="ln-569"></a>            <span class="n">mn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-570"></a>            <span class="n">c2</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
+<a name="ln-571"></a>            <span class="n">c5</span> <span class="o">=</span> <span class="n">c4</span>
+<a name="ln-572"></a>            <span class="n">c4</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">z</span>
+<a name="ln-573"></a>            <span class="k">do </span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-574"></a>                <span class="n">c3</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+<a name="ln-575"></a>                <span class="n">c2</span> <span class="o">=</span> <span class="n">c2</span><span class="o">*</span><span class="n">c3</span><span class="p">;</span>
+<a name="ln-576"></a>                <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-577"></a><span class="k">                    do </span><span class="n">k</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-578"></a>                        <span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">c5</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="p">))</span><span class="o">/</span><span class="n">c2</span><span class="p">;</span>
+<a name="ln-579"></a>                    <span class="n">enddo</span>
+<a name="ln-580"></a>                    <span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">c1</span><span class="o">*</span><span class="n">c5</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">c2</span><span class="p">;</span>
+<a name="ln-581"></a>                <span class="n">endif</span>
+<a name="ln-582"></a>                <span class="k">do </span><span class="n">k</span><span class="o">=</span><span class="n">mn</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-583"></a>                    <span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">c4</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">-</span> <span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">c3</span><span class="p">;</span>
+<a name="ln-584"></a>                <span class="n">enddo</span>
+<a name="ln-585"></a>                <span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">c4</span><span class="o">*</span><span class="n">W</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">c3</span><span class="p">;</span>
+<a name="ln-586"></a>            <span class="n">enddo</span>
+<a name="ln-587"></a>            <span class="n">c1</span> <span class="o">=</span> <span class="n">c2</span><span class="p">;</span>
+<a name="ln-588"></a>        <span class="n">enddo</span>
+<a name="ln-589"></a>
+<a name="ln-590"></a><span class="k">end subroutine </span><span class="n">weights</span>
+<a name="ln-591"></a>
+<a name="ln-592"></a><span class="k">end module </span><span class="n">pf_mod_exp</span>
 </pre></div>
 
     </section>

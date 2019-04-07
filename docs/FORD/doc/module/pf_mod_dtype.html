@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.2% of total for modules and submodules.">414 statements</a>
+    title=" 5.2% of total for modules and submodules.">417 statements</a>
      </li> 
      
      
@@ -3064,7 +3064,7 @@ public subroutine pf_integrate_p(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     
     
     <h3>
-public subroutine pf_residual_p(this, Lev, dt, flags)
+public subroutine pf_residual_p(this, pf, level_index, dt, flags)
     
     
    
@@ -3105,12 +3105,27 @@ public subroutine pf_residual_p(this, Lev, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>Lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -5831,7 +5846,7 @@ public subroutine pf_results_p(this)
   <div class="panel-body">
     
     
-    <p>The type that holds the state of the system </p>
+    <p>The type that holds the state of the system</p>
     
      
      <h4>Components</h4>
@@ -5940,6 +5955,20 @@ public subroutine pf_results_p(this)
   <td>public</td>
   <td></td><td>::</td>
   <td><strong>level</strong></td><td></td><td></td><td><p>which level is currently being operated on</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-finest_level"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>finest_level</strong></td><td></td><td></td><td><p>the current finest level (for variable depth V cycles)</p></td>
   
 </tr>
 
@@ -6971,7 +7000,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -6994,7 +7023,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7017,7 +7046,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7040,7 +7069,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7063,7 +7092,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7086,7 +7115,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7109,7 +7138,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7132,7 +7161,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7155,7 +7184,7 @@ public subroutine pf_results_p(this)
  functions values at sdc nodes (flat)
  fas correction in Q form
  functions at sdc nodes, previous sweep (flat)
- initial condition 
+ initial condition
  solution at end time</p></td>
   
 </tr>
@@ -7642,6 +7671,20 @@ public subroutine pf_results_p(this)
   
 <tr>
   
+  <td><span class="anchor" id="variable-datpath"></span>character(len=512),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>datpath</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
   <td><span class="anchor" id="variable-dump"></span>procedure(<a href='../interface/pf_results_p.html'>pf_results_p</a>),</td>
   
   <td>public,</td>
@@ -7950,7 +7993,7 @@ public subroutine pf_results_p(this)
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>use_LUq</strong></td><td> =</td><td>.true.</td><td><p>True if LU type implicit matrix is used </p></td>
+  <td><strong>use_LUq</strong></td><td> =</td><td>.true.</td><td><p>True if LU type implicit matrix is used</p></td>
   
 </tr>
 
@@ -8035,7 +8078,7 @@ public subroutine pf_results_p(this)
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>save_residuals</strong></td><td> =</td><td>.false.</td><td><p>If true, residuals are saved and output</p></td>
+  <td><strong>save_residuals</strong></td><td> =</td><td>.true.</td><td><p>If true, residuals are saved and output</p></td>
   
 </tr>
 
@@ -8049,7 +8092,7 @@ public subroutine pf_results_p(this)
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>save_timings</strong></td><td> =</td><td>.false.</td><td><p>If true, timings are saved and  output</p></td>
+  <td><strong>save_timings</strong></td><td> =</td><td>.true.</td><td><p>If true, timings are saved and  output</p></td>
   
 </tr>
 
@@ -8215,7 +8258,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-outdir"></span>character(len=512),</td>
+  <td><span class="anchor" id="variable-outdir"></span>character(len=255),</td>
   
   <td>public</td>
   <td></td><td>::</td>

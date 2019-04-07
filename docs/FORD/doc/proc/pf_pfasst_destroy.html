@@ -232,7 +232,7 @@ public subroutine pf_pfasst_destroy(pf)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E20"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E23"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -436,9 +436,11 @@ public subroutine pf_pfasst_destroy(pf)
     <span class="c">!&gt;  destroy all levels</span>
     <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
        <span class="k">call </span><span class="n">pf_level_destroy</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">),</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span><span class="p">)</span>
+
     <span class="k">end do</span>
+    
     <span class="c">!&gt;  deallocate pfasst pointer arrays</span>
-<span class="c">!    call pf%destroy_results()</span>
+
     <span class="k">deallocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">)</span>
     <span class="k">deallocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">)</span>
     <span class="k">deallocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">)</span>

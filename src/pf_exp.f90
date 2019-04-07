@@ -267,11 +267,15 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         lev => pf%levels(level_index)
         nnodes = lev%nnodes
+        call start_timer(pf, TLEVEL+lev%index-1)        
         call lev%Q(1)%copy(lev%q0)  
         call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))      ! compute F_j^{[k+1]}
 
         ! error sweeps
         do k = 1, nsweeps
+
+           pf%state%sweep=k                  
+
            call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
            do j = 1, nnodes
               call this%f_old(j)%copy(lev%F(j,1))  ! Save old f
@@ -301,7 +305,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               end if
 
 !!$              !  Now we have to add in the tauQ
-              if (allocated(lev%tauQ)) then
+            if (level_index < pf%state%finest_level) then
                  call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
                  if (j > 1) then     ! The tau is not node to node
 !                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       
@@ -311,7 +315,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            end do
            call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))                      ! eval last nonlinear term
 
-           call pf_residual(pf, lev, dt)
+           call pf_residual(pf, level_index, dt)
            call lev%qend%copy(lev%Q(lev%nnodes))
            call call_hooks(pf, level_index, PF_POST_SWEEP)
            
@@ -393,35 +397,41 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     end subroutine exp_integrate
 
     ! RESIDUAL: compute  residual (generic) ====================================
-    subroutine exp_residual(this, lev, dt, flags)
+    subroutine exp_residual(this, pf, level_index, dt, flags)
+      
+      class(pf_exp_t),  intent(inout)  :: this
+      type(pf_pfasst_t), target, intent(inout) :: pf
+      integer,              intent(in)    :: level_index
+      real(pfdp),             intent(in)    :: dt
+      integer, intent(in), optional    :: flags
+      
+      integer :: m
+      type(pf_level_t), pointer :: lev
+    
 
-        class(pf_exp_t),  intent(inout)  :: this
-        class(pf_level_t), intent(inout) :: lev  !!  Current level
-        real(pfdp),        intent(in   ) :: dt   !!  Time step
-        integer, intent(in), optional    :: flags
+      lev => pf%levels(level_index)   !!  Assign level pointer
 
-        integer :: m
-        !>  Compute the integral of F from t_n to t_m at each node
-        call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
-        
-        !> add tau if it exists
-        if (allocated(lev%tauQ)) then
-           do m = 1, lev%nnodes-1
-              call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
-              if (m > 1) then
-            !     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
-              end if
-              
-           end do
-        end if
-        
-        !> subtract out the solution value
-        do m = 1, lev%nnodes-1      
-           call lev%R(m)%copy(lev%I(m))
-           call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
-!           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
-        end do
-
+      !>  Compute the integral of F from t_n to t_m at each node
+      call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I, flags)
+      
+      !> add tau if it exists
+      if (level_index < pf%state%finest_level) then
+         do m = 1, lev%nnodes-1
+            call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
+            if (m > 1) then
+               !     call lev%I(m)%axpy(-1.0_pfdp, lev%tauQ(m-1), flags)
+            end if
+            
+         end do
+      end if
+      
+      !> subtract out the solution value
+      do m = 1, lev%nnodes-1      
+         call lev%R(m)%copy(lev%I(m))
+         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+         !           call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+      end do
+      
 
     end subroutine exp_residual
 

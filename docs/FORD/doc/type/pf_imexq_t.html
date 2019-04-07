@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.5% of total for derived types.</p>Including implementation: 181 statements,  4.0% of total for derived types.">22 statements</a>
+    title="<p> 3.5% of total for derived types.</p>Including implementation: 180 statements,  3.9% of total for derived types.">22 statements</a>
      </li> 
      
      
@@ -573,7 +573,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>explicit</strong></td><td> =</td><td>.true.</td><td><p>True if there is an explicit piece</p></td>
+  <td><strong>explicit</strong></td><td> =</td><td>.true.</td><td><p>True if there is an explicit piece (reset in derived sweeper)</p></td>
   
 </tr>
 
@@ -587,7 +587,7 @@
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>implicit</strong></td><td> =</td><td>.true.</td><td><p>True if there an implicit piece</p></td>
+  <td><strong>implicit</strong></td><td> =</td><td>.true.</td><td><p>True if there an implicit piece (reset in derived sweeper)</p></td>
   
 </tr>
 
@@ -651,8 +651,8 @@ subroutine pf_f_eval_p(this, y, t, level_index, f, piece)
 
 
 <p>This is the interface for the routine to compute the RHS function values
-  Evaluate f_piece(y), where piece is one or two 
-  Evaluate f_piece(y), where piece is one or two </p>
+  Evaluate f_piece(y), where piece is one or two
+  Evaluate f_piece(y), where piece is one or two</p>
     
     <h4>Arguments</h4>
     
@@ -843,7 +843,7 @@ subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>y</strong></td><td><p>Solution of implicit solve </p></td>
+  <td><strong>y</strong></td><td><p>Solution of implicit solve</p></td>
   
 </tr>
 
@@ -1533,7 +1533,7 @@ public subroutine <a href='../proc/imexq_integrate.html'>imexQ_integrate</a>(thi
           
     
     <h3>
-public subroutine <a href='../proc/imexq_residual.html'>imexQ_residual</a>(this, lev, dt, flags)
+public subroutine <a href='../proc/imexq_residual.html'>imexQ_residual</a>(this, pf, level_index, dt, flags)
     
     
    
@@ -1582,12 +1582,27 @@ public subroutine <a href='../proc/imexq_residual.html'>imexQ_residual</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2079,8 +2094,8 @@ public subroutine <a href='../proc/imexq_destroy.html'>imexQ_destroy</a>(this, l
      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">QdiffE</span><span class="p">(:,:)</span>  <span class="c">!!  qmat-QtilE</span>
      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">QdiffI</span><span class="p">(:,:)</span>  <span class="c">!!  qmat-QtilI</span>
 
-     <span class="kt">logical</span>                 <span class="kd">::</span> <span class="n">explicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="c">!!  True if there is an explicit piece</span>
-     <span class="kt">logical</span>                 <span class="kd">::</span> <span class="k">implicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="c">!!  True if there an implicit piece</span>
+     <span class="kt">logical</span>                 <span class="kd">::</span> <span class="n">explicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="c">!!  True if there is an explicit piece (reset in derived sweeper)</span>
+     <span class="kt">logical</span>                 <span class="kd">::</span> <span class="k">implicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="c">!!  True if there an implicit piece (reset in derived sweeper)</span>
 
 
      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">rhs</span>   <span class="c">!! holds rhs for implicit solve</span>

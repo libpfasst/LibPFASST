@@ -18,7 +18,8 @@ LibPFASST is a Fortran implementation of the PFASST algorithm.
 * :doc:`Download <download>` - download instructions.
 * :doc:`Compile <compiling>` - installation and compiling instructions.  
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
-* :doc:`Parameters <parameters>` - getting started and basic usage.
+* :doc:`Parameters <parameters>` - controlling the behavior of LibPFASST
+* :doc:`Output <output>`      - controlling the behavior of LibPFASST  
 .. * :doc:`Overview <overview>` - design and interface overview.
 .. * :doc:`Reference <reference>` - information about the internals of LibPFASST..* :doc:`FORD <parameters>` - Source documentation created by FORD
 
@@ -34,6 +35,7 @@ Contents
    compiling
    tutorial
    parameters
+   output.rst
 ..   self
 ..   overview
 ..   maths
