@@ -49,7 +49,7 @@ FSRC = src/pfasst.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
        src/encaps/pf_ndarray.f90 \
-       src/encaps/pf_ndarray-oc.f90 \
+       src/encaps/pf_ndarray_oc.f90 \
        src/encaps/pf_ndsysarray.f90 \
        src/encaps/pf_zndsysarray.f90 \
        src/encaps/pf_zndarray.f90 \
