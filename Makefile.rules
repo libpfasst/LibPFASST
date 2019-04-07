@@ -16,7 +16,10 @@ endif
 
 build/%.o build/%.mod: %.f90
 	@mkdir -p build
+	@mkdir -p build/encaps
+	@mkdir -p build/sweepers
 	@mkdir -p include
+
 ifeq ($(MKVERBOSE),TRUE)
 	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
 else
