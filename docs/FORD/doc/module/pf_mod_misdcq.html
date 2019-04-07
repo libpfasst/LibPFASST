@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.5% of total for modules and submodules.">198 statements</a>
+    title=" 2.7% of total for modules and submodules.">212 statements</a>
      </li> 
      
      
@@ -889,7 +889,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qdiffe%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qdiffe%7E3"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -903,7 +903,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qdiffi%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qdiffi%7E3"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -917,7 +917,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qtile%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qtile%7E3"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -931,7 +931,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qtili%7E3"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qtili%7E4"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -945,7 +945,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dtsdc%7E3"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dtsdc%7E4"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -973,7 +973,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-rhs%7E3"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-rhs%7E4"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1023,6 +1023,9 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_t.html#boundprocedure-misdcq_destroy'>misdcQ_destroy</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_t.html#boundprocedure-misdcq_initialize'>misdcQ_initialize</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -1194,7 +1197,7 @@ public subroutine <a href='../proc/misdcq_sweep.html'>misdcQ_sweep</a>(this, pf,
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_initialize"></span><h3>
-public subroutine <a href='../proc/misdcq_initialize.html'>misdcQ_initialize</a>(this, lev)
+public subroutine <a href='../proc/misdcq_initialize.html'>misdcQ_initialize</a>(this, pf, level_index)
     
     
    
@@ -1209,7 +1212,7 @@ public subroutine <a href='../proc/misdcq_initialize.html'>misdcQ_initialize</a>
 
 
 
-<p>Array of substep sizes</p><a href="../proc/misdcq_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Assign level pointer</p><a href="../proc/misdcq_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1245,12 +1248,27 @@ public subroutine <a href='../proc/misdcq_initialize.html'>misdcQ_initialize</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1268,7 +1286,7 @@ public subroutine <a href='../proc/misdcq_initialize.html'>misdcQ_initialize</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_destroy"></span><h3>
-public subroutine <a href='../proc/misdcq_destroy.html'>misdcQ_destroy</a>(this, lev)
+public subroutine <a href='../proc/misdcq_destroy.html'>misdcQ_destroy</a>(this, pf, level_index)
     
     
    
@@ -1276,6 +1294,14 @@ public subroutine <a href='../proc/misdcq_destroy.html'>misdcQ_destroy</a>(this,
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1311,12 +1337,27 @@ public subroutine <a href='../proc/misdcq_destroy.html'>misdcQ_destroy</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1334,7 +1375,7 @@ public subroutine <a href='../proc/misdcq_destroy.html'>misdcQ_destroy</a>(this,
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_integrate"></span><h3>
-public subroutine <a href='../proc/misdcq_integrate.html'>misdcQ_integrate</a>(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+public subroutine <a href='../proc/misdcq_integrate.html'>misdcQ_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
     
     
    
@@ -1342,6 +1383,14 @@ public subroutine <a href='../proc/misdcq_integrate.html'>misdcQ_integrate</a>(t
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1377,12 +1426,27 @@ public subroutine <a href='../proc/misdcq_integrate.html'>misdcQ_integrate</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1475,7 +1539,7 @@ public subroutine <a href='../proc/misdcq_integrate.html'>misdcQ_integrate</a>(t
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_evaluate"></span><h3>
-public subroutine <a href='../proc/misdcq_evaluate.html'>misdcQ_evaluate</a>(this, lev, t, m, flags, step)
+public subroutine <a href='../proc/misdcq_evaluate.html'>misdcQ_evaluate</a>(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -1490,7 +1554,8 @@ public subroutine <a href='../proc/misdcq_evaluate.html'>misdcQ_evaluate</a>(thi
 
 
 
-<p>Subroutine to evaluate function value at node m</p>
+<p>Subroutine to evaluate function value at node m
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1526,12 +1591,27 @@ public subroutine <a href='../proc/misdcq_evaluate.html'>misdcQ_evaluate</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1609,7 +1689,7 @@ public subroutine <a href='../proc/misdcq_evaluate.html'>misdcQ_evaluate</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_evaluate_all"></span><h3>
-public subroutine <a href='../proc/misdcq_evaluate_all.html'>misdcQ_evaluate_all</a>(this, lev, t, flags, step)
+public subroutine <a href='../proc/misdcq_evaluate_all.html'>misdcQ_evaluate_all</a>(this, pf, level_index, t, flags, step)
     
     
    
@@ -1660,12 +1740,27 @@ public subroutine <a href='../proc/misdcq_evaluate_all.html'>misdcQ_evaluate_all
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1847,7 +1942,7 @@ public subroutine <a href='../proc/misdcq_residual.html'>misdcQ_residual</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_spreadq0"></span><h3>
-public subroutine <a href='../proc/misdcq_spreadq0.html'>misdcQ_spreadq0</a>(this, lev, t0, flags, step)
+public subroutine <a href='../proc/misdcq_spreadq0.html'>misdcQ_spreadq0</a>(this, pf, level_index, t0, flags, step)
     
     
    
@@ -1890,12 +1985,27 @@ public subroutine <a href='../proc/misdcq_spreadq0.html'>misdcQ_spreadq0</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

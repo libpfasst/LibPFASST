@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.6% of total for procedures.">103 statements</a>
+    title=" 0.6% of total for procedures.">105 statements</a>
      </li> 
      
      
@@ -236,7 +236,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E24"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E44"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -543,7 +543,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span><span class="p">,</span> <span class="n">rel_res_tol</span>
     <span class="kt">logical</span>    <span class="kd">::</span> <span class="n">PFASST_pred</span><span class="p">,</span> <span class="n">RK_pred</span><span class="p">,</span> <span class="n">pipeline_pred</span>
     <span class="kt">integer</span>    <span class="kd">::</span>  <span class="n">nsweeps_burn</span><span class="p">,</span> <span class="n">q0_style</span><span class="p">,</span> <span class="n">taui0</span>
-    <span class="kt">logical</span>    <span class="kd">::</span>  <span class="n">Vcycle</span><span class="p">,</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">use_LUq</span>
+    <span class="kt">logical</span>    <span class="kd">::</span>  <span class="n">Vcycle</span><span class="p">,</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">use_LUq</span><span class="p">,</span> <span class="n">use_Sform</span>
     <span class="kt">logical</span>    <span class="kd">::</span> <span class="n">debug</span><span class="p">,</span> <span class="n">use_rk_stepper</span>
     <span class="kt">logical</span>    <span class="kd">::</span> <span class="n">save_timings</span><span class="p">,</span><span class="n">echo_timings</span><span class="p">,</span> <span class="n">save_residuals</span><span class="p">,</span> <span class="n">save_errors</span>
     <span class="kt">logical</span>    <span class="kd">::</span> <span class="n">use_no_left_q</span><span class="p">,</span><span class="n">use_composite_nodes</span><span class="p">,</span><span class="n">use_proper_nodes</span>
@@ -560,7 +560,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     <span class="c">!&gt; define the namelist for reading</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">niters</span><span class="p">,</span> <span class="n">nlevels</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">nsweeps_pred</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nsteps_rk</span><span class="p">,</span> <span class="n">abs_res_tol</span><span class="p">,</span> <span class="n">rel_res_tol</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">PFASST_pred</span><span class="p">,</span> <span class="n">RK_pred</span><span class="p">,</span> <span class="n">pipeline_pred</span><span class="p">,</span> <span class="n">nsweeps_burn</span><span class="p">,</span> <span class="n">q0_style</span><span class="p">,</span> <span class="n">taui0</span>
-    <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">Vcycle</span><span class="p">,</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">use_LUq</span><span class="p">,</span> <span class="n">echo_timings</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">save_timings</span><span class="p">,</span><span class="n">save_residuals</span><span class="p">,</span> <span class="n">save_errors</span><span class="p">,</span> <span class="n">use_rk_stepper</span>
+    <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">Vcycle</span><span class="p">,</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">use_LUq</span><span class="p">,</span> <span class="n">use_Sform</span><span class="p">,</span> <span class="n">echo_timings</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">save_timings</span><span class="p">,</span><span class="n">save_residuals</span><span class="p">,</span> <span class="n">save_errors</span><span class="p">,</span> <span class="n">use_rk_stepper</span>
     <span class="k">namelist</span> <span class="o">/</span><span class="n">pf_params</span><span class="o">/</span> <span class="n">use_no_left_q</span><span class="p">,</span><span class="n">use_composite_nodes</span><span class="p">,</span><span class="n">use_proper_nodes</span><span class="p">,</span> <span class="n">outdir</span>
 
     <span class="c">!&gt; set local variables to pf_pfasst defaults</span>
@@ -580,6 +580,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     <span class="n">Vcycle</span>       <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">Vcycle</span>
     <span class="n">Finterp</span>      <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">Finterp</span>
     <span class="n">use_LUq</span>      <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">use_LUq</span>
+    <span class="n">use_Sform</span>    <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">use_Sform</span>
     <span class="n">taui0</span>        <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">taui0</span>
     <span class="n">outdir</span>       <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">outdir</span>
     <span class="n">debug</span>        <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">debug</span>
@@ -635,6 +636,7 @@ public subroutine pf_read_opts(pf, read_cmd, fname)
     <span class="n">pf</span><span class="p">%</span><span class="n">Vcycle</span>       <span class="o">=</span> <span class="n">Vcycle</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">Finterp</span>      <span class="o">=</span> <span class="n">Finterp</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">use_LUq</span>      <span class="o">=</span> <span class="n">use_LUq</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">use_Sform</span>    <span class="o">=</span> <span class="n">use_Sform</span>
     <span class="n">pf</span><span class="p">%</span><span class="n">taui0</span>        <span class="o">=</span> <span class="n">taui0</span>
 
     <span class="n">pf</span><span class="p">%</span><span class="n">outdir</span>       <span class="o">=</span> <span class="n">outdir</span>

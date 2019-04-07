@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.4% of total for derived types.</p>Including implementation: 15 statements,  0.3% of total for derived types.">15 statements</a>
+    title="<p> 2.5% of total for derived types.</p>Including implementation: 15 statements,  0.3% of total for derived types.">15 statements</a>
      </li> 
      
      
@@ -189,7 +189,7 @@
       
       <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-qmatlu">QmatLU</a>
       
-      <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-s0mat">s0mat</a>
+      <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-smat">Smat</a>
       
       <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-use_proper_nodes">use_proper_nodes</a>
       
@@ -358,7 +358,7 @@
       
       <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-qmatlu">QmatLU</a>
       
-      <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-s0mat">s0mat</a>
+      <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-smat">Smat</a>
       
       <a class="list-group-item" href="../type/pf_sdcmats_t.html#variable-use_proper_nodes">use_proper_nodes</a>
       
@@ -546,11 +546,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-s0mat"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-smat"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>s0mat</strong>(:,:)</td><td></td><td></td><td></td>
+  <td><strong>Smat</strong>(:,:)</td><td></td><td></td><td></td>
   
 </tr>
 
@@ -622,7 +622,7 @@
      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">QmatTrap</span><span class="p">(:,:)</span> <span class="c">! Trapezoid rule matrix</span>
      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">QmatVer</span><span class="p">(:,:)</span>  <span class="c">! Verlet Matrix</span>
      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">QmatLU</span><span class="p">(:,:)</span>   <span class="c">!  LU of Wmat</span>
-     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">s0mat</span><span class="p">(:,:)</span>    <span class="c">!  deprecated</span>
+     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">Smat</span><span class="p">(:,:)</span>    <span class="c">!  The node to node version of Qmat</span>
 
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!  If true use gauss nodes in coarsening</span>
      <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_composite_nodes</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">! If true, finer nodes are composite</span>

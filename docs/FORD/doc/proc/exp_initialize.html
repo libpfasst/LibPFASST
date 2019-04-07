@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">21 statements</a>
+    title=" 0.1% of total for procedures.">24 statements</a>
      </li> 
      
      
@@ -140,7 +140,7 @@
     
      <li><a href='../sourcefile/pf_exp.f90.html'>pf_exp.f90</a></li>
     
-     <li><a href='../module/pf_mod_exp%7E2.html'>pf_mod_exp</a></li>
+     <li><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></li>
     
   
      <li class="active">exp_initialize</li>
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine exp_initialize(this, lev)
+public subroutine exp_initialize(this, pf, level_index)
     
     
    
@@ -243,12 +243,27 @@ public subroutine exp_initialize(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E3"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E2"></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -319,15 +334,20 @@ public subroutine exp_initialize(this, lev)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-
+    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>
+      
         <span class="c">! arguments</span>
         <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+        <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+        <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
 
+        
         <span class="c">! local variables</span>
         <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
         <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">q</span><span class="p">(:)</span>
+
+        <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+        <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
         <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">))</span>
@@ -339,7 +359,7 @@ public subroutine exp_initialize(this, lev)
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">))</span>
         <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
-            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:));</span>
+            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,:,:))</span>
         <span class="k">end do</span>
         <span class="c">! set number of rhs components</span>
         <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>

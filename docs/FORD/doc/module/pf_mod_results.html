@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.0% of total for modules and submodules.">83 statements</a>
+    title=" 1.4% of total for modules and submodules.">107 statements</a>
      </li> 
      
      
@@ -183,6 +183,8 @@
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-initialize_results">initialize_results</a>
       
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_results">dump_results</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_errors">dump_errors</a>
       
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_timings">dump_timings</a>
       
@@ -587,6 +589,8 @@
       
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_results">dump_results</a>
       
+      <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_errors">dump_errors</a>
+      
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-dump_timings">dump_timings</a>
       
       <a class="list-group-item" href="../module/pf_mod_results.html#proc-destroy_results">destroy_results</a>
@@ -628,7 +632,7 @@
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-initialize_results"></span><h3>
-public subroutine <a href='../proc/initialize_results.html'>initialize_results</a>(this, nsteps_in, niters_in, nprocs_in, nsweeps_in, rank_in, lev_ind, datpath)
+public subroutine <a href='../proc/initialize_results.html'>initialize_results</a>(this, nsteps_in, niters_in, nprocs_in, nsweeps_in, rank_in, level_index, datpath, save_residuals)
     
     
    
@@ -751,7 +755,7 @@ public subroutine <a href='../proc/initialize_results.html'>initialize_results</
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev_ind</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -770,6 +774,21 @@ public subroutine <a href='../proc/initialize_results.html'>initialize_results</
   
 </tr>
 
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>save_residuals</strong></td><td></td>
+  
+</tr>
+
 </tbody>
 </table>
 
@@ -785,6 +804,57 @@ public subroutine <a href='../proc/initialize_results.html'>initialize_results</
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-dump_results"></span><h3>
 public subroutine <a href='../proc/dump_results.html'>dump_results</a>(this)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_results_t.html'>pf_results_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-dump_errors"></span><h3>
+public subroutine <a href='../proc/dump_errors.html'>dump_errors</a>(this)
     
     
    

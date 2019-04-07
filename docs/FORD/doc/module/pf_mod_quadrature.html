@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.4% of total for modules and submodules.">436 statements</a>
+    title=" 5.6% of total for modules and submodules.">436 statements</a>
      </li> 
      
      
@@ -479,18 +479,18 @@
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M149.388,-83.9645C134.779,-79.3513 117.921,-74.0276 102.503,-69.1589"/>
 <polygon fill="#000000" stroke="#000000" points="103.208,-65.7111 92.618,-66.0373 101.1,-72.3862 103.208,-65.7111"/>
 </g>
-<!-- proc~imexq_initialize -->
-<g id="module~~pf_mod_quadrature~~UsedByGraph_node3" class="node"><title>proc~imexq_initialize</title>
-<g id="a_module~~pf_mod_quadrature~~UsedByGraph_node3"><a xlink:href=".././proc/imexq_initialize.html" xlink:title="imexQ_initialize">
-<polygon fill="#d9534f" stroke="#d9534f" points="232,-66 145,-66 145,-42 232,-42 232,-66"/>
-<text text-anchor="middle" x="188.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">imexQ_initialize</text>
+<!-- proc~imex_initialize -->
+<g id="module~~pf_mod_quadrature~~UsedByGraph_node3" class="node"><title>proc~imex_initialize</title>
+<g id="a_module~~pf_mod_quadrature~~UsedByGraph_node3"><a xlink:href=".././proc/imex_initialize.html" xlink:title="imex_initialize">
+<polygon fill="#d9534f" stroke="#d9534f" points="228,-66 149,-66 149,-42 228,-42 228,-66"/>
+<text text-anchor="middle" x="188.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">imex_initialize</text>
 </a>
 </g>
 </g>
-<!-- proc~imexq_initialize&#45;&gt;module~pf_mod_quadrature -->
-<g id="module~~pf_mod_quadrature~~UsedByGraph_edge2" class="edge"><title>proc~imexq_initialize&#45;&gt;module~pf_mod_quadrature</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M144.686,-54C135.875,-54 126.425,-54 117.08,-54"/>
-<polygon fill="#000000" stroke="#000000" points="117.014,-50.5001 107.014,-54 117.014,-57.5001 117.014,-50.5001"/>
+<!-- proc~imex_initialize&#45;&gt;module~pf_mod_quadrature -->
+<g id="module~~pf_mod_quadrature~~UsedByGraph_edge2" class="edge"><title>proc~imex_initialize&#45;&gt;module~pf_mod_quadrature</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.673,-54C138.912,-54 128.182,-54 117.569,-54"/>
+<polygon fill="#000000" stroke="#000000" points="117.465,-50.5001 107.465,-54 117.465,-57.5001 117.465,-50.5001"/>
 </g>
 <!-- proc~pf_level_destroy -->
 <g id="module~~pf_mod_quadrature~~UsedByGraph_node4" class="node"><title>proc~pf_level_destroy</title>
@@ -1443,7 +1443,7 @@ public subroutine <a href='../proc/myluq.html'>myLUq</a>(Q, QLU, Nnodes, fillq)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_quadrature"></span><h3>
-public subroutine <a href='../proc/pf_quadrature.html'>pf_quadrature</a>(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat, proper, composite, no_left)
+public subroutine <a href='../proc/pf_quadrature.html'>pf_quadrature</a>(qtype, nnodes, nnodes0, nodes, nflags, Smat, Qmat, proper, composite, no_left)
     
     
    
@@ -1559,7 +1559,7 @@ public subroutine <a href='../proc/pf_quadrature.html'>pf_quadrature</a>(qtype, 
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>smat</strong>(nnodes-1,nnodes)</td><td></td>
+  <td><strong>Smat</strong>(nnodes-1,nnodes)</td><td></td>
   
 </tr>
 
@@ -1574,7 +1574,7 @@ public subroutine <a href='../proc/pf_quadrature.html'>pf_quadrature</a>(qtype, 
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>qmat</strong>(nnodes-1,nnodes)</td><td></td>
+  <td><strong>Qmat</strong>(nnodes-1,nnodes)</td><td></td>
   
 </tr>
 
@@ -1792,7 +1792,7 @@ public subroutine <a href='../proc/sdc_qnodes.html'>sdc_qnodes</a>(qnodes, flags
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-sdc_qmats"></span><h3>
-public subroutine <a href='../proc/sdc_qmats.html'>sdc_qmats</a>(qmat, smat, dst, src, flags, ndst, nsrc)
+public subroutine <a href='../proc/sdc_qmats.html'>sdc_qmats</a>(Qmat, Smat, dst, src, flags, ndst, nsrc)
     
     
    
@@ -1833,7 +1833,7 @@ public subroutine <a href='../proc/sdc_qmats.html'>sdc_qmats</a>(qmat, smat, dst
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>qmat</strong>(ndst-1,nsrc)</td><td><p>O to dst quadrature weights</p></td>
+  <td><strong>Qmat</strong>(ndst-1,nsrc)</td><td><p>O to dst quadrature weights</p></td>
   
 </tr>
 
@@ -1848,7 +1848,7 @@ public subroutine <a href='../proc/sdc_qmats.html'>sdc_qmats</a>(qmat, smat, dst
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>smat</strong>(ndst-1,nsrc)</td><td><p>dst(m) to dst(m+1) quadrature weights</p></td>
+  <td><strong>Smat</strong>(ndst-1,nsrc)</td><td><p>dst(m) to dst(m+1) quadrature weights</p></td>
   
 </tr>
 

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">11 statements</a>
+    title=" 0.1% of total for procedures.">10 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine zndsysarray_destroy_single(this, x, level, shape)
+public subroutine zndsysarray_destroy_single(this, x)
     
     
    
@@ -251,36 +251,6 @@ public subroutine zndsysarray_destroy_single(this, x, level, shape)
   
   <td>allocatable</td><td>::</td>
   <td><strong>x</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-level%7E9"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-shape%7E11"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -351,10 +321,9 @@ public subroutine zndsysarray_destroy_single(this, x, level, shape)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zndsysarray_destroy_single</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="nb">shape</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zndsysarray_destroy_single</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">zndsysarray_factory</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>              <span class="kd">::</span> <span class="n">this</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">x</span>
-    <span class="kt">integer</span><span class="p">,</span>                <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>              <span class="kd">::</span> <span class="n">level</span><span class="p">,</span> <span class="nb">shape</span><span class="p">(:)</span>
 
     <span class="k">select type</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">class is</span> <span class="p">(</span><span class="n">zndsysarray</span><span class="p">)</span>

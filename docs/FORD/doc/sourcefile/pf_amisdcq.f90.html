@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.7% of total for source files.">166 statements</a>
+    title=" 1.8% of total for source files.">167 statements</a>
      </li> 
      
      
@@ -433,316 +433,317 @@
 <a name="ln-22"></a>     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">sweep_coupled_implicit_terms</span>
 <a name="ln-23"></a>     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">sweep_decoupled_implicit_terms</span>
 <a name="ln-24"></a>     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">amisdcQ_destroy</span>
-<a name="ln-25"></a>  <span class="k">end type </span><span class="n">pf_amisdcQ_t</span>
-<a name="ln-26"></a>
-<a name="ln-27"></a><span class="k">contains</span>
-<a name="ln-28"></a>
-<a name="ln-29"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
-<a name="ln-30"></a>  <span class="c">! In the asynchronous updates, the two implicit parts are coupled</span>
-<a name="ln-31"></a>  <span class="k">subroutine </span><span class="n">sweep_coupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-32"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
-<a name="ln-33"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-34"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-35"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
-<a name="ln-36"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-37"></a>
-<a name="ln-38"></a>    <span class="kt">integer</span>                        <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span>
-<a name="ln-39"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                     <span class="kd">::</span> <span class="n">t</span>
-<a name="ln-40"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                     <span class="kd">::</span> <span class="n">dtsdc</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-41"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">rhsA</span><span class="p">,</span> <span class="n">rhsB</span><span class="p">,</span> <span class="n">QA</span><span class="p">,</span> <span class="n">QB</span>
-<a name="ln-42"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">S2</span><span class="p">(:),</span> <span class="n">S3</span><span class="p">(:)</span>
-<a name="ln-43"></a>
-<a name="ln-44"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-45"></a>   
-<a name="ln-46"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-47"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-48"></a>    
-<a name="ln-49"></a>    <span class="c">! compute integrals and add fas correction</span>
-<a name="ln-50"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-51"></a>
-<a name="ln-52"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-53"></a>       <span class="k">call </span><span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0d0</span><span class="p">)</span>
-<a name="ln-54"></a>       <span class="k">call </span><span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0d0</span><span class="p">)</span>
-<a name="ln-55"></a>
-<a name="ln-56"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-57"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-58"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>    <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-<a name="ln-59"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>    <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<a name="ln-60"></a>          <span class="k">call </span><span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>     <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-<a name="ln-61"></a>          <span class="k">call </span><span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>     <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<a name="ln-62"></a>       <span class="k">end do</span>
-<a name="ln-63"></a><span class="k">       if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
-<a name="ln-64"></a><span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
-<a name="ln-65"></a>       <span class="k">end if</span>
-<a name="ln-66"></a><span class="k">    end do</span>
-<a name="ln-67"></a>
-<a name="ln-68"></a>    <span class="c">! do the time-stepping</span>
-<a name="ln-69"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
-<a name="ln-70"></a>
-<a name="ln-71"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f1eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-72"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-<a name="ln-73"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<a name="ln-74"></a>
-<a name="ln-75"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-76"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-77"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-78"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-79"></a>
-<a name="ln-80"></a>    <span class="k">call </span><span class="n">QA</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-81"></a>    <span class="k">call </span><span class="n">QB</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-82"></a>
-<a name="ln-83"></a>    <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span>
-<a name="ln-84"></a>    <span class="n">dtsdc</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-85"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-86"></a>       <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dtsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<a name="ln-87"></a>             
-<a name="ln-88"></a>       <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-89"></a>       <span class="c">! First compute the explicit part of the right-hand side</span>
-<a name="ln-90"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
-<a name="ln-91"></a>          <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  
-<a name="ln-92"></a>       <span class="k">end do</span>
-<a name="ln-93"></a><span class="k">       call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
-<a name="ln-94"></a>   
-<a name="ln-95"></a>       <span class="c">! Save the right-hand side with only the explicit contribution</span>
-<a name="ln-96"></a>       <span class="k">call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">rhsA</span><span class="p">)</span>
-<a name="ln-97"></a>
-<a name="ln-98"></a>       <span class="c">! Add the first implicit part to the right-hand side and solve for the first asynchronous update</span>
-<a name="ln-99"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
-<a name="ln-100"></a>          <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>  
-<a name="ln-101"></a>       <span class="k">end do</span>
-<a name="ln-102"></a><span class="k">       call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>  
-<a name="ln-103"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2comp</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-<a name="ln-104"></a>
-<a name="ln-105"></a>       <span class="c">! Add the second implicit part to the right-hand side and solve for the second asynchronous update</span>
-<a name="ln-106"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
-<a name="ln-107"></a>          <span class="k">call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>  
-<a name="ln-108"></a>       <span class="k">end do</span>
-<a name="ln-109"></a><span class="k">       call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>  
-<a name="ln-110"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3comp</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<a name="ln-111"></a>
-<a name="ln-112"></a>       <span class="c">! Now we average the two asynchronous updates</span>
-<a name="ln-113"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-114"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">0.5_pfdp</span><span class="p">,</span> <span class="n">QA</span><span class="p">)</span>
-<a name="ln-115"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">0.5_pfdp</span><span class="p">,</span> <span class="n">QB</span><span class="p">)</span>
-<a name="ln-116"></a>
-<a name="ln-117"></a>       <span class="c">! Evaluate the three right-hand sides with the updated variables</span>
-<a name="ln-118"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f1eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
-<a name="ln-119"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-<a name="ln-120"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<a name="ln-121"></a>    <span class="k">end do</span>
-<a name="ln-122"></a>
-<a name="ln-123"></a><span class="k">    call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
-<a name="ln-124"></a>
-<a name="ln-125"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-126"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-127"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-128"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-129"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-130"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-131"></a>
-<a name="ln-132"></a>    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-133"></a>
-<a name="ln-134"></a>  <span class="k">end subroutine </span><span class="n">sweep_coupled_implicit_terms</span>
-<a name="ln-135"></a>
-<a name="ln-136"></a>  
-<a name="ln-137"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
-<a name="ln-138"></a>  <span class="c">! In the asynchronous updates, the two implicit parts are decoupled</span>
-<a name="ln-139"></a>
-<a name="ln-140"></a>  <span class="c">! (in progress)</span>
-<a name="ln-141"></a>  <span class="k">subroutine </span><span class="n">sweep_decoupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-142"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
-<a name="ln-143"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-144"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-145"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
-<a name="ln-146"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-147"></a>
-<a name="ln-148"></a>    <span class="c">! integer                        :: m, n</span>
-<a name="ln-149"></a>    <span class="c">! real(pfdp)                     :: t</span>
-<a name="ln-150"></a>    <span class="c">! real(pfdp)                     :: dtsdc(1:lev%nnodes-1)</span>
-<a name="ln-151"></a>    <span class="c">! class(pf_encap_t), allocatable :: rhsA, rhsB, QA, QB</span>
-<a name="ln-152"></a>    <span class="c">! class(pf_encap_t), allocatable :: S2(:), S3(:)</span>
-<a name="ln-153"></a>
-<a name="ln-154"></a>    <span class="c">! call start_timer(pf, TLEVEL+lev%index-1)</span>
-<a name="ln-155"></a>   
-<a name="ln-156"></a>    <span class="c">! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-157"></a>    <span class="c">! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-158"></a>    
-<a name="ln-159"></a>    <span class="c">! ! compute integrals and add fas correction</span>
-<a name="ln-160"></a>    <span class="c">! do m = 1, lev%nnodes-1</span>
-<a name="ln-161"></a>
-<a name="ln-162"></a>    <span class="c">!    call lev%S(m)%setval(0.0_pfdp)</span>
-<a name="ln-163"></a>    <span class="c">!    call S2(m)%setval(0.0d0)</span>
-<a name="ln-164"></a>    <span class="c">!    call S3(m)%setval(0.0d0)</span>
-<a name="ln-165"></a>
-<a name="ln-166"></a>    <span class="c">!    do n = 1, lev%nnodes</span>
-<a name="ln-167"></a>    <span class="c">!       call lev%S(m)%axpy(dt*this%QdiffE(m,n),       lev%F(n,1))</span>
-<a name="ln-168"></a>    <span class="c">!       call S2(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,2))</span>
-<a name="ln-169"></a>    <span class="c">!       call S3(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,3))</span>
-<a name="ln-170"></a>    <span class="c">!       call S2(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))</span>
-<a name="ln-171"></a>    <span class="c">!       call S3(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))</span>
-<a name="ln-172"></a>    <span class="c">!    end do</span>
-<a name="ln-173"></a>    <span class="c">!    if (allocated(lev%tauQ)) then</span>
-<a name="ln-174"></a>    <span class="c">!       call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))</span>
-<a name="ln-175"></a>    <span class="c">!    end if</span>
-<a name="ln-176"></a>    <span class="c">! end do</span>
-<a name="ln-177"></a>
-<a name="ln-178"></a>    <span class="c">! ! do the time-stepping</span>
-<a name="ln-179"></a>    <span class="c">! call lev%Q(1)%unpack(lev%q0)</span>
-<a name="ln-180"></a>
-<a name="ln-181"></a>    <span class="c">! call this%f1eval(lev%Q(1), t0, lev%index, lev%F(1,1))</span>
-<a name="ln-182"></a>    <span class="c">! call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))</span>
-<a name="ln-183"></a>    <span class="c">! call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))</span>
-<a name="ln-184"></a>
-<a name="ln-185"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsA, lev%index,  lev%shape)</span>
-<a name="ln-186"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%shape)</span>
-<a name="ln-187"></a>    <span class="c">! call lev%ulevel%factory%create_single(QA,   lev%index,  lev%shape)</span>
-<a name="ln-188"></a>    <span class="c">! call lev%ulevel%factory%create_single(QB,   lev%index,  lev%shape)</span>
-<a name="ln-189"></a>
-<a name="ln-190"></a>    <span class="c">! call QA%setval(0.0_pfdp)</span>
-<a name="ln-191"></a>    <span class="c">! call QB%setval(0.0_pfdp)</span>
-<a name="ln-192"></a>
-<a name="ln-193"></a>    <span class="c">! t = t0</span>
-<a name="ln-194"></a>    <span class="c">! dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))</span>
-<a name="ln-195"></a>    <span class="c">! do m = 1, lev%nnodes-1</span>
-<a name="ln-196"></a>    <span class="c">!    t = t + dtsdc(m)</span>
-<a name="ln-197"></a>             
-<a name="ln-198"></a>    <span class="c">!    call rhsA%copy(lev%Q(1))</span>
-<a name="ln-199"></a>    <span class="c">!    ! First compute the explicit part of the right-hand side</span>
-<a name="ln-200"></a>    <span class="c">!    do n = 1, m</span>
-<a name="ln-201"></a>    <span class="c">!       call rhsA%axpy(dt*this%QtilE(m,n), lev%F(n,1))  </span>
-<a name="ln-202"></a>    <span class="c">!    end do</span>
-<a name="ln-203"></a>    <span class="c">!    call rhsA%axpy(1.0_pfdp, lev%S(m))</span>
-<a name="ln-204"></a>   
-<a name="ln-205"></a>    <span class="c">!    ! Save the right-hand side with only the explicit contribution</span>
-<a name="ln-206"></a>    <span class="c">!    call rhsB%copy(rhsA)</span>
-<a name="ln-207"></a>
-<a name="ln-208"></a>    <span class="c">!    ! Add the first implicit part to the right-hand side and solve for the first asynchronous update</span>
-<a name="ln-209"></a>    <span class="c">!    do n = 1, m</span>
-<a name="ln-210"></a>    <span class="c">!       call rhsA%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))  </span>
-<a name="ln-211"></a>    <span class="c">!    end do</span>
-<a name="ln-212"></a>    <span class="c">!    call rhsA%axpy(1.0_pfdp, S2(m))  </span>
-<a name="ln-213"></a>    <span class="c">!    call this%f2comp(QA, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsA, lev%index, lev%F(m+1,2))</span>
-<a name="ln-214"></a>
-<a name="ln-215"></a>    <span class="c">!    ! Add the second implicit part to the right-hand side and solve for the second asynchronous update</span>
-<a name="ln-216"></a>    <span class="c">!    do n = 1, m</span>
-<a name="ln-217"></a>    <span class="c">!       call rhsB%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))  </span>
-<a name="ln-218"></a>    <span class="c">!    end do</span>
-<a name="ln-219"></a>    <span class="c">!    call rhsB%axpy(1.0_pfdp, S3(m))  </span>
-<a name="ln-220"></a>    <span class="c">!    call this%f3comp(QB, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsB, lev%index, lev%F(m+1,3))</span>
-<a name="ln-221"></a>
-<a name="ln-222"></a>    <span class="c">!    ! Now we average the two asynchronous updates</span>
-<a name="ln-223"></a>    <span class="c">!    call lev%Q(m+1)%setval(0.0_pfdp)</span>
-<a name="ln-224"></a>    <span class="c">!    call lev%Q(m+1)%axpy(0.5_pfdp, QA)</span>
-<a name="ln-225"></a>    <span class="c">!    call lev%Q(m+1)%axpy(0.5_pfdp, QB)</span>
-<a name="ln-226"></a>
-<a name="ln-227"></a>    <span class="c">!    ! Evaluate the three right-hand sides with the updated variables</span>
-<a name="ln-228"></a>    <span class="c">!    call this%f1eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1))</span>
-<a name="ln-229"></a>    <span class="c">!    call this%f2eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2))</span>
-<a name="ln-230"></a>    <span class="c">!    call this%f3eval(lev%Q(m+1), t, lev%index, lev%F(m+1,3))</span>
-<a name="ln-231"></a>    <span class="c">! end do</span>
-<a name="ln-232"></a>
-<a name="ln-233"></a>    <span class="c">! call lev%qend%copy(lev%Q(lev%nnodes))</span>
-<a name="ln-234"></a>
-<a name="ln-235"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-236"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-237"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)</span>
-<a name="ln-238"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)</span>
-<a name="ln-239"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)</span>
-<a name="ln-240"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)</span>
-<a name="ln-241"></a>
-<a name="ln-242"></a>    <span class="c">! call end_timer(pf, TLEVEL+lev%index-1)</span>
-<a name="ln-243"></a>        
-<a name="ln-244"></a>  <span class="k">end subroutine </span><span class="n">sweep_decoupled_implicit_terms</span>
-<a name="ln-245"></a>
+<a name="ln-25"></a>     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">amisdcQ_initialize</span>
+<a name="ln-26"></a>  <span class="k">end type </span><span class="n">pf_amisdcQ_t</span>
+<a name="ln-27"></a>
+<a name="ln-28"></a><span class="k">contains</span>
+<a name="ln-29"></a>
+<a name="ln-30"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
+<a name="ln-31"></a>  <span class="c">! In the asynchronous updates, the two implicit parts are coupled</span>
+<a name="ln-32"></a>  <span class="k">subroutine </span><span class="n">sweep_coupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-33"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-34"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-35"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-36"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
+<a name="ln-37"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-38"></a>
+<a name="ln-39"></a>    <span class="kt">integer</span>                        <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span>
+<a name="ln-40"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                     <span class="kd">::</span> <span class="n">t</span>
+<a name="ln-41"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                     <span class="kd">::</span> <span class="n">dtsdc</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-42"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">rhsA</span><span class="p">,</span> <span class="n">rhsB</span><span class="p">,</span> <span class="n">QA</span><span class="p">,</span> <span class="n">QB</span>
+<a name="ln-43"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">S2</span><span class="p">(:),</span> <span class="n">S3</span><span class="p">(:)</span>
+<a name="ln-44"></a>
+<a name="ln-45"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-46"></a>   
+<a name="ln-47"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-48"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-49"></a>    
+<a name="ln-50"></a>    <span class="c">! compute integrals and add fas correction</span>
+<a name="ln-51"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-52"></a>
+<a name="ln-53"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-54"></a>       <span class="k">call </span><span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0d0</span><span class="p">)</span>
+<a name="ln-55"></a>       <span class="k">call </span><span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0d0</span><span class="p">)</span>
+<a name="ln-56"></a>
+<a name="ln-57"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-58"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-59"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>    <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-60"></a>          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>    <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<a name="ln-61"></a>          <span class="k">call </span><span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>     <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-62"></a>          <span class="k">call </span><span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span>     <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<a name="ln-63"></a>       <span class="k">end do</span>
+<a name="ln-64"></a><span class="k">       if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">))</span> <span class="k">then</span>
+<a name="ln-65"></a><span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+<a name="ln-66"></a>       <span class="k">end if</span>
+<a name="ln-67"></a><span class="k">    end do</span>
+<a name="ln-68"></a>
+<a name="ln-69"></a>    <span class="c">! do the time-stepping</span>
+<a name="ln-70"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
+<a name="ln-71"></a>
+<a name="ln-72"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f1eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-73"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-74"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<a name="ln-75"></a>
+<a name="ln-76"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-77"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-78"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-79"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-80"></a>
+<a name="ln-81"></a>    <span class="k">call </span><span class="n">QA</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-82"></a>    <span class="k">call </span><span class="n">QB</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-83"></a>
+<a name="ln-84"></a>    <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span>
+<a name="ln-85"></a>    <span class="n">dtsdc</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-86"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-87"></a>       <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dtsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<a name="ln-88"></a>             
+<a name="ln-89"></a>       <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-90"></a>       <span class="c">! First compute the explicit part of the right-hand side</span>
+<a name="ln-91"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
+<a name="ln-92"></a>          <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  
+<a name="ln-93"></a>       <span class="k">end do</span>
+<a name="ln-94"></a><span class="k">       call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">S</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+<a name="ln-95"></a>   
+<a name="ln-96"></a>       <span class="c">! Save the right-hand side with only the explicit contribution</span>
+<a name="ln-97"></a>       <span class="k">call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">rhsA</span><span class="p">)</span>
+<a name="ln-98"></a>
+<a name="ln-99"></a>       <span class="c">! Add the first implicit part to the right-hand side and solve for the first asynchronous update</span>
+<a name="ln-100"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
+<a name="ln-101"></a>          <span class="k">call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>  
+<a name="ln-102"></a>       <span class="k">end do</span>
+<a name="ln-103"></a><span class="k">       call </span><span class="n">rhsA</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">S2</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>  
+<a name="ln-104"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2comp</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-105"></a>
+<a name="ln-106"></a>       <span class="c">! Add the second implicit part to the right-hand side and solve for the second asynchronous update</span>
+<a name="ln-107"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
+<a name="ln-108"></a>          <span class="k">call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>  
+<a name="ln-109"></a>       <span class="k">end do</span>
+<a name="ln-110"></a><span class="k">       call </span><span class="n">rhsB</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">S3</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>  
+<a name="ln-111"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3comp</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">dt</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<a name="ln-112"></a>
+<a name="ln-113"></a>       <span class="c">! Now we average the two asynchronous updates</span>
+<a name="ln-114"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-115"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">0.5_pfdp</span><span class="p">,</span> <span class="n">QA</span><span class="p">)</span>
+<a name="ln-116"></a>       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">0.5_pfdp</span><span class="p">,</span> <span class="n">QB</span><span class="p">)</span>
+<a name="ln-117"></a>
+<a name="ln-118"></a>       <span class="c">! Evaluate the three right-hand sides with the updated variables</span>
+<a name="ln-119"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f1eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<a name="ln-120"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-121"></a>       <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<a name="ln-122"></a>    <span class="k">end do</span>
+<a name="ln-123"></a>
+<a name="ln-124"></a><span class="k">    call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
+<a name="ln-125"></a>
+<a name="ln-126"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">S2</span><span class="p">)</span>
+<a name="ln-127"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">S3</span><span class="p">)</span>
+<a name="ln-128"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">)</span>
+<a name="ln-129"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">)</span>
+<a name="ln-130"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QA</span><span class="p">)</span>
+<a name="ln-131"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QB</span><span class="p">)</span>
+<a name="ln-132"></a>
+<a name="ln-133"></a>    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-134"></a>
+<a name="ln-135"></a>  <span class="k">end subroutine </span><span class="n">sweep_coupled_implicit_terms</span>
+<a name="ln-136"></a>
+<a name="ln-137"></a>  
+<a name="ln-138"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
+<a name="ln-139"></a>  <span class="c">! In the asynchronous updates, the two implicit parts are decoupled</span>
+<a name="ln-140"></a>
+<a name="ln-141"></a>  <span class="c">! (in progress)</span>
+<a name="ln-142"></a>  <span class="k">subroutine </span><span class="n">sweep_decoupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-143"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-144"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-145"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-146"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
+<a name="ln-147"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-148"></a>
+<a name="ln-149"></a>    <span class="c">! integer                        :: m, n</span>
+<a name="ln-150"></a>    <span class="c">! real(pfdp)                     :: t</span>
+<a name="ln-151"></a>    <span class="c">! real(pfdp)                     :: dtsdc(1:lev%nnodes-1)</span>
+<a name="ln-152"></a>    <span class="c">! class(pf_encap_t), allocatable :: rhsA, rhsB, QA, QB</span>
+<a name="ln-153"></a>    <span class="c">! class(pf_encap_t), allocatable :: S2(:), S3(:)</span>
+<a name="ln-154"></a>
+<a name="ln-155"></a>    <span class="c">! call start_timer(pf, TLEVEL+lev%index-1)</span>
+<a name="ln-156"></a>   
+<a name="ln-157"></a>    <span class="c">! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
+<a name="ln-158"></a>    <span class="c">! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
+<a name="ln-159"></a>    
+<a name="ln-160"></a>    <span class="c">! ! compute integrals and add fas correction</span>
+<a name="ln-161"></a>    <span class="c">! do m = 1, lev%nnodes-1</span>
+<a name="ln-162"></a>
+<a name="ln-163"></a>    <span class="c">!    call lev%S(m)%setval(0.0_pfdp)</span>
+<a name="ln-164"></a>    <span class="c">!    call S2(m)%setval(0.0d0)</span>
+<a name="ln-165"></a>    <span class="c">!    call S3(m)%setval(0.0d0)</span>
+<a name="ln-166"></a>
+<a name="ln-167"></a>    <span class="c">!    do n = 1, lev%nnodes</span>
+<a name="ln-168"></a>    <span class="c">!       call lev%S(m)%axpy(dt*this%QdiffE(m,n),       lev%F(n,1))</span>
+<a name="ln-169"></a>    <span class="c">!       call S2(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,2))</span>
+<a name="ln-170"></a>    <span class="c">!       call S3(m)%axpy( 2.0_pfdp*dt*lev%qmat(m,n),   lev%F(n,3))</span>
+<a name="ln-171"></a>    <span class="c">!       call S2(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))</span>
+<a name="ln-172"></a>    <span class="c">!       call S3(m)%axpy(-2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))</span>
+<a name="ln-173"></a>    <span class="c">!    end do</span>
+<a name="ln-174"></a>    <span class="c">!    if (allocated(lev%tauQ)) then</span>
+<a name="ln-175"></a>    <span class="c">!       call lev%S(m)%axpy(1.0_pfdp, lev%tauQ(m))</span>
+<a name="ln-176"></a>    <span class="c">!    end if</span>
+<a name="ln-177"></a>    <span class="c">! end do</span>
+<a name="ln-178"></a>
+<a name="ln-179"></a>    <span class="c">! ! do the time-stepping</span>
+<a name="ln-180"></a>    <span class="c">! call lev%Q(1)%unpack(lev%q0)</span>
+<a name="ln-181"></a>
+<a name="ln-182"></a>    <span class="c">! call this%f1eval(lev%Q(1), t0, lev%index, lev%F(1,1))</span>
+<a name="ln-183"></a>    <span class="c">! call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))</span>
+<a name="ln-184"></a>    <span class="c">! call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))</span>
+<a name="ln-185"></a>
+<a name="ln-186"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsA, lev%index,  lev%shape)</span>
+<a name="ln-187"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%shape)</span>
+<a name="ln-188"></a>    <span class="c">! call lev%ulevel%factory%create_single(QA,   lev%index,  lev%shape)</span>
+<a name="ln-189"></a>    <span class="c">! call lev%ulevel%factory%create_single(QB,   lev%index,  lev%shape)</span>
+<a name="ln-190"></a>
+<a name="ln-191"></a>    <span class="c">! call QA%setval(0.0_pfdp)</span>
+<a name="ln-192"></a>    <span class="c">! call QB%setval(0.0_pfdp)</span>
+<a name="ln-193"></a>
+<a name="ln-194"></a>    <span class="c">! t = t0</span>
+<a name="ln-195"></a>    <span class="c">! dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))</span>
+<a name="ln-196"></a>    <span class="c">! do m = 1, lev%nnodes-1</span>
+<a name="ln-197"></a>    <span class="c">!    t = t + dtsdc(m)</span>
+<a name="ln-198"></a>             
+<a name="ln-199"></a>    <span class="c">!    call rhsA%copy(lev%Q(1))</span>
+<a name="ln-200"></a>    <span class="c">!    ! First compute the explicit part of the right-hand side</span>
+<a name="ln-201"></a>    <span class="c">!    do n = 1, m</span>
+<a name="ln-202"></a>    <span class="c">!       call rhsA%axpy(dt*this%QtilE(m,n), lev%F(n,1))  </span>
+<a name="ln-203"></a>    <span class="c">!    end do</span>
+<a name="ln-204"></a>    <span class="c">!    call rhsA%axpy(1.0_pfdp, lev%S(m))</span>
+<a name="ln-205"></a>   
+<a name="ln-206"></a>    <span class="c">!    ! Save the right-hand side with only the explicit contribution</span>
+<a name="ln-207"></a>    <span class="c">!    call rhsB%copy(rhsA)</span>
+<a name="ln-208"></a>
+<a name="ln-209"></a>    <span class="c">!    ! Add the first implicit part to the right-hand side and solve for the first asynchronous update</span>
+<a name="ln-210"></a>    <span class="c">!    do n = 1, m</span>
+<a name="ln-211"></a>    <span class="c">!       call rhsA%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,2))  </span>
+<a name="ln-212"></a>    <span class="c">!    end do</span>
+<a name="ln-213"></a>    <span class="c">!    call rhsA%axpy(1.0_pfdp, S2(m))  </span>
+<a name="ln-214"></a>    <span class="c">!    call this%f2comp(QA, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsA, lev%index, lev%F(m+1,2))</span>
+<a name="ln-215"></a>
+<a name="ln-216"></a>    <span class="c">!    ! Add the second implicit part to the right-hand side and solve for the second asynchronous update</span>
+<a name="ln-217"></a>    <span class="c">!    do n = 1, m</span>
+<a name="ln-218"></a>    <span class="c">!       call rhsB%axpy(2.0_pfdp*dt*this%QtilI(m,n), lev%F(n,3))  </span>
+<a name="ln-219"></a>    <span class="c">!    end do</span>
+<a name="ln-220"></a>    <span class="c">!    call rhsB%axpy(1.0_pfdp, S3(m))  </span>
+<a name="ln-221"></a>    <span class="c">!    call this%f3comp(QB, t, 2.0_pfdp*dt*this%QtilI(m,m+1), rhsB, lev%index, lev%F(m+1,3))</span>
+<a name="ln-222"></a>
+<a name="ln-223"></a>    <span class="c">!    ! Now we average the two asynchronous updates</span>
+<a name="ln-224"></a>    <span class="c">!    call lev%Q(m+1)%setval(0.0_pfdp)</span>
+<a name="ln-225"></a>    <span class="c">!    call lev%Q(m+1)%axpy(0.5_pfdp, QA)</span>
+<a name="ln-226"></a>    <span class="c">!    call lev%Q(m+1)%axpy(0.5_pfdp, QB)</span>
+<a name="ln-227"></a>
+<a name="ln-228"></a>    <span class="c">!    ! Evaluate the three right-hand sides with the updated variables</span>
+<a name="ln-229"></a>    <span class="c">!    call this%f1eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1))</span>
+<a name="ln-230"></a>    <span class="c">!    call this%f2eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2))</span>
+<a name="ln-231"></a>    <span class="c">!    call this%f3eval(lev%Q(m+1), t, lev%index, lev%F(m+1,3))</span>
+<a name="ln-232"></a>    <span class="c">! end do</span>
+<a name="ln-233"></a>
+<a name="ln-234"></a>    <span class="c">! call lev%qend%copy(lev%Q(lev%nnodes))</span>
+<a name="ln-235"></a>
+<a name="ln-236"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
+<a name="ln-237"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
+<a name="ln-238"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)</span>
+<a name="ln-239"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)</span>
+<a name="ln-240"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)</span>
+<a name="ln-241"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)</span>
+<a name="ln-242"></a>
+<a name="ln-243"></a>    <span class="c">! call end_timer(pf, TLEVEL+lev%index-1)</span>
+<a name="ln-244"></a>        
+<a name="ln-245"></a>  <span class="k">end subroutine </span><span class="n">sweep_decoupled_implicit_terms</span>
 <a name="ln-246"></a>
-<a name="ln-247"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
-<a name="ln-248"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_sweep</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-249"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
-<a name="ln-250"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-251"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-252"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
-<a name="ln-253"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-254"></a>
-<a name="ln-255"></a>    <span class="k">call </span><span class="n">sweep_coupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-256"></a>
-<a name="ln-257"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_sweep</span>
-<a name="ln-258"></a>    
-<a name="ln-259"></a>  <span class="c">! Initialize matrices</span>
-<a name="ln-260"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-<a name="ln-261"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-262"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-263"></a>
-<a name="ln-264"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-265"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nnodes</span>
-<a name="ln-266"></a>
-<a name="ln-267"></a>    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">3</span>
-<a name="ln-268"></a>
-<a name="ln-269"></a>    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-270"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
-<a name="ln-271"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-<a name="ln-272"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
-<a name="ln-273"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-<a name="ln-274"></a>
-<a name="ln-275"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-276"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-277"></a>
-<a name="ln-278"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-279"></a>    <span class="c">! Implicit matrix</span>
-<a name="ln-280"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq_</span><span class="p">)</span> <span class="k">then</span> 
-<a name="ln-281"></a>       <span class="c">! Get the LU</span>
-<a name="ln-282"></a>       <span class="k">call </span><span class="n">myLUq</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-283"></a>       <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span>
-<a name="ln-284"></a>    <span class="k">else </span>
-<a name="ln-285"></a><span class="k">       do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-286"></a>          <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
-<a name="ln-287"></a>             <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<a name="ln-288"></a>          <span class="k">end do</span>
-<a name="ln-289"></a><span class="k">       end do</span>
-<a name="ln-290"></a><span class="k">    end if</span>
-<a name="ln-291"></a>    <span class="c">! Explicit matrix</span>
-<a name="ln-292"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-293"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
-<a name="ln-294"></a>          <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>   <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<a name="ln-295"></a>       <span class="k">end do</span>
-<a name="ln-296"></a><span class="k">    end do</span>
-<a name="ln-297"></a>
-<a name="ln-298"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span>
-<a name="ln-299"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
-<a name="ln-300"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_initialize</span>
-<a name="ln-301"></a>
-<a name="ln-302"></a>  <span class="c">! Destroy the matrices</span>
-<a name="ln-303"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-<a name="ln-304"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-305"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-306"></a>    
-<a name="ln-307"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
-<a name="ln-308"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">)</span>
-<a name="ln-309"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">)</span>
-<a name="ln-310"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">)</span>
-<a name="ln-311"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_destroy</span>
-<a name="ln-312"></a>
+<a name="ln-247"></a>
+<a name="ln-248"></a>  <span class="c">! Perform an SDC sweep on level lev and set qend appropriately.</span>
+<a name="ln-249"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_sweep</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-250"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
+<a name="ln-251"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-252"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-253"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>          <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span><span class="p">,</span> <span class="n">t0</span>
+<a name="ln-254"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-255"></a>
+<a name="ln-256"></a>    <span class="k">call </span><span class="n">sweep_coupled_implicit_terms</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-257"></a>
+<a name="ln-258"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_sweep</span>
+<a name="ln-259"></a>    
+<a name="ln-260"></a>  <span class="c">! Initialize matrices</span>
+<a name="ln-261"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+<a name="ln-262"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-263"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-264"></a>
+<a name="ln-265"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-266"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nnodes</span>
+<a name="ln-267"></a>
+<a name="ln-268"></a>    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">3</span>
+<a name="ln-269"></a>
+<a name="ln-270"></a>    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-271"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
+<a name="ln-272"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
+<a name="ln-273"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
+<a name="ln-274"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
+<a name="ln-275"></a>
+<a name="ln-276"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-277"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-278"></a>
+<a name="ln-279"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-280"></a>    <span class="c">! Implicit matrix</span>
+<a name="ln-281"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq_</span><span class="p">)</span> <span class="k">then</span> 
+<a name="ln-282"></a>       <span class="c">! Get the LU</span>
+<a name="ln-283"></a>       <span class="k">call </span><span class="n">myLUq</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-284"></a>       <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span>
+<a name="ln-285"></a>    <span class="k">else </span>
+<a name="ln-286"></a><span class="k">       do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-287"></a>          <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
+<a name="ln-288"></a>             <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a name="ln-289"></a>          <span class="k">end do</span>
+<a name="ln-290"></a><span class="k">       end do</span>
+<a name="ln-291"></a><span class="k">    end if</span>
+<a name="ln-292"></a>    <span class="c">! Explicit matrix</span>
+<a name="ln-293"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-294"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
+<a name="ln-295"></a>          <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>   <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a name="ln-296"></a>       <span class="k">end do</span>
+<a name="ln-297"></a><span class="k">    end do</span>
+<a name="ln-298"></a>
+<a name="ln-299"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span>
+<a name="ln-300"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
+<a name="ln-301"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_initialize</span>
+<a name="ln-302"></a>
+<a name="ln-303"></a>  <span class="c">! Destroy the matrices</span>
+<a name="ln-304"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+<a name="ln-305"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-306"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-307"></a>    
+<a name="ln-308"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
+<a name="ln-309"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">)</span>
+<a name="ln-310"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">)</span>
+<a name="ln-311"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">)</span>
+<a name="ln-312"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_destroy</span>
 <a name="ln-313"></a>
-<a name="ln-314"></a>  <span class="c">! Compute SDC integral</span>
-<a name="ln-315"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
-<a name="ln-316"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-317"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>      <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-318"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
-<a name="ln-319"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">dt</span>
-<a name="ln-320"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
-<a name="ln-321"></a>
-<a name="ln-322"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
-<a name="ln-323"></a>    
-<a name="ln-324"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-325"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-326"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-327"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
-<a name="ln-328"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
-<a name="ln-329"></a>          <span class="k">end do</span>
-<a name="ln-330"></a><span class="k">       end do</span>
-<a name="ln-331"></a><span class="k">    end do  </span>
-<a name="ln-332"></a><span class="k">  end subroutine </span><span class="n">amisdcQ_integrate</span>
-<a name="ln-333"></a> 
-<a name="ln-334"></a><span class="k">end module </span><span class="n">pf_mod_amisdcQ</span>
+<a name="ln-314"></a>
+<a name="ln-315"></a>  <span class="c">! Compute SDC integral</span>
+<a name="ln-316"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
+<a name="ln-317"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-318"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>      <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-319"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
+<a name="ln-320"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-321"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
+<a name="ln-322"></a>
+<a name="ln-323"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
+<a name="ln-324"></a>    
+<a name="ln-325"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-326"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-327"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-328"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
+<a name="ln-329"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
+<a name="ln-330"></a>          <span class="k">end do</span>
+<a name="ln-331"></a><span class="k">       end do</span>
+<a name="ln-332"></a><span class="k">    end do  </span>
+<a name="ln-333"></a><span class="k">  end subroutine </span><span class="n">amisdcQ_integrate</span>
+<a name="ln-334"></a> 
+<a name="ln-335"></a><span class="k">end module </span><span class="n">pf_mod_amisdcQ</span>
 </pre></div>
 
     </section>

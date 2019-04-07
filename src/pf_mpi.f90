@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 module pf_mod_mpi
-  include "mpif.h"
+!  include "mpif.h"
 end module pf_mod_mpi
 
 !> Module to implement communication routines in  MPI.

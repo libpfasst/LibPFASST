@@ -229,10 +229,10 @@ public function get_array2d(x, flags) result(r)
 <tr>
   
   <td><span class="anchor" id="variable-x%7E37"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>x</strong></td><td></td>
   
 </tr>
@@ -243,7 +243,7 @@ public function get_array2d(x, flags) result(r)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E72"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E77"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -329,7 +329,7 @@ public function get_array2d(x, flags) result(r)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">get_array2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">target</span> <span class="kd">::</span> <span class="n">x</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">r</span><span class="p">(:,:)</span>
 

@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
+public subroutine interpolate_q0(pf, f_lev_p, c_lev_p, flags)
     
     
    
@@ -236,7 +236,7 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E37"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E64"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -251,12 +251,12 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-f_lev_ptr%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-f_lev_p%7E3"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>f_lev_ptr</strong></td><td><p>fine level</p></td>
+  <td><strong>f_lev_p</strong></td><td><p>fine level</p></td>
   
 </tr>
 
@@ -266,12 +266,12 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-c_lev_ptr%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-c_lev_p%7E3"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>c_lev_ptr</strong></td><td><p>coarse level</p></td>
+  <td><strong>c_lev_p</strong></td><td><p>coarse level</p></td>
   
 </tr>
 
@@ -281,7 +281,7 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E69"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E74"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -638,11 +638,11 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>          <span class="c">!!  main pfasst structure</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_lev_ptr</span>  <span class="c">!!  fine level</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_lev_ptr</span>  <span class="c">!!  coarse level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_lev_p</span>  <span class="c">!!  fine level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_lev_p</span>  <span class="c">!!  coarse level</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>       <span class="c">!!  optional: specify component on which to operate</span>
                                                     <span class="c">!   here flags more or less is logical, if it is present we operate on component 1</span>
                                                     <span class="c">!   of the ndarray-type</span>
@@ -650,32 +650,32 @@ public subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span>    <span class="n">c_delta</span>    <span class="c">!!  coarse correction</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span>    <span class="n">f_delta</span>    <span class="c">!!  fine correction</span>
 
-    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_PRE_INTERP_Q0</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_PRE_INTERP_Q0</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c">!&gt; create local workspace</span>
-    <span class="k">call </span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">f_delta</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">f_delta</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
 
     <span class="k">call </span><span class="n">c_delta</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
     <span class="k">call </span><span class="n">f_delta</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
     
 
     <span class="c">!&gt;  restrict fine initial data to coarse</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">c_delta</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">c_delta</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
     <span class="c">!&gt;  get coarse level correction</span>
-    <span class="k">call </span><span class="n">c_delta</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>    
+    <span class="k">call </span><span class="n">c_delta</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>    
     <span class="c">!&gt;  interpolate correction in space</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">,</span> <span class="n">f_delta</span><span class="p">,</span> <span class="n">c_delta</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_delta</span><span class="p">,</span> <span class="n">c_delta</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
     <span class="c">!&gt; update fine inital condition</span>
 
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_delta</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_POST_INTERP_Q0</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_delta</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_POST_INTERP_Q0</span><span class="p">)</span>
 
     <span class="c">!&gt; destroy local workspace</span>
-    <span class="k">call </span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">f_delta</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">c_delta</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">f_delta</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">interpolate_q0</span>
 </pre></div>
 

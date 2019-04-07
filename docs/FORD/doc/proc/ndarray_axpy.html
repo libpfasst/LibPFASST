@@ -245,7 +245,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-a%7E7"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-a%7E5"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E66"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E71"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -450,6 +450,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">x</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">a</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
+
 
     <span class="k">select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">type is</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>

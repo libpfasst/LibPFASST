@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.4% of total for modules and submodules.">351 statements</a>
+    title=" 4.7% of total for modules and submodules.">368 statements</a>
      </li> 
      
      
@@ -176,9 +176,9 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_eval_p%7E12">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_eval_p%7E10">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_comp_p%7E8">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_comp_p%7E7">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -441,9 +441,9 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_eval_p%7E12">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_eval_p%7E10">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_comp_p%7E8">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdcq_oc.html#interface-pf_f_comp_p%7E7">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -515,7 +515,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E12"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E10"></span><h3>interface 
     
   </h3></div>
   
@@ -701,7 +701,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E8"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E7"></span><h3>interface 
     
   </h3></div>
   
@@ -1052,37 +1052,40 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-f_eval%7E12'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-f_eval%7E10'>f_eval</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-f_comp%7E8'>f_comp</a></strong>  </td>
+       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-f_comp%7E7'>f_comp</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-sweep%7E15'>sweep</a></strong>  => misdcQ_oc_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-sweep%7E13'>sweep</a></strong>  => misdcQ_oc_sweep </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-initialize%7E16'>initialize</a></strong>  => misdcQ_oc_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-initialize%7E14'>initialize</a></strong>  => misdcQ_oc_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-integrate%7E14'>integrate</a></strong>  => misdcQ_oc_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-integrate%7E12'>integrate</a></strong>  => misdcQ_oc_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-residual%7E14'>residual</a></strong>  => misdcQ_oc_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-residual%7E12'>residual</a></strong>  => misdcQ_oc_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-spreadq0%7E11'>spreadq0</a></strong>  => misdcQ_oc_spreadq0 </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-spreadq0%7E9'>spreadq0</a></strong>  => misdcQ_oc_spreadq0 </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-evaluate_all%7E13'>evaluate_all</a></strong>  => misdcQ_oc_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-evaluate_all%7E11'>evaluate_all</a></strong>  => misdcQ_oc_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-evaluate%7E13'>evaluate</a></strong>  => misdcQ_oc_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-evaluate%7E11'>evaluate</a></strong>  => misdcQ_oc_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-destroy%7E16'>destroy</a></strong>  => misdcQ_oc_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-destroy%7E15'>destroy</a></strong>  => misdcQ_oc_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-misdcq_oc_destroy'>misdcQ_oc_destroy</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdcq_oc_t.html#boundprocedure-misdcq_oc_initialize'>misdcQ_oc_initialize</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -1254,7 +1257,7 @@ public subroutine <a href='../proc/misdcq_oc_sweep.html'>misdcQ_oc_sweep</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_initialize"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_initialize.html'>misdcQ_oc_initialize</a>(this, lev)
+public subroutine <a href='../proc/misdcq_oc_initialize.html'>misdcQ_oc_initialize</a>(this, pf, level_index)
     
     
    
@@ -1269,7 +1272,7 @@ public subroutine <a href='../proc/misdcq_oc_initialize.html'>misdcQ_oc_initiali
 
 
 
-<p>Array of substep sizes</p><a href="../proc/misdcq_oc_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Assign level pointer</p><a href="../proc/misdcq_oc_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1305,12 +1308,27 @@ public subroutine <a href='../proc/misdcq_oc_initialize.html'>misdcQ_oc_initiali
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1328,7 +1346,7 @@ public subroutine <a href='../proc/misdcq_oc_initialize.html'>misdcQ_oc_initiali
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_destroy"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_destroy.html'>misdcQ_oc_destroy</a>(this, lev)
+public subroutine <a href='../proc/misdcq_oc_destroy.html'>misdcQ_oc_destroy</a>(this, pf, level_index)
     
     
    
@@ -1336,6 +1354,14 @@ public subroutine <a href='../proc/misdcq_oc_destroy.html'>misdcQ_oc_destroy</a>
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1371,12 +1397,27 @@ public subroutine <a href='../proc/misdcq_oc_destroy.html'>misdcQ_oc_destroy</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1394,7 +1435,7 @@ public subroutine <a href='../proc/misdcq_oc_destroy.html'>misdcQ_oc_destroy</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_integrate"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_integrate.html'>misdcQ_oc_integrate</a>(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+public subroutine <a href='../proc/misdcq_oc_integrate.html'>misdcQ_oc_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
     
     
    
@@ -1402,6 +1443,14 @@ public subroutine <a href='../proc/misdcq_oc_integrate.html'>misdcQ_oc_integrate
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1437,12 +1486,27 @@ public subroutine <a href='../proc/misdcq_oc_integrate.html'>misdcQ_oc_integrate
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1535,7 +1599,7 @@ public subroutine <a href='../proc/misdcq_oc_integrate.html'>misdcQ_oc_integrate
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_evaluate"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_evaluate.html'>misdcQ_oc_evaluate</a>(this, lev, t, m, flags, step)
+public subroutine <a href='../proc/misdcq_oc_evaluate.html'>misdcQ_oc_evaluate</a>(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -1543,6 +1607,14 @@ public subroutine <a href='../proc/misdcq_oc_evaluate.html'>misdcQ_oc_evaluate</
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1578,12 +1650,27 @@ public subroutine <a href='../proc/misdcq_oc_evaluate.html'>misdcQ_oc_evaluate</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1661,7 +1748,7 @@ public subroutine <a href='../proc/misdcq_oc_evaluate.html'>misdcQ_oc_evaluate</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_evaluate_all"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_evaluate_all.html'>misdcQ_oc_evaluate_all</a>(this, lev, t, flags, step)
+public subroutine <a href='../proc/misdcq_oc_evaluate_all.html'>misdcQ_oc_evaluate_all</a>(this, pf, level_index, t, flags, step)
     
     
    
@@ -1676,7 +1763,8 @@ public subroutine <a href='../proc/misdcq_oc_evaluate_all.html'>misdcQ_oc_evalua
 
 
 
-<p>Evaluate all function values</p>
+<p>Evaluate all function values
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1712,12 +1800,27 @@ public subroutine <a href='../proc/misdcq_oc_evaluate_all.html'>misdcQ_oc_evalua
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1899,7 +2002,7 @@ public subroutine <a href='../proc/misdcq_oc_residual.html'>misdcQ_oc_residual</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-misdcq_oc_spreadq0"></span><h3>
-public subroutine <a href='../proc/misdcq_oc_spreadq0.html'>misdcQ_oc_spreadq0</a>(this, lev, t0, flags, step)
+public subroutine <a href='../proc/misdcq_oc_spreadq0.html'>misdcQ_oc_spreadq0</a>(this, pf, level_index, t0, flags, step)
     
     
    
@@ -1907,6 +2010,14 @@ public subroutine <a href='../proc/misdcq_oc_spreadq0.html'>misdcQ_oc_spreadq0</
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1942,12 +2053,27 @@ public subroutine <a href='../proc/misdcq_oc_spreadq0.html'>misdcQ_oc_spreadq0</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

@@ -394,7 +394,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E231"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E208"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -409,7 +409,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E68"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E108"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -424,7 +424,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E31"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E75"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -439,7 +439,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E31"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E27"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -454,7 +454,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E49"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E42"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -469,7 +469,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E11"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E10"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -484,7 +484,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E118"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E113"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -801,7 +801,7 @@ public subroutine imk_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span>   <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
 
     <span class="c">!&gt;  Local variables</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
 
     <span class="n">this</span><span class="p">%</span><span class="n">t0</span> <span class="o">=</span> <span class="n">t0</span>
     <span class="n">this</span><span class="p">%</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>

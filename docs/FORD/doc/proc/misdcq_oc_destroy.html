@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">11 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine misdcQ_oc_destroy(this, lev)
+public subroutine misdcQ_oc_destroy(this, pf, level_index)
     
     
    
@@ -208,6 +208,8 @@ public subroutine misdcQ_oc_destroy(this, lev)
   
 
 
+    
+    <p>Assign level pointer</p>
     
 
     <h3>Arguments</h3>
@@ -228,7 +230,7 @@ public subroutine misdcQ_oc_destroy(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E261"></span>class(<a href='../type/pf_misdcq_oc_t.html'>pf_misdcQ_oc_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E237"></span>class(<a href='../type/pf_misdcq_oc_t.html'>pf_misdcQ_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,12 +245,27 @@ public subroutine misdcQ_oc_destroy(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E93"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E135"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E96"></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -319,9 +336,13 @@ public subroutine misdcQ_oc_destroy(this, lev)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">misdcQ_oc_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">misdcQ_oc_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_misdcQ_oc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+    <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
+
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
 
     <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
     <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">)</span>
@@ -330,8 +351,8 @@ public subroutine misdcQ_oc_destroy(this, lev)
     <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dtsdc</span><span class="p">)</span>
 
 
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">misdcQ_oc_destroy</span>
 </pre></div>
 

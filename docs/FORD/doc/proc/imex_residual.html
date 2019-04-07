@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.0% of total for procedures.">6 statements</a>
+    title=" 0.0% of total for procedures.">8 statements</a>
      </li> 
      
      
@@ -140,7 +140,7 @@
     
      <li><a href='../sourcefile/pf_imex.f90.html'>pf_imex.f90</a></li>
     
-     <li><a href='../module/pf_mod_imex.html'>pf_mod_imex</a></li>
+     <li><a href='../module/pf_mod_imex_sweeper.html'>pf_mod_imex_sweeper</a></li>
     
   
      <li class="active">imex_residual</li>
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine imex_residual(this, lev, dt)
+public subroutine imex_residual(this, pf, level_index, dt, flags)
     
     
    
@@ -208,6 +208,8 @@ public subroutine imex_residual(this, lev, dt)
   
 
 
+    
+    <p>Subroutine to compute  Residual</p>
     
 
     <h3>Arguments</h3>
@@ -228,7 +230,7 @@ public subroutine imex_residual(this, lev, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E118"></span>class(<a href='../type/pf_imex_t.html'>pf_imex_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E117"></span>class(<a href='../type/pf_imex_sweeper_t.html'>pf_imex_sweeper_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,12 +245,27 @@ public subroutine imex_residual(this, lev, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E35"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E53"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E38"></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -263,7 +280,22 @@ public subroutine imex_residual(this, lev, dt)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dt</strong></td><td></td>
+  <td><strong>dt</strong></td><td><p>Time step</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-flags%7E59"></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
   
 </tr>
 
@@ -428,11 +460,14 @@ public subroutine imex_residual(this, lev, dt)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">imex_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_imex_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>
-    <span class="k">call </span><span class="n">pf_generic_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">imex_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_imex_sweeper_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>    <span class="c">!!  PFASST structure</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  level on which to initialize</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
+    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>   <span class="kd">::</span> <span class="n">flags</span>
+    
+    <span class="k">call </span><span class="n">pf_generic_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">imex_residual</span>
 </pre></div>
 

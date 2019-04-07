@@ -417,13 +417,13 @@ public subroutine pf_destroy_sdcmats(SDCmats)
     <span class="k">type</span><span class="p">(</span><span class="n">pf_sdcmats_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">SDCmats</span>
 
 
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmat</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmatFE</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmatBE</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmatTrap</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmatVer</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qmatLU</span><span class="p">)</span>  
-     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">s0mat</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">Qmat</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">QmatFE</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">QmatBE</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">QmatTrap</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">QmatVer</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">QmatLU</span><span class="p">)</span>  
+     <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">Smat</span><span class="p">)</span>  
      <span class="k">deallocate</span><span class="p">(</span><span class="n">SDCmats</span><span class="p">%</span><span class="n">qnodes</span><span class="p">)</span>       
   <span class="k">end subroutine </span><span class="n">pf_destroy_sdcmats</span>
 </pre></div>

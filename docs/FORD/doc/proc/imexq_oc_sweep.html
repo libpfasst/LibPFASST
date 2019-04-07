@@ -410,7 +410,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E8"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E20"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -425,7 +425,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E9"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E21"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -485,7 +485,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E40"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E39"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -741,7 +741,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
 
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
 
     <span class="c">! indicate if sweep on both (0, default; might skip y or p if tolerance satisfied), just y (1), just p (2)</span>
 

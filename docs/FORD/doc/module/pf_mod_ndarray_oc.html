@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.3% of total for modules and submodules.">344 statements</a>
+    title=" 4.4% of total for modules and submodules.">342 statements</a>
      </li> 
      
      
@@ -1242,10 +1242,10 @@ public function <a href='../proc/get_array2d_oc.html'>get_array2d_oc</a>(x, flag
 <tr>
   
   <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>x</strong></td><td></td>
   
 </tr>
@@ -1317,10 +1317,10 @@ public function <a href='../proc/get_array3d_oc.html'>get_array3d_oc</a>(x, flag
 <tr>
   
   <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>x</strong></td><td></td>
   
 </tr>
@@ -1727,7 +1727,7 @@ public subroutine <a href='../proc/ndarray_oc_destroy.html'>ndarray_oc_destroy</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_oc_destroy_single"></span><h3>
-public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_destroy_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_destroy_single</a>(this, x)
     
     
    
@@ -1787,36 +1787,6 @@ public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_de
   
 </tr>
 
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
-  
-</tr>
-
 </tbody>
 </table>
 
@@ -1831,7 +1801,7 @@ public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_de
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_oc_destroy_array"></span><h3>
-public subroutine <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_destroy_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_destroy_array</a>(this, x)
     
     
    
@@ -1888,51 +1858,6 @@ public subroutine <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_des
   
   <td>allocatable</td><td>::</td>
   <td><strong>x</strong>(:)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>n</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
   
 </tr>
 

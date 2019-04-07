@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.6% of total for modules and submodules.">209 statements</a>
+    title=" 2.8% of total for modules and submodules.">223 statements</a>
      </li> 
      
      
@@ -176,15 +176,13 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E11">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_single_commutators_p">pf_compute_single_commutators_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_omega_p">pf_compute_omega_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_propagate_solution_p">pf_propagate_solution_p</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_destroy_magpicard_p">pf_destroy_magpicard_p</a>
       
     </div>
   </div>
@@ -446,15 +444,13 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E11">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_single_commutators_p">pf_compute_single_commutators_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_omega_p">pf_compute_omega_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_propagate_solution_p">pf_propagate_solution_p</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_destroy_magpicard_p">pf_destroy_magpicard_p</a>
       
     </div>
   </div>
@@ -528,7 +524,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E11"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E9"></span><h3>interface 
     
   </h3></div>
   
@@ -1021,81 +1017,6 @@ public subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
 </div>
 
     
-     
-<div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_destroy_magpicard_p"></span><h3>interface 
-    
-  </h3></div>
-  
-  <ul class="list-group">
-  
-    <li class="list-group-item">
-    
-    
-    <h3>
-public subroutine pf_destroy_magpicard_p(this, Lev)
-    
-    
-   
-</h3>
-    
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>this</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>Lev</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-    </li>
-  
-  </ul>
-</div>
-
-    
     </section>
   <br>
     
@@ -1279,28 +1200,28 @@ public subroutine pf_destroy_magpicard_p(this, Lev)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-sweep%7E14'>sweep</a></strong>  => magpicard_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-sweep%7E12'>sweep</a></strong>  => magpicard_sweep </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-initialize%7E15'>initialize</a></strong>  => magpicard_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-initialize%7E13'>initialize</a></strong>  => magpicard_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate%7E12'>evaluate</a></strong>  => magpicard_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate%7E10'>evaluate</a></strong>  => magpicard_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-integrate%7E13'>integrate</a></strong>  => magpicard_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-integrate%7E11'>integrate</a></strong>  => magpicard_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-residual%7E13'>residual</a></strong>  => magpicard_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-residual%7E11'>residual</a></strong>  => magpicard_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-spreadq0%7E10'>spreadq0</a></strong>  => magpicard_spreadq0 </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-spreadq0%7E8'>spreadq0</a></strong>  => magpicard_spreadq0 </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate_all%7E12'>evaluate_all</a></strong>  => magpicard_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate_all%7E10'>evaluate_all</a></strong>  => magpicard_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-f_eval%7E11'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-f_eval%7E9'>f_eval</a></strong>  </td>
        <td></td></tr>
       
        <tr><td>procedure(pf_compute_single_commutators_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-compute_single_commutators'>compute_single_commutators</a></strong>  </td>
@@ -1312,10 +1233,13 @@ public subroutine pf_destroy_magpicard_p(this, Lev)
        <tr><td>procedure(pf_propagate_solution_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-propagate_solution'>propagate_solution</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_destroy_magpicard_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-destroy%7E15'>destroy</a></strong>  </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-destroy%7E14'>destroy</a></strong>  => magpicard_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-magpicard_destroy'>magpicard_destroy</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-magpicard_initialize'>magpicard_initialize</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -1487,7 +1411,7 @@ public subroutine <a href='../proc/magpicard_sweep.html'>magpicard_sweep</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_initialize"></span><h3>
-public subroutine <a href='../proc/magpicard_initialize.html'>magpicard_initialize</a>(this, lev)
+public subroutine <a href='../proc/magpicard_initialize.html'>magpicard_initialize</a>(this, pf, level_index)
     
     
    
@@ -1495,6 +1419,14 @@ public subroutine <a href='../proc/magpicard_initialize.html'>magpicard_initiali
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1530,12 +1462,27 @@ public subroutine <a href='../proc/magpicard_initialize.html'>magpicard_initiali
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -1553,7 +1500,7 @@ public subroutine <a href='../proc/magpicard_initialize.html'>magpicard_initiali
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_integrate"></span><h3>
-public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate</a>(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
     
     
    
@@ -1569,7 +1516,8 @@ public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate
 
 
 <p>Compute SDC integral
-  fintSDC = \int_{t_n}^{t_m} fSDC dt</p>
+  fintSDC = \int_{t_n}^{t_m} fSDC dt
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1605,12 +1553,27 @@ public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -1703,7 +1666,7 @@ public subroutine <a href='../proc/magpicard_integrate.html'>magpicard_integrate
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_evaluate"></span><h3>
-public subroutine <a href='../proc/magpicard_evaluate.html'>magpicard_evaluate</a>(this, lev, t, m, flags, step)
+public subroutine <a href='../proc/magpicard_evaluate.html'>magpicard_evaluate</a>(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -1711,6 +1674,14 @@ public subroutine <a href='../proc/magpicard_evaluate.html'>magpicard_evaluate</
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1746,12 +1717,27 @@ public subroutine <a href='../proc/magpicard_evaluate.html'>magpicard_evaluate</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -1829,7 +1815,7 @@ public subroutine <a href='../proc/magpicard_evaluate.html'>magpicard_evaluate</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_evaluate_all"></span><h3>
-public subroutine <a href='../proc/magpicard_evaluate_all.html'>magpicard_evaluate_all</a>(this, lev, t, flags, step)
+public subroutine <a href='../proc/magpicard_evaluate_all.html'>magpicard_evaluate_all</a>(this, pf, level_index, t, flags, step)
     
     
    
@@ -1837,6 +1823,14 @@ public subroutine <a href='../proc/magpicard_evaluate_all.html'>magpicard_evalua
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1872,12 +1866,27 @@ public subroutine <a href='../proc/magpicard_evaluate_all.html'>magpicard_evalua
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -2059,7 +2068,7 @@ public subroutine <a href='../proc/magpicard_residual.html'>magpicard_residual</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_spreadq0"></span><h3>
-public subroutine <a href='../proc/magpicard_spreadq0.html'>magpicard_spreadq0</a>(this, lev, t0, flags, step)
+public subroutine <a href='../proc/magpicard_spreadq0.html'>magpicard_spreadq0</a>(this, pf, level_index, t0, flags, step)
     
     
    
@@ -2067,6 +2076,14 @@ public subroutine <a href='../proc/magpicard_spreadq0.html'>magpicard_spreadq0</
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2102,12 +2119,27 @@ public subroutine <a href='../proc/magpicard_spreadq0.html'>magpicard_spreadq0</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -2170,7 +2202,7 @@ public subroutine <a href='../proc/magpicard_spreadq0.html'>magpicard_spreadq0</
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-magpicard_destroy"></span><h3>
-public subroutine <a href='../proc/magpicard_destroy.html'>magpicard_destroy</a>(this, lev)
+public subroutine <a href='../proc/magpicard_destroy.html'>magpicard_destroy</a>(this, pf, level_index)
     
     
    
@@ -2178,6 +2210,14 @@ public subroutine <a href='../proc/magpicard_destroy.html'>magpicard_destroy</a>
   <div class="panel-body">
        
     
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2213,12 +2253,27 @@ public subroutine <a href='../proc/magpicard_destroy.html'>magpicard_destroy</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 

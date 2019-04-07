@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat, proper, composite, no_left)
+public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, Smat, Qmat, proper, composite, no_left)
     
     
    
@@ -275,7 +275,7 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
   
 <tr>
   
-  <td><span class="anchor" id="variable-nodes%7E4"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-nodes%7E3"></span>real(kind=pfdp),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -305,12 +305,12 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
   
 <tr>
   
-  <td><span class="anchor" id="variable-smat"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-smat%7E2"></span>real(kind=pfdp),</td>
   <td>intent(out)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>smat</strong>(nnodes-1,nnodes)</td><td></td>
+  <td><strong>Smat</strong>(nnodes-1,nnodes)</td><td></td>
   
 </tr>
 
@@ -320,12 +320,12 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
   
 <tr>
   
-  <td><span class="anchor" id="variable-qmat"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qmat%7E3"></span>real(kind=pfdp),</td>
   <td>intent(out)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>qmat</strong>(nnodes-1,nnodes)</td><td></td>
+  <td><strong>Qmat</strong>(nnodes-1,nnodes)</td><td></td>
   
 </tr>
 
@@ -798,13 +798,13 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_quadrature</span><span class="p">(</span><span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qmat</span><span class="p">,</span><span class="n">proper</span><span class="p">,</span><span class="n">composite</span><span class="p">,</span><span class="n">no_left</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_quadrature</span><span class="p">(</span><span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">Smat</span><span class="p">,</span> <span class="n">Qmat</span><span class="p">,</span><span class="n">proper</span><span class="p">,</span><span class="n">composite</span><span class="p">,</span><span class="n">no_left</span><span class="p">)</span>
     <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">qtype</span>   <span class="c">! Type of nodes</span>
     <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">nnodes</span>  <span class="c">! Number of nodes on this level</span>
     <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">nnodes0</span> <span class="c">! Number of node on base level (either finest or coarsest)</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  The nodes</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">smat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  node to node integration matrix</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">qmat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  O to node collocation matrix</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">Smat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  node to node integration matrix</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">Qmat</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">)</span>  <span class="c">!  O to node collocation matrix</span>
     <span class="kt">integer</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nflags</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>         <span class="c">!  Flags</span>
     <span class="kt">logical</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">composite</span>  <span class="c">!  Use composite nodes</span>
     <span class="kt">logical</span><span class="p">,</span>    <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">proper</span>     <span class="c">!  Use proper nodes instead of node restriction</span>
@@ -813,13 +813,13 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>  <span class="c">!  The size of the composite base rule</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">qnodes0</span><span class="p">(</span><span class="n">nnodes0</span><span class="p">)</span>  <span class="c">! quad precision base nodes</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">)</span> <span class="kd">::</span>  <span class="n">qnodes</span><span class="p">(</span><span class="n">nnodes</span><span class="p">)</span>   <span class="c">! quad precision nodes</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span>  <span class="n">qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span> <span class="n">smat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span><span class="n">qcomp0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">)</span>    
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span>  <span class="n">Qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span> <span class="n">Smat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">),</span><span class="n">qcomp0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="p">)</span>    
     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">flags0</span><span class="p">(</span><span class="n">nnodes0</span><span class="p">)</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">ri</span><span class="p">,</span><span class="n">rj</span><span class="p">,</span> <span class="n">refine</span><span class="p">,</span><span class="n">m</span>
 
-    <span class="n">qmat</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">smat</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Qmat</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Smat</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">flags0</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">nflags</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -832,11 +832,11 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
        <span class="n">refine</span> <span class="o">=</span> <span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nnodes0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
        <span class="k">call </span><span class="n">sdc_qnodes</span><span class="p">(</span><span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span>  <span class="c">!  Make coarsest level nodes</span>
-       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat0</span><span class="p">,</span> <span class="n">smat0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span> <span class="c">!  Make coarsest level qmat</span>
+       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">Qmat0</span><span class="p">,</span> <span class="n">Smat0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">qnodes0</span><span class="p">,</span> <span class="n">flags0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">,</span> <span class="n">nnodes0</span><span class="p">)</span> <span class="c">!  Make coarsest level Qmat</span>
 
-       <span class="c">!  This block matrix will be used to fill in composite qmat</span>
+       <span class="c">!  This block matrix will be used to fill in composite Qmat</span>
        <span class="k">do </span><span class="n">m</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span>
-          <span class="n">qcomp0</span><span class="p">(</span><span class="n">m</span><span class="p">,:)</span><span class="o">=</span><span class="n">qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,:)</span>  <span class="c">!  load each row with the integral over the whole composite step    </span>
+          <span class="n">qcomp0</span><span class="p">(</span><span class="n">m</span><span class="p">,:)</span><span class="o">=</span><span class="n">Qmat0</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">,:)</span>  <span class="c">!  load each row with the integral over the whole composite step    </span>
        <span class="k">end do</span>
 
        <span class="c">!  Build big block matrix</span>
@@ -844,18 +844,18 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">refine</span>
           <span class="n">ri</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>  <span class="c">!  beginning of ith composite rule</span>
           <span class="n">qnodes</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">((</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">qnodes0</span><span class="p">)</span>  <span class="c">!  Assigns endpoints of composites twice, but no biggie</span>
-          <span class="n">smat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">smat0</span>   <span class="c">! Make block diagonal smat</span>
-          <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">qmat0</span>  <span class="c">! Make block diagonal qmat</span>
+          <span class="n">Smat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">Smat0</span>   <span class="c">! Make block diagonal Smat</span>
+          <span class="n">Qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="n">Qmat0</span>  <span class="c">! Make block diagonal Qmat</span>
           <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span>          <span class="c">!   column blocks to left of diag</span>
              <span class="n">rj</span><span class="o">=</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
-             <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">qcomp0</span>
+             <span class="n">Qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">Qmat</span><span class="p">(</span><span class="n">ri</span><span class="p">:</span><span class="n">ri</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">rj</span><span class="p">:</span><span class="n">rj</span><span class="o">+</span><span class="n">nnodes0</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">qcomp0</span>
           <span class="k">end do</span>
 <span class="k">       end do</span>
 
 <span class="k">    else if</span> <span class="p">(</span><span class="n">proper</span><span class="p">)</span> <span class="k">then</span>
        <span class="c">! nodes are given by proper quadrature rules</span>
        <span class="k">call </span><span class="n">sdc_qnodes</span><span class="p">(</span><span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">sdc_Qmats</span><span class="p">(</span><span class="n">Qmat</span><span class="p">,</span> <span class="n">Smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
     <span class="k">else</span>
        <span class="c">! nodes are given by refining the finest set of nodes.  note</span>
        <span class="c">! that in this case nnodes0 corresponds to the finest number of</span>
@@ -869,7 +869,7 @@ public subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qma
 
        <span class="k">if</span> <span class="p">(</span><span class="n">no_left</span><span class="p">)</span> <span class="n">nflags</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span>
 
-       <span class="k">call </span><span class="n">sdc_qmats</span><span class="p">(</span><span class="n">qmat</span><span class="p">,</span> <span class="n">smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">sdc_Qmats</span><span class="p">(</span><span class="n">Qmat</span><span class="p">,</span> <span class="n">Smat</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">qnodes</span><span class="p">,</span> <span class="n">nflags</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">)</span>
 
     <span class="k">end if</span>
 

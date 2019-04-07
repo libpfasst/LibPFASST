@@ -400,7 +400,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E234"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E211"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -415,7 +415,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E71"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E111"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -430,7 +430,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E32"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E76"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -445,7 +445,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E34"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E30"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -460,7 +460,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E52"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E45"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -475,7 +475,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E12"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E11"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -824,7 +824,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
     <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
 
     <span class="c">!&gt;  Local variables</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
 
     <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span><span class="n">k</span>   <span class="c">!!  Loop variables</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">t</span>        <span class="c">!!  Time at nodes</span>
@@ -849,7 +849,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
        <span class="c">!  Recompute the first function value if this is first sweep</span>
        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span> <span class="c">! likely an unnecessary setting of Omega=0</span>
-          <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
        <span class="k">end if</span>
 
 <span class="k">       </span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span>
@@ -866,7 +866,7 @@ public subroutine imk_actually_sweep(this, pf, level_index, t0, dt, nsweeps)
           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
 
           <span class="c">!&gt;  Compute explicit function on new value</span>
-          <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
        <span class="k">end do</span>  <span class="c">!!  End substep loop</span>
 
        <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>

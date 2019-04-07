@@ -142,7 +142,7 @@
     
      <li><a href='../sourcefile/pf_imex.f90.html'>pf_imex.f90</a></li>
     
-     <li><a href='../module/pf_mod_imex.html'>pf_mod_imex</a></li>
+     <li><a href='../module/pf_mod_imex_sweeper.html'>pf_mod_imex_sweeper</a></li>
     
   
      <li class="active">pf_f_comp_p</li>
@@ -199,7 +199,7 @@
     
       <h2>interface <br>
       
-public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
+public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
     
     
    
@@ -228,7 +228,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E122"></span>class(<a href='../type/pf_imex_t.html'>pf_imex_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E122"></span>class(<a href='../type/pf_imex_sweeper_t.html'>pf_imex_sweeper_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -248,7 +248,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>y</strong></td><td></td>
+  <td><strong>y</strong></td><td><p>Solution of implicit solve</p></td>
   
 </tr>
 
@@ -263,7 +263,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>t</strong></td><td></td>
+  <td><strong>t</strong></td><td><p>Time of solve</p></td>
   
 </tr>
 
@@ -273,12 +273,12 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E22"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dtq%7E3"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dt</strong></td><td></td>
+  <td><strong>dtq</strong></td><td><p>dt*quadrature weight</p></td>
   
 </tr>
 
@@ -293,7 +293,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>rhs</strong></td><td></td>
+  <td><strong>rhs</strong></td><td><p>RHS for solve</p></td>
   
 </tr>
 
@@ -303,12 +303,12 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E26"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E43"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>Level index</p></td>
   
 </tr>
 
@@ -323,7 +323,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>f</strong></td><td></td>
+  <td><strong>f</strong></td><td><p>f_2 of solution y</p></td>
   
 </tr>
 
@@ -338,7 +338,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>piece</strong></td><td></td>
+  <td><strong>piece</strong></td><td><p>Which piece to evaluate</p></td>
   
 </tr>
 
@@ -347,6 +347,10 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
 
     
     
+    
+    <h3>Description</h3>
+    <p>The interface to the routine to do implicit solve 
+  i.e, solve the equation y - dtq*f_2(y) =rhs</p>
     
     <br>
 

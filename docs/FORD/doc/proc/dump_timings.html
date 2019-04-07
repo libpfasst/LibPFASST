@@ -228,7 +228,7 @@ public subroutine dump_timings(pf)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E35"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E62"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -500,14 +500,14 @@ public subroutine dump_timings(pf)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">dump_timings</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">dump_timings</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">25</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for runtimes</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fullname</span>  <span class="c">!!  output file name for runtimes</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">50</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">datpath</span>  <span class="c">!!  directory path</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">istream</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">istream</span><span class="p">,</span><span class="nb">system</span>
 
-    <span class="n">datpath</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">outdir</span><span class="p">)</span> <span class="o">//</span> <span class="s1">&#39;runtimes&#39;</span>
+<span class="nb">    </span><span class="n">datpath</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">outdir</span><span class="p">)</span> <span class="o">//</span> <span class="s1">&#39;runtimes&#39;</span>
 
     <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span><span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">datpath</span><span class="p">))</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">istat</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span> <span class="s2">&quot;Cannot make directory in dump_timings&quot;</span><span class="p">)</span>

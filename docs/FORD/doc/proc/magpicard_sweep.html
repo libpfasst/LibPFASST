@@ -394,7 +394,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E246"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E223"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -409,7 +409,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E73"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E119"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -424,7 +424,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E34"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E84"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -439,7 +439,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E36"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E32"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -454,7 +454,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E55"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E48"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -469,7 +469,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E13"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E12"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -484,7 +484,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E125"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E120"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -783,7 +783,7 @@ public subroutine magpicard_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 
        <span class="c">!$omp barrier</span>
 
-       <span class="k">call </span><span class="n">magpicard_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">magpicard_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">)</span>
 
        <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">magnus_order</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">nnodes</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TAUX</span><span class="p">)</span>

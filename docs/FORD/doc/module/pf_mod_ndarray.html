@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.4% of total for modules and submodules.">194 statements</a>
+    title=" 2.4% of total for modules and submodules.">192 statements</a>
      </li> 
      
      
@@ -1247,10 +1247,10 @@ public function <a href='../proc/get_array2d%7E3.html'>get_array2d</a>(x, flags)
 <tr>
   
   <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>x</strong></td><td></td>
   
 </tr>
@@ -1322,10 +1322,10 @@ public function <a href='../proc/get_array3d%7E3.html'>get_array3d</a>(x, flags)
 <tr>
   
   <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>x</strong></td><td></td>
   
 </tr>
@@ -1732,7 +1732,7 @@ public subroutine <a href='../proc/ndarray_destroy.html'>ndarray_destroy</a>(enc
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_destroy_single"></span><h3>
-public subroutine <a href='../proc/ndarray_destroy_single.html'>ndarray_destroy_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/ndarray_destroy_single.html'>ndarray_destroy_single</a>(this, x)
     
     
    
@@ -1792,36 +1792,6 @@ public subroutine <a href='../proc/ndarray_destroy_single.html'>ndarray_destroy_
   
 </tr>
 
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
-  
-</tr>
-
 </tbody>
 </table>
 
@@ -1836,7 +1806,7 @@ public subroutine <a href='../proc/ndarray_destroy_single.html'>ndarray_destroy_
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_destroy_array"></span><h3>
-public subroutine <a href='../proc/ndarray_destroy_array.html'>ndarray_destroy_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/ndarray_destroy_array.html'>ndarray_destroy_array</a>(this, x)
     
     
    
@@ -1893,51 +1863,6 @@ public subroutine <a href='../proc/ndarray_destroy_array.html'>ndarray_destroy_a
   
   <td>allocatable</td><td>::</td>
   <td><strong>x</strong>(:)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>n</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
   
 </tr>
 

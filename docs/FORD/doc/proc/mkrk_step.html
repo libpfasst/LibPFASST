@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">42 statements</a>
+    title=" 0.3% of total for procedures.">42 statements</a>
      </li> 
      
      
@@ -392,7 +392,7 @@ public subroutine mkrk_step(this, pf, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E233"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E210"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -407,7 +407,7 @@ public subroutine mkrk_step(this, pf, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E70"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E110"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -422,7 +422,7 @@ public subroutine mkrk_step(this, pf, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E33"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E29"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -437,7 +437,7 @@ public subroutine mkrk_step(this, pf, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E51"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E44"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -774,7 +774,7 @@ public subroutine mkrk_step(this, pf, t0, dt)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>             <span class="c">!!  time step size</span>
 
     <span class="c">!&gt;  Local variables</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
 
     <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">level_index</span> <span class="c">!!  Level we are working on</span>
     <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">m</span>        <span class="c">!!  Loop variables</span>

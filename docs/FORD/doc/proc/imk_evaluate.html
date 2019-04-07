@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.4% of total for procedures.">65 statements</a>
+    title=" 0.4% of total for procedures.">68 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine imk_evaluate(this, lev, t, m, flags, step)
+public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -327,6 +327,8 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
 
 
     
+    <p>Assign level pointer</p>
+    
 
     <h3>Arguments</h3>
     
@@ -346,7 +348,7 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E237"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E214"></span>class(<a href='../type/pf_imk_t.html'>pf_imk_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -361,12 +363,12 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E81"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E114"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
   <td></td>
   
-  <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
   
 </tr>
 
@@ -376,7 +378,22 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E47"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-level_index%7E79"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-t%7E39"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -391,7 +408,7 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-m%7E13"></span>integer,</td>
+  <td><span class="anchor" id="variable-m%7E10"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -406,7 +423,7 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E120"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E115"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -421,7 +438,7 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-step%7E26"></span>integer,</td>
+  <td><span class="anchor" id="variable-step%7E23"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -497,16 +514,19 @@ public subroutine imk_evaluate(this, lev, t, m, flags, step)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">imk_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">imk_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
     <span class="k">use </span><span class="n">pf_mod_dtype</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_imk_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>    <span class="c">!!  PFASST structure</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  level on which to initialize</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">m</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span>   <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
 
     <span class="c">!  Propagate to get y=exp(Om)</span>
     <span class="c">!prop needs e^{Q (omega)} and apply to Y</span>

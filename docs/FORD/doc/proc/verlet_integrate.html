@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">18 statements</a>
+    title=" 0.1% of total for procedures.">21 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+public subroutine verlet_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
     
     
    
@@ -209,7 +209,8 @@ public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
 
 
     
-    <p>Integrate (t_n to node)</p>
+    <p>Integrate (t_n to node)
+  Assign level pointer</p>
     
 
     <h3>Arguments</h3>
@@ -245,12 +246,27 @@ public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E8"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E13"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E12"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -320,7 +336,7 @@ public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E35"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E34"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -396,9 +412,10 @@ public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">verlet_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">verlet_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_verlet_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>          <span class="c">!!  Current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+    <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:)</span>      <span class="c">!!  Solution values</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>   <span class="c">!!  RHS Function values</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
@@ -406,6 +423,8 @@ public subroutine verlet_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>    
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>    <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
 
     <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>

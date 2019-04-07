@@ -25,11 +25,13 @@ module pf_mod_imk
   !>  Implicit Munthe-Kaas Runge-Kutta sweeper type, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_imk_t
      class(pf_encap_t), allocatable :: A(:)
-     real(pfdp), allocatable :: QtilE(:,:)
-     real(pfdp), allocatable :: dtsdc(:)
-     real(pfdp), allocatable :: tsdc(:)
+     real(pfdp), allocatable :: QtilE(:,:)   !!  Aproximate quadrature matric
      real(pfdp), allocatable :: QdiffE(:,:)  !!  qmat-QtilE
-     real(pfdp) :: bernoullis(20), t0, dt
+     real(pfdp), allocatable :: dtsdc(:)     !!  SDC substep size
+     real(pfdp), allocatable :: tsdc(:)
+     real(pfdp) :: bernoullis(20)  !!  Bernoulli numbers
+     real(pfdp) :: t0   !!  Time at beginning of time step
+     real(pfdp) :: dt   !!  Time step size
      integer ::  qtype, nterms
      logical ::  Lax_pair, use_SDC, debug, mkrk, rk
   contains
@@ -40,7 +42,7 @@ module pf_mod_imk
     procedure :: residual     => imk_residual
     procedure :: spreadq0     => imk_spreadq0
     procedure :: evaluate_all => imk_evaluate_all
-    procedure :: imk_destroy
+    procedure :: destroy   => imk_destroy
     procedure(pf_f_eval_p), deferred :: f_eval
     procedure(pf_dexpinv_p), deferred :: dexpinv
     procedure(pf_propagate_p), deferred :: propagate
@@ -62,7 +64,7 @@ module pf_mod_imk
        class(pf_imk_t), intent(inout) :: this
        class(pf_encap_t), intent(inout) :: a
        class(pf_encap_t), intent(inout) :: omega
-       class(pf_encap_t), intent(inout) :: f       !!  The resultign-level
+       class(pf_encap_t), intent(inout) :: f       !!  The result
      end subroutine pf_dexpinv_p
     !>  Subroutine propagate   computes y_m=expm(Om_m)y_0(expm(Om_m))-1 or (expm(Om_m))y_0 or
      subroutine pf_propagate_p(this, q0, q)
@@ -99,7 +101,7 @@ contains
     integer, optional,   intent(in)    :: flags
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !!  points to current level
 
     this%t0 = t0
     this%dt = dt
@@ -123,7 +125,7 @@ contains
     real(pfdp),        intent(in   ) :: dt             !!  time step size
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !!  points to current level
 
     integer     :: level_index   !!  Level to work on
     integer     :: m        !!  Loop variables
@@ -191,7 +193,7 @@ contains
     real(pfdp),        intent(in   ) :: dt             !!  time step size
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !!  points to current level
 
     integer     :: level_index !!  Level we are working on
     integer     :: m        !!  Loop variables
@@ -252,7 +254,7 @@ contains
     integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
 
     !>  Local variables
-    class(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !!  points to current level
 
     integer     :: m, n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
@@ -277,7 +279,7 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%setval(0.0_pfdp) ! likely an unnecessary setting of Omega=0
-          call this%evaluate(lev, t0, 1)
+          call this%evaluate(pf,level_index, t0, 1)
        end if
 
        t = t0
@@ -294,7 +296,7 @@ contains
           call lev%Q(m+1)%axpy(1.0_pfdp, lev%I(m))
 
           !>  Compute explicit function on new value
-          call this%evaluate(lev, t, m+1)
+          call this%evaluate(pf,level_index, t, m+1)
        end do  !!  End substep loop
 
        call pf_residual(pf, level_index, dt)
@@ -305,11 +307,14 @@ contains
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imk_actually_sweep
 
-  subroutine imk_initialize(this, lev)
+  subroutine imk_initialize(this, pf,level_index)
     class(pf_imk_t),   intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
 
     integer :: m, nnodes
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     this%npieces = 1
     nnodes = lev%nnodes
@@ -346,15 +351,18 @@ contains
 
   end subroutine imk_initialize
 
-  subroutine imk_integrate(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+  subroutine imk_integrate(this, pf,level_index, qSDC, fSDC, dt, fintSDC, flags)
     class(pf_imk_t),   intent(inout) :: this
-    class(pf_level_t), intent(in   ) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     class(pf_encap_t), intent(in   ) :: qSDC(:), fSDC(:, :)
     real(pfdp),        intent(in   ) :: dt
     class(pf_encap_t), intent(inout) :: fintSDC(:)
     integer, optional,   intent(in)    :: flags
 
     integer :: j, m
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
@@ -365,16 +373,19 @@ contains
 
   end subroutine imk_integrate
 
-  subroutine imk_evaluate(this, lev, t, m, flags, step)
+  subroutine imk_evaluate(this, pf,level_index, t, m, flags, step)
     use pf_mod_dtype
     class(pf_imk_t),   intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: t
     integer,           intent(in   ) :: m
-    class(pf_level_t), intent(inout) :: lev
     integer, optional,   intent(in)    :: flags, step
 
     integer :: i
     real(pfdp) :: dt
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
@@ -454,18 +465,22 @@ contains
     if (this%debug) print*, 'end evaluate ------------'
   end subroutine imk_evaluate
 
-  subroutine imk_evaluate_all(this, lev, t, flags, step)
+  subroutine imk_evaluate_all(this, pf,level_index, t, flags, step)
     class(pf_imk_t),   intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: t(:)
     integer, optional,   intent(in)    :: flags, step
 
     integer :: m
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
     if (this%rk) then
-       call lev%ulevel%sweeper%evaluate(lev, t(1), 1)
+       call lev%ulevel%sweeper%evaluate(pf,level_index, t(1), 1)
     else
        do m = 1, lev%nnodes
-          call lev%ulevel%sweeper%evaluate(lev, t(m), m)
+          call lev%ulevel%sweeper%evaluate(pf,level_index, t(m), m)
        end do
     end if
   end subroutine imk_evaluate_all
@@ -479,9 +494,8 @@ contains
     integer :: m
 
     type(pf_level_t), pointer :: lev
-
     lev => pf%levels(level_index)   !!  Assign level pointer    
-    call lev%ulevel%sweeper%integrate(lev, lev%Q, lev%F, dt, lev%I)
+    call lev%ulevel%sweeper%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I)
 
     ! add tau (which is 'node to node')
     if (level_index < pf%nlevels) then
@@ -498,13 +512,17 @@ contains
 
   end subroutine imk_residual
 
-  subroutine imk_spreadq0(this, lev, t0, flags, step)
+  subroutine imk_spreadq0(this, pf,level_index, t0, flags, step)
     class(pf_imk_t),  intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: t0
     integer, optional,   intent(in)    :: flags, step
 
     integer m,p
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
+
     !  Stick initial condition into first node slot
     call lev%Q(1)%copy(lev%q0, flags=1)
 
@@ -512,7 +530,7 @@ contains
     call lev%Q(1)%setval(0.0_pfdp)
 
     !  Evaluate F at first spot
-    call lev%ulevel%sweeper%evaluate(lev, t0, 1)
+    call lev%ulevel%sweeper%evaluate(pf,level_index, t0, 1)
 
     ! Spread F and solution to all nodes
     do m = 2, lev%nnodes
@@ -527,7 +545,7 @@ contains
 
   !>  Save function values so that difference can be computed
   subroutine imk_save(lev)
-    class(pf_level_t), intent(inout) :: lev  !!  Level to save on
+    type(pf_level_t), intent(inout) :: lev  !!  Level to save on
 
     integer :: m
 
@@ -536,16 +554,20 @@ contains
     end do
   end subroutine imk_save
 
-  subroutine imk_destroy(this, lev)
-      class(pf_imk_t),   intent(inout) :: this
-      class(pf_level_t), intent(inout) :: lev
+  subroutine imk_destroy(this, pf,level_index)
+    class(pf_imk_t),   intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
+
+
+    type(pf_level_t), pointer  :: lev        !!  Current level
+    lev => pf%levels(level_index)   !!  Assign level pointer
 
       deallocate(this%QtilE, this%QdiffE)
       deallocate(this%dtsdc)
       deallocate(this%tsdc)
 
-      call lev%ulevel%factory%destroy_array(this%A, lev%nnodes, &
-           lev%index,   lev%shape)
+      call lev%ulevel%factory%destroy_array(this%A)
   end subroutine imk_destroy
 
 end module pf_mod_imk

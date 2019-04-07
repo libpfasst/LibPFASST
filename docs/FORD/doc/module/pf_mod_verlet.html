@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.0% of total for modules and submodules.">319 statements</a>
+    title=" 4.3% of total for modules and submodules.">336 statements</a>
      </li> 
      
      
@@ -1002,7 +1002,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>whichQQ</strong></td><td> =</td><td>3</td><td></td>
+  <td><strong>whichQQ</strong></td><td> =</td><td>0</td><td></td>
   
 </tr>
 
@@ -1316,9 +1316,6 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)
        <tr><td>procedure, public :: <strong><a href='../type/pf_verlet_t.html#boundprocedure-destroy%7E2'>destroy</a></strong>  => verlet_destroy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_verlet_t.html#boundprocedure-verlet_destroy'>verlet_destroy</a></strong>  </td>
-       <td></td></tr>
-      
        </tbody>
        </table>
      
@@ -1354,7 +1351,7 @@ public subroutine <a href='../proc/verlet_sweep.html'>verlet_sweep</a>(this, pf,
 
 
 
-<p>Perform one SDC sweep on level lev_index and set qend appropriately
+<p>Perform one SDC sweep on level level_index and set qend appropriately
   Assign level pointer
   Add the integral term</p><a href="../proc/verlet_sweep.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
@@ -1490,7 +1487,7 @@ public subroutine <a href='../proc/verlet_sweep.html'>verlet_sweep</a>(this, pf,
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_initialize"></span><h3>
-public subroutine <a href='../proc/verlet_initialize.html'>verlet_initialize</a>(this, lev)
+public subroutine <a href='../proc/verlet_initialize.html'>verlet_initialize</a>(this, pf, level_index)
     
     
    
@@ -1506,14 +1503,7 @@ public subroutine <a href='../proc/verlet_initialize.html'>verlet_initialize</a>
 
 
 <p>Initialize integration matrices
-  Array of substep sizes
-$       do i = 1,nnodes
-$          do j = 1,nnodes
-$             this%QQmat(i,j) =  this%bvec(j)*(1.0_pfdp-this%Qmat(j,i)/this%bvec(i))
-$          end do
-$       end do
-$       this%QQmat = matmul(this%QQmat,this%Qmat)
-  Make space for rhs</p>
+  Assign level pointer</p><a href="../proc/verlet_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1549,12 +1539,27 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1572,7 +1577,7 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_integrate"></span><h3>
-public subroutine <a href='../proc/verlet_integrate.html'>verlet_integrate</a>(this, lev, qSDC, fSDC, dt, fintSDC, flags)
+public subroutine <a href='../proc/verlet_integrate.html'>verlet_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintSDC, flags)
     
     
    
@@ -1587,7 +1592,8 @@ public subroutine <a href='../proc/verlet_integrate.html'>verlet_integrate</a>(t
 
 
 
-<p>Integrate (t_n to node)</p>
+<p>Integrate (t_n to node)
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1623,12 +1629,27 @@ public subroutine <a href='../proc/verlet_integrate.html'>verlet_integrate</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1841,7 +1862,7 @@ public subroutine <a href='../proc/verlet_residual.html'>verlet_residual</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_destroy"></span><h3>
-public subroutine <a href='../proc/verlet_destroy.html'>verlet_destroy</a>(this, lev)
+public subroutine <a href='../proc/verlet_destroy.html'>verlet_destroy</a>(this, pf, level_index)
     
     
    
@@ -1856,7 +1877,8 @@ public subroutine <a href='../proc/verlet_destroy.html'>verlet_destroy</a>(this,
 
 
 
-<p>Destroy Verlet sweeper matrices</p>
+<p>Destroy Verlet sweeper matrices
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1892,12 +1914,27 @@ public subroutine <a href='../proc/verlet_destroy.html'>verlet_destroy</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1915,7 +1952,7 @@ public subroutine <a href='../proc/verlet_destroy.html'>verlet_destroy</a>(this,
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_spreadq0"></span><h3>
-public subroutine <a href='../proc/verlet_spreadq0.html'>verlet_spreadq0</a>(this, lev, t0, flags, step)
+public subroutine <a href='../proc/verlet_spreadq0.html'>verlet_spreadq0</a>(this, pf, level_index, t0, flags, step)
     
     
    
@@ -1930,7 +1967,8 @@ public subroutine <a href='../proc/verlet_spreadq0.html'>verlet_spreadq0</a>(thi
 
 
 
-<p>Spread the intial data for Verlet sweepers</p>
+<p>Spread the intial data for Verlet sweepers
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1966,12 +2004,27 @@ public subroutine <a href='../proc/verlet_spreadq0.html'>verlet_spreadq0</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2034,7 +2087,7 @@ public subroutine <a href='../proc/verlet_spreadq0.html'>verlet_spreadq0</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_evaluate"></span><h3>
-public subroutine <a href='../proc/verlet_evaluate.html'>verlet_evaluate</a>(this, lev, t, m, flags, step)
+public subroutine <a href='../proc/verlet_evaluate.html'>verlet_evaluate</a>(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -2049,7 +2102,8 @@ public subroutine <a href='../proc/verlet_evaluate.html'>verlet_evaluate</a>(thi
 
 
 
-<p>Subroutine to evaluate function value at node m</p>
+<p>Subroutine to evaluate function value at node m
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2085,12 +2139,27 @@ public subroutine <a href='../proc/verlet_evaluate.html'>verlet_evaluate</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2168,7 +2237,7 @@ public subroutine <a href='../proc/verlet_evaluate.html'>verlet_evaluate</a>(thi
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-verlet_evaluate_all"></span><h3>
-public subroutine <a href='../proc/verlet_evaluate_all.html'>verlet_evaluate_all</a>(this, lev, t, flags, step)
+public subroutine <a href='../proc/verlet_evaluate_all.html'>verlet_evaluate_all</a>(this, pf, level_index, t, flags, step)
     
     
    
@@ -2183,7 +2252,8 @@ public subroutine <a href='../proc/verlet_evaluate_all.html'>verlet_evaluate_all
 
 
 
-<p>Subroutine to evaluate the function values at all nodes</p>
+<p>Subroutine to evaluate the function values at all nodes
+  Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2219,12 +2289,27 @@ public subroutine <a href='../proc/verlet_evaluate_all.html'>verlet_evaluate_all
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

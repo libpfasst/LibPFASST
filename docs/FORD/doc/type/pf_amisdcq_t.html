@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.4% of total for derived types.</p>Including implementation: 197 statements,  4.3% of total for derived types.">15 statements</a>
+    title="<p> 2.7% of total for derived types.</p>Including implementation: 230 statements,  5.1% of total for derived types.">16 statements</a>
      </li> 
      
      
@@ -235,19 +235,21 @@
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdc_destroy">amisdc_destroy</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep%7E12">sweep</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep%7E10">sweep</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-initialize%7E13">initialize</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-initialize%7E11">initialize</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-integrate%7E11">integrate</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-integrate%7E9">integrate</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-destroy%7E14">destroy</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-destroy%7E12">destroy</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep_coupled_implicit_terms">sweep_coupled_implicit_terms</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep_decoupled_implicit_terms">sweep_decoupled_implicit_terms</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdcq_destroy">amisdcQ_destroy</a>
+      
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdcq_initialize">amisdcQ_initialize</a>
       
     </div>
   </div>
@@ -438,19 +440,21 @@
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdc_destroy">amisdc_destroy</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep%7E12">sweep</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep%7E10">sweep</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-initialize%7E13">initialize</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-initialize%7E11">initialize</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-integrate%7E11">integrate</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-integrate%7E9">integrate</a>
       
-      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-destroy%7E14">destroy</a>
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-destroy%7E12">destroy</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep_coupled_implicit_terms">sweep_coupled_implicit_terms</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-sweep_decoupled_implicit_terms">sweep_decoupled_implicit_terms</a>
       
       <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdcq_destroy">amisdcQ_destroy</a>
+      
+      <a class="list-group-item" href="../type/pf_amisdcq_t.html#boundprocedure-amisdcq_initialize">amisdcQ_initialize</a>
       
     </div>
   </div>
@@ -639,7 +643,7 @@
             
     
     <h3>
-subroutine pf_spreadq0_p(this, Lev, t0, flags, step)
+subroutine pf_spreadq0_p(this, pf, level_index, t0, flags, step)
     
     
    
@@ -680,12 +684,27 @@ subroutine pf_spreadq0_p(this, Lev, t0, flags, step)
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>Lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1807,7 +1826,7 @@ public subroutine <a href='../proc/amisdc_destroy.html'>amisdc_destroy</a>(this,
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sweep%7E12"></span><h3>procedure, public :: <strong>sweep</strong>  => <a href='../proc/amisdcq_sweep.html'>amisdcQ_sweep</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sweep%7E10"></span><h3>procedure, public :: <strong>sweep</strong>  => <a href='../proc/amisdcq_sweep.html'>amisdcQ_sweep</a> 
     
   </h3></div>
   
@@ -1931,7 +1950,7 @@ public subroutine <a href='../proc/amisdcq_sweep.html'>amisdcQ_sweep</a>(this, p
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-initialize%7E13"></span><h3>procedure, public :: <strong>initialize</strong>  => <a href='../proc/amisdcq_initialize.html'>amisdcQ_initialize</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-initialize%7E11"></span><h3>procedure, public :: <strong>initialize</strong>  => <a href='../proc/amisdcq_initialize.html'>amisdcQ_initialize</a> 
     
   </h3></div>
   
@@ -2010,7 +2029,7 @@ public subroutine <a href='../proc/amisdcq_initialize.html'>amisdcQ_initialize</
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-integrate%7E11"></span><h3>procedure, public :: <strong>integrate</strong>  => <a href='../proc/amisdcq_integrate.html'>amisdcQ_integrate</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-integrate%7E9"></span><h3>procedure, public :: <strong>integrate</strong>  => <a href='../proc/amisdcq_integrate.html'>amisdcQ_integrate</a> 
     
   </h3></div>
   
@@ -2149,7 +2168,7 @@ public subroutine <a href='../proc/amisdcq_integrate.html'>amisdcQ_integrate</a>
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy%7E14"></span><h3>procedure, public :: <strong>destroy</strong>  => <a href='../proc/amisdcq_destroy.html'>amisdcQ_destroy</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy%7E12"></span><h3>procedure, public :: <strong>destroy</strong>  => <a href='../proc/amisdcq_destroy.html'>amisdcQ_destroy</a> 
     
   </h3></div>
   
@@ -2553,6 +2572,85 @@ public subroutine <a href='../proc/amisdcq_destroy.html'>amisdcQ_destroy</a>(thi
 </div>
 
     
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-amisdcq_initialize"></span><h3>procedure, public :: <strong>amisdcQ_initialize</strong>  
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/amisdcq_initialize.html'>amisdcQ_initialize</a>(this, lev)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_amisdcq_t.html'>pf_amisdcQ_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(pf_level_t),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lev</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
     </section>
     
     
@@ -2573,6 +2671,7 @@ public subroutine <a href='../proc/amisdcq_destroy.html'>amisdcQ_destroy</a>(thi
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">sweep_coupled_implicit_terms</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">sweep_decoupled_implicit_terms</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">amisdcQ_destroy</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">amisdcQ_initialize</span>
   <span class="k">end type </span><span class="n">pf_amisdcQ_t</span>
 </pre></div>
 

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">14 statements</a>
+    title=" 0.1% of total for procedures.">13 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine ndarray_destroy_array(this, x, n, level, shape)
+public subroutine ndarray_destroy_array(this, x)
     
     
    
@@ -251,51 +251,6 @@ public subroutine ndarray_destroy_array(this, x, n, level, shape)
   
   <td>allocatable</td><td>::</td>
   <td><strong>x</strong>(:)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-n%7E21"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>n</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-level%7E33"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-shape%7E23"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -366,15 +321,14 @@ public subroutine ndarray_destroy_array(this, x, n, level, shape)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ndarray_destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span>  <span class="nb">shape</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ndarray_destroy_array</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>              <span class="kd">::</span> <span class="n">this</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="k">allocatable</span> <span class="kd">::</span> <span class="n">x</span><span class="p">(:)</span>
-    <span class="kt">integer</span><span class="p">,</span>                <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>              <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="nb">shape</span><span class="p">(:)</span>
     <span class="kt">integer</span>                                            <span class="kd">::</span> <span class="n">i</span>
 
     <span class="k">select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">class is</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>
-       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">n</span>
+       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
           <span class="k">deallocate</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="nb">shape</span><span class="p">)</span>
           <span class="k">deallocate</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">flatarray</span><span class="p">)</span>
        <span class="k">end do</span>

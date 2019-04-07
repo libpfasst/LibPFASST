@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">53 statements</a>
+    title=" 0.3% of total for procedures.">52 statements</a>
      </li> 
      
      
@@ -140,7 +140,7 @@
     
      <li><a href='../sourcefile/pf_exp.f90.html'>pf_exp.f90</a></li>
     
-     <li><a href='../module/pf_mod_exp%7E2.html'>pf_mod_exp</a></li>
+     <li><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></li>
     
   
      <li class="active">exp_sweep</li>
@@ -373,9 +373,6 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 
 
     
-    <p>$              !  Now we have to add in the tauQ
-$</p>
-    
 
     <h3>Arguments</h3>
     
@@ -410,7 +407,7 @@ $</p>
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E3"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E4"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -425,7 +422,7 @@ $</p>
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -485,7 +482,7 @@ $</p>
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E28"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E27"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -752,42 +749,38 @@ $</p>
         <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
 
         <span class="c">! local variables</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+        <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
         <span class="kt">integer</span>                    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
         <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                 <span class="kd">::</span> <span class="n">t</span>
 
         <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
         <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
         <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>        
-        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>  
-        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
-
         <span class="c">! error sweeps</span>
         <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nsweeps</span>
-
            <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="o">=</span><span class="n">k</span>                  
 
            <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_PRE_SWEEP</span><span class="p">)</span>      <span class="c">! NOTE: ensure that lev%F has been properly initialized here</span>
            <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
               <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
            <span class="k">end do</span>
-<span class="k">           </span>
+<span class="k">           if</span> <span class="p">(</span><span class="n">k</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">              call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>  
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
+           <span class="k">end if</span>
 <span class="k">           </span><span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> 
            <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
               <span class="n">t</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span> <span class="o">*</span> <span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
               <span class="c">! form b vectors</span>
-              <span class="c">!              call LocalDerivsAtNode(this, j, nnodes, lev%F(:,1), this%b(2:nnodes+1))  ! phi expansion for exponential picard integral</span>
-              <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(:),</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! phi expansion for exponential picard integral              </span>
+              <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">)</span>  <span class="c">! phi expansion for exponential picard integral              </span>
               <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c">! add term \phi_0(tL) y_n</span>
-              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
-                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
-              <span class="n">endif</span>
-              
+
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
               <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
-              <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>                                 <span class="c">! add term \phi_1(tL) (F_j^{[k+1]} - F_j^{[k]})</span>
-                 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
-              <span class="k">end if</span>
-              
+
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
+
+
               <span class="c">! compute phi products</span>
               <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
@@ -795,23 +788,24 @@ $</p>
 <span class="k">                 call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
               <span class="k">end if</span>
 
-<span class="c">!!$              !  Now we have to add in the tauQ</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span> <span class="k">then</span>
+              <span class="c">!  Now we have to add in the tauQ</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span> <span class="k">then</span>
+
 <span class="k">                 call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
-                 <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>     <span class="c">! The tau is not node to node</span>
-<span class="c">!                    call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))                       </span>
+                 <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>     <span class="c">! The tau is not node to node, so subtract out</span>
+                    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">tauQ</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>                       
                  <span class="k">end if</span>
 <span class="k">              end if</span>
-<span class="c">!!$</span>
-           <span class="k">end do</span>
-<span class="k">           call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>                      <span class="c">! eval last nonlinear term</span>
+
+<span class="k">           end do</span>  <span class="c">!  Substepping over nodes</span>
+           <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>   <span class="c">! eval last nonlinear term</span>
 
            <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
            <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
            <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_POST_SWEEP</span><span class="p">)</span>
            
-        <span class="k">end do</span>
-<span class="k">    end subroutine </span><span class="n">exp_sweep</span>
+        <span class="k">end do</span>  <span class="c">!  Sweeps</span>
+    <span class="k">end subroutine </span><span class="n">exp_sweep</span>
 </pre></div>
 
     </section>

@@ -128,7 +128,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.3% of total for procedures.">224 statements</a>
+    title=" 1.4% of total for procedures.">230 statements</a>
      </li> 
      
      
@@ -204,7 +204,7 @@
      
     
       <h2>
-public subroutine pf_destroy_sweeper_p(this)
+public subroutine pf_destroy_sweeper_p(this, pf, level_index)
     
     
    
@@ -233,12 +233,42 @@ public subroutine pf_destroy_sweeper_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E168"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E169"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
   <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-pf%7E74"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E53"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 

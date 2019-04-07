@@ -7,33 +7,36 @@ module pf_mod_results
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
-
   
 contains
-    subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind,datpath)
+  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index,datpath,save_residuals)
+
     class(pf_results_t), intent(inout) :: this
-    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,lev_ind
+    integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index
     character(len=*), intent(in) :: datpath
+    logical, intent(in) :: save_residuals
 
     character(len = 50   ) :: fname  !!  output file name for residuals
     character(len = 100   ) :: fullname  !!  output file name for residuals
-    integer :: istat
+    integer :: istat,system
     
     !  Set up the directory to dump results
-    istat= system('mkdir -p ' // trim(datpath))
-    this%datpath= trim(datpath) // '/'
-    
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
-
-    write (fname, "(A17,I0.1,A4)") 'residuals_size_L',lev_ind,'.dat'
-    fullname = trim(this%datpath) // trim(fname)
-    
-    if (rank_in == 0) then
-       open(unit=123, file=trim(fullname), form='formatted')
-       write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nsweeps_in
-       close(unit=123)
+    if (save_residuals) then
+       istat= system('mkdir -p ' // trim(datpath))
+       this%datpath= trim(datpath) // '/'
+       
+       if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
+       
+       write (fname, "(A17,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
+       fullname = trim(this%datpath) // trim(fname)
+       
+       if (rank_in == 0) then
+          open(unit=123, file=trim(fullname), form='formatted')
+          write(123,'(I5, I5, I5, I5)') nsteps_in, niters_in, nprocs_in, nsweeps_in
+          close(unit=123)
+       end if
     end if
-    
+       
     this%dump => dump_results
     this%destroy => destroy_results
 
@@ -43,18 +46,18 @@ contains
     this%nprocs=nprocs_in
     this%nsweeps=nsweeps_in
     this%rank=rank_in
-    this%level=lev_ind    
+    this%level=level_index    
     
     if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in))
     if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in))
 
-    this%errors = 0.0_pfdp
-    this%residuals = 0.0_pfdp
+    this%errors = -1.0_pfdp
+    this%residuals = -1.0_pfdp
   end subroutine initialize_results
 
   subroutine dump_results(this)
     type(pf_results_t), intent(inout) :: this
-    integer :: i, j, k, istat
+    integer :: i, j, k, istat,system
     character(len = 50   ) :: fname  !!  output file name for residuals
     character(len = 100   ) :: fullname  !!  output file name for residuals
     character(len = 50   ) :: datpath  !!  directory path
@@ -79,13 +82,40 @@ contains
     close(100+this%rank)
 
   end subroutine dump_results
+  subroutine dump_errors(this)
+    type(pf_results_t), intent(inout) :: this
+    integer :: i, j, k, istat,system
+    character(len = 50   ) :: fname  !!  output file name for residuals
+    character(len = 100   ) :: fullname  !!  output file name for residuals
+    character(len = 50   ) :: datpath  !!  directory path
 
-    subroutine dump_timings(pf)
+    
+    datpath = trim(this%datpath) // 'errors'
+    istat= system('mkdir -p ' // trim(datpath))
+    
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_results")
+
+    write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level,'.dat'
+    fullname = trim(datpath) // trim(fname)
+    !  output errors
+    open(100+this%rank, file=trim(fullname), form='formatted')
+    do j = 1, this%nblocks
+       do i = 1 , this%niters
+          do k = 1, this%nsweeps
+             write(100+this%rank, '(I4, I4, I4, e21.14)') j,i,k,this%errors(i, j, k)
+          end do
+       end do
+    enddo
+    close(100+this%rank)
+
+  end subroutine dump_errors
+
+  subroutine dump_timings(pf)
     type(pf_pfasst_t), intent(inout) :: pf
     character(len = 25   ) :: fname  !!  output file name for runtimes
     character(len = 50   ) :: fullname  !!  output file name for runtimes
     character(len = 50   ) :: datpath  !!  directory path
-    integer :: istat,j, istream
+    integer :: istat,j, istream,system
 
     datpath = trim(pf%outdir) // 'runtimes'
 

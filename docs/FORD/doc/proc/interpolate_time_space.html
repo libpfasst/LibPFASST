@@ -217,7 +217,6 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
   interpolate coarse level correction in space only
  interpolate corrections in time</p>
 <p>either interpolate function values or recompute them
-  reset qend so that it is up to date
  destroy local data structures</p>
     
 
@@ -239,7 +238,7 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E36"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E63"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -269,7 +268,7 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E27"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E26"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -284,7 +283,7 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E13"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E45"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -314,7 +313,7 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E68"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E73"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -737,8 +736,8 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
 
     <span class="c">!  Local variables</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">c_lev_ptr</span>   <span class="c">!  Pointer to coarse level</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_ptr</span>   <span class="c">!  Pointer to fine level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">c_lev_p</span>   <span class="c">!  Pointer to coarse level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_p</span>   <span class="c">!  Pointer to fine level</span>
 
     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">step</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">c_times</span><span class="p">(:)</span>   <span class="c">! coarse level node times</span>
@@ -747,8 +746,8 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">c_delta</span><span class="p">(:)</span>    <span class="c">!  Coarse in time and space</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">cf_delta</span><span class="p">(:)</span>   <span class="c">!  Coarse in time but fine in space</span>
 
-    <span class="n">f_lev_ptr</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">! fine level</span>
-    <span class="n">c_lev_ptr</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c">! coarse level</span>
+    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">! fine level</span>
+    <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c">! coarse level</span>
 
     <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">PF_PRE_INTERP_ALL</span><span class="p">)</span>
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">level_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -757,71 +756,59 @@ public subroutine interpolate_time_space(pf, t0, dt, level_index, F_INTERP, flag
     <span class="n">step</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="o">+</span><span class="mi">1</span>
 
     <span class="c">!&gt; create workspaces</span>
-    <span class="k">call </span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span>  <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">cf_delta</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span>  <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">cf_delta</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
 
     <span class="c">!&gt; set time at coarse and fine nodes</span>
-    <span class="k">allocate</span><span class="p">(</span><span class="n">c_times</span><span class="p">(</span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
-    <span class="k">allocate</span><span class="p">(</span><span class="n">f_times</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">c_times</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">f_times</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
 
-    <span class="n">c_times</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nodes</span>
-    <span class="n">f_times</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">nodes</span>
+    <span class="n">c_times</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">nodes</span>
+    <span class="n">f_times</span> <span class="o">=</span> <span class="n">t0</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">nodes</span>
 
-    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
+    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
        <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
        <span class="k">call </span><span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
     <span class="k">end do</span>
 
     <span class="c">!&gt;  interpolate coarse level correction in space only</span>
-    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
-       <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">pQ</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">,</span><span class="n">c_lev_ptr</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_times</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
+       <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">pQ</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span><span class="n">c_lev_p</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_times</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
     <span class="k">end do</span>
 
     <span class="c">!&gt; interpolate corrections in time</span>
-    <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">tmat</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">flags</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">tmat</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">flags</span><span class="p">)</span>
 
     <span class="c">!&gt; either interpolate function values or recompute them</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">F_INTERP</span><span class="p">)</span> <span class="k">then</span>         <span class="c">!  Interpolating F</span>
-      <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,:))</span>
-          <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
+      <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,:))</span>
+          <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
              <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
              <span class="k">call </span><span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
           <span class="k">end do</span>
           <span class="c">! interpolate coarse corrections  in space</span>
-          <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span>
-            <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-            <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">pF</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-            <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_times</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+          <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
+            <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+            <span class="k">call </span><span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">pF</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+            <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_delta</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">c_times</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
          <span class="k">end do</span>
 
          <span class="c">! interpolate corrections  in time</span>
-          <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">F</span><span class="p">(:,</span><span class="n">p</span><span class="p">),</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">tmat</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">flags</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">F</span><span class="p">(:,</span><span class="n">p</span><span class="p">),</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">tmat</span><span class="p">,</span> <span class="n">cf_delta</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">flags</span><span class="p">)</span>
 
        <span class="k">end do</span> <span class="c">!  Loop on npieces</span>
     <span class="k">else</span>    <span class="c">! recompute function values</span>
-       <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">evaluate_all</span><span class="p">(</span><span class="n">f_lev_ptr</span><span class="p">,</span> <span class="n">f_times</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">evaluate_all</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">f_times</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
     <span class="k">end if</span>  <span class="c">!  Feval</span>
 
-    <span class="c">!&gt;  reset qend so that it is up to date</span>
-    <span class="c">!  This block moved to controllers</span>
-<span class="c">!         if (present(flags)) then</span>
-<span class="c">!           if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)</span>
-<span class="c">!           if (flags .eq. 2)  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), flags=2)</span>
-<span class="c">!         else</span>
-<span class="c">!           call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))</span>
-<span class="c">!         end if</span>
-    
-
     <span class="c">!&gt; destroy local data structures</span>
-    <span class="k">call </span><span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">c_delta</span><span class="p">,</span>  <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="p">&amp;</span>
-      <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">c_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">f_lev_ptr</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">cf_delta</span><span class="p">,</span> <span class="n">c_lev_ptr</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span> <span class="p">&amp;</span>
-      <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">c_delta</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">cf_delta</span><span class="p">)</span>
 
-    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_ptr</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_POST_INTERP_ALL</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TINTERPOLATE</span> <span class="o">+</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">PF_POST_INTERP_ALL</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">interpolate_time_space</span>
 </pre></div>
 

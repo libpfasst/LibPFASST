@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.0% of total for procedures.">8 statements</a>
+    title=" 0.1% of total for procedures.">11 statements</a>
      </li> 
      
      
@@ -140,7 +140,7 @@
     
      <li><a href='../sourcefile/pf_exp.f90.html'>pf_exp.f90</a></li>
     
-     <li><a href='../module/pf_mod_exp%7E2.html'>pf_mod_exp</a></li>
+     <li><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></li>
     
   
      <li class="active">exp_evaluate</li>
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine exp_evaluate(this, lev, t, m, flags, step)
+public subroutine exp_evaluate(this, pf, level_index, t, m, flags, step)
     
     
    
@@ -208,6 +208,8 @@ public subroutine exp_evaluate(this, lev, t, m, flags, step)
   
 
 
+    
+    <p>Assign level pointer</p>
     
 
     <h3>Arguments</h3>
@@ -243,12 +245,27 @@ public subroutine exp_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E4"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E8"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E7"></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Current level</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -288,7 +305,7 @@ public subroutine exp_evaluate(this, lev, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E32"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E31"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -379,15 +396,18 @@ public subroutine exp_evaluate(this, lev, t, m, flags, step)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-        <span class="c">! arguments</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  Current level</span>
-        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span>    <span class="c">!!  Time at which to evaluate</span>
-        <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">m</span>    <span class="c">!!  Node at which to evaluate</span>
-        <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
+    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_evaluate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+      <span class="c">! arguments</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+      <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+      <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
+      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">t</span>    <span class="c">!!  Time at which to evaluate</span>
+      <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">m</span>    <span class="c">!!  Node at which to evaluate</span>
+      <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
 
-        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+      <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+      <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+      <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="k">end subroutine </span><span class="n">exp_evaluate</span>
 </pre></div>

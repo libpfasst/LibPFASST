@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.4% of total for modules and submodules.">434 statements</a>
+    title=" 5.8% of total for modules and submodules.">456 statements</a>
      </li> 
      
      
@@ -181,6 +181,8 @@
     <div id="subs-0" class="panel-collapse collapse">
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_pfasst_create">pf_pfasst_create</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_level_set_size">pf_level_set_size</a>
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_pfasst_setup">pf_pfasst_setup</a>
       
@@ -625,6 +627,8 @@
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_pfasst_create">pf_pfasst_create</a>
       
+      <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_level_set_size">pf_level_set_size</a>
+      
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_pfasst_setup">pf_pfasst_setup</a>
       
       <a class="list-group-item" href="../module/pf_mod_pfasst.html#proc-pf_level_setup">pf_level_setup</a>
@@ -804,6 +808,110 @@ public subroutine <a href='../proc/pf_pfasst_create.html'>pf_pfasst_create</a>(p
     
     
   <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_level_set_size"></span><h3>
+public subroutine <a href='../proc/pf_level_set_size.html'>pf_level_set_size</a>(pf, level_index, shape_in, buflen_in)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Helper routine to set the size and mpi buffer length</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>pf</strong></td><td><p>Main pfasst structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>shape_in</strong>(:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>buflen_in</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_pfasst_setup"></span><h3>
 public subroutine <a href='../proc/pf_pfasst_setup.html'>pf_pfasst_setup</a>(pf)
     
@@ -867,7 +975,7 @@ public subroutine <a href='../proc/pf_pfasst_setup.html'>pf_pfasst_setup</a>(pf)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_level_setup"></span><h3>
-public subroutine <a href='../proc/pf_level_setup.html'>pf_level_setup</a>(pf, lev)
+public subroutine <a href='../proc/pf_level_setup.html'>pf_level_setup</a>(pf, level_index)
     
     
    
@@ -885,14 +993,7 @@ public subroutine <a href='../proc/pf_level_setup.html'>pf_level_setup</a>(pf, l
 <p>Setup (allocate) PFASST level
  If the level is already setup, calling this again will allocate
  (or deallocate) tauQ appropriately.
- do some sanity checks
- (re)allocate tauQ (may to need create/destroy tauQ dynamically  when doing AMR)
- skip the rest if we're already allocated
- allocate flat buffers for send, and recv
- allocate nodes, flags, and integration matrices
-  Allocate and compute all the matrices
-  initialize sweeper
- allocate solution and function arrays</p>
+  Assign level pointer</p><a href="../proc/pf_level_setup.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -914,10 +1015,10 @@ public subroutine <a href='../proc/pf_level_setup.html'>pf_level_setup</a>(pf, l
 <tr>
   
   <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(in)</td>
+  <td>intent(inout),</td>
   <td></td>
   
-  <td></td><td>::</td>
+  <td>target</td><td>::</td>
   <td><strong>pf</strong></td><td><p>Main pfasst structure</p></td>
   
 </tr>
@@ -928,12 +1029,12 @@ public subroutine <a href='../proc/pf_level_setup.html'>pf_level_setup</a>(pf, l
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout),</td>
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
-  <td>target</td><td>::</td>
-  <td><strong>lev</strong></td><td><p>Level to set up</p></td>
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td><p>level to set up</p></td>
   
 </tr>
 
@@ -1012,7 +1113,7 @@ public subroutine <a href='../proc/pf_pfasst_destroy.html'>pf_pfasst_destroy</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_level_destroy"></span><h3>
-public subroutine <a href='../proc/pf_level_destroy.html'>pf_level_destroy</a>(lev, nlevels)
+public subroutine <a href='../proc/pf_level_destroy.html'>pf_level_destroy</a>(pf, level_index)
     
     
    
@@ -1028,9 +1129,7 @@ public subroutine <a href='../proc/pf_level_destroy.html'>pf_level_destroy</a>(l
 
 
 <p>Deallocate PFASST level
- deallocate flat buffers for communcition
- deallocate nodes, flags, and integration matrices
- deallocate solution and function storage</p><a href="../proc/pf_level_destroy.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  Assign level pointer</p><a href="../proc/pf_level_destroy.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1051,12 +1150,12 @@ public subroutine <a href='../proc/pf_level_destroy.html'>pf_level_destroy</a>(l
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
   <td></td>
   
-  <td></td><td>::</td>
-  <td><strong>lev</strong></td><td><p>level to destroy</p></td>
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>Main pfasst structure    </p></td>
   
 </tr>
 
@@ -1066,12 +1165,12 @@ public subroutine <a href='../proc/pf_level_destroy.html'>pf_level_destroy</a>(l
   
 <tr>
   
-  <td><span class="anchor" ></span>integer</td>
-  <td></td>
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>nlevels</strong></td><td><p>number of pfasst levels</p></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
