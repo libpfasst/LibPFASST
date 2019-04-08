@@ -5,9 +5,7 @@
 !> Level specification for Dahlquist example.
 !>     u_t = lam1*u + lam2*u
 module pf_my_level
-  use pf_mod_dtype
   use pf_mod_ndarray
- 
 
   !>  extend the generic level type by defining transfer operators
   type, extends(pf_user_level_t) :: my_level_t

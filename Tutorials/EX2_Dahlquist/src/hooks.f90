@@ -3,7 +3,6 @@
 !
 !>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
-  use pf_mod_dtype
   use encap
   use pf_my_sweeper
   implicit none
