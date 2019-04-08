@@ -1,4 +1,4 @@
-!!  N-dimensional complex array encapsulation.
+!!  N-dimensional complex array encapsulation
 !
 ! This file is part of LIBPFASST.
 !
@@ -24,7 +24,7 @@ module pf_mod_zndarray
   use pf_mod_utils  
   implicit none
 
-
+  !>  Factory for making zndarray
   type, extends(pf_factory_t) :: zndarray_factory
   contains
      procedure :: create_single => zndarray_create_single
@@ -33,6 +33,7 @@ module pf_mod_zndarray
      procedure :: destroy_array => zndarray_destroy_array
   end type zndarray_factory
 
+  !>  Complex ndarray
   type, extends(pf_encap_t) :: zndarray
      integer :: dim
      integer,    allocatable :: shape(:)     

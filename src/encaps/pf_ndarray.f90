@@ -50,12 +50,6 @@ module pf_mod_ndarray
 
   !> Interfaces to output routines in pf_numpy.c
   interface
-     !>  Subroutine to make a directory for output
-     subroutine ndarray_mkdir(dname, dlen) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname
-       integer,    intent(in   ), value :: dlen
-     end subroutine ndarray_mkdir
      !>  Subroutine to write an the array to a file
      subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
        use iso_c_binding

@@ -1,4 +1,4 @@
-!! Verlet type sweeper for 2nd order problems!
+!! Verlet type sweeper for 2nd order problems module
 !
 ! This file is part of LIBPFASST.
 !
@@ -19,7 +19,7 @@ module pf_mod_verlet
 
   implicit none
 
-  !> Define sweeper type
+  !>  Verlet SDC sweeper type, extends abstract sweeper
   type, extends(pf_sweeper_t), abstract :: pf_verlet_t
      integer :: whichQQ=0
      integer :: doLU

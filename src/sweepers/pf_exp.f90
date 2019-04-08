@@ -1,13 +1,14 @@
+!!  Exponential integrator sweeper  module 
 ! =====================================================================================
 ! MODULE: pf_mod_exp
 ! !> @author
-!> Tommaso Buvoli
+! Tommaso Buvoli
 !
 ! Last Modified: Dec 28, 2018
 !
-! Description
-!
-!!  this module extends pf_sweeper_t and is used for creating an exponential sweeper 
+!> Exponential integrator module
+!!
+!!  This module extends pf_sweeper_t and is used for creating an exponential sweeper 
 !!  that solves equations of the form
 !!         $$   y' = L y + N(t,y)  $$
 !!  When extending this class, you must supply the functions phib, swpPhib, and resPhib
@@ -15,8 +16,6 @@
 !!         $$ \sum_{i=0}^n t^i \varphi_i(tL)b_i $$
 !!  in addition to the function f_eval for compluting the nonlinear term N(t,y).
 !!  The complete description of these three functions is contained below.
-! =====================================================================================
-
 module pf_mod_exp
 
 use pf_mod_dtype
@@ -24,7 +23,7 @@ use pf_mod_utils
 
 implicit none
 
-! Exponential SDC sweeper type, extends abstract pf_sweeper_t
+!> Exponential SDC sweeper type, extends abstract pf_sweeper_t
 type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
     real(pfdp),        allocatable :: w(:,:,:)   ! weights
@@ -344,46 +343,45 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
     ! =================================================================================
 
     subroutine exp_integrate(this, pf,level_index, qSDC, fSDC, dt, fintsdc, flags)
-        ! parameters
-        class(pf_exp_t),   intent(inout) :: this
+      class(pf_exp_t),   intent(inout) :: this
       type(pf_pfasst_t), target, intent(inout) :: pf
       integer,              intent(in)    :: level_index
-        class(pf_encap_t), intent(in   ) :: qSDC(:)      !!  Solution values
-        class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !!  RHS Function values
-        real(pfdp),        intent(in   ) :: dt           !!  Time step
-        class(pf_encap_t), intent(inout) :: fintsdc(:)   !!  Integral from t_n to t_m
-        integer, optional, intent(in   ) :: flags
+      class(pf_encap_t), intent(in   ) :: qSDC(:)      !!  Solution values
+      class(pf_encap_t), intent(in   ) :: fSDC(:, :)   !!  RHS Function values
+      real(pfdp),        intent(in   ) :: dt           !!  Time step
+      class(pf_encap_t), intent(inout) :: fintsdc(:)   !!  Integral from t_n to t_m
+      integer, optional, intent(in   ) :: flags
+      
+      ! local variables
+      integer :: i, nnodes
+      type(pf_level_t), pointer :: lev
+      lev => pf%levels(level_index)   !  Assign level pointer
 
-        ! local variables
-        integer :: i, nnodes
-        type(pf_level_t), pointer :: lev
-        lev => pf%levels(level_index)   !!  Assign level pointer
-
-        nnodes = lev%nnodes
-
-        do i = 1, nnodes
-           call this%f_old(i)%copy(fSDC(i,1))  ! Save old f
-        end do
-        
-        do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-           call LocalDerivsAtNode(this, i, nnodes, this%f_old, this%b) ! compute derivatives
-           
-           call this%b(1)%copy(qSDC(i))
-
-           
-           call fintsdc(i)%setval(0.0_pfdp)
-           if (this%use_phib) then
-              call this%phib(this%eta(i), dt, this%b, fintsdc(i))
-            else
-                call this%swpPhib(i, dt, this%b, fintsdc(i))
-             end if
-
-             call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
-             if (i > 1) then
-                call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
-             end if
-        end do
-             
+      nnodes = lev%nnodes
+      
+      do i = 1, nnodes
+         call this%f_old(i)%copy(fSDC(i,1))  ! Save old f
+      end do
+      
+      do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
+         call LocalDerivsAtNode(this, i, nnodes, this%f_old, this%b) ! compute derivatives
+         
+         call this%b(1)%copy(qSDC(i))
+         
+         
+         call fintsdc(i)%setval(0.0_pfdp)
+         if (this%use_phib) then
+            call this%phib(this%eta(i), dt, this%b, fintsdc(i))
+         else
+            call this%swpPhib(i, dt, this%b, fintsdc(i))
+         end if
+         
+         call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
+         if (i > 1) then
+            call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
+         end if
+      end do
+      
     end subroutine exp_integrate
 
     ! RESIDUAL: compute  residual (generic) ====================================
@@ -397,7 +395,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       
       integer :: m
       type(pf_level_t), pointer :: lev
-      lev => pf%levels(level_index)   !!  Assign level pointer
+      lev => pf%levels(level_index)   !  Assign level pointer
 
       !>  Compute the integral of F from t_n to t_m at each node
       call lev%ulevel%sweeper%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I, flags)
@@ -428,7 +426,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       integer, optional,   intent(in)  :: flags, step
 
       type(pf_level_t), pointer :: lev
-      lev => pf%levels(level_index)   !!  Assign level pointer
+      lev => pf%levels(level_index)   !  Assign level pointer
       
       call pf_generic_spreadq0(this, pf,level_index, t0)
       
@@ -445,7 +443,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       integer, intent(in), optional    :: flags, step
 
       type(pf_level_t), pointer :: lev
-      lev => pf%levels(level_index)   !!  Assign level pointer
+      lev => pf%levels(level_index)   !  Assign level pointer
       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
 
     end subroutine exp_evaluate
@@ -460,7 +458,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       integer, intent(in), optional    :: flags, step
 
       type(pf_level_t), pointer :: lev
-      lev => pf%levels(level_index)   !!  Assign level pointer
+      lev => pf%levels(level_index)   !  Assign level pointer
 
       call pf_generic_evaluate_all(this,pf, level_index, t)
 
@@ -474,7 +472,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
       integer,              intent(in)    :: level_index
 
       type(pf_level_t), pointer :: lev
-      lev => pf%levels(level_index)   !!  Assign level pointer
+      lev => pf%levels(level_index)   !  Assign level pointer
 
 
         deallocate(this%w)

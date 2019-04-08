@@ -1,4 +1,4 @@
-C     Files taken from http://www.netlib.org/fftpack/
+!! Files taken from http://www.netlib.org/fftpack/
 C     file	dp.tgz
 C     for	double precision clone of fftpack
 C     by	Hugh C. Pumphrey <hcp@met.ed.ac.uk>

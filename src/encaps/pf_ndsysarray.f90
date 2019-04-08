@@ -1,4 +1,4 @@
-!!  N-dimensional array encapsulation.
+!!  N-dimensional system of array encapsulation.
 !
 ! This file is part of LIBPFASST.
 !
@@ -55,12 +55,6 @@ module pf_mod_ndsysarray
 
   !> Interfaces to output routines in pf_numpy.c
   interface
-     !>  Subroutine to make a directory for output
-     subroutine ndsysarray_mkdir(dname, dlen) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname
-       integer,    intent(in   ), value :: dlen
-     end subroutine ndsysarray_mkdir
      !>  Subroutine to write an the array to a file
      subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
        use iso_c_binding

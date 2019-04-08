@@ -81,7 +81,7 @@ contains
     integer                        :: m, n,k
     real(pfdp)                     :: t
     type(pf_level_t), pointer:: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -159,7 +159,7 @@ contains
     integer,              intent(in)    :: level_index    
     integer    :: m, n, nnodes
     type(pf_level_t), pointer:: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 3
 
@@ -202,7 +202,7 @@ contains
     integer,              intent(in)    :: level_index
 
     type(pf_level_t), pointer:: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -227,7 +227,7 @@ contains
 
     integer :: n, m, p
     type(pf_level_t), pointer:: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
@@ -249,7 +249,7 @@ contains
     integer, intent(in), optional   :: flags, step
 
     type(pf_level_t), pointer:: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
     call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)

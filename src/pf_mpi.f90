@@ -2,6 +2,7 @@
 !
 ! This file is part of LIBPFASST.
 !
+!>  Module to hold include statement
 module pf_mod_mpi
   include "mpif.h"
 end module pf_mod_mpi
