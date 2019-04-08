@@ -1,4 +1,4 @@
-!!  Implicit Munthe-Kass Runge-Kutta sweeper
+!!  Implicit Munthe-Kass Runge-Kutta sweeper module
 !
 ! This file is part of LIBPFASST.
 !
@@ -258,7 +258,7 @@ contains
 
     integer     :: m, n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -314,7 +314,7 @@ contains
 
     integer :: m, nnodes
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 1
     nnodes = lev%nnodes
@@ -362,7 +362,7 @@ contains
 
     integer :: j, m
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
@@ -385,7 +385,7 @@ contains
     integer :: i
     real(pfdp) :: dt
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     !  Propagate to get y=exp(Om)
     !prop needs e^{Q (omega)} and apply to Y
@@ -474,7 +474,7 @@ contains
 
     integer :: m
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     if (this%rk) then
        call lev%ulevel%sweeper%evaluate(pf,level_index, t(1), 1)
@@ -494,7 +494,7 @@ contains
     integer :: m
 
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer    
+    lev => pf%levels(level_index)   !  Assign level pointer    
     call lev%ulevel%sweeper%integrate(pf,level_index, lev%Q, lev%F, dt, lev%I)
 
     ! add tau (which is 'node to node')
@@ -521,7 +521,7 @@ contains
 
     integer m,p
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     !  Stick initial condition into first node slot
     call lev%Q(1)%copy(lev%q0, flags=1)
@@ -561,7 +561,7 @@ contains
 
 
     type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
       deallocate(this%QtilE, this%QdiffE)
       deallocate(this%dtsdc)

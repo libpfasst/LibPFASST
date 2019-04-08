@@ -75,7 +75,7 @@ contains
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    !> add some hooks for output
+    !> add some hooks for output  (using a LibPFASST hook here)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
 
     !>  Output the run options 

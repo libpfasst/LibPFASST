@@ -1,14 +1,15 @@
+!!  Module of FFT based routines using fftpack
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module for reading parameters for the problem
+!>  Module for using fftpack
 module pf_mod_fftpackage
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
   
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
-  
+  !>  Variables and storage for FFT
   type :: pf_fft_t
      integer ::   nx,ny,nz                         !! grid sizes
      integer ::   dim                              !! spatial dimension

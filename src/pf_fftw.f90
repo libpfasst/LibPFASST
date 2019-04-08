@@ -1,4 +1,5 @@
-!
+!!  Module of FFT based routines using fftw
+!!
 ! This file is part of LIBPFASST.
 !
 !>  Module for providing FFTs based on fftw
@@ -14,7 +15,7 @@ module pf_mod_fftpackage
   include 'fftw3.f03'
   real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
-  !>  Define the fft package
+  !>  Variables and storage for FFTW
   type :: pf_fft_t
      type(c_ptr) :: ffft, ifft                       !! fftw pointers
      integer ::  dim                                 !! spatial number of dimensions

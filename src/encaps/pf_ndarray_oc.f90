@@ -49,13 +49,6 @@ module pf_mod_ndarray_oc
 
   ! interfaces to routines in pf_numpy.c
   interface
-     subroutine ndarray_mkdir(dname, dlen) bind(c)
-       use pf_mod_dtype       
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname
-       integer(c_int),    intent(in   ), value :: dlen
-     end subroutine ndarray_mkdir
-
      subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
        use iso_c_binding
        use pf_mod_dtype

@@ -1,4 +1,4 @@
-!! Storing results for eventual output
+!! Module for storing results for eventual output
 !
 ! This file is part of LIBPFASST.
 !

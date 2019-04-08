@@ -1,4 +1,4 @@
-!!  N-dimensional complex array encapsulation.
+!!  N-dimensional complex system of arrays encapsulation
 !
 ! This file is part of LIBPFASST.
 !
@@ -55,12 +55,6 @@ module pf_mod_zndsysarray
 
   !> Interfaces to output routines in pf_numpy.c
   interface
-     !>  Subroutine to make a directory for output
-     subroutine zndsysarray_mkdir(dname, dlen) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname
-       integer,    intent(in   ), value :: dlen
-     end subroutine zndsysarray_mkdir
      !>  Subroutine to write an the array to a file
      subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
        use iso_c_binding

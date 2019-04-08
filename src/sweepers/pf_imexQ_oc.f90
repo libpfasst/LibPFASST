@@ -85,7 +85,7 @@ contains
     integer,             intent(in)    :: nsweeps      !!  number of sweeps to do
     integer, optional, intent(in   ) :: flags
 
-    type(pf_level_t), pointer :: lev    !!  points to current level
+    type(pf_level_t), pointer :: lev    !  points to current level
 
     ! indicate if sweep on both (0, default; might skip y or p if tolerance satisfied), just y (1), just p (2)
 
@@ -96,7 +96,7 @@ contains
     real(pfdp), allocatable  :: norms_y(:) !, norms_p(Lev%nnodes-1)
     integer     ::step
 
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     step = pf%state%step+1
 !     print *, 'sweep on step', step
@@ -396,8 +396,8 @@ contains
     integer, intent(in), optional   :: flags, step
 
     integer                         :: which, mystep
-    type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     which = 0
     if (present(flags)) which = flags
@@ -429,8 +429,8 @@ contains
     integer, intent(in), optional   :: flags, step
 !     call pf_generic_evaluate_all(this, lev, t, flags, step)
     integer :: m
-    type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     if (.not.present(flags)) stop "IMEXQ_OC EVAL_ALL WITHOUT FLAGS"
     if (.not.present(step)) stop "IMEXQ_OC EVAL_ALL WITHOUT step"
@@ -449,8 +449,8 @@ contains
     integer,              intent(in)    :: level_index
 
     integer    ::  Nnodes
-    type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 2
 
@@ -497,8 +497,8 @@ contains
     integer, intent(in), optional    :: flags
 
     integer :: n, m, Nnodes, which
-    type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     Nnodes=lev%nnodes
 
@@ -596,8 +596,8 @@ contains
     integer,     optional, intent(in)    :: flags, step
 
     integer :: m, p, which, mystep
-    type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     which = 3
     if(present(flags)) which = flags
@@ -646,7 +646,7 @@ contains
   end subroutine imexQ_oc_spreadq0
 
   subroutine imexQ_oc_destroy(this, pf,level_index)
-    !!  deallocate
+    !  deallocate
     class(pf_imexQ_oc_t),  intent(inout) :: this
     type(pf_pfasst_t),  target,  intent(inout) :: pf
     integer,              intent(in)    :: level_index
