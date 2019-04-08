@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_mod_exp &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.4% of total for modules and submodules.">286 statements</a>
+    title=" 3.7% of total for modules and submodules.">286 statements</a>
      </li> 
      
      
@@ -182,7 +182,7 @@
       
       <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_resphib">pf_resPhib</a>
       
-      <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_f_eval_p">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_f_eval_p%7E2">pf_f_eval_p</a>
       
     </div>
   </div>
@@ -248,8 +248,8 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>Tommaso Buvoli
-  this module extends pf_sweeper_t and is used for creating an exponential sweeper 
+    <p>Exponential integrator module</p>
+<p>This module extends pf_sweeper_t and is used for creating an exponential sweeper 
   that solves equations of the form
          <script type="math/tex; mode=display">   y' = L y + N(t,y)  </script>
   When extending this class, you must supply the functions phib, swpPhib, and resPhib
@@ -460,7 +460,7 @@
       
       <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_resphib">pf_resPhib</a>
       
-      <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_f_eval_p">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_exp.html#interface-pf_f_eval_p%7E2">pf_f_eval_p</a>
       
     </div>
   </div>
@@ -896,7 +896,7 @@ public subroutine pf_resPhib(this, j, h, b, y)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E2"></span><h3>interface 
     
   </h3></div>
   
@@ -1031,6 +1031,9 @@ public subroutine pf_f_eval_p(this, y, t, level, n)
   </h3></div>
   <div class="panel-body">
     
+    
+    <p>Exponential SDC sweeper type, extends abstract pf_sweeper_t</p>
+    
      
      <h4>Components</h4>
     
@@ -1049,7 +1052,7 @@ public subroutine pf_f_eval_p(this, y, t, level, n)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1091,7 +1094,7 @@ public subroutine pf_f_eval_p(this, y, t, level, n)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nodes"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-nodes%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1180,7 +1183,7 @@ public subroutine pf_f_eval_p(this, y, t, level, n)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-f_eval'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-f_eval%7E2'>f_eval</a></strong>  </td>
        <td></td></tr>
       
        <tr><td>procedure(pf_phib), public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-phib'>phib</a></strong>  </td>
@@ -1192,28 +1195,28 @@ public subroutine pf_f_eval_p(this, y, t, level, n)
        <tr><td>procedure(pf_resPhib), public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-resphib'>resPhib</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-initialize'>initialize</a></strong>  => exp_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-initialize%7E4'>initialize</a></strong>  => exp_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-sweep'>sweep</a></strong>  => exp_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-sweep%7E3'>sweep</a></strong>  => exp_sweep </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-evaluate'>evaluate</a></strong>  => exp_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-evaluate%7E2'>evaluate</a></strong>  => exp_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-integrate'>integrate</a></strong>  => exp_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-integrate%7E2'>integrate</a></strong>  => exp_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-residual'>residual</a></strong>  => exp_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-residual%7E3'>residual</a></strong>  => exp_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-spreadq0'>spreadq0</a></strong>  => exp_spreadq0 </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-spreadq0%7E2'>spreadq0</a></strong>  => exp_spreadq0 </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-evaluate_all'>evaluate_all</a></strong>  => exp_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-evaluate_all%7E2'>evaluate_all</a></strong>  => exp_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-destroy'>destroy</a></strong>  => exp_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-destroy%7E5'>destroy</a></strong>  => exp_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_exp_t.html#boundprocedure-exp_destroy'>exp_destroy</a></strong>  </td>
@@ -1472,14 +1475,6 @@ public subroutine <a href='../proc/exp_integrate.html'>exp_integrate</a>(this, p
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1643,7 +1638,7 @@ public subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, pf,
 
 
 
-<p>Assign level pointer</p><a href="../proc/exp_residual.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Compute the integral of F from t_n to t_m at each node</p><a href="../proc/exp_residual.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1755,14 +1750,6 @@ public subroutine <a href='../proc/exp_spreadq0.html'>exp_spreadq0</a>(this, pf,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -1889,14 +1876,6 @@ public subroutine <a href='../proc/exp_evaluate.html'>exp_evaluate</a>(this, pf,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2038,14 +2017,6 @@ public subroutine <a href='../proc/exp_evaluate_all.html'>exp_evaluate_all</a>(t
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2172,14 +2143,6 @@ public subroutine <a href='../proc/exp_destroy.html'>exp_destroy</a>(this, pf, l
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2495,7 +2458,7 @@ public subroutine <a href='../proc/weights.html'>weights</a>(this, z, x, m, W)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

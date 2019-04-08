@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>exp_evaluate_all &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.0% of total for procedures.">10 statements</a>
+    title=" 0.1% of total for procedures.">10 statements</a>
      </li> 
      
      
@@ -209,8 +209,6 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
 
 
     
-    <p>Assign level pointer</p>
-    
 
     <h3>Arguments</h3>
     
@@ -230,7 +228,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E61"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E132"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +243,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E9"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E82"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -260,7 +258,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E34"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +273,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E8"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -290,7 +288,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E32"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E91"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -305,7 +303,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-step%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-step%7E9"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -484,7 +482,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
       <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span>    <span class="kd">::</span> <span class="n">flags</span><span class="p">,</span> <span class="n">step</span>
 
       <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
-      <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+      <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
       <span class="k">call </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
 
@@ -513,7 +511,7 @@ public subroutine exp_evaluate_all(this, pf, level_index, t, flags, step)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

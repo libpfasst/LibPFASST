@@ -8,7 +8,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_f_eval_p &ndash; LibPFASST</title>
@@ -128,21 +128,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">26 statements</a>
+    title=" 0.2% of total for procedures.">29 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_imexQ_oc.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_verlet.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_imexq_oc.f90.html'>pf_imexQ_oc.f90</a></li>
+     <li><a href='../sourcefile/pf_verlet.f90.html'>pf_verlet.f90</a></li>
     
-     <li><a href='../module/pf_mod_imexq_oc.html'>pf_mod_imexQ_oc</a></li>
+     <li><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></li>
     
   
      <li class="active">pf_f_eval_p</li>
@@ -197,18 +197,13 @@
     <div class="col-md-9" id='text'>
     
     
-      <h2>interface</h2>
-      <p>This is the interface for the routine to compute the RHS function values</p>
-      <br>
-    
-     
-    
-      <h2>
-public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, step)
+      <h2>interface <br>
+      
+public subroutine pf_f_eval_p(this, y, t, level_index, f)
     
     
    
-</h2>
+</h2>    
     
 
     
@@ -233,7 +228,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E100"></span>class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E149"></span>class(<a href='../type/pf_verlet_t.html'>pf_verlet_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -248,7 +243,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
   
 <tr>
   
-  <td><span class="anchor" id="variable-y%7E13"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-y%7E11"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -263,7 +258,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E19"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E14"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -278,7 +273,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E29"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E45"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -302,66 +297,6 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
   
 </tr>
 
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-piece%7E2"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>piece</strong></td><td><p>Which piece to evaluate</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-flags%7E45"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-idx"></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>idx</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-step%7E11"></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>step</strong></td><td></td>
-  
-</tr>
-
 </tbody>
 </table>
 
@@ -369,7 +304,9 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
     
     
     <h3>Description</h3>
-    <p>Evaluae f_piece(y), where piece is one or two</p>
+    <p>This is the interface for the routine to compute the RHS function values
+  Evaluate f_piece(y), where piece is one or two 
+  Evaluate f_piece(y), where piece is one or two </p>
     
     <br>
 
@@ -391,7 +328,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

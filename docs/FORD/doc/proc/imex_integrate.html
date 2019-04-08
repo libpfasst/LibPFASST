@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>imex_integrate &ndash; LibPFASST</title>
@@ -209,8 +209,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
 
 
     
-    <p>Subroutine to compute  Picard integral of function values
-  Assign level pointer</p>
+    <p>Subroutine to compute  Picard integral of function values</p>
     
 
     <h3>Arguments</h3>
@@ -231,7 +230,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E116"></span>class(<a href='../type/pf_imex_sweeper_t.html'>pf_imex_sweeper_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E176"></span>class(<a href='../type/pf_imex_sweeper_t.html'>pf_imex_sweeper_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -246,7 +245,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E52"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E104"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -261,7 +260,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E37"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E60"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -276,7 +275,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-qsdc%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-qsdc%7E6"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -291,7 +290,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-fsdc%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-fsdc%7E6"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -306,7 +305,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E22"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E33"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -321,7 +320,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-fintsdc%7E4"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-fintsdc%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -336,7 +335,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E58"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E107"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -423,8 +422,8 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!  Current level</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
     
     <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
@@ -464,7 +463,7 @@ public subroutine imex_integrate(this, pf, level_index, qSDC, fSDC, dt, fintSDC,
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

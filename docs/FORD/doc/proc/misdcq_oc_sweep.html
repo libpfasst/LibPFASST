@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>misdcQ_oc_sweep &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.6% of total for procedures.">135 statements</a>
+    title=" 0.8% of total for procedures.">135 statements</a>
      </li> 
      
      
@@ -373,8 +373,6 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 
 
     
-    <p>Assign level pointer</p>
-    
 
     <h3>Arguments</h3>
     
@@ -409,7 +407,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E133"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E140"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -439,7 +437,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E37"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E36"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -454,7 +452,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E59"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E57"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -484,7 +482,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E130"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E131"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -738,7 +736,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <span class="kt">logical</span>     <span class="kd">::</span> <span class="n">sweep_y</span><span class="p">,</span> <span class="n">sweep_p</span>
     <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">step</span>
 
-    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">step</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="o">+</span><span class="mi">1</span>
@@ -918,7 +916,7 @@ public subroutine misdcQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

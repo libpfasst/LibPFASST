@@ -2,7 +2,7 @@ src_dir: ../../src
 output_dir: ./doc
 project_website: https://pfasst.lbl.gov
 project: LibPFASST
-author:  Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli
+author:  Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli
 summary: The library for running PFASST
 project_github: https://github.com/libpfasst/LibPFASST/
 graph: true

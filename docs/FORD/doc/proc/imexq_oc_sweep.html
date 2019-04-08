@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>imexQ_oc_sweep &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.7% of total for procedures.">141 statements</a>
+    title=" 0.8% of total for procedures.">141 statements</a>
      </li> 
      
      
@@ -373,8 +373,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 
 
     
-    <p>Assign level pointer</p>
-<p>Loop over sweeps</p>
+    <p>Loop over sweeps</p>
     
 
     <h3>Arguments</h3>
@@ -395,7 +394,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E92"></span>class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E163"></span>class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -410,7 +409,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E20"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E93"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -425,7 +424,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E21"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E47"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -440,7 +439,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E10"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E19"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -455,7 +454,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E18"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E29"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -470,7 +469,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E6"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E7"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -485,7 +484,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E39"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E98"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -741,7 +740,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="c">!!  number of sweeps to do</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
 
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  points to current level</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!  points to current level</span>
 
     <span class="c">! indicate if sweep on both (0, default; might skip y or p if tolerance satisfied), just y (1), just p (2)</span>
 
@@ -752,7 +751,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span>  <span class="kd">::</span> <span class="n">norms_y</span><span class="p">(:)</span> <span class="c">!, norms_p(Lev%nnodes-1)</span>
     <span class="kt">integer</span>     <span class="kd">::</span><span class="n">step</span>
 
-    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
     <span class="n">step</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="o">+</span><span class="mi">1</span>
 <span class="c">!     print *, &#39;sweep on step&#39;, step</span>
@@ -1064,7 +1063,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

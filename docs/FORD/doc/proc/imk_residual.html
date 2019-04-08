@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>imk_residual &ndash; LibPFASST</title>
@@ -209,8 +209,6 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
 
 
     
-    <p>Assign level pointer    </p>
-    
 
     <h3>Arguments</h3>
     
@@ -245,7 +243,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E116"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E129"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -260,7 +258,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E81"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E83"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +273,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E49"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E51"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -290,7 +288,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E117"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E122"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -375,7 +373,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
-    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer    </span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer    </span>
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">)</span>
 
     <span class="c">! add tau (which is &#39;node to node&#39;)</span>
@@ -416,7 +414,7 @@ public subroutine imk_residual(this, pf, level_index, dt, flags)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

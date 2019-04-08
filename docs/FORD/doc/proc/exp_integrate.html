@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>exp_integrate &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">31 statements</a>
+    title=" 0.2% of total for procedures.">31 statements</a>
      </li> 
      
      
@@ -209,8 +209,6 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
 
 
     
-    <p>Assign level pointer</p>
-    
 
     <h3>Arguments</h3>
     
@@ -230,7 +228,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E57"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E128"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +243,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E5"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E78"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -260,7 +258,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E30"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +273,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-qsdc"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-qsdc%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -290,7 +288,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-fsdc"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-fsdc%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -305,7 +303,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E8"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E19"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -335,7 +333,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E28"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E87"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -506,46 +504,45 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">exp_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-        <span class="c">! parameters</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_exp_t</span><span class="p">),</span>   <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
       <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">target</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
       <span class="kt">integer</span><span class="p">,</span>              <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:)</span>      <span class="c">!!  Solution values</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>   <span class="c">!!  RHS Function values</span>
-        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
-        <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintsdc</span><span class="p">(:)</span>   <span class="c">!!  Integral from t_n to t_m</span>
-        <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:)</span>      <span class="c">!!  Solution values</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>   <span class="c">!!  RHS Function values</span>
+      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>           <span class="c">!!  Time step</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintsdc</span><span class="p">(:)</span>   <span class="c">!!  Integral from t_n to t_m</span>
+      <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">flags</span>
+      
+      <span class="c">! local variables</span>
+      <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
+      <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
+      <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
-        <span class="c">! local variables</span>
-        <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span>
-        <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
-        <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
-
-        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-
-        <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
-           <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">fSDC</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
-        <span class="k">end do</span>
-<span class="k">        </span>
-<span class="k">        do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span> <span class="c">! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
-           <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">)</span> <span class="c">! compute derivatives</span>
-           
-           <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-
-           
-           <span class="k">call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-           <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">              call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-            <span class="k">else</span>
-<span class="k">                call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-             <span class="k">end if</span>
-
-<span class="k">             call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-             <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">                call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-             <span class="k">end if</span>
-<span class="k">        end do</span>
-<span class="k">             </span>
+      <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+      
+      <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>
+         <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">fSDC</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>  <span class="c">! Save old f</span>
+      <span class="k">end do</span>
+<span class="k">      </span>
+<span class="k">      do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span> <span class="c">! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}</span>
+         <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">)</span> <span class="c">! compute derivatives</span>
+         
+         <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+         
+         
+         <span class="k">call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+         <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_phib</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">            call </span><span class="n">this</span><span class="p">%</span><span class="n">phib</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">eta</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+         <span class="k">else</span>
+<span class="k">            call </span><span class="n">this</span><span class="p">%</span><span class="n">swpPhib</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+         <span class="k">end if</span>
+<span class="k">         </span>
+<span class="k">         call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="n">qSDC</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+         <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">            call </span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="n">fintsdc</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+         <span class="k">end if</span>
+<span class="k">      end do</span>
+<span class="k">      </span>
 <span class="k">    end subroutine </span><span class="n">exp_integrate</span>
 </pre></div>
 
@@ -571,7 +568,7 @@ public subroutine exp_integrate(this, pf, level_index, qSDC, fSDC, dt, fintsdc, 
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

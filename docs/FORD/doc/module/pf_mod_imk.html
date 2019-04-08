@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_mod_imk &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.4% of total for modules and submodules.">406 statements</a>
+    title=" 5.2% of total for modules and submodules.">406 statements</a>
      </li> 
      
      
@@ -1031,7 +1031,7 @@ public subroutine pf_commutator_p(this, a, b, out, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1686,7 +1686,10 @@ public subroutine <a href='../proc/imk_actually_sweep.html'>imk_actually_sweep</
 
 
 
-<p>Assign level pointer</p><a href="../proc/imk_actually_sweep.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Loop over sweeps
+  Loop over substeps
+  Accumulate rhs
+  Add the tau term</p><a href="../proc/imk_actually_sweep.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -1820,7 +1823,8 @@ public subroutine <a href='../proc/imk_initialize.html'>imk_initialize</a>(this,
 
 
 
-<p>Assign level pointer</p><a href="../proc/imk_initialize.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+<p>Assign explicit approximate quadrature rule
+  Make space for temporary variables</p>
     
     <h4>Arguments</h4>
     
@@ -1902,14 +1906,6 @@ public subroutine <a href='../proc/imk_integrate.html'>imk_integrate</a>(this, p
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2066,14 +2062,6 @@ public subroutine <a href='../proc/imk_evaluate.html'>imk_evaluate</a>(this, pf,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2215,14 +2203,6 @@ public subroutine <a href='../proc/imk_evaluate_all.html'>imk_evaluate_all</a>(t
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2349,14 +2329,6 @@ public subroutine <a href='../proc/imk_residual.html'>imk_residual</a>(this, pf,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer    </p>
     
     <h4>Arguments</h4>
     
@@ -2468,14 +2440,6 @@ public subroutine <a href='../proc/imk_spreadq0.html'>imk_spreadq0</a>(this, pf,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2661,14 +2625,6 @@ public subroutine <a href='../proc/imk_destroy.html'>imk_destroy</a>(this, pf, l
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Assign level pointer</p>
     
     <h4>Arguments</h4>
     
@@ -2762,7 +2718,7 @@ public subroutine <a href='../proc/imk_destroy.html'>imk_destroy</a>(this, pf, l
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

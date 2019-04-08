@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_imk.f90 &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.0% of total for source files.">406 statements</a>
+    title=" 4.3% of total for source files.">406 statements</a>
      </li> 
      
      
@@ -204,7 +204,7 @@
 
     </div>
     <div class="col-md-9" id='text'>
-      <p>Implicit Munthe-Kass Runge-Kutta sweeper</p>
+      <p>Implicit Munthe-Kass Runge-Kutta sweeper module</p>
       <br>
     
     <div class="panel panel-default">
@@ -414,7 +414,7 @@
 
     <section>
       <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="hl"><pre><span></span><a name="ln-1"></a><span class="c">!!  Implicit Munthe-Kass Runge-Kutta sweeper</span>
+    <div class="hl"><pre><span></span><a name="ln-1"></a><span class="c">!!  Implicit Munthe-Kass Runge-Kutta sweeper module</span>
 <a name="ln-2"></a><span class="c">!</span>
 <a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
 <a name="ln-4"></a><span class="c">!</span>
@@ -674,7 +674,7 @@
 <a name="ln-258"></a>
 <a name="ln-259"></a>    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span><span class="n">k</span>   <span class="c">!!  Loop variables</span>
 <a name="ln-260"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">t</span>        <span class="c">!!  Time at nodes</span>
-<a name="ln-261"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-261"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-262"></a>
 <a name="ln-263"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <a name="ln-264"></a>
@@ -730,7 +730,7 @@
 <a name="ln-314"></a>
 <a name="ln-315"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span>
 <a name="ln-316"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-317"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-317"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-318"></a>
 <a name="ln-319"></a>    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>
 <a name="ln-320"></a>    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
@@ -778,7 +778,7 @@
 <a name="ln-362"></a>
 <a name="ln-363"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">j</span><span class="p">,</span> <span class="n">m</span>
 <a name="ln-364"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-365"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-365"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-366"></a>
 <a name="ln-367"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
 <a name="ln-368"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
@@ -801,7 +801,7 @@
 <a name="ln-385"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>
 <a name="ln-386"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>
 <a name="ln-387"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-388"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-388"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-389"></a>
 <a name="ln-390"></a>    <span class="c">!  Propagate to get y=exp(Om)</span>
 <a name="ln-391"></a>    <span class="c">!prop needs e^{Q (omega)} and apply to Y</span>
@@ -890,7 +890,7 @@
 <a name="ln-474"></a>
 <a name="ln-475"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
 <a name="ln-476"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-477"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-477"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-478"></a>
 <a name="ln-479"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rk</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-480"></a><span class="k">       call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">evaluate</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">t</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
@@ -910,7 +910,7 @@
 <a name="ln-494"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">m</span>
 <a name="ln-495"></a>
 <a name="ln-496"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-497"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer    </span>
+<a name="ln-497"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer    </span>
 <a name="ln-498"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">integrate</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">)</span>
 <a name="ln-499"></a>
 <a name="ln-500"></a>    <span class="c">! add tau (which is &#39;node to node&#39;)</span>
@@ -937,7 +937,7 @@
 <a name="ln-521"></a>
 <a name="ln-522"></a>    <span class="kt">integer </span><span class="n">m</span><span class="p">,</span><span class="n">p</span>
 <a name="ln-523"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-524"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-524"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-525"></a>
 <a name="ln-526"></a>    <span class="c">!  Stick initial condition into first node slot</span>
 <a name="ln-527"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -977,7 +977,7 @@
 <a name="ln-561"></a>
 <a name="ln-562"></a>
 <a name="ln-563"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-<a name="ln-564"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+<a name="ln-564"></a>    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 <a name="ln-565"></a>
 <a name="ln-566"></a>      <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
 <a name="ln-567"></a>      <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">dtsdc</span><span class="p">)</span>
@@ -1008,7 +1008,7 @@
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

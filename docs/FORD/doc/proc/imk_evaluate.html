@@ -7,7 +7,7 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>imk_evaluate &ndash; LibPFASST</title>
@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">68 statements</a>
+    title=" 0.4% of total for procedures.">68 statements</a>
      </li> 
      
      
@@ -327,8 +327,6 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
 
 
     
-    <p>Assign level pointer</p>
-    
 
     <h3>Arguments</h3>
     
@@ -363,7 +361,7 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E114"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E127"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -378,7 +376,7 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E79"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E81"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -423,7 +421,7 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E115"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E120"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -526,7 +524,7 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dt</span>
     <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>        <span class="c">!!  Current level</span>
-    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!!  Assign level pointer</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
     <span class="c">!  Propagate to get y=exp(Om)</span>
     <span class="c">!prop needs e^{Q (omega)} and apply to Y</span>
@@ -629,7 +627,7 @@ public subroutine imk_evaluate(this, pf, level_index, t, m, flags, step)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    
