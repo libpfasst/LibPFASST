@@ -38,17 +38,7 @@ FSRC = src/pfasst.f90 \
        src/pf_comm.f90 \
        src/pf_dtype.f90 \
        src/pf_hooks.f90 \
-       src/pf_exp.f90 \
-       src/pf_imex.f90 \
-       src/pf_imexQ_oc.f90 \
-       src/pf_imk.f90 \
        src/pf_interpolate.f90 \
-       src/pf_magnus_picard.f90 \
-       src/pf_misdcQ.f90 \
-       src/pf_misdcQ_oc.f90 \
-       src/pf_ndarray.f90 \
-       src/pf_ndarray-oc.f90 \
-       src/pf_ndsysarray.f90 \
        src/pf_parallel.f90 \
        src/pf_parallel_oc.f90 \
        src/pf_pfasst.f90 \
@@ -58,11 +48,21 @@ FSRC = src/pfasst.f90 \
        src/pf_rkstepper.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
-       src/pf_verlet.f90 \
-       src/pf_zndsysarray.f90 \
-       src/pf_zndarray.f90
-       #       src/pf_amisdc.f90 \
-#       src/pf_amisdcQ.f90 \
+       src/encaps/pf_ndarray.f90 \
+       src/encaps/pf_ndarray_oc.f90 \
+       src/encaps/pf_ndsysarray.f90 \
+       src/encaps/pf_zndsysarray.f90 \
+       src/encaps/pf_zndarray.f90 \
+       src/sweepers/pf_exp.f90 \
+       src/sweepers/pf_imex.f90 \
+       src/sweepers/pf_imexQ_oc.f90 \
+       src/sweepers/pf_imk.f90 \
+       src/sweepers/pf_magnus_picard.f90 \
+       src/sweepers/pf_misdcQ.f90 \
+       src/sweepers/pf_misdcQ_oc.f90 \
+       src/sweepers/pf_verlet.f90 
+       #       src/sweepers/pf_amisdc.f90 \
+#       src/sweepers/pf_amisdcQ.f90 \
 
 
 

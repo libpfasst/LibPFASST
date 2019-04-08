@@ -30,7 +30,7 @@ contains
     use pfasst        !<  This module has include statements for the main pfasst routines
     use pf_my_sweeper !<  Local module for sweeper
     use pf_my_level   !<  Local module for level
-    use probin        !< Local module reading/parsing problem parameters
+    use probin        !<  Local module reading/parsing problem parameters
 
     implicit none
 

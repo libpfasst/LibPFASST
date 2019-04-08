@@ -6,7 +6,7 @@
 !!
 
 module encap
-  use pf_mod_dtype
+  use pfasst
   implicit none
 
   !>  Type to create and destroy the arrays

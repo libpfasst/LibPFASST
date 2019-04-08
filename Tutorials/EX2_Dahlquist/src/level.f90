@@ -4,7 +4,6 @@
 !> Level specification for Dahlquist example.
 !>     u_t = lam1*u + lam2*u
 module pf_my_level
-  use pf_mod_dtype
   use encap
   use pf_mod_imex_sweeper
 
