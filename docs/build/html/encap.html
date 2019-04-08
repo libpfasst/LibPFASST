@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Sweepers &#8212; LIBPFASST 1.1 documentation</title>
+    <title>Data encapsulation &#8212; LIBPFASST 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -28,8 +28,8 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
-    <link rel="next" title="Sweepers" href="encap.html" />
-    <link rel="prev" title="Parameters and variables" href="parameters.html" /> 
+    <link rel="next" title="Output" href="output.html" />
+    <link rel="prev" title="Sweepers" href="sweepers.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -39,10 +39,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="encap.html" title="Sweepers"
+          <a href="output.html" title="Output"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="parameters.html" title="Parameters and variables"
+          <a href="sweepers.html" title="Sweepers"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>
@@ -53,21 +53,19 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="sweepers">
-<h1>Sweepers<a class="headerlink" href="#sweepers" title="Permalink to this headline">¶</a></h1>
-<p>Under construction!</p>
-<p>LibPFASST contains several sweeper types for solving different types of equations.  These are contained in <code class="docutils literal"><span class="pre">src/sweepers/</span></code>.</p>
+  <div class="section" id="data-encapsulation">
+<h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Permalink to this headline">¶</a></h1>
+<p>!  Under construction</p>
+<p>The temporal integration routines in LibPFASST do not specify the form of the solution in terms of its data layout, but rather this must be described by an encapsulation module which tells LibPFASST how to operate on the data.  For convenience LibPFASST provides sample encapsulations corresponding to regular Fortran arrays. These are provided in
+<code class="docutils literal"><span class="pre">src/encaps/</span></code></p>
+<p>Curently, the provided encaps are</p>
 <ul class="simple">
-<li>exp:  Exponential integrator</li>
-<li>imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</li>
-<li>misdc: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</li>
-<li>imk:  Implicit Munthe-Kass Runge-Kutta integrators</li>
-<li>magpicard:   Magnus  integrator based on Picard iterations</li>
-<li>verlet:   Verlet type integrator for 2nd order equations</li>
-<li>imex_oc:  Optimal control version of imex</li>
-<li>misdc_oc:  Optimal control version of misdc</li>
+<li>ndarray:  An N-dimensional array</li>
+<li>ndsysarray: System of ndarrays</li>
+<li>zndarray: An N-dimensional complex array</li>
+<li>zndsysarray: System of complex ndarrays</li>
+<li>ndarray_oc:  Optimal control version of ndarray</li>
 </ul>
-<p>For historical reasons, there are two versions of some of these sweeper, with a <cite>Q</cite> denoting the more modern version that can utilize DIRK style sweepers.</p>
 </div>
 
 
@@ -77,15 +75,15 @@
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="parameters.html"
-                        title="previous chapter">Parameters and variables</a></p>
+  <p class="topless"><a href="sweepers.html"
+                        title="previous chapter">Sweepers</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="encap.html"
-                        title="next chapter">Sweepers</a></p>
+  <p class="topless"><a href="output.html"
+                        title="next chapter">Output</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/sweepers.rst.txt"
+      <li><a href="_sources/encap.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -110,10 +108,10 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="encap.html" title="Sweepers"
+          <a href="output.html" title="Output"
              >next</a> |</li>
         <li class="right" >
-          <a href="parameters.html" title="Parameters and variables"
+          <a href="sweepers.html" title="Sweepers"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>

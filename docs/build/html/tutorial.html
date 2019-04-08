@@ -55,6 +55,8 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="example-1">
+<h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
 <p>The following material will walk the user through a couple of examples to demonstrate how to set up an application using
 LibPFASST.</p>
 <p>Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist
@@ -71,12 +73,60 @@ This example solves the  scalar model problem or Dahlquist equation</p>
 Any parameter in either list can be overwritten by adding it to the command line, as in</p>
 <p><cite>$ ./main.exe sdc.nml lam1=3.0 niters=10</cite></p>
 <p>The order of the command line parameters is not important except that they must come after the input file is specified.</p>
-<p>The main program is in <code class="docutils literal"><span class="pre">src/main.f90</span></code>.  The IMEX sweeper needs
+<p>To run an example that does the actualy PFASST algorithm</p>
+<p><cite>$ mpirun -n 32 ./main.exe multilevel.nml</cite></p>
+<p>The main program is in <code class="docutils literal"><span class="pre">src/main.f90</span></code> and can be used as a template for building applications using LibPFASST.
+The most important part of the routine <code class="docutils literal"><span class="pre">run_pfasst</span></code> is loop over levels where the level, sweeper, and
+data encapsulation are specified.  The abstract type defining a level must be extended with spatial restriction and
+interpolation operators (in this example, these are the identity operators).  This is done in the file <code class="docutils literal"><span class="pre">src/level.f90</span></code>.
+Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, a data type provided by the library corresponding to an N-dimensional array is used.  In the next Tutorial, a local encapsulation will be demonstrated.  Third, the type abstract sweeper type must be extended and assigned to the level. This is done in the file <code class="docutils literal"><span class="pre">src/sweeper.f90</span></code> discussed below.  Finally, the level type carries a one-dimensional integer array that to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; Loop over levels and set some level specific parameters</span>
+<span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+   <span class="c">!&gt;  Allocate the user specific level object</span>
+   <span class="k">allocate</span><span class="p">(</span><span class="n">my_level_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">)</span>
+
+   <span class="c">!&gt;  Allocate the user specific data constructor</span>
+   <span class="k">allocate</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
+
+   <span class="c">!&gt;  Allocate the sweeper at this level</span>
+   <span class="k">allocate</span><span class="p">(</span><span class="n">my_sweeper_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">)</span>
+
+   <span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
+   <span class="k">call </span><span class="n">pf_level_set_size</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+<span class="k">end do</span>
+</pre></div>
+</div>
+<p>The local sweeper type needs to define
 functions to evaluate each term in the IMEX splitting and
 a routine to solve an implicit equation equivalent to a
-backward-Euler step.  These routines are in <code class="docutils literal"><span class="pre">src/feval.f90</span></code> and are called
+backward-Euler step.  These routines are in <code class="docutils literal"><span class="pre">src/sweeper.f90</span></code> and are called
 <code class="docutils literal"><span class="pre">f_eval</span></code> and <code class="docutils literal"><span class="pre">f_comp</span></code>.</p>
-<p>Please see the <a href="#id1"><span class="problematic" id="id2">`adv_diff_fft`_</span></a> example included in LibPFASST for a simple PDE application of LibPFASST.</p>
+<p>There is also a file <code class="docutils literal"><span class="pre">src/probin.f90</span></code> to read in parameters for LibPFASST and the local application.</p>
+</div>
+<div class="section" id="example-2">
+<h2>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h2>
+<p>This example solves exactly the same equation as Example 1, but using more user generated code.
+The main difference is that instead of using the LibPFASST data encapsulation ndarray, a local data
+encapsulation called scalar_encap is defined in <code class="docutils literal"><span class="pre">src/encap.f90</span></code>.  To define a data encapsulation, the user must
+define 7 simple actions on the data set corresponding the the procedure</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">contains</span>
+<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">scalar_setval</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">scalar_copy</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">scalar_norm</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">pack</span> <span class="o">=&gt;</span> <span class="n">scalar_pack</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">unpack</span> <span class="o">=&gt;</span> <span class="n">scalar_unpack</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">axpy</span> <span class="o">=&gt;</span> <span class="n">scalar_axpy</span>
+   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">eprint</span> <span class="o">=&gt;</span> <span class="n">scalar_eprint</span>
+<span class="k">end type </span><span class="n">scalar_encap</span>
+</pre></div>
+</div>
+<p>In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed for by the LibPFASST but is included for convenience in debugging.</p>
+<p>Another difference in this example, is that a local hook is defined in the file <code class="docutils literal"><span class="pre">src/hooks.f90</span></code> to print the error to the screen.  The user can construct custom hooks following this template.</p>
+</div>
+<div class="section" id="example-3">
+<h2>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h2>
+<p>Please see the <code class="docutils literal"><span class="pre">LibPFASST/test/adv_diff_fft</span></code> directory included in LibPFASST
+for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
 <div class="math">
 \[u_t  = - v u_x + \nu u_{xx}.\]</div>
@@ -84,21 +134,7 @@ backward-Euler step.  These routines are in <code class="docutils literal"><span
 (<span class="math">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math">\(-v u_x\)</span>),
 hence an IMEX SDC substepper will be used to evolve the equation through time.</p>
 <p>The solution of  implicit equation is done using the FFT through the FFTW package.</p>
-<p>Three PFASST levels will be used.  The coarsest level will have 2 SDC
-nodes and 32 spatial points; the intermediate level will have 3 SDC
-nodes and 64 spatial points; and the fine level will have 5 SDC nodes
-and 128 spatial points.  The routines to spatially interpolate and
-restrict solutions are in <code class="docutils literal"><span class="pre">src/transfer.f90</span></code>.  Two coarse sweeps
-will be performed per iteration on the coarsest levels.  This helps
-reduce the total number of PFASST iterations required.</p>
-<p>The solution <span class="math">\(u\)</span> will be stored in a flat Fortran array, and
-hence this application will use LibPFASST&#8217;s built in <code class="docutils literal"><span class="pre">ndarray</span></code>
-encapsulation.  Note that LibPFASST doesn&#8217;t impose any particular
-storage format on your solver &#8211; instead, you must tell LibPFASST how
-to perform a few basic operations on your solution (eg, how to create
-solutions, perform <code class="docutils literal"><span class="pre">y</span> <span class="pre">&lt;-</span> <span class="pre">y</span> <span class="pre">+</span> <span class="pre">a</span> <span class="pre">x</span></code>, etc).  Various hooks are added to
-echo the error (on the finest level) and residual (on all levels)
-throughout the algorithm.  These hooks are in <code class="docutils literal"><span class="pre">src/hooks.f90</span></code>.</p>
+</div>
 </div>
 
 
@@ -107,6 +143,16 @@ throughout the algorithm.  These hooks are in <code class="docutils literal"><sp
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#example-1">Example 1</a></li>
+<li><a class="reference internal" href="#example-2">Example 2</a></li>
+<li><a class="reference internal" href="#example-3">Example 3</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="compiling.html"
                         title="previous chapter">Compiling</a></p>
