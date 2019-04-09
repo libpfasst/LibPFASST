@@ -5,29 +5,20 @@
 !  If run in parallel, this will be pipelined SDC
 
 &PF_PARAMS
-   !  These are internal pfasst variables that must be set
-    nlevels  = 1
-    nnodes =  5
+   !  Internal pfasst variable that must be set
+   nlevels  = 1
 
-    nsweeps_pred= 1 
-    nsweeps= 1 
+   !  These are internal pfasst variables that can be reset
+   nnodes =  5     !  Number of quadrature nodes (default is 3)
 
-    !  These are internal pfasst variables that can be reset
-    niters = 32   !  default is 5
+   niters = 10     !  Max PFASST iterations default is 5
  
-     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-     qtype   = 1   
-   
-     !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-13
-     rel_res_tol = 1.d-13
+    !  optional variables to control termination  (defaults are 0.0)
+    abs_res_tol = 1.d-13
+    rel_res_tol = 1.d-13
 
-     !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     Pipeline_pred =  .true.
-     PFASST_pred = .true.
-
-     !  Variable to tell if Vcycling will be done.  Here we do pipelining
-     Vcycle=.false.
+    !  Variable to tell if Vcycling will be done.  Here there is only one level
+    Vcycle=.false.
 /
 
 !  Now define the local variables you need
