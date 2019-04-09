@@ -26,22 +26,38 @@ Typing 'make' in the directory should compile the example creating an exectuable
 
   `$ ./main.exe sdc.nml`
 
-Using your favorite editor, open the file sdc.nml.  There are two namelists here, 'PF_PARAMS' and "PARAMS'.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.  The 'PF_PARAMS' variables are discussed below in the section `Parameters <parameters>`_
+Using your favorite editor, open the file sdc.nml.  There are two namelists here, 'PF_PARAMS' and 'PARAMS'.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.  The 'PF_PARAMS' variables are discussed below in the section `Parameters <parameters>`_. 
 Any parameter in either list can be overwritten by adding it to the command line, as in
 
 `$ ./main.exe sdc.nml lam1=3.0 niters=10`
 
 The order of the command line parameters is not important except that they must come after the input file is specified.
 
-To run an example that does the actualy PFASST algorithm
+To run an example that does the actual PFASST algorithm
 
 `$ mpirun -n 32 ./main.exe multilevel.nml`
 
-The main program is in ``src/main.f90`` and can be used as a template for building applications using LibPFASST.
-The most important part of the routine ``run_pfasst`` is loop over levels where the level, sweeper, and
-data encapsulation are specified.  The abstract type defining a level must be extended with spatial restriction and
-interpolation operators (in this example, these are the identity operators).  This is done in the file ``src/level.f90``.
-Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, a data type provided by the library corresponding to an N-dimensional array is used.  In the next Tutorial, a local encapsulation will be demonstrated.  Third, the type abstract sweeper type must be extended and assigned to the level. This is done in the file ``src/sweeper.f90`` discussed below.  Finally, the level type carries a one-dimensional integer array that to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.
+The main program is in ``src/main.f90`` and can be used as a template for building applications using LibPFASST.  The main routine here
+only initializes MPI, calls a routine ``run_pfasst`` to run the PFASST algorithm, then closes MPI.
+
+The first thing done in ``run_pfasst`` is to read in local problem parameters by calling  the subroutine ``probin_init`` located in ``src/probin.f90``.
+
+.. code-block:: fortran
+		
+    !> Read problem parameters
+    call probin_init(pf_fname)
+
+This routine also returns the location of the namelist for the PFASST parameters, which in this case will match the location of the local parameters (a different file can be specified if desired).  After
+the MPI based communicator is set up, the routine ``pf_pfasst_create`` is called to allocate the main PFASST structure called 'pf'.  Note that the filename for PFASST parameters is
+based to this routine so that it can be read.
+
+.. code-block:: fortran
+		
+    !>  Create the pfasst structure
+    call pf_pfasst_create(pf, comm, fname=pf_fname)
+    
+
+The most important part of the initialization in ``run_pfasst`` is the loop over levels where the level, sweeper, and data encapsulation are specified.
 
 .. code-block:: fortran
 
@@ -59,6 +75,12 @@ Next, the encapsulation of the data type must be specified by assigning its fact
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
     end do
+
+The abstract type defining a level must be extended with spatial restriction and
+interpolation operators (in this example, these are the identity operators).  This is done in the file ``src/level.f90``.
+Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, the data type 'ndarray' provided by LibPFASST and corresponding to an N-dimensional array is used.
+In the next Tutorial, a local encapsulation will be demonstrated.  Third, the abstract sweeper type must be extended and assigned to the level. This is done in the file ``src/sweeper.f90`` discussed below.  Finally, the level type carries a one-dimensional integer array to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.
+
    
 The local sweeper type needs to define
 functions to evaluate each term in the IMEX splitting and
@@ -66,15 +88,60 @@ a routine to solve an implicit equation equivalent to a
 backward-Euler step.  These routines are in ``src/sweeper.f90`` and are called
 ``f_eval`` and ``f_comp``.
 
-There is also a file ``src/probin.f90`` to read in parameters for LibPFASST and the local application.
+After the levels are assigned, the rest of the PFASST structure can is made by calling
 
+.. code-block:: fortran
+
+    !>  Set up some pfasst stuff
+    call pf_pfasst_setup(pf)
+
+Next, a hook is added that will echo residuals to the screen after every iteration.
+
+.. code-block:: fortran
+		
+    !> add some hooks for output  (using a LibPFASST hook here)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
+
+After a routine to echo 
+the run options to the screen, the initial conditions are set, and then the
+routine to actually do the time stepping is called.
+
+.. code-block:: fortran
+
+    !> Do the PFASST time stepping
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps)
+
+The rest is just cleanup.
 
 Example 2
 ---------
 This example solves exactly the same equation as Example 1, but using more user generated code.
-The main difference is that instead of using the LibPFASST data encapsulation ndarray, a local data
-encapsulation called scalar_encap is defined in ``src/encap.f90``.  To define a data encapsulation, the user must
-define 7 simple actions on the data set corresponding the the procedure
+The main difference is that instead of using the LibPFASST data encapsulation 'ndarray', a local data
+encapsulation called 'scalar_encap' is defined 
+
+.. code-block:: fortran
+		
+       !>  Allocate the user specific data constructor
+       allocate(scalar_factory::pf%levels(l)%ulevel%factory)
+
+The relevant code for the factory is in ``src/encap.f90``.       
+
+.. code-block:: fortran
+
+  !>  Type to create and destroy the local data encapsulation
+  type, extends(pf_factory_t) :: scalar_factory
+   contains
+     procedure :: create_single  => scalar_create_single
+     procedure :: create_array  => scalar_create_array
+     procedure :: destroy_single => scalar_destroy_single
+     procedure :: destroy_array => scalar_destroy_array
+  end type scalar_factory
+
+The four required subroutines are in this case trivial since no data structures need to be allocated to make the encapsulation.  
+
+To define a data encapsulation, the user must also provide
+7 subroutines that define actions on the data set corresponding to the procedures in
+``src/encap.f90``.       
 
 .. code-block:: fortran
 
@@ -88,10 +155,40 @@ define 7 simple actions on the data set corresponding the the procedure
      procedure :: eprint => scalar_eprint
   end type scalar_encap
 
-In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed for by the LibPFASST but is included for convenience in debugging.
+In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed  by LibPFASST but is included for convenience in debugging.
 
-Another difference in this example, is that a local hook is defined in the file ``src/hooks.f90`` to print the error to the screen.  The user can construct custom hooks following this template.
+The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in ``src/sweeper.f90``.
+
+.. code-block:: fortran
+
+     procedure :: initialize !  Overwrites imex sweeper initialize
+     procedure :: destroy    !  Overwrites imex sweeper destroy
+
+These two routines will be called instead of the base sweeper initialize and destroy in LibPFASST.  The point is that this then allows the user to add whatever things to the sweeper as necessary.  Here, there is nothing to do, but one must explicitly call the LibPFASST versions of these routines, as in
+
+.. code-block:: fortran
+
+    !>  Call the imex sweeper initialization
+    call this%imex_initialize(pf,level_index)
+
+
+Another difference in this example, is that a local hook is defined in the file ``src/hooks.f90`` to print the error to the screen.  It is assigned by
+
+
+.. code-block:: fortran
 		
+    !>  Add some hooks for output
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+
+
+The user can construct custom hooks following this template.
+
+Finally, note that in this example, an optional argument to return the solution at the final time, y_end is included in the call to ``pf_pfasst_run``
+
+.. code-block:: fortran
+		
+    !> Do the PFASST time stepping
+    call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
   
 
 Example 3
