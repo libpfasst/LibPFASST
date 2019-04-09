@@ -208,5 +208,4 @@ hence an IMEX SDC substepper will be used to evolve the equation through time.
 
 The solution of  implicit equation is done using the FFT through the FFTW package.
 
-
-to be continued . . .
+(to be continued)
