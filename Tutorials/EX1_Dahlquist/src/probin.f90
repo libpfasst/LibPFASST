@@ -1,34 +1,39 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module for reading parameters for the problem
+!>  Module for reading parameters for the problem  y'=lam1*y+lam2*y
 module probin
   use pfasst
 
-  character(len=64), save :: problem_type
-
+  !  The namlist for local variables
   real(pfdp), save :: lam1
   real(pfdp), save :: lam2
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
-
-  integer, save :: nsteps          ! number of time steps
+  integer, save :: nsteps    ! number of time steps
   character(len=32), save :: pfasst_nml  ! file for reading pfasst parameters
-  
+
+  namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml
+
+  !  Some local variables for reading
   CHARACTER(LEN=255) :: istring  ! stores command line argument
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
-
   integer :: ios,iostat
-  namelist /params/  lam1,lam2, dt, Tfin, nsteps,pfasst_nml
-
 
 contains
+  
+  subroutine probin_init(pf_fname)
+    character(len=*), intent(inout) :: pf_fname
+    integer :: i   !  loop variable
+    integer :: un  !  file read unit
+    character(len=32) :: arg  !  command line argument
 
-  subroutine probin_init(filename)
-    character(len=*), intent(in) :: filename
-    integer :: i
-    character(len=32) :: arg
-    integer :: un
+    character(128)    :: probin_fname   !<  file name for input parameters
+
+    !> Set the name of the input file
+    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
+    if (command_argument_count() >= 1) &
+         call get_command_argument(1, value=probin_fname)
 
     !> set defaults
     nsteps  = -1
@@ -38,12 +43,12 @@ contains
 
     dt      = 0.01_pfdp
     Tfin    = 1.0_pfdp
-    pfasst_nml=filename
+    pfasst_nml=probin_fname
     
     !>  Read in stuff from input file
     un = 9
-    write(*,*) 'opening file ',TRIM(filename), '  for input'
-    open(unit=un, file = filename, status = 'old', action = 'read')
+    write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
+    open(unit=un, file = probin_fname, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)
           
@@ -61,8 +66,12 @@ contains
 
     !  Reset dt if Tfin is set
     if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
+
+    !  Return the name of the file from which to read PFASST parameters
+    pf_fname=pfasst_nml
   end subroutine probin_init
 
+  !>  Subroutine to output run parameters 
   subroutine print_loc_options(pf, un_opt)
     type(pf_pfasst_t), intent(inout)           :: pf   
     integer,           intent(in   ), optional :: un_opt
@@ -70,6 +79,10 @@ contains
 
     if (pf%rank /= 0) return
     if (present(un_opt)) un = un_opt
+
+    !>  Output the PFASST options with the LibPFASST routine
+    call pf_print_options(pf,un_opt=un)
+
 
     !  Print out the local parameters
     write(un,*) '=================================================='

@@ -9,7 +9,7 @@ module encap
   use pfasst
   implicit none
 
-  !>  Type to create and destroy the arrays
+  !>  Type to create and destroy the local data encapsulation
   type, extends(pf_factory_t) :: scalar_factory
    contains
      procedure :: create_single  => scalar_create_single
@@ -35,37 +35,27 @@ contains
 
   !>  The following are the base subroutines that encapsulation factories need to provide
   
-  !>  Subroutine to allocate the array and set the size parameters
+  !>  Subroutine to allocate one encap
   subroutine scalar_create_single(this, x, level, shape)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )      :: level, shape(:)  ! passed by default, but not needed
     integer :: i
 
     allocate(scalar_encap::x)
   end subroutine scalar_create_single
 
-  !> Subroutine to create an array of arrays
+  !> Subroutine to create an array of encaps
   subroutine scalar_create_array(this, x, n, level,  shape)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n  ! size of array to build
+    integer,                intent(in   )    ::  level, shape(:) ! passed by default, but not needed
     integer :: i
     allocate(scalar_encap::x(n))
   end subroutine scalar_create_array
 
-  !>  Subroutine to destroy array
-  subroutine scalar_destroy(encap)
-    class(pf_encap_t), intent(inout) :: encap
-    type(scalar_encap), pointer :: scalar_obj
-
-    scalar_obj => cast_as_scalar(encap)
-
-    nullify(scalar_obj)
-
-  end subroutine scalar_destroy
-
-  !> Subroutine to destroy an single array
+  !> Subroutine to destroy a single array encap
   subroutine scalar_destroy_single(this, x)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x

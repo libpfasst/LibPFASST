@@ -38,24 +38,18 @@ contains
     type(pf_pfasst_t) :: pf       !<  the main pfasst structure
     type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
     type(ndarray)     :: y_0      !<  the initial condition
-    type(ndarray)     :: y_end    !<  the solution at the final time
-    character(256)    :: probin_fname   !<  file name for input parameters
+    character(256)    :: pf_fname   !<  file name for input of PFASST parameters
 
     integer           ::  l   !  loop variable over levels
 
-    !> Set the name of the input file
-    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
-    if (command_argument_count() >= 1) &
-         call get_command_argument(1, value=probin_fname)
-    
     !> Read problem parameters
-    call probin_init(probin_fname)
+    call probin_init(pf_fname)
 
     !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
     !>  Create the pfasst structure
-    call pf_pfasst_create(pf, comm, fname=probin_fname)
+    call pf_pfasst_create(pf, comm, fname=pf_fname)
 
     !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
@@ -78,10 +72,7 @@ contains
     !> add some hooks for output  (using a LibPFASST hook here)
     call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
 
-    !>  Output the run options 
-    call pf_print_options(pf,un_opt=6)
-
-    !>  Output local parameters
+    !>  Output run parameters to screen
     call print_loc_options(pf,un_opt=6)
     
     !>  Allocate initial consdition

@@ -4,17 +4,19 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 3   !  must be set
+   !  Internal pfasst variable that must be set
+   nlevels  = 3   !  must be set
 
-    niters = 25   !  default is 5
-    nnodes =    2  3  5
+   !  These are internal pfasst variables that can be reset
+   niters = 10   !  default is 5
+   nnodes =    2  3  5
 
     nsweeps_pred= 1 1 
     nsweeps= 1 1 1
     
-     !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-14
-     rel_res_tol = 1.d-14
+    !  optional variables to control termination  (defaults are 0.0)
+    abs_res_tol = 1.d-13
+    rel_res_tol = 1.d-13
 
      !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
      Vcycle=.TRUE.

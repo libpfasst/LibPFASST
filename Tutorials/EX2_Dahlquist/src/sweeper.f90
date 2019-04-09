@@ -22,18 +22,6 @@ module pf_my_sweeper
 
 contains
 
-  !>  Helper function to return sweeper pointer
-  function as_my_sweeper(sweeper) result(r)
-    class(pf_sweeper_t), intent(inout), target :: sweeper
-    class(my_sweeper_t), pointer :: r
-    select type(sweeper)
-    type is (my_sweeper_t)
-       r => sweeper
-    class default
-       stop
-    end select
-  end function as_my_sweeper
-
 
   !>  Routine to set up sweeper variables and operators
   subroutine initialize(this, pf,level_index)
