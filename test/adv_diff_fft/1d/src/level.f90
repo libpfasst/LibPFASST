@@ -21,22 +21,23 @@ contains
 !>  These are the transfer functions that must be  provided for the level
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  !>  Interpolate from coarse  level to fine
+  !>  Interpolate from coarse  level to fine using FFT
   subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     use pf_my_sweeper, only: ad_sweeper_t, as_ad_sweeper
     
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
     class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
-    real(pfdp),        intent(in   ) :: t
-    integer, intent(in), optional :: flags
+    real(pfdp),        intent(in   ) :: t                  !  Equation time
+    integer, intent(in), optional :: flags                 !  Optional flags (not used here)
 
-
-    integer :: nvarF, nvarG, xrat
-    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
-    real(pfdp),          pointer :: yvec_f(:), yvec_c(:)
-    complex(pfdp),       pointer :: wk_f(:),wk_c(:)    
-    type(pf_fft_t),      pointer :: fft_f,fft_c
+    !  Local variables
+    integer :: nx_f, nx_c
+    integer :: irat       !  Coarsening ratio
+    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c  !  fine and coarse sweepers
+    real(pfdp),          pointer :: yvec_f(:), yvec_c(:)  !  fine and coarse solutions
+    complex(pfdp),       pointer :: wk_f(:),wk_c(:)       !  fine and coarse FFT workspaces
+    type(pf_fft_t),      pointer :: fft_f,fft_c           !  fine and coarse FFT packages
 
 
     sweeper_c => as_ad_sweeper(c_lev%ulevel%sweeper)
@@ -47,25 +48,30 @@ contains
     yvec_f => get_array1d(f_vec) 
     yvec_c => get_array1d(c_vec)
 
-    nvarF = size(yvec_f)
-    nvarG = size(yvec_c)
-    xrat  = nvarF / nvarG
+    nx_f = size(yvec_f)
+    nx_c = size(yvec_c)
+    irat  = nx_f / nx_c
 
-    if (xrat == 1) then
-       yvec_f = yvec_c
+    !>  If 
+    if (irat == 1) then !  Identity map
+       yvec_f = yvec_c   
        return
-    endif
-    wk_f => fft_f%get_wk_ptr_1d()
-    wk_c => fft_c%get_wk_ptr_1d()
-    wk_c=yvec_c
-    call fft_c%fftf()    
-    wk_f = 0.0d0
-    wk_f(1:nvarG/2) = wk_c(1:nvarG/2)
-    wk_f(nvarF-nvarG/2+2:nvarF) = wk_c(nvarG/2+2:nvarG)
+    elseif (irat == 2) then  !  Use spectral space
+       ! Grab workspace
+       call fft_f%get_wk_ptr(wk_f)
+       call fft_c%get_wk_ptr(wk_c)
 
-    wk_f=wk_f*2.0_pfdp
-    call fft_f%fftb()
-    yvec_f=real(wk_f)
+       wk_c=yvec_c         ! Load coarse solution
+       call fft_c%fftf()   ! Take fft of wk_c
+       ! Make wk_f a padded version of wk_c        
+       wk_f = 0.0d0        
+       wk_f(1:nx_c/2) = wk_c(1:nx_c/2)
+       wk_f(nx_f-nx_c/2+2:nx_f) = wk_c(nx_c/2+2:nx_c)
+       wk_f=wk_f*2.0_pfdp  !  Factor needed to normalize
+       !  Take ifft of wk_f
+       call fft_f%fftb()
+       yvec_f=real(wk_f)  !  Extract fine solution
+    end if
   end subroutine interpolate
 
   !>  Restrict from fine level to coarse
@@ -83,11 +89,13 @@ contains
 
     integer :: irat
 
+    !>  Grab the vectors from the encap
     yvec_f => get_array1d(f_vec)
     yvec_c => get_array1d(c_vec)
 
     irat  = size(yvec_f)/size(yvec_c)
 
+    !>  Pointwise coarsening
     yvec_c = yvec_f(::irat)
   end subroutine restrict
 

@@ -90,8 +90,8 @@ contains
       call this%fft_tool%fft_setup([nx],1)
       allocate(this%lap(nx))
       allocate(this%ddx(nx))
-      call this%fft_tool%make_lap_1d(this%lap)
-      call this%fft_tool%make_deriv_1d(this%ddx)
+      call this%fft_tool%make_lap(this%lap)
+      call this%fft_tool%make_deriv(this%ddx)
     end subroutine initialize
       
 
@@ -132,24 +132,18 @@ contains
         ! local variables
         real(pfdp),         pointer :: yvec(:), nvec(:)
         type(pf_fft_t),     pointer :: fft
-        complex(pfdp),      pointer :: wk(:)
 
         yvec  => get_array1d(y)
         nvec  => get_array1d(n)
         fft   => this%fft_tool
-        wk    => fft%get_wk_ptr_1d() ! FFT work array
 
         select case (splitting)
             case (1) ! u_xx exponential, u_x explicit
-                wk = yvec
-                call fft%conv(-v * this%ddx)
-                nvec = real(wk)
+                call fft%conv(yvec,-v * this%ddx,nvec)
             case (2) ! Fully Exponential
                 call n%setval(real(0.0, pfdp))
-            case (3) ! Fully Exponential
-                wk = yvec
-                call fft%conv(nu * this%lap)
-                nvec = real(wk)
+            case (3) ! u_x exponential, u_xx explicit
+                call fft%conv(yvec,nu * this%lap,nvec)
         end select
 
      end subroutine f_eval
@@ -272,7 +266,7 @@ contains
 
           ! prepare fft variables
           fft    => this%fft_tool
-          fft_wk => fft%get_wk_ptr_1d() ! FFT work array
+          call fft%get_wk_ptr(fft_wk) ! FFT work array
 
           this%yhat = CMPLX(0.0, 0.0, pfdp)
           do i = 1, n

@@ -30,37 +30,41 @@ module pf_mod_fftpackage
      procedure :: fft_destroy
      procedure :: fftf
      procedure :: fftb
-     procedure, private :: conv_1d, conv_2d, conv_3d
+     !  Convolution in spectral space     
+     procedure, private :: conv_1d, conv_2d, conv_3d  
      generic :: conv => conv_1d, conv_2d, conv_3d
-     procedure :: get_wk_ptr_1d
-     procedure :: get_wk_ptr_2d
-     procedure :: get_wk_ptr_3d
-     procedure :: make_lap_1d
-     procedure :: make_lap_2d
-     procedure :: make_lap_3d
-     procedure :: make_deriv_1d
-     procedure :: make_deriv_2d
-     procedure :: make_deriv_3d                    
+     !  Complex convolution in real space     
+     procedure, private :: zconv_1d, zconv_2d, zconv_3d  
+     generic :: zconv => zconv_1d, zconv_2d, zconv_3d  
+     !  Convenience function to grab pointer to workspace
+     procedure, private :: get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d  
+     generic   :: get_wk_ptr =>get_wk_ptr_1d,get_wk_ptr_2d,get_wk_ptr_3d
+     !  Construct spectral Laplacian
+     procedure, private :: make_lap_1d,make_lap_2d, make_lap_3d
+     generic   :: make_lap =>make_lap_1d,make_lap_2d,make_lap_3d
+     !  Construct spectral derivative
+     procedure, private :: make_deriv_1d, make_deriv_2d, make_deriv_3d                    
+     generic   :: make_deriv =>make_deriv_1d,make_deriv_2d,make_deriv_3d
   end type pf_fft_t 
   
 contains
 
   !> Routines to return the pointer to the work variable
-  function get_wk_ptr_1d(this) result(wk)
+  subroutine get_wk_ptr_1d(this,wk) 
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer :: wk(:)              ! work space
+    complex(pfdp), pointer,intent(inout) :: wk(:)              ! work space
     wk=>this%wk_1d
-  end function get_wk_ptr_1d
-  function get_wk_ptr_2d(this) result(wk)
+  end subroutine get_wk_ptr_1d
+  subroutine get_wk_ptr_2d(this,wk) 
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer :: wk(:,:)              ! work space
+    complex(pfdp), pointer,intent(inout) :: wk(:,:)              ! work space
     wk=>this%wk_2d
-  end function get_wk_ptr_2d
-  function get_wk_ptr_3d(this) result(wk)
+  end subroutine get_wk_ptr_2d
+  subroutine get_wk_ptr_3d(this,wk) 
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer :: wk(:,:,:)              ! work space
+    complex(pfdp), pointer,intent(inout) :: wk(:,:,:)              ! work space
     wk=>this%wk_3d
-  end function get_wk_ptr_3d
+  end subroutine get_wk_ptr_3d
     
   !> Initialize the package
   subroutine fft_setup(this, grid_shape, dim, grid_size)
@@ -82,12 +86,10 @@ contains
     this%Ly = 1.0_pfdp
     this%Lz = 1.0_pfdp
     
-    if(present(grid_size)) this%Lx = grid_size(1)
-    if(present(grid_size)) this%Ly = grid_size(2)
-    if(present(grid_size)) this%Lz = grid_size(3)
 
     select case (dim)
     case (1)            
+       if(present(grid_size)) this%Lx = grid_size(1)
        this%normfact=real(nx,pfdp)
        wk = fftw_alloc_complex(int(nx, c_size_t))
        call c_f_pointer(wk, this%wk_1d, [nx])          
@@ -97,6 +99,11 @@ contains
        this%ifft = fftw_plan_dft_1d(nx, &
             this%wk_1d, this%wk_1d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (2)  
+       if(present(grid_size)) then
+          this%Lx = grid_size(1)
+          this%Ly = grid_size(2)
+       end if
+       
        ny=grid_shape(2)          
        this%ny = ny
        this%normfact=real(nx*ny,pfdp)
@@ -109,6 +116,12 @@ contains
        this%ifft = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (3)
+       if(present(grid_size))then
+          this%Lx = grid_size(1)
+          this%Ly = grid_size(2)
+          this%Lz = grid_size(3)
+       end if
+    
        ny=grid_shape(2)          
        nz=grid_shape(3)          
        this%ny = ny
@@ -178,35 +191,77 @@ contains
 
     ! START private convolution procedures
 
-    subroutine conv_1d(this, g)
-        ! Variable Types
+  ! Convolve g with spectral op and return in c
+  subroutine conv_1d(this, g,op,c)
+    class(pf_fft_t), intent(inout) :: this
+    real(pfdp), intent(inout) :: g(:)
+    complex(pfdp), intent(in) :: op(:)
+    real(pfdp), intent(inout) :: c(:)
+
+    this%wk_1d=g
+    call fftf(this)
+    this%wk_1d = this%wk_1d * op
+    call fftb(this)
+    c=real(this%wk_1d)
+  end subroutine conv_1d
+
+  ! Convolve g with spectral op and return in c
+  subroutine conv_2d(this, g,op,c)
+    class(pf_fft_t), intent(inout) :: this
+    real(pfdp), intent(in) :: g(:,:)
+    complex(pfdp), intent(in) :: op(:,:)
+    real(pfdp), intent(inout) :: c(:,:)
+    this%wk_2d=g
+    ! Compute Convolution
+    call fftf(this)
+    this%wk_2d = this%wk_2d * op
+    call fftb(this)
+    c=real(this%wk_2d)        
+  end subroutine conv_2d
+  
+  subroutine conv_3d(this, g,op,c)
         class(pf_fft_t), intent(inout) :: this
-        complex(pfdp), intent(in) :: g(:)
+    real(pfdp), intent(in) :: g(:,:,:)
+    complex(pfdp), intent(in) :: op(:,:,:)
+    real(pfdp), intent(inout) :: c(:,:,:)
+    this%wk_3d=g
+    ! Compute Convolution
+    call fftf(this)
+    this%wk_3d = this%wk_3d * op
+    call fftb(this)
+    c=real(this%wk_3d)            
+  end subroutine conv_3d
+
+  subroutine zconv_1d(this, g)
+    ! Variable Types
+        class(pf_fft_t), intent(inout) :: this
+        real(pfdp), intent(in) :: g(:)
         ! Compute Convolution
-        call fftf(this)
+        call fftb(this)
         this%wk_1d = this%wk_1d * g
-        call fftb(this)
-    end subroutine conv_1d
+        call fftf(this)
+    end subroutine zconv_1d
 
-    subroutine conv_2d(this, g)
+    subroutine zconv_2d(this, g)
         ! Variable Types
         class(pf_fft_t), intent(inout) :: this
-        complex(pfdp), intent(in) :: g(:,:)
+        real(pfdp), intent(in) :: g(:,:)
         ! Compute Convolution
-        call fftf(this)
+        call fftb(this)
         this%wk_2d = this%wk_2d * g
-        call fftb(this)
-    end subroutine conv_2d
+        call fftf(this)
+    end subroutine zconv_2d
 
-    subroutine conv_3d(this, g)
+    subroutine zconv_3d(this, g)
         ! Variable Types
         class(pf_fft_t), intent(inout) :: this
-        complex(pfdp), intent(in) :: g(:,:,:)
+        real(pfdp), intent(in) :: g(:,:,:)
         ! Compute Convolution
-        call fftf(this)
-        this%wk_3d = this%wk_3d * g
         call fftb(this)
-    end subroutine conv_3d
+        this%wk_3d = this%wk_3d * g
+        call fftf(this)
+    end subroutine zconv_3d
+    
     
     ! END private convolution procedures
 

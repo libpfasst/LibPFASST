@@ -113,7 +113,7 @@ contains
        do l = loopstart, loopend
         yvec  => get_array1d_oc(y, l)
         fvec  => get_array1d_oc(f, l)
-        wk => this%fft_tool%get_wk_ptr_1d()
+        call  this%fft_tool%get_wk_ptr(wk)
         wk = yvec
         call this%fft_tool%fftf()
         wk = nu * this%lap * wk 
@@ -170,7 +170,7 @@ contains
     integer :: l, loopstart, loopend
 
     fft => this%fft_tool
-    wk => fft%get_wk_ptr_1d()
+    call fft%get_wk_ptr(wk)
     
     if (piece == 2) then
       select case (flags)
@@ -261,8 +261,8 @@ contains
     ! create operators
     allocate(this%ddx(nvars))
     allocate(this%lap(nvars))
-    call this%fft_tool%make_lap_1d(this%lap)
-    call this%fft_tool%make_deriv_1d(this%ddx) 
+    call this%fft_tool%make_lap(this%lap)
+    call this%fft_tool%make_deriv(this%ddx) 
 
     ! allocate control and desired state
     allocate(this%u(nnodes,nvars))
@@ -291,8 +291,8 @@ contains
     ! create operators
     allocate(this%ddx(nx))
     allocate(this%lap(nx))
-    call this%fft_tool%make_lap_1d(this%lap)
-    call this%fft_tool%make_deriv_1d(this%ddx) 
+    call this%fft_tool%make_lap(this%lap)
+    call this%fft_tool%make_deriv(this%ddx) 
 
     ! allocate control and desired state
     allocate(this%u(nnodes,nx))
@@ -370,7 +370,7 @@ contains
 
     nnodes = size(nodes)
 
-    wk => sweeper%fft_tool%get_wk_ptr_1d()
+    call sweeper%fft_tool%get_wk_ptr(wk)
     do m = 1, nnodes
        sweeper%u(m,:) = 0.0_pfdp
        if ( t0+dt*nodes(m) > 2.5 ) then
@@ -408,7 +408,7 @@ contains
     LinfErrorCtrl = 0.0_pfdp
     LinfExactCtrl = 0.0_pfdp
 
-    wk => sweeper%fft_tool%get_wk_ptr_1d()
+    call sweeper%fft_tool%get_wk_ptr(wk)
     do i = 1, nnodes
 !       call exact_rhs(t0+dt*nodes(i), nvars, uexact)
       uexact = 0.0_pfdp

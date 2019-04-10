@@ -121,8 +121,8 @@ contains
        return
     endif
 
-    wkF => fftF%get_wk_ptr_1d()
-    wkC => fftC%get_wk_ptr_1d()
+    call fftF%get_wk_ptr(wkF)
+    call fftC%get_wk_ptr(wkC)
 
     wkC = qC
     call fftC%fftf()    
