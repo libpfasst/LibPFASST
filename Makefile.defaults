@@ -33,58 +33,56 @@ FFLAGS  +=  -I$(FFTW)/include
 LDFLAGS += -L$(FFTW)/lib -lfftw3
 endif
 
-
-FSRC = src/pfasst.f90 \
-       src/pf_comm.f90 \
-       src/pf_dtype.f90 \
-       src/pf_fft.f90 \
-       src/pf_hooks.f90 \
-       src/pf_interpolate.f90 \
-       src/pf_parallel.f90 \
-       src/pf_parallel_oc.f90 \
-       src/pf_pfasst.f90 \
-       src/pf_quadrature.f90 \
-       src/pf_restrict.f90 \
-       src/pf_results.f90 \
-       src/pf_rkstepper.f90 \
-       src/pf_timer.f90 \
-       src/pf_utils.f90 \
-       src/encaps/pf_ndarray.f90 \
-       src/encaps/pf_ndarray_oc.f90 \
-       src/encaps/pf_ndsysarray.f90 \
-       src/encaps/pf_zndsysarray.f90 \
-       src/encaps/pf_zndarray.f90 \
-       src/sweepers/pf_exp.f90 \
-       src/sweepers/pf_imex.f90 \
-       src/sweepers/pf_imexQ_oc.f90 \
-       src/sweepers/pf_imk.f90 \
-       src/sweepers/pf_magnus_picard.f90 \
-       src/sweepers/pf_misdcQ.f90 \
-       src/sweepers/pf_misdcQ_oc.f90 \
-       src/sweepers/pf_verlet.f90 
-       #       src/sweepers/pf_amisdc.f90 \
-#       src/sweepers/pf_amisdcQ.f90 \
+FSRC = pfasst.f90 \
+       pf_comm.f90 \
+       pf_dtype.f90 \
+       pf_fft.f90 \
+       pf_hooks.f90 \
+       pf_interpolate.f90 \
+       pf_parallel.f90 \
+       pf_parallel_oc.f90 \
+       pf_pfasst.f90 \
+       pf_quadrature.f90 \
+       pf_restrict.f90 \
+       pf_results.f90 \
+       pf_rkstepper.f90 \
+       pf_timer.f90 \
+       pf_utils.f90 \
+       pf_ndarray_encap.f90 \
+       pf_ndarray_oc_encap.f90 \
+       pf_ndsysarray_encap.f90 \
+       pf_zndsysarray_encap.f90 \
+       pf_zndarray_encap.f90 \
+       pf_exp_sweeper.f90 \
+       pf_imex_sweeper.f90 \
+       pf_imexQ_oc_sweeper.f90 \
+       pf_imk_sweeper.f90 \
+       pf_magpicard_sweeper.f90 \
+       pf_misdcQ_sweeper.f90 \
+       pf_misdcQ_oc_sweeper.f90 \
+       pf_verlet_sweeper.f90 
+       #       pf_amisdc.f90 \
+#       pf_amisdcQ.f90 \
 
 
 
 ifeq ($(NOFFTW),TRUE)
-FSRC+=src/pf_fftpack.f90
+FSRC+=pf_fftpack.f90
 else
-FSRC+=src/pf_fftw.f90
+FSRC+=pf_fftw.f90
 endif
 
 ifdef NOMPI
   FFLAGS += -DNOMPI
 else
-  FSRC += src/pf_mpi.f90
+  FSRC += pf_mpi.f90
 endif
 
 ifdef OMP
   FFLAGS += -fopenmp
 endif
 
-
-OBJ = $(subst src,build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 ifeq ($(NOFFTW),TRUE)
 OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif
