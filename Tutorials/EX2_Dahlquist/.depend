@@ -1,0 +1,11 @@
+FOBJ=./build/main.o ./build/sweeper.o ./build/level.o ./build/hooks.o ./build/encap.o ./build/probin.o 
+
+foo: $(FOBJ)
+	$(FC) -o $@ $(FFLAGS) $(LDFLAGS) $(FOBJ) $(LIBS)
+
+./build/main.o : src/main.f90 ./build/encap.o ./build/probin.o ./build/hooks.o ./build/level.o ./build/sweeper.o 
+./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/encap.o 
+./build/level.o : src/level.f90 ./build/encap.o 
+./build/hooks.o : src/hooks.f90 ./build/sweeper.o ./build/encap.o 
+./build/encap.o : src/encap.f90 
+./build/probin.o : src/probin.f90 

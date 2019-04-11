@@ -90,7 +90,7 @@ contains
     call ndarray_build(y_end, [ nx(pf%nlevels) ])    
 
     !> compute initial condition
-    call initial(y_0)
+    call initial_sol(y_0)
 
     !> Do the PFASST stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)

@@ -16,8 +16,6 @@ endif
 
 build/%.o build/%.mod: %.f90
 	@mkdir -p build
-	@mkdir -p build/encaps
-	@mkdir -p build/sweepers
 	@mkdir -p include
 
 ifeq ($(MKVERBOSE),TRUE)
@@ -51,16 +49,16 @@ endif
 .PHONY: clean depend
 
 clean:
-	find . -name build | xargs rm -rf
-	find . -name '*.exe' | xargs rm -f
+	\rm -f *.exe
+	\rm -rf  build
 	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
-	\rm -f include/*.mod
+	\rm -rf include
 	\rm -f lib/*.a
 
 
 #  We can use this to build a new dependency file if makedepf90 is installed  type "make depend"
-depend $(LIBPFASST)/.depend:
-	makedepf90 -b ./build -o foo $(FSRC) > .depend
+depend $(PWD)/.depend:
+	makedepf90 -b ./build  $(addprefix src/,$(FSRC)) > .depend
 
 #
 # LIBPFASST dependencies

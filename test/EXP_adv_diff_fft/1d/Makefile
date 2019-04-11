@@ -4,22 +4,15 @@
 
 LIBPFASST ?= ../../..
 
-
-FFTW=TRUE
 EXE = main.exe
+BUILDDIR = build
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = src/main.f90 \
-       src/sweeper.f90 \
-       src/level.f90 \
-       src/hooks.f90 \
-       src/probin.f90 \
-       src/phi_mod.f90
+FSRC = main.f90 sweeper.f90 level.f90 hooks.f90 probin.f90 phi_mod.f90
 
-OBJ = $(subst src,build,$(FSRC:.f90=.o))
-LDFLAGS += -L$(LIBPFASST)/lib -lpfasst
+OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
+
 FFLAGS  += -I$(LIBPFASST)/include 
-
 
 all: $(EXE)
 
@@ -28,27 +21,11 @@ VPATHS = src
 
 include $(LIBPFASST)/Makefile.rules
 
-build/%.o: %.c
-	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
 
-
-build/%.o: %.f90
-	@mkdir -p build
-	@mkdir -p include
-	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
-
-
-#
 # dependencies
 #
-./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/level.o ./build/sweeper.o 
-./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/phi_mod.o 
-./build/level.o : src/level.f90 ./build/phi_mod.o 
-./build/hooks.o : src/hooks.f90 ./build/sweeper.o 
-./build/probin.o : src/probin.f90 
-./build/phi_mod.o : src/phi_mod.f90 
-
+include $(PWD)/.depend
 main.exe : $(LIBPFASST)/lib/libpfasst.a 
+
 
 

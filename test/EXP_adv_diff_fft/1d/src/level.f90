@@ -56,8 +56,8 @@ contains
        yvec_f = yvec_c
        return
     endif
-    wk_f => fft_f%get_wk_ptr_1d()
-    wk_c => fft_c%get_wk_ptr_1d()
+    call fft_f%get_wk_ptr(wk_f)
+    call fft_c%get_wk_ptr(wk_c)
     wk_c=yvec_c
     call fft_c%fftf()    
     wk_f = 0.0d0

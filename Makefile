@@ -3,7 +3,7 @@
 #
 
 LIBPFASST ?= $(PWD)
-
+BUILDDIR = build
 include $(LIBPFASST)/Makefile.defaults
 
 #

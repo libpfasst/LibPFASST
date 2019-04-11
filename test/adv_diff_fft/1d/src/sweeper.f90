@@ -16,10 +16,8 @@ module pf_my_sweeper
      integer ::     nx   !  Grid size
      !>  Spectral derivative operators
      type(pf_fft_t), pointer :: fft_tool
-     complex(pfdp), allocatable :: lap(:) ! Lapclacian operators
-     complex(pfdp), allocatable :: ddx(:) ! First derivative operators
-     complex(pfdp), allocatable :: opE(:)         ! Lapclacian operators
-     complex(pfdp), allocatable :: opI(:)         ! First derivative operators
+     complex(pfdp), allocatable :: opE(:) ! Lapclacian operators
+     complex(pfdp), allocatable :: opI(:) ! First derivative operators
      
    contains
 
@@ -52,6 +50,8 @@ contains
     type(pf_pfasst_t),   intent(inout),target :: pf
     integer,             intent(in)    :: level_index
 
+    complex(pfdp), allocatable :: lap(:) ! Lapclacian operator
+    complex(pfdp), allocatable :: ddx(:) ! First derivative operator
 
     integer     :: nx
 
@@ -76,29 +76,33 @@ contains
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx],1)
 
-    allocate(this%lap(nx))
-    allocate(this%ddx(nx))
+    allocate(lap(nx))
+    allocate(ddx(nx))
     allocate(this%opE(nx))
     allocate(this%opI(nx))
-    call this%fft_tool%make_lap_1d(this%lap)
-    call this%fft_tool%make_deriv_1d(this%ddx)    
+    !>  Set up the correct Fourier operators
+    call this%fft_tool%make_lap(lap)
+    call this%fft_tool%make_deriv(ddx)    
 
+    !>  Choose the explicit and implicit operators depending on imex_stat
     select case (imex_stat)
     case (0)  ! Fully Explicit        
-       this%opE = -v*this%ddx + nu * this%lap
+       this%opE = -v*ddx + nu*lap
        this%opI = 0.0_pfdp          
     case (1)  ! Fully Implicit
        this%opE = 0.0_pfdp
-       this%opI = -v*this%ddx + nu * this%lap 
+       this%opI = -v*ddx + nu * lap 
     case (2)  ! IMEX
-       this%opE = -v*this%ddx
-       this%opI =  nu * this%lap           
+       this%opE = -v*ddx
+       this%opI =  nu*lap           
     case DEFAULT
        print *,'Bad case for imex_stat in f_eval ', imex_stat
        call exit(0)
     end select
-    deallocate(this%lap)
-    deallocate(this%ddx)
+
+    !>  Clean up
+    deallocate(lap)
+    deallocate(ddx)
     
   end subroutine initialize
   
@@ -112,10 +116,11 @@ contains
     !>  Call base sweeper destroy
     call this%imex_destroy(pf,level_index)
 
-    !> Nuke the local stuff
+    !> Nuke the FFT operators 
     deallocate(this%opE)
     deallocate(this%opI)
-    
+
+    !>  Free up FFT stuff
     call this%fft_tool%fft_destroy()
     deallocate(this%fft_tool)
 
@@ -133,65 +138,65 @@ contains
     class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
     integer,             intent(in   ) :: level_index
-    integer,             intent(in   ) :: piece
+    integer,             intent(in   ) :: piece  !  Which piece to solve for
     
     real(pfdp),      pointer :: yvec(:), fvec(:)
     type(pf_fft_t),     pointer :: fft
-    complex(pfdp),      pointer :: wk(:)
 
     yvec  => get_array1d(y)
     fvec => get_array1d(f)
     fft => this%fft_tool
-    wk => fft%get_wk_ptr_1d()
-    
-    ! Load the solution into the FFT
-    wk=yvec
 
     ! Apply spectral operators using the FFT convolution function
     select case (piece)
     case (1)  ! Explicit piece
-       call fft%conv(this%opE)            
+       call fft%conv(yvec,this%opE,fvec)            
     case (2)  ! Implicit piece
-       call fft%conv(this%opI)            
+       call fft%conv(yvec,this%opI,fvec)            
     case DEFAULT
        print *,'Bad case for piece in f_eval ', piece
        call exit(0)
     end select
 
-    fvec=real(wk)
   end subroutine f_eval
 
-  ! Solve for y and return f2 also.
+  ! Solve for y and return f2 also
+  !   y-dtq*f(y,t) = rhs
   subroutine f_comp(this, y, t, dtq, rhs, level_index, f,piece)
     use probin, only:  imex_stat ,nu,v
     class(ad_sweeper_t), intent(inout) :: this
-    class(pf_encap_t),   intent(inout) :: y
-    real(pfdp),          intent(in   ) :: t
-    real(pfdp),          intent(in   ) :: dtq
-    class(pf_encap_t),   intent(in   ) :: rhs
-    integer,             intent(in   ) :: level_index
-    class(pf_encap_t),   intent(inout) :: f
-    integer,             intent(in   ) :: piece
+    class(pf_encap_t),   intent(inout) :: y       !  The solution we seek
+    real(pfdp),          intent(in   ) :: t       !  Equation time of implicit solve
+    real(pfdp),          intent(in   ) :: dtq     !  The 
+    class(pf_encap_t),   intent(in   ) :: rhs     !  The right hand side of the solve
+    integer,             intent(in   ) :: level_index !  Which level this is
+    class(pf_encap_t),   intent(inout) :: f       !  The function value
+    integer,             intent(in   ) :: piece   !  Designates which piece to solve for (here implicit)
 
     real(pfdp),      pointer :: yvec(:), rhsvec(:), fvec(:)
-    complex(pfdp),      pointer :: wk(:)
     type(pf_fft_t),     pointer :: fft
 
+    yvec  => get_array1d(y)
+    rhsvec => get_array1d(rhs)
+    fvec => get_array1d(f)
+
+    if (imex_stat .eq. 0)  then
+       print *,'We should not be calling fcomp for fully explicit'
+       yvec=rhsvec
+       fvec=0.0_pfdp
+       return
+    endif
+
+    ! Grab the fft workspace
     fft => this%fft_tool
-    wk => fft%get_wk_ptr_1d()
+
     if (piece == 2) then
-       yvec  => get_array1d(y)
-       rhsvec => get_array1d(rhs)
-       fvec => get_array1d(f)
 
        ! Apply the inverse opeator with the FFT convolution
-       wk=rhsvec
-       call fft%conv(1.0_pfdp/(1.0_pfdp - dtq*this%opI))
+       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
-       yvec=real(wk)
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq
-
     else
        print *,'Bad piece in f_comp ',piece
        call exit(0)
@@ -204,10 +209,10 @@ contains
 !>  Here are some extra routines which are problem dependent  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
-  subroutine initial(y_0)
+  subroutine initial_sol(y_0)
     type(ndarray), intent(inout) :: y_0
     call exact(0.0_pfdp, y_0%flatarray)
-  end subroutine initial
+  end subroutine initial_sol
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
@@ -217,7 +222,7 @@ contains
 
     integer    :: nx, i, ii, k,nbox
     real(pfdp) :: tol, t0,Dx, omega
-    real(pfdp), allocatable ::  x
+    real(pfdp) ::  x
 
     nx = size(yex)
     Dx = 1.0d0/dble(nx)

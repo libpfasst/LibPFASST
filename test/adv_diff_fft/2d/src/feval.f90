@@ -90,9 +90,9 @@ contains
     allocate(this%opE(nx,ny))
     allocate(this%opI(nx,ny))
 
-    call this%fft_tool%make_lap_2d(this%lap)
-    call this%fft_tool%make_deriv_2d(this%ddx,1)
-    call this%fft_tool%make_deriv_2d(this%ddy,2)
+    call this%fft_tool%make_lap(this%lap)
+    call this%fft_tool%make_deriv(this%ddx,1)
+    call this%fft_tool%make_deriv(this%ddy,2)
     select case (imex_stat)
     case (0)  ! Fully Explicit        
        this%opE = -a*this%ddx-b*this%ddy + nu * this%lap
@@ -146,29 +146,24 @@ contains
     
     real(pfdp),      pointer :: yvec(:,:), fvec(:,:)
     type(pf_fft_t),     pointer :: fft
-    complex(pfdp),      pointer :: wk(:,:)
 
     yvec  => get_array2d(y)
     fvec => get_array2d(f)
     fft => this%fft_tool
-    wk => fft%get_wk_ptr_2d()
     
-    ! Load the solution into the FFT
-    wk=yvec
 
     ! Apply spectral operators using the FFT convolution function
     select case (piece)
     case (1)  ! Explicit piece
-       call fft%conv(this%opE)            
+       call fft%conv(yvec,this%opE,fvec)            
     case (2)  ! Implicit piece
-       call fft%conv(this%opI)            
+       call fft%conv(yvec,this%opI,fvec)            
     case DEFAULT
       print *,'Bad case for piece in f_eval ', piece
       call exit(0)
     end select
 
 
-    fvec=real(wk)
   end subroutine f_eval
 
   ! Solve for y and return f2 also.
@@ -184,21 +179,18 @@ contains
     integer,             intent(in   ) :: piece
 
     real(pfdp),      pointer :: yvec(:,:), rhsvec(:,:), fvec(:,:)
-    complex(pfdp),      pointer :: wk(:,:)
     type(pf_fft_t),     pointer :: fft
 
     fft => this%fft_tool
-    wk => fft%get_wk_ptr_2d()
+
     if (piece == 2) then
        yvec  => get_array2d(y)
        rhsvec => get_array2d(rhs)
        fvec => get_array2d(f)
 
-       ! Apply the inverse opeator with the FFT convolution
-       wk=rhsvec
-       call fft%conv(1.0_pfdp/(1.0_pfdp - dtq*this%opI))
+       ! Apply the inverse operator with the FFT convolution
+       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
-       yvec=real(wk)
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq
     else
@@ -246,8 +238,8 @@ contains
     fft_c => sweeper_c%fft_tool
     fft_f => sweeper_f%fft_tool    
 
-    wk_f => fft_f%get_wk_ptr_2d()
-    wk_c => fft_c%get_wk_ptr_2d()
+    call fft_f%get_wk_ptr(wk_f)
+    call fft_c%get_wk_ptr(wk_c)
     wk_c=yvec_c
     call fft_c%fftf()    
 
