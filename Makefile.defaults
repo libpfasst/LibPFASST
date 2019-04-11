@@ -24,7 +24,7 @@ include $(wildcard $(LIBPFASST)/*.defs)
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst
 
-NOFFTW=TRUE
+NOFFTW=FALSE
 ifeq ($(NOFFTW),TRUE)
 F77SRC = src/dfftpack.o
 else
@@ -37,6 +37,7 @@ endif
 FSRC = src/pfasst.f90 \
        src/pf_comm.f90 \
        src/pf_dtype.f90 \
+       src/pf_fft.f90 \
        src/pf_hooks.f90 \
        src/pf_interpolate.f90 \
        src/pf_parallel.f90 \
@@ -63,10 +64,6 @@ FSRC = src/pfasst.f90 \
        src/sweepers/pf_verlet.f90 
        #       src/sweepers/pf_amisdc.f90 \
 #       src/sweepers/pf_amisdcQ.f90 \
-
-
-
-
 
 
 
