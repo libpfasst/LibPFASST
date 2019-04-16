@@ -10,54 +10,52 @@ module probin
 
   real(pfdp), save :: v      ! advection velocity
   real(pfdp), save :: nu     ! viscosity
-  real(pfdp), save :: t00     ! initial time for exact solution
-  real(pfdp), save :: sigma  ! initial condition parameter
-  integer,          save :: kfreq  ! initial condition parameter
+  integer,    save :: kfreq  ! initial condition parameter
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
 
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
-  integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
-  integer, save :: nsteps_rk       ! number of time steps for rk
   integer, save :: imex_stat       ! type of imex splitting
 
-  character(len=32), save :: pfasst_nml
+  character(len=128), save :: pfasst_nml
 
   character(len=64), save :: output ! directory name for output
   CHARACTER(LEN=255) :: istring  ! stores command line argument
   CHARACTER(LEN=255) :: message           ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/  nx,nprob, nsteps,nsteps_rk, dt, Tfin
-  namelist /params/  pfasst_nml, v, nu, t00, sigma, kfreq,imex_stat
+  namelist /params/  nx, nsteps, dt, Tfin
+  namelist /params/  pfasst_nml, v, nu, kfreq,imex_stat
 
 contains
 
-  subroutine probin_init(filename)
-    character(len=*), intent(in) :: filename
-    integer :: i
-    character(len=32) :: arg
-    integer :: un
-
+  subroutine probin_init(pf_fname)
+    character(len=*), intent(inout) :: pf_fname
+    integer :: i   !  loop variable
+    integer :: un  !  file read unit
+    character(len=128) :: arg  !  command line argument
+    character(128)    :: probin_fname   !<  file name for input parameters
+    
+    !> Set the name of the input file
+    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
+    if (command_argument_count() >= 1) &
+         call get_command_argument(1, value=probin_fname)
+    
     !> set defaults
     nsteps  = -1
-    nsteps_rk  = -1
-
     v       = 1.0_pfdp
     nu      = 0.01_pfdp
     kfreq   = 1.0_pfdp
-    t00      = 0.08_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
-    nprob = 0  !  0: Gaussian, 1: Sin wave
     imex_stat=2    !  Default is full IMEX
-    pfasst_nml=filename
+    pfasst_nml=probin_fname
 
     !>  Read in stuff from input file
     un = 9
-    write(*,*) 'opening file ',TRIM(filename), '  for input'
-    open(unit=un, file = filename, status = 'old', action = 'read')
+    write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
+    open(unit=un, file = probin_fname, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)
           
@@ -75,6 +73,10 @@ contains
 
     !  Reset dt if Tfin is set
     if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
+
+    !  Return the name of the file from which to read PFASST parameters
+    pf_fname=pfasst_nml
+
   end subroutine probin_init
 
   subroutine print_loc_options(pf, un_opt)
@@ -108,15 +110,6 @@ contains
        call exit(0)
     end select
 
-    select case (nprob)
-    case (0)  
-       write(un,*) 'Periodic Gaussian initial conditions with t00=',t00
-    case (1)  
-       write(un,*) 'Sine initial conditions with kfreq=',kfreq
-    case DEFAULT
-       print *,'Bad case for nprob in probin ', nprob
-       call exit(0)
-    end select
     
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml
     write(un,*) '=================================================='

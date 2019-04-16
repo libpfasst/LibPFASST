@@ -33,7 +33,7 @@ contains
     !>  compute error
     err0 = maxval(abs(y_end-yexact))
 
-    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7,es14.7," res: ",es18.10e4)', &
+    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7,es14.7," res: ",es14.7)', &
          state%step+1, state%iter,level%index, maxerr,err0,level%residual
     call flush(6)
   end subroutine echo_error

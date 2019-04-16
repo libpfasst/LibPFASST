@@ -57,27 +57,13 @@ contains
        yvec_f = yvec_c   
        return
     elseif (irat == 2) then  !  Use spectral space
-       ! Grab workspace
-       call fft_f%get_wk_ptr(wk_f)
-       call fft_c%get_wk_ptr(wk_c)
-
-       wk_c=yvec_c         ! Load coarse solution
-       call fft_c%fftf()   ! Take fft of wk_c
-       ! Make wk_f a padded version of wk_c        
-       wk_f = 0.0d0        
-       wk_f(1:nx_c/2) = wk_c(1:nx_c/2)
-       wk_f(nx_f-nx_c/2+2:nx_f) = wk_c(nx_c/2+2:nx_c)
-       wk_f=wk_f*2.0_pfdp  !  Factor needed to normalize
-       !  Take ifft of wk_f
-       call fft_f%fftb()
-       yvec_f=real(wk_f)  !  Extract fine solution
+       call fft_c%interp(yvec_c,fft_f,yvec_f)
     end if
+
   end subroutine interpolate
 
   !>  Restrict from fine level to coarse
   subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
-    use pf_my_sweeper, only: ad_sweeper_t
-
     class(ad_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
     class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
@@ -98,8 +84,6 @@ contains
     !>  Pointwise coarsening
     yvec_c = yvec_f(::irat)
   end subroutine restrict
-
-
 
 end module pf_my_level
 

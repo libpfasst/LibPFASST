@@ -1,4 +1,5 @@
-./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/feval.o 
-./build/feval.o : src/feval.f90 ./build/probin.o 
-./build/hooks.o : src/hooks.f90 ./build/feval.o 
+./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/level.o ./build/sweeper.o 
+./build/level.o : src/level.f90 
+./build/sweeper.o : src/sweeper.f90 ./build/probin.o 
+./build/hooks.o : src/hooks.f90 ./build/sweeper.o 
 ./build/probin.o : src/probin.f90 

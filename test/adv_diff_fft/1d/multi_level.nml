@@ -6,8 +6,8 @@
 &PF_PARAMS
     nlevels  = 3   !  must be set
 
-    niters = 50   !  default is 5
-    nnodes =     3 5 9
+    niters = 15   !  default is 5
+    nnodes =     3 5 9 
 
     use_proper_nodes=.false.
     nsweeps_pred= 1 1 1
@@ -17,8 +17,8 @@
     qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
-     rel_res_tol = 1.d-12
+     abs_res_tol = 1.d-13
+     rel_res_tol = 1.d-13
 
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
@@ -41,10 +41,9 @@
     nu = 0.02
     v=1.0
 
-    Tfin = 1.0
-    nsteps = 8
+    Tfin = 0.9
+    nsteps = 16
 
     imex_stat=2
-    nprob = 1
 
 /

@@ -9,7 +9,7 @@ BUILDDIR = build
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = main.f90 feval.f90 hooks.f90 probin.f90 
+FSRC = main.f90 level.f90 sweeper.f90 hooks.f90 probin.f90 
 
 OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
 
