@@ -10,7 +10,7 @@ contains
 
   !>  Output the error and residual in the solution
   subroutine echo_error(pf, level, state)
-    use feval, only: exact
+    use pf_my_sweeper, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
     class(pf_level_t), intent(inout) :: level
     type(pf_state_t),  intent(in   ) :: state
@@ -28,7 +28,7 @@ contains
     !>  compute error
     maxerr = maxval(abs(y_end-y_ex))
     
-    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
+    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es14.7)', &
          state%step+1, state%iter,level%index, maxerr,level%residual
     call flush(6)
     call ndarray_destroy(y_exact)    

@@ -6,8 +6,8 @@
 &PF_PARAMS
     nlevels  = 3   !  must be set
 
-    niters = 10   !  default is 5
-    nnodes =     3 5 9
+    niters = 15   !  default is 5
+    nnodes =     3 5 9 
 
     use_proper_nodes=.false.
     nsweeps_pred= 1 1 1

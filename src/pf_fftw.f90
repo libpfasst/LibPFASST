@@ -9,63 +9,28 @@
 module pf_mod_fftpackage
   use pf_mod_dtype
   use pf_mod_utils
+  use pf_mod_fft_abs
   
   implicit none
   
   include 'fftw3.f03'
-  real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
   
   !>  Variables and storage for FFTW
-  type :: pf_fft_t
-     type(c_ptr) :: ffft, ifft                       !! fftw pointers
-     integer ::  dim                                 !! spatial number of dimensions
-     integer ::  nx,ny,nz                            !! grid sizes
-     real(pfdp) :: Lx, Ly, Lz                        !! domain size
+  type,extends(pf_fft_abs_t) :: pf_fft_t
+     type(c_ptr) :: ffftw, ifftw                     !! fftw pointers
      real(pfdp) :: normfact                          !! normalization factor
-     complex(pfdp), pointer :: wk_1d(:)              !! work space
-     complex(pfdp), pointer :: wk_2d(:,:)            !! work space
-     complex(pfdp), pointer :: wk_3d(:,:,:)          !! work space               
    contains
      procedure :: fft_setup
      procedure :: fft_destroy
      procedure :: fftf
      procedure :: fftb
-     !  Convolution in spectral space     
-     procedure, private :: conv_1d, conv_2d, conv_3d  
-     generic :: conv => conv_1d, conv_2d, conv_3d
-     !  Complex convolution in real space     
-     procedure, private :: zconv_1d, zconv_2d, zconv_3d  
-     generic :: zconv => zconv_1d, zconv_2d, zconv_3d  
-     !  Convenience function to grab pointer to workspace
-     procedure, private :: get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d  
-     generic   :: get_wk_ptr =>get_wk_ptr_1d,get_wk_ptr_2d,get_wk_ptr_3d
-     !  Construct spectral Laplacian
-     procedure, private :: make_lap_1d,make_lap_2d, make_lap_3d
-     generic   :: make_lap =>make_lap_1d,make_lap_2d,make_lap_3d
-     !  Construct spectral derivative
-     procedure, private :: make_deriv_1d, make_deriv_2d, make_deriv_3d                    
-     generic   :: make_deriv =>make_deriv_1d,make_deriv_2d,make_deriv_3d
+     !  Interpolate in spectral space
+     procedure , private :: interp_1d,interp_2d, interp_3d,zinterp_1d,zinterp_2d, zinterp_3d
+     generic   :: interp =>interp_1d,interp_2d,interp_3d,zinterp_1d,zinterp_2d,zinterp_3d          
   end type pf_fft_t 
   
 contains
 
-  !> Routines to return the pointer to the work variable
-  subroutine get_wk_ptr_1d(this,wk) 
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:)              ! work space
-    wk=>this%wk_1d
-  end subroutine get_wk_ptr_1d
-  subroutine get_wk_ptr_2d(this,wk) 
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:,:)              ! work space
-    wk=>this%wk_2d
-  end subroutine get_wk_ptr_2d
-  subroutine get_wk_ptr_3d(this,wk) 
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:,:,:)              ! work space
-    wk=>this%wk_3d
-  end subroutine get_wk_ptr_3d
-    
   !> Initialize the package
   subroutine fft_setup(this, grid_shape, dim, grid_size)
     class(pf_fft_t), intent(inout) :: this
@@ -94,9 +59,9 @@ contains
        wk = fftw_alloc_complex(int(nx, c_size_t))
        call c_f_pointer(wk, this%wk_1d, [nx])          
        
-       this%ffft = fftw_plan_dft_1d(nx, &
+       this%ffftw = fftw_plan_dft_1d(nx, &
             this%wk_1d, this%wk_1d, FFTW_FORWARD, FFTW_ESTIMATE)
-       this%ifft = fftw_plan_dft_1d(nx, &
+       this%ifftw = fftw_plan_dft_1d(nx, &
             this%wk_1d, this%wk_1d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (2)  
        if(present(grid_size)) then
@@ -111,9 +76,9 @@ contains
        wk = fftw_alloc_complex(int(nx*ny, c_size_t))
        call c_f_pointer(wk, this%wk_2d, [nx,ny])
 
-       this%ffft = fftw_plan_dft_2d(nx,ny, &
+       this%ffftw = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_FORWARD, FFTW_ESTIMATE)
-       this%ifft = fftw_plan_dft_2d(nx,ny, &
+       this%ifftw = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (3)
        if(present(grid_size))then
@@ -129,9 +94,9 @@ contains
        this%normfact=real(nx*ny*nz,pfdp)          
        wk = fftw_alloc_complex(int(nx*ny*nz, c_size_t))
        call c_f_pointer(wk, this%wk_3d, [nx,ny,nz])
-       this%ffft = fftw_plan_dft_3d(nx,ny,nz, &
+       this%ffftw = fftw_plan_dft_3d(nx,ny,nz, &
             this%wk_3d, this%wk_3d, FFTW_FORWARD, FFTW_ESTIMATE)
-       this%ifft = fftw_plan_dft_3d(nx,ny,nz, &
+       this%ifftw = fftw_plan_dft_3d(nx,ny,nz, &
             this%wk_3d, this%wk_3d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
@@ -141,8 +106,8 @@ contains
   !>  Destroy the package
   subroutine fft_destroy(this)
     class(pf_fft_t), intent(inout) :: this
-    call fftw_destroy_plan(this%ffft)
-    call fftw_destroy_plan(this%ifft)
+    call fftw_destroy_plan(this%ffftw)
+    call fftw_destroy_plan(this%ifftw)
     select case (this%dim)
     case (1)            
        deallocate(this%wk_1d)
@@ -160,11 +125,11 @@ contains
     class(pf_fft_t), intent(inout) :: this
     select case (this%dim)       
     case (1)            
-       call fftw_execute_dft(this%ffft, this%wk_1d, this%wk_1d)
+       call fftw_execute_dft(this%ffftw, this%wk_1d, this%wk_1d)
     case (2)            
-       call fftw_execute_dft(this%ffft, this%wk_2d, this%wk_2d)
+       call fftw_execute_dft(this%ffftw, this%wk_2d, this%wk_2d)
     case (3)            
-       call fftw_execute_dft(this%ffft, this%wk_3d, this%wk_3d)
+       call fftw_execute_dft(this%ffftw, this%wk_3d, this%wk_3d)
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)       
     end select
@@ -177,273 +142,169 @@ contains
     select case (this%dim)       
     case (1)
        this%wk_1d=this%wk_1d/this%normfact          
-       call fftw_execute_dft(this%ifft, this%wk_1d, this%wk_1d)
+       call fftw_execute_dft(this%ifftw, this%wk_1d, this%wk_1d)
     case (2)
        this%wk_2d=this%wk_2d/this%normfact          
-       call fftw_execute_dft(this%ifft, this%wk_2d, this%wk_2d)
+       call fftw_execute_dft(this%ifftw, this%wk_2d, this%wk_2d)
     case (3)            
        this%wk_3d=this%wk_3d/this%normfact
-       call fftw_execute_dft(this%ifft, this%wk_3d, this%wk_3d)
+       call fftw_execute_dft(this%ifftw, this%wk_3d, this%wk_3d)
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
   end subroutine fftb
 
-    ! START private convolution procedures
+      subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
+!      use pf_mod_fftpackage, only: pf_fft_t
+!        class(pf_fft_abs_t), intent(inout) :: this
+        class(pf_fft_t), intent(inout) :: this
+    real(pfdp), intent(inout),  pointer :: yvec_f(:)
+    real(pfdp), intent(inout),  pointer :: yvec_c(:)
+    type(pf_fft_t),  pointer,intent(in) :: fft_f
+    integer :: nx_f, nx_c
 
-  ! Convolve g with spectral op and return in c
-  subroutine conv_1d(this, g,op,c)
+    complex(pfdp),         pointer :: wk_f(:), wk_c(:)
+
+    call this%get_wk_ptr(wk_c)
+    call fft_f%get_wk_ptr(wk_f)
+    
+    wk_c=yvec_c
+    !  internal forward fft call    
+    call this%fftf()    
+
+    call this%zinterp_1d(wk_c, wk_f)
+    wk_f=wk_f*2.0_pfdp
+
+    !  internal inverse fft call
+    call fft_f%fftb()
+
+    yvec_f=real(wk_f)
+    
+  end subroutine interp_1d
+  subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
+        class(pf_fft_t), intent(inout) :: this
+!    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(inout),  pointer :: yvec_f(:,:)
+    real(pfdp), intent(inout),  pointer :: yvec_c(:,:)
+    type(pf_fft_t),  pointer,intent(in) :: fft_f
+
+    complex(pfdp),         pointer :: wk_f(:,:), wk_c(:,:)
+
+    call this%get_wk_ptr(wk_c)
+    call fft_f%get_wk_ptr(wk_f)
+    
+    wk_c=yvec_c
+    !  internal forward fft call    
+    call this%fftf()    
+
+    call this%zinterp_2d(wk_c, wk_f)
+    wk_f=wk_f*4.0_pfdp
+
+    !  internal inverse fft call
+    call fft_f%fftb()
+
+    yvec_f=real(wk_f)
+    
+  end subroutine interp_2d
+  subroutine interp_3d(this, yvec_c, fft_f,yvec_f)
+         class(pf_fft_t), intent(inout) :: this
+!   class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(inout),  pointer :: yvec_f(:,:,:)
+    real(pfdp), intent(inout),  pointer :: yvec_c(:,:,:)
+    type(pf_fft_t),  pointer,intent(in) :: fft_f
+    complex(pfdp),         pointer :: wk_f(:,:,:), wk_c(:,:,:)
+
+    call this%get_wk_ptr(wk_c)
+    call fft_f%get_wk_ptr(wk_f)
+    
+    wk_c=yvec_c
+    !  internal forward fft call    
+    call this%fftf()    
+
+    call this%zinterp_3d(wk_c, wk_f)
+    wk_f=wk_f*8.0_pfdp
+
+    !  internal inverse fft call
+    call fft_f%fftb()
+
+    yvec_f=real(wk_f)
+    
+
+  end subroutine interp_3d
+
+  !>  Interpolate from coarse  level to fine
+  subroutine zinterp_1d(this, yhat_c, yhat_f)
     class(pf_fft_t), intent(inout) :: this
-    real(pfdp), intent(inout) :: g(:)
-    complex(pfdp), intent(in) :: op(:)
-    real(pfdp), intent(inout) :: c(:)
+    complex(pfdp),         pointer :: yhat_f(:), yhat_c(:)
+    integer :: nx_f, nx_c
 
-    this%wk_1d=g
-    call fftf(this)
-    this%wk_1d = this%wk_1d * op
-    call fftb(this)
-    c=real(this%wk_1d)
-  end subroutine conv_1d
+    nx_f = size(yhat_f)
+    nx_c = size(yhat_c)
 
-  ! Convolve g with spectral op and return in c
-  subroutine conv_2d(this, g,op,c)
+    yhat_f = 0.0_pfdp
+    yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
+    yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
+    
+  end subroutine zinterp_1d
+  !>  Interpolate from coarse  level to fine
+  subroutine zinterp_2d(this, yhat_c, yhat_f)
     class(pf_fft_t), intent(inout) :: this
-    real(pfdp), intent(in) :: g(:,:)
-    complex(pfdp), intent(in) :: op(:,:)
-    real(pfdp), intent(inout) :: c(:,:)
-    this%wk_2d=g
-    ! Compute Convolution
-    call fftf(this)
-    this%wk_2d = this%wk_2d * op
-    call fftb(this)
-    c=real(this%wk_2d)        
-  end subroutine conv_2d
+    complex(pfdp),         pointer :: yhat_f(:,:), yhat_c(:,:)
+
+    integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
+
+    nx_f = shape(yhat_f)
+    nx_c = shape(yhat_c)
+    
+    nf1=nx_f(1)-nx_c(1)/2+2
+    nf2=nx_f(2)-nx_c(2)/2+2
+    nc1=nx_c(1)/2+2
+    nc2=nx_c(2)/2+2
+
+    yhat_f = 0.0_pfdp
+    yhat_f(1:nx_c(1)/2,1:nx_c(2)/2) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2)
+    yhat_f(nf1:nx_f(1),1:nx_c(2)/2) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2)    
+    yhat_f(1:nx_c(1)/2,nf2:nx_f(2)) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2)) 
+    yhat_f(nf1:nx_f(1),nf2:nx_f(2)) = yhat_c(nc1:nx_c(1),nc2:nx_c(2)) 
+
+    
+  end subroutine zinterp_2d
+
+  !>  Interpolate from coarse  level to fine
+  subroutine zinterp_3d(this, yhat_c, yhat_f)
+    class(pf_fft_t), intent(inout) :: this
+    complex(pfdp),         pointer :: yhat_f(:,:,:), yhat_c(:,:,:)
+
+  integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
+
+
+    nx_f = size(yhat_f)
+    nx_c = size(yhat_c)
+
+    yhat_f = 0.0_pfdp
   
-  subroutine conv_3d(this, g,op,c)
-        class(pf_fft_t), intent(inout) :: this
-    real(pfdp), intent(in) :: g(:,:,:)
-    complex(pfdp), intent(in) :: op(:,:,:)
-    real(pfdp), intent(inout) :: c(:,:,:)
-    this%wk_3d=g
-    ! Compute Convolution
-    call fftf(this)
-    this%wk_3d = this%wk_3d * op
-    call fftb(this)
-    c=real(this%wk_3d)            
-  end subroutine conv_3d
+    nx_f = shape(yhat_f)
+    nx_c = shape(yhat_c)
+    
+    nf1=nx_f(1)-nx_c(1)/2+2
+    nf2=nx_f(2)-nx_c(2)/2+2
+    nf3=nx_f(3)-nx_c(3)/2+2
+    nc1=nx_c(1)/2+2
+    nc2=nx_c(2)/2+2
+    nc3=nx_c(3)/2+2
 
-  subroutine zconv_1d(this, g)
-    ! Variable Types
-        class(pf_fft_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:)
-        ! Compute Convolution
-        call fftb(this)
-        this%wk_1d = this%wk_1d * g
-        call fftf(this)
-    end subroutine zconv_1d
+    yhat_f = 0.0_pfdp
+    yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2)
+    yhat_f(nf1:nx_f(1),1:nx_c(2)/2,1:nx_c(3)/2) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2,1:nx_c(3)/2)    
+    yhat_f(1:nx_c(1)/2,nf2:nx_f(2),1:nx_c(3)/2) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2),1:nx_c(3)/2) 
+    yhat_f(nf1:nx_f(1),nf2:nx_f(2),1:nx_c(3)/2) = yhat_c(nc1:nx_c(1),nc2:nx_c(2),1:nx_c(3)/2) 
 
-    subroutine zconv_2d(this, g)
-        ! Variable Types
-        class(pf_fft_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:,:)
-        ! Compute Convolution
-        call fftb(this)
-        this%wk_2d = this%wk_2d * g
-        call fftf(this)
-    end subroutine zconv_2d
-
-    subroutine zconv_3d(this, g)
-        ! Variable Types
-        class(pf_fft_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:,:,:)
-        ! Compute Convolution
-        call fftb(this)
-        this%wk_3d = this%wk_3d * g
-        call fftf(this)
-    end subroutine zconv_3d
+    yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,nf3:nx_f(3)) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,nc3:nx_c(3))
+    yhat_f(nf1:nx_f(1),1:nx_c(2)/2,nf3:nx_f(3)) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2,nc3:nx_c(3))    
+    yhat_f(1:nx_c(1)/2,nf2:nx_f(2),nf3:nx_f(3)) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2),nc3:nx_c(3)) 
+    yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3)) = yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) 
     
-    
-    ! END private convolution procedures
-
-  !>  Routines to construct spectral differential operators
-  subroutine make_lap_1d(this, lap)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: lap(:)
-    
-    integer     :: i,nx
-    real(pfdp)  :: kx
-    
-    nx=this%nx
-    do i = 1, nx
-       if (i <= nx/2+1) then
-          kx = two_pi / this%Lx * dble(i-1)
-       else
-          kx = two_pi / this%Lx * dble(-nx + i - 1)
-       end if
-       lap(i) = -kx**2
-    end do
-  end subroutine make_lap_1d
-  subroutine make_deriv_1d(this, ddx)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: ddx(:)
-    
-    integer     :: i,nx
-    real(pfdp)  :: kx
-    
-    nx=this%nx
-    do i = 1, nx
-       if (i <= nx/2+1) then
-          kx = two_pi /this%Lx * dble(i-1)
-       else
-          kx = two_pi / this%Lx * dble(-nx + i - 1)
-       end if
-       
-       ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
-    end do
-  end subroutine make_deriv_1d
-     
-  subroutine make_lap_2d(this, lap)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: lap(:,:)
-    
-    integer     :: i,j,nx,ny
-    real(pfdp)  :: kx,ky
-
-
-    nx=this%nx
-    ny=this%ny
-
-    do j = 1, ny
-       if (j <= ny/2+1) then
-          ky = two_pi / this%Ly * dble(j-1)
-       else
-          ky = two_pi / this%Ly * dble(-ny + j - 1)
-       end if
-       do i = 1, nx
-          if (i <= nx/2+1) then
-             kx = two_pi / this%Lx * dble(i-1)
-          else
-             kx = two_pi / this%Lx * dble(-nx + i - 1)
-          end if
-          
-          lap(i,j) = -(kx**2+ky**2)
-       end do
-    end do
-  end subroutine make_lap_2d
-
-  subroutine make_deriv_2d(this, deriv,dir)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: deriv(:,:)
-    integer, intent(in) :: dir
-    
-    integer     :: i,j,nx,ny
-    real(pfdp)  :: kx,ky
-    
-    nx=this%nx
-    ny=this%ny
-    
-    do j = 1, ny
-       if (j <= ny/2+1) then
-          ky = two_pi / this%Ly * dble(j-1)
-       else
-          ky = two_pi / this%Ly * dble(-ny + j - 1)
-       end if
-       do i = 1, nx
-          if (i <= nx/2+1) then
-             kx = two_pi / this%Lx * dble(i-1)
-          else
-             kx = two_pi / this%Lx * dble(-nx + i - 1)
-          end if
-          
-          if (dir .eq. 1) then
-             deriv(i,j) = (0.0_pfdp,1.0_pfdp)*kx
-          else
-             deriv(i,j) = (0.0_pfdp,1.0_pfdp)*ky
-          endif
-       end do
-    end do
-  end subroutine make_deriv_2d
-
-  subroutine make_lap_3d(this, lap)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: lap(:,:,:)
-    
-    integer     :: i,j,k,nx,ny,nz
-    real(pfdp)  :: kx,ky,kz
-    
-    nx=this%nx
-    ny=this%ny
-    nz=this%nz
-    do k = 1,nz
-       if (k <= nz/2+1) then
-          kz = two_pi / this%Lz * dble(k-1)
-       else
-          kz = two_pi / this%Lz * dble(-nz + k - 1)
-       end if
-       do j = 1, ny
-          if (j <= ny/2+1) then
-             ky = two_pi / this%Ly * dble(j-1)
-          else
-             ky = two_pi / this%Ly * dble(-ny + j - 1)
-          end if
-          do i = 1, nx
-             if (i <= nx/2+1) then
-                kx = two_pi / this%Lx * dble(i-1)
-             else
-                kx = two_pi / this%Lx * dble(-nx + i - 1)
-             end if
-             lap(i,j,k) = -(kx**2+ky**2+kz**2)
-          end do
-       end do
-    end do
-  end subroutine make_lap_3d
-
-  subroutine make_deriv_3d(this, deriv,dir)
-    class(pf_fft_t), intent(inout) :: this
-    complex(pfdp), intent(inout) :: deriv(:,:,:)
-    integer, intent(in) :: dir
-    
-    integer     :: i,j,k,nx,ny,nz
-    real(pfdp)  :: kx,ky,kz
-
-    nx=this%nx
-    ny=this%ny
-    nz=this%nz       
-    
-    select case (dir)
-    case (1)  
-       do i = 1, nx
-          if (i <= nx/2+1) then
-             kx = two_pi / this%Lx * dble(i-1)
-          else
-             kx = two_pi / this%Lx * dble(-nx + i - 1)
-          end if
-          deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*kx
-       end do
-       
-    case (2)
-       do j = 1, ny
-          if (j <= ny/2+1) then
-             ky = two_pi / this%Ly * dble(j-1)
-          else
-             ky = two_pi / this%Ly * dble(-ny + j - 1)
-          end if
-          deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*ky
-       end do
-          
-    case (3)
-       do k = 1, nz
-          if (k <= nz/2+1) then
-             kz = two_pi / this%Lz * dble(k-1)
-          else
-             kz = two_pi / this%Lz * dble(-nz + k - 1)
-          end if
-          deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*kz
-       end do
-    case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
-    end select
-  end subroutine make_deriv_3d
+  end subroutine zinterp_3d
 
 end module pf_mod_fftpackage
 

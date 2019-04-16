@@ -3,44 +3,29 @@
 #
 
 LIBPFASST ?= ../..
+BUILDDIR = build
 
 EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
-FSRC = src/main.f90 \
-       src/sweeper.f90 \
-       src/level.f90 \
-       src/probin.f90 
 
+FSRC = main.f90  sweeper.f90 level.f90   probin.f90 
 
-OBJ = $(subst src,build,$(FSRC:.f90=.o))
-FFLAGS  += -g -I$(LIBPFASST)/include
-LDFLAGS += -g -L$(LIBPFASST)/lib -lpfasst
+OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
 
+FFLAGS  += -I$(LIBPFASST)/include
 
 all: $(EXE)
 
 VPATHS = src 
 
-
 include $(LIBPFASST)/Makefile.rules
-
-build/%.o: %.c
-	@mkdir -p build
-	$(CC) $(CFLAGS) -c $< $(OUTPUT_OPTION)
-
-
-build/%.o: %.f90
-	@mkdir -p build
-	@mkdir -p include
-	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
-
 
 #
 # dependencies
 #
 main.exe : $(LIBPFASST)/lib/libpfasst.a 
-build/sweeper.o : src/sweeper.f90 ./build/probin.o 
-build/level.o : src/level.f90 ./build/probin.o 
-build/main.o : src/main.f90 ./build/probin.o  ./build/sweeper.o  ./build/level.o 
-build/probin.o : src/probin.f90 
+$(BUILDDIR)/main.o :  $(BUILDDIR)/probin.o  $(BUILDDIR)/sweeper.o  $(BUILDDIR)/level.o 
+$(BUILDDIR)/sweeper.o :  $(BUILDDIR)/probin.o 
+$(BUILDDIR)/level.o : 
+$(BUILDDIR)/probin.o : 

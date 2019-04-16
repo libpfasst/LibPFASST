@@ -11,7 +11,7 @@ module probin
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
   integer, save :: nsteps    ! number of time steps
-  character(len=32), save :: pfasst_nml  ! file for reading pfasst parameters
+  character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
   namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml
 
@@ -29,8 +29,11 @@ contains
     integer :: i   !  loop variable
     integer :: un  !  file read unit
 
+    character(len=128) :: arg  !  command line argument
+    character(128)    :: probin_fname   !<  file name for input parameters
+
     !> Set the name of the input file
-    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
+    probin_fname = "probin.nml" ! default file name - can be overwritten on the
     if (command_argument_count() >= 1) &
          call get_command_argument(1, value=probin_fname)
 
