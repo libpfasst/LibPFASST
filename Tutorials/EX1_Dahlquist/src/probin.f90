@@ -11,7 +11,7 @@ module probin
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
   integer, save :: nsteps    ! number of time steps
-  character(len=32), save :: pfasst_nml  ! file for reading pfasst parameters
+  character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
   namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml
 
@@ -26,8 +26,7 @@ contains
     character(len=*), intent(inout) :: pf_fname
     integer :: i   !  loop variable
     integer :: un  !  file read unit
-    character(len=32) :: arg  !  command line argument
-
+    character(len=128) :: arg  !  command line argument
     character(128)    :: probin_fname   !<  file name for input parameters
 
     !> Set the name of the input file
