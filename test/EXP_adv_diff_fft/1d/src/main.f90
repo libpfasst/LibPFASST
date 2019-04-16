@@ -38,23 +38,19 @@ contains
     type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
     type(ndarray)     :: y_0      !<  the initial condition
     type(ndarray)     :: y_end    !<  the solution at the final time
-    character(256)    :: probin_fname   !<  file name for input parameters
+    character(256)    :: pf_fname   !<  file name for input parameters
 
     integer           ::  l   !  loop variable over levels
 
-    !> set the name of the input file
-    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
-    if (command_argument_count() >= 1) &
-         call get_command_argument(1, value=probin_fname)
     
     !> read problem parameters
-    call probin_init(probin_fname)
+    call probin_init(pf_fname)
 
     !>  set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
     !>  create the pfasst structure
-    call pf_pfasst_create(pf, comm, fname=probin_fname)
+    call pf_pfasst_create(pf, comm, fname=pf_fname)
 
     !> loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
@@ -67,7 +63,6 @@ contains
 
        !>  Allocate the shape array for level (here just one dimension)
        call pf_level_set_size(pf,l,[nx(l)])
-
 
     end do
 

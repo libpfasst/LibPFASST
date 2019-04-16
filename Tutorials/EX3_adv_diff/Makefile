@@ -2,7 +2,7 @@
 # Makefile for advection diffusion example
 #
 
-LIBPFASST ?= ../../..
+LIBPFASST ?= ../..
 BUILDDIR = build
 
 EXE = main.exe

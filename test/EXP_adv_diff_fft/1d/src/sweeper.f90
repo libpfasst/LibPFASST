@@ -24,6 +24,7 @@ module pf_my_sweeper
      complex(pfdp), allocatable :: swp_phi(:,:,:)
      complex(pfdp), allocatable :: res_phi(:,:,:)
      complex(pfdp), allocatable :: yhat(:) ! used in applyPhi to store Fourier transform of final result
+     complex(pfdp), allocatable :: bhat(:) ! used in applyPhi to store Fourier transform of final result
      real(pfdp) :: h_swpPhi = real(0.0, pfdp)
      real(pfdp) :: h_resPhi = real(0.0, pfdp)
      ! fft object and differentiaton matrices
@@ -84,6 +85,7 @@ contains
       allocate(this%swp_phi(lev%nnodes - 1, lev%nnodes+1, nx))
       allocate(this%res_phi(lev%nnodes - 1, lev%nnodes+1, nx))
       allocate(this%yhat(nx))
+      allocate(this%bhat(nx))
       
       ! allocate fft & differentiation matrices
       allocate(this%fft_tool)
@@ -109,6 +111,8 @@ contains
        deallocate(this%res_phi)
        deallocate(this%lap)
        deallocate(this%ddx)
+       deallocate(this%yhat)
+       deallocate(this%bhat)
        call this%fft_tool%fft_destroy()
        deallocate(this%fft_tool)
        
@@ -257,34 +261,26 @@ contains
           ! local variables
           integer :: i, n
           real(pfdp), pointer :: bvec(:), yvec(:)
-          ! local variables
           type(pf_fft_t),     pointer :: fft
-          complex(pfdp),      pointer :: fft_wk(:)
 
           n = size(b)
           yvec => get_array1d(y)
 
           ! prepare fft variables
           fft    => this%fft_tool
-          call fft%get_wk_ptr(fft_wk) ! FFT work array
 
           this%yhat = CMPLX(0.0, 0.0, pfdp)
           do i = 1, n
-
-             ! cast b(i) as complex array and take Fourier transform
              bvec => get_array1d(b(i))
-             fft_wk = CMPLX(bvec, 0*bvec, pfdp)
-             call fft%fftf()
 
+             call fft%fft(bvec,this%bhat)
              if(i .eq. 1) then
-                 this%yhat = phis(1,:) * fft_wk                              ! phi_0(hL) b(1)           [no h factor]
+                 this%yhat = phis(1,:) * this%bhat                              ! phi_0(hL) b(1)           [no h factor]
              else
-                 this%yhat = this%yhat + t**(i-1) * h * phis(i,:) * fft_wk   ! t^{n-1} phi_i(hL) h b(n) [h factor included]
+                this%yhat =this%yhat+  t**(i-1) * h * phis(i,:) * this%bhat   ! t^{n-1} phi_i(hL) h b(n) [h factor included]
              end if
          end do
-         fft_wk = this%yhat
-         call fft%fftb()
-         yvec = real(fft_wk, pfdp)
+         call fft%ifft(this%yhat,yvec)
 
       end subroutine applyPhi
 

@@ -22,6 +22,13 @@ module pf_mod_fft_abs
      procedure(pf_fft_p),deferred :: fft_destroy
      procedure(pf_fft_p),deferred :: fftf   !  Forward FFT
      procedure(pf_fft_p),deferred :: fftb   !  Inverse (backward)  FFT
+     !  FFT
+     procedure, private  :: fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d  
+     generic :: fft => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d  
+     !  Inverse FFT
+     procedure, private  :: ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d  
+     generic :: ifft => ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d    
+
      !  Convolution in spectral space     
      procedure, private  :: conv_1d, conv_2d, conv_3d  
      generic :: conv => conv_1d, conv_2d, conv_3d  
@@ -37,6 +44,11 @@ module pf_mod_fft_abs
      !  Construct spectral derivative
      procedure , private :: make_deriv_1d,make_deriv_2d, make_deriv_3d
      generic   :: make_deriv =>make_deriv_1d,make_deriv_2d,make_deriv_3d
+     !  Restrict in spectral space
+     procedure , private :: restrict_1d,restrict_2d, restrict_3d,zrestrict_1d,zrestrict_2d, zrestrict_3d
+     generic   :: restrict =>restrict_1d,restrict_2d,restrict_3d,zrestrict_1d,zrestrict_2d,zrestrict_3d
+
+     
   end type pf_fft_abs_t
 
   interface
@@ -56,6 +68,132 @@ module pf_mod_fft_abs
 contains
   ! START private convolution procedures
   
+  !++++++++++ Forward FFT real to complex  ++++++++++++++++
+  subroutine fft_1d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(in) :: g(:)
+    complex(pfdp), intent(inout) :: ghat(:)
+
+    this%wk_1d=g
+    call this%fftf()
+    ghat=this%wk_1d
+  end subroutine fft_1d
+
+  subroutine fft_2d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(in) :: g(:,:)
+    complex(pfdp), intent(inout) :: ghat(:,:)
+
+    this%wk_2d=g
+    call this%fftf()
+    ghat=this%wk_2d
+  end subroutine fft_2d
+
+    subroutine fft_3d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(in) :: g(:,:,:)
+    complex(pfdp), intent(inout) :: ghat(:,:,:)
+
+    this%wk_3d=g
+    call this%fftf()
+    ghat=this%wk_3d
+  end subroutine fft_3d
+
+  !++++++++++ Backward FFT complex to real   ++++++++++++++++
+  subroutine ifft_1d(this,ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(inout) :: g(:)
+    complex(pfdp), intent(in) :: ghat(:)
+
+    this%wk_1d=ghat
+    call this%fftb()
+    g=real(this%wk_1d)
+  end subroutine ifft_1d
+
+  subroutine ifft_2d(this, ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(inout) :: g(:,:)
+    complex(pfdp), intent(in) :: ghat(:,:)
+
+    this%wk_2d=ghat
+    call this%fftb()
+    g=real(this%wk_2d)
+  end subroutine ifft_2d
+
+    subroutine ifft_3d(this, ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp), intent(inout) :: g(:,:,:)
+    complex(pfdp), intent(in) :: ghat(:,:,:)
+
+    this%wk_3d=ghat
+    call this%fftb()
+    g=real(this%wk_3d)
+  end subroutine ifft_3d
+
+  !++++++++++ Forward FFT complex to complex   ++++++++++++++++
+  subroutine zfft_1d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(in) :: g(:)
+    complex(pfdp), intent(inout) :: ghat(:)
+
+    this%wk_1d=g
+    call this%fftf()
+    ghat=this%wk_1d
+  end subroutine zfft_1d
+
+    subroutine zfft_2d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(in) :: g(:,:)
+    complex(pfdp), intent(inout) :: ghat(:,:)
+
+    this%wk_2d=g
+    call this%fftf()
+    ghat=this%wk_2d
+  end subroutine zfft_2d
+
+  subroutine zfft_3d(this, g,ghat)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(in) :: g(:,:,:)
+    complex(pfdp), intent(inout) :: ghat(:,:,:)
+
+    this%wk_3d=g
+    call this%fftf()
+    ghat=this%wk_3d
+  end subroutine zfft_3d
+
+  !++++++++++ Backward FFT complex to complex   ++++++++++++++++
+  subroutine izfft_1d(this,ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: g(:)
+    complex(pfdp), intent(in) :: ghat(:)
+
+    
+    this%wk_1d=ghat
+    call this%fftb()
+    g=this%wk_1d
+  end subroutine izfft_1d
+
+  ! Take forward FFT
+  subroutine izfft_2d(this, ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: g(:,:)
+    complex(pfdp), intent(in) :: ghat(:,:)
+
+    this%wk_2d=ghat
+    call this%fftb()
+    g=this%wk_2d
+  end subroutine izfft_2d
+
+  subroutine izfft_3d(this, ghat,g)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: g(:,:,:)
+    complex(pfdp), intent(in) :: ghat(:,:,:)
+
+    this%wk_3d=ghat
+    call this%fftb()
+    g=this%wk_3d
+  end subroutine izfft_3d
+
   ! Convolve g with spectral op and return in c
   subroutine conv_1d(this, g,op,c)
     class(pf_fft_abs_t), intent(inout) :: this
@@ -334,7 +472,72 @@ contains
       end select
 
     end subroutine make_deriv_3d
+  !  Interp routines that take a coarse vector and produce a fine    
+  
+  
+
+  subroutine restrict_1d(this, yvec_f, yvec_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp),         pointer :: yvec_f(:), yvec_c(:)
+    integer :: nx_f, nx_c,irat
+    nx_f = size(yvec_f)
+    nx_c = size(yvec_c)
+    irat  = nx_f/nx_c
+
+    yvec_c = yvec_f(::irat)
+  end subroutine restrict_1d
+  subroutine restrict_2d(this, yvec_f, yvec_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp),         pointer :: yvec_f(:,:), yvec_c(:,:)
+    integer :: nx_f(2), nx_c(2), irat, jrat
+
+    nx_f = shape(yvec_f)
+    nx_c = shape(yvec_c)
+
+    irat  = nx_f(1)/nx_c(1)
+    jrat  = nx_f(2)/nx_c(2)
     
+    yvec_c = yvec_f(::irat,::jrat)           
+  end subroutine restrict_2d
+  subroutine restrict_3d(this, yvec_f, yvec_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    real(pfdp),         pointer :: yvec_f(:,:,:), yvec_c(:,:,:)
+    integer :: nx_f(3), nx_c(3)
+    integer :: irat, jrat,krat
+
+    nx_f = shape(yvec_f)
+    nx_c = shape(yvec_c)
+
+    irat  = nx_f(1)/nx_c(1)
+    jrat  = nx_f(2)/nx_c(2)
+    krat  = nx_f(3)/nx_c(3)
+    
+    yvec_c = yvec_f(::irat,::jrat,::krat)           
+  end subroutine restrict_3d
+  
+  subroutine zrestrict_1d(this, yhat_f, yhat_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp),  pointer :: yhat_f(:), yhat_c(:)
+    integer :: nx_f, nx_c
+
+    nx_f = size(yhat_f)
+    nx_c = size(yhat_c)
+
+    yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
+    yhat_c(nx_c/2+2:nx_c) = yhat_f(nx_f-nx_c/2+2:nx_f)
+    
+  end subroutine zrestrict_1d
+  subroutine zrestrict_2d(this, yhat_f, yhat_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp),         pointer :: yhat_f(:,:), yhat_c(:,:)
+    integer :: nx_f(2), nx_c(2)
+  end subroutine zrestrict_2d
+  subroutine zrestrict_3d(this, yhat_f, yhat_c)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp),         pointer :: yhat_f(:,:,:), yhat_c(:,:,:)
+    integer :: nx_f(3), nx_c(3)
+  end subroutine zrestrict_3d
+
   end module pf_mod_fft_abs
   
    

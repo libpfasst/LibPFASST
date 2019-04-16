@@ -1,0 +1,7 @@
+./build/probin.o : src/probin.f90 
+./build/factory.o : src/factory.f90 
+./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/utils.o ./build/factory.o 
+./build/level.o : src/level.f90 ./build/utils.o ./build/factory.o 
+./build/main.o : src/main.f90 ./build/utils.o ./build/hooks.o ./build/level.o ./build/sweeper.o ./build/factory.o ./build/probin.o 
+./build/hooks.o : src/hooks.f90 ./build/probin.o ./build/sweeper.o ./build/factory.o 
+./build/utils.o : src/utils.f90 ./build/factory.o ./build/probin.o 
