@@ -5,6 +5,7 @@
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray
+  use pf_mod_utils
   implicit none
 contains
 
@@ -32,5 +33,7 @@ contains
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7,"  err0: ",es14.7," res: ",es18.10e4)', &
          state%step+1, state%iter,level%index, maxerr,err0,level%residual
     call flush(6)
+
+    call pf_set_error(pf,level%index,maxerr)
   end subroutine echo_error
 end module hooks

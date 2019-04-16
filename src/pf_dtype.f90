@@ -226,8 +226,6 @@ module pf_mod_dtype
      integer :: level
 
      character(len=128) :: datpath
-     
-     procedure(pf_results_p), pointer, nopass :: dump 
      procedure(pf_results_p), pointer, nopass :: destroy 
 
   end type pf_results_t
@@ -301,7 +299,7 @@ module pf_mod_dtype
      double precision :: runtimes(100) = 0.0d0
 
      !> output directory
-     character(len=255) :: outdir
+     character(len=256) :: outdir
 
   end type pf_pfasst_t
 

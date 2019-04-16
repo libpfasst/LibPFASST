@@ -6,7 +6,7 @@
 &PF_PARAMS
     nlevels  = 3   !  must be set
 
-    niters = 50   !  default is 5
+    niters = 10   !  default is 5
     nnodes =     3 5 9
 
     use_proper_nodes=.false.
