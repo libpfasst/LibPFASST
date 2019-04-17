@@ -126,19 +126,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.9% of total for modules and submodules.">386 statements</a>
+    title=" 4.8% of total for modules and submodules.">386 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_imexQ_oc.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_imexQ_oc_sweeper.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_imexq_oc.f90.html'>pf_imexQ_oc.f90</a></li>
+     <li><a href='../sourcefile/pf_imexq_oc_sweeper.f90.html'>pf_imexQ_oc_sweeper.f90</a></li>
     
   
      <li class="active">pf_mod_imexQ_oc</li>
@@ -176,9 +176,9 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_eval_p%7E4">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_comp_p%7E3">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_comp_p%7E7">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -438,9 +438,9 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_eval_p%7E4">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_comp_p%7E3">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_imexq_oc.html#interface-pf_f_comp_p%7E7">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -512,7 +512,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E4"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E9"></span><h3>interface 
     
   </h3></div>
   
@@ -701,7 +701,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f, piece, flags, idx, ste
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E3"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E7"></span><h3>interface 
     
   </h3></div>
   
@@ -926,7 +926,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -954,7 +954,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-qtile"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qtile%7E6"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -968,7 +968,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-qtili%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qtili%7E6"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -982,7 +982,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-dtsdc%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dtsdc%7E6"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -996,7 +996,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-qdiffe"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qdiffe%7E6"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1010,7 +1010,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-qdiffi"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-qdiffi%7E5"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1024,7 +1024,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-explicit%7E2"></span>logical,</td>
+  <td><span class="anchor" id="variable-explicit%7E3"></span>logical,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1038,7 +1038,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-implicit%7E2"></span>logical,</td>
+  <td><span class="anchor" id="variable-implicit%7E3"></span>logical,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1052,7 +1052,7 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
   
 <tr>
   
-  <td><span class="anchor" id="variable-rhs%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-rhs%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1071,34 +1071,34 @@ public subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-f_eval%7E4'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-f_eval%7E9'>f_eval</a></strong>  </td>
        <td><p>RHS function evaluations</p></td></tr>
       
-       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-f_comp%7E3'>f_comp</a></strong>  </td>
+       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-f_comp%7E7'>f_comp</a></strong>  </td>
        <td><p>Implicit solver</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-sweep%7E6'>sweep</a></strong>  => imexQ_oc_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-sweep%7E12'>sweep</a></strong>  => imexQ_oc_sweep </td>
        <td><p>Set the generic functions</p></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-initialize%7E7'>initialize</a></strong>  => imexQ_oc_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-initialize%7E13'>initialize</a></strong>  => imexQ_oc_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-evaluate%7E5'>evaluate</a></strong>  => imexQ_oc_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-evaluate%7E10'>evaluate</a></strong>  => imexQ_oc_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-integrate%7E5'>integrate</a></strong>  => imexQ_oc_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-integrate%7E11'>integrate</a></strong>  => imexQ_oc_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-residual%7E6'>residual</a></strong>  => imexQ_oc_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-residual%7E11'>residual</a></strong>  => imexQ_oc_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-evaluate_all%7E5'>evaluate_all</a></strong>  => imexQ_oc_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-evaluate_all%7E10'>evaluate_all</a></strong>  => imexQ_oc_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-spreadq0%7E4'>spreadq0</a></strong>  => imexQ_oc_spreadq0 </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-spreadq0%7E8'>spreadq0</a></strong>  => imexQ_oc_spreadq0 </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-destroy%7E8'>destroy</a></strong>  => imexQ_oc_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-destroy%7E14'>destroy</a></strong>  => imexQ_oc_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_imexq_oc_t.html#boundprocedure-imexq_oc_destroy'>imexQ_oc_destroy</a></strong>  </td>

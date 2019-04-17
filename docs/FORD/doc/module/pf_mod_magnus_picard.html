@@ -131,14 +131,14 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_magnus_picard.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_magpicard_sweeper.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_magnus_picard.f90.html'>pf_magnus_picard.f90</a></li>
+     <li><a href='../sourcefile/pf_magpicard_sweeper.f90.html'>pf_magpicard_sweeper.f90</a></li>
     
   
      <li class="active">pf_mod_magnus_picard</li>
@@ -176,7 +176,7 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E10">pf_f_eval_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_single_commutators_p">pf_compute_single_commutators_p</a>
       
@@ -444,7 +444,7 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E9">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_f_eval_p%7E10">pf_f_eval_p</a>
       
       <a class="list-group-item" href="../module/pf_mod_magnus_picard.html#interface-pf_compute_single_commutators_p">pf_compute_single_commutators_p</a>
       
@@ -524,7 +524,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E9"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E10"></span><h3>interface 
     
   </h3></div>
   
@@ -1055,7 +1055,7 @@ public subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1083,7 +1083,7 @@ public subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dtsdc%7E6"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dtsdc%7E7"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1200,28 +1200,28 @@ public subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-sweep%7E12'>sweep</a></strong>  => magpicard_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-sweep%7E13'>sweep</a></strong>  => magpicard_sweep </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-initialize%7E13'>initialize</a></strong>  => magpicard_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-initialize%7E14'>initialize</a></strong>  => magpicard_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate%7E10'>evaluate</a></strong>  => magpicard_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate%7E11'>evaluate</a></strong>  => magpicard_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-integrate%7E11'>integrate</a></strong>  => magpicard_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-integrate%7E12'>integrate</a></strong>  => magpicard_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-residual%7E11'>residual</a></strong>  => magpicard_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-residual%7E12'>residual</a></strong>  => magpicard_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-spreadq0%7E8'>spreadq0</a></strong>  => magpicard_spreadq0 </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-spreadq0%7E9'>spreadq0</a></strong>  => magpicard_spreadq0 </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate_all%7E10'>evaluate_all</a></strong>  => magpicard_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-evaluate_all%7E11'>evaluate_all</a></strong>  => magpicard_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-f_eval%7E9'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-f_eval%7E10'>f_eval</a></strong>  </td>
        <td></td></tr>
       
        <tr><td>procedure(pf_compute_single_commutators_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-compute_single_commutators'>compute_single_commutators</a></strong>  </td>
@@ -1233,7 +1233,7 @@ public subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
        <tr><td>procedure(pf_propagate_solution_p), public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-propagate_solution'>propagate_solution</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-destroy%7E14'>destroy</a></strong>  => magpicard_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-destroy%7E15'>destroy</a></strong>  => magpicard_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_magpicard_t.html#boundprocedure-magpicard_destroy'>magpicard_destroy</a></strong>  </td>

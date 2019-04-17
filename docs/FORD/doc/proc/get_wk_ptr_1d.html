@@ -109,7 +109,7 @@
   
   <div class="row">
     <h1>get_wk_ptr_1d
-      <small>Function</small>
+      <small>Subroutine</small>
     
     </h1>
     
@@ -131,16 +131,16 @@
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_fftw.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_fft.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></li>
+     <li><a href='../sourcefile/pf_fft.f90.html'>pf_fft.f90</a></li>
     
-     <li><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></li>
+     <li><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></li>
     
   
      <li class="active">get_wk_ptr_1d</li>
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public function get_wk_ptr_1d(this) result(wk)
+public subroutine get_wk_ptr_1d(this, wk)
     
     
    
@@ -208,8 +208,6 @@ public function get_wk_ptr_1d(this) result(wk)
   
 
 
-    
-    <p>Routines to return the pointer to the work variable</p>
     
 
     <h3>Arguments</h3>
@@ -230,7 +228,7 @@ public function get_wk_ptr_1d(this) result(wk)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E106"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -239,18 +237,24 @@ public function get_wk_ptr_1d(this) result(wk)
   
 </tr>
 
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-wk"></span>complex(kind=pfdp),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>pointer</td><td>::</td>
+  <td><strong>wk</strong>(:)</td><td></td>
+  
+</tr>
+
 </tbody>
 </table>
 
-    
-    
-    
-    
-    
-    
-    
-   <h3>Return Value <small><span class="anchor" id="variable-wk"></span>complex(kind=pfdp),
-  pointer,(:)</small></h3>
     
     
     
@@ -315,11 +319,11 @@ public function get_wk_ptr_1d(this) result(wk)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">get_wk_ptr_1d</span><span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">wk</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">wk</span><span class="p">(:)</span>              <span class="c">! work space</span>
+    <div class="highlight"><pre><span></span> <span class="k">subroutine </span><span class="n">get_wk_ptr_1d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">wk</span><span class="p">)</span> 
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">pointer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">wk</span><span class="p">(:)</span>              <span class="c">! work space</span>
     <span class="n">wk</span><span class="o">=&gt;</span><span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span>
-  <span class="k">end function </span><span class="n">get_wk_ptr_1d</span>
+  <span class="k">end subroutine </span><span class="n">get_wk_ptr_1d</span>
 </pre></div>
 
     </section>

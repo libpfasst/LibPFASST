@@ -126,21 +126,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">41 statements</a>
+    title=" 0.3% of total for procedures.">44 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_fftw.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_fft.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></li>
+     <li><a href='../sourcefile/pf_fft.f90.html'>pf_fft.f90</a></li>
     
-     <li><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></li>
+     <li><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></li>
     
   
      <li class="active">make_deriv_3d</li>
@@ -228,7 +228,7 @@ public subroutine make_deriv_3d(this, deriv, dir)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E16"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E117"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -428,52 +428,54 @@ public subroutine make_deriv_3d(this, deriv, dir)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">make_deriv_3d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">deriv</span><span class="p">,</span><span class="n">dir</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">deriv</span><span class="p">(:,:,:)</span>
-    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dir</span>
-    
-    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">kx</span><span class="p">,</span><span class="n">ky</span><span class="p">,</span><span class="n">kz</span>
+    <div class="highlight"><pre><span></span>    <span class="k">subroutine </span><span class="n">make_deriv_3d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">deriv</span><span class="p">,</span><span class="n">dir</span><span class="p">)</span>
+      <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+      <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">deriv</span><span class="p">(:,:,:)</span>
+      <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dir</span>
+      
+      <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span>
+      <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">kx</span><span class="p">,</span><span class="n">ky</span><span class="p">,</span><span class="n">kz</span><span class="p">,</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">Lz</span>
+      
+      <span class="n">nx</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">nx</span>
+      <span class="n">ny</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">ny</span>
+      <span class="n">nz</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">nz</span>       
+      <span class="n">Lx</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">Lx</span>
+      <span class="n">Ly</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">Ly</span>
+      <span class="n">Lz</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">Lz</span>
+      
+      <span class="k">select case</span> <span class="p">(</span><span class="n">dir</span><span class="p">)</span>
+      <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
+         <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">nx</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">               </span><span class="n">kx</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Lx</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span>
+<span class="k">               </span><span class="n">kx</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Lx</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nx</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">end if</span>
+<span class="k">            </span><span class="n">deriv</span><span class="p">(</span><span class="n">i</span><span class="p">,:,:)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">kx</span>
+         <span class="k">end do</span>
+<span class="k">      case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+         <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">ny</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">               </span><span class="n">ky</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span>
+<span class="k">               </span><span class="n">ky</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">ny</span> <span class="o">+</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">end if</span>
+<span class="k">            </span><span class="n">deriv</span><span class="p">(:,</span><span class="n">j</span><span class="p">,:)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">ky</span>
+         <span class="k">end do</span>
+<span class="k">      case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+         <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nz</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&lt;=</span> <span class="n">nz</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">               </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Lz</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span>
+<span class="k">               </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nz</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">end if</span>
+<span class="k">            </span><span class="n">deriv</span><span class="p">(:,:,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">kz</span>
+         <span class="k">end do</span>
+<span class="k">      case </span><span class="n">DEFAULT</span>
+         <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">dir</span><span class="p">)</span>
+      <span class="k">end select</span>
 
-    <span class="n">nx</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">nx</span>
-    <span class="n">ny</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">ny</span>
-    <span class="n">nz</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">nz</span>       
-    
-    <span class="k">select case</span> <span class="p">(</span><span class="n">dir</span><span class="p">)</span>
-    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
-       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">nx</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">             </span><span class="n">kx</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Lx</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-          <span class="k">else</span>
-<span class="k">             </span><span class="n">kx</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Lx</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nx</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">end if</span>
-<span class="k">          </span><span class="n">deriv</span><span class="p">(</span><span class="n">i</span><span class="p">,:,:)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">kx</span>
-       <span class="k">end do</span>
-<span class="k">       </span>
-<span class="k">    case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-       <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">ny</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">             </span><span class="n">ky</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-          <span class="k">else</span>
-<span class="k">             </span><span class="n">ky</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">ny</span> <span class="o">+</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">end if</span>
-<span class="k">          </span><span class="n">deriv</span><span class="p">(:,</span><span class="n">j</span><span class="p">,:)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">ky</span>
-       <span class="k">end do</span>
-<span class="k">          </span>
-<span class="k">    case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-       <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nz</span>
-          <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&lt;=</span> <span class="n">nz</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">             </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Lz</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-          <span class="k">else</span>
-<span class="k">             </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Lz</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nz</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">end if</span>
-<span class="k">          </span><span class="n">deriv</span><span class="p">(:,:,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">kz</span>
-       <span class="k">end do</span>
-<span class="k">    case </span><span class="n">DEFAULT</span>
-       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">dir</span><span class="p">)</span>
-    <span class="k">end select</span>
-<span class="k">  end subroutine </span><span class="n">make_deriv_3d</span>
+<span class="k">    end subroutine </span><span class="n">make_deriv_3d</span>
 </pre></div>
 
     </section>

@@ -230,7 +230,7 @@ public subroutine pf_dump_results(pf)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E20"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E37"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -295,16 +295,16 @@ public subroutine pf_dump_results(pf)
 <path fill="none" stroke="#000000" d="M92.1778,-54C100.542,-54 109.312,-54 117.776,-54"/>
 <polygon fill="#000000" stroke="#000000" points="117.9,-57.5001 127.9,-54 117.9,-50.5001 117.9,-57.5001"/>
 </g>
-<!-- proc~dump_results -->
-<g id="proc~~pf_dump_results~~CallsGraph_node4" class="node"><title>proc~dump_results</title>
-<g id="a_proc~~pf_dump_results~~CallsGraph_node4"><a xlink:href=".././proc/dump_results.html" xlink:title="dump_results">
-<polygon fill="#d9534f" stroke="#d9534f" points="206,-24 129,-24 129,-0 206,-0 206,-24"/>
-<text text-anchor="middle" x="167.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dump_results</text>
+<!-- proc~dump_resids -->
+<g id="proc~~pf_dump_results~~CallsGraph_node4" class="node"><title>proc~dump_resids</title>
+<g id="a_proc~~pf_dump_results~~CallsGraph_node4"><a xlink:href=".././proc/dump_resids.html" xlink:title="dump_resids">
+<polygon fill="#d9534f" stroke="#d9534f" points="204.5,-24 130.5,-24 130.5,-0 204.5,-0 204.5,-24"/>
+<text text-anchor="middle" x="167.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">dump_resids</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_dump_results&#45;&gt;proc~dump_results -->
-<g id="proc~~pf_dump_results~~CallsGraph_edge3" class="edge"><title>proc~pf_dump_results&#45;&gt;proc~dump_results</title>
+<!-- proc~pf_dump_results&#45;&gt;proc~dump_resids -->
+<g id="proc~~pf_dump_results~~CallsGraph_edge3" class="edge"><title>proc~pf_dump_results&#45;&gt;proc~dump_resids</title>
 <path fill="none" stroke="#000000" d="M81.2439,-41.9645C94.1195,-37.4392 108.94,-32.2301 122.576,-27.4376"/>
 <polygon fill="#000000" stroke="#000000" points="123.977,-30.6551 132.251,-24.0373 121.656,-24.0512 123.977,-30.6551"/>
 </g>
@@ -536,7 +536,7 @@ public subroutine pf_dump_results(pf)
     
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       do </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-          <span class="k">call  </span><span class="n">dump_results</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">level_index</span><span class="p">))</span>
+          <span class="k">call  </span><span class="n">dump_resids</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">level_index</span><span class="p">))</span>
        <span class="k">end do</span>
 <span class="k">    end if</span>
 <span class="k">    </span>

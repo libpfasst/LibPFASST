@@ -126,19 +126,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.4% of total for modules and submodules.">185 statements</a>
+    title=" 2.3% of total for modules and submodules.">185 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_amisdc.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_amisdc_sweeper.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_amisdc.f90.html'>pf_amisdc.f90</a></li>
+     <li><a href='../sourcefile/pf_amisdc_sweeper.f90.html'>pf_amisdc_sweeper.f90</a></li>
     
   
      <li class="active">pf_mod_amisdc</li>
@@ -1312,7 +1312,7 @@ public subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -1340,7 +1340,7 @@ public subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
   
 <tr>
   
-  <td><span class="anchor" id="variable-sdiffe"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-sdiffe%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1354,7 +1354,7 @@ public subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
   
 <tr>
   
-  <td><span class="anchor" id="variable-sdiffi"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-sdiffi%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -1391,25 +1391,25 @@ public subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
        <tr><td>procedure(pf_f3comp_p), public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-f3comp'>f3comp</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-sweep%7E5'>sweep</a></strong>  => amisdc_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-sweep%7E6'>sweep</a></strong>  => amisdc_sweep </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-initialize%7E6'>initialize</a></strong>  => amisdc_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-evaluate%7E4'>evaluate</a></strong>  => amisdc_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-evaluate%7E6'>evaluate</a></strong>  => amisdc_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-integrate%7E4'>integrate</a></strong>  => amisdc_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-integrate%7E6'>integrate</a></strong>  => amisdc_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-residual%7E5'>residual</a></strong>  => amisdc_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-residual%7E6'>residual</a></strong>  => amisdc_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-evaluate_all%7E4'>evaluate_all</a></strong>  => amisdc_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-evaluate_all%7E6'>evaluate_all</a></strong>  => amisdc_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-destroy%7E7'>destroy</a></strong>  => amisdc_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-destroy%7E6'>destroy</a></strong>  => amisdc_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_amisdc_t.html#boundprocedure-amisdc_destroy'>amisdc_destroy</a></strong>  </td>

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.8% of total for source files.">456 statements</a>
+    title=" 4.7% of total for source files.">456 statements</a>
      </li> 
      
      
@@ -934,9 +934,9 @@
 <a name="ln-346"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">un</span> <span class="o">=</span> <span class="mi">9</span>
 <a name="ln-347"></a>    <span class="kt">integer</span>            <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">ios</span><span class="p">,</span><span class="nb">stat</span>
 <a name="ln-348"></a><span class="nb">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">arg</span>
-<a name="ln-349"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">istring</span>  <span class="c">! stores command line argument</span>
-<a name="ln-350"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">message</span>  <span class="c">! use for i/o error messages</span>
-<a name="ln-351"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
+<a name="ln-349"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span> <span class="kd">::</span> <span class="n">istring</span>  <span class="c">! stores command line argument</span>
+<a name="ln-350"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span> <span class="kd">::</span> <span class="n">message</span>  <span class="c">! use for i/o error messages</span>
+<a name="ln-351"></a>    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
 <a name="ln-352"></a>
 <a name="ln-353"></a>    
 <a name="ln-354"></a>    <span class="c">!&gt; define the namelist for reading</span>
@@ -993,7 +993,7 @@
 <a name="ln-405"></a>       <span class="k">do</span>
 <a name="ln-406"></a><span class="k">          call </span><span class="nb">get_command_argument</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span><span class="n">status</span><span class="o">=</span><span class="nb">stat</span><span class="p">)</span>
 <a name="ln-407"></a>          <span class="k">if</span> <span class="p">(</span><span class="nb">len_trim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">exit</span>
-<a name="ln-408"></a><span class="k">          if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-408"></a><span class="k">          if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-409"></a><span class="k">             </span><span class="n">istring</span><span class="o">=</span><span class="s2">&quot;&amp;pf_params &quot;</span> <span class="o">//</span> <span class="nb">trim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">//</span> <span class="s2">&quot; /&quot;</span>
 <a name="ln-410"></a>             <span class="k">read</span><span class="p">(</span><span class="n">istring</span><span class="p">,</span> <span class="n">nml</span><span class="o">=</span><span class="n">pf_params</span><span class="p">,</span> <span class="n">iostat</span><span class="o">=</span><span class="n">ios</span><span class="p">,</span> <span class="n">iomsg</span><span class="o">=</span><span class="n">message</span><span class="p">)</span> <span class="c">! internal read of namelist</span>
 <a name="ln-411"></a>          <span class="k">end if</span>
@@ -1212,7 +1212,7 @@
 <a name="ln-624"></a>    
 <a name="ln-625"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-626"></a><span class="k">       do </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-<a name="ln-627"></a>          <span class="k">call  </span><span class="n">dump_results</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">level_index</span><span class="p">))</span>
+<a name="ln-627"></a>          <span class="k">call  </span><span class="n">dump_resids</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">(</span><span class="n">level_index</span><span class="p">))</span>
 <a name="ln-628"></a>       <span class="k">end do</span>
 <a name="ln-629"></a><span class="k">    end if</span>
 <a name="ln-630"></a><span class="k">    </span>
@@ -1243,9 +1243,10 @@
 <a name="ln-655"></a>
 <a name="ln-656"></a><span class="k">end subroutine </span><span class="n">pf_destroy_results</span>
 <a name="ln-657"></a>  
-<a name="ln-658"></a>    
-<a name="ln-659"></a>  
-<a name="ln-660"></a><span class="k">end module </span><span class="n">pf_mod_pfasst</span>
+<a name="ln-658"></a>  
+<a name="ln-659"></a>    
+<a name="ln-660"></a>  
+<a name="ln-661"></a><span class="k">end module </span><span class="n">pf_mod_pfasst</span>
 </pre></div>
 
     </section>

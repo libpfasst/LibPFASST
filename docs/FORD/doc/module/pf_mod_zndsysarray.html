@@ -126,19 +126,19 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.5% of total for modules and submodules.">196 statements</a>
+    title=" 2.4% of total for modules and submodules.">196 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_zndsysarray.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_zndsysarray_encap.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_zndsysarray.f90.html'>pf_zndsysarray.f90</a></li>
+     <li><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></li>
     
   
      <li class="active">pf_mod_zndsysarray</li>
@@ -209,11 +209,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-cast_as_zndsysarray">cast_as_zndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E2">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E3">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E2">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E3">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E2">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E3">get_array3d</a>
       
     </div>
   </div>
@@ -467,11 +467,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-cast_as_zndsysarray">cast_as_zndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E2">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E3">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E2">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E3">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E2">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E3">get_array3d</a>
       
     </div>
   </div>
@@ -721,16 +721,16 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_single%7E3'>create_single</a></strong>  => zndsysarray_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_single%7E5'>create_single</a></strong>  => zndsysarray_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_array%7E3'>create_array</a></strong>  => zndsysarray_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_array%7E5'>create_array</a></strong>  => zndsysarray_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_single%7E3'>destroy_single</a></strong>  => zndsysarray_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_single%7E5'>destroy_single</a></strong>  => zndsysarray_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_array%7E3'>destroy_array</a></strong>  => zndsysarray_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_array%7E5'>destroy_array</a></strong>  => zndsysarray_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -768,7 +768,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-dim%7E5"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -824,7 +824,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-flatarray%7E2"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-flatarray%7E3"></span>complex(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -843,25 +843,25 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-setval%7E3'>setval</a></strong>  => zndsysarray_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-setval%7E5'>setval</a></strong>  => zndsysarray_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-copy%7E3'>copy</a></strong>  => zndsysarray_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-copy%7E5'>copy</a></strong>  => zndsysarray_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-norm%7E3'>norm</a></strong>  => zndsysarray_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-norm%7E5'>norm</a></strong>  => zndsysarray_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-pack%7E3'>pack</a></strong>  => zndsysarray_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-pack%7E5'>pack</a></strong>  => zndsysarray_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-unpack%7E3'>unpack</a></strong>  => zndsysarray_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-unpack%7E5'>unpack</a></strong>  => zndsysarray_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-axpy%7E3'>axpy</a></strong>  => zndsysarray_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-axpy%7E5'>axpy</a></strong>  => zndsysarray_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-eprint%7E3'>eprint</a></strong>  => zndsysarray_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-eprint%7E5'>eprint</a></strong>  => zndsysarray_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -1024,8 +1024,8 @@ public function <a href='../proc/cast_as_zndsysarray.html'>cast_as_zndsysarray</
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E2"></span><h3>
-public function <a href='../proc/get_array1d%7E2.html'>get_array1d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E3"></span><h3>
+public function <a href='../proc/get_array1d%7E3.html'>get_array1d</a>(x, n, flags) result(r)
     
     
    
@@ -1122,8 +1122,8 @@ public function <a href='../proc/get_array1d%7E2.html'>get_array1d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E2"></span><h3>
-public function <a href='../proc/get_array2d%7E2.html'>get_array2d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E3"></span><h3>
+public function <a href='../proc/get_array2d%7E3.html'>get_array2d</a>(x, n, flags) result(r)
     
     
    
@@ -1212,8 +1212,8 @@ public function <a href='../proc/get_array2d%7E2.html'>get_array2d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E2"></span><h3>
-public function <a href='../proc/get_array3d%7E2.html'>get_array3d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E3"></span><h3>
+public function <a href='../proc/get_array3d%7E3.html'>get_array3d</a>(x, n, flags) result(r)
     
     
    

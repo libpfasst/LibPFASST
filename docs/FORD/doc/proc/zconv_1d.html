@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,10 +7,10 @@
    
    <meta name="description" content="The library for running PFASST">
     
-    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli" >
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
-    <title>zndsysarray_mkdir &ndash; LibPFASST</title>
+    <title>zconv_1d &ndash; LibPFASST</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -109,11 +108,10 @@
     
   
   <div class="row">
-    <h1>zndsysarray_mkdir
-   <small>Interface</small>
+    <h1>zconv_1d
+      <small>Subroutine</small>
     
     </h1>
-    
     
 <div class="row">
   <div class="col-lg-12">
@@ -128,24 +126,24 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">14 statements</a>
+    title=" 0.0% of total for procedures.">7 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_zndsysarray.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_fft.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_zndsysarray.f90.html'>pf_zndsysarray.f90</a></li>
+     <li><a href='../sourcefile/pf_fft.f90.html'>pf_fft.f90</a></li>
     
-     <li><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></li>
+     <li><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></li>
     
   
-     <li class="active">zndsysarray_mkdir</li>
+     <li class="active">zconv_1d</li>
   </ol>
 </div>
 </div>
@@ -156,7 +154,6 @@
   })
 </script>
 
-    
   </div>
   
   <div class="row">
@@ -187,7 +184,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/zconv_1d.html#src">zconv_1d</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -195,25 +198,17 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    
-    
-      <h2>interface</h2>
-      <p>Interfaces to output routines in pf_numpy.c</p>
-      <br>
-    
-     
-    
-      <h2>
-public subroutine zndsysarray_mkdir(dname, dlen) bind(c)
+    <h2>
+public subroutine zconv_1d(this, g)
     
     
    
 </h2>
     
-
-    
   
 
+
+    
 
     <h3>Arguments</h3>
     
@@ -233,12 +228,12 @@ public subroutine zndsysarray_mkdir(dname, dlen) bind(c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dname%7E3"></span>character(len=c_char),</td>
-  <td>intent(in)</td>
+  <td><span class="anchor" id="variable-this%7E109"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dname</strong></td><td></td>
+  <td><strong>this</strong></td><td></td>
   
 </tr>
 
@@ -248,12 +243,12 @@ public subroutine zndsysarray_mkdir(dname, dlen) bind(c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dlen%7E2"></span>integer,</td>
-  <td>intent(in),</td>
+  <td><span class="anchor" id="variable-g%7E16"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
   <td></td>
   
-  <td>value</td><td>::</td>
-  <td><strong>dlen</strong></td><td></td>
+  <td></td><td>::</td>
+  <td><strong>g</strong>(:)</td><td></td>
   
 </tr>
 
@@ -263,13 +258,84 @@ public subroutine zndsysarray_mkdir(dname, dlen) bind(c)
     
     
     
-    <h3>Description</h3>
-    <p>Subroutine to make a directory for output</p>
     
+     
     <br>
 
- </div>
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/zconv_1d.html#src">zconv_1d</a>
+  </div>
 </div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zconv_1d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="c">! Variable Types</span>
+        <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+        <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">g</span><span class="p">(:)</span>
+        <span class="c">! Compute Convolution</span>
+        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>
+        <span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span> <span class="o">*</span> <span class="n">g</span>
+        <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftf</span><span class="p">()</span>
+    <span class="k">end subroutine </span><span class="n">zconv_1d</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
 
 
     <hr>    
@@ -286,7 +352,7 @@ public subroutine zndsysarray_mkdir(dname, dlen) bind(c)
             
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tommaso Buvoli</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
       </div>
       <br>
       </div> <!-- /container -->    
