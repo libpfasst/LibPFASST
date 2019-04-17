@@ -1,9 +1,8 @@
 #
-# Makefile for advection diffusion example.
+# Makefile for advection diffusion example
 #
 
-
-LIBPFASST ?= ../../..
+LIBPFASST ?= ../..
 BUILDDIR = build
 
 EXE = main.exe
@@ -25,7 +24,5 @@ include $(LIBPFASST)/Makefile.rules
 #
 # dependencies
 #
-include $(PWD)/.depend
+include .depend
 main.exe : $(LIBPFASST)/lib/libpfasst.a 
-
-

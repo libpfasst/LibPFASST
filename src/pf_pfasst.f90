@@ -346,9 +346,9 @@ contains
     integer, parameter :: un = 9
     integer            :: i, ios,stat
     character(len=128)  :: arg
-    character(len=255) :: istring  ! stores command line argument
-    character(len=255) :: message  ! use for i/o error messages
-    character(len=255) :: outdir
+    character(len=256) :: istring  ! stores command line argument
+    character(len=1024) :: message  ! use for i/o error messages
+    character(len=256) :: outdir
 
     
     !> define the namelist for reading
@@ -405,7 +405,7 @@ contains
        do
           call get_command_argument(i, arg,status=stat)
           if (len_trim(arg) == 0) exit
-          if (i > 0) then
+          if (i > 1) then
              istring="&pf_params " // trim(arg) // " /"
              read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
           end if
@@ -624,7 +624,7 @@ contains
     
     if (pf%save_residuals) then
        do level_index = 1,pf%nlevels
-          call  dump_results(pf%results(level_index))
+          call  dump_resids(pf%results(level_index))
        end do
     end if
     
@@ -654,6 +654,7 @@ end subroutine pf_dump_results
   
 
 end subroutine pf_destroy_results
+  
   
     
   

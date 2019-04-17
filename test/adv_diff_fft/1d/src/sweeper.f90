@@ -14,10 +14,11 @@ module pf_my_sweeper
   !>  extend the imex sweeper type with stuff we need to compute rhs
   type, extends(pf_imex_sweeper_t) :: ad_sweeper_t
      integer ::     nx   !  Grid size
-     !>  Spectral derivative operators
+
+     !>  FFT and Spectral derivatives
      type(pf_fft_t), pointer :: fft_tool
-     complex(pfdp), allocatable :: opE(:) ! Lapclacian operators
-     complex(pfdp), allocatable :: opI(:) ! First derivative operators
+     complex(pfdp), allocatable :: opE(:) ! Explicit spectral operator
+     complex(pfdp), allocatable :: opI(:) ! Implicit spectral operator
      
    contains
 
@@ -43,7 +44,7 @@ contains
   end function as_ad_sweeper
 
 
-  !>  Routine to initialize variables (bypasses imex sweeper initialize)
+  !>  Routine to initialize sweeper (bypasses imex sweeper initialize)
   subroutine initialize(this, pf,level_index)
     use probin, only:  imex_stat, v ,nu
     class(ad_sweeper_t), intent(inout) :: this
@@ -72,18 +73,20 @@ contains
 
     nx=pf%levels(level_index)%shape(1)  !  local convenient grid size
 
-    !>  Set up the FFT based operators
+    !>  Set up the FFT 
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx],1)
 
+    !>  Define spectral derivatitive operators
     allocate(lap(nx))
     allocate(ddx(nx))
+    call this%fft_tool%make_lap(lap)
+    call this%fft_tool%make_deriv(ddx)
+    
+    !> Allocate operators for implicit and explicit parts
     allocate(this%opE(nx))
     allocate(this%opI(nx))
-    !>  Set up the correct Fourier operators
-    call this%fft_tool%make_lap(lap)
-    call this%fft_tool%make_deriv(ddx)    
-
+    
     !>  Choose the explicit and implicit operators depending on imex_stat
     select case (imex_stat)
     case (0)  ! Fully Explicit        
@@ -100,7 +103,7 @@ contains
        call exit(0)
     end select
 
-    !>  Clean up
+    !>  Clean up locals
     deallocate(lap)
     deallocate(ddx)
     
@@ -124,7 +127,6 @@ contains
     call this%fft_tool%fft_destroy()
     deallocate(this%fft_tool)
 
-
   end subroutine destroy
   
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -143,6 +145,7 @@ contains
     real(pfdp),      pointer :: yvec(:), fvec(:)
     type(pf_fft_t),     pointer :: fft
 
+    !  Grab the arrays from the encap
     yvec  => get_array1d(y)
     fvec => get_array1d(f)
     fft => this%fft_tool
@@ -176,6 +179,7 @@ contains
     real(pfdp),      pointer :: yvec(:), rhsvec(:), fvec(:)
     type(pf_fft_t),     pointer :: fft
 
+    !  Grab the arrays from the encaps
     yvec  => get_array1d(y)
     rhsvec => get_array1d(rhs)
     fvec => get_array1d(f)
@@ -191,7 +195,6 @@ contains
     fft => this%fft_tool
 
     if (piece == 2) then
-
        ! Apply the inverse opeator with the FFT convolution
        call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
@@ -216,45 +219,22 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nprob,nu, v, t00, kfreq
+    use probin, only: nu, v,kfreq
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
-    integer    :: nx, i, ii, k,nbox
-    real(pfdp) :: tol, t0,Dx, omega
+    integer    :: nx, i
+    real(pfdp) ::  omega
     real(pfdp) ::  x
 
     nx = size(yex)
-    Dx = 1.0d0/dble(nx)
 
-    if (nprob .eq. 1) then
-       !  Using sin wave initial condition
-       omega = two_pi*kfreq
-       do i = 1, nx
-          x = dble(i-1-nx/2)/dble(nx) - t*v 
-          yex(i) = cos(omega*x)*exp(-omega*omega*nu*t)
-       end do
-    else  !  Use periodic image of Gaussians
-       yex=0
-       if (nu .gt. 0.0) then
-          nbox = ceiling(sqrt(4.0*nu*(t00+t)*37.0d0))  !  Decide how many periodic images
-          do k = -nbox,nbox
-             do i = 1, nx
-                x = dble(i-1-nx/2)/dble(nx) - t*v  + dble(k)
-                yex(i) = yex(i) + sqrt(t00)/sqrt(t00+t)*exp(-x*x/(4.0*nu*(t00+t)))
-             end do
-          end do
-       else
-          nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
-          do k = -nbox,nbox
-             do i = 1, nx
-                x = dble(i-1-nx/2)/dble(nx) - t*v  + dble(k)
-                yex(i) = yex(i) + exp(-x*x)
-             end do
-          end do
-       end if  ! nbox
-
-    end if
+    !  Using sin wave initial condition
+    omega = two_pi*kfreq
+    do i = 1, nx
+       x = dble(i-1)/dble(nx) - t*v 
+       yex(i) = cos(omega*x)*exp(-omega*omega*nu*t)
+    end do
 
   end subroutine exact
 

@@ -2,9 +2,9 @@
 ! This file is part of LIBPFASST.
 !
 !
-!> Sweeper and RHS routines for 3-D advection/diffusion example.
-!>     u_t + a*u_x+b*u_y+c*u_z = nu*u_xx
-module feval
+!> Sweeper and RHS routines for 2-D advection/diffusion example.
+!>     u_t + a*u_x+b*u_y = nu*(u_xx+u_yy)
+module pf_my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_imex_sweeper
@@ -12,21 +12,10 @@ module feval
   implicit none
 
 
-
-  !>  extend the generic level type by defining transfer operators
-  type, extends(pf_user_level_t) :: ad_level_t
-   contains
-     procedure :: restrict
-     procedure :: interpolate
-  end type ad_level_t
-
   !>  extend the imex sweeper type with stuff we need to compute rhs
   type, extends(pf_imex_sweeper_t) :: ad_sweeper_t
      integer ::     nx,ny
      type(pf_fft_t), pointer :: fft_tool
-     complex(pfdp), allocatable :: lap(:,:)         ! Lapclacian operators
-     complex(pfdp), allocatable :: ddx(:,:) ! First derivative operators
-     complex(pfdp), allocatable :: ddy(:,:) ! First derivative operators
      complex(pfdp), allocatable :: opE(:,:) ! Explicit part operator
      complex(pfdp), allocatable :: opI(:,:) ! Implicit part operator
      
@@ -62,7 +51,10 @@ contains
 
 
     integer     :: i,nx,ny
-
+    complex(pfdp), allocatable :: lap(:,:)         ! Lapclacian operators
+    complex(pfdp), allocatable :: ddx(:,:) ! First derivative operators
+    complex(pfdp), allocatable :: ddy(:,:) ! First derivative operators
+    
     nx=pf%levels(level_index)%shape(1)
     ny=pf%levels(level_index)%shape(2)
     
@@ -84,33 +76,33 @@ contains
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx,ny],2)
 
-    allocate(this%lap(nx,ny))
-    allocate(this%ddx(nx,ny))
-    allocate(this%ddy(nx,ny))
+    allocate(lap(nx,ny))
+    allocate(ddx(nx,ny))
+    allocate(ddy(nx,ny))
     allocate(this%opE(nx,ny))
     allocate(this%opI(nx,ny))
 
-    call this%fft_tool%make_lap(this%lap)
-    call this%fft_tool%make_deriv(this%ddx,1)
-    call this%fft_tool%make_deriv(this%ddy,2)
+    call this%fft_tool%make_lap(lap)
+    call this%fft_tool%make_deriv(ddx,1)
+    call this%fft_tool%make_deriv(ddy,2)
     select case (imex_stat)
     case (0)  ! Fully Explicit        
-       this%opE = -a*this%ddx-b*this%ddy + nu * this%lap
+       this%opE = -a*ddx-b*ddy + nu * lap
        this%opI = 0.0_pfdp          
     case (1)  ! Fully Implicit
        this%opE = 0.0_pfdp
-       this%opI = -a*this%ddx-b*this%ddy + nu * this%lap 
+       this%opI = -a*ddx-b*ddy + nu * lap 
     case (2)  ! IMEX
-       this%opE = -a*this%ddx-b*this%ddy
-       this%opI =  nu * this%lap           
+       this%opE = -a*ddx-b*ddy
+       this%opI =  nu * lap           
     case DEFAULT
        print *,'Bad case for imex_stat in f_eval ', imex_stat
        call exit(0)
     end select
 
-    deallocate(this%lap)
-    deallocate(this%ddx)
-    deallocate(this%ddy)    
+    deallocate(lap)
+    deallocate(ddx)
+    deallocate(ddy)    
 
   end subroutine initialize
 
@@ -199,103 +191,6 @@ contains
     end if
   end subroutine f_comp
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  These are the transfer functions that must be  provided for the level
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
-    class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
-    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
-    real(pfdp),        intent(in   ) :: t
-    integer, intent(in), optional :: flags
-
-    integer      :: nx_f, nx_c, ny_f, ny_c
-    integer      :: irat,jrat,i,j,ii,jj
-    class(ad_sweeper_t), pointer :: sweeper_f, sweeper_c
-    real(pfdp),         pointer :: yvec_f(:,:), yvec_c(:,:)
-    complex(pfdp),         pointer ::  wk_f(:,:),wk_c(:,:)    
-    type(pf_fft_t),     pointer :: fft_f,fft_c
-
-    sweeper_c => as_ad_sweeper(c_lev%ulevel%sweeper)
-    sweeper_f => as_ad_sweeper(f_lev%ulevel%sweeper)
-
-    yvec_f => get_array2d(f_vec) 
-    yvec_c => get_array2d(c_vec)
-
-    nx_f=size(yvec_f,1)
-    ny_f=size(yvec_f,2)
-    nx_c=size(yvec_c,1)
-    ny_c=size(yvec_c,2)
-    irat  = nx_f/nx_c
-    jrat  = ny_f/ny_c
-
-    if (irat == 1 .and. jrat==1) then
-       yvec_f = yvec_c
-       return
-    endif
-
-    fft_c => sweeper_c%fft_tool
-    fft_f => sweeper_f%fft_tool    
-
-    call fft_f%get_wk_ptr(wk_f)
-    call fft_c%get_wk_ptr(wk_c)
-    wk_c=yvec_c
-    call fft_c%fftf()    
-
-    wk_f = 0.0_pfdp
-
-    do j = 1, ny_c
-       if (j <= ny_c/2) then
-          jj = j
-       else if (j > ny_c/2+1) then
-          jj = ny_f - ny_c + j
-       else
-          cycle
-       end if
-       
-       do i = 1, nx_c
-          if (i <= nx_c/2) then
-             ii = i
-          else if (i > nx_c/2+1) then
-             ii = nx_f - nx_c + i
-          else
-             cycle
-          end if
-          
-          wk_f(ii, jj) = wk_c(i, j)
-       end do
-    end do
-    wk_f=wk_f*4.0_pfdp
-    call fft_f%fftb()
-    yvec_f=real(wk_f)
-  end subroutine interpolate
-
-  !>  Restrict from fine level to coarse
-  subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
-    class(ad_level_t), intent(inout) :: this
-    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
-    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
-    real(pfdp),        intent(in   ) :: t      !<  time of solution
-    integer, intent(in), optional :: flags
-
-
-    real(pfdp), pointer :: yvec_f(:,:), yvec_c(:,:)  
-    integer      :: irat,jrat
-    yvec_f => get_array2d(f_vec)
-    yvec_c => get_array2d(c_vec)
-
-    irat  = size(yvec_f,1)/size(yvec_c,1)
-    jrat  = size(yvec_f,2)/size(yvec_c,2)
-
-    if (irat == 1 .and. jrat==1) then
-       yvec_c = yvec_f
-    else
-       yvec_c = yvec_f(::irat,::jrat)       
-    endif
-
-
-  end subroutine restrict
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -311,27 +206,37 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nu, a,b, kfreq
+    use probin, only: nprob,nu, a,b, kfreq, t00
     real(pfdp), intent(in)  :: t
     
     real(pfdp), intent(out) :: yex(:,:)
 
     integer    :: nx,ny, i, j
-    real(pfdp) :: tol, x,y,  omega
+    real(pfdp) :: tol, x,y, r2, omega
 
     nx = size(yex,1)
     ny = size(yex,2)
 
     !  Using sin wave initial condition
-    omega = two_pi*kfreq
-    do j = 1, ny
-       y = dble(j-1-ny/2)/dble(ny) - t*b 
-       do i = 1, nx
-          x = dble(i-1-nx/2)/dble(nx) - t*a 
-          yex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
+    if (nprob .eq. 1) then
+       omega = two_pi*kfreq
+       do j = 1, ny
+          y = dble(j-1)/dble(ny)-0.5_pfdp - t*b 
+          do i = 1, nx
+             x = dble(i-1)/dble(nx)-0.5_pfdp - t*a 
+             yex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
+          end do
        end do
-    end do
+    else
+       do j = 1, ny
+          y = dble(j-1)/dble(ny)-0.5_pfdp - t*b 
+          do i = 1, nx
+             x = dble(i-1)/dble(nx)-0.5_pfdp - t*a
+             r2=x*x+y*y
+             yex(i,j) = t00/(t00+t)*exp(-r2/(4.0*nu*(t00+t)))             
+          end do
+       end do
+    endif
   end subroutine exact
+end module pf_my_sweeper
 
-
-end module feval

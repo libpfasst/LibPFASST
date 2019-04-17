@@ -16,8 +16,8 @@ contains
     character(len=*), intent(in) :: datpath
     logical, intent(in) :: save_residuals
 
-    character(len = 50   ) :: fname  !!  output file name for residuals
-    character(len = 100   ) :: fullname  !!  output file name for residuals
+    character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 256) :: fullname  !!  output file name for residuals
     integer :: istat,system
     
     !  Set up the directory to dump results
@@ -37,7 +37,7 @@ contains
        end if
     end if
        
-    this%dump => dump_results
+!    this%dump => dump_results
     this%destroy => destroy_results
 
     this%nsteps=nsteps_in
@@ -55,18 +55,18 @@ contains
     this%residuals = -1.0_pfdp
   end subroutine initialize_results
 
-  subroutine dump_results(this)
+  subroutine dump_resids(this)
     type(pf_results_t), intent(inout) :: this
     integer :: i, j, k, istat,system
-    character(len = 50   ) :: fname  !!  output file name for residuals
-    character(len = 100   ) :: fullname  !!  output file name for residuals
-    character(len = 50   ) :: datpath  !!  directory path
+    character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 256) :: fullname  !!  output file name for residuals
+    character(len = 128) :: datpath  !!  directory path
 
     
     datpath = trim(this%datpath) // 'residuals'
     istat= system('mkdir -p ' // trim(datpath))
     
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_results")
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
 
     write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level,'.dat'
     fullname = trim(datpath) // trim(fname)
@@ -75,25 +75,25 @@ contains
     do j = 1, this%nblocks
        do i = 1 , this%niters
           do k = 1, this%nsweeps
-             write(100+this%rank, '(I4, I4, I4, e21.14)') j,i,k,this%residuals(i, j, k)
+             write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%residuals(i, j, k)
           end do
        end do
     enddo
     close(100+this%rank)
 
-  end subroutine dump_results
+  end subroutine dump_resids
   subroutine dump_errors(this)
     type(pf_results_t), intent(inout) :: this
     integer :: i, j, k, istat,system
-    character(len = 50   ) :: fname  !!  output file name for residuals
-    character(len = 100   ) :: fullname  !!  output file name for residuals
-    character(len = 50   ) :: datpath  !!  directory path
+    character(len = 128   ) :: fname  !!  output file name for residuals
+    character(len = 256   ) :: fullname  !!  output file name for residuals
+    character(len = 128   ) :: datpath  !!  directory path
 
     
     datpath = trim(this%datpath) // 'errors'
     istat= system('mkdir -p ' // trim(datpath))
     
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_results")
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_errors")
 
     write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level,'.dat'
     fullname = trim(datpath) // trim(fname)
@@ -102,7 +102,7 @@ contains
     do j = 1, this%nblocks
        do i = 1 , this%niters
           do k = 1, this%nsweeps
-             write(100+this%rank, '(I4, I4, I4, e21.14)') j,i,k,this%errors(i, j, k)
+             write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%errors(i, j, k)
           end do
        end do
     enddo
@@ -112,9 +112,9 @@ contains
 
   subroutine dump_timings(pf)
     type(pf_pfasst_t), intent(inout) :: pf
-    character(len = 25   ) :: fname  !!  output file name for runtimes
-    character(len = 50   ) :: fullname  !!  output file name for runtimes
-    character(len = 50   ) :: datpath  !!  directory path
+    character(len = 128   ) :: fname  !!  output file name for runtimes
+    character(len = 256   ) :: fullname  !!  output file name for runtimes
+    character(len = 128   ) :: datpath  !!  directory path
     integer :: istat,j, istream,system
 
     datpath = trim(pf%outdir) // 'runtimes'

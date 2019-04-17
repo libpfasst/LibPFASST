@@ -19,6 +19,11 @@ def make_sdc():
     nsteps = 32
     for nodes in range(4, 5):
         for imex_status in [0, 2]:
+            if imex_status == 0:
+                nsteps = 256
+            else:
+                nsteps = 32
+
             sdc.append((nodes, imex_status, mpi_tasks, nml, nsteps))
 
     return sdc
@@ -29,13 +34,10 @@ def make_mlsdc():
     nml = NMLFILE.format('multi_level')
     mpi_tasks = 1
     nodes = '[2 3 5]'
-    for imex_status in [0, 2]:
-        if imex_status == 0:
-            nsteps = 256
-        else:
-            nsteps = 32
+    imex_status = 2
+    nsteps = 32
 
-        mlsdc.append((nodes, imex_status, mpi_tasks, nml,nsteps))
+    mlsdc.append((nodes, imex_status, mpi_tasks, nml,nsteps))
 
     return mlsdc
 
@@ -45,13 +47,10 @@ def make_pfasst():
     nml = NMLFILE.format('multi_level')
     mpi_tasks = 4
     nodes = '[2 3 5]'
-    for imex_status in [0, 2]:
-        if imex_status == 0:
-            nsteps = 256
-        else:
-            nsteps = 32
+    imex_status=2
+    nsteps = 32
 
-        pfasst.append((nodes, imex_status, mpi_tasks, nml,nsteps))
+    pfasst.append((nodes, imex_status, mpi_tasks, nml,nsteps))
 
     return pfasst
 
