@@ -98,7 +98,7 @@ contains
     integer     :: m, n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
 
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     call start_timer(pf, TLEVEL+lev%index-1)
 
@@ -198,10 +198,10 @@ contains
     type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
     integer,           intent(in)    :: level_index  !!  level on which to initialize
 
-    type(pf_level_t), pointer  :: lev    !!  Current level
+    type(pf_level_t), pointer  :: lev    !  Current level
 
     integer    ::  nnodes,ierr
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     this%npieces = 2
 
     !  The default is to use both pieces, but can be overriddent in local sweeper
@@ -256,8 +256,8 @@ contains
     type(pf_pfasst_t),  target,  intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
-    type(pf_level_t), pointer  :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer  :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -282,8 +282,8 @@ contains
     integer, optional, intent(in   ) :: flags
 
     integer :: n, m
-    type(pf_level_t), pointer :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     do n = 1, lev%nnodes-1
        call fintSDC(n)%setval(0.0_pfdp)
@@ -333,8 +333,8 @@ contains
     integer,           intent(in   ) :: m    !!  Node at which to evaluate
     integer, intent(in), optional   :: flags, step
 
-    type(pf_level_t), pointer :: lev        !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    type(pf_level_t), pointer :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     if (this%explicit) &
        call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)

@@ -193,7 +193,7 @@ Finally, note that in this example, an optional argument to return the solution 
 
 Example 3
 ---------
-Please see the ``LibPFASST/test/adv_diff_fft`` directory included in LibPFASST
+Please see the ``LibPFASST/Tutorials/EX3_adv_diff`` directory included in LibPFASST
 for a simple PDE application of LibPFASST.
 
 This example solves a 1d linear advection diffusion equation
@@ -205,7 +205,35 @@ This example solves a 1d linear advection diffusion equation
 This right hand side of the equation will be split into stiff terms handled implicitly
 (:math:`\nu u_{xx}`) and non-stiff terms handled explicitly (:math:`-v u_x`),
 hence an IMEX SDC substepper will be used to evolve the equation through time.
+As in Example 1, the ndarray encapsulation provided by LibPFASST is used here.
 
-The solution of  implicit equation is done using the FFT through the FFTW package.
+The code in ``src/main.f90`` is almost identical to that of Example 1 except that the size of the ndarray is different and set per level
+from the variable 'nx' read from the local namelist.
 
-(to be continued)
+.. code-block:: fortran
+		
+   !>  Set the size of the data on this level (here just one)
+   call pf_level_set_size(pf,l,[nx(l)])
+
+The most noticable difference in this example is that the function evaluations, implicit solves, and interpolation and restriction operators
+are not trivial as in the Dahlquist examples.  This example is done with a pseudo-spectral discretization in space and the method of lines in time.
+In the local definition of the sweeper,  variables are added to facilitate operations in spectral space
+
+.. code-block:: fortran
+
+     !>  FFT and Spectral derivatives
+     type(pf_fft_t), pointer :: fft_tool
+     complex(pfdp), allocatable :: opE(:) ! Explicit spectral operator
+     complex(pfdp), allocatable :: opI(:) ! Implicit spectral operator
+
+The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  ``feval`` and ``f_comp`` the convolution subroutine `conv` is used for either implicit or explicit
+function evaluations in spectral space, e.g.
+
+.. code-block:: fortran
+		
+       ! Apply the inverse opeator with the FFT convolution
+       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
+
+In a similar manner, in the local definition of the `level`, the interpolation is done in spectral space while the restriction is just pointwise coarsening.
+
+When creating and example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.

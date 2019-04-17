@@ -86,7 +86,7 @@ contains
     logical     :: sweep_y, sweep_p
     integer     :: step
 
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     call start_timer(pf, TLEVEL+lev%index-1)
     step = pf%state%step+1
@@ -251,7 +251,7 @@ contains
 
     integer    :: m,n, nnodes
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 3
 
@@ -292,7 +292,7 @@ contains
     integer,              intent(in)    :: level_index
 
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     deallocate(this%QdiffE)
     deallocate(this%QdiffI)
@@ -317,7 +317,7 @@ contains
 
     integer :: n, m, p, which
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     which = 0
     if(present(flags)) which = flags
@@ -355,7 +355,7 @@ contains
 
     integer  :: which, mystep
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     
     which = 0
@@ -380,7 +380,7 @@ contains
 
     integer :: m
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     if (.not.present(flags)) stop "MISDCQ_OC EVAL_ALL WITHOUT FLAGS"
     if (.not.present(step)) stop "MISDCQ_OC EVAL_ALL WITHOUT step"
@@ -400,7 +400,7 @@ contains
 
     integer :: m, n, which
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     which = 0
     if(present(flags)) which = flags
@@ -441,7 +441,7 @@ contains
 
     integer :: m, p, which, mystep
     type(pf_level_t), pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
 
     which = 3

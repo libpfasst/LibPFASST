@@ -1,4 +1,4 @@
-!! Calling of user defined routines from various places in the pfasst algorithm
+!! Module for calling of user defined routines from various places in the pfasst algorithm
 !
 ! This file is part of LIBPFASST.
 !

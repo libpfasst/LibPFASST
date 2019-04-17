@@ -46,9 +46,10 @@ contains
        lev%residual_rel = 0.0d0
     end if
 
-    if (pf%save_residuals .and. pf%state%iter>0)  then
-       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
-    end if
+    call pf_set_resid(pf,lev%index,lev%residual)
+!    if (pf%save_residuals .and. pf%state%iter>0)  then
+!       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
+!    end if
 
     call end_timer(pf, TRESIDUAL)
 
@@ -115,6 +116,31 @@ contains
     
     call flush(6)
   end subroutine pf_echo_residual
+
+  !>  Subroutine to store a residual value
+  subroutine pf_set_resid(pf,level_index,resid)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: resid
+    
+    if (pf%save_residuals .and. pf%state%iter>0)  then
+       pf%results(level_index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = resid
+    end if
+    
+  end subroutine pf_set_resid
+
+  !>  Subroutine to store a residual value
+  subroutine pf_set_error(pf,level_index,error)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: error
+    
+    if (pf%save_residuals .and. pf%state%iter>0)  then
+       pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
+    end if
+    
+  end subroutine pf_set_error
+
 
   !
   !> Generic evaluate all

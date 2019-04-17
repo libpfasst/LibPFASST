@@ -194,16 +194,38 @@ encapsulation called &#8216;scalar_encap&#8217; is defined</p>
 </div>
 <div class="section" id="example-3">
 <h2>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h2>
-<p>Please see the <code class="docutils literal"><span class="pre">LibPFASST/test/adv_diff_fft</span></code> directory included in LibPFASST
+<p>Please see the <code class="docutils literal"><span class="pre">LibPFASST/Tutorials/EX3_adv_diff</span></code> directory included in LibPFASST
 for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
 <div class="math">
 \[u_t  = - v u_x + \nu u_{xx}.\]</div>
 <p>This right hand side of the equation will be split into stiff terms handled implicitly
 (<span class="math">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math">\(-v u_x\)</span>),
-hence an IMEX SDC substepper will be used to evolve the equation through time.</p>
-<p>The solution of  implicit equation is done using the FFT through the FFTW package.</p>
-<p>(to be continued)</p>
+hence an IMEX SDC substepper will be used to evolve the equation through time.
+As in Example 1, the ndarray encapsulation provided by LibPFASST is used here.</p>
+<p>The code in <code class="docutils literal"><span class="pre">src/main.f90</span></code> is almost identical to that of Example 1 except that the size of the ndarray is different and set per level
+from the variable &#8216;nx&#8217; read from the local namelist.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
+<span class="k">call </span><span class="n">pf_level_set_size</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">,[</span><span class="n">nx</span><span class="p">(</span><span class="n">l</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>The most noticable difference in this example is that the function evaluations, implicit solves, and interpolation and restriction operators
+are not trivial as in the Dahlquist examples.  This example is done with a pseudo-spectral discretization in space and the method of lines in time.
+In the local definition of the sweeper,  variables are added to facilitate operations in spectral space</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  FFT and Spectral derivatives</span>
+<span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fft_tool</span>
+<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opE</span><span class="p">(:)</span> <span class="c">! Explicit spectral operator</span>
+<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opI</span><span class="p">(:)</span> <span class="c">! Implicit spectral operator</span>
+</pre></div>
+</div>
+<p>The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal"><span class="pre">feval</span></code> and <code class="docutils literal"><span class="pre">f_comp</span></code> the convolution subroutine <cite>conv</cite> is used for either implicit or explicit
+function evaluations in spectral space, e.g.</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse opeator with the FFT convolution</span>
+<span class="k">call </span><span class="n">fft</span><span class="p">%</span><span class="n">conv</span><span class="p">(</span><span class="n">rhsvec</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0_pfdp</span> <span class="o">-</span> <span class="n">dtq</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">opI</span><span class="p">),</span><span class="n">yvec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In a similar manner, in the local definition of the <cite>level</cite>, the interpolation is done in spectral space while the restriction is just pointwise coarsening.</p>
+<p>When creating and example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.</p>
 </div>
 </div>
 

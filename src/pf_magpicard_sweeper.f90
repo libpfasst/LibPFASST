@@ -1,4 +1,4 @@
-!!  Sweeper for Magnus integrator
+!!  Magnus integrator sweeper module
 !
 ! This file is part of LIBPFASST.
 !
@@ -147,7 +147,7 @@ contains
 
     integer :: m, nnodes
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%commutator_coefs = 0.0_pfdp
     this%npieces = 1
@@ -184,7 +184,7 @@ contains
     
     integer :: j, m
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     do m = 1, lev%nnodes-1
        call fintSDC(m)%setval(0.0_pfdp)
@@ -205,7 +205,7 @@ contains
     integer, optional, intent(in   ) :: flags, step
 
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
   end subroutine magpicard_evaluate
 
@@ -217,7 +217,7 @@ contains
     integer, optional, intent(in   ) :: flags, step
 
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     call pf_generic_evaluate_all(this, pf,level_index, t)
   end subroutine magpicard_evaluate_all
 
@@ -229,7 +229,7 @@ contains
     integer, optional, intent(in   ) :: flags
     integer :: m
     type(pf_level_t),    pointer :: lev
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     do m = 1, lev%nnodes-1
        call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
     end do
@@ -245,7 +245,7 @@ contains
     integer, optional, intent(in   ) :: flags, step
 
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     call pf_generic_spreadq0(this,pf,level_index,  t0)
   end subroutine magpicard_spreadq0
@@ -257,7 +257,7 @@ contains
     integer,           intent(in)    :: level_index  !!  level on which to initialize
 
     type(pf_level_t), pointer  :: lev    !!  Current level
-    lev => pf%levels(level_index)   !!  Assign level pointer
+    lev => pf%levels(level_index)   !  Assign level pointer
     
     deallocate(this%dtsdc)
     
