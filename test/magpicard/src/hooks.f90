@@ -22,9 +22,10 @@ contains
 
     level=>pf%levels(level_index)
     
-    q_ex = (/ 1.49416312927603D00, 7.07931926144930D-01, 9.18515292243515D-01, 7.82054091257729D-01, 2.69391225733346D-01, 2.07255594844625D-01, 2.88290898201622D-01, &
-               3.95894489648885D-01, 4.87366423981801D-01, 4.08042164859455D-01, 4.08042164854834D-01, 4.87366423981942D-01, 3.95894489649903D-01, 2.88290898204303D-01, &
-               2.07255594845227D-01, 2.69391225736145D-01, 7.82054091276840D-01, 9.18515292255153D-01, 7.07931926128900D-01, 1.49416312923829D+00 /)
+   !  20 particles run with 512
+   q_ex =(/ 1.49416313027551D+00, 7.07931923619350D-01, 9.18515291508953D-01, 7.82054090221508D-01, 2.69391225356707D-01, 2.07255594164204D-01, 2.88290898242198D-01, &
+            3.95894491436281D-01, 4.87366427184367D-01, 4.08042164173400D-01, 4.08042164173065D-01, 4.87366427184291D-01, 3.95894491436375D-01, 2.88290898242375D-01, &
+            2.07255594164250D-01, 2.69391225356918D-01, 7.82054090222874D-01, 9.18515291509728D-01, 7.07931923618189D-01, 1.49416313027296D+00 /)
     magpicard => cast_as_magpicard_sweeper(level%ulevel%sweeper)
     qend => cast_as_zndarray(level%qend)
     q_array=>get_array2d(level%qend)
@@ -54,13 +55,13 @@ contains
 
     type(zndarray), pointer :: qend,Fend
     character(len=256) :: time, filename
-    integer :: un
+    integer :: un,istat
     complex(pfdp),      pointer :: q_array(:,:)
 
     !  Solution at the end
     qend => cast_as_zndarray(level%qend)
     q_array=>get_array2d(level%qend)
-    
+    istat= system('mkdir -p ' // trim(fbase))
     un = 200+pf%rank
     write(time, '(f10.5)') state%t0+state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &

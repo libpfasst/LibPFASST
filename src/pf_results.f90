@@ -117,9 +117,9 @@ contains
     character(len = 128   ) :: datpath  !!  directory path
     integer :: istat,j, istream,system
 
-    datpath = trim(pf%outdir) // 'runtimes'
-
+    datpath = trim(pf%outdir) // '/runtimes'
     istat= system('mkdir -p '// trim(datpath))
+
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 
     write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.dat'    
