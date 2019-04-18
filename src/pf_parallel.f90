@@ -334,8 +334,6 @@ contains
        call pf_send_status(pf, send_tag)
     end if
 
-    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
-
   end subroutine pf_check_convergence_block
 
   !

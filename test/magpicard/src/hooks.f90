@@ -6,54 +6,44 @@ module hooks
 
 contains
 
-  subroutine echo_error(pf, level, state)
-    type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+  subroutine echo_error(pf, level_index)
+    type(pf_pfasst_t), target,intent(inout) :: pf
+    integer,  intent(in   ) :: level_index
 
+    class(pf_level_t), pointer :: level    
     class(magpicard_sweeper_t), pointer :: magpicard
     type(zndarray) :: yexact
     type(zndarray), pointer :: qend
     integer :: dim(2)
-    real(pfdp) :: error
+    real(pfdp) :: errd,t_end
+    complex(pfdp),      pointer :: q_array(:,:)
+    real(pfdp)   :: q_ex(20)
+    real(pfdp)   :: q_diag(20)
 
+    level=>pf%levels(level_index)
+    
+    q_ex = (/ 1.49416312927603D00, 7.07931926144930D-01, 9.18515292243515D-01, 7.82054091257729D-01, 2.69391225733346D-01, 2.07255594844625D-01, 2.88290898201622D-01, &
+               3.95894489648885D-01, 4.87366423981801D-01, 4.08042164859455D-01, 4.08042164854834D-01, 4.87366423981942D-01, 3.95894489649903D-01, 2.88290898204303D-01, &
+               2.07255594845227D-01, 2.69391225736145D-01, 7.82054091276840D-01, 9.18515292255153D-01, 7.07931926128900D-01, 1.49416312923829D+00 /)
     magpicard => cast_as_magpicard_sweeper(level%ulevel%sweeper)
     qend => cast_as_zndarray(level%qend)
-!!$    dim = shape(qend%flatarray)
-!!$    call zndarray_build(yexact, dim(1))
-!!$
-!!$    yexact%array = 0.0_pfdp
-!!$    call exact(yexact, state%t0+state%dt)
-!!$    error = compute_inf_norm(qend%array - yexact%array, dim(1))
-!!$    error = error / compute_inf_norm(yexact%array, dim(1))
+    q_array=>get_array2d(level%qend)
+
+    t_end=pf%state%t0+pf%state%dt
+
+    if (abs(t_end-0.05_pfdp) .lt. 1e-12) then
+       q_diag = real(qend%flatarray(1:400:21))
+       errd = maxval(abs(q_diag-q_ex))
+      
+       print *,'Max error at end=',errd
+    endif
+
+
 !!$    print '("time: ", f5.2, " step: ",i3.3," iter: ",i4.3," error (dmat): ",es14.7)', &
 !!$         state%t0+state%dt, state%step+1, state%iter, error
 
-    ! stop
-    ! print*, '------------------------------------------------------'
-!    deallocate(yexact%array)
-    call flush()
-    !if (state%iter == 2) stop
   end subroutine echo_error
 
-  subroutine echo_residual(pf, level, state)
-    type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
-
-    type(zndarray), pointer :: r, q
-
-    r => cast_as_zndarray(level%R(level%nnodes-1))
-
-!    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
-!         state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, maxval(abs(r%flatarray))
-!    print '("resid:  step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",f18.10)', &
-!         state%step+1, state%iter, level%index, maxval(abs(r%flatarray))
-    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7)', &
-         state%step+1, state%iter,level%index,maxval(abs(r%flatarray))
-    
-    call flush()
-  end subroutine echo_residual
 
 
   subroutine save_solution(pf, level, state)
@@ -66,8 +56,11 @@ contains
     character(len=256) :: time, filename
     integer :: un
     complex(pfdp),      pointer :: q_array(:,:)
+
+    !  Solution at the end
     qend => cast_as_zndarray(level%qend)
-    q_array=>get_array2d(level%qend)    
+    q_array=>get_array2d(level%qend)
+    
     un = 200+pf%rank
     write(time, '(f10.5)') state%t0+state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
@@ -76,25 +69,21 @@ contains
     write(un) q_array
     
     close(un)
-
-    !    write(time, '(f10.5)') state%t0+state%dt
-!    write(time, '(i5.5)') int(1000*(state%t0+state%dt)+0.49)    
-!    write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
- !        pf%rank, state%step+1, state%iter, level%index
-    ! open(unit=20, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
-
     
-    write(filename, '("step_",i5.5)') &
+    write(filename, '("P_step_",i5.5)') &
           state%step+1
 
-    open(unit=20, file=trim(fbase)//'/P/'//trim(adjustl(filename)), form='formatted')    
+    open(unit=20, file=trim(fbase)//'/'//trim(adjustl(filename)), form='formatted')    
     write(20,*) real(qend%flatarray)
     write(20,*) ' '
     write(20,*) aimag(qend%flatarray)    
     close(20)
 
-    Fend => cast_as_zndarray(level%F(level%nnodes,1))    
-    open(unit=21, file=trim(fbase)//'/F/'//trim(adjustl(filename)), form='formatted')    
+
+    Fend => cast_as_zndarray(level%F(level%nnodes,1))
+    write(filename, '("F_step_",i5.5)') &
+          state%step+1
+    open(unit=21, file=trim(fbase)//'/'//trim(adjustl(filename)), form='formatted')    
     write(21,*) real(Fend%flatarray)
     write(21,*) ' '
     write(21,*) aimag(Fend%flatarray)    

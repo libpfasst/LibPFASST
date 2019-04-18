@@ -165,7 +165,7 @@ module utils
     
     integer :: i,j,n,m
     real(pfdp) :: xi,xj,xn,xm,cst,dx
-    real(pfdp),allocatable :: x(:)
+    real(pfdp),allocatable :: x(:),x1,x2
 
     allocate(x(Nmat))
 
@@ -181,6 +181,7 @@ module utils
        do j = 1, i
           cst = -Znuc*L_array(i,j)*conjg(L_array(j,i))
           B_array(i,j) = cst*one_electron(x(i),x(j))
+          x1=abs(B_array(i,j))
           do m = 1, Nmat
              do n = 1, Nmat
                 cst = E0*L_array(m,n)*conjg(L_array(n,m))*L_array(i,j)*conjg(L_array(j,i))
@@ -189,9 +190,12 @@ module utils
                 B_array(i,j) =  B_array(i,j) + cst*(-0.5_pfdp*two_electron(x(i),x(n),x(m),x(j))) 
              enddo
           enddo
+          x2=abs(B_array(i,j))
+!          if (i .eq. j) print *,x1/x2
           if (j < i) then
              B_array(j,i) = conjg(B_array(i,j))
           end if
+
        enddo
     end do
 
