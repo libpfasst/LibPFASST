@@ -18,6 +18,7 @@ module pf_mod_dtype
   real(pfdp), parameter :: THREE  = 3.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
   complex(pfdp), parameter :: ZI  = cmplx(0.0,1.0,pfdp)
+  complex(pfdp), parameter :: Z0  = cmplx(0.0,0.0,pfdp)  
   real(pfdp),parameter ::  two_pi = 6.2831853071795862_pfdp  
   integer, parameter :: PF_MAXLEVS = 4
   integer, parameter :: PF_MAX_HOOKS = 32

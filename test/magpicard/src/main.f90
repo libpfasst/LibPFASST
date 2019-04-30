@@ -63,7 +63,7 @@ contains
 !      print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
 
-!      call pf_add_hook(pf, 1, PF_POST_SWEEP, echo_error)
+      call pf_add_hook(pf, 1, PF_POST_SWEEP, echo_error)
 !      call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, pf_echo_residual)      
       if (save_solutions) call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, save_solution)
 

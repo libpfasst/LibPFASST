@@ -7,10 +7,8 @@ module utils
   implicit none
 
   complex(pfdp), parameter :: &
-       z0 = (0.0_pfdp, 0.0_pfdp), &
        z1 = (1.0_pfdp, 0.0_pfdp), &
        zm1 = (-1.0_pfdp, 0.0_pfdp), &
-       zi = (0.0_pfdp, 1.0_pfdp), &
        zmi = (0.0_pfdp, -1.0_pfdp)
 
  contains
