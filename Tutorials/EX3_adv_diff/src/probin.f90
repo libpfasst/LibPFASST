@@ -10,9 +10,10 @@ module probin
 
   real(pfdp), save :: v      ! advection velocity
   real(pfdp), save :: nu     ! viscosity
-  integer,    save :: kfreq  ! initial condition parameter
+  real(pfdp), save :: kfreq  ! initial condition parameter
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
+  real(pfdp), save :: Lx     ! Domain size
 
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: nsteps          ! number of time steps
@@ -26,7 +27,7 @@ module probin
 
   integer :: ios,iostat
   namelist /params/  nx, nsteps, dt, Tfin
-  namelist /params/  pfasst_nml, v, nu, kfreq,imex_stat
+  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat
 
 contains
 
@@ -49,6 +50,7 @@ contains
     kfreq   = 1.0_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
+    Lx      = 1.0_pfdp
     imex_stat=2    !  Default is full IMEX
     pfasst_nml=probin_fname
 

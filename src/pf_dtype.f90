@@ -17,7 +17,8 @@ module pf_mod_dtype
   real(pfdp), parameter :: TWO   = 2.0_pfdp
   real(pfdp), parameter :: THREE  = 3.0_pfdp
   real(pfdp), parameter :: HALF  = 0.5_pfdp
-
+  complex(pfdp), parameter :: ZI  = cmplx(0.0,1.0,pfdp)
+  real(pfdp),parameter ::  two_pi = 6.2831853071795862_pfdp  
   integer, parameter :: PF_MAXLEVS = 4
   integer, parameter :: PF_MAX_HOOKS = 32
 
@@ -306,12 +307,11 @@ module pf_mod_dtype
   !> Interfaces for subroutines
   interface
     !> hooks subroutines
-    subroutine pf_hook_p(pf, level, state)
+    subroutine pf_hook_p(pf, level_index)
        use iso_c_binding
-       import pf_pfasst_t, pf_level_t, pf_state_t
+       import pf_pfasst_t
        type(pf_pfasst_t), intent(inout) :: pf
-       class(pf_level_t), intent(inout) :: level
-       type(pf_state_t),  intent(in)    :: state
+       integer, intent(in) :: level_index
      end subroutine pf_hook_p
 
      !> SDC sweeper subroutines

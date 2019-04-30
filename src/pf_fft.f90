@@ -7,8 +7,7 @@ module pf_mod_fft_abs
   use pf_mod_dtype
   use pf_mod_utils
   implicit none
-  
-  real(pfdp), parameter :: two_pi = 6.2831853071795862_pfdp
+
   !>  Variables and storage for FFT
   type, abstract  :: pf_fft_abs_t
      integer ::   nx,ny,nz                         !! grid sizes
@@ -66,7 +65,22 @@ module pf_mod_fft_abs
   end interface
   
 contains
-  ! START private convolution procedures
+
+ subroutine get_wk_ptr_1d(this,wk) 
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), pointer,intent(inout) :: wk(:)              ! work space
+    wk=>this%wk_1d
+  end subroutine get_wk_ptr_1d
+  subroutine get_wk_ptr_2d(this,wk) 
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), pointer,intent(inout) :: wk(:,:)              ! work space
+    wk=>this%wk_2d
+  end subroutine get_wk_ptr_2d
+  subroutine get_wk_ptr_3d(this,wk) 
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), pointer,intent(inout) :: wk(:,:,:)              ! work space
+    wk=>this%wk_3d
+  end subroutine get_wk_ptr_3d
   
   !++++++++++ Forward FFT real to complex  ++++++++++++++++
   subroutine fft_1d(this, g,ghat)
@@ -107,7 +121,7 @@ contains
 
     this%wk_1d=ghat
     call this%fftb()
-    g=real(this%wk_1d)
+    g=real(this%wk_1d,pfdp)
   end subroutine ifft_1d
 
   subroutine ifft_2d(this, ghat,g)
@@ -117,7 +131,7 @@ contains
 
     this%wk_2d=ghat
     call this%fftb()
-    g=real(this%wk_2d)
+    g=real(this%wk_2d,pfdp)
   end subroutine ifft_2d
 
     subroutine ifft_3d(this, ghat,g)
@@ -227,58 +241,54 @@ contains
     real(pfdp), intent(in) :: g(:,:,:)
     complex(pfdp), intent(in) :: op(:,:,:)
     real(pfdp), intent(inout) :: c(:,:,:)
+
     this%wk_3d=g
-    ! Compute Convolution
     call this%fftf()
     this%wk_3d = this%wk_3d * op
     call this%fftb()
     c=real(this%wk_3d,pfdp)            
   end subroutine conv_3d
 
- subroutine get_wk_ptr_1d(this,wk) 
+  ! Compute in real space 
+  subroutine zconv_1d(this, ghat,op,chat)
     class(pf_fft_abs_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:)              ! work space
-    wk=>this%wk_1d
-  end subroutine get_wk_ptr_1d
-  subroutine get_wk_ptr_2d(this,wk) 
-    class(pf_fft_abs_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:,:)              ! work space
-    wk=>this%wk_2d
-  end subroutine get_wk_ptr_2d
-  subroutine get_wk_ptr_3d(this,wk) 
-    class(pf_fft_abs_t), intent(inout) :: this
-    complex(pfdp), pointer,intent(inout) :: wk(:,:,:)              ! work space
-    wk=>this%wk_3d
-  end subroutine get_wk_ptr_3d
-    
-  subroutine zconv_1d(this, g)
-    ! Variable Types
-        class(pf_fft_abs_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:)
-        ! Compute Convolution
-        call this%fftb()
-        this%wk_1d = this%wk_1d * g
-        call this%fftf()
-    end subroutine zconv_1d
+    complex(pfdp), intent(in) :: ghat(:),op(:)
+    complex(pfdp), intent(inout) :: chat(:)
 
-    subroutine zconv_2d(this, g)
-        ! Variable Types
-        class(pf_fft_abs_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:,:)
-        ! Compute Convolution
-        call this%fftb()
-        this%wk_2d = this%wk_2d * g
-        call this%fftf()
+    this%wk_1d=ghat
+    call this%fftb()
+    this%wk_1d = this%wk_1d * op
+    call this%fftf()
+    chat=this%wk_1d
+
+  end subroutine zconv_1d
+
+    subroutine zconv_2d(this, ghat,op,chat)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(in) :: ghat(:,:),op(:,:)
+      complex(pfdp), intent(inout) ::chat(:,:)
+
+      
+      this%wk_2d=ghat
+      call this%fftb()
+      this%wk_2d = this%wk_2d * op
+      call this%fftf()
+      chat=this%wk_2d
+
+
     end subroutine zconv_2d
 
-    subroutine zconv_3d(this, g)
-        ! Variable Types
-        class(pf_fft_abs_t), intent(inout) :: this
-        real(pfdp), intent(in) :: g(:,:,:)
-        ! Compute Convolution
-        call this%fftb()
-        this%wk_3d = this%wk_3d * g
-        call this%fftf()
+    subroutine zconv_3d(this, ghat,op,chat)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(in) :: ghat(:,:,:),op(:,:,:)
+      complex(pfdp), intent(inout) ::chat(:,:,:)
+      
+      this%wk_3d=ghat
+      call this%fftb()
+      this%wk_3d = this%wk_3d * op
+      call this%fftf()
+      chat=this%wk_3d
+
     end subroutine zconv_3d
     
     subroutine make_lap_1d(this, lap)
@@ -386,43 +396,6 @@ contains
     end subroutine make_deriv_2d
 
 
-    subroutine make_lap_3d(this, lap)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:,:,:)
-      
-      integer     :: i,j,k,nx,ny,nz
-      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
-      
-      nx=this%nx
-      ny=this%ny
-      nz=this%nz
-      Lx=this%Lx
-      Ly=this%Ly
-      Lz=this%Lz
-      do k = 1,nz
-         if (k <= nz/2+1) then
-            kz = two_pi / Lz * dble(k-1)
-         else
-            kz = two_pi / Ly * dble(-nz + k - 1)
-         end if
-         do j = 1, ny
-            if (j <= ny/2+1) then
-               ky = two_pi / Ly * dble(j-1)
-            else
-               ky = two_pi / Ly * dble(-ny + j - 1)
-            end if
-            do i = 1, nx
-               if (i <= nx/2+1) then
-                  kx = two_pi / Lx * dble(i-1)
-               else
-                  kx = two_pi / Lx * dble(-nx + i - 1)
-               end if
-               lap(i,j,k) = -(kx**2+ky**2+kz**2)
-            end do
-         end do
-      end do
-      
-    end subroutine make_lap_3d
 
     subroutine make_deriv_3d(this, deriv,dir)
       class(pf_fft_abs_t), intent(inout) :: this
@@ -463,7 +436,7 @@ contains
             if (k <= nz/2+1) then
                kz = two_pi / Lz * dble(k-1)
             else
-               kz = two_pi / Ly * dble(-nz + k - 1)
+               kz = two_pi / Lz * dble(-nz + k - 1)
             end if
             deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*kz
          end do
@@ -472,6 +445,43 @@ contains
       end select
 
     end subroutine make_deriv_3d
+    subroutine make_lap_3d(this, lap)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: lap(:,:,:)
+      
+      integer     :: i,j,k,nx,ny,nz
+      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
+      
+      nx=this%nx
+      ny=this%ny
+      nz=this%nz
+      Lx=this%Lx
+      Ly=this%Ly
+      Lz=this%Lz
+      do k = 1,nz
+         if (k <= nz/2+1) then
+            kz = two_pi / Lz * dble(k-1)
+         else
+            kz = two_pi / Ly * dble(-nz + k - 1)
+         end if
+         do j = 1, ny
+            if (j <= ny/2+1) then
+               ky = two_pi / Ly * dble(j-1)
+            else
+               ky = two_pi / Ly * dble(-ny + j - 1)
+            end if
+            do i = 1, nx
+               if (i <= nx/2+1) then
+                  kx = two_pi / Lx * dble(i-1)
+               else
+                  kx = two_pi / Lx * dble(-nx + i - 1)
+               end if
+               lap(i,j,k) = -(kx**2+ky**2+kz**2)
+            end do
+         end do
+      end do
+      
+    end subroutine make_lap_3d
   !  Interp routines that take a coarse vector and produce a fine    
   
   
@@ -523,6 +533,7 @@ contains
     nx_f = size(yhat_f)
     nx_c = size(yhat_c)
 
+    yhat_c=0.0_pfdp
     yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
     yhat_c(nx_c/2+2:nx_c) = yhat_f(nx_f-nx_c/2+2:nx_f)
     
@@ -530,12 +541,53 @@ contains
   subroutine zrestrict_2d(this, yhat_f, yhat_c)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp),         pointer :: yhat_f(:,:), yhat_c(:,:)
-    integer :: nx_f(2), nx_c(2)
+
+    integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
+    nx_f = shape(yhat_f)
+    nx_c = shape(yhat_c)
+    
+    nf1=nx_f(1)-nx_c(1)/2+2
+    nf2=nx_f(2)-nx_c(2)/2+2
+    nc1=nx_c(1)/2+2
+    nc2=nx_c(2)/2+2
+
+    yhat_c=0.0_pfdp
+    yhat_c(1:nx_c(1)/2,1:nx_c(2)/2) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2)
+    yhat_c(nc1:nx_c(1),1:nx_c(2)/2) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2)
+    yhat_c(1:nx_c(1)/2,nc2:nx_c(2)) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2))
+    yhat_c(nc1:nx_c(1),nc2:nx_c(2)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2)) 
+    
   end subroutine zrestrict_2d
   subroutine zrestrict_3d(this, yhat_f, yhat_c)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp),         pointer :: yhat_f(:,:,:), yhat_c(:,:,:)
-    integer :: nx_f(3), nx_c(3)
+
+    integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
+    
+    
+    
+    yhat_c = 0.0_pfdp
+    
+    nx_f = shape(yhat_f)
+    nx_c = shape(yhat_c)
+    
+    nf1=nx_f(1)-nx_c(1)/2+2
+    nf2=nx_f(2)-nx_c(2)/2+2
+    nf3=nx_f(3)-nx_c(3)/2+2
+    nc1=nx_c(1)/2+2
+    nc2=nx_c(2)/2+2
+    nc3=nx_c(3)/2+2
+    
+    yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2)
+    yhat_c(nc1:nx_c(1),1:nx_c(2)/2,1:nx_c(3)/2) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2,1:nx_c(3)/2)
+    yhat_c(1:nx_c(1)/2,nc2:nx_c(2),1:nx_c(3)/2) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2),1:nx_c(3)/2)
+    yhat_c(nc1:nx_c(1),nc2:nx_c(2),1:nx_c(3)/2) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),1:nx_c(3)/2) 
+    
+    yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,nf3:nx_f(3)) 
+    yhat_c(nc1:nx_c(1),1:nx_c(2)/2,nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2,nf3:nx_f(3))
+    yhat_c(1:nx_c(1)/2,nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2),nf3:nx_f(3)) 
+    yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3))
+    
   end subroutine zrestrict_3d
 
   end module pf_mod_fft_abs

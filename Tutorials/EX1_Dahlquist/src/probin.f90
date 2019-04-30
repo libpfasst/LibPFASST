@@ -29,9 +29,6 @@ contains
     integer :: i   !  loop variable
     integer :: un  !  file read unit
 
-    character(len=128) :: arg  !  command line argument
-    character(128)    :: probin_fname   !<  file name for input parameters
-
     !> Set the name of the input file
     probin_fname = "probin.nml" ! default file name - can be overwritten on the
     if (command_argument_count() >= 1) &
