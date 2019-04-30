@@ -46,11 +46,10 @@ contains
 
 
 
-  subroutine save_solution(pf, level, state)
+  subroutine save_solution(pf, level_index)
     use probin, only: fbase
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
 
     type(zndarray), pointer :: qend,Fend
     character(len=256) :: time, filename
@@ -58,20 +57,20 @@ contains
     complex(pfdp),      pointer :: q_array(:,:)
 
     !  Solution at the end
-    qend => cast_as_zndarray(level%qend)
-    q_array=>get_array2d(level%qend)
+    qend => cast_as_zndarray(pf%levels(level_index)%qend)
+    q_array=>get_array2d(pf%levels(level_index)%qend)
     
     un = 200+pf%rank
-    write(time, '(f10.5)') state%t0+state%dt
+    write(time, '(f10.5)') pf%state%t0+pf%state%dt
     write(filename, '("-rank_", i3.3, "-step_",i5.5,"-iter_",i3.3,"-level_",i1.1,"_soln")') &
-         pf%rank, state%step+1, state%iter, level%index
+         pf%rank, pf%state%step+1, pf%state%iter, level_index
     open(unit=un, file=trim(fbase)//'/time_'//trim(adjustl(time))//trim(adjustl(filename)), form='unformatted')
     write(un) q_array
     
     close(un)
     
     write(filename, '("P_step_",i5.5)') &
-          state%step+1
+          pf%state%step+1
 
     open(unit=20, file=trim(fbase)//'/'//trim(adjustl(filename)), form='formatted')    
     write(20,*) real(qend%flatarray)
@@ -80,9 +79,9 @@ contains
     close(20)
 
 
-    Fend => cast_as_zndarray(level%F(level%nnodes,1))
+    Fend => cast_as_zndarray(pf%levels(level_index)%F(pf%levels(level_index)%nnodes,1))
     write(filename, '("F_step_",i5.5)') &
-          state%step+1
+          pf%state%step+1
     open(unit=21, file=trim(fbase)//'/'//trim(adjustl(filename)), form='formatted')    
     write(21,*) real(Fend%flatarray)
     write(21,*) ' '
