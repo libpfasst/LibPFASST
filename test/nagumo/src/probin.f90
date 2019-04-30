@@ -1,9 +1,6 @@
 module probin
   use pf_mod_dtype
 
-  double precision, parameter :: pi     = 3.141592653589793d0
-  double precision, parameter :: two_pi = 6.2831853071795862d0
-
   integer, parameter :: maxlevs = 3
 
   integer, save :: wtype
