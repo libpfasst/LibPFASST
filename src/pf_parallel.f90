@@ -179,9 +179,10 @@ contains
           call pf_recv(pf, c_lev_p, 100000+pf%rank, .true.)
 
           !  Do a RK_step
-          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
+          call c_lev_p%ulevel%stepper%do_n_steps(pf, level_index,t0, c_lev_p%q0,c_lev_p%qend, dt, 1)       
           !  Send forward
           call pf_send(pf, c_lev_p,  100000+pf%rank+1, .false.)
+          print *,'woo hoo'
        else  !  Normal PFASST burn in
           level_index=1
           c_lev_p => pf%levels(level_index)
@@ -438,7 +439,11 @@ contains
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
           !  If we are converged, exit block
-          if (pf%state%status == PF_STATUS_CONVERGED)  exit
+          if (pf%state%status == PF_STATUS_CONVERGED)  then
+             call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             exit             
+          end if
+
        end do  !  Loop over the iteration in this bloc
        call call_hooks(pf, -1, PF_POST_CONVERGENCE)
        call end_timer(pf, TITERATION)
@@ -500,7 +505,7 @@ contains
     else
        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true.)
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
-       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
+       call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration, .false.)
     endif
 
     ! Now move coarse to fine interpolating and sweeping

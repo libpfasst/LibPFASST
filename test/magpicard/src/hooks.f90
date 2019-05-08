@@ -34,7 +34,7 @@ contains
        q_diag = real(qend%flatarray(1:400:21))
        errd = maxval(abs(q_diag-q_ex))
       
-       print *,'Max error at end=',errd
+       print *,'Rank ',pf%rank,' Iter ',pf%state%iter,' Max error at end=',errd
     endif
 
 
