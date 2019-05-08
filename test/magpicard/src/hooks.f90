@@ -7,6 +7,7 @@ module hooks
 contains
 
   subroutine echo_error(pf, level_index)
+    use probin, only:  magnus_order, nnodes
     type(pf_pfasst_t), intent(inout) :: pf
     integer,  intent(in   ) :: level_index
 
@@ -34,7 +35,7 @@ contains
        q_diag = real(qend%flatarray(1:400:21))
        errd = maxval(abs(q_diag-q_ex))
       
-       print *,'Rank ',pf%rank,' Iter ',pf%state%iter,' Max error at end=',errd
+       print *,'Rank ',pf%rank,'Nsteps ',pf%state%step+1,' Iter ',pf%state%iter,' error at end=',errd, 'totTime=',pf%runtimes(1),'Ord=',magnus_order, 'Nnodes=',nnodes(1), 'qtype=',pf%qtype
     endif
 
 
