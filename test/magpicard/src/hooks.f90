@@ -53,7 +53,7 @@ contains
 
     type(zndarray), pointer :: qend,Fend
     character(len=256) :: time, filename
-    integer :: un,istat
+    integer :: un,istat,system
     complex(pfdp),      pointer :: q_array(:,:)
 
     !  Solution at the end
