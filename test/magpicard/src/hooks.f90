@@ -7,10 +7,9 @@ module hooks
 contains
 
   subroutine echo_error(pf, level_index)
-    type(pf_pfasst_t), target,intent(inout) :: pf
+    type(pf_pfasst_t), intent(inout) :: pf
     integer,  intent(in   ) :: level_index
 
-    class(pf_level_t), pointer :: level    
     class(magpicard_sweeper_t), pointer :: magpicard
     type(zndarray) :: yexact
     type(zndarray), pointer :: qend
@@ -20,15 +19,14 @@ contains
     real(pfdp)   :: q_ex(20)
     real(pfdp)   :: q_diag(20)
 
-    level=>pf%levels(level_index)
     
    !  20 particles run with 512
    q_ex =(/ 1.49416313027551D+00, 7.07931923619350D-01, 9.18515291508953D-01, 7.82054090221508D-01, 2.69391225356707D-01, 2.07255594164204D-01, 2.88290898242198D-01, &
             3.95894491436281D-01, 4.87366427184367D-01, 4.08042164173400D-01, 4.08042164173065D-01, 4.87366427184291D-01, 3.95894491436375D-01, 2.88290898242375D-01, &
             2.07255594164250D-01, 2.69391225356918D-01, 7.82054090222874D-01, 9.18515291509728D-01, 7.07931923618189D-01, 1.49416313027296D+00 /)
-    magpicard => cast_as_magpicard_sweeper(level%ulevel%sweeper)
-    qend => cast_as_zndarray(level%qend)
-    q_array=>get_array2d(level%qend)
+    magpicard => cast_as_magpicard_sweeper(pf%levels(level_index)%ulevel%sweeper)
+    qend => cast_as_zndarray(pf%levels(level_index)%qend)
+    q_array=>get_array2d(pf%levels(level_index)%qend)
 
     t_end=pf%state%t0+pf%state%dt
 
