@@ -110,7 +110,7 @@ contains
       stop "pf_parallel_oc:pf_recv_status"
    end if
 
-   if (pf%debug) print*, pf%rank,  'is receiving status backwards with tag ', tag
+   if (pf%debug) print*, pf%rank,  'is receiving status with tag ', tag
 
    call pf%comm%recv_status(pf, tag, istatus, ierror, source)
 
@@ -141,6 +141,16 @@ contains
     if(pf%rank == 0 .and. dir == 2) return
     if(pf%rank == pf%comm%nproc-1 .and. dir == 1) return
 
+    ierror = 0
+    ! need to wait here
+    if(blocking .eqv. .false.) &
+        call pf_mpi_wait(pf, level%index, ierror)
+    if (ierror /= 0) then
+      print *, pf%rank, 'warning: error during send (wait)', ierror
+      stop "pf_parallel:pf_send"
+    end if
+
+
     if(dir == 2) then
        call level%q0%pack(level%send, 2)
        dest=pf%rank-1
@@ -153,9 +163,10 @@ contains
        end if
     end if
 
-    ierror = 0
+!     ierror = 0
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
+!     if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%send), 'send buffer=',level%send
 
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
     if (ierror /= 0) then
@@ -188,6 +199,8 @@ contains
                                   .and. dir == 1) then
        source=pf%rank-1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
+!        if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%recv), 'recv buffer=',level%recv
+
 
        if (ierror .eq. 0) then
           if (present(direction)) then
@@ -200,6 +213,8 @@ contains
                                      .and. dir == 2) then
        source=pf%rank+1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
+!        if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%recv), 'recv buffer=',level%recv
+
 
        if (ierror .eq. 0) then
          if (present(direction)) then
