@@ -71,6 +71,8 @@ program main
   pf%echo_timings = .false.
        
   do l = 1, pf%nlevels
+       pf%levels(l)%nnodes = nnodes(l)
+
        !  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
        allocate(ndarray_oc_factory::pf%levels(l)%ulevel%factory)
@@ -97,7 +99,7 @@ program main
 !   call pf_add_hook(pf, 3, PF_POST_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,3,PF_POST_ITERATION,echo_error_hook)
   call pf_add_hook(pf,pf%nlevels,PF_POST_STEP,echo_error_hook)
-!   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_residual_hook)
+!   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
 
 
@@ -188,6 +190,7 @@ program main
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
   if (pf%rank .eq. 0)  print *, ' **** solve state with zero control ***'
+  pf%state%pfblock=1
   call pf_pfasst_block_oc(pf, dt, nsteps, .true., 1)
   ! solution at t=2.5 has to be send to all later ranks
   allocate(solAt25(nvars(pf%nlevels)))    
