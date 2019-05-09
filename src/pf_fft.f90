@@ -462,7 +462,7 @@ contains
          if (k <= nz/2+1) then
             kz = two_pi / Lz * dble(k-1)
          else
-            kz = two_pi / Ly * dble(-nz + k - 1)
+            kz = two_pi / Lz * dble(-nz + k - 1)
          end if
          do j = 1, ny
             if (j <= ny/2+1) then
