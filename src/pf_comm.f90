@@ -141,6 +141,15 @@ contains
     if(pf%rank == 0 .and. dir == 2) return
     if(pf%rank == pf%comm%nproc-1 .and. dir == 1) return
 
+    ierror = 0
+    ! need to wait here
+    if(blocking .eqv. .false.) &
+        call pf_mpi_wait(pf, level%index, ierror)
+    if (ierror /= 0) then
+      print *, pf%rank, 'warning: error during send (wait)', ierror
+      stop "pf_parallel:pf_send"
+    end if
+
     if(dir == 2) then
        call level%q0%pack(level%send, 2)
        dest=pf%rank-1

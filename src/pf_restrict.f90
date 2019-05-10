@@ -101,6 +101,7 @@ contains
 
     deallocate(c_times)
     deallocate(f_times)
+
   end subroutine restrict_time_space_fas
 
 

@@ -197,12 +197,11 @@ contains
 
   end subroutine exact_ad_cos_3dz
 
-  function ad_exp_ex(t, x,nu,v,kfreq,Lx) result(u)
+  function ad_exp_ex(t, x,nu,v,Lx) result(u)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(in)  :: x
     real(pfdp), intent(in)  :: v    
     real(pfdp), intent(in)  :: nu
-    real(pfdp), intent(in)  :: kfreq
     real(pfdp), intent(in)  :: Lx        
     real(pfdp)  :: u
 
@@ -233,10 +232,10 @@ contains
 
   end function ad_exp_ex
   
-  subroutine exact_ad_exp_1d(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_1d(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:)
-    real(pfdp), intent(in) :: nu,v,kfreq,Lx
+    real(pfdp), intent(in) :: nu,v,Lx
     
     integer    :: nx, i
     real(pfdp) :: x
@@ -244,15 +243,15 @@ contains
     nx = size(uex)
     do i = 1, nx
        x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
-       uex(i) = ad_exp_ex(t, x,nu,v,kfreq,Lx)
+       uex(i) = ad_exp_ex(t, x,nu,v,Lx)
     end do
 
   end subroutine exact_ad_exp_1d
   
-  subroutine exact_ad_exp_1dz(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_1dz(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:)
-    real(pfdp), intent(in) :: nu,v,kfreq,Lx
+    real(pfdp), intent(in) :: nu,v,Lx
     
     integer    :: nx, i
     real(pfdp) :: x
@@ -260,15 +259,15 @@ contains
     nx = size(uex)
     do i = 1, nx
        x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
-       uex(i) = ad_exp_ex(t, x,nu,v,kfreq,Lx)       
+       uex(i) = ad_exp_ex(t, x,nu,v,Lx)       
     end do
 
   end subroutine exact_ad_exp_1dz
   
-  subroutine exact_ad_exp_2d(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_2d(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:,:)
-    real(pfdp), intent(in) :: nu,v(2),kfreq(2),Lx(2)
+    real(pfdp), intent(in) :: nu,v(2),Lx(2)
     
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
@@ -278,19 +277,19 @@ contains
 
     do j = 1, ny
        y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-       uy=ad_exp_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
+       uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
        do i = 1, nx
           x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-          uex(i,j) = ad_exp_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy
+          uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
        end do
     end do
     
   end subroutine exact_ad_exp_2d
   
-  subroutine exact_ad_exp_2dz(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_2dz(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:,:)
-    real(pfdp), intent(in) :: nu,v(2),kfreq(2),Lx(2)
+    real(pfdp), intent(in) :: nu,v(2),Lx(2)
     
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
@@ -299,18 +298,18 @@ contains
     ny = size(uex,2)    
     do j = 1, ny
        y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-       uy=ad_exp_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
+       uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
        do i = 1, nx
           x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-          uex(i,j) = ad_exp_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy
+          uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
        end do
     end do
        
   end subroutine exact_ad_exp_2dz
-  subroutine exact_ad_exp_3d(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_3d(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:,:,:)
-    real(pfdp), intent(in) :: nu,v(3),kfreq(3),Lx(3)
+    real(pfdp), intent(in) :: nu,v(3),Lx(3)
     
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
@@ -321,23 +320,23 @@ contains
 
     do k = 1, nz
        z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
-       uz=ad_exp_ex(t, z,nu,v(3),kfreq(3),Lx(3))              
+       uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
        do j = 1, ny
           y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-          uy=ad_exp_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
+          uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
           do i = 1, nx
              x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy*uz
+             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
           end do
        end do
     end do
     
   end subroutine exact_ad_exp_3d
   
-  subroutine exact_ad_exp_3dz(t, uex,nu,v,kfreq,Lx)
+  subroutine exact_ad_exp_3dz(t, uex,nu,v,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:,:,:)
-    real(pfdp), intent(in) :: nu,v(3),kfreq(3),Lx(3)
+    real(pfdp), intent(in) :: nu,v(3),Lx(3)
     
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
@@ -348,13 +347,13 @@ contains
 
     do k = 1, nz
        z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
-       uz=ad_exp_ex(t, z,nu,v(3),kfreq(3),Lx(3))              
+       uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
        do j = 1, ny
           y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-          uy=ad_exp_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
+          uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
           do i = 1, nx
              x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy*uz
+             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
           end do
        end do
     end do

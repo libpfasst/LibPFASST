@@ -112,8 +112,6 @@ contains
     call call_hooks(pf, f_lev_p%index, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + f_lev_p%index - 1)
 
-    !> create local workspace
-    call f_lev_p%ulevel%factory%create_single(f_lev_p%q0_delta, f_lev_p%index, f_lev_p%shape)
 
     call c_lev_p%q0_delta%setval(0.0_pfdp,flags)
     call f_lev_p%q0_delta%setval(0.0_pfdp,flags)
@@ -143,7 +141,6 @@ contains
     
     call call_hooks(pf, f_lev_p%index, PF_PRE_INTERP_Q0)
     call start_timer(pf, TINTERPOLATE + f_lev_p%index - 1)
-    !> create local workspace
     
     call c_lev_p%q0_delta%setval(0.0_pfdp)
     call f_lev_p%q0_delta%setval(0.0_pfdp)

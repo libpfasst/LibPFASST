@@ -147,7 +147,7 @@ contains
        call call_hooks(pf, -1, PF_POST_ITERATION)
 
        call start_timer(pf, TITERATION)
-       do j = 1, pf%niters
+       do j = 2, pf%niters
 
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
@@ -157,7 +157,7 @@ contains
           call pf_parareal_v_cycle(pf, k, pf%state%t0, dt, 1,2)
 
           !  Check for convergence
-!          call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
+          call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
 
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
@@ -191,7 +191,7 @@ contains
     integer                   :: nsteps_c,nsteps_f    !!  Number of RK  steps
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
-    pf%state%iter = -1          
+    pf%state%iter = 0          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call start_timer(pf, TPREDICTOR)
@@ -242,7 +242,7 @@ contains
     call end_timer(pf, TPREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
-    pf%state%iter   = 0
+    pf%state%iter   = 1
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'ending predictor'
@@ -277,7 +277,9 @@ contains
 
 
     ! Do the coarsest level steps
+
     call pf_recv(pf, c_lev_p, 10000+iteration, .true.)
+
     call c_lev_p%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev_p%q0,c_lev_p%qend, dt, nsteps_c)
     !  Compute the correction (store in Q(1))
     call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)
@@ -300,9 +302,14 @@ contains
 
     !  Send coarse forward  (nonblocking)
     call pf_send(pf, c_lev_p, 10000+iteration, .false.)
-
-    ! Now sweep step on fine
+    
+    ! Now  step on fine
     !  Copy  new initial condition
+    !  Compute the jump in the initial condition
+    call f_lev_p%q0_delta%copy(c_lev_p%q0, flags=0)
+    call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
+    f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
+
     if (pf%rank /= 0) then
        call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
     end if
@@ -331,5 +338,74 @@ contains
 !!$    print *, "### rank = ", pf%rank, " iteration = ", iteration, " norm = ", del%norm() 
 !!$
 !!$  end subroutine pf_compute_initial_condition_jump
+  !> Subroutine to check if the current processor has converged and
+  !> to update the next processor on the status
+  !> Note that if the previous processor hasn't converged yet
+  !> (pstatus), the current processor can't be converged yet either
+  subroutine pf_check_convergence_block(pf, level_index, send_tag)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: level_index
+    integer,           intent(in)    :: send_tag  !! identifier for status send and receive
+
+    logical           :: residual_converged, converged
+
+
+    ! Shortcut for fixed iteration mode
+    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+       pf%state%pstatus = PF_STATUS_ITERATING
+       pf%state%status  = PF_STATUS_ITERATING
+       return
+    end if
+
+    call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
+
+    !> Check to see if tolerances are met
+    call pf_check_residual(pf, level_index, residual_converged)
+
+    !>  Until I hear the previous processor is done, recieve it's status
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, send_tag)
+
+    !>  Check to see if I am converged
+    converged = .false.
+    if (residual_converged) then
+       if (pf%rank == 0) then
+          converged = .true.
+       else  !  I am not the first processor, so I need to check the previous one
+          if (pf%state%pstatus == PF_STATUS_CONVERGED) converged = .true.
+       end if
+    end if ! (residual_converged)
+
+
+    !> Assign status and send it forward
+    if (converged) then
+       if (pf%state%status == PF_STATUS_ITERATING) then
+          !  If I am converged for the first time
+          !  then flip my flag and send the last status update
+          pf%state%status = PF_STATUS_CONVERGED
+          call pf_send_status(pf, send_tag)
+       end if
+    else
+       !  I am not converged, send the news
+       pf%state%status = PF_STATUS_ITERATING
+       call pf_send_status(pf, send_tag)
+    end if
+
+  end subroutine pf_check_convergence_block
+
+  !> Subroutine to test residuals to determine if the current processor has converged.
+  subroutine pf_check_residual(pf, level_index, residual_converged)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer,           intent(in)    :: level_index
+    logical,           intent(out)   :: residual_converged  !! Return true if residual is below tolerances
+
+    residual_converged = .false.
+
+    ! Check to see if absolute tolerance is met
+    if   (pf%levels(level_index)%residual     < pf%abs_res_tol)  then
+       if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
+       residual_converged = .true.
+    end if
+
+  end subroutine pf_check_residual
 
 end module pf_mod_parareal
