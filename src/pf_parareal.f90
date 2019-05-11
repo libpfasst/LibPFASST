@@ -48,6 +48,9 @@ contains
     end if
     pf%state%nsteps = nsteps_loc
 
+    !>  Allocate stuff for holding results
+    call pf_initialize_results(pf)
+
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
 
@@ -57,9 +60,11 @@ contains
        call pf_parareal_block_run(pf, q0, dt,  nsteps_loc)
     end if
 
-    pf%state%iter = -1
-    call end_timer(pf, TTOTAL)
 
+    call pf_dump_results(pf)
+
+    !>   deallocate results data
+    call pf_destroy_results(pf)
 
   end subroutine pf_parareal_run
 
@@ -123,6 +128,7 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
+       pf%state%sweep = 1   !  Needed for compatibility of residual storage       
 
 
        if (k > 1) then
@@ -142,10 +148,7 @@ contains
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
 
-       !>  Start the loops over SDC sweeps
-       pf%state%iter = 0
-       call call_hooks(pf, -1, PF_POST_ITERATION)
-
+       !>  Start the parareal iterations
        call start_timer(pf, TITERATION)
        do j = 2, pf%niters
 
@@ -154,7 +157,7 @@ contains
           pf%state%iter = j
 
           !  Do a v_cycle
-          call pf_parareal_v_cycle(pf, k, pf%state%t0, dt, 1,2)
+          call pf_parareal_v_cycle_new(pf, k, pf%state%t0, dt, 1,2)
 
           !  Check for convergence
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
@@ -222,30 +225,21 @@ contains
     call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
 
 
-    !!  Step 5:  Return to fine level and Step there
-    if(pf%state%finest_level > 1) then  !  Will do nothing with one level
-       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
-       nsteps_f= f_lev_p%ulevel%stepper%nsteps  !  Each processor integrates alone
-       call f_lev_p%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
-    endif
-       
-
-!!$       call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
-!!$       call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
-!!$       if (pf%rank /= 0) call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
-!!$
-!!$       !  Do a sweep on level unless we are at the finest level
-!!$       if (level_index < pf%state%finest_level) then
-!!$          call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps_pred)
-!!$       end if
+    !!  Step 3:  Return to fine level and Step there
+!    if(pf%state%finest_level > 1) then  !  Will do nothing with one level
+!       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
+!       nsteps_f= f_lev_p%ulevel%stepper%nsteps  !  Each processor integrates alone
+!       call f_lev_p%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
+!    endif
 
     call end_timer(pf, TPREDICTOR)
-    call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 1
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'ending predictor'
+    call call_hooks(pf, -1, PF_POST_PREDICTOR)
+
   end subroutine pf_parareal_predictor
 
   !> Execute a V-cycle between levels nfine and ncoarse
@@ -270,35 +264,20 @@ contains
     nsteps_c= c_lev_p%ulevel%stepper%nsteps
     nsteps_f= f_lev_p%ulevel%stepper%nsteps  
 
-!!$    print *,'before save'
-!!$    call f_lev_p%qend%eprint()    
-!!$    call c_lev_p%qend%eprint()
-!!$    call c_lev_p%q(2)%eprint()    
-
 
     ! Do the coarsest level steps
-
     call pf_recv(pf, c_lev_p, 10000+iteration, .true.)
 
     call c_lev_p%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev_p%q0,c_lev_p%qend, dt, nsteps_c)
     !  Compute the correction (store in Q(1))
-    call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)
-    call c_lev_p%Q(1)%axpy(-1.0_pfdp,c_lev_p%Q(2))        
+    call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)  !  Current 
+    call c_lev_p%Q(1)%axpy(-1.0_pfdp,c_lev_p%Q(2)) !       
 
-    ! Save the coarse sweep
+    ! Save the result of the coarse sweep
     call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
-!!$    print *,'after coarse steps'
-!!$    call f_lev_p%qend%eprint()
-!!$    call c_lev_p%qend%eprint()
-!!$    call c_lev_p%q(2)%eprint()
 
     ! correct coarse level solution at end (the parareal correction)
     call c_lev_p%qend%axpy(1.0_pfdp,c_lev_p%Q(1))    
-
-!!$    print *,'after coarse correction'
-!!$    call f_lev_p%qend%eprint()
-!!$    call c_lev_p%qend%eprint()
-!!$    call c_lev_p%q(2)%eprint()    
 
     !  Send coarse forward  (nonblocking)
     call pf_send(pf, c_lev_p, 10000+iteration, .false.)
@@ -309,7 +288,7 @@ contains
     call f_lev_p%q0_delta%copy(c_lev_p%q0, flags=0)
     call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
     f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
-
+    call pf_set_resid(pf,2,f_lev_p%residual)
     if (pf%rank /= 0) then
        call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
     end if
@@ -320,6 +299,66 @@ contains
 !!$    call c_lev_p%qend%eprint()
 
   end subroutine pf_parareal_v_cycle
+  
+  !> Execute a V-cycle between levels nfine and ncoarse
+  subroutine pf_parareal_v_cycle_new(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
+
+
+    type(pf_pfasst_t), intent(inout), target :: pf
+    real(pfdp),        intent(in)    :: t0, dt
+    integer,           intent(in)    :: iteration
+    integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle
+    integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle
+    integer, optional, intent(in)    :: flags
+
+    type(pf_level_t), pointer :: f_lev_p, c_lev_p
+    integer :: level_index, j,nsteps_f,nsteps_c
+
+    if (pf%nlevels <2) return
+    
+    !  This is for two levels only
+    c_lev_p => pf%levels(1)
+    f_lev_p => pf%levels(2)
+    nsteps_c= c_lev_p%ulevel%stepper%nsteps
+    nsteps_f= f_lev_p%ulevel%stepper%nsteps  
+
+
+    !  Do fine steps with old initial condition
+    if (pf%rank /= 0) then
+       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
+    end if
+    call f_lev_p%ulevel%stepper%do_n_steps(pf, 2,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
+    
+    ! Get a new initial condition on coarse
+    call pf_recv(pf, c_lev_p, 10000+iteration, .true.)
+
+    !  Step on coarse
+    call c_lev_p%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev_p%q0,c_lev_p%qend, dt, nsteps_c)
+
+    !  Compute the correction (store in Q(1))
+    call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)  !  Current 
+    call c_lev_p%Q(1)%axpy(-1.0_pfdp,c_lev_p%Q(2)) !       
+
+    ! Save the result of the coarse sweep
+    call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
+
+    ! correct coarse level solution at end (the parareal correction)
+    call c_lev_p%qend%axpy(1.0_pfdp,c_lev_p%Q(1))    
+
+    !  Send coarse forward  (nonblocking)
+    call pf_send(pf, c_lev_p, 10000+iteration, .false.)
+    
+    !  Compute the jump in the initial condition
+    call f_lev_p%q0_delta%copy(c_lev_p%q0, flags=0)
+    call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
+    f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
+    call pf_set_resid(pf,2,f_lev_p%residual)
+
+!!$    print *,'after fine steps '
+!!$    call f_lev_p%qend%eprint()
+!!$    call c_lev_p%qend%eprint()
+
+  end subroutine pf_parareal_v_cycle_new
   
 
 !!$  subroutine pf_compute_initial_condition_jump(pf, iteration, lev_ptr, q_recv, q_interp)
@@ -375,7 +414,11 @@ contains
        end if
     end if ! (residual_converged)
 
-
+    !>  For parareal, Proc N is converged after iteration N
+    if (pf%rank .lt. pf%state%iter) then
+       converged = .true.
+    end if
+    
     !> Assign status and send it forward
     if (converged) then
        if (pf%state%status == PF_STATUS_ITERATING) then

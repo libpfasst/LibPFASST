@@ -273,11 +273,13 @@ contains
     if (pf%levels(level_index)%residual_rel < pf%rel_res_tol) then
        if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(level_index)%residual_rel
        residual_converged = .true.
+       print*, 'DEBUG --',pf%rank, 'residual_rel tol met',pf%levels(level_index)%residual_rel              
     end if
-    ! Check to see if relative tolerance is met
+    ! Check to see if absolute tolerance is met
     if   (pf%levels(level_index)%residual     < pf%abs_res_tol)  then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
        residual_converged = .true.
+       print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual       
     end if
 
   end subroutine pf_check_residual
@@ -523,7 +525,7 @@ contains
           call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
        end if
        ! don't sweep on the finest level since that is only done at beginning
-       if (level_index < level_index_f) then
+       if (level_index <= level_index_f) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
        else  !  compute residual for diagnostics since we didn't sweep
           pf%state%sweep=1
