@@ -7,8 +7,8 @@ CC = mpicc
 
 AR = ar rcs
 
-DEBUG = TRUE
-MKVERBOSE = FALSE
+DEBUG = FALSE
+MKVERBOSE = TRUE
 
 #  Set some compiler flags
 FFLAGS = -Ibuild -Jinclude -cpp
@@ -24,7 +24,7 @@ include $(wildcard $(LIBPFASST)/*.defs)
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst
 
-NOFFTW=TRUE
+NOFFTW=FALSE
 ifeq ($(NOFFTW),TRUE)
 F77SRC = src/dfftpack.o
 else
@@ -61,7 +61,8 @@ FSRC = pfasst.f90 \
        pf_magpicard_sweeper.f90 \
        pf_misdcQ_sweeper.f90 \
        pf_misdcQ_oc_sweeper.f90 \
-       pf_verlet_sweeper.f90 
+       pf_verlet_sweeper.f90 \
+       pf_eulerstepper.f90
        #       pf_amisdc.f90 \
 #       pf_amisdcQ.f90 \
 

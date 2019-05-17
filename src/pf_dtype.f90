@@ -397,14 +397,16 @@ module pf_mod_dtype
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
-     subroutine pf_do_n_steps_p(this, pf, level_index, t0, big_dt,nsteps_rk)
-       import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp
+     subroutine pf_do_n_steps_p(this, pf, level_index, t0, big_dt, nsteps_rk,  flags)
+       import pf_pfasst_t, pf_stepper_t, pf_level_t, pf_encap_t, pfdp
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: big_dt !!  Time step size
        real(pfdp),          intent(in)    :: t0
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
+!        class(pf_encap_t),   intent(inout), optional :: solution(:)  !! store the solution at all time steps (size has to be nsteps)
+       integer,           intent(in), optional    :: flags   
      end subroutine pf_do_n_steps_p
 
      subroutine pf_initialize_stepper_p(this, lev)

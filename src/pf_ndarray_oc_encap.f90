@@ -437,13 +437,13 @@ contains
     do m=1, pf%levels(level_index)%nnodes
       qend => cast_as_ndarray_oc(pf%levels(level_index)%Q(m))
 
-      write(fnamey, "('y_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
+      write(fnamey, "('y_s',i0.2,'l',i0.2,'m',i0.3,'.npy')") &
            pf%state%step, level_index, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
            qend%dim, qend%shape, size(qend%yflatarray), qend%yflatarray)
 
-      write(fnamep, "('p_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
+      write(fnamep, "('p_s',i0.2,'l',i0.2,'m',i0.3,'.npy')") &
            pf%state%step, level_index, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
