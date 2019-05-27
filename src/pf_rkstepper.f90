@@ -37,7 +37,7 @@ module pf_mod_rkstepper
        integer,           intent(in   ) :: level_index
        class(pf_encap_t), intent(inout) :: f
        integer,           intent(in   ) :: piece
-       integer, intent(in), optional    :: flags
+       integer, intent(in)              :: flags
        integer, intent(in), optional    :: idx       ! index of quadrature node
        integer, intent(in), optional    :: step      ! time step for sequential version
      end subroutine pf_f_eval_p
@@ -52,7 +52,7 @@ module pf_mod_rkstepper
        integer,           intent(in   ) :: level_index
        class(pf_encap_t), intent(inout) :: f
        integer,           intent(in   ) :: piece
-       integer,           intent(in), optional    :: flags
+       integer,           intent(in)    :: flags
 
      end subroutine pf_f_comp_p
 
@@ -61,7 +61,7 @@ module pf_mod_rkstepper
 contains
 
   !> Perform N steps of ark on level level_index and set qend appropriately.
-  subroutine ark_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk, flags)
+  subroutine ark_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk, state, adjoint, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -71,6 +71,7 @@ contains
     real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on
     integer,           intent(in)            :: level_index  !!  Level of the index to step on
     integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
+    real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)
     integer,           intent(in), optional    :: flags  
 
     class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
@@ -79,6 +80,9 @@ contains
     real(pfdp)                               :: t            !!  Time
     real(pfdp)                               :: dt           !!  Size of each ark step
 
+    integer :: which, adjStepExpl, mystep
+    which = 1
+    if(present(flags)) which = flags
     
     lev => pf%levels(level_index)   !! Assign pointer to appropriate level
     
@@ -93,177 +97,216 @@ contains
 
        ! Recompute the first explicit function value 
        if (n == 1) then
-          call lev%Q(1)%copy(lev%q0)
+          if (which==1) call lev%Q(1)%copy(lev%q0,1)
+          if (which==2) call lev%Q(1)%copy(lev%qend,2)
        else
-          call lev%Q(1)%copy(lev%Q(lev%nnodes))
+          call lev%Q(1)%copy(lev%Q(lev%nnodes),which)
        end if
 
-
+       adjStepExpl = nsteps_rk+1-(n-1)
+       if(which == 2) then
+          mystep = adjStepExpl
+          t = big_dt-dt*(n-1)-dt*this%cvec(1)
+          if(n==1) then
+             call lev%Q(1)%unpack(state(adjStepExpl,:),1)
+             call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)
+          end if
+       else
+          mystep = n
+          t = t0+dt*(n-1)+dt*this%cvec(1)
+          if(n==1) call lev%Q(1)%pack(state(n,:), 1)
+       end if
+       
+!       print *, t
        ! this assumes that cvec(1) == 0
        if (this%explicit) &
-            call this%f_eval(lev%Q(1), t0+dt*(n-1)+dt*this%cvec(1), lev%index, lev%F(1,1),1)
+            call this%f_eval(lev%Q(1), t, lev%index, lev%F(1,1),1, flags=which, idx=1, step=mystep)
        if (this%implicit) &
-            call this%f_eval(lev%Q(1), t0+dt*(n-1)+dt*this%cvec(1), lev%index, lev%F(1,2),2)
+            call this%f_eval(lev%Q(1), t, lev%index, lev%F(1,2),2, flags=which, idx=1, step=mystep)
      
        ! Loop over stage values
        do m = 1, this%nstages-1  
+             
+          adjStepExpl = nsteps_rk+1-(n-1)
+          if(which == 2) then
+             mystep = adjStepExpl
+             t = big_dt-dt*(n-1)-dt*this%cvec(m+1)
+          else
+             mystep = n
+             t = t0+dt*(n-1)+dt*this%cvec(m+1)
+          end if
           
           ! Set current time
-          t = t0 + dt*(n-1) + dt*this%cvec(m+1)
+          !t = t0 + dt*(n-1) + dt*this%cvec(m+1)
 
           ! Initialize the right-hand size for each stage
-          call rhs%copy(lev%Q(1))
+          call rhs%copy(lev%Q(1), which)
 
           do j = 1, m
 
              ! Add explicit rhs
              if (this%explicit) &
-                  call rhs%axpy(dt*this%AmatE(m+1,j), lev%F(j,1))
+                  call rhs%axpy(dt*this%AmatE(m+1,j), lev%F(j,1), which)
 
              ! Add implicit rhs
              if (this%implicit) &
-                  call rhs%axpy(dt*this%AmatI(m+1,j), lev%F(j,2))
+                  call rhs%axpy(dt*this%AmatI(m+1,j), lev%F(j,2), which)
 
           end do
 
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
-             call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(m+1,m+1), rhs, lev%index,lev%F(m+1,2), 2)
+             call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(m+1,m+1), rhs, lev%index,lev%F(m+1,2), 2, flags=which)
           else
-             call lev%Q(m+1)%copy(rhs)
+             call lev%Q(m+1)%copy(rhs,which)
           end if
                     
           ! Reevaluate explicit rhs with the new solution
+          if(which==2)   call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1)
+ 
+!call lev%Q(m+1)%copy(lev%Q(m),1) ! to evaluate objective
           if (this%explicit) &
-               call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1)
+               call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, flags=which, idx=1, step=mystep)
           
        end do  ! End loop over stage values
        
        ! Compute final value using quadrature rule
-       call lev%Q(lev%nnodes)%copy(lev%Q(1))
+       call lev%Q(lev%nnodes)%copy(lev%Q(1), which)
 
        ! Loop over stage values one more time
        do j = 1, this%nstages
 
           ! Add explicit terms
           if (this%explicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1))
+               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1), which)
 
           ! Add implicit terms
           if (this%implicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(j), lev%F(j,2))
+               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(j), lev%F(j,2), which)
 
        end do ! End loop over stage values
+
+       if (which .eq. 2) then ! backward solve
+ !        print *, 'assigning value', adjStepExpl-1
+         call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl-1,:),2) ! store solution value
+         call lev%Q(1)%unpack(state(adjStepExpl-1,:), 1)
+       else
+         call lev%Q(lev%nnodes)%pack(state(n+1,:), 1)
+       end if
 
     end do ! End Loop over time steps
     
     ! Assign final value to end of time step
-    call lev%qend%copy(lev%Q(lev%nnodes))
-
+    !call lev%qend%copy(lev%Q(lev%nnodes))
+    if (which .eq. 2) then ! backward solve
+      call lev%q0%copy(lev%Q(lev%nnodes), which)
+    else
+      call lev%qend%copy(lev%Q(lev%nnodes), which)
+    end if
   end subroutine ark_do_n_steps
   
   
-    !> Perform N steps backward in time of ark on level level_index and set q0 appropriately.
-  subroutine ark_do_n_steps_backward(this, pf, level_index, t0, big_dt, nsteps_rk)
-    use pf_mod_timer
-    use pf_mod_hooks
-
-    class(pf_ark_t),   intent(inout)         :: this
-    type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in   )         :: t0           !!  Time at beginning of time interval
-    real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on; time interval is [tend, tend-big_dt]
-    integer,           intent(in)            :: level_index  !!  Level of the index to step on
-    integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
-
-    class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
-    class(pf_encap_t), allocatable           :: rhs          !!  Accumulated right hand side for implicit solves
-    integer                                  :: j, m, n      !!  Loop counters
-    real(pfdp)                               :: t            !!  Time
-    real(pfdp)                               :: dt           !!  Size of each ark step
-    real(pfdp)                               :: tend         !!  Final time of time interval
-    
-    lev => pf%levels(level_index)   !! Assign pointer to appropriate level
-    
-    tend = t0 + big_dt
-    dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
-
-    ! Allocate space for the right-hand side
-    call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
-
-    
-    do n = 1, nsteps_rk      ! Loop over time steps
-
-       ! Recompute the first explicit function value 
-       if (n == 1) then
-          call lev%Q(lev%nnodes)%copy(lev%qend,2)
-       else
-          call lev%Q(lev%nnodes)%copy(lev%Q(1),2)
-       end if
-
-
-       ! this assumes that cvec(1) == 0
-       if (this%explicit) &
-            call this%f_eval(lev%Q(lev%nnodes), tend-dt*(n-1)-dt*this%cvec(1), lev%index, lev%F(lev%nnodes,1),1,flags=2,idx=lev%nnodes)
-       if (this%implicit) &
-            call this%f_eval(lev%Q(lev%nnodes), tend-dt*(n-1)-dt*this%cvec(1), lev%index, lev%F(lev%nnodes,2),2,flags=2,idx=lev%nnodes)
-     
-       ! Loop over stage values
-       do m = 1, this%nstages-1  
-          
-          ! Set current time
-          t = tend - dt*(n-1) - dt*this%cvec(m+1)
-
-          ! Initialize the right-hand size for each stage
-          call rhs%copy(lev%Q(lev%nnodes),flags=2)
-
-          do j = 1, m
-
-             ! Add explicit rhs
-             if (this%explicit) &
-                  call rhs%axpy(dt*this%AmatE(m+1,j), lev%F(j,1),flags=2)
-
-             ! Add implicit rhs
-             if (this%implicit) &
-                  call rhs%axpy(dt*this%AmatI(m+1,j), lev%F(j,2),flags=2)
-
-          end do
-
-          ! Solve the implicit system
-          if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
-             call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(m+1,m+1), rhs, lev%index,lev%F(m+1,2), 2, flags=2)
-          else
-             call lev%Q(m+1)%copy(rhs,flags=2)
-          end if
-                    
-          ! Reevaluate explicit rhs with the new solution
-          if (this%explicit) &
-               call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1)
-          
-       end do  ! End loop over stage values
-       
-       ! Compute final value using quadrature rule
-       call lev%Q(lev%nnodes)%copy(lev%Q(1))
-
-       ! Loop over stage values one more time
-       do j = 1, this%nstages
-
-          ! Add explicit terms
-          if (this%explicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1))
-
-          ! Add implicit terms
-          if (this%implicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(j), lev%F(j,2))
-
-       end do ! End loop over stage values
-
-    end do ! End Loop over time steps
-    
-    ! Assign final value to end of time step
-    call lev%qend%copy(lev%Q(lev%nnodes))
-
-  end subroutine ark_do_n_steps_backward
-
+!   !> Perform N steps backward in time of ark on level level_index and set q0 appropriately.
+!  subroutine ark_do_n_steps_backward(this, pf, level_index, t0, big_dt, nsteps_rk)
+!    use pf_mod_timer
+!    use pf_mod_hooks
+!
+!    class(pf_ark_t),   intent(inout)         :: this
+!    type(pf_pfasst_t), intent(inout), target :: pf
+!    real(pfdp),        intent(in   )         :: t0           !!  Time at beginning of time interval
+!    real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on; time interval is [tend, tend-big_dt]
+!    integer,           intent(in)            :: level_index  !!  Level of the index to step on
+!    integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
+!
+!    class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
+!    class(pf_encap_t), allocatable           :: rhs          !!  Accumulated right hand side for implicit solves
+!    integer                                  :: j, m, n      !!  Loop counters
+!    real(pfdp)                               :: t            !!  Time
+!    real(pfdp)                               :: dt           !!  Size of each ark step
+!    real(pfdp)                               :: tend         !!  Final time of time interval
+!    
+!    lev => pf%levels(level_index)   !! Assign pointer to appropriate level
+!    
+!    tend = t0 + big_dt
+!    dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
+!
+!    ! Allocate space for the right-hand side
+!    call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
+!
+!    
+!    do n = 1, nsteps_rk      ! Loop over time steps
+!
+!       ! Recompute the first explicit function value 
+!       if (n == 1) then
+!          call lev%Q(lev%nnodes)%copy(lev%qend,2)
+!       else
+!          call lev%Q(lev%nnodes)%copy(lev%Q(1),2)
+!       end if
+!
+!
+!       ! this assumes that cvec(1) == 0
+!       if (this%explicit) &
+!            call this%f_eval(lev%Q(lev%nnodes), tend-dt*(n-1)-dt*this%cvec(1), lev%index, lev%F(lev%nnodes,1),1,flags=2,idx=lev%nnodes)
+!       if (this%implicit) &
+!            call this%f_eval(lev%Q(lev%nnodes), tend-dt*(n-1)-dt*this%cvec(1), lev%index, lev%F(lev%nnodes,2),2,flags=2,idx=lev%nnodes)
+!     
+!       ! Loop over stage values
+!       do m = 1, this%nstages-1  
+!          
+!          ! Set current time
+!          t = tend - dt*(n-1) - dt*this%cvec(m+1)
+!
+!          ! Initialize the right-hand size for each stage
+!          call rhs%copy(lev%Q(lev%nnodes),flags=2)
+!
+!          do j = 1, m
+!
+!             ! Add explicit rhs
+!             if (this%explicit) &
+!                  call rhs%axpy(dt*this%AmatE(m+1,j), lev%F(j,1),flags=2)
+!
+!             ! Add implicit rhs
+!             if (this%implicit) &
+!                  call rhs%axpy(dt*this%AmatI(m+1,j), lev%F(j,2),flags=2)
+!
+!          end do
+!
+!          ! Solve the implicit system
+!          if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
+!             call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(m+1,m+1), rhs, lev%index,lev%F(m+1,2), 2, flags=2)
+!          else
+!             call lev%Q(m+1)%copy(rhs,flags=2)
+!          end if
+!                    
+!          ! Reevaluate explicit rhs with the new solution
+!          if (this%explicit) &
+!               call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1)
+!          
+!       end do  ! End loop over stage values
+!       
+!       ! Compute final value using quadrature rule
+!       call lev%Q(lev%nnodes)%copy(lev%Q(1))
+!
+!       ! Loop over stage values one more time
+!       do j = 1, this%nstages
+!
+!          ! Add explicit terms
+!          if (this%explicit) &
+!               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1))
+!
+!          ! Add implicit terms
+!          if (this%implicit) &
+!               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(j), lev%F(j,2))
+!
+!       end do ! End loop over stage values
+!
+!    end do ! End Loop over time steps
+!    
+!    ! Assign final value to end of time step
+!    call lev%qend%copy(lev%Q(lev%nnodes))
+!
+!  end subroutine ark_do_n_steps_backward
+!
   subroutine ark_initialize(this, lev)
     class(pf_ark_t), intent(inout) :: this
     class(pf_level_t), intent(inout) :: lev

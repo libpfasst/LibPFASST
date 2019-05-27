@@ -55,7 +55,7 @@ contains
 
   !> Perform N fwd or bwd steps of IMEX Euler on level level_index and set qend or q0 appropriately.
   subroutine euler_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk, &
-                              flags)
+                              state, adjoint, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
@@ -65,7 +65,7 @@ contains
     real(pfdp),        intent(in   )           :: big_dt       !!  Length of time interval to integrate on
     integer,           intent(in)              :: level_index  !!  Level of the index to step on
     integer,           intent(in)              :: nsteps_rk       !!  Number of steps to use
-!     class(pf_encap_t), intent(inout), optional :: solution(:)  !! store the solution at all time steps (size has to be nsteps)
+    real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)  !! store the solution at all time steps (size has to be nsteps times nvars)
     integer,           intent(in), optional    :: flags        !!  which component to compute
     
     class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
@@ -93,19 +93,24 @@ contains
     call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
 
     if (which == 2) then
-      nstart = nsteps_rk
-      nend = 1
+      nstart = nsteps_rk+1
+      nend = 2
       inc = -1
     else
       nstart = 1
       nend = nsteps_rk
       inc=1
     end if
-    
+   
+!print *, which, nstart, nend, inc
+ 
     if (which .eq. 1) then ! forward solve
-      call lev%Q(1)%copy(lev%q0, which)      
+      call lev%Q(1)%copy(lev%q0, 1)
+      call lev%Q(1)%pack(state(1,:), 1)      
     else
-      call lev%Q(nsteps_rk)%copy(lev%qend, which)
+      call lev%Q(1)%copy(lev%qend, which)
+      call lev%Q(1)%unpack(state(nsteps_rk+1,:), 1)
+      call lev%Q(1)%pack(adjoint(nsteps_rk+1,:), 2)
       !               call solution(nsteps_rk)%copy(lev%Q(1),which) ! store terminal solution
     end if
     
@@ -116,7 +121,7 @@ contains
        ! t is the _end_ of the current local time step
        if (which .eq. 2) then ! backward solve
           t = tend + dt*n    ! dt is negative here  
-          mystep = nsteps_rk+1-n
+          mystep = n
           ! here we need to unpack the state solution into Q(1)
 !           call lev%Q(n)%copy(solution(mystep), 1)
        else
@@ -125,30 +130,35 @@ contains
        end if
        
        if (this%explicit) &
-            call this%f_eval(lev%Q(n), t-dt, lev%index, lev%F(n,1), 1, &
+            call this%f_eval(lev%Q(1), t-dt, lev%index, lev%F(1,1), 1, &
                             flags=which, idx=1, step=mystep )
 !        if (this%implicit) &
 !             call this%f_eval(lev%Q(1), t, lev%index, lev%F(1,2),2, &
 !                              flags=which, idx=1, step=mystep )
      
        ! set up rhs
-       call rhs%copy(lev%Q(n), which)
+       call rhs%copy(lev%Q(1), which)
        if (this%explicit) &
-          call rhs%axpy(dt, lev%F(n,1), which)
-          
+          call rhs%axpy(inc*dt, lev%F(1,1), which)
+          !print *, n+inc, n
       ! solve
+      !print *, t, inc*dt, n+inc
       if (this%implicit) then
-        call this%f_comp(lev%Q(n+inc), t, dt, rhs, lev%index, lev%F(n,2), 2, which)
+        call this%f_comp(lev%Q(2), t, inc*dt, rhs, lev%index, lev%F(2,2), 2, which)
       else
-        call lev%Q(n+inc)%copy(rhs,which)
+        call lev%Q(2)%copy(rhs,which)
       end if
-       
+      
+      call lev%Q(1)%copy(lev%Q(2),which)
+      call lev%F(1,2)%copy(lev%F(2,2),which)
+ 
       ! store solution
-!       if (which .eq. 2) then ! backward solve
-!         call solution(mystep-1)%copy(lev%Q(1),which) ! store solution value
-!       else
-!         call solution(mystep+1)%copy(lev%Q(1),which)
-!       end if
+       if (which .eq. 2) then ! backward solve
+         call lev%Q(1)%pack(adjoint(n+inc,:),2) ! store solution value
+         call lev%Q(1)%unpack(state(n+inc,:), 1)
+       else
+         call lev%Q(1)%pack(state(n+inc,:), 1)
+       end if
 
     end do ! End Loop over time steps
     
@@ -156,7 +166,7 @@ contains
     if (which .eq. 2) then ! backward solve
       call lev%q0%copy(lev%Q(1), which)
     else
-      call lev%qend%copy(lev%Q(nend), which)
+      call lev%qend%copy(lev%Q(1), which)
     end if
 
   end subroutine euler_do_n_steps
