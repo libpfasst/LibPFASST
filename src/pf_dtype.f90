@@ -174,6 +174,7 @@ module pf_mod_dtype
           R(:),     &           !! full residuals
           I(:),     &           !! 0 to node integrals
           Fflt(:),  &           !! functions values at sdc nodes (flat)
+          Frkflt(:), &          !!  Stage Function values
           tauQ(:),  &           !! fas correction in Q form
           pFflt(:), &           !! functions at sdc nodes, previous sweep (flat)
           q0,       &           !! initial condition
@@ -389,7 +390,7 @@ module pf_mod_dtype
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
 
-     subroutine pf_destroy_p(this, pf,level_index)
+     subroutine pf_destroy_p(this, pf, level_index)
        import pf_sweeper_t,pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
        type(pf_pfasst_t),  target,  intent(inout) :: pf
@@ -397,30 +398,33 @@ module pf_mod_dtype
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
-     subroutine pf_do_n_steps_p(this, pf, level_index, t0, big_dt, nsteps_rk, state, adjoint, flags)
-       import pf_pfasst_t, pf_stepper_t, pf_level_t, pf_encap_t, pfdp
+     subroutine pf_do_n_steps_p(this, pf, level_index, t0, q0, qend, big_dt, nsteps_rk, state, adjoint, flags)
+       import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp, pf_encap_t,
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: big_dt !!  Time step size
        real(pfdp),          intent(in)    :: t0
+       class(pf_encap_t), intent(inout)   :: q0     !!  Starting value
+       class(pf_encap_t), intent(inout)   :: qend   !!  Final value
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
-!        class(pf_encap_t),   intent(inout), optional :: solution(:)  !! store the solution at all time steps (size has to be nsteps)
        real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)
        integer,           intent(in), optional    :: flags   
      end subroutine pf_do_n_steps_p
 
-     subroutine pf_initialize_stepper_p(this, lev)
-       import pf_stepper_t, pf_level_t
+     subroutine pf_initialize_stepper_p(this, pf, level_index)
+       import pf_stepper_t, pf_pfasst_t
        class(pf_stepper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: lev
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer, intent(in) :: level_index
      end subroutine pf_initialize_stepper_p
 
-     subroutine pf_destroy_stepper_p(this, lev)
-       import pf_stepper_t, pf_level_t, pfdp
+     subroutine pf_destroy_stepper_p(this, pf, level_index)
+       import pf_stepper_t, pf_pfasst_t
        class(pf_stepper_t), intent(inout) :: this
-       class(pf_level_t),   intent(inout) :: Lev
-     end subroutine pf_destroy_stepper_p
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer, intent(in) :: level_index     
+    end subroutine pf_destroy_stepper_p
 
      !> transfer interfaces used for restriction and interpolation
      subroutine pf_transfer_p(this, f_lev, c_lev, f_vec, c_vec, t, flags)

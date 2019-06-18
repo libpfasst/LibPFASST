@@ -213,8 +213,7 @@ contains
     call lev%ulevel%sweeper%initialize(pf,level_index)
 
     
-    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
-
+    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(pf, level_index)
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
 

@@ -9,7 +9,7 @@ module pf_mod_rkstepper
   implicit none
 
   !>  IMEX or additive or semi-implicit Runge-Kutta stepper  type
-  type, extends(pf_stepper_t), abstract :: pf_ark_t
+  type, extends(pf_stepper_t), abstract :: pf_ark_stepper_t
      real(pfdp), allocatable :: AmatI(:,:)
      real(pfdp), allocatable :: AmatE(:,:)
      real(pfdp), allocatable :: cvec(:)
@@ -25,13 +25,13 @@ module pf_mod_rkstepper
      procedure :: do_n_steps  => ark_do_n_steps
      procedure :: initialize  => ark_initialize
      procedure :: destroy     => ark_destroy
-  end type pf_ark_t
+  end type pf_ark_stepper_t
 
   interface
 
      subroutine pf_f_eval_p(this,y, t, level_index, f, piece, flags, idx, step)
-       import pf_ark_t, pf_encap_t, pfdp
-       class(pf_ark_t),   intent(inout) :: this
+       import pf_ark_stepper_t, pf_encap_t, pfdp
+       class(pf_ark_stepper_t),   intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: y
        real(pfdp),        intent(in   ) :: t
        integer,           intent(in   ) :: level_index
@@ -43,8 +43,8 @@ module pf_mod_rkstepper
      end subroutine pf_f_eval_p
 
       subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece, flags)
-       import pf_ark_t, pf_encap_t, pfdp
-       class(pf_ark_t),   intent(inout) :: this
+       import pf_ark_stepper_t, pf_encap_t, pfdp
+       class(pf_ark_stepper_t),   intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y
        real(pfdp),        intent(in   ) :: t
        real(pfdp),        intent(in   ) :: dtq
@@ -61,13 +61,15 @@ module pf_mod_rkstepper
 contains
 
   !> Perform N steps of ark on level level_index and set qend appropriately.
-  subroutine ark_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk, state, adjoint, flags)
+  subroutine ark_do_n_steps(this, pf, level_index, t0, q0, qend, big_dt, nsteps_rk, state, adjoint, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
-    class(pf_ark_t),   intent(inout)         :: this
+    class(pf_ark_stepper_t),   intent(inout)         :: this
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in   )         :: t0           !!  Time at start of time interval
+    class(pf_encap_t), intent(inout)         :: q0           !!  Starting value
+    class(pf_encap_t), intent(inout)         :: qend !!  Final value
     real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on
     integer,           intent(in)            :: level_index  !!  Level of the index to step on
     integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
@@ -211,7 +213,7 @@ contains
 !    use pf_mod_timer
 !    use pf_mod_hooks
 !
-!    class(pf_ark_t),   intent(inout)         :: this
+!    class(pf_ark_stepper_t),   intent(inout)         :: this
 !    type(pf_pfasst_t), intent(inout), target :: pf
 !    real(pfdp),        intent(in   )         :: t0           !!  Time at beginning of time interval
 !    real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on; time interval is [tend, tend-big_dt]
@@ -307,12 +309,15 @@ contains
 !
 !  end subroutine ark_do_n_steps_backward
 !
-  subroutine ark_initialize(this, lev)
-    class(pf_ark_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
-
+  subroutine ark_initialize(this, pf, level_index)
+    class(pf_ark_stepper_t), intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
     integer    :: nstages
     real(pfdp) :: gamma, delta
+    
+    type(pf_level_t), pointer  :: lev    !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
 
     this%explicit = .true.
     this%implicit = .true.
@@ -463,10 +468,13 @@ contains
 
   end subroutine ark_initialize
 
-  subroutine ark_destroy(this, lev)
-    class(pf_ark_t),   intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
-    
+  subroutine ark_destroy(this, pf, level_index)
+    class(pf_ark_stepper_t),   intent(inout) :: this
+    type(pf_pfasst_t),  target,  intent(inout) :: pf
+    integer,              intent(in)    :: level_index 
+
+    type(pf_level_t), pointer  :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer    
     deallocate(this%AmatE)
     deallocate(this%AmatI)
     deallocate(this%bvecE)

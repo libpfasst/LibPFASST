@@ -9,7 +9,7 @@ module pf_mod_eulerstepper
   implicit none
 
   !>  IMEX or additive or semi-implicit Runge-Kutta stepper  type
-  type, extends(pf_stepper_t), abstract :: pf_euler_t
+  type, extends(pf_stepper_t), abstract :: pf_eulerstepper_t
      logical                 :: explicit = .true.
      logical                 :: implicit = .true.
    contains
@@ -18,13 +18,13 @@ module pf_mod_eulerstepper
      procedure :: do_n_steps  => euler_do_n_steps
      procedure :: initialize  => euler_initialize
      procedure :: destroy     => euler_destroy
-  end type pf_euler_t
+  end type pf_eulerstepper_t
 
   interface
 
      subroutine pf_f_eval_p(this,y, t, level_index, f,  piece, flags, idx, step)
-       import pf_euler_t, pf_encap_t, pfdp
-       class(pf_euler_t),   intent(inout) :: this
+       import pf_eulerstepper_t, pf_encap_t, pfdp
+       class(pf_eulerstepper_t),   intent(inout) :: this
        class(pf_encap_t),   intent(in   ) :: y
        real(pfdp),          intent(in   ) :: t
        integer,             intent(in   ) :: level_index
@@ -36,8 +36,8 @@ module pf_mod_eulerstepper
      end subroutine pf_f_eval_p
 
       subroutine pf_f_comp_p(this,y, t, dtq, rhs, level_index, f, piece, flags)
-       import pf_euler_t, pf_encap_t, pfdp
-       class(pf_euler_t),   intent(inout) :: this
+       import pf_eulerstepper_t, pf_encap_t, pfdp
+       class(pf_eulerstepper_t),   intent(inout) :: this
        class(pf_encap_t),   intent(inout) :: y
        real(pfdp),          intent(in   ) :: t
        real(pfdp),          intent(in   ) :: dtq
@@ -54,14 +54,16 @@ module pf_mod_eulerstepper
 contains
 
   !> Perform N fwd or bwd steps of IMEX Euler on level level_index and set qend or q0 appropriately.
-  subroutine euler_do_n_steps(this, pf, level_index, t0, big_dt, nsteps_rk, &
+  subroutine euler_do_n_steps(this, pf, level_index, t0, q0, qend, big_dt, nsteps_rk, &
                               state, adjoint, flags)
     use pf_mod_timer
     use pf_mod_hooks
 
-    class(pf_euler_t), intent(inout)           :: this
+    class(pf_eulerstepper_t), intent(inout)           :: this
     type(pf_pfasst_t), intent(inout), target   :: pf
     real(pfdp),        intent(in   )           :: t0           !!  Time at start of time interval
+    class(pf_encap_t), intent(inout)         :: q0           !!  Starting value
+    class(pf_encap_t), intent(inout)         :: qend !!  Final value
     real(pfdp),        intent(in   )           :: big_dt       !!  Length of time interval to integrate on
     integer,           intent(in)              :: level_index  !!  Level of the index to step on
     integer,           intent(in)              :: nsteps_rk       !!  Number of steps to use
@@ -174,17 +176,19 @@ contains
   
   
 
-  subroutine euler_initialize(this, lev)
-    class(pf_euler_t), intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+  subroutine euler_initialize(this, pf, level_index)
+    class(pf_eulerstepper_t), intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
 
     this%explicit = .true.
     this%implicit = .true.
   end subroutine euler_initialize
 
-  subroutine euler_destroy(this, lev)
-    class(pf_euler_t),   intent(inout) :: this
-    class(pf_level_t), intent(inout) :: lev
+  subroutine euler_destroy(this, pf, level_index)
+    class(pf_eulerstepper_t),   intent(inout) :: this
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to initialize
   end subroutine euler_destroy
 
 end module pf_mod_eulerstepper
