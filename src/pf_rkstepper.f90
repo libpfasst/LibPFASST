@@ -79,10 +79,10 @@ contains
     class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
     class(pf_encap_t), allocatable           :: rhs          !!  Accumulated right hand side for implicit solves
     integer                                  :: j, m, n      !!  Loop counters
-    real(pfdp)                               :: t            !!  Time
+    real(pfdp)                               :: t!, tend      !!  Time
     real(pfdp)                               :: dt           !!  Size of each ark step
 
-    integer :: which, adjStepExpl, mystep
+    integer :: which, adjStepExpl, mystep!, idx, idxj, inc
     which = 1
     if(present(flags)) which = flags
     
@@ -94,29 +94,39 @@ contains
     ! Allocate space for the right-hand side
     call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
 
+!     if (which == 2) then
+!       inc = -1
+!     else
+!       inc=1
+!     end if
     
     do n = 1, nsteps_rk      ! Loop over time steps
 
        ! Recompute the first explicit function value 
-       if (n == 1) then
-          if (which==1) call lev%Q(1)%copy(lev%q0,1)
-          if (which==2) call lev%Q(1)%copy(lev%qend,2)
+       if (n == 1) then                                  ! first step
+          if (which==1) call lev%Q(1)%copy(lev%q0,1)     ! state sol: initial value in q0
+          if (which==2) call lev%Q(1)%copy(lev%qend,2)   ! adjoint sol: initial value in qend
        else
-          call lev%Q(1)%copy(lev%Q(lev%nnodes),which)
+          call lev%Q(1)%copy(lev%Q(lev%nnodes),which)    ! copy from final sol of prev step
        end if
 
-       adjStepExpl = nsteps_rk+1-(n-1)
+       adjStepExpl = nsteps_rk+1-(n-1)  ! for adjoint: time transform tau = T-t to use correct
+                                        ! state solution
        if(which == 2) then
           mystep = adjStepExpl
           t = big_dt-dt*(n-1)-dt*this%cvec(1)
+!           t = t0+dt*(n-1)+dt*this%cvec(1)
+!           tend = t-dt
           if(n==1) then
-             call lev%Q(1)%unpack(state(adjStepExpl,:),1)
-             call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)
+             call lev%Q(1)%unpack(state(adjStepExpl,:),1)  ! load state solution
+             call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)  ! save adjoint sol for later gradient
+                                                           ! computation
           end if
        else
           mystep = n
           t = t0+dt*(n-1)+dt*this%cvec(1)
-          if(n==1) call lev%Q(1)%pack(state(n,:), 1)
+!           tend=t+dt
+          if(n==1) call lev%Q(1)%pack(state(n,:), 1)       ! save state for later adjoint solution
        end if
        
 !       print *, t
@@ -128,11 +138,13 @@ contains
      
        ! Loop over stage values
        do m = 1, this%nstages-1  
-             
-          adjStepExpl = nsteps_rk+1-(n-1)
+!           if(which==1) idx = m+1
+!           if(which==2) idx = m+1!this%nstages-m
+          
+!           adjStepExpl = nsteps_rk+1-(n-1) ! constant on time step, we have no intermediate values
           if(which == 2) then
              mystep = adjStepExpl
-             t = big_dt-dt*(n-1)-dt*this%cvec(m+1)
+             t = big_dt-dt*(n-1)-dt*this%cvec(m+1)  ! is not used in feval, so doesn't matter
           else
              mystep = n
              t = t0+dt*(n-1)+dt*this%cvec(m+1)
@@ -143,9 +155,12 @@ contains
 
           ! Initialize the right-hand size for each stage
           call rhs%copy(lev%Q(1), which)
-
+          
           do j = 1, m
 
+!               if(which==1) idxj = j
+!               if(which==2) idxj = j!m+1-j
+          
              ! Add explicit rhs
              if (this%explicit) &
                   call rhs%axpy(dt*this%AmatE(m+1,j), lev%F(j,1), which)
@@ -156,6 +171,9 @@ contains
 
           end do
 
+          if(which==2)   &   ! load state solution into next quadrature node 
+             call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1) ! (required for feval later)
+
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
              call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(m+1,m+1), rhs, lev%index,lev%F(m+1,2), 2, flags=which)
@@ -164,7 +182,6 @@ contains
           end if
                     
           ! Reevaluate explicit rhs with the new solution
-          if(which==2)   call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1)
  
 !call lev%Q(m+1)%copy(lev%Q(m),1) ! to evaluate objective
           if (this%explicit) &
@@ -178,6 +195,9 @@ contains
        ! Loop over stage values one more time
        do j = 1, this%nstages
 
+!           if(which==1) idx = j
+!           if(which==2) idx = j!this%nstages-j+1
+       
           ! Add explicit terms
           if (this%explicit) &
                call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1), which)

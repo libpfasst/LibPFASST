@@ -411,13 +411,13 @@ contains
 
     qend => cast_as_ndarray_oc(pf%levels(level_index)%qend)
     
-    write(fnamey, "('y_s',i0.2,'i',i0.3,'l',i0.2,'.npy')") &
+    write(fnamey, "('y_s',i0.4,'i',i0.3,'l',i0.2,'.npy')") &
          pf%state%step, pf%state%iter, level_index
 
     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
          qend%dim, qend%shape, size(qend%yflatarray), qend%yflatarray)
 
-    write(fnamep, "('p_s',i0.2,'i',i0.3,'l',i0.2,'.npy')") &
+    write(fnamep, "('p_s',i0.4,'i',i0.3,'l',i0.2,'.npy')") &
          pf%state%step, pf%state%iter, level_index
 
     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
@@ -459,9 +459,12 @@ contains
   subroutine ndarray_oc_eprint(this,flags)
     class(ndarray_oc), intent(inout) :: this
     integer,     intent(in   ), optional :: flags    
+    integer :: which
     !  Just print the first few values
-    print *, this%yflatarray(1:10)
-    print *, this%pflatarray(1:10)
+    which = 0
+    if(present(flags)) which = flags
+    if(which == 0 .or. which == 1) print *, this%yflatarray(:)
+    if(which == 0 .or. which == 2) print *, this%pflatarray(:)
   end subroutine ndarray_oc_eprint
 
 !   function array2_oc(solptr, flags) result(r)
