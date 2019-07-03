@@ -67,7 +67,7 @@ contains
     real(pfdp),        intent(in   )           :: big_dt       !!  Length of time interval to integrate on
     integer,           intent(in)              :: level_index  !!  Level of the index to step on
     integer,           intent(in)              :: nsteps_rk       !!  Number of steps to use
-    real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)  !! store the solution at all time steps (size has to be nsteps times nvars)
+    real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)  !! store the solution at all time steps (size has to be nsteps times nvars)
     integer,           intent(in), optional    :: flags        !!  which component to compute
     
     class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
@@ -108,16 +108,22 @@ contains
  
     if (which .eq. 1) then ! forward solve
       call lev%Q(1)%copy(lev%q0, 1)
-      call lev%Q(1)%pack(state(1,:), 1)      
+!       call lev%Q(1)%pack(state(1,:), 1)      
     else
       call lev%Q(1)%copy(lev%qend, which)
-      call lev%Q(1)%unpack(state(nsteps_rk+1,:), 1)
-      call lev%Q(1)%pack(adjoint(nsteps_rk+1,:), 2)
+!       call lev%Q(1)%unpack(state(nsteps_rk+1,:), 1)
+!       call lev%Q(1)%pack(adjoint(nsteps_rk+1,:), 2)
       !               call solution(nsteps_rk)%copy(lev%Q(1),which) ! store terminal solution
     end if
     
     do n = nstart, nend, inc !1, nsteps_rk      ! Loop over time steps
 
+       if(which==2) then
+         call lev%Q(1)%unpack(state(n,lev%nnodes,:), 1)
+         call lev%Q(1)%pack(adjoint(n,lev%nnodes,:), 2)
+       else
+         call lev%Q(1)%pack(state(n,1,:), 1)  
+       end if
        ! Recompute the first explicit function value 
         
        ! t is the _end_ of the current local time step
@@ -156,10 +162,12 @@ contains
  
       ! store solution
        if (which .eq. 2) then ! backward solve
-         call lev%Q(1)%pack(adjoint(n+inc,:),2) ! store solution value
-         call lev%Q(1)%unpack(state(n+inc,:), 1)
+!          call lev%Q(1)%pack(adjoint(n+inc,:),2) ! store solution value
+!          call lev%Q(1)%unpack(state(n+inc,:), 1)
+         call lev%Q(1)%pack(adjoint(n,1,:),2) ! store solution value
+!          call lev%Q(1)%unpack(state(n,1,:), 1)
        else
-         call lev%Q(1)%pack(state(n+inc,:), 1)
+         call lev%Q(1)%pack(state(n,lev%nnodes,:), 1)
        end if
 
     end do ! End Loop over time steps

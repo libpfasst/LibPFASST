@@ -408,7 +408,7 @@ module pf_mod_dtype
        class(pf_encap_t), intent(inout)   :: qend   !!  Final value
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
-       real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)
+       real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)
        integer,           intent(in), optional    :: flags   
      end subroutine pf_do_n_steps_p
 
