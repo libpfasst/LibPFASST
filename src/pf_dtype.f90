@@ -80,6 +80,7 @@ module pf_mod_dtype
   type, abstract :: pf_stepper_t
      integer     :: npieces
      integer     :: order
+     real(pfdp), allocatable :: cvec(:)
    contains
      procedure(pf_do_n_steps_p),           deferred :: do_n_steps
      procedure(pf_initialize_stepper_p),   deferred :: initialize
@@ -408,7 +409,8 @@ module pf_mod_dtype
        class(pf_encap_t), intent(inout)   :: qend   !!  Final value
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
-       real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)
+!        real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)
+       real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)
        integer,           intent(in), optional    :: flags   
      end subroutine pf_do_n_steps_p
 

@@ -12,7 +12,7 @@ module pf_mod_rkstepper
   type, extends(pf_stepper_t), abstract :: pf_ark_stepper_t
      real(pfdp), allocatable :: AmatI(:,:)
      real(pfdp), allocatable :: AmatE(:,:)
-     real(pfdp), allocatable :: cvec(:)
+!      real(pfdp), allocatable :: cvec(:)
      real(pfdp), allocatable :: bvecI(:)
      real(pfdp), allocatable :: bvecE(:)
      real(pfdp), allocatable :: QtilI(:,:)
@@ -73,7 +73,8 @@ contains
     real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrate on
     integer,           intent(in)            :: level_index  !!  Level of the index to step on
     integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
-    real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)
+!     real(pfdp),        intent(inout), optional :: state(:,:,:), adjoint(:,:,:)
+    real(pfdp),        intent(inout), optional :: state(:,:), adjoint(:,:)
     integer,           intent(in), optional    :: flags  
 
     class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
@@ -110,32 +111,33 @@ contains
           call lev%Q(1)%copy(lev%Q(lev%nnodes),which)    ! copy from final sol of prev step
        end if
 
-       adjStepExpl = nsteps_rk-(n-1)  ! for adjoint: time transform tau = T-t to use correct
+!        adjStepExpl = nsteps_rk-(n-1) 
+       adjStepExpl = nsteps_rk+1-(n-1)  ! for adjoint: time transform tau = T-t to use correct
                                         ! state solution
 !        if(which==2) print *, "time step = ", n, "state time step = ", adjStepExpl
        
        if(which == 2) then !backward
           mystep = adjStepExpl
           myidx=lev%nnodes
-          t = big_dt-dt*(n-1)-dt*this%cvec(myidx)
-!           t = t0+dt*(n-1)+dt*this%cvec(1)
-!           tend = t-dt
-!           if(n==1) then
-             call lev%Q(1)%unpack(state(adjStepExpl,lev%nnodes,:),1)  ! load state solution
-             call lev%Q(1)%pack(adjoint(adjStepExpl,lev%nnodes,:),2)  ! save adjoint sol for later gradient
-                                                           ! computation
-!           end if
+          t = big_dt-dt*(n-1)-dt*this%cvec(1)
+!              call lev%Q(1)%unpack(state(adjStepExpl,lev%nnodes,:),1)  ! load state solution
+!              call lev%Q(1)%pack(adjoint(adjStepExpl,lev%nnodes,:),2)  ! save adjoint sol for later gradient computation
+             call lev%Q(1)%unpack(state(adjStepExpl,:),1)  ! load state solution
+             call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)  ! save adjoint sol for later
+                                                           
        else
           mystep = n
           myidx=1
           t = t0+dt*(n-1)+dt*this%cvec(1)
 !           tend=t+dt
 !           if(n==1) &
-            call lev%Q(1)%pack(state(n,1,:), 1)       ! save state for later adjoint solution
+!             call lev%Q(1)%pack(state(n,1,:), 1)       ! save state for later adjoint solution
+            call lev%Q(1)%pack(state(n,:), 1)       ! save state for later adjoint solution
        end if
        
 !       print *, t
        ! this assumes that cvec(1) == 0
+       ! keep control, ydesired constant over time step -> idx is not used in feval
        if (this%explicit) &
             call this%f_eval(lev%Q(1), t, lev%index, lev%F(1,1),1, flags=which, idx=myidx, step=mystep)
        if (this%implicit) &
@@ -149,27 +151,22 @@ contains
 !           adjStepExpl = nsteps_rk+1-(n-1) ! constant on time step, we have no intermediate values
           if(which == 2) then
              mystep = adjStepExpl
-             myidx= lev%nnodes-m!-1
-             t = big_dt-dt*(n-1)-dt*this%cvec(myidx)  ! is not used in feval, so doesn't matter
+             myidx= m+1!lev%nnodes-m!-1
+             t = big_dt-dt*(n-1)-dt*this%cvec(m+1)  ! is not used in feval, so doesn't matter
           else
              mystep = n
              myidx=m+1
              t = t0+dt*(n-1)+dt*this%cvec(m+1)
           end if
-          
-!           print *, "step", mystep, "idx", myidx
-          
-          ! Set current time
-          !t = t0 + dt*(n-1) + dt*this%cvec(m+1)
-
+                    
           ! Initialize the right-hand size for each stage
           call rhs%copy(lev%Q(1), which)
           
           do j = 1, m
 
-!               idxj = j
-              if(which==1) idxj = j
-              if(which==2) idxj = m+1-j
+              idxj = j
+!               if(which==1) idxj = j
+!               if(which==2) idxj = m+1-j
           
              ! Add explicit rhs
              if (this%explicit) &
@@ -183,7 +180,8 @@ contains
 
           if(which==2)   then   ! load state solution into next quadrature node 
 !              print *, "stage", m, "load substep", lev%nnodes-m-1
-             call lev%Q(m+1)%unpack(state(adjStepExpl,lev%nnodes-m,:), 1) ! (required for feval later)
+!              call lev%Q(m+1)%unpack(state(adjStepExpl,lev%nnodes-m,:), 1) ! (required for feval later)
+             call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1) ! (required for feval later)
           end if
 
           ! Solve the implicit system
@@ -200,9 +198,11 @@ contains
                call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, flags=which, idx=myidx, step=mystep)
           
           if(which==2) then
-             call lev%Q(m+1)%pack(adjoint(adjStepExpl,lev%nnodes-m,:),2) 
+!              call lev%Q(m+1)%pack(adjoint(adjStepExpl,lev%nnodes-m,:),2) 
+            call lev%Q(m+1)%pack(adjoint(adjStepExpl,:),2) 
           else
-            call lev%Q(m+1)%pack(state(n,m+1,:), 1) 
+!             call lev%Q(m+1)%pack(state(n,m+1,:), 1) 
+            call lev%Q(m+1)%pack(state(n,:), 1) 
           end if
           
        end do  ! End loop over stage values
@@ -213,9 +213,9 @@ contains
        ! Loop over stage values one more time
        do j = 1, this%nstages
 
-!           idxj=j
-          if(which==1) idxj = j
-          if(which==2) idxj = this%nstages-j+1
+          idxj=j
+!           if(which==1) idxj = j
+!           if(which==2) idxj = this%nstages-j+1
        
           ! Add explicit terms
           if (this%explicit) &
@@ -229,13 +229,13 @@ contains
 
        if (which .eq. 2) then ! backward solve
  !        print *, 'assigning value', adjStepExpl-1
-!          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl-1,:),2) ! store solution value
+         call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl-1,:),2) ! store solution value
 !          call lev%Q(1)%unpack(state(adjStepExpl-1,:), 1)
-         call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl,1,:),2) ! store solution value
+!          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl,1,:),2) ! store solution value
 !          call lev%Q(1)%unpack(state(adjStepExpl-1,,lev%nnodes:), 1)
        else
-!          call lev%Q(lev%nnodes)%pack(state(n+1,:), 1)
-         call lev%Q(lev%nnodes)%pack(state(n,lev%nnodes,:), 1)
+         call lev%Q(lev%nnodes)%pack(state(n+1,:), 1)
+!          call lev%Q(lev%nnodes)%pack(state(n,lev%nnodes,:), 1)
        end if
 
 !        pf%state%step=mystep
