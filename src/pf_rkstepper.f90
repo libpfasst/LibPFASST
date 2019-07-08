@@ -118,13 +118,14 @@ contains
        
        if(which == 2) then !backward
           mystep = adjStepExpl
-          myidx=lev%nnodes
+          myidx=1!lev%nnodes
           t = big_dt-dt*(n-1)-dt*this%cvec(1)
 !              call lev%Q(1)%unpack(state(adjStepExpl,lev%nnodes,:),1)  ! load state solution
 !              call lev%Q(1)%pack(adjoint(adjStepExpl,lev%nnodes,:),2)  ! save adjoint sol for later gradient computation
+          if(n==1) then
              call lev%Q(1)%unpack(state(adjStepExpl,:),1)  ! load state solution
              call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)  ! save adjoint sol for later
-                                                           
+          end if
        else
           mystep = n
           myidx=1
@@ -164,17 +165,17 @@ contains
           
           do j = 1, m
 
-              idxj = j
+!               idxj = j
 !               if(which==1) idxj = j
 !               if(which==2) idxj = m+1-j
           
              ! Add explicit rhs
              if (this%explicit) &
-                  call rhs%axpy(dt*this%AmatE(myidx,idxj), lev%F(j,1), which)
+                  call rhs%axpy(dt*this%AmatE(myidx,j), lev%F(j,1), which)
 
              ! Add implicit rhs
              if (this%implicit) &
-                  call rhs%axpy(dt*this%AmatI(myidx,idxj), lev%F(j,2), which)
+                  call rhs%axpy(dt*this%AmatI(myidx,j), lev%F(j,2), which)
 
           end do
 
@@ -183,7 +184,7 @@ contains
 !              call lev%Q(m+1)%unpack(state(adjStepExpl,lev%nnodes-m,:), 1) ! (required for feval later)
              call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1) ! (required for feval later)
           end if
-
+          
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(myidx,myidx) /= 0) then
              call this%f_comp(lev%Q(m+1), t, dt*this%AmatI(myidx,myidx), rhs, lev%index,lev%F(m+1,2), 2, flags=which)
@@ -192,18 +193,19 @@ contains
           end if
                     
           ! Reevaluate explicit rhs with the new solution
- 
+
+          
 !call lev%Q(m+1)%copy(lev%Q(m),1) ! to evaluate objective
           if (this%explicit) &
                call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, flags=which, idx=myidx, step=mystep)
           
-          if(which==2) then
-!              call lev%Q(m+1)%pack(adjoint(adjStepExpl,lev%nnodes-m,:),2) 
-            call lev%Q(m+1)%pack(adjoint(adjStepExpl,:),2) 
-          else
-!             call lev%Q(m+1)%pack(state(n,m+1,:), 1) 
-            call lev%Q(m+1)%pack(state(n,:), 1) 
-          end if
+!           if(which==2) then
+! !              call lev%Q(m+1)%pack(adjoint(adjStepExpl,lev%nnodes-m,:),2) 
+!             call lev%Q(m+1)%pack(adjoint(adjStepExpl,:),2) 
+!           else
+! !             call lev%Q(m+1)%pack(state(n,m+1,:), 1) 
+!             call lev%Q(m+1)%pack(state(n,:), 1) 
+!           end if
           
        end do  ! End loop over stage values
        
@@ -213,24 +215,24 @@ contains
        ! Loop over stage values one more time
        do j = 1, this%nstages
 
-          idxj=j
+!           idxj=j
 !           if(which==1) idxj = j
 !           if(which==2) idxj = this%nstages-j+1
        
           ! Add explicit terms
           if (this%explicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(idxj), lev%F(j,1), which)
+               call lev%Q(lev%nnodes)%axpy(dt*this%bvecE(j), lev%F(j,1), which)
 
           ! Add implicit terms
           if (this%implicit) &
-               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(idxj), lev%F(j,2), which)
+               call lev%Q(lev%nnodes)%axpy(dt*this%bvecI(j), lev%F(j,2), which)
 
        end do ! End loop over stage values
 
        if (which .eq. 2) then ! backward solve
  !        print *, 'assigning value', adjStepExpl-1
          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl-1,:),2) ! store solution value
-!          call lev%Q(1)%unpack(state(adjStepExpl-1,:), 1)
+         call lev%Q(1)%unpack(state(adjStepExpl-1,:), 1)
 !          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl,1,:),2) ! store solution value
 !          call lev%Q(1)%unpack(state(adjStepExpl-1,,lev%nnodes:), 1)
        else
