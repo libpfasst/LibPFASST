@@ -60,12 +60,12 @@ contains
 
       end do
 
-      print *,'Initializing mpi and pfasst...'
+!      print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
 
-      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-      call pf_add_hook(pf, -1, PF_POST_SWEEP, pf_echo_residual)
-      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)
+!      call pf_add_hook(pf, 1, PF_POST_SWEEP, echo_error)
+!      call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, pf_echo_residual)      
+!      if (save_solutions) call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, save_solution)
 
       !  Get initial condition
       call zndarray_build(dmat_t0, [nparticles,nparticles])
@@ -74,11 +74,10 @@ contains
       !  Allocate space for end solution
       call zndarray_build(dmat_tfinal,[nparticles,nparticles])
 
-
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       start = MPI_Wtime()
-      print*, 'Running pfasst...'
+!      print*, 'Running pfasst...'
       call pf_pfasst_run(pf, dmat_t0, dt, 0.0_pfdp, nsteps, dmat_tfinal)
 
 
@@ -89,10 +88,11 @@ contains
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       if(pf%rank == comm%nproc-1) then
-         call dmat_tfinal%write_to_disk('final_solution') !necessary for pfasst.py
-         print *,'solution at end of run'
-         if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
-         call dmat_tfinal%eprint() !only for debug purpose         
+!         call dmat_tfinal%write_to_disk('final_solution') !necessary for pfasst.py
+!         print *,'solution at end of run'
+!         if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
+!         call dmat_tfinal%eprint() !only for debug purpose
+         call echo_error(pf, 1)         
       endif
 
       call zndarray_destroy(dmat_t0)

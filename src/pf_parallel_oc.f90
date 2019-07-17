@@ -380,7 +380,7 @@ contains
     pf%state%pstatus = PF_STATUS_ITERATING
 
 
-    k = 1 !
+    k = pf%state%pfblock  !
     !pf%state%pfblock = k ! has to be set in pf_optimization_flex to current step
                           ! this is relevant for save_residuals
     do j = 1, pf%niters
@@ -460,7 +460,7 @@ contains
     else
        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true., dir)
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps, which)
-       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false., dir)
+       call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration, .false., dir)
     endif
 
 

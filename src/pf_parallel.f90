@@ -179,9 +179,10 @@ contains
           call pf_recv(pf, c_lev_p, 100000+pf%rank, .true.)
 
           !  Do a RK_step
-          call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
+          call c_lev_p%ulevel%stepper%do_n_steps(pf, level_index,t0, c_lev_p%q0,c_lev_p%qend, dt, 1)       
           !  Send forward
           call pf_send(pf, c_lev_p,  100000+pf%rank+1, .false.)
+          print *,'woo hoo'
        else  !  Normal PFASST burn in
           level_index=1
           c_lev_p => pf%levels(level_index)
@@ -242,7 +243,7 @@ contains
        c_lev_p => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev_p%Finterp)
        call f_lev_p%qend%copy(f_lev_p%Q(f_lev_p%nnodes), flags=0)
-       call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
+       if (pf%rank /= 0) call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
 
        !  Do a sweep on level unless we are at the finest level
        if (level_index < pf%state%finest_level) then
@@ -272,11 +273,13 @@ contains
     if (pf%levels(level_index)%residual_rel < pf%rel_res_tol) then
        if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(level_index)%residual_rel
        residual_converged = .true.
+       print*, 'DEBUG --',pf%rank, 'residual_rel tol met',pf%levels(level_index)%residual_rel              
     end if
-    ! Check to see if relative tolerance is met
+    ! Check to see if absolute tolerance is met
     if   (pf%levels(level_index)%residual     < pf%abs_res_tol)  then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
        residual_converged = .true.
+       print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual       
     end if
 
   end subroutine pf_check_residual
@@ -333,8 +336,6 @@ contains
        pf%state%status = PF_STATUS_ITERATING
        call pf_send_status(pf, send_tag)
     end if
-
-    call call_hooks(pf, 1, PF_POST_CONVERGENCE)
 
   end subroutine pf_check_convergence_block
 
@@ -440,7 +441,11 @@ contains
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
           !  If we are converged, exit block
-          if (pf%state%status == PF_STATUS_CONVERGED)  exit
+          if (pf%state%status == PF_STATUS_CONVERGED)  then
+             call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             exit             
+          end if
+
        end do  !  Loop over the iteration in this bloc
        call call_hooks(pf, -1, PF_POST_CONVERGENCE)
        call end_timer(pf, TITERATION)
@@ -502,7 +507,7 @@ contains
     else
        call pf_recv(pf, f_lev_p, f_lev_p%index*10000+iteration, .true.)
        call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
-       call pf_send(pf, f_lev_p, level_index*10000+iteration, .false.)
+       call pf_send(pf, f_lev_p, f_lev_p%index*10000+iteration, .false.)
     endif
 
     ! Now move coarse to fine interpolating and sweeping
@@ -520,7 +525,7 @@ contains
           call interpolate_q0(pf, f_lev_p, c_lev_p,flags=0)
        end if
        ! don't sweep on the finest level since that is only done at beginning
-       if (level_index < level_index_f) then
+       if (level_index <= level_index_f) then
           call f_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev_p%nsweeps)
        else  !  compute residual for diagnostics since we didn't sweep
           pf%state%sweep=1
