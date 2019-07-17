@@ -263,25 +263,18 @@ contains
     integer, optional, intent(in)   :: flags !!  which component to save (state/adjoint)
     integer :: m, p
 
-
-    if (lev%Finterp) then
-       !if (allocated(lev%pFflt)) then
-       if(lev%index < pf%state%finest_level) then
-          do m = 1, lev%nnodes
+    !  Save the data so we can interpolate correction later
+    if(lev%index < pf%state%finest_level) then
+       do m = 1, lev%nnodes
+          call lev%pQ(m)%copy(lev%Q(m), flags)
+          if (lev%Finterp) then
              do p = 1,size(lev%F(1,:))
                 call lev%pF(m,p)%copy(lev%F(m,p), flags)
              end do
-             call lev%pQ(m)%copy(lev%Q(m), flags)
-          end do
-       end if
-    else
-       !if (allocated(lev%pQ)) then
-       if(lev%index < pf%state%finest_level) then
-          do m = 1, lev%nnodes
-             call lev%pQ(m)%copy(lev%Q(m), flags)
-          end do
-       end if
+          end if
+       end do
     end if
+    
   end subroutine save
 
 end module pf_mod_comm

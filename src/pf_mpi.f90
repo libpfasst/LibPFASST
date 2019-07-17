@@ -152,7 +152,7 @@ contains
        call mpi_send(level%send, level%mpibuflen, myMPI_Datatype, &
                      dest, tag, pf%comm%comm, stat, ierror)
     else
-!        call mpi_wait(pf%comm%sendreq(level%index), stat, ierror) ! wait has to be done outside before filling the send buffer
+
        call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if

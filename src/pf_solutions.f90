@@ -21,6 +21,14 @@ module pf_mod_solutions
      module procedure exact_ad_cos_3d
      module procedure exact_ad_cos_3dz
   end interface exact_ad_cos
+  interface exact_ad_exp
+     module procedure exact_ad_exp_1d
+     module procedure exact_ad_exp_1dz
+     module procedure exact_ad_exp_2d
+     module procedure exact_ad_exp_2dz
+     module procedure exact_ad_exp_3d
+     module procedure exact_ad_exp_3dz
+  end interface exact_ad_exp
   interface exact_burg_sin
      module procedure exact_burg_sin_1d
      module procedure exact_burg_sin_1dz
@@ -44,6 +52,8 @@ module pf_mod_solutions
   end interface exact_kdv
   
 contains
+  !> Routine to return the exact solution for advection diffusion
+  
   !> Routine to return the exact solution for advection diffusion
   function ad_cos_ex(t, x,nu,v,kfreq,Lx) result(u)
     real(pfdp), intent(in)  :: t
@@ -186,23 +196,183 @@ contains
     end do
 
   end subroutine exact_ad_cos_3dz
-  
-  !> Routine to return the exact solution for inviscid Burgers based on Platzman
-  !>See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Math,2007
-  function burg_sin_ex(t, x,Lx) result(u)
+
+  function ad_exp_ex(t, x,nu,v,Lx) result(u)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(in)  :: x
+    real(pfdp), intent(in)  :: v    
+    real(pfdp), intent(in)  :: nu
     real(pfdp), intent(in)  :: Lx        
     real(pfdp)  :: u
 
-    real(pfdp) :: rn,ts,xs
+    integer    :: nx, i, ii, k,nbox
+        
+    real(pfdp) ::  xx,c,t0
+
+    u=0.0_pfdp
+    if (nu .gt. 0.0) then
+       t0=0.0025_pfdp/nu
+       nbox = ceiling(sqrt(4.0_pfdp*nu*(t0+t)*37.0_pfdp))  !  Decide how many periodic images
+       do k = -nbox,nbox
+          xx = x- 0.5_pfdp*Lx - t*v + real(k,pfdp)*Lx
+          u = u + sqrt(t0)/sqrt(t0+t)*exp(-xx*xx/(4.0_pfdp*nu*(t0+t)))
+       end do
+    else
+       nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
+       do k = -nbox,nbox
+          xx = x - 0.5_pfdp*Lx- t*v  + real(k,pfdp)*Lx
+          u = u + exp(-xx*xx/(4.0_pfdp*0.0025_pfdp))
+       end do
+       
+    end if  
+
+  end function ad_exp_ex
+  
+  subroutine exact_ad_exp_1d(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu,v,Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = size(uex)
+    do i = 1, nx
+       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       uex(i) = ad_exp_ex(t, x,nu,v,Lx)
+    end do
+
+  end subroutine exact_ad_exp_1d
+  
+  subroutine exact_ad_exp_1dz(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu,v,Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = size(uex)
+    do i = 1, nx
+       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       uex(i) = ad_exp_ex(t, x,nu,v,Lx)       
+    end do
+
+  end subroutine exact_ad_exp_1dz
+  
+  subroutine exact_ad_exp_2d(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: nu,v(2),Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,uy
+    
+    nx = size(uex,1)
+    ny = size(uex,2)    
+
+    do j = 1, ny
+       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
+       end do
+    end do
+    
+  end subroutine exact_ad_exp_2d
+  
+  subroutine exact_ad_exp_2dz(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: nu,v(2),Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,uy
+    
+    nx = size(uex,1)
+    ny = size(uex,2)    
+    do j = 1, ny
+       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
+       end do
+    end do
+       
+  end subroutine exact_ad_exp_2dz
+  subroutine exact_ad_exp_3d(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: nu,v(3),Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,uy,uz
+    
+    nx = size(uex,1)
+    ny = size(uex,2)    
+    nz = size(uex,3)    
+
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
+       do j = 1, ny
+          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
+          do i = 1, nx
+             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
+          end do
+       end do
+    end do
+    
+  end subroutine exact_ad_exp_3d
+  
+  subroutine exact_ad_exp_3dz(t, uex,nu,v,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: nu,v(3),Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,uy,uz
+    
+    nx = size(uex,1)
+    ny = size(uex,2)    
+    nz = size(uex,3)    
+
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
+       do j = 1, ny
+          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
+          do i = 1, nx
+             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
+          end do
+       end do
+    end do
+
+  end subroutine exact_ad_exp_3dz
+  
+  !> Routine to return the exact solution for inviscid Burgers based on Platzman
+  !>See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Math,2007
+  function burg_sin_ex(t, x,nu,Lx) result(u)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(in)  :: x
+    real(pfdp), intent(in)  :: nu
+    real(pfdp), intent(in)  :: Lx        
+    real(pfdp)  :: u
+
+    real(pfdp) :: rn,ts,xs,a,b,c,phi,dphi,o1,o2
     integer :: n,nterms
 
     nterms = 100
     u=0.0_pfdp
     xs=x*two_pi/Lx       
     ts=t*two_pi/Lx       
-    
+
     if (t .gt. 0.0_pfdp) then
        do n =  nterms,1,-1
           rn = real(n,pfdp)
@@ -211,12 +381,14 @@ contains
     else
        u=-sin(xs)    
     end if
+
   end function burg_sin_ex
   
   
-  subroutine exact_burg_sin_1d(t, uex,Lx)
+  subroutine exact_burg_sin_1d(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu    
     real(pfdp), intent(in) :: Lx
     
     integer    :: nx, i
@@ -225,14 +397,15 @@ contains
     nx = size(uex)
     do i = 1, nx
        x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
-       uex(i) = burg_sin_ex(t, x,Lx)
+       uex(i) = burg_sin_ex(t, x,nu,Lx)
     end do
 
   end subroutine exact_burg_sin_1d
   
-  subroutine exact_burg_sin_1dz(t, uex,Lx)
+  subroutine exact_burg_sin_1dz(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu    
     real(pfdp), intent(in) :: Lx
     
     integer    :: nx, i
@@ -241,14 +414,15 @@ contains
     nx = size(uex)
     do i = 1, nx
        x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
-       uex(i) = burg_sin_ex(t, x,Lx)       
+       uex(i) = burg_sin_ex(t, x,nu,Lx)       
     end do
 
   end subroutine exact_burg_sin_1dz
   
-  subroutine exact_burg_sin_2d(t, uex,Lx)
+  subroutine exact_burg_sin_2d(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: nu    
     real(pfdp), intent(in) :: Lx(2)
     
     integer    :: nx,ny, i,j
@@ -261,15 +435,16 @@ contains
        y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
        do i = 1, nx
           x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-          uex(i,j) = burg_sin_ex(2.0_pfdp*t, x+y,L)
+          uex(i,j) = burg_sin_ex(2.0_pfdp*t, x+y,nu,L)
        end do
     end do
     
   end subroutine exact_burg_sin_2d
   
-  subroutine exact_burg_sin_2dz(t, uex,Lx)
+  subroutine exact_burg_sin_2dz(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: nu    
     real(pfdp), intent(in) :: Lx(2)
     
     integer    :: nx,ny, i,j
@@ -282,14 +457,15 @@ contains
        y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
        do i = 1, nx
           x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-          uex(i,j) = burg_sin_ex(2.0_pfdp*t,x+y,L)
+          uex(i,j) = burg_sin_ex(2.0_pfdp*t,x+y,nu,L)
        end do
     end do
        
   end subroutine exact_burg_sin_2dz
-  subroutine exact_burg_sin_3d(t, uex,Lx)
+  subroutine exact_burg_sin_3d(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: nu
     real(pfdp), intent(in) :: Lx(3)
     
     integer    :: nx,ny,nz, i,j,k
@@ -305,16 +481,17 @@ contains
           y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
           do i = 1, nx
              x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-             uex(i,j,k) = burg_sin_ex(3.0_pfdp*t, x+y+z,L)
+             uex(i,j,k) = burg_sin_ex(3.0_pfdp*t, x+y+z,nu,L)
           end do
        end do
     end do
     
   end subroutine exact_burg_sin_3d
   
-  subroutine exact_burg_sin_3dz(t, uex,Lx)
+  subroutine exact_burg_sin_3dz(t, uex,nu,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: nu
     real(pfdp), intent(in) :: Lx(3)
     
     integer    :: nx,ny,nz, i,j,k
@@ -330,7 +507,7 @@ contains
           y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
           do i = 1, nx
              x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-             uex(i,j,k) = burg_sin_ex(3.0_pfdp*t,x+y+z,L)
+             uex(i,j,k) = burg_sin_ex(3.0_pfdp*t,x+y+z,nu,L)
           end do
        end do
     end do
@@ -518,8 +695,4 @@ contains
 !!$
 !!$  end subroutine exact_kdv_3dz
 !!$
-  
-
-
-  
 end module pf_mod_solutions
