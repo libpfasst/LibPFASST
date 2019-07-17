@@ -150,14 +150,14 @@ contains
 
        !>  Start the parareal iterations
        call start_timer(pf, TITERATION)
-       do j = 2, pf%niters
+       do j = 1, pf%niters
 
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           pf%state%iter = j
 
           !  Do a v_cycle
-          call pf_parareal_v_cycle_new(pf, k, pf%state%t0, dt, 1,2)
+          call pf_parareal_v_cycle(pf, k, pf%state%t0, dt, 1,2)
 
           !  Check for convergence
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
@@ -265,64 +265,6 @@ contains
     nsteps_f= f_lev_p%ulevel%stepper%nsteps  
 
 
-    ! Do the coarsest level steps
-    call pf_recv(pf, c_lev_p, 10000+iteration, .true.)
-
-    call c_lev_p%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev_p%q0,c_lev_p%qend, dt, nsteps_c)
-    !  Compute the correction (store in Q(1))
-    call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)  !  Current 
-    call c_lev_p%Q(1)%axpy(-1.0_pfdp,c_lev_p%Q(2)) !       
-
-    ! Save the result of the coarse sweep
-    call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
-
-    ! correct coarse level solution at end (the parareal correction)
-    call c_lev_p%qend%axpy(1.0_pfdp,c_lev_p%Q(1))    
-
-    !  Send coarse forward  (nonblocking)
-    call pf_send(pf, c_lev_p, 10000+iteration, .false.)
-    
-    ! Now  step on fine
-    !  Copy  new initial condition
-    !  Compute the jump in the initial condition
-    call f_lev_p%q0_delta%copy(c_lev_p%q0, flags=0)
-    call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
-    f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
-    call pf_set_resid(pf,2,f_lev_p%residual)
-    if (pf%rank /= 0) then
-       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
-    end if
-    call f_lev_p%ulevel%stepper%do_n_steps(pf, 2,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
-
-!!$    print *,'after fine steps '
-!!$    call f_lev_p%qend%eprint()
-!!$    call c_lev_p%qend%eprint()
-
-  end subroutine pf_parareal_v_cycle
-  
-  !> Execute a V-cycle between levels nfine and ncoarse
-  subroutine pf_parareal_v_cycle_new(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
-
-
-    type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in)    :: t0, dt
-    integer,           intent(in)    :: iteration
-    integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle
-    integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle
-    integer, optional, intent(in)    :: flags
-
-    type(pf_level_t), pointer :: f_lev_p, c_lev_p
-    integer :: level_index, j,nsteps_f,nsteps_c
-
-    if (pf%nlevels <2) return
-    
-    !  This is for two levels only
-    c_lev_p => pf%levels(1)
-    f_lev_p => pf%levels(2)
-    nsteps_c= c_lev_p%ulevel%stepper%nsteps
-    nsteps_f= f_lev_p%ulevel%stepper%nsteps  
-
-
     !  Do fine steps with old initial condition
     if (pf%rank /= 0) then
        call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
@@ -358,25 +300,9 @@ contains
 !!$    call f_lev_p%qend%eprint()
 !!$    call c_lev_p%qend%eprint()
 
-  end subroutine pf_parareal_v_cycle_new
+  end subroutine pf_parareal_v_cycle
   
 
-!!$  subroutine pf_compute_initial_condition_jump(pf, iteration, lev_ptr, q_recv, q_interp)
-!!$    type(pf_pfasst_t), intent(in)    :: pf  
-!!$    class(pf_level_t), intent(inout) :: lev_ptr 
-!!$    class(pf_encap_t), intent(in)    :: q_recv 
-!!$    class(pf_encap_t), intent(in)    :: q_interp 
-!!$    integer,           intent(in)    :: iteration
-!!$
-!!$    class(pf_encap_t), allocatable   :: del
-!!$
-!!$    call lev_ptr%ulevel%factory%create_single(del, lev_ptr%index, SDC_KIND_SOL_NO_FEVAL, lev_ptr%nvars, lev_ptr%shape)
-!!$    call del%copy(q_recv)
-!!$    call del%axpy(-1.0_pfdp, q_interp)
-!!$
-!!$    print *, "### rank = ", pf%rank, " iteration = ", iteration, " norm = ", del%norm() 
-!!$
-!!$  end subroutine pf_compute_initial_condition_jump
   !> Subroutine to check if the current processor has converged and
   !> to update the next processor on the status
   !> Note that if the previous processor hasn't converged yet

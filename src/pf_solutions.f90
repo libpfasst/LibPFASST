@@ -209,9 +209,9 @@ contains
         
     real(pfdp) ::  xx,c,t0
 
-    t0=0.0025_pfdp/nu
     u=0.0_pfdp
     if (nu .gt. 0.0) then
+       t0=0.0025_pfdp/nu
        nbox = ceiling(sqrt(4.0_pfdp*nu*(t0+t)*37.0_pfdp))  !  Decide how many periodic images
        do k = -nbox,nbox
           xx = x- 0.5_pfdp*Lx - t*v + real(k,pfdp)*Lx
@@ -219,14 +219,10 @@ contains
        end do
     else
        nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
-       do k = -nbox,-1
+       do k = -nbox,nbox
           xx = x - 0.5_pfdp*Lx- t*v  + real(k,pfdp)*Lx
-          u = u + exp(-2.0_pfdp*xx*xx)
-          xx = x - 0.5_pfdp*Lx- t*v  - real(k,pfdp)*Lx
-          u = u + exp(-2.0_pfdp*xx*xx)
+          u = u + exp(-xx*xx/(4.0_pfdp*0.0025_pfdp))
        end do
-       xx = x - 0.5_pfdp*Lx- t*v  
-       u = u + exp(-2.0_pfdp*xx*xx)
        
     end if  
 
