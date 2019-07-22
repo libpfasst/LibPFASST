@@ -7,7 +7,7 @@ module pf_mod_dtype
   use iso_c_binding
   implicit none
 
-  !>  static pfasst paramters
+  !>  pfasst static  paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
   !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
 
@@ -140,6 +140,9 @@ module pf_mod_dtype
 
   !>  Data type of a PFASST level
   type :: pf_level_t
+     !  ===Mandatory level parameters===
+     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
+
      !  level parameters set by the pfasst_t values
      integer  :: index        = -1   !! level number (1 is the coarsest)
      integer  :: nnodes       = -1   !! number of sdc nodes
@@ -148,8 +151,6 @@ module pf_mod_dtype
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
-     !  Mandatory level parameter
-     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
 
      !  Diagnostics
      real(pfdp)  :: error            !! holds the user defined error
@@ -244,10 +245,10 @@ module pf_mod_dtype
 
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
-     !>  Mandatory parameters (must be set on command line or input file)
+     !> === Mandatory pfasst parameters (must be set on command line or input file)  ===
      integer :: nlevels = -1             !! number of pfasst levels
 
-     !>  Optional parameters
+     !>  ===  Optional pfasst parameters ====
      integer :: niters  = 5             !! number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
      logical :: use_proper_nodes =  .false.
@@ -281,14 +282,15 @@ module pf_mod_dtype
      integer :: taui0 = -999999      !! iteration cutoff for tau inclusion
 
 
-
-     !> RK and Parareal options
+     ! -- RK and Parareal options
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta nodes
+     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
+
+     ! -- controller for the results 
      logical :: save_residuals = .false.  !!  If true, residuals are saved and output
      logical :: save_timings  = .false.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen

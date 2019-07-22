@@ -86,7 +86,7 @@ contains
 
   end subroutine pf_pfasst_create
 
-  !> Helper routine to set the size and mpi buffer length
+  !> Helper routine to set the size and mpi buffer length for regular grids
   subroutine pf_level_set_size(pf,level_index,shape_in,buflen_in)
     type(pf_pfasst_t), intent(inout) :: pf   !!  Main pfasst structure
     integer, intent(in)  ::  level_index
@@ -105,7 +105,6 @@ contains
     
     pf%levels(level_index)%mpibuflen = buflen_local
 
-    
   end subroutine pf_level_set_size
   
 
