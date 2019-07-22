@@ -1,37 +1,25 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Parameters and variables &#8212; LIBPFASST 1.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="next" title="Sweepers" href="sweepers.html" />
     <link rel="prev" title="Tutorial" href="tutorial.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -71,42 +59,42 @@ variants of PFASST.</p>
 <h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>LibPFASST static parameters:  are hard coded and cannot be changed at run time</li>
-<li><code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time
+<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time
 the use of default values will result in program termination.</li>
-<li><code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time,
 the use of default values will result in default execution.</li>
-<li><code class="docutils literal"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time,
 the use of default values will result in default execution.</li>
-<li><code class="docutils literal"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time,
 the use of default values will result in default execution.</li>
-<li>local mandatory parameters: must be passed in a call to <code class="docutils literal"><span class="pre">pf_run_pfasst</span></code></li>
+<li>local mandatory parameters: must be passed in a call to <code class="docutils literal notranslate"><span class="pre">pf_run_pfasst</span></code></li>
 <li>local optional parameters: specified by the user application and
 unrelated to the workings of LibPFASST</li>
 </ul>
 </div>
 <div class="section" id="libfpasst-static-parameters">
 <h2>libfpasst static parameters<a class="headerlink" href="#libfpasst-static-parameters" title="Permalink to this headline">¶</a></h2>
-<p>The parameters at the top of the file <code class="docutils literal"><span class="pre">src/pf_dtype.f90</span></code> are all set
-at compile time and can&#8217;t be changed at runtime.  The only parameter
+<p>The parameters at the top of the file <code class="docutils literal notranslate"><span class="pre">src/pf_dtype.f90</span></code> are all set
+at compile time and can’t be changed at runtime.  The only parameter
 here of interest to the user is</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="kt">c_double</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="kt">c_double</span>
 </pre></div>
 </div>
 <p>which controls the precision of all floating point numbers (or at
-least all those using <code class="docutils literal"><span class="pre">pfdp</span></code> in the declaration).</p>
+least all those using <code class="docutils literal notranslate"><span class="pre">pfdp</span></code> in the declaration).</p>
 </div>
 <div class="section" id="pfasst-mandatory-parameters">
 <h2>pfasst mandatory parameters<a class="headerlink" href="#pfasst-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
-<p>The parameters defined in type <code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> in <code class="docutils literal"><span class="pre">src/pf_dtype.f90</span></code>
+<p>The parameters defined in type <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pf_dtype.f90</span></code>
 are all given a default value.  Currently only the variable
-<code class="docutils literal"><span class="pre">nlevels</span></code> is given a problematic default.  Hence setting this
+<code class="docutils literal notranslate"><span class="pre">nlevels</span></code> is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory</p>
 </div>
 <div class="section" id="pfasst-optional-parameters">
 <h2>pfasst optional parameters<a class="headerlink" href="#pfasst-optional-parameters" title="Permalink to this headline">¶</a></h2>
-<p>The remaining variables in the specification of <code class="docutils literal"><span class="pre">pf_pfasst_t</span></code> are given
+<p>The remaining variables in the specification of <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> are given
 default values as below:</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
 
    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">! number of iterations</span>
    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>
@@ -129,11 +117,11 @@ default values as below:</p>
 </div>
 <div class="section" id="level-mandatory-parameters">
 <h2>level mandatory parameters<a class="headerlink" href="#level-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
-<p>In the specification of <code class="docutils literal"><span class="pre">pf_level_t</span></code>, the first two variables
-<code class="docutils literal"><span class="pre">nvars</span></code> and <code class="docutils literal"><span class="pre">nnodes</span></code> are given default values that will cause the
+<p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the first two variables
+<code class="docutils literal notranslate"><span class="pre">nvars</span></code> and <code class="docutils literal notranslate"><span class="pre">nnodes</span></code> are given default values that will cause the
 program to abort.  These variables are typically set per level when
 initializing PFASST.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
 
    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nvars</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>          <span class="c">! number of variables (dofs)</span>
    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nnodes</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>         <span class="c">! number of sdc nodes</span>
@@ -142,10 +130,10 @@ initializing PFASST.</p>
 </div>
 <div class="section" id="level-optional-parameters">
 <h2>level optional parameters<a class="headerlink" href="#level-optional-parameters" title="Permalink to this headline">¶</a></h2>
-<p>In the specification of <code class="docutils literal"><span class="pre">pf_level_t</span></code>, the first variables
-<code class="docutils literal"><span class="pre">nsweeps</span></code> and <code class="docutils literal"><span class="pre">Finterp</span></code> are default values.  These can be changed
+<p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the first variables
+<code class="docutils literal notranslate"><span class="pre">nsweeps</span></code> and <code class="docutils literal notranslate"><span class="pre">Finterp</span></code> are default values.  These can be changed
 per level as the levels are when initializing PFASST.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
 
    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">1</span>         <span class="c">! number of sdc sweeps to perform</span>
    <span class="kt">logical</span>     <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">! interpolate functions instead of solutions</span>
@@ -155,18 +143,18 @@ per level as the levels are when initializing PFASST.</p>
 <div class="section" id="local-mandatory-parameters">
 <h2>local mandatory parameters<a class="headerlink" href="#local-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
 <p>In the call to run pfasst</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tend</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">qend</span><span class="p">)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tend</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">qend</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The variables <code class="docutils literal"><span class="pre">q0</span></code>, <code class="docutils literal"><span class="pre">dt</span></code>, and <code class="docutils literal"><span class="pre">tend</span></code> must be included.  The
-variable <code class="docutils literal"><span class="pre">nsteps</span></code> is optional, if it is not included, then
-<code class="docutils literal"><span class="pre">nsteps</span></code> is set to</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+<p>The variables <code class="docutils literal notranslate"><span class="pre">q0</span></code>, <code class="docutils literal notranslate"><span class="pre">dt</span></code>, and <code class="docutils literal notranslate"><span class="pre">tend</span></code> must be included.  The
+variable <code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is optional, if it is not included, then
+<code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is set to</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Finally, <code class="docutils literal"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
+<p>Finally, <code class="docutils literal notranslate"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
 <blockquote>
-<div>The usual default input file is &#8220;probin.nml&#8221; wherein the namelist
+<div>The usual default input file is “probin.nml” wherein the namelist
 PARAMS (defined locally in probin.f90) can be specified.
 Alternatively, a different input file can be specified on the command
 line by adding the file name directly after the executable.  The
@@ -175,34 +163,34 @@ parameter specifications (see next section).</div></blockquote>
 </div>
 <div class="section" id="file-input-for-pfasst-variables">
 <h2>File input for pfasst  variables<a class="headerlink" href="#file-input-for-pfasst-variables" title="Permalink to this headline">¶</a></h2>
-<p>The pfasst parameters are specified in a namelist <code class="docutils literal"><span class="pre">PF_PARAMS</span></code>
-defined in routine <code class="docutils literal"><span class="pre">pf_read_opts</span></code> in <code class="docutils literal"><span class="pre">src/pf_options.f90</span></code>.  This
-routine is called from <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code> in <code class="docutils literal"><span class="pre">pf_pfasst.f90</span></code>
+<p>The pfasst parameters are specified in a namelist <code class="docutils literal notranslate"><span class="pre">PF_PARAMS</span></code>
+defined in routine <code class="docutils literal notranslate"><span class="pre">pf_read_opts</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pf_options.f90</span></code>.  This
+routine is called from <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code> in <code class="docutils literal notranslate"><span class="pre">pf_pfasst.f90</span></code>
 (which is typically called when initializing PFASST).  If no file is
-specified in the call to <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code>, then no file is read.
+specified in the call to <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code>, then no file is read.
 Typically the main routine specifies this input file (the default
 being probin.nml), and this file can be changed by specifying the
 value of</p>
 <blockquote>
-<div>pfasst_nml = &#8216;probin.nml&#8217;</div></blockquote>
+<div>pfasst_nml = ‘probin.nml’</div></blockquote>
 <p>either in the local input file or the command line.</p>
 </div>
 <div class="section" id="command-line-input">
 <h2>Command line input<a class="headerlink" href="#command-line-input" title="Permalink to this headline">¶</a></h2>
-<p>All the variables in the namelist <code class="docutils literal"><span class="pre">PF_PARAMS</span></code> can be modified by
+<p>All the variables in the namelist <code class="docutils literal notranslate"><span class="pre">PF_PARAMS</span></code> can be modified by
 simply specifying their value on the command line.  There is only one
 caveat to this in that any parameters must be specified after the
 (optional) input file specification.  For example</p>
-<div class="highlight-sh"><div class="highlight"><pre><span></span>mpirun -n <span class="m">20</span> main.exe  myinput.nml <span class="nv">niters</span><span class="o">=</span><span class="m">10</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpirun -n <span class="m">20</span> main.exe  myinput.nml <span class="nv">niters</span><span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
-<p>would set the input file to &#8220;myinput.nml&#8221; and then over-ride any
+<p>would set the input file to “myinput.nml” and then over-ride any
 specified value of niters with the value 10. Command line options
 over-ride input files.</p>
 </div>
 <div class="section" id="variables-for-the-predictor">
 <h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Permalink to this headline">¶</a></h2>
-<p>The two variables <code class="docutils literal"><span class="pre">Pipeline_G</span></code> and <code class="docutils literal"><span class="pre">PFASST_pred</span></code> determine how the
+<p>The two variables <code class="docutils literal notranslate"><span class="pre">Pipeline_G</span></code> and <code class="docutils literal notranslate"><span class="pre">PFASST_pred</span></code> determine how the
 predictor works.  The different combinations of these variables and
 the parameter Nsweeps on the coarsest level great some subtle
 differences in how the predictor performs.</p>
@@ -220,7 +208,7 @@ greater than one, then the predictor is a version of pipelined
 SDC. There is no communication necessary until the second sweep on
 the each processor is done.  After that, each processor must
 recieve a new initial value.</li>
-<li>If PFASST_pred is true, and Nsweeps equals one, then it doesn&#8217;t
+<li>If PFASST_pred is true, and Nsweeps equals one, then it doesn’t
 matter what Pipeline_G is.  No communication is necessary, and we
 simply reuse the function values from the previous iteration in
 each SDC sweep.  Some care must be taken here as to how to
@@ -287,12 +275,14 @@ without communication in all cases.</p>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -316,7 +306,7 @@ without communication in all cases.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
     </div>
   </body>
 </html>

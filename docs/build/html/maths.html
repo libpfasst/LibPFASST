@@ -1,35 +1,23 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Maths &#8212; LIBPFASST 1.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -61,35 +49,35 @@ Parareal algorithm (see below).</p>
 <div class="section" id="parareal">
 <h2>Parareal<a class="headerlink" href="#parareal" title="Permalink to this headline">¶</a></h2>
 <p>The Parareal method can be roughly described in terms of two numerical
-approximation methods, denoted here by <span class="math">\(\mathcal{G}\)</span> and
-<span class="math">\(\mathcal{F}\)</span>.  Both <span class="math">\(\mathcal{G}\)</span> and <span class="math">\(\mathcal{F}\)</span>
-propagate an initial value <span class="math">\(U_n \approx u(t_n)\)</span> by approximating
+approximation methods, denoted here by <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> and
+<span class="math notranslate nohighlight">\(\mathcal{F}\)</span>.  Both <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{F}\)</span>
+propagate an initial value <span class="math notranslate nohighlight">\(U_n \approx u(t_n)\)</span> by approximating
 the solution to</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[\dot{u} = f(u,t), \quad u(t_n) = u_n\]</div>
-<p>from <span class="math">\(t_n\)</span> to <span class="math">\(t_{n+1}\)</span>.  For the methods to be efficient,
-it must be the case that the <span class="math">\(\mathcal{G}\)</span> propagator is
-computationally less expensive than the <span class="math">\(\mathcal{F}\)</span>
-propagator, and hence <span class="math">\(\mathcal{G}\)</span> is typically a low-order
+<p>from <span class="math notranslate nohighlight">\(t_n\)</span> to <span class="math notranslate nohighlight">\(t_{n+1}\)</span>.  For the methods to be efficient,
+it must be the case that the <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> propagator is
+computationally less expensive than the <span class="math notranslate nohighlight">\(\mathcal{F}\)</span>
+propagator, and hence <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> is typically a low-order
 method.  Since the overall accuracy of the methods is limited by the
-accuracy of the <span class="math">\(\mathcal{F}\)</span> propagator, <span class="math">\(\mathcal{F}\)</span> is
+accuracy of the <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> propagator, <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> is
 typically higher-order and in addition may use a smaller time step
-than <span class="math">\(\mathcal{G}\)</span>.  For these reasons, <span class="math">\(\mathcal{G}\)</span> is
-referred to as the coarse propagator and <span class="math">\(\mathcal{F}\)</span> the fine
+than <span class="math notranslate nohighlight">\(\mathcal{G}\)</span>.  For these reasons, <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> is
+referred to as the coarse propagator and <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> the fine
 propagator.</p>
 <p>The parareal method begins by computing a first approximation
-<span class="math">\(U_{n+1}^0\)</span> for <span class="math">\(n = 0 \ldots N-1\)</span> where <span class="math">\(N\)</span> is the
+<span class="math notranslate nohighlight">\(U_{n+1}^0\)</span> for <span class="math notranslate nohighlight">\(n = 0 \ldots N-1\)</span> where <span class="math notranslate nohighlight">\(N\)</span> is the
 number of time steps, often performed with the coarse propagator:</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[U_{n+1}^0 = \mathcal{G}(t_{n+1}, t_{n}, U_n^0).\]</div>
 <p>The Parareal method then proceeds iteratively, alternating between the
-parallel computation of <span class="math">\(\mathcal{F}(t_{n+1},t_n,U_n^k)\)</span> and an
+parallel computation of <span class="math notranslate nohighlight">\(\mathcal{F}(t_{n+1},t_n,U_n^k)\)</span> and an
 update of the initial conditions at each processor of the form</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[U_{n+1}^{k+1} = \mathcal{G}(t_{n+1}, t_n, U_n^{k+1})
                  + \mathcal{F}(t_{n+1}, t_n, U_n^k)
                  - \mathcal{G}(t_{n+1}, t_n, U_n^{k})\]</div>
-<p>for <span class="math">\(n = 0 \ldots N-1\)</span>.  That is, the fine propagator is used
+<p>for <span class="math notranslate nohighlight">\(n = 0 \ldots N-1\)</span>.  That is, the fine propagator is used
 to refine the solution in each time slice in parallel, while the
 coarse propagator is used to propagate the refinements performed by
 the fine propagator through time to later processors.</p>
@@ -127,12 +115,14 @@ way to improve the parallel efficiency of the method.</p>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -150,7 +140,7 @@ way to improve the parallel efficiency of the method.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
     </div>
   </body>
 </html>

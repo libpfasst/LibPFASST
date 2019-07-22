@@ -10,6 +10,11 @@ or Ubuntu machines, we recommend MPICH2:
 
   `$ sudo apt-get install mpich2 libmpich2-dev`
 
+You may also need to install open-blas
+
+  `$ sudo apt-get install  libopenblas-dev`
+
+
 The user will probably have to adjust some flags in 'Makefile.defaults'.
 
 The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.

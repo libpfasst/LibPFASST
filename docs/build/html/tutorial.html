@@ -1,37 +1,25 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Tutorial &#8212; LIBPFASST 1.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="next" title="Parameters and variables" href="parameters.html" />
     <link rel="prev" title="Compiling" href="compiling.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -61,36 +49,36 @@
 LibPFASST.</p>
 <p>Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist
 This example solves the  scalar model problem or Dahlquist equation</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}y'  = \lambda y\\y(0) = 1\end{aligned}\end{align} \]</div>
 <p>An implicit-explicit or IMEX  (also known as semi-implicit) splitting is used in this example, so the equation can be written</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[y'  = \lambda_1 y + \lambda_2 y\]</div>
-<p>Typing &#8216;make&#8217; in the directory should compile the example creating an exectuable called &#8216;main.exe&#8217;.  In the same directory, there are a few parameter files with the extension &#8216;.nml&#8217;.  You can run the example using one of these files, as in</p>
+<p>Typing ‘make’ in the directory should compile the example creating an exectuable called ‘main.exe’.  In the same directory, there are a few parameter files with the extension ‘.nml’.  You can run the example using one of these files, as in</p>
 <blockquote>
 <div><cite>$ ./main.exe sdc.nml</cite></div></blockquote>
-<p>Using your favorite editor, open the file sdc.nml.  There are two namelists here, &#8216;PF_PARAMS&#8217; and &#8216;PARAMS&#8217;.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.  The &#8216;PF_PARAMS&#8217; variables are discussed below in the section <a class="reference external" href="parameters">Parameters</a>.
+<p>Using your favorite editor, open the file sdc.nml.  There are two namelists here, ‘PF_PARAMS’ and ‘PARAMS’.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.  The ‘PF_PARAMS’ variables are discussed below in the section <a class="reference external" href="parameters">Parameters</a>.
 Any parameter in either list can be overwritten by adding it to the command line, as in</p>
 <p><cite>$ ./main.exe sdc.nml lam1=3.0 niters=10</cite></p>
 <p>The order of the command line parameters is not important except that they must come after the input file is specified.</p>
 <p>To run an example that does the actual PFASST algorithm</p>
 <p><cite>$ mpirun -n 32 ./main.exe multilevel.nml</cite></p>
-<p>The main program is in <code class="docutils literal"><span class="pre">src/main.f90</span></code> and can be used as a template for building applications using LibPFASST.  The main routine here
-only initializes MPI, calls a routine <code class="docutils literal"><span class="pre">run_pfasst</span></code> to run the PFASST algorithm, then closes MPI.</p>
-<p>The first thing done in <code class="docutils literal"><span class="pre">run_pfasst</span></code> is to read in local problem parameters by calling  the subroutine <code class="docutils literal"><span class="pre">probin_init</span></code> located in <code class="docutils literal"><span class="pre">src/probin.f90</span></code>.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; Read problem parameters</span>
+<p>The main program is in <code class="docutils literal notranslate"><span class="pre">src/main.f90</span></code> and can be used as a template for building applications using LibPFASST.  The main routine here
+only initializes MPI, calls a routine <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> to run the PFASST algorithm, then closes MPI.</p>
+<p>The first thing done in <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> is to read in local problem parameters by calling  the subroutine <code class="docutils literal notranslate"><span class="pre">probin_init</span></code> located in <code class="docutils literal notranslate"><span class="pre">src/probin.f90</span></code>.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Read problem parameters</span>
 <span class="k">call </span><span class="n">probin_init</span><span class="p">(</span><span class="n">pf_fname</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This routine also returns the location of the namelist for the PFASST parameters, which in this case will match the location of the local parameters (a different file can be specified if desired).  After
-the MPI based communicator is set up, the routine <code class="docutils literal"><span class="pre">pf_pfasst_create</span></code> is called to allocate the main PFASST structure called &#8216;pf&#8217;.  Note that the filename for PFASST parameters is
+the MPI based communicator is set up, the routine <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code> is called to allocate the main PFASST structure called ‘pf’.  Note that the filename for PFASST parameters is
 based to this routine so that it can be read.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Create the pfasst structure</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Create the pfasst structure</span>
 <span class="k">call </span><span class="n">pf_pfasst_create</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">pf_fname</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The most important part of the initialization in <code class="docutils literal"><span class="pre">run_pfasst</span></code> is the loop over levels where the level, sweeper, and data encapsulation are specified.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; Loop over levels and set some level specific parameters</span>
+<p>The most important part of the initialization in <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> is the loop over levels where the level, sweeper, and data encapsulation are specified.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Loop over levels and set some level specific parameters</span>
 <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
    <span class="c">!&gt;  Allocate the user specific level object</span>
    <span class="k">allocate</span><span class="p">(</span><span class="n">my_level_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">)</span>
@@ -107,28 +95,28 @@ based to this routine so that it can be read.</p>
 </pre></div>
 </div>
 <p>The abstract type defining a level must be extended with spatial restriction and
-interpolation operators (in this example, these are the identity operators).  This is done in the file <code class="docutils literal"><span class="pre">src/level.f90</span></code>.
-Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, the data type &#8216;ndarray&#8217; provided by LibPFASST and corresponding to an N-dimensional array is used.
-In the next Tutorial, a local encapsulation will be demonstrated.  Third, the abstract sweeper type must be extended and assigned to the level. This is done in the file <code class="docutils literal"><span class="pre">src/sweeper.f90</span></code> discussed below.  Finally, the level type carries a one-dimensional integer array to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.</p>
+interpolation operators (in this example, these are the identity operators).  This is done in the file <code class="docutils literal notranslate"><span class="pre">src/level.f90</span></code>.
+Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, the data type ‘ndarray’ provided by LibPFASST and corresponding to an N-dimensional array is used.
+In the next Tutorial, a local encapsulation will be demonstrated.  Third, the abstract sweeper type must be extended and assigned to the level. This is done in the file <code class="docutils literal notranslate"><span class="pre">src/sweeper.f90</span></code> discussed below.  Finally, the level type carries a one-dimensional integer array to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.</p>
 <p>The local sweeper type needs to define
 functions to evaluate each term in the IMEX splitting and
 a routine to solve an implicit equation equivalent to a
-backward-Euler step.  These routines are in <code class="docutils literal"><span class="pre">src/sweeper.f90</span></code> and are called
-<code class="docutils literal"><span class="pre">f_eval</span></code> and <code class="docutils literal"><span class="pre">f_comp</span></code>.</p>
+backward-Euler step.  These routines are in <code class="docutils literal notranslate"><span class="pre">src/sweeper.f90</span></code> and are called
+<code class="docutils literal notranslate"><span class="pre">f_eval</span></code> and <code class="docutils literal notranslate"><span class="pre">f_comp</span></code>.</p>
 <p>After the levels are assigned, the rest of the PFASST structure can is made by calling</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Set up some pfasst stuff</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Set up some pfasst stuff</span>
 <span class="k">call </span><span class="n">pf_pfasst_setup</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Next, a hook is added that will echo residuals to the screen after every iteration.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output  (using a LibPFASST hook here)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output  (using a LibPFASST hook here)</span>
 <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">pf_echo_residual</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>After a routine to echo
 the run options to the screen, the initial conditions are set, and then the
 routine to actually do the time stepping is called.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
 <span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -137,14 +125,14 @@ routine to actually do the time stepping is called.</p>
 <div class="section" id="example-2">
 <h2>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h2>
 <p>This example solves exactly the same equation as Example 1, but using more user generated code.
-The main difference is that instead of using the LibPFASST data encapsulation &#8216;ndarray&#8217;, a local data
-encapsulation called &#8216;scalar_encap&#8217; is defined</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Allocate the user specific data constructor</span>
+The main difference is that instead of using the LibPFASST data encapsulation ‘ndarray’, a local data
+encapsulation called ‘scalar_encap’ is defined</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Allocate the user specific data constructor</span>
 <span class="k">allocate</span><span class="p">(</span><span class="n">scalar_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The relevant code for the factory is in <code class="docutils literal"><span class="pre">src/encap.f90</span></code>.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Type to create and destroy the local data encapsulation</span>
+<p>The relevant code for the factory is in <code class="docutils literal notranslate"><span class="pre">src/encap.f90</span></code>.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Type to create and destroy the local data encapsulation</span>
 <span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_factory_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">scalar_factory</span>
  <span class="k">contains</span>
 <span class="k">   procedure</span> <span class="kd">::</span> <span class="n">create_single</span>  <span class="o">=&gt;</span> <span class="n">scalar_create_single</span>
@@ -157,8 +145,8 @@ encapsulation called &#8216;scalar_encap&#8217; is defined</p>
 <p>The four required subroutines are in this case trivial since no data structures need to be allocated to make the encapsulation.</p>
 <p>To define a data encapsulation, the user must also provide
 7 subroutines that define actions on the data set corresponding to the procedures in
-<code class="docutils literal"><span class="pre">src/encap.f90</span></code>.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">contains</span>
+<code class="docutils literal notranslate"><span class="pre">src/encap.f90</span></code>.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">contains</span>
 <span class="k">   procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">scalar_setval</span>
    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">scalar_copy</span>
    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">scalar_norm</span>
@@ -170,57 +158,57 @@ encapsulation called &#8216;scalar_encap&#8217; is defined</p>
 </pre></div>
 </div>
 <p>In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed  by LibPFASST but is included for convenience in debugging.</p>
-<p>The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in <code class="docutils literal"><span class="pre">src/sweeper.f90</span></code>.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="k">procedure</span> <span class="kd">::</span> <span class="n">initialize</span> <span class="c">!  Overwrites imex sweeper initialize</span>
+<p>The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in <code class="docutils literal notranslate"><span class="pre">src/sweeper.f90</span></code>.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">procedure</span> <span class="kd">::</span> <span class="n">initialize</span> <span class="c">!  Overwrites imex sweeper initialize</span>
 <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy</span>    <span class="c">!  Overwrites imex sweeper destroy</span>
 </pre></div>
 </div>
 <p>These two routines will be called instead of the base sweeper initialize and destroy in LibPFASST.  The point is that this then allows the user to add whatever things to the sweeper as necessary.  Here, there is nothing to do, but one must explicitly call the LibPFASST versions of these routines, as in</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Call the imex sweeper initialization</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Call the imex sweeper initialization</span>
 <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">imex_initialize</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Another difference in this example, is that a local hook is defined in the file <code class="docutils literal"><span class="pre">src/hooks.f90</span></code> to print the error to the screen.  It is assigned by</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Add some hooks for output</span>
+<p>Another difference in this example, is that a local hook is defined in the file <code class="docutils literal notranslate"><span class="pre">src/hooks.f90</span></code> to print the error to the screen.  It is assigned by</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Add some hooks for output</span>
 <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The user can construct custom hooks following this template.</p>
-<p>Finally, note that in this example, an optional argument to return the solution at the final time, y_end is included in the call to <code class="docutils literal"><span class="pre">pf_pfasst_run</span></code></p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
+<p>Finally, note that in this example, an optional argument to return the solution at the final time, y_end is included in the call to <code class="docutils literal notranslate"><span class="pre">pf_pfasst_run</span></code></p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
 <span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span><span class="n">y_end</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="example-3">
 <h2>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h2>
-<p>Please see the <code class="docutils literal"><span class="pre">LibPFASST/Tutorials/EX3_adv_diff</span></code> directory included in LibPFASST
+<p>Please see the <code class="docutils literal notranslate"><span class="pre">LibPFASST/Tutorials/EX3_adv_diff</span></code> directory included in LibPFASST
 for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
-<div class="math">
+<div class="math notranslate nohighlight">
 \[u_t  = - v u_x + \nu u_{xx}.\]</div>
 <p>This right hand side of the equation will be split into stiff terms handled implicitly
-(<span class="math">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math">\(-v u_x\)</span>),
+(<span class="math notranslate nohighlight">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math notranslate nohighlight">\(-v u_x\)</span>),
 hence an IMEX SDC substepper will be used to evolve the equation through time.
 As in Example 1, the ndarray encapsulation provided by LibPFASST is used here.</p>
-<p>The code in <code class="docutils literal"><span class="pre">src/main.f90</span></code> is almost identical to that of Example 1 except that the size of the ndarray is different and set per level
-from the variable &#8216;nx&#8217; read from the local namelist.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
+<p>The code in <code class="docutils literal notranslate"><span class="pre">src/main.f90</span></code> is almost identical to that of Example 1 except that the size of the ndarray is different and set per level
+from the variable ‘nx’ read from the local namelist.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
 <span class="k">call </span><span class="n">pf_level_set_size</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">,[</span><span class="n">nx</span><span class="p">(</span><span class="n">l</span><span class="p">)])</span>
 </pre></div>
 </div>
 <p>The most noticable difference in this example is that the function evaluations, implicit solves, and interpolation and restriction operators
 are not trivial as in the Dahlquist examples.  This example is done with a pseudo-spectral discretization in space and the method of lines in time.
 In the local definition of the sweeper,  variables are added to facilitate operations in spectral space</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt;  FFT and Spectral derivatives</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  FFT and Spectral derivatives</span>
 <span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fft_tool</span>
 <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opE</span><span class="p">(:)</span> <span class="c">! Explicit spectral operator</span>
 <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opI</span><span class="p">(:)</span> <span class="c">! Implicit spectral operator</span>
 </pre></div>
 </div>
-<p>The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal"><span class="pre">feval</span></code> and <code class="docutils literal"><span class="pre">f_comp</span></code> the convolution subroutine <cite>conv</cite> is used for either implicit or explicit
+<p>The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal notranslate"><span class="pre">feval</span></code> and <code class="docutils literal notranslate"><span class="pre">f_comp</span></code> the convolution subroutine <cite>conv</cite> is used for either implicit or explicit
 function evaluations in spectral space, e.g.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse opeator with the FFT convolution</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse opeator with the FFT convolution</span>
 <span class="k">call </span><span class="n">fft</span><span class="p">%</span><span class="n">conv</span><span class="p">(</span><span class="n">rhsvec</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0_pfdp</span> <span class="o">-</span> <span class="n">dtq</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">opI</span><span class="p">),</span><span class="n">yvec</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -260,12 +248,14 @@ function evaluations in spectral space, e.g.</p>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -289,7 +279,7 @@ function evaluations in spectral space, e.g.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
     </div>
   </body>
 </html>

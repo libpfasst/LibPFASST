@@ -1,36 +1,24 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>Output &#8212; LIBPFASST 1.1 documentation</title>
-    
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '1.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="prev" title="Data encapsulation" href="encap.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -54,20 +42,20 @@
 <p>There are two main ways to produce output automatically from LibPFASST, namely through the setting of hooks and the output of the results module.</p>
 <div class="section" id="hooks">
 <h2>hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
-<p>The first output possibility is through the use of the what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in &#8220;LibPFASST/Tutorials/EX1_Dahlquist/src/main.f90&#8221;  a hook is added by the statement.</p>
-<div class="highlight-fortran"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
+<p>The first output possibility is through the use of the what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in “LibPFASST/Tutorials/EX1_Dahlquist/src/main.f90”  a hook is added by the statement.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
 <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This will force a call to  the user-supplied subroutine &#8220;echo_error&#8221; (supplied locally in the file &#8220;hooks.f90&#8221;) after every PFASST iteration.      The second parameter specifies the level on which the hooks should be called with the value -1 indicating all levels.  See the file
-&#8220;LibPFASST/src/pf_hooks.f90&#8221; for a list of hook locations.</p>
+<p>This will force a call to  the user-supplied subroutine “echo_error” (supplied locally in the file “hooks.f90”) after every PFASST iteration.      The second parameter specifies the level on which the hooks should be called with the value -1 indicating all levels.  See the file
+“LibPFASST/src/pf_hooks.f90” for a list of hook locations.</p>
 </div>
 <div class="section" id="results">
 <h2>results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
-<p>LibPFASST contains the module &#8220;pf_mod_results&#8221; which is used to collect information about the run during a call to library.
-The destination of the output can be changed from default direct &#8220;dat/&#8221; to an arbitrary path by specifying the variable &#8220;outdir&#8221; in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\&#8221;my_outdir\&#8221;.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
-then output to the directory &#8220;my_outdir/residuals&#8221; after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, echo_timings prints timings to  stdout while the code is running.</p>
-<p>Note that for the library supplied data encapsulations there is a subroutine called &#8220;eprint&#8221; which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine could be modified for an additional avenue for output from any place in the code.</p>
+<p>LibPFASST contains the module “pf_mod_results” which is used to collect information about the run during a call to library.
+The destination of the output can be changed from default direct “dat/” to an arbitrary path by specifying the variable “outdir” in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=&quot;my_outdir&quot;.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
+then output to the directory “my_outdir/residuals” after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, echo_timings prints timings to  stdout while the code is running.</p>
+<p>Note that for the library supplied data encapsulations there is a subroutine called “eprint” which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine could be modified for an additional avenue for output from any place in the code.</p>
 </div>
 </div>
 
@@ -98,12 +86,14 @@ then output to the directory &#8220;my_outdir/residuals&#8221; after the complet
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -124,7 +114,7 @@ then output to the directory &#8220;my_outdir/residuals&#8221; after the complet
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
     </div>
   </body>
 </html>
