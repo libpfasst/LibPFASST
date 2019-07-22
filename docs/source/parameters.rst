@@ -2,7 +2,7 @@
 Parameters and variables
 ========================
 
-The LibPFASST library has many parameters which control the
+The LibPFASST library has many parameters that control the
 behavior of the PFASST algorithm and can be changed by the
 user.  This section lists all the parameters and describes
 their function, location, and default values. Most of the
@@ -12,7 +12,7 @@ command line.  Some of the parameters must be changed from
 their default value or PFASST will not execute.
 
 Following these lists is an explanation of how to set
-parameters through input files or the command line, and
+parameters through input files or the command line and
 how to choose certain parameters to acheive particular
 variants of PFASST.
 
@@ -20,20 +20,20 @@ Types of parameters
 -------------------
 
 * LibPFASST static parameters:  are hard coded and cannot be changed at run time
-* ``pf_pfasst_t`` mandatory parameters: must be reassigned at run time
+* ``pf_pfasst_t`` mandatory parameters: must be reassigned at run time because 
   the use of default values will result in program termination.
-* ``pf_pfasst_t`` optional parameters: can be reassigned at run time,
+* ``pf_pfasst_t`` optional parameters: can be reassigned at run time, but
   the use of default values will result in default execution.
-* ``pf_level_t`` mandatory parameters: must be reassigned at run time,
+* ``pf_level_t`` mandatory parameters: must be reassigned at run time because
   the use of default values will result in default execution.
-* ``pf_level_t`` optional parameters: can  be reassigned at run time,
+* ``pf_level_t`` optional parameters: can  be reassigned at run time, but
   the use of default values will result in default execution.
 * local mandatory parameters: must be passed in a call to ``pf_run_pfasst``
 * local optional parameters: specified by the user application and
   unrelated to the workings of LibPFASST
 
 
-libfpasst static parameters
+passt static parameters
 ---------------------------
 
 The parameters at the top of the file ``src/pf_dtype.f90`` are all set
@@ -47,7 +47,7 @@ here of interest to the user is
 which controls the precision of all floating point numbers (or at
 least all those using ``pfdp`` in the declaration).
 
-pfasst mandatory parameters
+Mandatory pfasst parameters
 ---------------------------
 
 The parameters defined in type ``pf_pfasst_t`` in ``src/pf_dtype.f90``
@@ -56,7 +56,7 @@ are all given a default value.  Currently only the variable
 variable on the command line or in an initialization file is mandatory
 
 
-pfasst optional parameters
+Optional pfasst parameters
 --------------------------
 
 The remaining variables in the specification of ``pf_pfasst_t`` are given
@@ -64,60 +64,83 @@ default values as below:
 
 .. code-block:: fortran
 
-  type :: pf_pfasst_t
+     !>  ===  Optional pfasst parameters ====
+     integer :: niters  = 5             !! number of PFASST iterations to do
+     integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
+     logical :: use_proper_nodes =  .false.
+     logical :: use_composite_nodes = .false.
+     logical :: use_no_left_q = .false.
 
-     integer :: niters  = 5             ! number of iterations
-     integer :: qtype   = SDC_GAUSS_LOBATTO
-     integer :: ctype   = SDC_CYCLE_V
+     ! --  level dependent parameters
+     integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
+     integer :: nsweeps_pred(PF_MAXLEVS) =1   !!  number of sweeps during predictor
+     integer :: nnodes(PF_MAXLEVS)=3          !! number of nodes
 
-     real(pfdp) :: abs_res_tol = 0.d0
-     real(pfdp) :: rel_res_tol = 0.d0
+     ! --  tolerances
+     real(pfdp) :: abs_res_tol = 0.d0   !!  absolute convergence tolerance
+     real(pfdp) :: rel_res_tol = 0.d0   !!  relative convergence tolerance
 
-     integer :: window = PF_WINDOW_BLOCK
+     ! --  predictor options  (should be set before pfasst_run is called)
+     logical :: PFASST_pred = .true.    !!  true if the PFASST type predictor is used
+     logical :: pipeline_pred = .false. !!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
+     integer :: nsweeps_burn =  1       !!  number of sdc sweeps to perform during coarse level burn in
+     integer :: q0_style =  0           !!  q0 can take 3 values
+                                        !!  0:  Only the q0 at t=0 is valid  (default)
+                                        !!  1:  The q0 at each processor is valid
+                                        !!  2:  q0 and all nodes at each processor is valid
 
-     logical :: Pipeline_G =  .false.
-     logical :: PFASST_pred = .false.
 
-     logical :: save_residuals = .false.   !!  If true, residuals are saved and output
+     ! --  run options  (should be set before pfasst_run is called)
+     logical :: Vcycle = .true.      !!  decides if Vcycles are done
+     logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
+     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
+     logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
+     integer :: taui0 = -999999      !! iteration cutoff for tau inclusion
+
+
+     ! -- RK and Parareal options
+     logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
+     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
+     logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+
+     ! -- misc
+     logical :: debug = .false.         !!  If true, debug diagnostics are printed
+
+     ! -- controller for the results 
+     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
      logical :: save_timings  = .false.    !!  If true, timings are saved and  output
      logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
+     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
-
-These value can be changed as desired.
-
-
-level mandatory parameters
+Mandatory level parameters
 --------------------------
 
-In the specification of ``pf_level_t``, the first two variables
-``nvars`` and ``nnodes`` are given default values that will cause the
-program to abort.  These variables are typically set per level when
-initializing PFASST.
+In the specification of ``pf_level_t``, the  variable
+``mpibuflen`` is given the default values -1.  This must be
+changed to the length of the mpi buffer required by the user's data type
+per level as the levels are  initialized.
 
 .. code-block:: fortran
 
-  type :: pf_level_t
-
-     integer     :: nvars = -1          ! number of variables (dofs)
-     integer     :: nnodes = -1         ! number of sdc nodes
+     !  ===Mandatory level parameters===
+     integer  :: mpibuflen    = -1   !! size of solution in pfdp units
 
 
-level optional parameters
+Optional level parameters
 -------------------------
-
-In the specification of ``pf_level_t``, the first variables
-``nsweeps`` and ``Finterp`` are default values.  These can be changed
-per level as the levels are when initializing PFASST.
-
+ In the specification of ``pf_level_t``, there are a set of parameters that are given values from the corresponding copies in the ``pf_pfasst_t``.  This redundancy is simply for convenience.  
 .. code-block:: fortran
 
-  type :: pf_level_t
+     !  level parameters set by the pfasst_t values
+     integer  :: index        = -1   !! level number (1 is the coarsest)
+     integer  :: nnodes       = -1   !! number of sdc nodes
+     integer  :: nsteps_rk    = -1   !! number of rk steps to perform
+     integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
+     integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
+     logical     :: Finterp = .false.   !! interpolate functions instead of solutions
 
-     integer     :: nsweeps = 1         ! number of sdc sweeps to perform
-     logical     :: Finterp = .false.   ! interpolate functions instead of solutions
 
-
-local mandatory parameters
+Mandatory local parameters
 --------------------------
 
 In the call to run pfasst
@@ -132,10 +155,9 @@ variable ``nsteps`` is optional, if it is not included, then
 
 .. code-block:: fortran
 
-  pf%state%nsteps = ceiling(1.0*tend/dt)
+  pf%state%nsteps = ceiling(tend/dt)
 
 Finally, ``qend`` is also optional and returns the final solution.
-
 
 ..
 
@@ -187,30 +209,30 @@ over-ride input files.
 Variables for the predictor
 ---------------------------
 
-The two variables ``Pipeline_G`` and ``PFASST_pred`` determine how the
+The two variables ``pipeline_pred`` and ``PFASST_pred`` determine how the
 predictor works.  The different combinations of these variables and
-the parameter Nsweeps on the coarsest level great some subtle
+the parameter nsweeps_pred on the coarsest level great some subtle
 differences in how the predictor performs.
 
 Some cases:
 
-#. If PFASST_pred is false and Pipeline_G is false, then the predictor
-   is a serial application of SDC with Nsweeps.  This can be done
+#. If PFASST_pred is false and pipeline_pred is false, then the predictor
+   is a serial application of SDC with nsweeps_pred sweeps.  This can be done
    without communication wherein every processor mimics the behavior
    of the processors previous to it in time.
 
-#. If PFASST_pred is false and Pipeline_G is true and Nsweeps is one,
+#. If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is one,
    then the predictor is a serial application of SDC with 1 sweep.  As
    above, there is no communication necessary.
 
-#. If PFASST_pred is false and Pipeline_G is true and Nsweeps is
+#. If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is
    greater than one, then the predictor is a version of pipelined
    SDC. There is no communication necessary until the second sweep on
-   the each processor is done.  After that, each processor must
-   recieve a new initial value.
+   each processor is done.  After that, each processor must
+   recieve a new initial value before each new sweep.
 
-#. If PFASST_pred is true, and Nsweeps equals one, then it doesn't
-   matter what Pipeline_G is.  No communication is necessary, and we
+#. If PFASST_pred is true, and nsweeps_pred equals one, then it doesn't
+   matter what pipeline_pred is.  No communication is necessary, and we
    simply reuse the function values from the previous iteration in
    each SDC sweep.  Some care must be taken here as to how to
    interpret the variable t0 especially in light of time dependent
@@ -218,17 +240,17 @@ Some cases:
    iterations, hence one should use caution using PFASST_pred = true
    with time dependent boundary conditions.
 
-#. If PFASST_pred is true, and Nsweeps is greater than one and
-   Pipeline_G is true, then the predictor will act like the normal
-   PFASST_pred with Nsweeps equals one, but more iterations will be
+#. If PFASST_pred is true, and nsweeps_pred is greater than one and
+   pipeline_pred is true, then the predictor will act like the normal
+   PFASST_pred with nsweeps equals one, but more iterations will be
    taken.  This choice is a bit strange.  No communication is needed
    until each processor is doing the P+1st iteration, then new initial
    data must be used and in all cases, previous f values are used in
    the SDCsweeps.  The caveat about t0 is still valid.
 
-#. Finally, if PFASST_pred is true, and Nsweeps is greater than one
-   and Pipeline_G is false, then the predictor will act like the
-   normal PFASST_pred with Nsweeps equals one, but additional
+#. Finally, if PFASST_pred is true, and nsweeps_pred is greater than one
+   and pipeline_pred is false, then the predictor will act like the
+   normal PFASST_pred with nsweeps equals one, but additional
    iterations are taken before the initial conditions at each
    processor are reset.  This can be done without communication.  The
    caveat about t0 is still valid.
@@ -236,4 +258,4 @@ Some cases:
 How is this implemented?  There are two pieces to the initialization.
 The first consists of the process of giving every processor an initial
 value which is consistent with t0 at that processor.  This can be done
-without communication in all cases.
+without communication in all cases.  Then,  additional sweeps are done if specified with communication if necessary.

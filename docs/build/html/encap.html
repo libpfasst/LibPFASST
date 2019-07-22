@@ -45,7 +45,7 @@
 <h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Permalink to this headline">¶</a></h1>
 <p>!  Under construction</p>
 <p>The temporal integration routines in LibPFASST do not specify the form of the solution in terms of its data layout, but rather this must be described by an encapsulation module which tells LibPFASST how to operate on the data.  For convenience LibPFASST provides sample encapsulations corresponding to regular Fortran arrays. These are provided in
-<code class="docutils literal notranslate"><span class="pre">src/encaps/</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that include <code class="docutils literal notranslate"><span class="pre">encap</span></code></p>
 <p>Curently, the provided encaps are</p>
 <ul class="simple">
 <li>ndarray:  An N-dimensional array</li>
@@ -54,6 +54,7 @@
 <li>zndsysarray: System of complex ndarrays</li>
 <li>ndarray_oc:  Optimal control version of ndarray</li>
 </ul>
+<p>A discussion of how to construct an encapsulation is included in the 2nd tutorial.</p>
 </div>
 
 

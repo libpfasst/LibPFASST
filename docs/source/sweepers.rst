@@ -3,8 +3,7 @@ Sweepers
 
 Under construction!
 
-LibPFASST contains several sweeper types for solving different types of equations.  These are contained in ``src/sweepers/``.
-
+LibPFASST contains several sweeper types for solving different types of equations.  These are contained in ``src/`` with names that contain ``sweeper`` in the name.
 
 * exp:  Exponential integrator
 * imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting

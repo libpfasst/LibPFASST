@@ -43,7 +43,7 @@
             
   <div class="section" id="parameters-and-variables">
 <h1>Parameters and variables<a class="headerlink" href="#parameters-and-variables" title="Permalink to this headline">¶</a></h1>
-<p>The LibPFASST library has many parameters which control the
+<p>The LibPFASST library has many parameters that control the
 behavior of the PFASST algorithm and can be changed by the
 user.  This section lists all the parameters and describes
 their function, location, and default values. Most of the
@@ -52,28 +52,28 @@ specifying the value either in an input file or on the
 command line.  Some of the parameters must be changed from
 their default value or PFASST will not execute.</p>
 <p>Following these lists is an explanation of how to set
-parameters through input files or the command line, and
+parameters through input files or the command line and
 how to choose certain parameters to acheive particular
 variants of PFASST.</p>
 <div class="section" id="types-of-parameters">
 <h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>LibPFASST static parameters:  are hard coded and cannot be changed at run time</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time
+<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time because
 the use of default values will result in program termination.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time, but
 the use of default values will result in default execution.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time because
 the use of default values will result in default execution.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time,
+<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time, but
 the use of default values will result in default execution.</li>
 <li>local mandatory parameters: must be passed in a call to <code class="docutils literal notranslate"><span class="pre">pf_run_pfasst</span></code></li>
 <li>local optional parameters: specified by the user application and
 unrelated to the workings of LibPFASST</li>
 </ul>
 </div>
-<div class="section" id="libfpasst-static-parameters">
-<h2>libfpasst static parameters<a class="headerlink" href="#libfpasst-static-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="passt-static-parameters">
+<h2>passt static parameters<a class="headerlink" href="#passt-static-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The parameters at the top of the file <code class="docutils literal notranslate"><span class="pre">src/pf_dtype.f90</span></code> are all set
 at compile time and can’t be changed at runtime.  The only parameter
 here of interest to the user is</p>
@@ -83,65 +83,94 @@ here of interest to the user is</p>
 <p>which controls the precision of all floating point numbers (or at
 least all those using <code class="docutils literal notranslate"><span class="pre">pfdp</span></code> in the declaration).</p>
 </div>
-<div class="section" id="pfasst-mandatory-parameters">
-<h2>pfasst mandatory parameters<a class="headerlink" href="#pfasst-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mandatory-pfasst-parameters">
+<h2>Mandatory pfasst parameters<a class="headerlink" href="#mandatory-pfasst-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The parameters defined in type <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> in <code class="docutils literal notranslate"><span class="pre">src/pf_dtype.f90</span></code>
 are all given a default value.  Currently only the variable
 <code class="docutils literal notranslate"><span class="pre">nlevels</span></code> is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory</p>
 </div>
-<div class="section" id="pfasst-optional-parameters">
-<h2>pfasst optional parameters<a class="headerlink" href="#pfasst-optional-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="optional-pfasst-parameters">
+<h2>Optional pfasst parameters<a class="headerlink" href="#optional-pfasst-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The remaining variables in the specification of <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> are given
 default values as below:</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  ===  Optional pfasst parameters ====</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">!! number of PFASST iterations to do</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>  <span class="c">!! type of nodes</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_composite_nodes</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_no_left_q</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
 
-   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">! number of iterations</span>
-   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>
-   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ctype</span>   <span class="o">=</span> <span class="n">SDC_CYCLE_V</span>
+<span class="c">! --  level dependent parameters</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c">!!  number of sweeps at each levels</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span><span class="mi">1</span>   <span class="c">!!  number of sweeps during predictor</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>          <span class="c">!! number of nodes</span>
 
-   <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>
-   <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">rel_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>
+<span class="c">! --  tolerances</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  absolute convergence tolerance</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">rel_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  relative convergence tolerance</span>
 
-   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">window</span> <span class="o">=</span> <span class="n">PF_WINDOW_BLOCK</span>
+<span class="c">! --  predictor options  (should be set before pfasst_run is called)</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">PFASST_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  true if the PFASST type predictor is used</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">pipeline_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_burn</span> <span class="o">=</span>  <span class="mi">1</span>       <span class="c">!!  number of sdc sweeps to perform during coarse level burn in</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">q0_style</span> <span class="o">=</span>  <span class="mi">0</span>           <span class="c">!!  q0 can take 3 values</span>
+                                   <span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
+                                   <span class="c">!!  1:  The q0 at each processor is valid</span>
+                                   <span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
 
-   <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Pipeline_G</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-   <span class="kt">logical</span> <span class="kd">::</span> <span class="n">PFASST_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
 
-   <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">!!  If true, residuals are saved and output</span>
-   <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are saved and  output</span>
-   <span class="kt">logical</span> <span class="kd">::</span> <span class="n">echo_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are  output to screen</span>
+<span class="c">! --  run options  (should be set before pfasst_run is called)</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>      <span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_Sform</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  True if Qmat type of stepping is used</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999999</span>      <span class="c">!! iteration cutoff for tau inclusion</span>
+
+
+<span class="c">! -- RK and Parareal options</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_rk_stepper</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!! decides if RK steps are used instead of the sweeps</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>  <span class="c">!! number of runge-kutta steps per time step</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">RK_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>        <span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
+
+<span class="c">! -- misc</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
+
+<span class="c">! -- controller for the results</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  If true, residuals are saved and output</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are saved and  output</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">echo_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are  output to screen</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, errors  are saved and output</span>
 </pre></div>
 </div>
-<p>These value can be changed as desired.</p>
 </div>
-<div class="section" id="level-mandatory-parameters">
-<h2>level mandatory parameters<a class="headerlink" href="#level-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
-<p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the first two variables
-<code class="docutils literal notranslate"><span class="pre">nvars</span></code> and <code class="docutils literal notranslate"><span class="pre">nnodes</span></code> are given default values that will cause the
-program to abort.  These variables are typically set per level when
-initializing PFASST.</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
-
-   <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nvars</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>          <span class="c">! number of variables (dofs)</span>
-   <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nnodes</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>         <span class="c">! number of sdc nodes</span>
+<div class="section" id="mandatory-level-parameters">
+<h2>Mandatory level parameters<a class="headerlink" href="#mandatory-level-parameters" title="Permalink to this headline">¶</a></h2>
+<p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the  variable
+<code class="docutils literal notranslate"><span class="pre">mpibuflen</span></code> is given the default values -1.  This must be
+changed to the length of the mpi buffer required by the user’s data type
+per level as the levels are  initialized.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!  ===Mandatory level parameters===</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">mpibuflen</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! size of solution in pfdp units</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="level-optional-parameters">
-<h2>level optional parameters<a class="headerlink" href="#level-optional-parameters" title="Permalink to this headline">¶</a></h2>
-<p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the first variables
-<code class="docutils literal notranslate"><span class="pre">nsweeps</span></code> and <code class="docutils literal notranslate"><span class="pre">Finterp</span></code> are default values.  These can be changed
-per level as the levels are when initializing PFASST.</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">pf_level_t</span>
-
-   <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">1</span>         <span class="c">! number of sdc sweeps to perform</span>
-   <span class="kt">logical</span>     <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">! interpolate functions instead of solutions</span>
+<div class="section" id="optional-level-parameters">
+<h2>Optional level parameters<a class="headerlink" href="#optional-level-parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, there are a set of parameters that are given values from the corresponding copies in the <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code>.  This redundancy is simply for convenience.</div></blockquote>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!  level parameters set by the pfasst_t values</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="nb">index</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! level number (1 is the coarsest)</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nnodes</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc nodes</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsteps_rk</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of rk steps to perform</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc sweeps to perform</span>
+<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps_pred</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>      <span class="c">!! number of coarse sdc sweeps to perform predictor in predictor</span>
+<span class="kt">logical</span>     <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">!! interpolate functions instead of solutions</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="local-mandatory-parameters">
-<h2>local mandatory parameters<a class="headerlink" href="#local-mandatory-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mandatory-local-parameters">
+<h2>Mandatory local parameters<a class="headerlink" href="#mandatory-local-parameters" title="Permalink to this headline">¶</a></h2>
 <p>In the call to run pfasst</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tend</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">qend</span><span class="p">)</span>
 </pre></div>
@@ -149,7 +178,7 @@ per level as the levels are when initializing PFASST.</p>
 <p>The variables <code class="docutils literal notranslate"><span class="pre">q0</span></code>, <code class="docutils literal notranslate"><span class="pre">dt</span></code>, and <code class="docutils literal notranslate"><span class="pre">tend</span></code> must be included.  The
 variable <code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is optional, if it is not included, then
 <code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is set to</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Finally, <code class="docutils literal notranslate"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
@@ -190,42 +219,42 @@ over-ride input files.</p>
 </div>
 <div class="section" id="variables-for-the-predictor">
 <h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Permalink to this headline">¶</a></h2>
-<p>The two variables <code class="docutils literal notranslate"><span class="pre">Pipeline_G</span></code> and <code class="docutils literal notranslate"><span class="pre">PFASST_pred</span></code> determine how the
+<p>The two variables <code class="docutils literal notranslate"><span class="pre">pipeline_pred</span></code> and <code class="docutils literal notranslate"><span class="pre">PFASST_pred</span></code> determine how the
 predictor works.  The different combinations of these variables and
-the parameter Nsweeps on the coarsest level great some subtle
+the parameter nsweeps_pred on the coarsest level great some subtle
 differences in how the predictor performs.</p>
 <p>Some cases:</p>
 <ol class="arabic simple">
-<li>If PFASST_pred is false and Pipeline_G is false, then the predictor
-is a serial application of SDC with Nsweeps.  This can be done
+<li>If PFASST_pred is false and pipeline_pred is false, then the predictor
+is a serial application of SDC with nsweeps_pred sweeps.  This can be done
 without communication wherein every processor mimics the behavior
 of the processors previous to it in time.</li>
-<li>If PFASST_pred is false and Pipeline_G is true and Nsweeps is one,
+<li>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is one,
 then the predictor is a serial application of SDC with 1 sweep.  As
 above, there is no communication necessary.</li>
-<li>If PFASST_pred is false and Pipeline_G is true and Nsweeps is
+<li>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is
 greater than one, then the predictor is a version of pipelined
 SDC. There is no communication necessary until the second sweep on
-the each processor is done.  After that, each processor must
-recieve a new initial value.</li>
-<li>If PFASST_pred is true, and Nsweeps equals one, then it doesn’t
-matter what Pipeline_G is.  No communication is necessary, and we
+each processor is done.  After that, each processor must
+recieve a new initial value before each new sweep.</li>
+<li>If PFASST_pred is true, and nsweeps_pred equals one, then it doesn’t
+matter what pipeline_pred is.  No communication is necessary, and we
 simply reuse the function values from the previous iteration in
 each SDC sweep.  Some care must be taken here as to how to
 interpret the variable t0 especially in light of time dependent
 boundary conditions.  Currently t0 does not change in these
 iterations, hence one should use caution using PFASST_pred = true
 with time dependent boundary conditions.</li>
-<li>If PFASST_pred is true, and Nsweeps is greater than one and
-Pipeline_G is true, then the predictor will act like the normal
-PFASST_pred with Nsweeps equals one, but more iterations will be
+<li>If PFASST_pred is true, and nsweeps_pred is greater than one and
+pipeline_pred is true, then the predictor will act like the normal
+PFASST_pred with nsweeps equals one, but more iterations will be
 taken.  This choice is a bit strange.  No communication is needed
 until each processor is doing the P+1st iteration, then new initial
 data must be used and in all cases, previous f values are used in
 the SDCsweeps.  The caveat about t0 is still valid.</li>
-<li>Finally, if PFASST_pred is true, and Nsweeps is greater than one
-and Pipeline_G is false, then the predictor will act like the
-normal PFASST_pred with Nsweeps equals one, but additional
+<li>Finally, if PFASST_pred is true, and nsweeps_pred is greater than one
+and pipeline_pred is false, then the predictor will act like the
+normal PFASST_pred with nsweeps equals one, but additional
 iterations are taken before the initial conditions at each
 processor are reset.  This can be done without communication.  The
 caveat about t0 is still valid.</li>
@@ -233,7 +262,7 @@ caveat about t0 is still valid.</li>
 <p>How is this implemented?  There are two pieces to the initialization.
 The first consists of the process of giving every processor an initial
 value which is consistent with t0 at that processor.  This can be done
-without communication in all cases.</p>
+without communication in all cases.  Then,  additional sweeps are done if specified with communication if necessary.</p>
 </div>
 </div>
 
@@ -247,12 +276,12 @@ without communication in all cases.</p>
   <ul>
 <li><a class="reference internal" href="#">Parameters and variables</a><ul>
 <li><a class="reference internal" href="#types-of-parameters">Types of parameters</a></li>
-<li><a class="reference internal" href="#libfpasst-static-parameters">libfpasst static parameters</a></li>
-<li><a class="reference internal" href="#pfasst-mandatory-parameters">pfasst mandatory parameters</a></li>
-<li><a class="reference internal" href="#pfasst-optional-parameters">pfasst optional parameters</a></li>
-<li><a class="reference internal" href="#level-mandatory-parameters">level mandatory parameters</a></li>
-<li><a class="reference internal" href="#level-optional-parameters">level optional parameters</a></li>
-<li><a class="reference internal" href="#local-mandatory-parameters">local mandatory parameters</a></li>
+<li><a class="reference internal" href="#passt-static-parameters">passt static parameters</a></li>
+<li><a class="reference internal" href="#mandatory-pfasst-parameters">Mandatory pfasst parameters</a></li>
+<li><a class="reference internal" href="#optional-pfasst-parameters">Optional pfasst parameters</a></li>
+<li><a class="reference internal" href="#mandatory-level-parameters">Mandatory level parameters</a></li>
+<li><a class="reference internal" href="#optional-level-parameters">Optional level parameters</a></li>
+<li><a class="reference internal" href="#mandatory-local-parameters">Mandatory local parameters</a></li>
 <li><a class="reference internal" href="#file-input-for-pfasst-variables">File input for pfasst  variables</a></li>
 <li><a class="reference internal" href="#command-line-input">Command line input</a></li>
 <li><a class="reference internal" href="#variables-for-the-predictor">Variables for the predictor</a></li>
