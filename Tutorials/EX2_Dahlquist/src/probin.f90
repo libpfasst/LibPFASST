@@ -92,7 +92,7 @@ contains
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
     write(un,*) 'lam1:   ', lam1, '! explicit constant'
-    write(un,*) 'lam1:   ', lam2, '! implicit constant'    
+    write(un,*) 'lam2:   ', lam2, '! implicit constant'    
 
 
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml

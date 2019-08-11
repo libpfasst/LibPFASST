@@ -91,7 +91,7 @@ contains
     write(un,*) 'nsteps: ', nsteps, '! Number of steps'
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
-    write(un,*) 'lam1:   ', lam1, '! explicit constant'
+    write(un,*) 'lam2:   ', lam1, '! explicit constant'
     write(un,*) 'lam1:   ', lam2, '! implicit constant'    
 
 
