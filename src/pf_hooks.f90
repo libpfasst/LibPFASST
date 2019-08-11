@@ -91,12 +91,12 @@ contains
     if (level_ind == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
           do i = 1, pf%nhooks(l,hook)
-             call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state)
+             call pf%hooks(l,hook,i)%proc(pf,l)
           end do
        end do
     else  ! Do to just level level_ind
        do i = 1, pf%nhooks(level_ind,hook)
-          call pf%hooks(level_ind,hook,i)%proc(pf, pf%levels(level_ind), pf%state)
+          call pf%hooks(level_ind,hook,i)%proc(pf,level_ind)
        end do
     end if
 
@@ -104,13 +104,12 @@ contains
   end subroutine call_hooks
 
   !>  Subroutine defining log hook
-  subroutine pf_logger_hook(pf, level, state)
+  subroutine pf_logger_hook(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
     
     print '("PF:: trank: ",i4,", step: ",i6,", iter: ",i3,", level: ",i2," location: ",a)', &
-         pf%rank, state%step, state%iter, level%index, hook_names(state%hook)
+         pf%rank, pf%state%step, pf%state%iter, level_index, hook_names(pf%state%hook)
   end subroutine pf_logger_hook
 
   !>  Subroutine to add log hook

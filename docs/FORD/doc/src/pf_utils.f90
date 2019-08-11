@@ -46,9 +46,10 @@ contains
        lev%residual_rel = 0.0d0
     end if
 
-    if (pf%save_residuals .and. pf%state%iter>0)  then
-       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
-    end if
+    call pf_set_resid(pf,lev%index,lev%residual)
+!    if (pf%save_residuals .and. pf%state%iter>0)  then
+!       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
+!    end if
 
     call end_timer(pf, TRESIDUAL)
 
@@ -105,16 +106,40 @@ contains
   end subroutine pf_generic_residual
 
   !>  Output the current residual in the solution
-  subroutine pf_echo_residual(pf, level, state)
+  subroutine pf_echo_residual(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
 
     print '("resid: time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
-         state%t0+state%dt,state%step+1, pf%rank, state%iter,level%index,level%residual    
+         pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
     call flush(6)
   end subroutine pf_echo_residual
+
+  !>  Subroutine to store a residual value
+  subroutine pf_set_resid(pf,level_index,resid)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: resid
+    
+    if (pf%save_residuals .and. pf%state%iter>0)  then
+       pf%results(level_index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = resid
+    end if
+    
+  end subroutine pf_set_resid
+
+  !>  Subroutine to store a residual value
+  subroutine pf_set_error(pf,level_index,error)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: error
+    
+    if (pf%save_residuals .and. pf%state%iter>0)  then
+       pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
+    end if
+    
+  end subroutine pf_set_error
+
 
   !
   !> Generic evaluate all

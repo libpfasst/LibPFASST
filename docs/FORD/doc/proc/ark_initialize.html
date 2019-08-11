@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.7% of total for procedures.">118 statements</a>
+    title=" 0.7% of total for procedures.">126 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine ark_initialize(this, lev)
+public subroutine ark_initialize(this, pf, level_index)
     
     
    
@@ -228,7 +228,7 @@ public subroutine ark_initialize(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E174"></span>class(<a href='../type/pf_ark_t.html'>pf_ark_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E2"></span>class(<a href='../type/pf_ark_stepper_t.html'>pf_ark_stepper_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,12 +243,27 @@ public subroutine ark_initialize(this, lev)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E16"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  <td>intent(inout)</td>
+  <td><span class="anchor" id="variable-pf%7E2"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td><p>PFASST structure</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E2"></span>integer,</td>
+  <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>lev</strong></td><td></td>
+  <td><strong>level_index</strong></td><td><p>level on which to initialize</p></td>
   
 </tr>
 
@@ -319,35 +334,57 @@ public subroutine ark_initialize(this, lev)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ark_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_ark_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ark_initialize</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">)</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_ark_stepper_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>    <span class="c">!!  PFASST structure</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!!  level on which to initialize</span>
 
-    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nstages</span>
+    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nstages</span><span class="p">,</span><span class="n">npieces</span><span class="p">,</span><span class="n">i</span>   <span class="c">!  Local copies for convenience</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="nb">gamma</span><span class="p">,</span> <span class="n">delta</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!  Current level</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
 
-    <span class="n">this</span><span class="p">%</span><span class="n">explicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>
-    <span class="n">this</span><span class="p">%</span><span class="k">implicit</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>
+    <span class="c">!  The implicit and explicit flags should be set before calling initialize</span>
+    <span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="k">implicit</span> <span class="p">.</span><span class="n">eqv</span><span class="p">.</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">this</span><span class="p">%</span><span class="n">explicit</span> <span class="p">.</span><span class="n">eqv</span><span class="p">.</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span> <span class="n">npieces</span><span class="o">=</span><span class="mi">2</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span> 
-
-       <span class="c">!  Ascher-Ruuth-Spiteri</span>
-
+    <span class="k">select case</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c">!  Forward-backward Euler</span>
+       <span class="n">nstages</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c">!  Ascher-Ruuth-Spiteri</span>
        <span class="n">nstages</span> <span class="o">=</span> <span class="mi">3</span>
-       
-       <span class="n">this</span><span class="p">%</span><span class="n">nstages</span> <span class="o">=</span> <span class="n">nstages</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Explicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatI</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Implicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">cvec</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>           <span class="c">!  stage times</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecE</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on explicit</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecI</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on implicit</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c">! Third-order Kennedy-Carpenter</span>
+       <span class="n">nstages</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c">! Fourth-order Kennedy-Carpenter</span>
+       <span class="n">nstages</span> <span class="o">=</span> <span class="mi">6</span> 
+    <span class="k">case </span><span class="n">DEFAULT</span>
+       <span class="k">stop</span> <span class="s2">&quot;ark_initialize: This RK order is not supported&quot;</span>
+       <span class="k">call exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">end select</span>
+<span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">nstages</span> <span class="o">=</span> <span class="n">nstages</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="n">npieces</span>
 
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">cvec</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Explicit Butcher matrix</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatI</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Implicit Butcher matrix</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">cvec</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>           <span class="c">!  stage times</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecE</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on explicit</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecI</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on implicit</span>
+    
+    <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">AmatI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">cvec</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+
+    <span class="k">select case</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c">!  Forward-backward Euler</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">ONE</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">AmatI</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">ONE</span>
        
+       <span class="n">this</span><span class="p">%</span><span class="n">cvec</span>       <span class="o">=</span> <span class="p">(</span><span class="o">/</span> <span class="n">ZERO</span><span class="p">,</span> <span class="n">ONE</span> <span class="o">/</span><span class="p">)</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span>      <span class="o">=</span> <span class="p">(</span><span class="o">/</span>  <span class="n">ONE</span><span class="p">,</span> <span class="n">ZERO</span> <span class="o">/</span><span class="p">)</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span>      <span class="o">=</span> <span class="p">(</span><span class="o">/</span> <span class="n">ZERO</span><span class="p">,</span> <span class="n">ONE</span> <span class="o">/</span><span class="p">)</span>
+    <span class="k">case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c">!  Ascher-Ruuth-Spiteri</span>
        <span class="nb">gamma</span>           <span class="o">=</span> <span class="p">(</span><span class="n">TWO</span> <span class="o">-</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">TWO</span><span class="p">))</span><span class="o">/</span><span class="n">TWO</span>
        <span class="n">delta</span>           <span class="o">=</span> <span class="o">-</span><span class="n">TWO</span><span class="o">*</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">TWO</span><span class="p">)</span><span class="o">/</span><span class="n">THREE</span>
        
@@ -363,25 +400,7 @@ public subroutine ark_initialize(this, lev)
        <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span>      <span class="o">=</span> <span class="p">(</span><span class="o">/</span> <span class="n">ZERO</span><span class="p">,</span> <span class="n">ONE</span><span class="o">-</span><span class="nb">gamma</span><span class="p">,</span> <span class="nb">gamma</span> <span class="o">/</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span>      <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span>
 
-    <span class="k">else if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">order</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">then</span>
-      
-       <span class="c">! Third-order Kennedy-Carpenter</span>
-
-       <span class="n">nstages</span> <span class="o">=</span> <span class="mi">4</span>
-      
-       <span class="n">this</span><span class="p">%</span><span class="n">nstages</span> <span class="o">=</span> <span class="n">nstages</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Explicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatI</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Implicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">cvec</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>           <span class="c">!  stage times</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecE</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on explicit</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecI</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on implicit</span>
-
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">cvec</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-
+    <span class="k">case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c">! Third-order Kennedy-Carpenter</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>   <span class="mi">176773220590</span><span class="mf">3.0_pfdp</span>  <span class="o">/</span> <span class="mi">202783664111</span><span class="mf">8.0_pfdp</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>   <span class="mi">553582888582</span><span class="mf">5.0_pfdp</span>  <span class="o">/</span> <span class="mi">1049269177363</span><span class="mf">7.0_pfdp</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span>   <span class="mi">78802234243</span><span class="mf">7.0_pfdp</span>   <span class="o">/</span> <span class="mi">1088263485894</span><span class="mf">0.0_pfdp</span>
@@ -404,25 +423,7 @@ public subroutine ark_initialize(this, lev)
                             <span class="mi">1126623926642</span><span class="mf">8.0_pfdp</span> <span class="o">/</span> <span class="mi">1159328672282</span><span class="mf">1.0_pfdp</span><span class="p">,</span>   <span class="mi">176773220590</span><span class="mf">3.0_pfdp</span> <span class="o">/</span> <span class="mi">405567328223</span><span class="mf">6.0_pfdp</span> <span class="o">/</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span>      <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span>   
 
-    <span class="k">else if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">order</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="k">then</span>
-
-       <span class="c">! Fourth-order Kennedy-Carpenter</span>
-       
-       <span class="n">nstages</span> <span class="o">=</span> <span class="mi">6</span> 
-
-       <span class="n">this</span><span class="p">%</span><span class="n">nstages</span> <span class="o">=</span> <span class="n">nstages</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Explicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">AmatI</span><span class="p">(</span><span class="n">nstages</span><span class="p">,</span><span class="n">nstages</span><span class="p">))</span>  <span class="c">!  Implicit Butcher matrix</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">cvec</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>           <span class="c">!  stage times</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecE</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on explicit</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">bvecI</span><span class="p">(</span><span class="n">nstages</span><span class="p">))</span>          <span class="c">!  quadrature weights on implicit</span>
-
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">AmatI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">cvec</span>  <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-
+    <span class="k">case</span> <span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c">! Fourth-order Kennedy-Carpenter</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>   <span class="mf">0.5_pfdp</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>   <span class="mi">1386</span><span class="mf">1.0_pfdp</span>          <span class="o">/</span> <span class="mi">6250</span><span class="mf">0.0_pfdp</span>
        <span class="n">this</span><span class="p">%</span><span class="n">AmatE</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span>   <span class="mi">688</span><span class="mf">9.0_pfdp</span>           <span class="o">/</span> <span class="mi">6250</span><span class="mf">0.0_pfdp</span>
@@ -466,12 +467,23 @@ public subroutine ark_initialize(this, lev)
                             <span class="mi">6987</span><span class="mf">5.0_pfdp</span> <span class="o">/</span> <span class="mi">10267</span><span class="mf">2.0_pfdp</span><span class="p">,</span> <span class="o">-</span> <span class="mi">226</span><span class="mf">0.0_pfdp</span> <span class="o">/</span> <span class="mi">821</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="mf">0.25_pfdp</span> <span class="o">/</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">bvecI</span>      <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">bvecE</span>   
 
-    <span class="k">else</span>
-<span class="k">       stop</span> <span class="s2">&quot;ark_initialize: This RK order is not supported&quot;</span>
-    <span class="k">end if</span>
+    <span class="k">case </span><span class="n">DEFAULT</span>
+       <span class="k">stop</span> <span class="s2">&quot;ark_initialize: This RK order is not supported&quot;</span>
+       <span class="k">call exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">end select</span>
 
-<span class="k">    if</span> <span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span> <span class="o">&lt;</span> <span class="n">this</span><span class="p">%</span><span class="n">nstages</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="p">&amp;</span>
-         <span class="k">stop</span> <span class="s2">&quot;ark_initialize: With RK, lev%nnodes should be equal to rkstepper%nstages + 1&quot;</span>
+    <span class="c">! Allocate space for local variables</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qtemp</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>            
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Frkflt</span><span class="p">,</span> <span class="n">nstages</span><span class="o">*</span><span class="n">npieces</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nstages</span><span class="o">*</span><span class="n">npieces</span>
+       <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">Frkflt</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">end do</span>
+<span class="k">    </span>
+<span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nstages</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">npieces</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">lev</span><span class="p">%</span><span class="n">Frkflt</span>
+
 
   <span class="k">end subroutine </span><span class="n">ark_initialize</span>
 </pre></div>

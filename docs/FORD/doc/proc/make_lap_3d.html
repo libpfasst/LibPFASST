@@ -228,7 +228,7 @@ public subroutine make_lap_3d(this, lap)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E116"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E61"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -336,7 +336,7 @@ public subroutine make_lap_3d(this, lap)
          <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&lt;=</span> <span class="n">nz</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">            </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Lz</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
          <span class="k">else</span>
-<span class="k">            </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Ly</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nz</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">            </span><span class="n">kz</span> <span class="o">=</span> <span class="n">two_pi</span> <span class="o">/</span> <span class="n">Lz</span> <span class="o">*</span> <span class="nb">dble</span><span class="p">(</span><span class="o">-</span><span class="n">nz</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
          <span class="k">end if</span>
 <span class="k">         do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">ny</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>

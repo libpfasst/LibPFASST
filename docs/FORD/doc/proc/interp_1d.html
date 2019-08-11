@@ -228,7 +228,7 @@ public subroutine interp_1d(this, yvec_c, fft_f, yvec_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E36"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E74"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine interp_1d(this, yvec_c, fft_f, yvec_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yvec_c"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yvec_c%7E4"></span>real(kind=pfdp),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -273,7 +273,7 @@ public subroutine interp_1d(this, yvec_c, fft_f, yvec_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yvec_f"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yvec_f%7E4"></span>real(kind=pfdp),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -368,7 +368,7 @@ public subroutine interp_1d(this, yvec_c, fft_f, yvec_f)
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftf</span><span class="p">()</span>    
 
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">zinterp_1d</span><span class="p">(</span><span class="n">wk_c</span><span class="p">,</span> <span class="n">wk_f</span><span class="p">)</span>
-    <span class="n">wk_f</span><span class="o">=</span><span class="n">wk_f</span><span class="o">*</span><span class="mf">2.0_pfdp</span>
+    <span class="n">wk_f</span><span class="o">=</span><span class="n">wk_f</span>
 
     <span class="c">!  internal inverse fft call</span>
     <span class="k">call </span><span class="n">fft_f</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>

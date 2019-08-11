@@ -86,7 +86,7 @@ contains
 
   end subroutine pf_pfasst_create
 
-  !> Helper routine to set the size and mpi buffer length
+  !> Helper routine to set the size and mpi buffer length for regular grids
   subroutine pf_level_set_size(pf,level_index,shape_in,buflen_in)
     type(pf_pfasst_t), intent(inout) :: pf   !!  Main pfasst structure
     integer, intent(in)  ::  level_index
@@ -105,7 +105,6 @@ contains
     
     pf%levels(level_index)%mpibuflen = buflen_local
 
-    
   end subroutine pf_level_set_size
   
 
@@ -213,7 +212,7 @@ contains
     call lev%ulevel%sweeper%initialize(pf,level_index)
 
     
-    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(lev)
+    if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(pf,level_index)
 
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
@@ -223,11 +222,12 @@ contains
     do i = 1, nnodes*npieces
        call lev%Fflt(i)%setval(0.0_pfdp, 0)
     end do
+
     lev%F(1:nnodes,1:npieces) => lev%Fflt
     call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%shape)
     call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%shape)
 
-    !  Need space for old function values in imexR sweepers
+    !  Need space for old function values in im sweepers
     call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, lev%shape)
     lev%pF(1:nnodes,1:npieces) => lev%pFflt
     if (lev%index < pf%nlevels) then
@@ -235,6 +235,7 @@ contains
     end if
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%shape)
     
   end subroutine pf_level_setup
 
@@ -248,7 +249,6 @@ contains
     !>  destroy all levels
     do l = 1, pf%nlevels
        call pf_level_destroy(pf,l)
-
     end do
     
     !>  deallocate pfasst pointer arrays
@@ -300,8 +300,12 @@ contains
     if (lev%index < pf%nlevels) then
        call lev%ulevel%factory%destroy_array(lev%pQ)
     end if
-    call lev%ulevel%factory%destroy_single(lev%qend)
-    call lev%ulevel%factory%destroy_single(lev%q0)
+    if (lev%interp_workspace_allocated   .eqv. .true.) then      
+       call lev%ulevel%factory%destroy_array(lev%c_delta)
+       call lev%ulevel%factory%destroy_array(lev%cf_delta)
+       lev%interp_workspace_allocated =.false.
+    endif
+ 
 
     !> destroy the sweeper 
     call lev%ulevel%sweeper%destroy(pf,level_index)
@@ -346,9 +350,9 @@ contains
     integer, parameter :: un = 9
     integer            :: i, ios,stat
     character(len=128)  :: arg
-    character(len=255) :: istring  ! stores command line argument
-    character(len=255) :: message  ! use for i/o error messages
-    character(len=255) :: outdir
+    character(len=256) :: istring  ! stores command line argument
+    character(len=1024) :: message  ! use for i/o error messages
+    character(len=256) :: outdir
 
     
     !> define the namelist for reading
@@ -405,7 +409,7 @@ contains
        do
           call get_command_argument(i, arg,status=stat)
           if (len_trim(arg) == 0) exit
-          if (i > 0) then
+          if (i > 1) then
              istring="&pf_params " // trim(arg) // " /"
              read(istring, nml=pf_params, iostat=ios, iomsg=message) ! internal read of namelist
           end if
@@ -624,7 +628,7 @@ contains
     
     if (pf%save_residuals) then
        do level_index = 1,pf%nlevels
-          call  dump_results(pf%results(level_index))
+          call  dump_resids(pf%results(level_index))
        end do
     end if
     
@@ -654,6 +658,7 @@ end subroutine pf_dump_results
   
 
 end subroutine pf_destroy_results
+  
   
     
   

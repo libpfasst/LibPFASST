@@ -209,7 +209,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
 
 
     
-    <p>Helper routine to set the size and mpi buffer length</p>
+    <p>Helper routine to set the size and mpi buffer length for regular grids</p>
     
 
     <h3>Arguments</h3>
@@ -230,7 +230,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E29"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E22"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E20"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E26"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -369,7 +369,6 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
     
     <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">mpibuflen</span> <span class="o">=</span> <span class="n">buflen_local</span>
 
-    
   <span class="k">end subroutine </span><span class="n">pf_level_set_size</span>
 </pre></div>
 

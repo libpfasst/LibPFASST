@@ -34,27 +34,18 @@ contains
 
     real(pfdp), allocatable :: c_times(:)  !!  Simulation time at coarse nodes  
     real(pfdp), allocatable :: f_times(:)  !!  Simulation time at fine nodes
-    class(pf_encap_t), allocatable :: &
-         c_tmp_array(:), &    ! coarse integral of coarse function values
-         f_int_array(:), &    ! fine integral of fine function values
-         f_int_arrayr(:)      ! coarse integral of restricted fine function values
+    
     
     f_lev_p => pf%levels(level_index);
     c_lev_p => pf%levels(level_index-1)
-
+    
     step = pf%state%step+1
     if(present(mystep)) step = mystep
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
     call start_timer(pf, TRESTRICT + level_index - 1)
     
-    !> create workspaces
-    call c_lev_p%ulevel%factory%create_array(c_tmp_array, c_lev_p%nnodes, &
-      c_lev_p%index,   c_lev_p%shape)
-    call c_lev_p%ulevel%factory%create_array(f_int_arrayr, c_lev_p%nnodes, &
-      c_lev_p%index,   c_lev_p%shape)
-    call c_lev_p%ulevel%factory%create_array(f_int_array, f_lev_p%nnodes, &
-      f_lev_p%index,   f_lev_p%shape)
+
     allocate(c_times(c_lev_p%nnodes))
     allocate(f_times(f_lev_p%nnodes))
 
@@ -74,7 +65,7 @@ contains
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
       call c_lev_p%ulevel%sweeper%integrate(pf,level_index-1,  c_lev_p%Q, &
-        c_lev_p%F, dt, c_tmp_array, flags)
+           c_lev_p%F, dt, c_lev_p%I, flags)
        ! compute '0 to node' integral on the fine level
       call f_lev_p%ulevel%sweeper%integrate(pf,level_index, f_lev_p%Q, &
         f_lev_p%F, dt, f_lev_p%I, flags)
@@ -84,34 +75,33 @@ contains
              call f_lev_p%I(m)%axpy(1.0_pfdp, f_lev_p%tauQ(m), flags)
           end do
        end if
-  
-       ! restrict '0 to node' integral on the fine level  in time and space
-       call restrict_ts_integral(f_lev_p, c_lev_p, f_lev_p%I, f_int_arrayr, f_times, flags)
-
-      ! compute '0 to node' tau correction
+       !  Subtract coarse integral
        do m = 1, c_lev_p%nnodes-1
-          call c_lev_p%tauQ(m)%axpy(1.0_pfdp, f_int_arrayr(m), flags)
-          call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_tmp_array(m), flags)
+          call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_lev_p%I(m), flags)
        end do
 
-       if (pf%use_Sform) then
-          do m = c_lev_p%nnodes-1,2,-1
-!             call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_lev_p%tauQ(m-1), flags)
-          end do
-       end if
+       ! restrict '0 to node' integral on the fine level  in time and space
+       call restrict_ts_integral(f_lev_p, c_lev_p, f_lev_p%I, c_lev_p%I, f_times, flags)
+
+       ! Add fine restriction of fine integral (stored on coarse)
+       do m = 1, c_lev_p%nnodes-1
+          call c_lev_p%tauQ(m)%axpy(1.0_pfdp, c_lev_p%I(m), flags)
+       end do
+
+!!$       if (pf%use_Sform) then
+!!$          do m = c_lev_p%nnodes-1,2,-1
+!!$!             call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_lev_p%tauQ(m-1), flags)
+!!$          end do
+!!$       end if
        
     end if
 
     call end_timer(pf, TRESTRICT + level_index - 1)
     call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
-    !>  Clean up
-    call c_lev_p%ulevel%factory%destroy_array(c_tmp_array)
-    call c_lev_p%ulevel%factory%destroy_array(f_int_arrayr)
-    call f_lev_p%ulevel%factory%destroy_array(f_int_array)
-
     deallocate(c_times)
     deallocate(f_times)
+
   end subroutine restrict_time_space_fas
 
 
