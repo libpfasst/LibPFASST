@@ -19,12 +19,12 @@ module pf_mod_parareal
 contains
   !>  Do the parareal algorithm
   subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
-    type(pf_pfasst_t), intent(inout), target   :: pf   !<  The complete PFASST structure
-    class(pf_encap_t), intent(in   )           :: q0   !<  The initial condition
-    real(pfdp),        intent(in   )           :: dt   !<  The time step for each processor
-    real(pfdp),        intent(in   )           :: tend !<  The final time of run
-    integer,           intent(in   ), optional :: nsteps  !<  The number of time steps
-    class(pf_encap_t), intent(inout), optional :: qend    !<  The computed solution at tend
+    type(pf_pfasst_t), intent(inout), target   :: pf   !!  The complete PFASST structure
+    class(pf_encap_t), intent(in   )           :: q0   !!  The initial condition
+    real(pfdp),        intent(in   )           :: dt   !!  The time step for each processor
+    real(pfdp),        intent(in   )           :: tend !!  The final time of run
+    integer,           intent(in   ), optional :: nsteps  !!  The number of time steps
+    class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
 
     !  Local variables
     integer :: nproc  !!  Total number of processors
