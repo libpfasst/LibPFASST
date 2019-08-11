@@ -12,8 +12,8 @@ module pf_mod_fftpackage
   use pf_mod_fft_abs
   
   implicit none
-
-!  include 'fftw3.f03'
+  
+  include 'fftw3.f03'
   
   !>  Variables and storage for FFTW
   type,extends(pf_fft_abs_t) :: pf_fft_t
