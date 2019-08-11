@@ -209,10 +209,7 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
 
 
     
-    <p>Execute a V-cycle between levels nfine and ncoarse</p>
-<p>$    print *,'after fine steps '
-$    call f_lev_p%qend%eprint()
-$    call c_lev_p%qend%eprint()</p>
+    <p>Execute a parareal V-cycle (iteration)</p>
     
 
     <h3>Arguments</h3>
@@ -298,7 +295,7 @@ $    call c_lev_p%qend%eprint()</p>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level_index_c</strong></td><td><p>Coarsest level of V-cycle</p></td>
+  <td><strong>level_index_c</strong></td><td><p>Coarsest level of V-cycle (not supported)</p></td>
   
 </tr>
 
@@ -313,7 +310,7 @@ $    call c_lev_p%qend%eprint()</p>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level_index_f</strong></td><td><p>Finest level of V-cycle</p></td>
+  <td><strong>level_index_f</strong></td><td><p>Finest level of V-cycle (not supported)</p></td>
   
 </tr>
 
@@ -405,16 +402,15 @@ $    call c_lev_p%qend%eprint()</p>
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">iteration</span>
-    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_c</span>  <span class="c">!! Coarsest level of V-cycle</span>
-    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_f</span>  <span class="c">!! Finest level of V-cycle</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_c</span>  <span class="c">!! Coarsest level of V-cycle (not supported)</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_f</span>  <span class="c">!! Finest level of V-cycle (not supported)</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span><span class="n">nsteps_f</span><span class="p">,</span><span class="n">nsteps_c</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span> <span class="o">&lt;</span><span class="mi">2</span><span class="p">)</span> <span class="k">return</span>
-    
-    <span class="c">!  This is for two levels only</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span> <span class="o">&lt;</span><span class="mi">2</span><span class="p">)</span> <span class="k">return</span>     <span class="c">!  This is for two levels only</span>
+
     <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">nsteps_c</span><span class="o">=</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">nsteps</span>
@@ -451,10 +447,6 @@ $    call c_lev_p%qend%eprint()</p>
     <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0_delta</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0d0</span><span class="p">,</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">f_lev_p</span><span class="p">%</span><span class="n">residual</span><span class="o">=</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0_delta</span><span class="p">%</span><span class="n">norm</span><span class="p">(</span><span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">call </span><span class="n">pf_set_resid</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">residual</span><span class="p">)</span>
-
-<span class="c">!!$    print *,&#39;after fine steps &#39;</span>
-<span class="c">!!$    call f_lev_p%qend%eprint()</span>
-<span class="c">!!$    call c_lev_p%qend%eprint()</span>
 
   <span class="k">end subroutine </span><span class="n">pf_parareal_v_cycle</span>
 </pre></div>

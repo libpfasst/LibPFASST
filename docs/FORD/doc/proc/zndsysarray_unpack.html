@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">10 statements</a>
+    title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine zndsysarray_unpack(this, z, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E163"></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E166"></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -344,8 +344,8 @@ public subroutine zndsysarray_unpack(this, z, flags)
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ntot</span>    
     <span class="n">ntot</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">ncomp</span>
     <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">)</span>
-    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="nb">cmplx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">)</span>
-    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span>  <span class="nb">cmplx</span><span class="p">(</span><span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">),</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">))</span>        
+<span class="c">!    this%flatarray = this%flatarray + cmplx(0.0,1.0,pfdp)*z(ntot+1:2*ntot)</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span>  <span class="nb">cmplx</span><span class="p">(</span><span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">),</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">),</span><span class="n">pfdp</span><span class="p">)</span>        
   <span class="k">end subroutine </span><span class="n">zndsysarray_unpack</span>
 </pre></div>
 

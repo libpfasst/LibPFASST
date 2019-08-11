@@ -234,6 +234,10 @@ See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Mat
 			 
 			   <tr><td><a href='../proc/exact_kdv_1dz.html'>exact_kdv_1dz</a></td><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td>Subroutine</td><td></td></tr>
 			 
+			   <tr><td><a href='../proc/exact_kdv_2dz.html'>exact_kdv_2dz</a></td><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td>Subroutine</td><td></td></tr>
+			 
+			   <tr><td><a href='../proc/exact_kdv_3dz.html'>exact_kdv_3dz</a></td><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td>Subroutine</td><td></td></tr>
+			 
 			   <tr><td><a href='../interface/exact_nls.html'>exact_nls</a></td><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td>Interface</td><td></td></tr>
 			 
 			   <tr><td><a href='../proc/exact_nls_1dz.html'>exact_nls_1dz</a></td><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td>Subroutine</td><td></td></tr>
@@ -444,6 +448,12 @@ See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Mat
 			   <tr><td><a href='../proc/make_deriv_2d.html'>make_deriv_2d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
 			 
 			   <tr><td><a href='../proc/make_deriv_3d.html'>make_deriv_3d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
+			 
+			   <tr><td><a href='../proc/make_ilap_1d.html'>make_ilap_1d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
+			 
+			   <tr><td><a href='../proc/make_ilap_2d.html'>make_ilap_2d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
+			 
+			   <tr><td><a href='../proc/make_ilap_3d.html'>make_ilap_3d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
 			 
 			   <tr><td><a href='../proc/make_lap_1d.html'>make_lap_1d</a></td><td><a href='../module/pf_mod_fft_abs.html'>pf_mod_fft_abs</a></td><td>Subroutine</td><td></td></tr>
 			 
@@ -850,7 +860,7 @@ See Tuncay Aktosun et al 2007 Inverse Problems 23 217
   pass in the time step size and length of run
   Allocate stuff for holding results</p><a href="../proc/pf_parareal_run.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
 			 
-			   <tr><td><a href='../proc/pf_parareal_v_cycle.html'>pf_parareal_v_cycle</a></td><td><a href='../module/pf_mod_parareal.html'>pf_mod_parareal</a></td><td>Subroutine</td><td><p>Execute a V-cycle between levels nfine and ncoarse</p><a href="../proc/pf_parareal_v_cycle.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/pf_parareal_v_cycle.html'>pf_parareal_v_cycle</a></td><td><a href='../module/pf_mod_parareal.html'>pf_mod_parareal</a></td><td>Subroutine</td><td><p>Execute a parareal V-cycle (iteration)</p></td></tr>
 			 
 			   <tr><td><a href='../proc/pf_pfasst_block_oc.html'>pf_pfasst_block_oc</a></td><td><a href='../module/pf_mod_parallel_oc.html'>pf_mod_parallel_oc</a></td><td>Subroutine</td><td><p>Routine to do the pfasst iterations for optimal control problems on one block of processors until completion.
   Each processor will do either a fixed number of iterations, or iterate until a tolerance is met

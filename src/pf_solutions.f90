@@ -649,50 +649,52 @@ contains
 
   end subroutine exact_kdv_1d
   
-!!$  subroutine exact_kdv_2dz(t, uex,beta,Lx)
-!!$    real(pfdp), intent(in)  :: t
-!!$    complex(pfdp), intent(inout) :: uex(:,:)
-!!$    real(pfdp), intent(in) :: Lx(2)
-!!$    
-!!$    integer    :: nx,ny, i,j
-!!$    real(pfdp) :: x, y,L
-!!$    
-!!$    nx = size(uex,1)
-!!$    ny = size(uex,2)
-!!$    L=0.5_pfdp*(Lx(1)+Lx(2))
-!!$    do j = 1, ny
-!!$       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-!!$       do i = 1, nx
-!!$          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-!!$          uex(i,j) = kdv_ex(2.0_pfdp*t,x+y,L)
-!!$       end do
-!!$    end do
-!!$       
-!!$  end subroutine exact_kdv_2dz
-!!$  
-!!$  subroutine exact_kdv_3dz(t, uex,Lx)
-!!$    real(pfdp), intent(in)  :: t
-!!$    complex(pfdp), intent(inout) :: uex(:,:,:)
-!!$    real(pfdp), intent(in) :: Lx(3)
-!!$    
-!!$    integer    :: nx,ny,nz, i,j,k
-!!$    real(pfdp) :: x, y,z,L
-!!$    
-!!$    nx = size(uex,1)
-!!$    ny = size(uex,2)    
-!!$    nz = size(uex,3)    
-!!$    L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
-!!$    do k = 1, nz
-!!$       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
-!!$       do j = 1, ny
-!!$          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
-!!$          do i = 1, nx
-!!$             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
-!!$             uex(i,j,k) = kdv_ex(3.0_pfdp*t,x+y+z,L)
-!!$          end do
-!!$       end do
-!!$    end do
-!!$
-!!$  end subroutine exact_kdv_3dz
-!!$
+  subroutine exact_kdv_2dz(t, uex,beta,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in)  :: beta
+    real(pfdp), intent(in) :: Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,L
+    
+    nx = size(uex,1)
+    ny = size(uex,2)
+    L=0.5_pfdp*(Lx(1)+Lx(2))
+    do j = 1, ny
+       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       do i = 1, nx
+          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          uex(i,j) = kdv_ex(2.0_pfdp*t,x,beta,L)
+       end do
+    end do
+       
+  end subroutine exact_kdv_2dz
+  
+  subroutine exact_kdv_3dz(t, uex,beta,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in)  :: beta
+    real(pfdp), intent(in) :: Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,L
+    
+    nx = size(uex,1)
+    ny = size(uex,2)    
+    nz = size(uex,3)    
+    L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       do j = 1, ny
+          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          do i = 1, nx
+             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             uex(i,j,k) = kdv_ex(3.0_pfdp*t,x,beta,L)
+          end do
+       end do
+    end do
+
+  end subroutine exact_kdv_3dz
+
 end module pf_mod_solutions

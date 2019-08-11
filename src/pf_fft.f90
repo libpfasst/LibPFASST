@@ -40,6 +40,9 @@ module pf_mod_fft_abs
      !  Construct spectral Laplacian
      procedure , private :: make_lap_1d,make_lap_2d, make_lap_3d
      generic   :: make_lap =>make_lap_1d,make_lap_2d,make_lap_3d
+     !  Construct inverse spectral Laplacian
+     procedure , private :: make_ilap_1d,make_ilap_2d, make_ilap_3d
+     generic   :: make_ilap =>make_ilap_1d,make_ilap_2d,make_ilap_3d
      !  Construct spectral derivative
      procedure , private :: make_deriv_1d,make_deriv_2d, make_deriv_3d
      generic   :: make_deriv =>make_deriv_1d,make_deriv_2d,make_deriv_3d
@@ -291,9 +294,9 @@ contains
 
     end subroutine zconv_3d
     
-    subroutine make_lap_1d(this, lap)
+    subroutine make_ilap_1d(this, ilap)
       class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:)
+      complex(pfdp), intent(inout) :: ilap(:)
       
       integer     :: i,nx
       real(pfdp)  :: kx, Lx
@@ -306,33 +309,18 @@ contains
          else
             kx = two_pi / Lx * dble(-nx + i - 1)
          end if
-         lap(i) = -kx**2
+               if (i .eq. 0) then
+                  ilap(i) = 0.0_pfdp !    This sets DC component
+               else
+                  ilap(i) = -1.0_pfdp/(kx**2)
+               end if
       end do
       
-    end subroutine make_lap_1d
-    subroutine make_deriv_1d(this, ddx)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: ddx(:)
-      
-      integer     :: i,nx
-      real(pfdp)  :: kx, Lx
-      
-      nx=this%nx
-      Lx=this%Lx
-      do i = 1, nx
-         if (i <= nx/2+1) then
-            kx = two_pi / Lx * dble(i-1)
-         else
-            kx = two_pi / Lx * dble(-nx + i - 1)
-         end if
-         
-         ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
-      end do
-    end subroutine make_deriv_1d
+    end subroutine make_ilap_1d
      
-    subroutine make_lap_2d(this, lap)
+    subroutine make_ilap_2d(this, ilap)
       class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:,:)
+      complex(pfdp), intent(inout) :: ilap(:,:)
       
       integer     :: i,j,nx,ny
       real(pfdp)  :: kx,ky,Lx,Ly
@@ -355,11 +343,159 @@ contains
                kx = two_pi / Lx * dble(-nx + i - 1)
             end if
             
+               if (i .eq. 0  .and. j .eq. 0 ) then
+                  ilap(i,j) = 0.0_pfdp !    This sets DC component
+               else
+                  ilap(i,j) = -1.0_pfdp/(kx**2+ky**2)
+               end if
+         end do
+      end do
+    end subroutine make_ilap_2d
+
+    subroutine make_ilap_3d(this, ilap)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: ilap(:,:,:)
+      
+      integer     :: i,j,k,nx,ny,nz
+      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
+      
+      nx=this%nx
+      ny=this%ny
+      nz=this%nz
+      Lx=this%Lx
+      Ly=this%Ly
+      Lz=this%Lz
+      do k = 1,nz
+         if (k <= nz/2+1) then
+            kz = two_pi / Lz * dble(k-1)
+         else
+            kz = two_pi / Lz * dble(-nz + k - 1)
+         end if
+         do j = 1, ny
+            if (j <= ny/2+1) then
+               ky = two_pi / Ly * dble(j-1)
+            else
+               ky = two_pi / Ly * dble(-ny + j - 1)
+            end if
+            do i = 1, nx
+               if (i <= nx/2+1) then
+                  kx = two_pi / Lx * dble(i-1)
+               else
+                  kx = two_pi / Lx * dble(-nx + i - 1)
+               end if
+               if (i .eq. 0  .and. j .eq. 0 ) then
+                  ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+               else
+                  ilap(i,j,k) = -1.0_pfdp/(kx**2+ky**2+kz**2)
+               end if
+            end do
+         end do
+      end do
+      
+    end subroutine make_ilap_3d
+    subroutine make_lap_1d(this, lap)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: lap(:)
+      
+      integer     :: i,nx
+      real(pfdp)  :: kx,Lx
+      
+      nx=this%nx
+      Lx=this%Lx
+      do i = 1, nx
+         if (i <= nx/2+1) then
+            kx = two_pi / Lx * dble(i-1)
+         else
+            kx = two_pi / Lx * dble(-nx + i - 1)
+         end if
+         lap(i) = -(kx**2)
+      end do
+    end subroutine make_lap_1d
+    
+    subroutine make_lap_2d(this, lap)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: lap(:,:)
+      
+      integer     :: i,j,nx,ny
+      real(pfdp)  :: kx,ky,Lx,Ly
+      
+      nx=this%nx
+      ny=this%ny
+      Lx=this%Lx
+      Ly=this%Ly
+      do j = 1, ny
+         if (j <= ny/2+1) then
+            ky = two_pi / Ly * dble(j-1)
+         else
+            ky = two_pi / Ly * dble(-ny + j - 1)
+         end if
+         do i = 1, nx
+            if (i <= nx/2+1) then
+               kx = two_pi / Lx * dble(i-1)
+            else
+               kx = two_pi / Lx * dble(-nx + i - 1)
+            end if
             lap(i,j) = -(kx**2+ky**2)
          end do
       end do
     end subroutine make_lap_2d
+    subroutine make_lap_3d(this, lap)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: lap(:,:,:)
+      
+      integer     :: i,j,k,nx,ny,nz
+      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
+      
+      nx=this%nx
+      ny=this%ny
+      nz=this%nz
+      Lx=this%Lx
+      Ly=this%Ly
+      Lz=this%Lz
+      do k = 1,nz
+         if (k <= nz/2+1) then
+            kz = two_pi / Lz * dble(k-1)
+         else
+            kz = two_pi / Lz * dble(-nz + k - 1)
+         end if
+         do j = 1, ny
+            if (j <= ny/2+1) then
+               ky = two_pi / Ly * dble(j-1)
+            else
+               ky = two_pi / Ly * dble(-ny + j - 1)
+            end if
+            do i = 1, nx
+               if (i <= nx/2+1) then
+                  kx = two_pi / Lx * dble(i-1)
+               else
+                  kx = two_pi / Lx * dble(-nx + i - 1)
+               end if
+                  lap(i,j,k) = -(kx**2+ky**2+kz**2)
+            end do
+         end do
+      end do
+      
+    end subroutine make_lap_3d
 
+    subroutine make_deriv_1d(this, ddx)
+      class(pf_fft_abs_t), intent(inout) :: this
+      complex(pfdp), intent(inout) :: ddx(:)
+      
+      integer     :: i,nx
+      real(pfdp)  :: kx, Lx
+      
+      nx=this%nx
+      Lx=this%Lx
+      do i = 1, nx
+         if (i <= nx/2+1) then
+            kx = two_pi / Lx * dble(i-1)
+         else
+            kx = two_pi / Lx * dble(-nx + i - 1)
+         end if
+         
+         ddx(i) = (0.0_pfdp, 1.0_pfdp) * kx
+      end do
+    end subroutine make_deriv_1d
     subroutine make_deriv_2d(this, deriv,dir)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: deriv(:,:)
@@ -445,43 +581,6 @@ contains
       end select
 
     end subroutine make_deriv_3d
-    subroutine make_lap_3d(this, lap)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:,:,:)
-      
-      integer     :: i,j,k,nx,ny,nz
-      real(pfdp)  :: kx,ky,kz,Lx,Ly,Lz
-      
-      nx=this%nx
-      ny=this%ny
-      nz=this%nz
-      Lx=this%Lx
-      Ly=this%Ly
-      Lz=this%Lz
-      do k = 1,nz
-         if (k <= nz/2+1) then
-            kz = two_pi / Lz * dble(k-1)
-         else
-            kz = two_pi / Lz * dble(-nz + k - 1)
-         end if
-         do j = 1, ny
-            if (j <= ny/2+1) then
-               ky = two_pi / Ly * dble(j-1)
-            else
-               ky = two_pi / Ly * dble(-ny + j - 1)
-            end if
-            do i = 1, nx
-               if (i <= nx/2+1) then
-                  kx = two_pi / Lx * dble(i-1)
-               else
-                  kx = two_pi / Lx * dble(-nx + i - 1)
-               end if
-               lap(i,j,k) = -(kx**2+ky**2+kz**2)
-            end do
-         end do
-      end do
-      
-    end subroutine make_lap_3d
   !  Interp routines that take a coarse vector and produce a fine    
   
   

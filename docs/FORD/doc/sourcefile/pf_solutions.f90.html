@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.8% of total for source files.">508 statements</a>
+    title=" 5.1% of total for source files.">548 statements</a>
      </li> 
      
      
@@ -912,53 +912,55 @@
 <a name="ln-649"></a>
 <a name="ln-650"></a><span class="k">  end subroutine </span><span class="n">exact_kdv_1d</span>
 <a name="ln-651"></a>  
-<a name="ln-652"></a><span class="c">!!$  subroutine exact_kdv_2dz(t, uex,beta,Lx)</span>
-<a name="ln-653"></a><span class="c">!!$    real(pfdp), intent(in)  :: t</span>
-<a name="ln-654"></a><span class="c">!!$    complex(pfdp), intent(inout) :: uex(:,:)</span>
-<a name="ln-655"></a><span class="c">!!$    real(pfdp), intent(in) :: Lx(2)</span>
-<a name="ln-656"></a><span class="c">!!$    </span>
-<a name="ln-657"></a><span class="c">!!$    integer    :: nx,ny, i,j</span>
-<a name="ln-658"></a><span class="c">!!$    real(pfdp) :: x, y,L</span>
-<a name="ln-659"></a><span class="c">!!$    </span>
-<a name="ln-660"></a><span class="c">!!$    nx = size(uex,1)</span>
-<a name="ln-661"></a><span class="c">!!$    ny = size(uex,2)</span>
-<a name="ln-662"></a><span class="c">!!$    L=0.5_pfdp*(Lx(1)+Lx(2))</span>
-<a name="ln-663"></a><span class="c">!!$    do j = 1, ny</span>
-<a name="ln-664"></a><span class="c">!!$       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)</span>
-<a name="ln-665"></a><span class="c">!!$       do i = 1, nx</span>
-<a name="ln-666"></a><span class="c">!!$          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) </span>
-<a name="ln-667"></a><span class="c">!!$          uex(i,j) = kdv_ex(2.0_pfdp*t,x+y,L)</span>
-<a name="ln-668"></a><span class="c">!!$       end do</span>
-<a name="ln-669"></a><span class="c">!!$    end do</span>
-<a name="ln-670"></a><span class="c">!!$       </span>
-<a name="ln-671"></a><span class="c">!!$  end subroutine exact_kdv_2dz</span>
-<a name="ln-672"></a><span class="c">!!$  </span>
-<a name="ln-673"></a><span class="c">!!$  subroutine exact_kdv_3dz(t, uex,Lx)</span>
-<a name="ln-674"></a><span class="c">!!$    real(pfdp), intent(in)  :: t</span>
-<a name="ln-675"></a><span class="c">!!$    complex(pfdp), intent(inout) :: uex(:,:,:)</span>
-<a name="ln-676"></a><span class="c">!!$    real(pfdp), intent(in) :: Lx(3)</span>
-<a name="ln-677"></a><span class="c">!!$    </span>
-<a name="ln-678"></a><span class="c">!!$    integer    :: nx,ny,nz, i,j,k</span>
-<a name="ln-679"></a><span class="c">!!$    real(pfdp) :: x, y,z,L</span>
-<a name="ln-680"></a><span class="c">!!$    </span>
-<a name="ln-681"></a><span class="c">!!$    nx = size(uex,1)</span>
-<a name="ln-682"></a><span class="c">!!$    ny = size(uex,2)    </span>
-<a name="ln-683"></a><span class="c">!!$    nz = size(uex,3)    </span>
-<a name="ln-684"></a><span class="c">!!$    L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp</span>
-<a name="ln-685"></a><span class="c">!!$    do k = 1, nz</span>
-<a name="ln-686"></a><span class="c">!!$       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) </span>
-<a name="ln-687"></a><span class="c">!!$       do j = 1, ny</span>
-<a name="ln-688"></a><span class="c">!!$          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)</span>
-<a name="ln-689"></a><span class="c">!!$          do i = 1, nx</span>
-<a name="ln-690"></a><span class="c">!!$             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) </span>
-<a name="ln-691"></a><span class="c">!!$             uex(i,j,k) = kdv_ex(3.0_pfdp*t,x+y+z,L)</span>
-<a name="ln-692"></a><span class="c">!!$          end do</span>
-<a name="ln-693"></a><span class="c">!!$       end do</span>
-<a name="ln-694"></a><span class="c">!!$    end do</span>
-<a name="ln-695"></a><span class="c">!!$</span>
-<a name="ln-696"></a><span class="c">!!$  end subroutine exact_kdv_3dz</span>
-<a name="ln-697"></a><span class="c">!!$</span>
-<a name="ln-698"></a><span class="k">end module </span><span class="n">pf_mod_solutions</span>
+<a name="ln-652"></a>  <span class="k">subroutine </span><span class="n">exact_kdv_2dz</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uex</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">Lx</span><span class="p">)</span>
+<a name="ln-653"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">t</span>
+<a name="ln-654"></a>    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">uex</span><span class="p">(:,:)</span>
+<a name="ln-655"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">beta</span>
+<a name="ln-656"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a name="ln-657"></a>    
+<a name="ln-658"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span>
+<a name="ln-659"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">L</span>
+<a name="ln-660"></a>    
+<a name="ln-661"></a>    <span class="n">nx</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-662"></a>    <span class="n">ny</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<a name="ln-663"></a>    <span class="n">L</span><span class="o">=</span><span class="mf">0.5_pfdp</span><span class="o">*</span><span class="p">(</span><span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<a name="ln-664"></a>    <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
+<a name="ln-665"></a>       <span class="n">y</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+<a name="ln-666"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
+<a name="ln-667"></a>          <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+<a name="ln-668"></a>          <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">kdv_ex</span><span class="p">(</span><span class="mf">2.0_pfdp</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">L</span><span class="p">)</span>
+<a name="ln-669"></a>       <span class="k">end do</span>
+<a name="ln-670"></a><span class="k">    end do</span>
+<a name="ln-671"></a><span class="k">       </span>
+<a name="ln-672"></a><span class="k">  end subroutine </span><span class="n">exact_kdv_2dz</span>
+<a name="ln-673"></a>  
+<a name="ln-674"></a>  <span class="k">subroutine </span><span class="n">exact_kdv_3dz</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uex</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">Lx</span><span class="p">)</span>
+<a name="ln-675"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">t</span>
+<a name="ln-676"></a>    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">uex</span><span class="p">(:,:,:)</span>
+<a name="ln-677"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">beta</span>
+<a name="ln-678"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<a name="ln-679"></a>    
+<a name="ln-680"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span>
+<a name="ln-681"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">L</span>
+<a name="ln-682"></a>    
+<a name="ln-683"></a>    <span class="n">nx</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-684"></a>    <span class="n">ny</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>    
+<a name="ln-685"></a>    <span class="n">nz</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>    
+<a name="ln-686"></a>    <span class="n">L</span><span class="o">=</span><span class="p">(</span><span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">/</span><span class="mf">3.0_pfdp</span>
+<a name="ln-687"></a>    <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nz</span>
+<a name="ln-688"></a>       <span class="n">z</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+<a name="ln-689"></a>       <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
+<a name="ln-690"></a>          <span class="n">y</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+<a name="ln-691"></a>          <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
+<a name="ln-692"></a>             <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+<a name="ln-693"></a>             <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">kdv_ex</span><span class="p">(</span><span class="mf">3.0_pfdp</span><span class="o">*</span><span class="n">t</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">L</span><span class="p">)</span>
+<a name="ln-694"></a>          <span class="k">end do</span>
+<a name="ln-695"></a><span class="k">       end do</span>
+<a name="ln-696"></a><span class="k">    end do</span>
+<a name="ln-697"></a>
+<a name="ln-698"></a><span class="k">  end subroutine </span><span class="n">exact_kdv_3dz</span>
+<a name="ln-699"></a>
+<a name="ln-700"></a><span class="k">end module </span><span class="n">pf_mod_solutions</span>
 </pre></div>
 
     </section>

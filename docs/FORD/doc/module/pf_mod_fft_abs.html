@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.3% of total for modules and submodules.">466 statements</a>
+    title=" 6.2% of total for modules and submodules.">555 statements</a>
      </li> 
      
      
@@ -248,17 +248,23 @@
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-zconv_3d">zconv_3d</a>
       
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_1d">make_ilap_1d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_2d">make_ilap_2d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_3d">make_ilap_3d</a>
+      
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_1d">make_lap_1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_1d">make_deriv_1d</a>
-      
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_2d">make_lap_2d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_3d">make_lap_3d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_1d">make_deriv_1d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_2d">make_deriv_2d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_3d">make_deriv_3d</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_3d">make_lap_3d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-restrict_1d">restrict_1d</a>
       
@@ -412,17 +418,23 @@
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-zconv_3d">zconv_3d</a>
       
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_1d">make_ilap_1d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_2d">make_ilap_2d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_ilap_3d">make_ilap_3d</a>
+      
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_1d">make_lap_1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_1d">make_deriv_1d</a>
-      
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_2d">make_lap_2d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_3d">make_lap_3d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_1d">make_deriv_1d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_2d">make_deriv_2d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_deriv_3d">make_deriv_3d</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-make_lap_3d">make_lap_3d</a>
       
       <a class="list-group-item" href="../module/pf_mod_fft_abs.html#proc-restrict_1d">restrict_1d</a>
       
@@ -838,6 +850,9 @@ public subroutine pf_fft_p(this)
        <td></td></tr>
       
        <tr><td>generic, public :: <strong><a href='../type/pf_fft_abs_t.html#boundprocedure-make_lap'>make_lap</a></strong>  => make_lap_1d, make_lap_2d, make_lap_3d </td>
+       <td></td></tr>
+      
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_abs_t.html#boundprocedure-make_ilap'>make_ilap</a></strong>  => make_ilap_1d, make_ilap_2d, make_ilap_3d </td>
        <td></td></tr>
       
        <tr><td>generic, public :: <strong><a href='../type/pf_fft_abs_t.html#boundprocedure-make_deriv'>make_deriv</a></strong>  => make_deriv_1d, make_deriv_2d, make_deriv_3d </td>
@@ -2611,6 +2626,204 @@ public subroutine <a href='../proc/zconv_3d.html'>zconv_3d</a>(this, ghat, op, c
     
     
   <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-make_ilap_1d"></span><h3>
+public subroutine <a href='../proc/make_ilap_1d.html'>make_ilap_1d</a>(this, ilap)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-make_ilap_2d"></span><h3>
+public subroutine <a href='../proc/make_ilap_2d.html'>make_ilap_2d</a>(this, ilap)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-make_ilap_3d"></span><h3>
+public subroutine <a href='../proc/make_ilap_3d.html'>make_ilap_3d</a>(this, ilap)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:,:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-make_lap_1d"></span><h3>
 public subroutine <a href='../proc/make_lap_1d.html'>make_lap_1d</a>(this, lap)
     
@@ -2677,72 +2890,6 @@ public subroutine <a href='../proc/make_lap_1d.html'>make_lap_1d</a>(this, lap)
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-make_deriv_1d"></span><h3>
-public subroutine <a href='../proc/make_deriv_1d.html'>make_deriv_1d</a>(this, ddx)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>this</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>ddx</strong>(:)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-make_lap_2d"></span><h3>
 public subroutine <a href='../proc/make_lap_2d.html'>make_lap_2d</a>(this, lap)
     
@@ -2793,6 +2940,138 @@ public subroutine <a href='../proc/make_lap_2d.html'>make_lap_2d</a>(this, lap)
   
   <td></td><td>::</td>
   <td><strong>lap</strong>(:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-make_lap_3d"></span><h3>
+public subroutine <a href='../proc/make_lap_3d.html'>make_lap_3d</a>(this, lap)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lap</strong>(:,:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-make_deriv_1d"></span><h3>
+public subroutine <a href='../proc/make_deriv_1d.html'>make_deriv_1d</a>(this, ddx)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ddx</strong>(:)</td><td></td>
   
 </tr>
 
@@ -2955,72 +3234,6 @@ public subroutine <a href='../proc/make_deriv_3d.html'>make_deriv_3d</a>(this, d
   
   <td></td><td>::</td>
   <td><strong>dir</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-make_lap_3d"></span><h3>
-public subroutine <a href='../proc/make_lap_3d.html'>make_lap_3d</a>(this, lap)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>this</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>lap</strong>(:,:,:)</td><td></td>
   
 </tr>
 

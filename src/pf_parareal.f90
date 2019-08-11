@@ -1,3 +1,9 @@
+!!  Routines that run the pararealalgorithm
+!
+! This file is part of LIBPFASST.
+!
+
+!> Module of routines to run parareal
 module pf_mod_parareal
   use pf_mod_interpolate
   use pf_mod_restrict
@@ -9,19 +15,18 @@ module pf_mod_parareal
   use pf_mod_comm
   
   implicit none
-  !>  The main PFASST data type which includes pretty much everythingl
   
 contains
   !>  Do the parareal algorithm
   subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
-    type(pf_pfasst_t), intent(inout), target   :: pf   !<  The complete PFASST structure
-    class(pf_encap_t), intent(in   )           :: q0   !<  The initial condition
-    real(pfdp),        intent(in   )           :: dt   !<  The time step for each processor
-    real(pfdp),        intent(in   )           :: tend !<  The final time of run
-    integer,           intent(in   ), optional :: nsteps  !<  The number of time steps
-    class(pf_encap_t), intent(inout), optional :: qend    !<  The computed solution at tend
-    !  Local variables
+    type(pf_pfasst_t), intent(inout), target   :: pf   !!  The complete PFASST structure
+    class(pf_encap_t), intent(in   )           :: q0   !!  The initial condition
+    real(pfdp),        intent(in   )           :: dt   !!  The time step for each processor
+    real(pfdp),        intent(in   )           :: tend !!  The final time of run
+    integer,           intent(in   ), optional :: nsteps  !!  The number of time steps
+    class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
 
+    !  Local variables
     integer :: nproc  !!  Total number of processors
     integer :: nsteps_loc  !!  local number of time steps
     real(pfdp) :: tend_loc !!  The final time of run
@@ -224,14 +229,6 @@ contains
     ! Save the coarse level value
     call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
 
-
-    !!  Step 3:  Return to fine level and Step there
-!    if(pf%state%finest_level > 1) then  !  Will do nothing with one level
-!       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
-!       nsteps_f= f_lev_p%ulevel%stepper%nsteps  !  Each processor integrates alone
-!       call f_lev_p%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
-!    endif
-
     call end_timer(pf, TPREDICTOR)
 
     pf%state%iter   = 1
@@ -242,23 +239,22 @@ contains
 
   end subroutine pf_parareal_predictor
 
-  !> Execute a V-cycle between levels nfine and ncoarse
+  !> Execute a parareal V-cycle (iteration)
   subroutine pf_parareal_v_cycle(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
 
 
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: t0, dt
     integer,           intent(in)    :: iteration
-    integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle
-    integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle
+    integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle (not supported)
+    integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle (not supported)
     integer, optional, intent(in)    :: flags
 
     type(pf_level_t), pointer :: f_lev_p, c_lev_p
     integer :: level_index, j,nsteps_f,nsteps_c
 
-    if (pf%nlevels <2) return
-    
-    !  This is for two levels only
+    if (pf%nlevels <2) return     !  This is for two levels only
+
     c_lev_p => pf%levels(1)
     f_lev_p => pf%levels(2)
     nsteps_c= c_lev_p%ulevel%stepper%nsteps
@@ -295,10 +291,6 @@ contains
     call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
     f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
     call pf_set_resid(pf,2,f_lev_p%residual)
-
-!!$    print *,'after fine steps '
-!!$    call f_lev_p%qend%eprint()
-!!$    call c_lev_p%qend%eprint()
 
   end subroutine pf_parareal_v_cycle
   

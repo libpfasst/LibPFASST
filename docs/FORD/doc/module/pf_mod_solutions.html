@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 5.7% of total for modules and submodules.">508 statements</a>
+    title=" 6.1% of total for modules and submodules.">548 statements</a>
      </li> 
      
      
@@ -266,6 +266,10 @@
       
       <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_1d">exact_kdv_1d</a>
       
+      <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_2dz">exact_kdv_2dz</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_3dz">exact_kdv_3dz</a>
+      
     </div>
   </div>
 </div>
@@ -284,53 +288,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>Module with useful subroutines that don't  fit in other modules
-$  subroutine exact_kdv_2dz(t, uex,beta,Lx)
-$    real(pfdp), intent(in)  :: t
-$    complex(pfdp), intent(inout) :: uex(:,:)
-$    real(pfdp), intent(in) :: Lx(2)
-$  <br>
-$    integer    :: nx,ny, i,j
-$    real(pfdp) :: x, y,L
-$  <br>
-$    nx = size(uex,1)
-$    ny = size(uex,2)
-$    L=0.5_pfdp<em>(Lx(1)+Lx(2))
-$    do j = 1, ny
-$       y = Lx(2)</em>real(j-1,pfdp)/real(ny,pfdp)
-$       do i = 1, nx
-$          x = Lx(1)<em>real(i-1,pfdp)/real(nx,pfdp) 
-$          uex(i,j) = kdv_ex(2.0_pfdp</em>t,x+y,L)
-$       end do
-$    end do
-$     <br>
-$  end subroutine exact_kdv_2dz
-$<br>
-$  subroutine exact_kdv_3dz(t, uex,Lx)
-$    real(pfdp), intent(in)  :: t
-$    complex(pfdp), intent(inout) :: uex(:,:,:)
-$    real(pfdp), intent(in) :: Lx(3)
-$  <br>
-$    integer    :: nx,ny,nz, i,j,k
-$    real(pfdp) :: x, y,z,L
-$  <br>
-$    nx = size(uex,1)
-$    ny = size(uex,2)  <br>
-$    nz = size(uex,3)  <br>
-$    L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
-$    do k = 1, nz
-$       z = Lx(3)<em>real(k-1,pfdp)/real(nz,pfdp) 
-$       do j = 1, ny
-$          y = Lx(2)</em>real(j-1,pfdp)/real(ny,pfdp)
-$          do i = 1, nx
-$             x = Lx(1)<em>real(i-1,pfdp)/real(nx,pfdp) 
-$             uex(i,j,k) = kdv_ex(3.0_pfdp</em>t,x+y+z,L)
-$          end do
-$       end do
-$    end do
-$
-$  end subroutine exact_kdv_3dz
-$</p>
+    <p>Module with useful subroutines that don't  fit in other modules</p>
       <br>
     
   
@@ -467,6 +425,10 @@ $</p>
       <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_1dz">exact_kdv_1dz</a>
       
       <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_1d">exact_kdv_1d</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_2dz">exact_kdv_2dz</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_solutions.html#proc-exact_kdv_3dz">exact_kdv_3dz</a>
       
     </div>
   </div>
@@ -5955,6 +5917,198 @@ public subroutine <a href='../proc/exact_kdv_1d.html'>exact_kdv_1d</a>(t, uex, b
   
   <td></td><td>::</td>
   <td><strong>Lx</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-exact_kdv_2dz"></span><h3>
+public subroutine <a href='../proc/exact_kdv_2dz.html'>exact_kdv_2dz</a>(t, uex, beta, Lx)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>uex</strong>(:,:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>beta</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>Lx</strong>(2)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-exact_kdv_3dz"></span><h3>
+public subroutine <a href='../proc/exact_kdv_3dz.html'>exact_kdv_3dz</a>(t, uex, beta, Lx)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>uex</strong>(:,:,:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>beta</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>Lx</strong>(3)</td><td></td>
   
 </tr>
 

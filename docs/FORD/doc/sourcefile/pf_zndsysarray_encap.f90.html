@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.9% of total for source files.">196 statements</a>
+    title=" 1.8% of total for source files.">195 statements</a>
      </li> 
      
      
@@ -458,8 +458,8 @@
 <a name="ln-195"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ntot</span>    
 <a name="ln-196"></a>    <span class="n">ntot</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">ncomp</span>
 <a name="ln-197"></a>    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">)</span>
-<a name="ln-198"></a>    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="nb">cmplx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">)</span>
-<a name="ln-199"></a>    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span>  <span class="nb">cmplx</span><span class="p">(</span><span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">),</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">))</span>        
+<a name="ln-198"></a><span class="c">!    this%flatarray = this%flatarray + cmplx(0.0,1.0,pfdp)*z(ntot+1:2*ntot)</span>
+<a name="ln-199"></a>    <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span>  <span class="nb">cmplx</span><span class="p">(</span><span class="n">z</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">ntot</span><span class="p">),</span><span class="n">z</span><span class="p">(</span><span class="n">ntot</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">ntot</span><span class="p">),</span><span class="n">pfdp</span><span class="p">)</span>        
 <a name="ln-200"></a>  <span class="k">end subroutine </span><span class="n">zndsysarray_unpack</span>
 <a name="ln-201"></a>
 <a name="ln-202"></a>  <span class="c">!&gt; Subroutine to define the norm of the array (here the max norm)</span>

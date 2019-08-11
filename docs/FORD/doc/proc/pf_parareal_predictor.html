@@ -212,8 +212,7 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
     <p>The parareal predictor does a serial integration on the coarse level followed
   by a fine integration if there is a fine level
  Step 1. Getting the initial condition on the coarsest level</p>
-<p>Step 2. Do coarse level integration, no communication necessary
-  Step 3:  Return to fine level and Step there</p>
+<p>Step 2. Do coarse level integration, no communication necessary</p>
     
 
     <h3>Arguments</h3>
@@ -396,14 +395,6 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
     <span class="k">end do</span>
     <span class="c">! Save the coarse level value</span>
     <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>     
-
-
-    <span class="c">!!  Step 3:  Return to fine level and Step there</span>
-<span class="c">!    if(pf%state%finest_level &gt; 1) then  !  Will do nothing with one level</span>
-<span class="c">!       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition</span>
-<span class="c">!       nsteps_f= f_lev_p%ulevel%stepper%nsteps  !  Each processor integrates alone</span>
-<span class="c">!       call f_lev_p%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)</span>
-<span class="c">!    endif</span>
 
     <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TPREDICTOR</span><span class="p">)</span>
 

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.0% of total for source files.">212 statements</a>
+    title=" 2.0% of total for source files.">213 statements</a>
      </li> 
      
      
@@ -275,8 +275,8 @@
 <a name="ln-12"></a>  <span class="k">use </span><span class="n">pf_mod_fft_abs</span>
 <a name="ln-13"></a>  
 <a name="ln-14"></a>  <span class="k">implicit none</span>
-<a name="ln-15"></a>  
-<a name="ln-16"></a><span class="c">!  include &#39;fftw3.f03&#39;</span>
+<a name="ln-15"></a><span class="k">  use</span><span class="p">,</span> <span class="k">intrinsic</span> <span class="kd">::</span> <span class="nb">iso_c_binding</span>
+<a name="ln-16"></a>  <span class="c">!include &#39;fftw3.f03&#39;</span>
 <a name="ln-17"></a>  
 <a name="ln-18"></a>  <span class="c">!&gt;  Variables and storage for FFTW</span>
 <a name="ln-19"></a>  <span class="k">type</span><span class="p">,</span><span class="k">extends</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf_fft_t</span>

@@ -229,7 +229,7 @@ All Modules &ndash; LibPFASST
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_parareal.html'>pf_mod_parareal</a></td><td><a href='../sourcefile/pf_parareal.f90.html'>pf_parareal.f90</a></td><td><p>The main PFASST data type which includes pretty much everythingl</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_parareal.html'>pf_mod_parareal</a></td><td><a href='../sourcefile/pf_parareal.f90.html'>pf_parareal.f90</a></td><td><p>Module of routines to run parareal</p></td></tr>
                
                <!--active-->
 			 
@@ -253,53 +253,7 @@ All Modules &ndash; LibPFASST
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules
-$  subroutine exact_kdv_2dz(t, uex,beta,Lx)
-$    real(pfdp), intent(in)  :: t
-$    complex(pfdp), intent(inout) :: uex(:,:)
-$    real(pfdp), intent(in) :: Lx(2)
-$  <br>
-$    integer    :: nx,ny, i,j
-$    real(pfdp) :: x, y,L
-$  <br>
-$    nx = size(uex,1)
-$    ny = size(uex,2)
-$    L=0.5_pfdp<em>(Lx(1)+Lx(2))
-$    do j = 1, ny
-$       y = Lx(2)</em>real(j-1,pfdp)/real(ny,pfdp)
-$       do i = 1, nx
-$          x = Lx(1)<em>real(i-1,pfdp)/real(nx,pfdp) 
-$          uex(i,j) = kdv_ex(2.0_pfdp</em>t,x+y,L)
-$       end do
-$    end do
-$     <br>
-$  end subroutine exact_kdv_2dz
-$<br>
-$  subroutine exact_kdv_3dz(t, uex,Lx)
-$    real(pfdp), intent(in)  :: t
-$    complex(pfdp), intent(inout) :: uex(:,:,:)
-$    real(pfdp), intent(in) :: Lx(3)
-$  <br>
-$    integer    :: nx,ny,nz, i,j,k
-$    real(pfdp) :: x, y,z,L
-$  <br>
-$    nx = size(uex,1)
-$    ny = size(uex,2)  <br>
-$    nz = size(uex,3)  <br>
-$    L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
-$    do k = 1, nz
-$       z = Lx(3)<em>real(k-1,pfdp)/real(nz,pfdp) 
-$       do j = 1, ny
-$          y = Lx(2)</em>real(j-1,pfdp)/real(ny,pfdp)
-$          do i = 1, nx
-$             x = Lx(1)<em>real(i-1,pfdp)/real(nx,pfdp) 
-$             uex(i,j,k) = kdv_ex(3.0_pfdp</em>t,x+y+z,L)
-$          end do
-$       end do
-$    end do
-$
-$  end subroutine exact_kdv_3dz
-$</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
                
                <!--active-->
 			 

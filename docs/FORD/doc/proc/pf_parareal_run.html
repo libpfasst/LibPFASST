@@ -393,8 +393,8 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">tend</span> <span class="c">!!  The final time of run</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">nsteps</span>  <span class="c">!!  The number of time steps</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">qend</span>    <span class="c">!!  The computed solution at tend</span>
-    <span class="c">!  Local variables</span>
 
+    <span class="c">!  Local variables</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nproc</span>  <span class="c">!!  Total number of processors</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_loc</span>  <span class="c">!!  local number of time steps</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tend_loc</span> <span class="c">!!  The final time of run</span>

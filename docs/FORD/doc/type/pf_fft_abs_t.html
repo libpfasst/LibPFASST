@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 4.8% of total for derived types.</p>Including implementation: 865 statements, 13.6% of total for derived types.">29 statements</a>
+    title="<p> 5.1% of total for derived types.</p>Including implementation: 1041 statements, 15.6% of total for derived types.">31 statements</a>
      </li> 
      
      
@@ -237,6 +237,8 @@
       
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_lap">make_lap</a>
       
+      <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_ilap">make_ilap</a>
+      
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_deriv">make_deriv</a>
       
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-restrict">restrict</a>
@@ -346,6 +348,8 @@
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-get_wk_ptr">get_wk_ptr</a>
       
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_lap">make_lap</a>
+      
+      <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_ilap">make_ilap</a>
       
       <a class="list-group-item" href="../type/pf_fft_abs_t.html#boundprocedure-make_deriv">make_deriv</a>
       
@@ -2881,6 +2885,219 @@ public subroutine <a href='../proc/make_lap_3d.html'>make_lap_3d</a>(this, lap)
     
      
 <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-make_ilap"></span><h3>generic, public :: <strong>make_ilap</strong>  => make_ilap_1d, make_ilap_2d, make_ilap_3d 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+public subroutine <a href='../proc/make_ilap_1d.html'>make_ilap_1d</a>(this, ilap)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+public subroutine <a href='../proc/make_ilap_2d.html'>make_ilap_2d</a>(this, ilap)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+public subroutine <a href='../proc/make_ilap_3d.html'>make_ilap_3d</a>(this, ilap)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>complex(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>ilap</strong>(:,:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-make_deriv"></span><h3>generic, public :: <strong>make_deriv</strong>  => make_deriv_1d, make_deriv_2d, make_deriv_3d 
     
   </h3></div>
@@ -3663,6 +3880,9 @@ public subroutine <a href='../proc/zrestrict_3d.html'>zrestrict_3d</a>(this, yha
      <span class="c">!  Construct spectral Laplacian</span>
      <span class="k">procedure</span> <span class="p">,</span> <span class="k">private</span> <span class="kd">::</span> <span class="n">make_lap_1d</span><span class="p">,</span><span class="n">make_lap_2d</span><span class="p">,</span> <span class="n">make_lap_3d</span>
      <span class="k">generic</span>   <span class="kd">::</span> <span class="n">make_lap</span> <span class="o">=&gt;</span><span class="n">make_lap_1d</span><span class="p">,</span><span class="n">make_lap_2d</span><span class="p">,</span><span class="n">make_lap_3d</span>
+     <span class="c">!  Construct inverse spectral Laplacian</span>
+     <span class="k">procedure</span> <span class="p">,</span> <span class="k">private</span> <span class="kd">::</span> <span class="n">make_ilap_1d</span><span class="p">,</span><span class="n">make_ilap_2d</span><span class="p">,</span> <span class="n">make_ilap_3d</span>
+     <span class="k">generic</span>   <span class="kd">::</span> <span class="n">make_ilap</span> <span class="o">=&gt;</span><span class="n">make_ilap_1d</span><span class="p">,</span><span class="n">make_ilap_2d</span><span class="p">,</span><span class="n">make_ilap_3d</span>
      <span class="c">!  Construct spectral derivative</span>
      <span class="k">procedure</span> <span class="p">,</span> <span class="k">private</span> <span class="kd">::</span> <span class="n">make_deriv_1d</span><span class="p">,</span><span class="n">make_deriv_2d</span><span class="p">,</span> <span class="n">make_deriv_3d</span>
      <span class="k">generic</span>   <span class="kd">::</span> <span class="n">make_deriv</span> <span class="o">=&gt;</span><span class="n">make_deriv_1d</span><span class="p">,</span><span class="n">make_deriv_2d</span><span class="p">,</span><span class="n">make_deriv_3d</span>
