@@ -4,7 +4,8 @@
 !
 !>  Module to hold include statement
 module pf_mod_mpi
-  include "mpif.h"
+  !  include "mpif.h"
+  use  mpi
 end module pf_mod_mpi
 
 !> Module to implement communication routines in  MPI.
