@@ -35,7 +35,7 @@ The order of the command line parameters is not important except that they must 
 
 To run an example that does the actual PFASST algorithm
 
-`$ mpirun -n 32 ./main.exe multilevel.nml`
+`$ mpirun -n 32 ./main.exe multi_level.nml`
 
 The main program is in ``src/main.f90`` and can be used as a template for building applications using LibPFASST.  The main routine here
 only initializes MPI, calls a routine ``run_pfasst`` to run the PFASST algorithm, then closes MPI.
