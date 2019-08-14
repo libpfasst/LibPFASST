@@ -7,7 +7,7 @@ CC = mpicc
 
 AR = ar rcs
 
-DEBUG = TRUE
+DEBUG = FALSE
 MKVERBOSE = FALSE
 
 #  Set some compiler flags
@@ -33,6 +33,13 @@ FFLAGS  +=  -I$(FFTW)/include
 LDFLAGS += -L$(FFTW)/lib -lfftw3
 endif
 
+USE_PETSC=TRUE
+ifeq ($(USE_PETSC),TRUE)
+FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
+endif
+
+
+
 FSRC = pfasst.f90 \
        pf_comm.f90 \
        pf_dtype.f90 \
@@ -48,6 +55,7 @@ FSRC = pfasst.f90 \
        pf_rkstepper.f90 \
        pf_timer.f90 \
        pf_utils.f90 \
+       pf_petscVec_encap.f90 \
        pf_ndarray_encap.f90 \
        pf_ndarray_oc_encap.f90 \
        pf_ndsysarray_encap.f90 \
