@@ -211,8 +211,6 @@ contains
     select type(x)
     type is (ndarray)
        this%flatarray = a * x%flatarray + this%flatarray
-    type is (petsc_vec)
-       call VecAXPY(a,x,y)
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select

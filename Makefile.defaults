@@ -22,7 +22,7 @@ endif
 include $(wildcard $(LIBPFASST)/*.defs)
 
 VPATHS = $(LIBPFASST)/src
-LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst
+LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
 
 NOFFTW=TRUE
 ifeq ($(NOFFTW),TRUE)
@@ -32,13 +32,6 @@ FFTW=$(LIBPFASST)/fftw3
 FFLAGS  +=  -I$(FFTW)/include
 LDFLAGS += -L$(FFTW)/lib -lfftw3
 endif
-
-USE_PETSC=TRUE
-ifeq ($(USE_PETSC),TRUE)
-FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
-endif
-
-
 
 FSRC = pfasst.f90 \
        pf_comm.f90 \
@@ -55,7 +48,6 @@ FSRC = pfasst.f90 \
        pf_rkstepper.f90 \
        pf_timer.f90 \
        pf_utils.f90 \
-       pf_petscVec_encap.f90 \
        pf_ndarray_encap.f90 \
        pf_ndarray_oc_encap.f90 \
        pf_ndsysarray_encap.f90 \
@@ -73,6 +65,16 @@ FSRC = pfasst.f90 \
 #       pf_amisdcQ.f90 \
 
 
+#  Before using petsc, one must set the environment variables
+#  PETSC_DIR and PETSC_ARCH
+#  These are displayed at the end of the petsc configuration step
+
+USE_PETSC=TRUE
+ifeq ($(USE_PETSC),TRUE)
+FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
+FSRC+= pf_petscVec_encap.f90
+LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
+endif
 
 ifeq ($(NOFFTW),TRUE)
 FSRC+=pf_fftpack.f90
