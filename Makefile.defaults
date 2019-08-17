@@ -46,6 +46,7 @@ FSRC = pfasst.f90 \
        pf_restrict.f90 \
        pf_results.f90 \
        pf_rkstepper.f90 \
+       pf_solutions.f90 \
        pf_timer.f90 \
        pf_utils.f90 \
        pf_ndarray_encap.f90 \

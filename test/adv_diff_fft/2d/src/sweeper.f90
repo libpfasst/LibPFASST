@@ -9,6 +9,7 @@ module pf_my_sweeper
   use pf_mod_ndarray
   use pf_mod_imex_sweeper
   use pf_mod_fftpackage
+  use pf_mod_solutions
   implicit none
 
 
@@ -219,14 +220,15 @@ contains
 
     !  Using sin wave initial condition
     if (nprob .eq. 1) then
-       omega = two_pi*kfreq
-       do j = 1, ny
-          y = dble(j-1)/dble(ny)-0.5_pfdp - t*b 
-          do i = 1, nx
-             x = dble(i-1)/dble(nx)-0.5_pfdp - t*a 
-             yex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
-          end do
-       end do
+!!$       omega = two_pi*kfreq
+!!$       do j = 1, ny
+!!$          y = dble(j-1)/dble(ny)-0.5_pfdp - t*b 
+!!$          do i = 1, nx
+!!$             x = dble(i-1)/dble(nx)-0.5_pfdp - t*a 
+!!$             yex(i,j) = sin(omega*x)*sin(omega*y)*exp(-2.0_pfdp*omega*omega*nu*t)
+!!$          end do
+!!$       end do
+       call exact_ad_cos(t,yex,nu,[a,b],[kfreq,kfreq],[1.0_pfdp,1.0_pfdp])
     else
        do j = 1, ny
           y = dble(j-1)/dble(ny)-0.5_pfdp - t*b 

@@ -58,6 +58,7 @@ contains
     fft_f => sweeper_f%fft_tool    
 
     call fft_c%interp(yvec_c,fft_f,yvec_f)
+
   end subroutine interpolate
 
   !>  Restrict from fine level to coarse

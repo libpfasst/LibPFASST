@@ -9,6 +9,7 @@ module pf_my_sweeper
   use pf_mod_ndarray
   use pf_mod_imex_sweeper
   use pf_mod_fftpackage
+  use pf_mod_solutions
   implicit none
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
@@ -219,23 +220,13 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nu, v,kfreq
+    use probin, only: nu, v,kfreq,Lx
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
-    integer    :: nx, i
-    real(pfdp) ::  omega
-    real(pfdp) ::  x
 
-    nx = size(yex)
-
-    !  Using sin wave initial condition
-    omega = two_pi*kfreq
-    do i = 1, nx
-       x = dble(i-1)/dble(nx) - t*v 
-       yex(i) = cos(omega*x)*exp(-omega*omega*nu*t)
-    end do
-
+    !  Call exact solution from Libpfasst for ad problem
+    call exact_ad_cos_1d(t,yex,nu,v,kfreq,Lx)
   end subroutine exact
 
 

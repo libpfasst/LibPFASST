@@ -27,7 +27,7 @@ contains
        
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
        
-       write (fname, "(A17,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
+       write (fname, "(A16,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
        fullname = trim(this%datpath) // trim(fname)
        
        if (rank_in == 0) then

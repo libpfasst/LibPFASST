@@ -99,7 +99,7 @@ contains
   subroutine interp1(qF, qC, adF, adC)
     use feval, only: ad_sweeper_t, as_ad_sweeper
     class(ad_sweeper_t), pointer :: adF, adC
-    real(pfdp),  intent(inout) :: qF(:), qC(:)
+    real(pfdp),  pointer, intent(inout) :: qF(:), qC(:)
 
     class(ad_sweeper_t), pointer :: sweeperF, sweeperC
     complex(pfdp),       pointer :: wkF(:), wkC(:)
@@ -121,19 +121,8 @@ contains
        return
     endif
 
-    call fftF%get_wk_ptr(wkF)
-    call fftC%get_wk_ptr(wkC)
+    call fftC%interp(qC,fftF,qF)
 
-    wkC = qC
-    call fftC%fftf()    
-
-    wkF = 0.0d0
-    wkF(1:NxC/2) = wkC(1:NxC/2)
-    wkF(NxF-NxC/2+2:NxF) = wkC(NxC/2+2:NxC)
-    wkF = wkF*2.0_pfdp
-
-    call fftF%fftb()
-    qF = real(wkF)
   end subroutine interp1
 
 

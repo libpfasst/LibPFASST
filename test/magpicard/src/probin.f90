@@ -95,7 +95,7 @@ contains
     ird = 0
     DO
        CALL get_command_argument(ird, arg)
-       print *, arg
+       ! print *, arg
        
        IF (LEN_TRIM(arg) == 0) EXIT
        if (ird > 0) then
