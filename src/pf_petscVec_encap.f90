@@ -26,7 +26,7 @@ module pf_mod_pf_petscVec
   use petscvec
   implicit none
 
-  !>  Type to create and destroy N-dimenstional arrays
+  !>  Type to create and destroy N-dimenstional arrays 
   type, extends(pf_factory_t) :: pf_petscVec_factory
    contains
      procedure :: create_single  => pf_petscVec_create_single
@@ -41,6 +41,7 @@ module pf_mod_pf_petscVec
      integer,    allocatable :: shape(:)
      real(pfdp), allocatable :: flatarray(:)
      type(tVec) ::  foo
+     integer :: ierr
    contains
      procedure :: setval => pf_petscVec_setval
      procedure :: copy => pf_petscVec_copy
@@ -80,14 +81,18 @@ contains
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: shape(:)
 
-    integer ierr,nn
+    integer nn,psize,rank,ierr
     select type (q)
     class is (pf_petscVec)
-       print *,'creating petscVec',   PETSC_COMM_WORLD    
-       call VecCreate(PETSC_COMM_WORLD,q%foo,ierr)
 
+       call VecCreate(PETSC_COMM_WORLD,q%foo,ierr)
        call VecSetSizes(q%foo,PETSC_DECIDE,shape(1),ierr)
+       
        call VecSetFromOptions(q%foo,ierr)
+       call VecGetLocalSize(q%foo,psize,ierr)
+       call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr)
+!       print *,'created petscVec, size=',shape(1), 'local size=', psize, 'rank=',rank
+       
        allocate(q%shape(size(shape)))
        allocate(q%flatarray(product(shape)))
        q%dim   = size(shape)
@@ -121,10 +126,9 @@ contains
   subroutine pf_petscVec_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
     type(pf_petscVec), pointer :: pf_petscVec_obj
-    integer :: ierr
-
+    integer ::  ierr
     pf_petscVec_obj => cast_as_pf_petscVec(encap)
-    print *,'destroying petscVec'
+!    print *,'destroying petscVec'
     call VecDestroy(pf_petscVec_obj%foo,ierr)
     deallocate(pf_petscVec_obj%shape)
     deallocate(pf_petscVec_obj%flatarray)
@@ -137,10 +141,11 @@ contains
   subroutine pf_petscVec_destroy_single(this, x)
     class(pf_petscVec_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer :: ierr
+    integer ::  ierr
+
     select type (x)
     class is (pf_petscVec)
-       print *,'destroying petscVec'
+!       print *,'destroying petscVec'
        call VecDestroy(x%foo,ierr)
        
        deallocate(x%shape)
@@ -154,12 +159,11 @@ contains
   subroutine pf_petscVec_destroy_array(this, x)
     class(pf_petscVec_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout),allocatable :: x(:)
-    integer                                            :: i
-    integer :: ierr
+    integer                                            :: i,ierr
     select type(x)
     class is (pf_petscVec)
        do i = 1,size(x)
-          print *,'destroying  petscVec'
+!          print *,'destroying  petscVec'
           call VecDestroy(x(i)%foo,ierr)
           deallocate(x(i)%shape)
           deallocate(x(i)%flatarray)
@@ -172,12 +176,13 @@ contains
   !>  The following are the base subroutines that all encapsulations must provide
   !!
   
-  !> Subroutine to set array to a scalare  value.
+  !> Subroutine to set array to a scalar  value.
   subroutine pf_petscVec_setval(this, val, flags)
     class(pf_petscVec), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
     this%flatarray = val
+    call VecSet(this%foo,val,this%ierr)
   end subroutine pf_petscVec_setval
 
   !> Subroutine to copy an array
@@ -188,6 +193,7 @@ contains
     select type(src)
     type is (pf_petscVec)
        this%flatarray = src%flatarray
+      call VecCopy(src%foo,this%foo,this%ierr)       
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
@@ -198,7 +204,17 @@ contains
     class(pf_petscVec), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
+
+    real(pfdp),  pointer :: pfoo(:)
+    integer :: psize
+
+    call VecGetArrayReadF90(this%foo,pfoo,this%ierr)
+    call VecGetLocalSize(this%foo,psize,this%ierr)
     z = this%flatarray
+    z=pfoo(1:psize) 
+    
+    call VecRestoreArrayReadF90(this%foo,pfoo,this%ierr)
+    
   end subroutine pf_petscVec_pack
 
   !> Subroutine to unpack a flatarray after receiving
@@ -206,7 +222,17 @@ contains
     class(pf_petscVec), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     integer,     intent(in   ), optional :: flags
+
+    real(pfdp),  pointer :: pfoo(:)
+    integer :: psize
+
+    call VecGetArrayF90(this%foo,pfoo,this%ierr)
+    call VecGetLocalSize(this%foo,psize,this%ierr)
+    
     this%flatarray = z
+    pfoo=z(1:psize)
+    call VecRestoreArrayF90(this%foo,pfoo,this%ierr)
+    
   end subroutine pf_petscVec_unpack
 
   !> Subroutine to define the norm of the array (here the max norm)
@@ -214,7 +240,9 @@ contains
     class(pf_petscVec), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
-    norm = maxval(abs(this%flatarray))
+
+    call VecNorm(this%foo,NORM_INFINITY,norm,this%ierr)
+!    norm = maxval(abs(this%flatarray))
   end function pf_petscVec_norm
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
@@ -224,9 +252,9 @@ contains
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
-
     select type(x)
     type is (pf_petscVec)
+       call VecAXPY(this%foo,a,x%foo,this%ierr)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
