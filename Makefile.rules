@@ -8,10 +8,10 @@ vpath %.f   $(VPATHS)
 
 $(EXE): $(OBJ)
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	$(FC) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 else
 	@echo "Linking..."
-	@$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	@$(FC) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 endif
 
 build/%.o build/%.mod: %.f90
@@ -19,10 +19,10 @@ build/%.o build/%.mod: %.f90
 	@mkdir -p include
 
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+	$(FC) $(FFLAGS) -c  $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+	@$(FC) $(FFLAGS) -c  $< $(OUTPUT_OPTION)
 endif
 
 build/%.o: %.c
@@ -40,10 +40,10 @@ build/%.o: %.f
 	@mkdir -p build
 	@mkdir -p include
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) -c -w    $< $(OUTPUT_OPTION)
+	$(FC)  -c -w $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC) -c -w   $< $(OUTPUT_OPTION)
+	@$(FC)  -c -w $< $(OUTPUT_OPTION)
 endif
 
 .PHONY: clean depend

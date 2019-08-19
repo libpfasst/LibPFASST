@@ -191,10 +191,11 @@ module pf_mod_dtype
 
      !>  Interpolation and restriction data structures
      logical :: interp_workspace_allocated = .false.
+     logical :: restrict_workspace_allocated = .false.
      class(pf_encap_t), allocatable :: &
           cf_delta(:), &   ! delta fine in space and coarse in time
-          c_delta(:)       ! delta on the coarse level
-
+          c_delta(:), &    ! delta on the coarse level
+          f_encap_array_c(:)  !  fine solution restricted in space only
      
      integer, allocatable :: shape(:)   !! user defined shape array
      type(pf_sdcmats_t), allocatable :: sdcmats

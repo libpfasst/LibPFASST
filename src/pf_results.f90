@@ -75,7 +75,9 @@ contains
     do j = 1, this%nblocks
        do i = 1 , this%niters
           do k = 1, this%nsweeps
-             write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%residuals(i, j, k)
+             if (this%residuals(i, j, k) .gt. 0.0) then
+                write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%residuals(i, j, k)
+             end if
           end do
        end do
     enddo
@@ -122,7 +124,8 @@ contains
 
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 
-    write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.dat'    
+    !  Write a file with timer names and times
+    write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.txt'    
     fullname = trim(datpath) // trim(fname)
     istream = 200+pf%rank !  Use processor dependent file number
     !  output timings
@@ -132,7 +135,20 @@ contains
           write(istream, '(a16,  f23.8)') timer_names(j),pf%runtimes(j)
        end if
     end do
-       
+    close(istream)
+    
+    !  Write a file with timer numbers and times
+    write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.dat'    
+    fullname = trim(datpath) // trim(fname)
+    istream = 200+pf%rank !  Use processor dependent file number
+    !  output timings
+    open(istream, file=trim(fullname), form='formatted')
+    do j = 1, 100
+       if (pf%runtimes(j) > 0.0d0) then
+          write(istream, '(I0.3,  f23.8)') j,pf%runtimes(j)
+       end if
+    end do
+    
     close(istream)
 
   end subroutine dump_timings
