@@ -91,7 +91,7 @@ contains
        call VecSetFromOptions(q%foo,ierr)
        call VecGetLocalSize(q%foo,psize,ierr)
        call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr)
-!       print *,'created petscVec, size=',shape(1), 'local size=', psize, 'rank=',rank
+       print *,'created petscVec, size=',shape(1), 'local size=', psize, 'rank=',rank
        
        allocate(q%shape(size(shape)))
        allocate(q%flatarray(product(shape)))

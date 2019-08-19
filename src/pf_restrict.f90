@@ -117,7 +117,6 @@ contains
     real(pfdp),         intent(in) :: f_time(:)             !! time at the fine nodes
     integer, optional, intent(in)    :: flags    
 
-    class(pf_encap_t), allocatable :: f_encap_array_c(:)  !!  fine solution restricted in space only
     integer :: m,j
     integer :: f_nnodes,c_nnodes
 
@@ -126,24 +125,26 @@ contains
     c_nnodes = c_lev_p%nnodes
 
     !!  Create a temp array for the spatial restriction
-    call c_lev_p%ulevel%factory%create_array(f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
-
+    if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
+       print *,'create in restrict'
+       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
+       f_lev_p%restrict_workspace_allocated  = .true.
+    end if
+ 
     !  spatial restriction
     do m = 1, f_nnodes
-       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_encap_array_c(m), f_time(m), flags)
+       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_lev_p%f_encap_array_c(m), f_time(m), flags)
     end do
 
     ! temporal restriction
     if (present(flags)) then
        if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_encap_array_c, .true., flags)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true., flags)
        if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_encap_array_c, .true., flags=2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true., flags=2)
     else
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_encap_array_c, .true.)
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true.)
     end if
-    call c_lev_p%ulevel%factory%destroy_array(f_encap_array_c)
-
 
   end subroutine restrict_ts
 
@@ -168,24 +169,27 @@ contains
     c_nnodes = c_lev_p%nnodes
 
     !!  Create a temp array for the spatial restriction
-    call c_lev_p%ulevel%factory%create_array(f_encap_array_c, f_nnodes-1, c_lev_p%index, c_lev_p%shape)
+    if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
+       print *,'create in restrict'
+       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
+       f_lev_p%restrict_workspace_allocated  = .true.
+    end if
 
     !  spatial restriction
     do m = 1, f_nnodes-1
-       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_encap_array_c(m), f_time(m), flags)
+       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_lev_p%f_encap_array_c(m), f_time(m), flags)
     end do
     
     ! temporal restriction
     ! when restricting '0 to node' integral terms, skip the first entry since it is zero
     if (present(flags)) then
        if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_encap_array_c, .true., flags=1)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true., flags=1)
        if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_encap_array_c, .true., flags=2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true., flags=2)
     else
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_encap_array_c, .true.)
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true.)
     end if
-    call c_lev_p%ulevel%factory%destroy_array(f_encap_array_c)
 
   end subroutine restrict_ts_integral
 

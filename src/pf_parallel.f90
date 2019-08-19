@@ -273,13 +273,11 @@ contains
     if (pf%levels(level_index)%residual_rel < pf%rel_res_tol) then
        if (pf%debug) print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(level_index)%residual_rel
        residual_converged = .true.
-       print*, 'DEBUG --',pf%rank, 'residual_rel tol met',pf%levels(level_index)%residual_rel              
     end if
     ! Check to see if absolute tolerance is met
     if   (pf%levels(level_index)%residual     < pf%abs_res_tol)  then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
        residual_converged = .true.
-       print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual       
     end if
 
   end subroutine pf_check_residual
