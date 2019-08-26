@@ -581,9 +581,6 @@ contains
       end select
 
     end subroutine make_deriv_3d
-  !  Interp routines that take a coarse vector and produce a fine    
-  
-  
 
   subroutine restrict_1d(this, yvec_f, yvec_c)
     class(pf_fft_abs_t), intent(inout) :: this
@@ -644,7 +641,13 @@ contains
     integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
     nx_f = shape(yhat_f)
     nx_c = shape(yhat_c)
+
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2)) then
+       yhat_c=yhat_f
+       return
+    end if
     
+
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nc1=nx_c(1)/2+2

@@ -10,9 +10,9 @@ module pf_mod_fftpackage
   use pf_mod_dtype
   use pf_mod_utils
   use pf_mod_fft_abs
+  use, intrinsic :: iso_c_binding
   
   implicit none
-  use, intrinsic :: iso_c_binding
   include 'fftw3.f03'
   
   !>  Variables and storage for FFTW
@@ -255,7 +255,13 @@ contains
 
     nx_f = shape(yhat_f)
     nx_c = shape(yhat_c)
+
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2)) then
+       yhat_f = yhat_c
+       return
+    end if
     
+  
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nc1=nx_c(1)/2+2
@@ -266,8 +272,7 @@ contains
     yhat_f(nf1:nx_f(1),1:nx_c(2)/2) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2)    
     yhat_f(1:nx_c(1)/2,nf2:nx_f(2)) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2)) 
     yhat_f(nf1:nx_f(1),nf2:nx_f(2)) = yhat_c(nc1:nx_c(1),nc2:nx_c(2)) 
-
-    
+   
   end subroutine zinterp_2d
 
   !>  Interpolate from coarse  level to fine
