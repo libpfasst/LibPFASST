@@ -200,7 +200,6 @@ contains
                 end if
              end if
              !  Do some sweeps
-             print *,'sweeping in predictor 3'             
              call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
           end do
        endif  !  RK_pred
@@ -220,7 +219,6 @@ contains
              call pf_recv(pf, c_lev_p, c_lev_p%index*110000+pf%rank+k, .true.)
 
              !  Do a sweep
-             print *,'sweeping in predictor 2'             
              call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
              !  Send forward
              call pf_send(pf, c_lev_p,  c_lev_p%index*110000+pf%rank+1+k, .false.)
@@ -230,7 +228,6 @@ contains
           call pf_recv(pf, c_lev_p, c_lev_p%index*110000+pf%rank, .true.)
 
           !  Do a sweeps
-          print *,'sweeping in predictor'
           call c_lev_p%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev_p%nsweeps_pred)
           !  Send forward
           call pf_send(pf, c_lev_p,  c_lev_p%index*110000+pf%rank+1, .false.)
