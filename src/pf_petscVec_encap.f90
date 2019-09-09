@@ -92,6 +92,7 @@ contains
        call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr);CHKERRQ(ierr)
 !       print *,'created petscVec, size=',shape(1), 'local size=', psize, 'rank=',rank
 
+
        allocate(q%shape(size(shape)))
        q%dim   = size(shape)
        q%shape = shape

@@ -106,13 +106,12 @@ contains
   end subroutine pf_generic_residual
 
   !>  Output the current residual in the solution
-  subroutine pf_echo_residual(pf, level, state)
+  subroutine pf_echo_residual(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
 
     print '("resid: time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
-         state%t0+state%dt,state%step+1, pf%rank, state%iter,level%index,level%residual    
+         pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
     call flush(6)
   end subroutine pf_echo_residual

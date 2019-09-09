@@ -29,10 +29,6 @@ contains
     integer :: i   !  loop variable
     integer :: un  !  file read unit
 
-    character(len=128) :: arg  !  command line argument
-    character(128)    :: probin_fname   !<  file name for input parameters
-
-
     !> Set the name of the input file
     probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
     if (command_argument_count() >= 1) &
@@ -96,7 +92,7 @@ contains
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
     write(un,*) 'lam1:   ', lam1, '! explicit constant'
-    write(un,*) 'lam1:   ', lam2, '! implicit constant'    
+    write(un,*) 'lam2:   ', lam2, '! implicit constant'    
 
 
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml

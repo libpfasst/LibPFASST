@@ -12,7 +12,7 @@ module pf_mod_fftpackage
   use pf_mod_fft_abs
   
   implicit none
-  
+  use, intrinsic :: iso_c_binding
   include 'fftw3.f03'
   
   !>  Variables and storage for FFTW
@@ -124,11 +124,14 @@ contains
   subroutine fftf(this)
     class(pf_fft_t), intent(inout) :: this
     select case (this%dim)       
-    case (1)            
+    case (1)
+       this%wk_1d=this%wk_1d/this%normfact                 
        call fftw_execute_dft(this%ffftw, this%wk_1d, this%wk_1d)
     case (2)            
+       this%wk_2d=this%wk_2d/this%normfact          
        call fftw_execute_dft(this%ffftw, this%wk_2d, this%wk_2d)
     case (3)            
+       this%wk_3d=this%wk_3d/this%normfact
        call fftw_execute_dft(this%ffftw, this%wk_3d, this%wk_3d)
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)       
@@ -141,13 +144,10 @@ contains
     !  Normalize the fft
     select case (this%dim)       
     case (1)
-       this%wk_1d=this%wk_1d/this%normfact          
        call fftw_execute_dft(this%ifftw, this%wk_1d, this%wk_1d)
     case (2)
-       this%wk_2d=this%wk_2d/this%normfact          
        call fftw_execute_dft(this%ifftw, this%wk_2d, this%wk_2d)
     case (3)            
-       this%wk_3d=this%wk_3d/this%normfact
        call fftw_execute_dft(this%ifftw, this%wk_3d, this%wk_3d)
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
@@ -173,7 +173,7 @@ contains
     call this%fftf()    
 
     call this%zinterp_1d(wk_c, wk_f)
-    wk_f=wk_f*2.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
@@ -198,7 +198,7 @@ contains
     call this%fftf()    
 
     call this%zinterp_2d(wk_c, wk_f)
-    wk_f=wk_f*4.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
@@ -222,7 +222,7 @@ contains
     call this%fftf()    
 
     call this%zinterp_3d(wk_c, wk_f)
-    wk_f=wk_f*8.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()

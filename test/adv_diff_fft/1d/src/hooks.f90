@@ -10,25 +10,29 @@ module hooks
 contains
 
   !>  Output the error and residual in the solution
-  subroutine echo_error(pf, level, state)
+  subroutine echo_error(pf, level_index)
     use pf_my_sweeper, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
 
-    real(pfdp) :: yexact(level%mpibuflen)
+    real(pfdp) :: yexact(pf%levels(level_index)%shape(1))
     real(pfdp), pointer :: y_end(:)
     real(pfdp) :: maxerr
-
+    real(pfdp) :: residual
+    
     !>  compute the error at last end point
-    y_end => get_array1d(level%qend)
-    call exact(state%t0+state%dt, yexact)
+    y_end => get_array1d(pf%levels(level_index)%qend)
+    call exact(pf%state%t0+pf%state%dt, yexact)
+
+
     maxerr = maxval(abs(y_end-yexact))
-
+    residual=pf%levels(level_index)%residual
+    
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es14.7)', &
-         state%step+1, state%iter,level%index, maxerr,level%residual
-    call flush(6)
+         pf%state%step+1, pf%state%iter,level_index, maxerr,residual
+    maxerr = maxval(abs(y_end-yexact))
+    residual=pf%levels(level_index)%residual
 
-    call pf_set_error(pf,level%index,maxerr)
+    call pf_set_error(pf,level_index,maxerr)
   end subroutine echo_error
 end module hooks

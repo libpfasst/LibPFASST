@@ -7,7 +7,7 @@
 module feval
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_imexQ
+  use pf_mod_imex_sweeper
   use pf_mod_fftpackage
   implicit none
 

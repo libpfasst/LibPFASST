@@ -31,30 +31,37 @@ test -h "pf" || ln -s "$PFASSTDIR/pf"
 
 echo "Building libpfasst"
 cd "$PFASSTDIR"
+make clean
 make -j || exit 1
 
 echo "Building magpicard"
 cd "$TESTDIR/magpicard"
+make clean
 make -j || exit 1
 
 echo "Building imk"
 cd "$TESTDIR/imk"
+make clean
 OMP=y make -j || exit 1
 
 echo "Building nagumo"
 cd "$TESTDIR/nagumo"
+make clean
 make -j || exit 1
 
 echo "Building EXP 1d"
 cd "$TESTDIR/EXP_adv_diff_fft/1d"
+make clean
 make -j || exit 1
 
 echo "Building ad 1d"
 cd "$TESTDIR/adv_diff_fft/1d"
+make clean
 make -j || exit 1
 
 echo "Building ad 2d"
 cd "$TESTDIR/adv_diff_fft/2d"
+make clean
 make -j
 
 

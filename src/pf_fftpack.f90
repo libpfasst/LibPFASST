@@ -44,7 +44,7 @@ contains
     nx=grid_shape(1)
     this%nx = nx
     this%lensavx = 4*nx + 15
-    this%normfact=nx
+    this%normfact=real(nx,pfdp)
     
     allocate(this%workhatx(nx))   !  complex transform
     allocate(this%wsavex(this%lensavx))
@@ -57,7 +57,7 @@ contains
        ny=grid_shape(2)       
        this%ny = ny
        this%lensavy = 4*ny + 15
-       this%normfact=nx*ny
+       this%normfact=real(nx*ny,pfdp)
        allocate(this%workhaty(ny))   !  complex transform
        allocate(this%wsavey(this%lensavy))
        this%Ly = 1.0_pfdp
@@ -70,7 +70,7 @@ contains
           nz=grid_shape(3)       
           this%nz = nz
           this%lensavz = 4*nz + 15
-          this%normfact=nx*ny*nz             
+          this%normfact=real(nx*ny*nz,pfdp)
           allocate(this%workhatz(nz))   !  complex transform
           allocate(this%wsavez(this%lensavz))
           this%Lz = 1.0_pfdp
@@ -126,6 +126,7 @@ contains
     select case (this%dim)       
     case (1)            
        call zfftf(this%nx, this%wk_1d, this%wsavex )
+       this%wk_1d=this%wk_1d/this%normfact
     case (2)
        do j = 1,this%ny
           this%workhatx =this%wk_2d(:,j)
@@ -137,6 +138,7 @@ contains
           call zfftf(this%ny, this%workhaty, this%wsavey )
           this%wk_2d(i,:)=this%workhaty
        end do
+       this%wk_2d=this%wk_2d/this%normfact
     case (3)            
        do k = 1,this%nz
           do j = 1,this%ny
@@ -159,6 +161,8 @@ contains
              this%wk_3d(i,j,:)=this%workhatz
           end do
        end do
+       this%wk_3d=this%wk_3d/this%normfact
+       
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
@@ -172,10 +176,10 @@ contains
     
     select case (this%dim)       
     case (1)
-       this%wk_1d=this%wk_1d/this%normfact                                              
+       this%wk_1d=this%wk_1d
        call zfftb(this%nx, this%wk_1d, this%wsavex )
     case (2)
-       this%wk_2d=this%wk_2d/this%normfact                                    
+       this%wk_2d=this%wk_2d
        do j = 1,this%ny
           this%workhatx =this%wk_2d(:,j)
           call zfftb(this%nx, this%workhatx, this%wsavex )
@@ -187,7 +191,7 @@ contains
           this%wk_2d(i,:)=this%workhaty
        end do
     case (3)            
-       this%wk_3d=this%wk_3d/this%normfact                          
+       this%wk_3d=this%wk_3d
        do k = 1,this%nz
           do j = 1,this%ny
              this%workhatx =this%wk_3d(:,j,k)
@@ -209,6 +213,7 @@ contains
              this%wk_3d(i,j,:)=this%workhatz
           end do
        end do
+
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
     end select
@@ -234,12 +239,12 @@ contains
     call this%fftf()    
 
     call this%zinterp_1d(wk_c, wk_f)
-    wk_f=wk_f*2.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
 
-    yvec_f=real(wk_f)
+    yvec_f=real(wk_f,pfdp)
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
@@ -259,12 +264,12 @@ contains
     call this%fftf()    
 
     call this%zinterp_2d(wk_c, wk_f)
-    wk_f=wk_f*4.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
 
-    yvec_f=real(wk_f)
+    yvec_f=real(wk_f,pfdp)
     
   end subroutine interp_2d
   subroutine interp_3d(this, yvec_c, fft_f,yvec_f)
@@ -283,12 +288,12 @@ contains
     call this%fftf()    
 
     call this%zinterp_3d(wk_c, wk_f)
-    wk_f=wk_f*8.0_pfdp
+    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
 
-    yvec_f=real(wk_f)
+    yvec_f=real(wk_f,pfdp)
     
 
   end subroutine interp_3d
@@ -298,9 +303,10 @@ contains
     class(pf_fft_t), intent(inout) :: this
     complex(pfdp),         pointer :: yhat_f(:), yhat_c(:)
     integer :: nx_f, nx_c
-
+    real(pfdp) :: fct
     nx_f = size(yhat_f)
     nx_c = size(yhat_c)
+    fct=real(nx_f,pfdp)/real(nx_c,pfdp)
 
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
@@ -339,11 +345,6 @@ contains
   integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
 
 
-    nx_f = size(yhat_f)
-    nx_c = size(yhat_c)
-
-    yhat_f = 0.0_pfdp
-  
     nx_f = shape(yhat_f)
     nx_c = shape(yhat_c)
     

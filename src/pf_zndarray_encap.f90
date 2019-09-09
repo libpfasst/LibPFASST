@@ -223,7 +223,7 @@ module pf_mod_zndarray
     class(zndarray), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
 
-    print*, this%flatarray(1:10)
+    print*, this%flatarray(1:2)
   end subroutine zndarray_eprint
 
   subroutine write_to_disk(this, filename)

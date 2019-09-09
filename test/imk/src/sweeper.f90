@@ -15,10 +15,6 @@ module sweeper
 
   implicit none
 
-  real(pfdp), parameter :: &
-       pi = 3.141592653589793_pfdp, &
-       two_pi = 6.2831853071795862_pfdp
-
   external :: zgemm
 
   type, extends(pf_imk_t) :: imk_sweeper_t

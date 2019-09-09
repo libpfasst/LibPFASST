@@ -195,8 +195,8 @@ contains
     integer :: ntot    
     ntot = this%ndof*this%ncomp
     this%flatarray = z(1:ntot)
-    this%flatarray = this%flatarray + cmplx(0.0,1.0,pfdp)*z(ntot+1:2*ntot)
-    this%flatarray =  cmplx(z(1:ntot),z(ntot+1:2*ntot))        
+!    this%flatarray = this%flatarray + cmplx(0.0,1.0,pfdp)*z(ntot+1:2*ntot)
+    this%flatarray =  cmplx(z(1:ntot),z(ntot+1:2*ntot),pfdp)        
   end subroutine zndsysarray_unpack
 
   !> Subroutine to define the norm of the array (here the max norm)
