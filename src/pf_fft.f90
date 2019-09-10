@@ -629,9 +629,13 @@ contains
     nx_f = size(yhat_f)
     nx_c = size(yhat_c)
 
-    yhat_c=0.0_pfdp
-    yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
-    yhat_c(nx_c/2+2:nx_c) = yhat_f(nx_f-nx_c/2+2:nx_f)
+    if (nx_f .eq. nx_c) then
+       yhat_c=yhat_f
+    else
+       yhat_c=0.0_pfdp
+       yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
+       yhat_c(nx_c/2+2:nx_c) = yhat_f(nx_f-nx_c/2+2:nx_f)
+    end if
     
   end subroutine zrestrict_1d
   subroutine zrestrict_2d(this, yhat_f, yhat_c)
@@ -668,10 +672,14 @@ contains
     
     
     
-    yhat_c = 0.0_pfdp
     
     nx_f = shape(yhat_f)
     nx_c = shape(yhat_c)
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3)) then
+       yhat_c=yhat_f
+       return
+    end if
+    yhat_c = 0.0_pfdp
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2

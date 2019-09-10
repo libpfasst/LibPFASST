@@ -154,10 +154,8 @@ contains
     end select
   end subroutine fftb
 
-      subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
-!      use pf_mod_fftpackage, only: pf_fft_t
-!        class(pf_fft_abs_t), intent(inout) :: this
-        class(pf_fft_t), intent(inout) :: this
+  subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
+
     real(pfdp), intent(inout),  pointer :: yvec_f(:)
     real(pfdp), intent(inout),  pointer :: yvec_c(:)
     type(pf_fft_t),  pointer,intent(in) :: fft_f
@@ -173,7 +171,6 @@ contains
     call this%fftf()    
 
     call this%zinterp_1d(wk_c, wk_f)
-    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
@@ -198,7 +195,6 @@ contains
     call this%fftf()    
 
     call this%zinterp_2d(wk_c, wk_f)
-    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
@@ -222,7 +218,6 @@ contains
     call this%fftf()    
 
     call this%zinterp_3d(wk_c, wk_f)
-    wk_f=wk_f
 
     !  internal inverse fft call
     call fft_f%fftb()
