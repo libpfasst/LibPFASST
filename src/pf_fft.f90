@@ -46,9 +46,6 @@ module pf_mod_fft_abs
      !  Construct spectral derivative
      procedure , private :: make_deriv_1d,make_deriv_2d, make_deriv_3d
      generic   :: make_deriv =>make_deriv_1d,make_deriv_2d,make_deriv_3d
-     !  Restrict in spectral space
-     procedure , private :: restrict_1d,restrict_2d, restrict_3d,zrestrict_1d,zrestrict_2d, zrestrict_3d
-     generic   :: restrict =>restrict_1d,restrict_2d,restrict_3d,zrestrict_1d,zrestrict_2d,zrestrict_3d
 
      
   end type pf_fft_abs_t
@@ -699,6 +696,7 @@ contains
     yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3))
     
   end subroutine zrestrict_3d
+
 
   end module pf_mod_fft_abs
   

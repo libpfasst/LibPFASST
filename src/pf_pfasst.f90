@@ -96,7 +96,6 @@ contains
     integer ::  buflen_local
 
     ! Allocate and set shape array for the level
-    print *,level_index,shape_in
     allocate(pf%levels(level_index)%shape(size(shape_in)))
     pf%levels(level_index)%shape = shape_in
 

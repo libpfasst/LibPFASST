@@ -219,84 +219,96 @@ contains
     end select
   end subroutine fftb
   
-
   subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
     class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:)
     real(pfdp), intent(inout),  pointer :: yvec_c(:)
     type(pf_fft_t),  pointer,intent(in) :: fft_f
-    integer :: nx_f, nx_c
     
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
     integer :: nx_f, nx_c
-
+    
     nx_f = size(yvec_f)
     nx_c = size(yvec_c)
+    if (nx_f .eq. nx_c) then
+       yvec_f=yvec_c
+       return
+    end if
     
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
 
-    call this%zinterp_1d(wk_c, wk_f)
+    call this%fftf()       !  internal forward fft call      on wk_c
+    
+    call this%zinterp_1d(wk_c, wk_f) !  intepolation in spectral space
 
-    !  internal inverse fft call
-    call fft_f%fftb()
-
-    yvec_f=real(wk_f,pfdp)
+    call fft_f%fftb()      !  internal fine inverse fft call
+    
+    yvec_f=real(wk_f,pfdp) !  return real part
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
-        class(pf_fft_t), intent(inout) :: this
-!    class(pf_fft_abs_t), intent(inout) :: this
+    class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:,:)
     real(pfdp), intent(inout),  pointer :: yvec_c(:,:)
     type(pf_fft_t),  pointer,intent(in) :: fft_f
 
     complex(pfdp),         pointer :: wk_f(:,:), wk_c(:,:)
+    integer :: nx_f(2), nx_c(2)
+    
+    nx_f = shape(yvec_f)
+    nx_c = shape(yvec_c)
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2)) then
+       yvec_f=yvec_c
+       return
+    end if
 
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
 
-    call this%zinterp_2d(wk_c, wk_f)
+    call this%fftf()       !  internal forward fft call  on wk_c
 
-    !  internal inverse fft call
-    call fft_f%fftb()
+    call this%zinterp_2d(wk_c, wk_f)   !  intepolation in spectral space
 
-    yvec_f=real(wk_f,pfdp)
+    call fft_f%fftb()       !  internal fine inverse fft call
+
+    yvec_f=real(wk_f,pfdp)  !  return real part
     
   end subroutine interp_2d
   subroutine interp_3d(this, yvec_c, fft_f,yvec_f)
-         class(pf_fft_t), intent(inout) :: this
-!   class(pf_fft_abs_t), intent(inout) :: this
+    class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:,:,:)
     real(pfdp), intent(inout),  pointer :: yvec_c(:,:,:)
     type(pf_fft_t),  pointer,intent(in) :: fft_f
+    
     complex(pfdp),         pointer :: wk_f(:,:,:), wk_c(:,:,:)
+    integer :: nx_f(3), nx_c(3)
+
+    nx_f = shape(yvec_f)
+    nx_c = shape(yvec_c)
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3)) then
+       yvec_f=yvec_c
+       return
+    end if
 
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
+    call this%fftf()    !  internal forward fft call on wk_c   
 
-    call this%zinterp_3d(wk_c, wk_f)
-    wk_f=wk_f
+    call this%zinterp_3d(wk_c, wk_f) !  intepolation in spectral space
 
-    !  internal inverse fft call
-    call fft_f%fftb()
+    call fft_f%fftb()     !  internal fine inverse fft call
 
-    yvec_f=real(wk_f,pfdp)
-    
+    yvec_f=real(wk_f,pfdp) ! return real part
 
   end subroutine interp_3d
+
 
   !>  Interpolate from coarse  level to fine
   subroutine zinterp_1d(this, yhat_c, yhat_f)
