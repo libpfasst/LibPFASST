@@ -53,17 +53,6 @@ module pf_mod_zndsysarray
      procedure :: eprint => zndsysarray_eprint
   end type zndsysarray
 
-  !> Interfaces to output routines in pf_numpy.c
-  interface
-     !>  Subroutine to write an the array to a file
-     subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, mpibuflen
-       integer,    intent(in   )        :: arr_shape(dim)
-       real(c_double),    intent(in   )        :: array(mpibuflen)
-     end subroutine zndsysarray_dump_numpy
-  end interface
 
 contains
   !>  Subroutine to allocate the array and set the size parameters

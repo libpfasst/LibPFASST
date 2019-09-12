@@ -87,7 +87,6 @@ contains
     call start_timer(pf, THOOKS)
 
     pf%state%hook = hook
-
     if (level_ind == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
           do i = 1, pf%nhooks(l,hook)

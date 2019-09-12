@@ -184,7 +184,6 @@ contains
        end do  !!  End substep loop
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
-
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
 

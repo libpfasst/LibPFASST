@@ -9,23 +9,27 @@ module pf_mod_results
   implicit none
   
 contains
-  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index,datpath,save_residuals)
+  subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index,outdir,save_residuals)
 
     class(pf_results_t), intent(inout) :: this
     integer, intent(in) :: nsteps_in, niters_in, nprocs_in, nsweeps_in,rank_in,level_index
-    character(len=*), intent(in) :: datpath
+    character(len=*), intent(in) :: outdir
     logical, intent(in) :: save_residuals
 
     character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 128) :: datpath  !!  path to output files
     character(len = 256) :: fullname  !!  output file name for residuals
     integer :: istat,system
     
     !  Set up the directory to dump results
+    istat= system('mkdir -p dat')
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")       
+    istat= system('mkdir -p dat/' // trim(outdir))       
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
+    this%datpath= 'dat/' // trim(outdir) // '/'
+!    this%datpath=this%datpath //   '/'
+    
     if (save_residuals) then
-       istat= system('mkdir -p ' // trim(datpath))
-       this%datpath= trim(datpath) // '/'
-       
-       if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in initialize_results")
        
        write (fname, "(A16,I0.1,A4)") 'residuals_size_L',level_index,'.dat'
        fullname = trim(this%datpath) // trim(fname)
@@ -61,14 +65,18 @@ contains
     character(len = 128) :: fname  !!  output file name for residuals
     character(len = 256) :: fullname  !!  output file name for residuals
     character(len = 128) :: datpath  !!  directory path
-
+    character(len = 128) :: dirname  !!  directory name
     
     datpath = trim(this%datpath) // 'residuals'
     istat= system('mkdir -p ' // trim(datpath))
-    
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
 
-    write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level,'.dat'
+    write (dirname, "(A6,I0.3)") '/Proc_',this%rank
+    datpath=trim(datpath) // trim(dirname) 
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
+
+    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level,'.dat'
     fullname = trim(datpath) // trim(fname)
     !  output residuals
     open(100+this%rank, file=trim(fullname), form='formatted')
@@ -119,7 +127,7 @@ contains
     character(len = 128   ) :: datpath  !!  directory path
     integer :: istat,j, istream,system
 
-    datpath = trim(pf%outdir) // '/runtimes'
+    datpath = 'dat/' // trim(pf%outdir) // '/runtimes'
     istat= system('mkdir -p '// trim(datpath))
 
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
