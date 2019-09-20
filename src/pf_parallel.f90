@@ -66,7 +66,7 @@ contains
     if (present(qend)) then
        call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)
     else
-       call pf_block_run(pf, q0, dt,  nsteps_loc,flags=flags)
+       call pf_block_run(pf, q0, dt,  nsteps_loc,q0,flags=flags)
     end if
 
     call pf_dump_results(pf)
@@ -145,10 +145,10 @@ contains
     !! Step 1. Getting the  initial condition on the finest level at each processor
     !!         If we are doing multiple levels, then we need to coarsen to fine level
     f_lev_p => pf%levels(pf%state%finest_level)
-
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
        call f_lev_p%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0)
     endif
+    if (pf%nlevels==1) return
     !!
     !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'do coarsen  in predictor'
@@ -182,7 +182,6 @@ contains
           call c_lev_p%ulevel%stepper%do_n_steps(pf, level_index,t0, c_lev_p%q0,c_lev_p%qend, dt, 1)       
           !  Send forward
           call pf_send(pf, c_lev_p,  100000+pf%rank+1, .false.)
-          print *,'woo hoo'
        else  !  Normal PFASST burn in
           level_index=1
           c_lev_p => pf%levels(level_index)
@@ -440,7 +439,7 @@ contains
 
           !  If we are converged, exit block
           if (pf%state%status == PF_STATUS_CONVERGED)  then
-             call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+!             call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
              exit             
           end if
 

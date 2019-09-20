@@ -10,6 +10,7 @@ AR = ar rcs
 DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
+USE_FFTW=FALSE
 
 #  Set some compiler flags
 FFLAGS = -Ibuild -Jinclude -cpp
@@ -25,8 +26,8 @@ include $(wildcard $(LIBPFASST)/*.defs)
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
 
-NOFFTW=TRUE
-ifeq ($(NOFFTW),TRUE)
+
+ifeq ($(USE_FFTW),FALSE)
 F77SRC = src/dfftpack.o
 else
 FFTW=$(LIBPFASST)/fftw3
@@ -78,7 +79,7 @@ FSRC+= pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
 
-ifeq ($(NOFFTW),TRUE)
+ifeq ($(USE_FFTW),FALSE)
 FSRC+=pf_fftpack.f90
 else
 FSRC+=pf_fftw.f90
@@ -95,7 +96,7 @@ ifdef OMP
 endif
 
 OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-ifeq ($(NOFFTW),TRUE)
+ifeq ($(USE_FFTW),FALSE)
 OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif
 
