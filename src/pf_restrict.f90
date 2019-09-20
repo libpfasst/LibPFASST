@@ -127,7 +127,7 @@ contains
     !!  Create a temp array for the spatial restriction
     if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
        print *,'create in restrict'
-       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
+       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%lev_shape)
        f_lev_p%restrict_workspace_allocated  = .true.
     end if
  
@@ -171,7 +171,7 @@ contains
     !!  Create a temp array for the spatial restriction
     if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
        print *,'create in restrict'
-       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
+       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%lev_shape)
        f_lev_p%restrict_workspace_allocated  = .true.
     end if
 

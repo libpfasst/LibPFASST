@@ -40,11 +40,11 @@ contains
     !!  pass in the time step size and length of run
     if (present(nsteps)) then
       nsteps_loc = nsteps
-      tend_loc=dble(nsteps_loc*dt)
+      tend_loc=real(nsteps_loc*dt,pfdp)
     else
       nsteps_loc = ceiling(tend/dt)
       !  Do  sanity check on steps
-      if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/100.0) then
+      if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/1d-7) then
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend

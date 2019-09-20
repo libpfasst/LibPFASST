@@ -159,10 +159,10 @@ contains
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-         lev%index,  lev%shape)
+         lev%index,  lev%lev_shape)
 
     call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
-         lev%index,  lev%shape)
+         lev%index,  lev%lev_shape)
 
     do m = 1, nnodes-1
         call this%omega(m)%setval(0.0_pfdp)

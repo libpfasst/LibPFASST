@@ -36,21 +36,23 @@ contains
   !>  The following are the base subroutines that encapsulation factories need to provide
   
   !>  Subroutine to allocate one encap
-  subroutine scalar_create_single(this, x, level, shape)
+  subroutine scalar_create_single(this, x, level_index, lev_shape)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )      :: level, shape(:)  ! passed by default, but not needed
+    integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
+    integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: i
 
     allocate(scalar_encap::x)
   end subroutine scalar_create_single
 
   !> Subroutine to create an array of encaps
-  subroutine scalar_create_array(this, x, n, level,  shape)
+  subroutine scalar_create_array(this, x, n, level_index,lev_shape)
     class(scalar_factory), intent(inout)              :: this
-    class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n  ! size of array to build
-    integer,                intent(in   )    ::  level, shape(:) ! passed by default, but not needed
+    class(pf_encap_t),     intent(inout), allocatable :: x(:)
+    integer,               intent(in   )              :: n  ! size of array to build
+    integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
+    integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: i
     allocate(scalar_encap::x(n))
   end subroutine scalar_create_array

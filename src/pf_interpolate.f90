@@ -42,8 +42,8 @@ contains
 
     !> create workspaces
     if (f_lev_p%interp_workspace_allocated   .eqv. .false.) then  
-       call c_lev_p%ulevel%factory%create_array(f_lev_p%c_delta,  c_lev_p%nnodes, c_lev_p%index,  c_lev_p%shape)
-       call f_lev_p%ulevel%factory%create_array(f_lev_p%cf_delta, c_lev_p%nnodes, f_lev_p%index,  f_lev_p%shape)
+       call c_lev_p%ulevel%factory%create_array(f_lev_p%c_delta,  c_lev_p%nnodes, c_lev_p%index,  c_lev_p%lev_shape)
+       call f_lev_p%ulevel%factory%create_array(f_lev_p%cf_delta, c_lev_p%nnodes, f_lev_p%index,  f_lev_p%lev_shape)
        f_lev_p%interp_workspace_allocated  = .true.     
     end if
     !> set time at coarse and fine nodes
@@ -70,7 +70,7 @@ contains
 
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
-      do p = 1,size(c_lev_p%F(1,:))
+      do p = 1,SIZE(c_lev_p%F(1,:))
           do m = 1, c_lev_p%nnodes
              call f_lev_p%c_delta(m)%setval(0.0_pfdp, flags)
              call f_lev_p%cf_delta(m)%setval(0.0_pfdp, flags)

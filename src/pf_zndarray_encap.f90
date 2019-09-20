@@ -1,20 +1,20 @@
-!!  N-dimensional complex array encapsulation
+!!  N-ndimensional complex array encapsulation
 !
 ! This file is part of LIBPFASST.
 !
 
-!> N-dimensional complex array encapsulation.
+!> N-ndimensional complex array encapsulation.
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
-!! uses the levels 'shape' attribute to create a new array with that
-!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! uses the levels 'lev_shape' attribute to create a new array with that
+!! shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
 !! set appropriately.  For example, before calling pf_pfasst_run we can
 !! set the shape of the coarsest level by doing:
 !!
-!!   allocate(pf%levels(1)%shape(2))
-!!   pf%levels(1)%shape = [ 3, 10 ]
+!!   allocate(pf%levels(1)%lev_shape(2))
+!!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
 !! extract pointers to the encapsulated array  without
 !! performing any copies.
 !!
@@ -35,7 +35,7 @@ module pf_mod_zndarray
 
   !>  Complex ndarray
   type, extends(pf_encap_t) :: zndarray
-     integer :: dim
+     integer :: ndim
      integer,    allocatable :: shape(:)     
     complex(pfdp), allocatable :: flatarray(:)
   contains
@@ -62,22 +62,21 @@ module pf_mod_zndarray
   end function cast_as_zndarray
 
   !> Allocates complex ndarray
-  subroutine zndarray_build(q, shape)
+  subroutine zndarray_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
-    integer,           intent(in   ) :: shape(:)
+    integer,           intent(in   ) :: shape_in(:)
 
     type(zndarray), pointer :: zndarray_obj
 
     select type (q)
     class is (zndarray)
-       allocate(q%shape(size(shape)))
-       allocate(q%flatarray(product(shape)))
-       q%dim   = size(shape)
-       q%shape = shape
+       allocate(q%shape(SIZE(shape_in)))
+       allocate(q%flatarray(product(shape_in)))
+       q%ndim   = SIZE(shape_in)
+       q%shape = shape_in
        q%flatarray = cmplx(0.0, 0.0,pfdp)
        
     end select
-
 
     nullify(zndarray_obj)
   end subroutine zndarray_build
@@ -95,26 +94,29 @@ module pf_mod_zndarray
   end subroutine zndarray_destroy
 
   !> Wrapper routine for allocation of a single zndarray type array
-  subroutine zndarray_create_single(this, x, level,  shape)
+  subroutine zndarray_create_single(this, x, level_index,  lev_shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
-    integer, intent(in) :: level, shape(:)
+    integer, intent(in) :: level_index
+    integer, intent(in) :: lev_shape(:)
 
     allocate(zndarray::x)
-    call zndarray_build(x, shape)
+    call zndarray_build(x, lev_shape)
 
   end subroutine zndarray_create_single
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
-  subroutine zndarray_create_array(this, x, n, level,  shape)
+  subroutine zndarray_create_array(this, x, n, level_index,  lev_shape)
     class(zndarray_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x(:)
-    integer, intent(in) :: n, level,  shape(:)
+    integer, intent(in) :: n
+    integer, intent(in) :: level_index
+    integer, intent(in) :: lev_shape(:)
     integer :: i
 
     allocate(zndarray::x(n))
     do i = 1, n
-       call zndarray_build(x(i), shape)
+       call zndarray_build(x(i), lev_shape)
     end do
 
   end subroutine zndarray_create_array
@@ -140,7 +142,7 @@ module pf_mod_zndarray
 
     select type(x)
     class is (zndarray)
-       do i = 1,size(x)
+       do i = 1,SIZE(x)
           deallocate(x(i)%shape)
           deallocate(x(i)%flatarray)
        end do
@@ -181,8 +183,8 @@ module pf_mod_zndarray
     integer :: i
 
     do i = 1,product(this%shape)
-       z(2*i-1) = real(this%flatarray(i))
-       z(2*i)    = aimag(this%flatarray(i))
+       z(2*i-1) = REAL(this%flatarray(i))
+       z(2*i)    = AIMAG(this%flatarray(i))
     end do
   end subroutine zndarray_pack
 

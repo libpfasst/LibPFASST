@@ -50,7 +50,7 @@ contains
     this%nprocs=nprocs_in
     this%nsweeps=nsweeps_in
     this%rank=rank_in
-    this%level=level_index    
+    this%level_index=level_index    
     
     if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in))
     if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in))
@@ -76,7 +76,7 @@ contains
     istat= system('mkdir -p ' // trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
 
-    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level,'.dat'
+    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level_index,'.dat'
     fullname = trim(datpath) // trim(fname)
     !  output residuals
     open(100+this%rank, file=trim(fullname), form='formatted')
@@ -105,7 +105,7 @@ contains
     
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_errors")
 
-    write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level,'.dat'
+    write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level_index,'.dat'
     fullname = trim(datpath) // trim(fname)
     !  output errors
     open(100+this%rank, file=trim(fullname), form='formatted')

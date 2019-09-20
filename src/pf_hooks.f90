@@ -54,31 +54,31 @@ module pf_mod_hooks
 contains
 
   !> Subroutine to add a procedure to the hook on the given level
-  subroutine pf_add_hook(pf, level_ind, hook, proc)
+  subroutine pf_add_hook(pf, level_index, hook, proc)
     type(pf_pfasst_t), intent(inout) :: pf            !! main pfasst structure
-    integer,           intent(in)    :: level_ind     !! which pfasst level to add hook
+    integer,           intent(in)    :: level_index     !! which pfasst level to add hook
     integer,           intent(in)    :: hook          !! which hook to add
     procedure(pf_hook_p)             :: proc          !! precudre to call from hook
 
     integer :: l   !
 
-    if (level_ind == -1) then  ! Do to all levels
+    if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
           pf%nhooks(l,hook) = pf%nhooks(l,hook) + 1
           pf%hooks(l,hook,pf%nhooks(l,hook))%proc => proc
        end do
-    else  ! Do to just level level_ind
-       pf%nhooks(level_ind,hook) = pf%nhooks(level_ind,hook) + 1
-       pf%hooks(level_ind,hook,pf%nhooks(level_ind,hook))%proc => proc
+    else  ! Do to just level level_index
+       pf%nhooks(level_index,hook) = pf%nhooks(level_index,hook) + 1
+       pf%hooks(level_index,hook,pf%nhooks(level_index,hook))%proc => proc
     end if
 
   end subroutine pf_add_hook
 
   !> Subroutine to call hooks associated with the hook and level
-  subroutine call_hooks(pf, level_ind, hook)
+  subroutine call_hooks(pf, level_index, hook)
     use pf_mod_timer
     type(pf_pfasst_t), intent(inout), target :: pf         !! main pfasst structure
-    integer,           intent(in)            :: level_ind  !! which pfasst level to call hook
+    integer,           intent(in)            :: level_index  !! which pfasst level to call hook
     integer,           intent(in)            :: hook       !! which hook to call
 
     integer :: i  !!  hook loop index
@@ -87,15 +87,15 @@ contains
     call start_timer(pf, THOOKS)
 
     pf%state%hook = hook
-    if (level_ind == -1) then  ! Do to all levels
+    if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
           do i = 1, pf%nhooks(l,hook)
              call pf%hooks(l,hook,i)%proc(pf,l)
           end do
        end do
-    else  ! Do to just level level_ind
-       do i = 1, pf%nhooks(level_ind,hook)
-          call pf%hooks(level_ind,hook,i)%proc(pf,level_ind)
+    else  ! Do to just level level_index
+       do i = 1, pf%nhooks(level_index,hook)
+          call pf%hooks(level_index,hook,i)%proc(pf,level_index)
        end do
     end if
 

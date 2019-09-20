@@ -183,19 +183,19 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         !   t     (input) DOUBLE
         !         time t
         !
-        !   level (input) INTEGER
+        !   level_index (input) INTEGER
         !         current level index
         !
         !   f     (output) pf_encap_t
         !         N(t,y)
         ! =================================================================================
 
-        subroutine pf_f_eval_p(this, y, t, level, n)
+        subroutine pf_f_eval_p(this, y, t, level_index, n)
             import pf_exp_t, pf_encap_t, pfdp
             class(pf_exp_t),   intent(inout) :: this
             class(pf_encap_t), intent(in)    :: y
             real(pfdp),        intent(in)    :: t
-            integer,           intent(in)    :: level
+            integer,           intent(in)    :: level_index
             class(pf_encap_t), intent(inout) :: n
         end subroutine pf_f_eval_p
 
@@ -238,14 +238,14 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         allocate(this%w(nnodes - 1, nnodes, nnodes))
         do i = 1, nnodes - 1
             q = this%nodes - this%nodes(i);
-            call weights(this, real(0.0, pfdp), q, nnodes - 1, this%W(i,:,:))
+            call weights(this, REAL(0.0, pfdp), q, nnodes - 1, this%W(i,:,:))
         end do
         ! set number of rhs components
         this%npieces = 1
         ! initialize temporary storage objects
-        call lev%ulevel%factory%create_single(this%newF, lev%index, lev%shape)
-        call lev%ulevel%factory%create_array(this%b, nnodes + 1, lev%index, lev%shape)
-        call lev%ulevel%factory%create_array(this%f_old, nnodes, lev%index, lev%shape)
+        call lev%ulevel%factory%create_single(this%newF, lev%index, lev%lev_shape)
+        call lev%ulevel%factory%create_array(this%b, nnodes + 1, lev%index, lev%lev_shape)
+        call lev%ulevel%factory%create_array(this%f_old, nnodes, lev%index, lev%lev_shape)
 
     end subroutine exp_initialize
 
@@ -291,10 +291,10 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               call LocalDerivsAtNode(this, j, nnodes, this%f_old, this%b)  ! phi expansion for exponential picard integral              
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
 
-              call this%b(2)%axpy(real(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
+              call this%b(2)%axpy(REAL(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
               call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      ! compute F_j^{[k+1]}
 
-              call this%b(2)%axpy(real(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
+              call this%b(2)%axpy(REAL(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
 
 
               ! compute phi products
@@ -514,7 +514,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         ! form nonlinear derivative vectors b
         do j = 1, nnodes                                                ! loop over derivatives j = 1 ... n
-            call N_deriv(j+1)%setval(real(0.0, pfdp))
+            call N_deriv(j+1)%setval(REAL(0.0, pfdp))
             do k = 1, nnodes                                            ! look over nodes k = 1 ... n
                 call N_deriv(j+1)%axpy(this%w(i, k, j), N_eval(k))
             end do
@@ -565,7 +565,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            W  = 0.0_pfdp
            W(1,1) = 1.0_pfdp
            
-           n = size(x)
+           n = SIZE(x)
            do i=2,n
               mn = min(i,m+1)
               c2 = 1.0_pfdp
@@ -576,13 +576,13 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
                  c2 = c2*c3;
                  if(j == i-1) then
                     do k=mn,2,-1
-                       W(i,k) = c1*(real(k-1,pfdp)*W(i-1,k-1) - c5*W(i-1,k))/c2;
+                       W(i,k) = c1*(REAL(k-1,pfdp)*W(i-1,k-1) - c5*W(i-1,k))/c2;
                     enddo
                     
                     W(i,1) = -c1*c5*W(i-1,1)/c2;
                  endif
                  do k=mn,2,-1
-                    W(j,k) = (c4*W(j,k) - real(k-1,pfdp)*W(j,k-1))/c3;
+                    W(j,k) = (c4*W(j,k) - REAL(k-1,pfdp)*W(j,k-1))/c3;
                  enddo
                  W(j,1) = c4*W(j,1)/c3;
               enddo

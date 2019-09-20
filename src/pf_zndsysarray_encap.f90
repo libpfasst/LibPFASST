@@ -6,19 +6,19 @@
 !> System of complex N-dimensional arrays encapsulation.
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
-!! uses the levels 'arr_shape' attribute to create a new multi-component array with that
-!! shape.  Thus, the 'arr_shape' attributes of the PFASST levels should be
-!! set appropriately.  The last component of arr_shape is the number of components in the system
+!! uses the levels 'lev_shape' attribute to create a new multi-component array with that
+!! shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
+!! set appropriately.  The last component of lev_shape is the number of components in the system
 !!
 !! For example, before calling pf_pfasst_run we can
 !! set the arr_shape of the coarsest level by doing:
 !!
-!!   allocate(pf%levels(1)%arr_shape(3))
-!!   pf%levels(1)%arr_shape = [ nx, ny, 3 ]
+!!   allocate(pf%levels(1)%lev_shape(3))
+!!   pf%levels(1)%lev_shape = [ nx, ny, 3 ]
 !!
 !! Which would imply that a 3 component system of two-dimensional solutions.
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
 !! extract pointers to a component of  encapsulated system
 !! performing any copies.
 !!
@@ -38,7 +38,7 @@ module pf_mod_zndsysarray
 
   !>  Type to extend the abstract encap and set procedure pointers
   type, extends(pf_encap_t) :: zndsysarray
-     integer             :: dim    !  The spatial dimension of each component in system
+     integer             :: ndim    !  The spatial dimension of each component in system
      integer             :: ncomp  !  The number of components in the system
      integer             :: ndof   !  The number of variables in each component
      integer,    allocatable :: arr_shape(:)
@@ -53,6 +53,17 @@ module pf_mod_zndsysarray
      procedure :: eprint => zndsysarray_eprint
   end type zndsysarray
 
+  !> Interfaces to output routines in pf_numpy.c
+  interface
+     !>  Subroutine to write an the array to a file
+     subroutine zndsysarray_dump_numpy(dname, fname, endian, ndim, mpibuflen, arr_shape, array) bind(c)
+       use iso_c_binding
+       character(c_char), intent(in   )        :: dname, fname, endian(5)
+       integer,    intent(in   ), value :: ndim, mpibuflen
+       integer,    intent(in   )        :: arr_shape(ndim)
+       real(c_double),    intent(in   )        :: array(mpibuflen)
+     end subroutine zndsysarray_dump_numpy
+  end interface
 
 contains
   !>  Subroutine to allocate the array and set the size parameters
@@ -62,10 +73,10 @@ contains
 
     select type (q)
     class is (zndsysarray)
-       allocate(q%arr_shape(size(arr_shape)))
-       q%dim   = size(arr_shape)-1
-       q%ncomp = arr_shape(q%dim+1)
-       q%ndof = product(arr_shape(1:q%dim))
+       allocate(q%arr_shape(SIZE(arr_shape)))
+       q%ndim   = SIZE(arr_shape)-1
+       q%ncomp = arr_shape(q%ndim+1)
+       q%ndof = product(arr_shape(1:q%ndim))
        q%arr_shape = arr_shape
 
        allocate(q%flatarray(product(arr_shape)))
@@ -73,24 +84,27 @@ contains
   end subroutine zndsysarray_build
 
   !> Subroutine to  create a single array
-  subroutine zndsysarray_create_single(this, x, level, shape)
+  subroutine zndsysarray_create_single(this, x, level_index, lev_shape)
     class(zndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
     allocate(zndsysarray::x)
-    call zndsysarray_build(x, shape)
+    call zndsysarray_build(x, lev_shape)
   end subroutine zndsysarray_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine zndsysarray_create_array(this, x, n, level,  shape)
+  subroutine zndsysarray_create_array(this, x, n, level_index,  lev_shape)
     class(zndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n
+    integer,                intent(in   )              ::  level_index
+    integer,                intent(in   )              ::  lev_shape(:)
     integer :: i
     allocate(zndsysarray::x(n))
     do i = 1, n
-       call zndsysarray_build(x(i), shape)
+       call zndsysarray_build(x(i), lev_shape)
     end do
   end subroutine zndsysarray_create_array
 
@@ -130,7 +144,7 @@ contains
 
     select type(x)
     class is (zndsysarray)
-       do i = 1,size(x)
+       do i = 1,SIZE(x)
           deallocate(x(i)%arr_shape)
           deallocate(x(i)%flatarray)
        end do
@@ -171,8 +185,8 @@ contains
     integer :: ntot
     ntot = this%ndof*this%ncomp
     
-    z(1:ntot) = real(this%flatarray,pfdp)
-    z(ntot+1:2*ntot) = aimag(this%flatarray)
+    z(1:ntot) = REAL(this%flatarray,pfdp)
+    z(ntot+1:2*ntot) = AIMAG(this%flatarray)
   end subroutine zndsysarray_pack
 
   !> Subroutine to unpack a flatarray after receiving

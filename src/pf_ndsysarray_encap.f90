@@ -18,7 +18,7 @@
 !!
 !! Which would imply that a 3 component system of two-dimensional solutions.
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
 !! extract pointers to a component of  encapsulated system
 !! performing any copies.
 !!
@@ -38,7 +38,7 @@ module pf_mod_ndsysarray
 
   !> Type for system of  N-dimensional arrays,  extends the abstract encap type  
   type, extends(pf_encap_t) :: ndsysarray
-     integer             :: dim    !  The spatial dimension of each component in system
+     integer             :: ndim    !  The spatial dimension of each component in system
      integer             :: ncomp  !  The number of components in the system
      integer             :: ndof   !  The number of variables in each component
      integer,    allocatable :: arr_shape(:)
@@ -53,18 +53,6 @@ module pf_mod_ndsysarray
      procedure :: eprint => ndsysarray_eprint
   end type ndsysarray
 
-  !> Interfaces to output routines in pf_numpy.c
-  interface
-     !>  Subroutine to write an the array to a file
-     subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, mpibuflen
-       integer,    intent(in   )        :: arr_shape(dim)
-       real(c_double),    intent(in   )        :: array(mpibuflen)
-     end subroutine ndsysarray_dump_numpy
-  end interface
-
 contains
   !>  Subroutine to allocate the array and set the size parameters
   subroutine ndsysarray_build(q, arr_shape)
@@ -73,10 +61,10 @@ contains
 
     select type (q)
     class is (ndsysarray)
-       allocate(q%arr_shape(size(arr_shape)))
-       q%dim   = size(arr_shape)-1
-       q%ncomp = arr_shape(q%dim+1)
-       q%ndof = product(arr_shape(1:q%dim))
+       allocate(q%arr_shape(SIZE(arr_shape)))
+       q%ndim   = SIZE(arr_shape)-1
+       q%ncomp = arr_shape(q%ndim+1)
+       q%ndof = product(arr_shape(1:q%ndim))
        q%arr_shape = arr_shape
 
        allocate(q%flatarray(product(arr_shape)))
@@ -84,24 +72,27 @@ contains
   end subroutine ndsysarray_build
 
   !> Subroutine to  create a single array
-  subroutine ndsysarray_create_single(this, x, level, shape)
+  subroutine ndsysarray_create_single(this, x, level_index, lev_shape)
     class(ndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
 
     allocate(ndsysarray::x)
-    call ndsysarray_build(x, shape)
+    call ndsysarray_build(x, lev_shape)
   end subroutine ndsysarray_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine ndsysarray_create_array(this, x, n, level,  shape)
+  subroutine ndsysarray_create_array(this, x, n, level_index,  lev_shape)
     class(ndsysarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
     allocate(ndsysarray::x(n))
     do i = 1, n
-       call ndsysarray_build(x(i), shape)
+       call ndsysarray_build(x(i), lev_shape)
     end do
   end subroutine ndsysarray_create_array
 !!$
@@ -141,7 +132,7 @@ contains
 
     select type(x)
     class is (ndsysarray)
-       do i = 1,size(x)
+       do i = 1,SIZE(x)
           deallocate(x(i)%arr_shape)
           deallocate(x(i)%flatarray)
        end do

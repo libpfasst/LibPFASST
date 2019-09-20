@@ -238,8 +238,8 @@ contains
     lzero = .true.; if (present(zero_first)) lzero = zero_first
     which = 1;      if(present(flags)) which = flags
         
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
+    n = SIZE(mat, dim=1)
+    m = SIZE(mat, dim=2)
         
     do i = 1, n
       if (lzero) call dst(i)%setval(0.0_pfdp, flags)
@@ -272,8 +272,8 @@ contains
     if( which /= 2 ) &
       stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
 
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
+    n = SIZE(mat, dim=1)
+    m = SIZE(mat, dim=2)
         
     do i = 1, n
       if (lzero) call dst(n+1-i)%setval(0.0_pfdp, 2)

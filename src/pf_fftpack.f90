@@ -43,10 +43,10 @@ contains
     this%ndim=ndim
     
     !  FFT Storage parameters
-    nx=grid_shape(1)
+    nx=grid_SHAPE(1)
     this%nx = nx
     this%lensavx = 4*nx + 15
-    this%normfact=real(nx,pfdp)
+    this%normfact=REAL(nx,pfdp)
     
     allocate(this%workhatx(nx))   !  complex transform
     allocate(this%wsavex(this%lensavx))
@@ -57,10 +57,10 @@ contains
     
     if (ndim > 1) then
        !  FFT Storage
-       ny=grid_shape(2)       
+       ny=grid_SHAPE(2)       
        this%ny = ny
        this%lensavy = 4*ny + 15
-       this%normfact=real(nx*ny,pfdp)
+       this%normfact=REAL(nx*ny,pfdp)
        allocate(this%workhaty(ny))   !  complex transform
        allocate(this%wsavey(this%lensavy))
        this%Ly = 1.0_pfdp
@@ -70,10 +70,10 @@ contains
        
        if (ndim > 2) then
           !  FFT Storage
-          nz=grid_shape(3)       
+          nz=grid_SHAPE(3)       
           this%nz = nz
           this%lensavz = 4*nz + 15
-          this%normfact=real(nx*ny*nz,pfdp)
+          this%normfact=REAL(nx*ny*nz,pfdp)
           allocate(this%workhatz(nz))   !  complex transform
           allocate(this%wsavez(this%lensavz))
           this%Lz = 1.0_pfdp
@@ -98,9 +98,9 @@ contains
     om=two_pi/this%Lx                
     do i = 1, nx
        if (i <= nx/2+1) then
-          this%kx(i) = om*real(i-1,pfdp)
+          this%kx(i) = om*REAL(i-1,pfdp)
        else
-          this%kx(i) = om*real(-nx + i - 1,pfdp)
+          this%kx(i) = om*REAL(-nx + i - 1,pfdp)
        end if
     end do
 
@@ -109,9 +109,9 @@ contains
        om=two_pi/this%Ly 
        do j = 1, ny
           if (j <= ny/2+1) then
-             this%ky(j) = om*real(j-1,pfdp)
+             this%ky(j) = om*REAL(j-1,pfdp)
           else
-             this%ky(j) = om*real(-ny + j - 1,pfdp)
+             this%ky(j) = om*REAL(-ny + j - 1,pfdp)
           end if
        end do
     end if
@@ -121,9 +121,9 @@ contains
        om=two_pi / this%Lz 
        do k = 1,nz
           if (k <= nz/2+1) then
-             this%kz(k) = om*real(k-1,pfdp)
+             this%kz(k) = om*REAL(k-1,pfdp)
           else
-             this%kz(k) = om*real(-nz + k - 1,pfdp)
+             this%kz(k) = om*REAL(-nz + k - 1,pfdp)
           end if
        end do
     end if
@@ -281,7 +281,7 @@ contains
     call this%zinterp_1d(wk_c, wk_f)
     call fft_f%fftb()     !  internal inverse fft call
 
-    yvec_f=real(wk_f,pfdp) !  grab the real part
+    yvec_f=REAL(wk_f,pfdp) !  grab the real part
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
@@ -301,7 +301,7 @@ contains
     call this%zinterp_2d(wk_c, wk_f)
     call fft_f%fftb()     !  internal inverse fft call
 
-    yvec_f=real(wk_f,pfdp)  !  grab the real part
+    yvec_f=REAL(wk_f,pfdp)  !  grab the real part
     
   end subroutine interp_2d
   subroutine interp_3d(this, yvec_c, fft_f,yvec_f)
@@ -320,7 +320,7 @@ contains
     call this%zinterp_3d(wk_c, wk_f)
     call fft_f%fftb()     !  internal inverse fft call
 
-    yvec_f=real(wk_f,pfdp)  !  grab the real part
+    yvec_f=REAL(wk_f,pfdp)  !  grab the real part
   end subroutine interp_3d
 
   !>  Interpolate from coarse  level to fine in spectral space
@@ -331,8 +331,8 @@ contains
 
     integer :: nx_f, nx_c
 
-    nx_f = size(yhat_f)
-    nx_c = size(yhat_c)
+    nx_f = SIZE(yhat_f)
+    nx_c = SIZE(yhat_c)
 
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
@@ -347,8 +347,8 @@ contains
 
     integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
 
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
@@ -373,8 +373,8 @@ contains
     integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
 
 
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2

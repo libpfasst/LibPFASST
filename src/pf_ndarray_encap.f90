@@ -6,15 +6,15 @@
 !> N-dimensional array encapsulation.
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
-!! uses the levels 'shape' attribute to create a new array with that
-!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! uses the levels 'lev_shape' attribute to create a new array with that
+!! shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
 !! set appropriately.  For example, before calling pf_pfasst_run we can
 !! set the shape of the coarsest level by doing:
 !!
-!!   allocate(pf%levels(1)%shape(2))
-!!   pf%levels(1)%shape = [ 3, 10 ]
+!!   allocate(pf%levels(1)%lev_shape(2))
+!!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
 !! extract pointers to the encapsulated array without
 !! performing any copies.
 !!
@@ -35,7 +35,7 @@ module pf_mod_ndarray
 
   !>  N-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: ndarray
-     integer             :: dim
+     integer             :: ndim
      integer,    allocatable :: shape(:)
      real(pfdp), allocatable :: flatarray(:)
    contains
@@ -47,18 +47,6 @@ module pf_mod_ndarray
      procedure :: axpy => ndarray_axpy
      procedure :: eprint => ndarray_eprint
   end type ndarray
-
-  !> Interfaces to output routines in pf_numpy.c
-  interface
-     !>  Subroutine to write an the array to a file
-     subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, mpibuflen
-       integer,    intent(in   )        :: shape(dim)
-       real(c_double),    intent(in   )        :: array(mpibuflen)
-     end subroutine ndarray_dump_numpy
-  end interface
 
 contains
   function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
@@ -72,38 +60,41 @@ contains
   end function cast_as_ndarray
 
   !>  Subroutine to allocate the array and set the size parameters
-  subroutine ndarray_build(q, shape)
+  subroutine ndarray_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
-    integer,           intent(in   ) :: shape(:)
+    integer,           intent(in   ) :: shape_in(:)
 
     select type (q)
     class is (ndarray)
-       allocate(q%shape(size(shape)))
-       allocate(q%flatarray(product(shape)))
-       q%dim   = size(shape)
-       q%shape = shape
+       allocate(q%shape(SIZE(shape_in)))
+       allocate(q%flatarray(product(shape_in)))
+       q%ndim   = SIZE(shape_in)
+       q%shape = shape_in
     end select
   end subroutine ndarray_build
 
   !> Subroutine to  create a single array
-  subroutine ndarray_create_single(this, x, level, shape)
+  subroutine ndarray_create_single(this, x, level_index, lev_shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
     allocate(ndarray::x)
-    call ndarray_build(x, shape)
+    call ndarray_build(x, lev_shape)
   end subroutine ndarray_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine ndarray_create_array(this, x, n, level,  shape)
+  subroutine ndarray_create_array(this, x, n, level_index,  lev_shape)
     class(ndarray_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
     allocate(ndarray::x(n))
     do i = 1, n
-       call ndarray_build(x(i), shape)
+       call ndarray_build(x(i), lev_shape)
     end do
   end subroutine ndarray_create_array
 
@@ -143,7 +134,7 @@ contains
 
     select type(x)
     class is (ndarray)
-       do i = 1,size(x)
+       do i = 1,SIZE(x)
           deallocate(x(i)%shape)
           deallocate(x(i)%flatarray)
        end do

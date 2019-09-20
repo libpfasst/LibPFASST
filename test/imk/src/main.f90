@@ -73,8 +73,8 @@ contains
       !>  output the run options 
       call pf_print_options(pf,un_opt=6)
       
-      call zmkpair_build(q0, pf%levels(pf%nlevels)%shape(1))
-      call zmkpair_build(qend, pf%levels(pf%nlevels)%shape(1))
+      call zmkpair_build(q0, pf%levels(pf%nlevels)%lev_shape(1))
+      call zmkpair_build(qend, pf%levels(pf%nlevels)%lev_shape(1))
       call initial(q0)
 
       call mpi_barrier(MPI_COMM_WORLD, err)

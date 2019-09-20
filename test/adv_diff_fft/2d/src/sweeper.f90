@@ -56,8 +56,8 @@ contains
     complex(pfdp), allocatable :: ddx(:,:) ! First derivative operators
     complex(pfdp), allocatable :: ddy(:,:) ! First derivative operators
     
-    nx=pf%levels(level_index)%shape(1)
-    ny=pf%levels(level_index)%shape(2)
+    nx=pf%levels(level_index)%lev_shape(1)
+    ny=pf%levels(level_index)%lev_shape(2)
     
     !  Call the imex sweeper initialize
     call this%imex_initialize(pf,level_index)

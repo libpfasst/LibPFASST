@@ -605,7 +605,7 @@ contains
     real(pfqp), intent(inout) :: a(:)
     integer :: iq
 
-    if (size(a) > 1) then
+    if (SIZE(a) > 1) then
        call qsort_partition(a, iq)
        call qsort(a(:iq-1))
        call qsort(a(iq:))
@@ -621,7 +621,7 @@ contains
 
     x = a(1)
     i = 0
-    j = size(a) + 1
+    j = SIZE(a) + 1
 
     do
        j = j-1

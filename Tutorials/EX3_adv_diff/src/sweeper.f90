@@ -72,7 +72,7 @@ contains
        this%explicit=.TRUE.
     end if
 
-    nx=pf%levels(level_index)%shape(1)  !  local convenient grid size
+    nx=pf%levels(level_index)%lev_shape(1)  !  local convenient grid size
 
     !>  Set up the FFT 
     allocate(this%fft_tool)

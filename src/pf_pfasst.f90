@@ -96,8 +96,8 @@ contains
     integer ::  buflen_local
 
     ! Allocate and set shape array for the level
-    allocate(pf%levels(level_index)%shape(size(shape_in)))
-    pf%levels(level_index)%shape = shape_in
+    allocate(pf%levels(level_index)%lev_shape(SIZE(shape_in)))
+    pf%levels(level_index)%lev_shape = shape_in
 
     !  Set the size of mpi buffer
     buflen_local= product(shape_in)
@@ -180,7 +180,7 @@ contains
 
     !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
-       call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%shape)
+       call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
     end if
 
     !> skip the rest if we're already allocated
@@ -217,25 +217,25 @@ contains
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
 
-    call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%shape)
-    call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%shape)
+    call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%lev_shape)
     do i = 1, nnodes*npieces
        call lev%Fflt(i)%setval(0.0_pfdp, 0)
     end do
 
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%shape)
-    call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%shape)
+    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%lev_shape)
 
     !  Need space for old function values in im sweepers
-    call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, lev%shape)
+    call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, lev%lev_shape)
     lev%pF(1:nnodes,1:npieces) => lev%pFflt
     if (lev%index < pf%nlevels) then
-       call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%shape)
+       call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%lev_shape)
     end if
-    call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%shape)
-    call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%shape)
-    call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%lev_shape)
+    call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%lev_shape)
+    call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%lev_shape)
     
   end subroutine pf_level_setup
 
@@ -311,8 +311,8 @@ contains
     call lev%ulevel%sweeper%destroy(pf,level_index)
 
     !> deallocate misc. arrays
-    if (allocated(lev%shape)) then
-       deallocate(lev%shape)
+    if (allocated(lev%lev_shape)) then
+       deallocate(lev%lev_shape)
     end if
 
     if (allocated(lev%tmat)) then

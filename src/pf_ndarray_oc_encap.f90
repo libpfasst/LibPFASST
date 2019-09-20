@@ -4,15 +4,15 @@
 !
 !!
 !> When a new solution is created by a PFASST level, this encapsulation
-!! uses the levels 'shape' attribute to create a new array with that
-!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! uses the levels 'lev_shape' attribute to create a new array with that
+!! shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
 !! set appropriately.  For example, before calling pf_pfasst_run we can
 !! set the shape of the coarsest level by doing:
 !!
-!!   allocate(pf%levels(1)%shape(2))
-!!   pf%levels(1)%shape = [ 3, 10 ]
+!!   allocate(pf%levels(1)%lev_shape(2))
+!!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d_oc, get_array2d_oc, get_array3d_oc, etc can be used to
 !! extract pointers to the encapsulated array from a C pointer without
 !! performing any copies.
 module pf_mod_ndarray_oc
@@ -32,7 +32,7 @@ module pf_mod_ndarray_oc
 
   !>  N-dimensional array type for optimal control,  extends the abstract encap type  
   type, extends(pf_encap_t) :: ndarray_oc
-     integer                 :: dim
+     integer                 :: ndim
      integer,    allocatable :: shape(:)    
      real(pfdp), allocatable :: yflatarray(:)
      real(pfdp), allocatable :: pflatarray(:) 
@@ -49,52 +49,56 @@ module pf_mod_ndarray_oc
 
   ! interfaces to routines in pf_numpy.c
   interface
-     subroutine ndarray_dump_numpy(dname, fname, endian, dim, shape, nvars, array) bind(c)
+     subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, array) bind(c)
        use iso_c_binding
        use pf_mod_dtype
        character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer(c_int),    intent(in   ), value :: dim, nvars
-       integer(c_int),    intent(in   )        :: shape(dim)
+       integer(c_int),    intent(in   ), value :: ndim, nvars
+       integer(c_int),    intent(in   )        :: shape(ndim)
        real(pfdp),    intent(in   )        :: array(nvars)
      end subroutine ndarray_dump_numpy
   end interface
 
 contains
   !>  Subroutine to allocate the array and set the size parameters
-  subroutine ndarray_oc_build(q, shape)
+  subroutine ndarray_oc_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
-    integer,           intent(in   ) :: shape(:)
+    integer,           intent(in   ) :: shape_in(:)
 
     select type (q)
     class is (ndarray_oc)
-       allocate(q%shape(size(shape)))
-       allocate(q%yflatarray(product(shape)))
-       allocate(q%pflatarray(product(shape)))
-       q%dim   = size(shape)
-       q%shape = shape
+       allocate(q%shape(SIZE(shape_in)))
+       allocate(q%yflatarray(product(shape_in)))
+       allocate(q%pflatarray(product(shape_in)))
+       q%ndim   = SIZE(shape_in)
+       q%shape = shape_in
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_oc_build
 
   !> Subroutine to  create a single array
-  subroutine ndarray_oc_create_single(this, x, level, shape)
+  subroutine ndarray_oc_create_single(this, x, level_index, lev_shape)
     class(ndarray_oc_factory), intent(inout)           :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
+
     allocate(ndarray_oc::x)
-    call ndarray_oc_build(x, shape)
+    call ndarray_oc_build(x, lev_shape)
   end subroutine ndarray_oc_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine ndarray_oc_create_array(this, x, n, level, shape)
+  subroutine ndarray_oc_create_array(this, x, n, level_index, lev_shape)
     class(ndarray_oc_factory), intent(inout)              :: this
     class(pf_encap_t),         intent(inout), allocatable :: x(:)
-    integer,                   intent(in   )              :: n, level, shape(:)
+    integer,                   intent(in   )              :: n
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
     allocate(ndarray_oc::x(n))
     do i = 1, n
-       call ndarray_oc_build(x(i), shape)
+       call ndarray_oc_build(x(i), lev_shape)
     end do
   end subroutine ndarray_oc_create_array
   
@@ -135,7 +139,7 @@ contains
     
     select type(x)
     class is (ndarray_oc)
-       do i = 1,size(x)
+       do i = 1,SIZE(x)
           deallocate(x(i)%pflatarray)
           deallocate(x(i)%yflatarray)
           deallocate(x(i)%shape)
@@ -303,16 +307,6 @@ contains
   end subroutine ndarray_oc_axpy
 
   
-  ! Helpers
-!   function dims(solptr) result(r)
-!     type(c_ptr), intent(in   ), value :: solptr
-!     integer :: r
-! 
-!     type(ndarray_oc), pointer :: sol
-!     call c_f_pointer(solptr, sol)
-! 
-!     r = sol%dim
-!   end function dims
 
   function cast_as_ndarray_oc(encap_polymorph) result(ndarray_oc_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
@@ -415,13 +409,13 @@ contains
          pf%state%step, pf%state%iter, level_index
 
     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
-         qend%dim, qend%shape, size(qend%yflatarray), qend%yflatarray)
+         qend%ndim, qend%shape, SIZE(qend%yflatarray), qend%yflatarray)
 
     write(fnamep, "('p_s',i0.2,'i',i0.3,'l',i0.2,'.npy')") &
          pf%state%step, pf%state%iter, level_index
 
     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
-         qend%dim, qend%shape, size(qend%pflatarray), qend%pflatarray)
+         qend%ndim, qend%shape, SIZE(qend%pflatarray), qend%pflatarray)
   end subroutine ndarray_oc_dump_hook
 
   
@@ -441,18 +435,16 @@ contains
            pf%state%step, level_index, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           qend%dim, qend%shape, size(qend%yflatarray), qend%yflatarray)
+           qend%ndim, qend%shape, SIZE(qend%yflatarray), qend%yflatarray)
 
       write(fnamep, "('p_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
            pf%state%step, level_index, m
 
       call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
-           qend%dim, qend%shape, size(qend%pflatarray), qend%pflatarray)
+           qend%ndim, qend%shape, SIZE(qend%pflatarray), qend%pflatarray)
    end do
 
   end subroutine ndarray_oc_dump_all_hook
-
-
 
   
     !>  Subroutine to print the array to the screen (mainly for debugging purposes)
@@ -463,160 +455,5 @@ contains
     print *, this%yflatarray(1:10)
     print *, this%pflatarray(1:10)
   end subroutine ndarray_oc_eprint
-
-!   function array2_oc(solptr, flags) result(r)
-!     type(c_ptr), intent(in   ), value :: solptr
-!     integer,     intent(in   ), optional :: flags
-!     real(pfdp), pointer :: r(:,:)
-! 
-!     integer                :: shp(2)
-!     integer                :: which
-!     type(ndarray_oc), pointer :: sol
-!     call c_f_pointer(solptr, sol)
-! 
-!     if (sol%dim == 2) then
-!        shp = sol%shape
-!        
-!        which = 0
-!        if (present(flags)) which = flags
-! 
-!        select case (which)
-!        case (0)
-!           stop "ERROR in array2_oc: only 1, 2 allowed as flags"
-!        case (1)
-!           call c_f_pointer(sol%yptr, r, shp)
-!        case (2)
-!           call c_f_pointer(sol%pptr, r, shp)
-!        case default
-!           stop "ERROR in array2_oc: only 1, 2 allowed as flags"
-!        end select
-!     else
-!        stop "ERROR: array2 dimension mismatch."
-!     end if
-!   end function array2_oc
-! 
-!   function array3_oc(solptr, flags) result(r)
-!     type(c_ptr), intent(in   ), value :: solptr
-!     integer,     intent(in   ), optional :: flags
-!     real(pfdp), pointer :: r(:,:,:)
-! 
-!     integer                :: shp(3)
-!     integer                :: which
-!     type(ndarray_oc), pointer :: sol
-!     call c_f_pointer(solptr, sol)
-! 
-!     if (sol%dim == 3) then
-!        shp = sol%shape
-! 
-!        which = 0
-!        if (present(flags)) which = flags
-! 
-!        select case (which)
-!        case (0)
-!           stop "ERROR in array3_oc: only 1, 2 allowed as flags"
-!        case (1)
-!           call c_f_pointer(sol%yptr, r, shp)
-!        case (2)
-!           call c_f_pointer(sol%pptr, r, shp)
-!        case default
-!           stop "ERROR in array3_oc: only 1, 2 allowed as flags"
-!        end select
-!     else
-!        stop "ERROR: array3 dimension mismatch."
-!     end if
-!   end function array3_oc
-! 
-!   function array4_oc(solptr, flags) result(r)
-!     type(c_ptr), intent(in   ), value :: solptr
-!     integer,     intent(in   ), optional :: flags
-!     real(pfdp), pointer :: r(:,:,:,:)
-! 
-!     integer                :: shp(4)
-!     integer                :: which
-!     type(ndarray_oc), pointer :: sol
-!     call c_f_pointer(solptr, sol)
-! 
-!     if (sol%dim == 4) then
-!        shp = sol%shape
-!        
-!        which = 0
-!        if (present(flags)) which = flags
-! 
-!        select case (which)
-!        case (0)
-!           stop "ERROR in array4_oc: only 1, 2 allowed as flags"
-!        case (1)
-!           call c_f_pointer(sol%yptr, r, shp)
-!        case (2)
-!           call c_f_pointer(sol%pptr, r, shp)
-!        case default
-!           stop "ERROR in array4_oc: only 1, 2 allowed as flags"
-!        end select
-!     else
-!        stop "ERROR: array4 dimension mismatch."
-!     end if
-!   end function array4_oc
-! 
-!   function array5_oc(solptr, flags) result(r)
-!     type(c_ptr), intent(in   ), value :: solptr
-!     integer,     intent(in   ), optional :: flags
-!     real(pfdp), pointer :: r(:,:,:,:,:)
-! 
-!     integer                :: shp(5)
-!     integer                :: which
-!     type(ndarray_oc), pointer :: sol
-!     call c_f_pointer(solptr, sol)
-! 
-!     if (sol%dim == 5) then
-!        shp = sol%shape
-! 
-!        which = 0
-!        if (present(flags)) which = flags
-! 
-!        select case (which)
-!        case (0)
-!           stop "ERROR in array5_oc: only 1, 2 allowed as flags"
-!        case (1)
-!           call c_f_pointer(sol%yptr, r, shp)
-!        case (2)
-!           call c_f_pointer(sol%pptr, r, shp)
-!        case default
-!           stop "ERROR in array5_oc: only 1, 2 allowed as flags"
-!        end select
-!     else
-!        stop "ERROR: array5 dimension mismatch."
-!     end if
-!   end function array5_oc
-! 
-!    function get_y(ptr) result(y)
-!      type(c_ptr), intent(in), value :: ptr
-!      real(pfdp),    pointer :: y(:)
-!      type(ndarray_oc), pointer :: sol
-! 
-!      call c_f_pointer(ptr, sol)
-!      y => sol%yflatarray
-!    end function get_y
-! 
-!    function get_p(ptr) result(p)
-!      type(c_ptr), intent(in), value :: ptr
-!      real(pfdp),    pointer :: p(:)
-!      type(ndarray_oc), pointer :: sol
-! 
-!      call c_f_pointer(ptr, sol)
-!      p => sol%pflatarray
-!    end function get_p
-! 
-!   subroutine ndarray_oc_encap_create(encap)
-!     type(pf_encap_t), intent(out) :: encap
-! 
-!     encap%create  => ndarray_oc_create
-!     encap%destroy => ndarray_oc_destroy
-!     encap%setval  => ndarray_oc_setval
-!     encap%copy    => ndarray_oc_copy
-!     encap%norm    => ndarray_oc_norm
-!     encap%pack    => ndarray_oc_pack
-!     encap%unpack  => ndarray_oc_unpack
-!     encap%axpy    => ndarray_oc_saxpy
-!   end subroutine ndarray_oc_encap_create
 
 end module pf_mod_ndarray_oc
