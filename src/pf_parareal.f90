@@ -1,4 +1,4 @@
-!!  Routines that run the pararealalgorithm
+!!  Routines that run the parareal algorithm
 !
 ! This file is part of LIBPFASST.
 !
@@ -40,11 +40,11 @@ contains
     !!  pass in the time step size and length of run
     if (present(nsteps)) then
       nsteps_loc = nsteps
-      tend_loc=dble(nsteps_loc*dt)
+      tend_loc=real(nsteps_loc*dt,pfdp)
     else
       nsteps_loc = ceiling(tend/dt)
       !  Do  sanity check on steps
-      if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/100.0) then
+      if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/1d-7) then
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
@@ -82,7 +82,7 @@ contains
     class(pf_encap_t), intent(inout), optional :: qend
     integer,           intent(in   ), optional :: flags(:)
 
-    class(pf_level_t), pointer :: lev_p  !!  pointer to the one level we are operating on
+    class(pf_level_t), pointer :: lev  !!  pointer to the one level we are operating on
     integer                   :: j, k
     integer                   :: nblocks !!  The number of blocks of steps to do
     integer                   :: nproc   !!  The number of processors being used
@@ -101,10 +101,10 @@ contains
     pf%state%finest_level = pf%nlevels
 
     !  pointer to finest  level to start
-    lev_p => pf%levels(pf%state%finest_level)
+    lev => pf%levels(pf%state%finest_level)
 
     !  Stick the initial condition into q0 (will happen on all processors)
-    call lev_p%q0%copy(q0, flags=0)
+    call lev%q0%copy(q0, flags=0)
 
 
     nproc = pf%comm%nproc
@@ -138,11 +138,11 @@ contains
 
        if (k > 1) then
           if (nproc > 1)  then
-             call lev_p%qend%pack(lev_p%send)    !!  Pack away your last solution
-             call pf_broadcast(pf, lev_p%send, lev_p%mpibuflen, pf%comm%nproc-1)
-             call lev_p%q0%unpack(lev_p%send)    !!  Everyone resets their q0
+             call lev%qend%pack(lev%send)    !!  Pack away your last solution
+             call pf_broadcast(pf, lev%send, lev%mpibuflen, pf%comm%nproc-1)
+             call lev%q0%unpack(lev%send)    !!  Everyone resets their q0
           else
-             call lev_p%q0%copy(lev_p%qend, flags=0)    !!  Just stick qend in q0
+             call lev%q0%copy(lev%qend, flags=0)    !!  Just stick qend in q0
           end if
 
           !>  Update the step and t0 variables for new block
@@ -181,7 +181,7 @@ contains
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
-       call qend%copy(lev_p%qend, flags=0)
+       call qend%copy(lev%qend, flags=0)
     end if
   end subroutine pf_parareal_block_run
   !>  The parareal predictor does a serial integration on the coarse level followed
@@ -193,8 +193,8 @@ contains
     real(pfdp),        intent(in   )         :: dt     !! time step
     integer,           intent(in   ), optional :: flags(:)  !!  User defined flags
 
-    class(pf_level_t), pointer :: c_lev_p
-    class(pf_level_t), pointer :: f_lev_p     !!
+    class(pf_level_t), pointer :: c_lev
+    class(pf_level_t), pointer :: f_lev     !!
     integer                   :: k,n               !!  Loop indices
     integer                   :: nsteps_c,nsteps_f    !!  Number of RK  steps
     integer                   :: level_index     !!  Local variable for looping over levels
@@ -205,29 +205,29 @@ contains
     call start_timer(pf, TPREDICTOR)
 
     !  This is for one two levels only or one if only RK is done
-    c_lev_p => pf%levels(1)
-    f_lev_p => pf%levels(pf%state%finest_level)
+    c_lev => pf%levels(1)
+    f_lev => pf%levels(pf%state%finest_level)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning parareal predictor'
 
     !! Step 1. Getting the initial condition on the coarsest level
     if (pf%state%finest_level > 1) then
        if (pf%q0_style < 2) then  !  Copy coarse
-          call c_lev_p%q0%copy(f_lev_p%q0)
+          call c_lev%q0%copy(f_lev%q0)
        end if
     end if
     level_index = 1
 
     !!
     !! Step 2. Do coarse level integration, no communication necessary
-    nsteps_c= c_lev_p%ulevel%stepper%nsteps  !  Each processor integrates alone
+    nsteps_c= c_lev%ulevel%stepper%nsteps  !  Each processor integrates alone
     do n=1,pf%rank+1
-       if (n .gt. 1) call c_lev_p%q0%copy(c_lev_p%qend)       
+       if (n .gt. 1) call c_lev%q0%copy(c_lev%qend)       
        t0k      = dt*real(n-1,pfdp)
-       call c_lev_p%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev_p%q0,c_lev_p%qend,dt, nsteps_c)
+       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,c_lev%qend,dt, nsteps_c)
     end do
     ! Save the coarse level value
-    call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
+    call c_lev%Q(2)%copy(c_lev%qend, flags=0)     
 
     call end_timer(pf, TPREDICTOR)
 
@@ -250,47 +250,47 @@ contains
     integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle (not supported)
     integer, optional, intent(in)    :: flags
 
-    type(pf_level_t), pointer :: f_lev_p, c_lev_p
+    type(pf_level_t), pointer :: f_lev, c_lev
     integer :: level_index, j,nsteps_f,nsteps_c
 
     if (pf%nlevels <2) return     !  This is for two levels only
 
-    c_lev_p => pf%levels(1)
-    f_lev_p => pf%levels(2)
-    nsteps_c= c_lev_p%ulevel%stepper%nsteps
-    nsteps_f= f_lev_p%ulevel%stepper%nsteps  
+    c_lev => pf%levels(1)
+    f_lev => pf%levels(2)
+    nsteps_c= c_lev%ulevel%stepper%nsteps
+    nsteps_f= f_lev%ulevel%stepper%nsteps  
 
 
     !  Do fine steps with old initial condition
     if (pf%rank /= 0) then
-       call f_lev_p%q0%copy(c_lev_p%q0, flags=0)       !  Get fine initial condition
+       call f_lev%q0%copy(c_lev%q0, flags=0)       !  Get fine initial condition
     end if
-    call f_lev_p%ulevel%stepper%do_n_steps(pf, 2,pf%state%t0, f_lev_p%q0,f_lev_p%qend, dt, nsteps_f)
+    call f_lev%ulevel%stepper%do_n_steps(pf, 2,pf%state%t0, f_lev%q0,f_lev%qend, dt, nsteps_f)
     
     ! Get a new initial condition on coarse
-    call pf_recv(pf, c_lev_p, 10000+iteration, .true.)
+    call pf_recv(pf, c_lev, 10000+iteration, .true.)
 
     !  Step on coarse
-    call c_lev_p%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev_p%q0,c_lev_p%qend, dt, nsteps_c)
+    call c_lev%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev%q0,c_lev%qend, dt, nsteps_c)
 
     !  Compute the correction (store in Q(1))
-    call c_lev_p%Q(1)%copy(f_lev_p%qend, flags=0)  !  Current 
-    call c_lev_p%Q(1)%axpy(-1.0_pfdp,c_lev_p%Q(2)) !       
+    call c_lev%Q(1)%copy(f_lev%qend, flags=0)  !  Current 
+    call c_lev%Q(1)%axpy(-1.0_pfdp,c_lev%Q(2)) !       
 
     ! Save the result of the coarse sweep
-    call c_lev_p%Q(2)%copy(c_lev_p%qend, flags=0)     
+    call c_lev%Q(2)%copy(c_lev%qend, flags=0)     
 
     ! correct coarse level solution at end (the parareal correction)
-    call c_lev_p%qend%axpy(1.0_pfdp,c_lev_p%Q(1))    
+    call c_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))    
 
     !  Send coarse forward  (nonblocking)
-    call pf_send(pf, c_lev_p, 10000+iteration, .false.)
+    call pf_send(pf, c_lev, 10000+iteration, .false.)
     
     !  Compute the jump in the initial condition
-    call f_lev_p%q0_delta%copy(c_lev_p%q0, flags=0)
-    call f_lev_p%q0_delta%axpy(-1.0d0,f_lev_p%q0, flags=0)
-    f_lev_p%residual=f_lev_p%q0_delta%norm(flags=0)
-    call pf_set_resid(pf,2,f_lev_p%residual)
+    call f_lev%q0_delta%copy(c_lev%q0, flags=0)
+    call f_lev%q0_delta%axpy(-1.0d0,f_lev%q0, flags=0)
+    f_lev%residual=f_lev%q0_delta%norm(flags=0)
+    call pf_set_resid(pf,2,f_lev%residual)
 
   end subroutine pf_parareal_v_cycle
   

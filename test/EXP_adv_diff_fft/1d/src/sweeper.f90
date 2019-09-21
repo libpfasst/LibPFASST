@@ -69,7 +69,7 @@ contains
         
 
       lev => pf%levels(level_index)
-      this%nx=lev%shape(1)
+      this%nx=lev%lev_shape(1)
       nx=this%nx
       nnodes=lev%nnodes
 
@@ -123,14 +123,14 @@ contains
   ! ==================================================================
 
      !F_EVAL: evaluates the nonlinear function N(t,y(t)) at y, t.
-     subroutine f_eval(this, y, t, level, n)
+     subroutine f_eval(this, y, t, level_index, n)
         use probin, only:  splitting, v,nu
 
         ! arguments
         class(ad_sweeper_t), intent(inout) :: this
         class(pf_encap_t),   intent(in)    :: y
         real(pfdp),          intent(in)    :: t
-        integer,             intent(in)    :: level
+        integer,             intent(in)    :: level_index
         class(pf_encap_t),   intent(inout) :: n
 
         ! local variables
@@ -289,7 +289,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
   subroutine initial(y_0)
-    type(ndarray), intent(inout) :: y_0
+    type(pf_ndarray_t), intent(inout) :: y_0
     call exact(0.0_pfdp, y_0%flatarray)
   end subroutine initial
 

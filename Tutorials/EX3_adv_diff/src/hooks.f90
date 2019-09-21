@@ -14,7 +14,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
-    real(pfdp) :: yexact(pf%levels(level_index)%shape(1))
+    real(pfdp) :: yexact(pf%levels(level_index)%lev_shape(1))
     real(pfdp), pointer :: y_end(:)
     real(pfdp) :: maxerr
     real(pfdp) :: residual

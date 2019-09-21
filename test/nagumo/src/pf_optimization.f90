@@ -87,7 +87,7 @@ contains
     do m = 1, pf%levels(pf%nlevels)%nnodes
 !       if (pf%rank .eq. 0) print *, m
       call objective_function(pf%levels(pf%nlevels)%ulevel%sweeper, pf%levels(pf%nlevels)%Q(m), &
-                                    product(pf%levels(pf%nlevels)%shape), m, obj(m))
+                                    product(pf%levels(pf%nlevels)%lev_shape), m, obj(m))
     end do
     objective = 0.0
     do m = 1, pf%levels(pf%nlevels)%nnodes-1
@@ -96,7 +96,7 @@ contains
     end do
     objective = 0.5*objective !0.5 for trapezoidal rule
     call control_L2Q(pf%levels(pf%nlevels)%ulevel%sweeper, dt, pf%levels(pf%nlevels)%nodes, &
-                                  product(pf%levels(pf%nlevels)%shape), L2NormUSq)
+                                  product(pf%levels(pf%nlevels)%lev_shape), L2NormUSq)
     objective = 0.5*objective + 0.5*alpha*L2NormUSq
     deallocate(obj)
   end subroutine evaluate_objective

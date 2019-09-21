@@ -86,7 +86,7 @@ contains
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
     call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,3),3)
 
-    call lev%ulevel%factory%create_single(rhs, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(rhs, lev%index,   lev%lev_shape)
 
     t = t0
     dtsdc = dt * (lev%nodes(2:lev%nnodes) - lev%nodes(1:lev%nnodes-1))
@@ -111,7 +111,7 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! done
-    call lev%ulevel%factory%destroy_single(rhs, lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_single(rhs, lev%index,  lev%lev_shape)
 
     call end_timer(pf, TLEVEL+lev%index-1)
 

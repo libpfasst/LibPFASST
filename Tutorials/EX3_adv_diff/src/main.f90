@@ -36,8 +36,8 @@ contains
     !>  Local variables
     type(pf_pfasst_t) :: pf       !<  the main pfasst structure
     type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
-    type(ndarray)     :: y_0      !<  the initial condition
-    type(ndarray)     :: y_end    !<  the solution at the final time
+    type(pf_ndarray_t):: y_0      !<  the initial condition
+    type(pf_ndarray_t):: y_end    !<  the solution at the final time
     character(256)    :: pf_fname   !<  file name for input of PFASST parameters
 
     integer           ::  l   !  loop variable over levels
@@ -57,7 +57,7 @@ contains
        allocate(ad_level_t::pf%levels(l)%ulevel)
 
        !>  Allocate the user specific data factory
-       allocate(ndarray_factory::pf%levels(l)%ulevel%factory)
+       allocate(pf_ndarray_factory_t::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)

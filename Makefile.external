@@ -14,6 +14,10 @@ $(FFTW3).tar.gz:
 	wget http://fftw.org/$(FFTW3).tar.gz
 
 
+libnpy:
+	git clone https://github.com/kovalp/libnpy.git
+	cd libnpy && cp archs/arch.inc.gcc arch.inc &&	make INSTALL_FLAVOR=fortran_mod
+
 #
 # hdf5
 #

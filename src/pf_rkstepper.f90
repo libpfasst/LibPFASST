@@ -298,11 +298,11 @@ contains
     end select
 
     ! Allocate space for local variables
-    call lev%ulevel%factory%create_single(this%rhs, level_index,  lev%shape)
-    call lev%ulevel%factory%create_single(this%q0, level_index,  lev%shape)
-    call lev%ulevel%factory%create_single(this%qend, level_index,  lev%shape)
-    call lev%ulevel%factory%create_single(this%qtemp, level_index,  lev%shape)            
-    call lev%ulevel%factory%create_array(lev%Frkflt, nstages*npieces, level_index,  lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%q0, level_index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%qend, level_index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%qtemp, level_index,  lev%lev_shape)            
+    call lev%ulevel%factory%create_array(lev%Frkflt, nstages*npieces, level_index,  lev%lev_shape)
     do i = 1, nstages*npieces
        call lev%Frkflt(i)%setval(0.0_pfdp, 0)
     end do

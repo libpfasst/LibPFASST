@@ -189,10 +189,10 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
 
     !>  Make space for extra integration piece
-    call lev%ulevel%factory%create_array(this%I3,lev%nnodes-1,lev%index,lev%shape)
+    call lev%ulevel%factory%create_array(this%I3,lev%nnodes-1,lev%index,lev%lev_shape)
 
   end subroutine misdcQ_initialize
 

@@ -15,7 +15,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
-    real(pfdp) :: yexact(pf%levels(level_index)%shape(1))
+    real(pfdp) :: yexact(pf%levels(level_index)%lev_shape(1))
     real(pfdp), pointer :: y_end(:)
     real(pfdp) :: maxerr
     real(pfdp) :: residual
@@ -23,7 +23,6 @@ contains
     !>  compute the error at last end point
     y_end => get_array1d(pf%levels(level_index)%qend)
     call exact(pf%state%t0+pf%state%dt, yexact)
-
 
     maxerr = maxval(abs(y_end-yexact))
     residual=pf%levels(level_index)%residual
