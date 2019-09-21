@@ -27,8 +27,8 @@ contains
     integer, optional, intent(in)    :: flags, mystep    
 
     !>  Local variables
-    class(pf_level_t), pointer :: c_lev_p    
-    class(pf_level_t), pointer :: f_lev_p
+    class(pf_level_t), pointer :: c_lev    
+    class(pf_level_t), pointer :: f_lev
 
     integer    :: m, step
 
@@ -36,8 +36,8 @@ contains
     real(pfdp), allocatable :: f_times(:)  !!  Simulation time at fine nodes
     
     
-    f_lev_p => pf%levels(level_index);
-    c_lev_p => pf%levels(level_index-1)
+    f_lev => pf%levels(level_index);
+    c_lev => pf%levels(level_index-1)
     
     step = pf%state%step+1
     if(present(mystep)) step = mystep
@@ -46,51 +46,51 @@ contains
     call start_timer(pf, TRESTRICT + level_index - 1)
     
 
-    allocate(c_times(c_lev_p%nnodes))
-    allocate(f_times(f_lev_p%nnodes))
+    allocate(c_times(c_lev%nnodes))
+    allocate(f_times(f_lev%nnodes))
 
     !> restrict q's and recompute f's
-    c_times = t0 + dt*c_lev_p%nodes
-    f_times = t0 + dt*f_lev_p%nodes
+    c_times = t0 + dt*c_lev%nodes
+    f_times = t0 + dt*f_lev%nodes
 
-    call restrict_ts(f_lev_p, c_lev_p, f_lev_p%Q, c_lev_p%Q, f_times, flags)
+    call restrict_ts(f_lev, c_lev, f_lev%Q, c_lev%Q, f_times, flags)
 
     !>  Recompute the functions
-    call c_lev_p%ulevel%sweeper%evaluate_all(pf,level_index-1, c_times, flags=flags, step=step)
+    call c_lev%ulevel%sweeper%evaluate_all(pf,level_index-1, c_times, flags=flags, step=step)
 
     !>  Compute  FAS correction
-    do m = 1, c_lev_p%nnodes-1
-       call c_lev_p%tauQ(m)%setval(0.0_pfdp, flags)
+    do m = 1, c_lev%nnodes-1
+       call c_lev%tauQ(m)%setval(0.0_pfdp, flags)
     end do
     if (pf%state%iter >= pf%taui0)  then
        ! compute '0 to node' integral on the coarse level
-      call c_lev_p%ulevel%sweeper%integrate(pf,level_index-1,  c_lev_p%Q, &
-           c_lev_p%F, dt, c_lev_p%I, flags)
+      call c_lev%ulevel%sweeper%integrate(pf,level_index-1,  c_lev%Q, &
+           c_lev%F, dt, c_lev%I, flags)
        ! compute '0 to node' integral on the fine level
-      call f_lev_p%ulevel%sweeper%integrate(pf,level_index, f_lev_p%Q, &
-        f_lev_p%F, dt, f_lev_p%I, flags)
+      call f_lev%ulevel%sweeper%integrate(pf,level_index, f_lev%Q, &
+        f_lev%F, dt, f_lev%I, flags)
        !  put tau in on fine level
       if (level_index < pf%state%finest_level) then
-          do m = 1, f_lev_p%nnodes-1
-             call f_lev_p%I(m)%axpy(1.0_pfdp, f_lev_p%tauQ(m), flags)
+          do m = 1, f_lev%nnodes-1
+             call f_lev%I(m)%axpy(1.0_pfdp, f_lev%tauQ(m), flags)
           end do
        end if
        !  Subtract coarse integral
-       do m = 1, c_lev_p%nnodes-1
-          call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_lev_p%I(m), flags)
+       do m = 1, c_lev%nnodes-1
+          call c_lev%tauQ(m)%axpy(-1.0_pfdp, c_lev%I(m), flags)
        end do
 
        ! restrict '0 to node' integral on the fine level  in time and space
-       call restrict_ts_integral(f_lev_p, c_lev_p, f_lev_p%I, c_lev_p%I, f_times, flags)
+       call restrict_ts_integral(f_lev, c_lev, f_lev%I, c_lev%I, f_times, flags)
 
        ! Add fine restriction of fine integral (stored on coarse)
-       do m = 1, c_lev_p%nnodes-1
-          call c_lev_p%tauQ(m)%axpy(1.0_pfdp, c_lev_p%I(m), flags)
+       do m = 1, c_lev%nnodes-1
+          call c_lev%tauQ(m)%axpy(1.0_pfdp, c_lev%I(m), flags)
        end do
 
 !!$       if (pf%use_Sform) then
-!!$          do m = c_lev_p%nnodes-1,2,-1
-!!$!             call c_lev_p%tauQ(m)%axpy(-1.0_pfdp, c_lev_p%tauQ(m-1), flags)
+!!$          do m = c_lev%nnodes-1,2,-1
+!!$!             call c_lev%tauQ(m)%axpy(-1.0_pfdp, c_lev%tauQ(m-1), flags)
 !!$          end do
 !!$       end if
        
@@ -105,13 +105,13 @@ contains
   end subroutine restrict_time_space_fas
 
 
-  subroutine restrict_ts(f_lev_p, c_lev_p, f_encap_array, c_encap_array, f_time, flags)
+  subroutine restrict_ts(f_lev, c_lev, f_encap_array, c_encap_array, f_time, flags)
 
     !! Restrict (in time and space) f_sol_array  to c_sol_array
     !! This version is for point values (either functions or solutions)
     
-    class(pf_level_t),  intent(inout) :: f_lev_p   !!   pointer to fine level
-    class(pf_level_t),  intent(inout) :: c_lev_p   !!   pointer to coarse level
+    class(pf_level_t),  intent(inout) :: f_lev   !!   pointer to fine level
+    class(pf_level_t),  intent(inout) :: c_lev   !!   pointer to coarse level
     class(pf_encap_t),  intent(inout) :: f_encap_array(:)   !! array of fine level data to be restricted
     class(pf_encap_t),  intent(inout) :: c_encap_array(:)   !! array of coarse level data to be computed
     real(pfdp),         intent(in) :: f_time(:)             !! time at the fine nodes
@@ -121,40 +121,40 @@ contains
     integer :: f_nnodes,c_nnodes
 
 
-    f_nnodes = f_lev_p%nnodes
-    c_nnodes = c_lev_p%nnodes
+    f_nnodes = f_lev%nnodes
+    c_nnodes = c_lev%nnodes
 
     !!  Create a temp array for the spatial restriction
-    if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
+    if (f_lev%restrict_workspace_allocated   .eqv. .false.) then      
        print *,'create in restrict'
-       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
-       f_lev_p%restrict_workspace_allocated  = .true.
+       call c_lev%ulevel%factory%create_array(f_lev%f_encap_array_c, f_nnodes, c_lev%index, c_lev%lev_shape)
+       f_lev%restrict_workspace_allocated  = .true.
     end if
  
     !  spatial restriction
     do m = 1, f_nnodes
-       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_lev_p%f_encap_array_c(m), f_time(m), flags)
+       call f_lev%ulevel%restrict(f_lev, c_lev, f_encap_array(m), f_lev%f_encap_array_c(m), f_time(m), flags)
     end do
 
     ! temporal restriction
     if (present(flags)) then
        if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true., flags)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev%rmat, f_lev%f_encap_array_c, .true., flags)
        if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true., flags=2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev%rmat, f_lev%f_encap_array_c, .true., flags=2)
     else
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat, f_lev_p%f_encap_array_c, .true.)
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev%rmat, f_lev%f_encap_array_c, .true.)
     end if
 
   end subroutine restrict_ts
 
-  subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_array,f_time, flags)
+  subroutine restrict_ts_integral(f_lev, c_lev, f_encap_array, c_encap_array,f_time, flags)
 
     !! Restrict (in time and space) f_sol_array  to c_sol_array
     !! This version is for integrals
     
-    class(pf_level_t),  intent(inout) :: f_lev_p   !!   pointer to fine level
-    class(pf_level_t),  intent(inout) :: c_lev_p   !!   pointer to coarse level
+    class(pf_level_t),  intent(inout) :: f_lev   !!   pointer to fine level
+    class(pf_level_t),  intent(inout) :: c_lev   !!   pointer to coarse level
     class(pf_encap_t),  intent(inout) :: f_encap_array(:)   !! array of fine level data to be restricted
     class(pf_encap_t),  intent(inout) :: c_encap_array(:)   !! array of coarse level data to be computed
     real(pfdp),         intent(in) :: f_time(:)             !! time at the fine nodes
@@ -165,30 +165,30 @@ contains
     integer :: f_nnodes,c_nnodes
 
 
-    f_nnodes = f_lev_p%nnodes
-    c_nnodes = c_lev_p%nnodes
+    f_nnodes = f_lev%nnodes
+    c_nnodes = c_lev%nnodes
 
     !!  Create a temp array for the spatial restriction
-    if (f_lev_p%restrict_workspace_allocated   .eqv. .false.) then      
+    if (f_lev%restrict_workspace_allocated   .eqv. .false.) then      
        print *,'create in restrict'
-       call c_lev_p%ulevel%factory%create_array(f_lev_p%f_encap_array_c, f_nnodes, c_lev_p%index, c_lev_p%shape)
-       f_lev_p%restrict_workspace_allocated  = .true.
+       call c_lev%ulevel%factory%create_array(f_lev%f_encap_array_c, f_nnodes, c_lev%index, c_lev%lev_shape)
+       f_lev%restrict_workspace_allocated  = .true.
     end if
 
     !  spatial restriction
     do m = 1, f_nnodes-1
-       call f_lev_p%ulevel%restrict(f_lev_p, c_lev_p, f_encap_array(m), f_lev_p%f_encap_array_c(m), f_time(m), flags)
+       call f_lev%ulevel%restrict(f_lev, c_lev, f_encap_array(m), f_lev%f_encap_array_c(m), f_time(m), flags)
     end do
     
     ! temporal restriction
     ! when restricting '0 to node' integral terms, skip the first entry since it is zero
     if (present(flags)) then
        if ((flags .eq. 0) .or. (flags .eq. 1)) &
-            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true., flags=1)
+            call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev%rmat(2:,2:), f_lev%f_encap_array_c, .true., flags=1)
        if ((flags .eq. 0) .or. (flags .eq. 2)) &
-            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true., flags=2)
+            call pf_apply_mat_backward(c_encap_array, 1.0_pfdp, f_lev%rmat(2:,2:), f_lev%f_encap_array_c, .true., flags=2)
     else
-       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev_p%rmat(2:,2:), f_lev_p%f_encap_array_c, .true.)
+       call pf_apply_mat(c_encap_array, 1.0_pfdp, f_lev%rmat(2:,2:), f_lev%f_encap_array_c, .true.)
     end if
 
   end subroutine restrict_ts_integral

@@ -29,49 +29,49 @@ module pf_mod_amisdc
   end type pf_amisdc_t
 
   interface 
-     subroutine pf_f1eval_p(this, y, t, level, f1)
+     subroutine pf_f1eval_p(this, y, t, level_index, f1)
        import pf_amisdc_t, pf_encap_t, pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f1
        real(pfdp),         intent(in   ) :: t
-       integer,     intent(in   ) :: level
+       integer,     intent(in   ) :: level_index
      end subroutine pf_f1eval_p
 
-     subroutine pf_f2eval_p(this, y, t, level, f2)
+     subroutine pf_f2eval_p(this, y, t, level_index, f2)
        import pf_amisdc_t, pf_encap_t, pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f2
        real(pfdp),         intent(in   ) :: t
-       integer,     intent(in   ) :: level
+       integer,     intent(in   ) :: level_index
      end subroutine pf_f2eval_p
 
-     subroutine pf_f2comp_p(this, y, t, dt, rhs, level, f2)
+     subroutine pf_f2comp_p(this, y, t, dt, rhs, level_index, f2)
        import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: rhs
        class(pf_encap_t),  intent(inout) :: y, f2
        real(pfdp),         intent(in   ) :: t, dt
-       integer,     intent(in   ) :: level
+       integer,     intent(in   ) :: level_index
      end subroutine pf_f2comp_p
 
-     subroutine pf_f3eval_p(this, y, t, level, f3)
+     subroutine pf_f3eval_p(this, y, t, level_index, f3)
        import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t),  intent(in   ) :: y
        class(pf_encap_t),  intent(inout) :: f3
        real(pfdp),         intent(in   ) :: t
-       integer,     intent(in   ) :: level
+       integer,     intent(in   ) :: level_index
      end subroutine pf_f3eval_p
 
-     subroutine pf_f3comp_p(this, y, t, dt, rhs, level, f3)
+     subroutine pf_f3comp_p(this, y, t, dt, rhs, level_index, f3)
        import pf_amisdc_t, pf_encap_t,  pfdp
        class(pf_amisdc_t), intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: rhs
        class(pf_encap_t), intent(inout) :: y, f3
        real(pfdp),        intent(in   ) :: t, dt
-       integer,    intent(in   ) :: level
+       integer,    intent(in   ) :: level_index
      end subroutine pf_f3comp_p
   end interface
 
@@ -112,10 +112,10 @@ contains
     call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))
     call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))
 
-    call lev%ulevel%factory%create_single(rhsA, lev%index, lev%shape)
-    call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%shape)
-    call lev%ulevel%factory%create_single(QA,   lev%index,  lev%shape)
-    call lev%ulevel%factory%create_single(QB,   lev%index,  lev%shape)
+    call lev%ulevel%factory%create_single(rhsA, lev%index, lev%lev_shape)
+    call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(QA,   lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(QB,   lev%index,  lev%lev_shape)
 
     call QA%setval(0.0_pfdp)
     call QB%setval(0.0_pfdp)
@@ -155,10 +155,10 @@ contains
     call lev%qend%copy(lev%Q(lev%nnodes))
 
     ! Destroy the temporary variables
-    call lev%ulevel%factory%destroy_single(rhsA, lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_single(rhsB, lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_single(QA,   lev%index,  lev%shape)
-    call lev%ulevel%factory%destroy_single(QB,   lev%index,  lev%shape)
+    call lev%ulevel%factory%destroy_single(rhsA, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%destroy_single(rhsB, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%destroy_single(QA,   lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%destroy_single(QB,   lev%index,  lev%lev_shape)
 
     call end_timer(pf, TLEVEL+lev%index-1)
 

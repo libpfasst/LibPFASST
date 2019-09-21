@@ -58,7 +58,6 @@ contains
        return
     elseif (irat == 2) then  !  Use spectral space
        call fft_c%interp(yvec_c,fft_f,yvec_f)
-       print *,'max',maxval(yvec_c),maxval(yvec_f)
     end if
 
   end subroutine interpolate

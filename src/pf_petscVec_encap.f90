@@ -6,17 +6,13 @@
 !> N-dimensional array encapsulation.
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
-!! uses the levels 'shape' attribute to create a new array with that
-!! shape.  Thus, the 'shape' attributes of the PFASST levels should be
+!! uses the levels 'shape_lev' attribute to create a new array with that
+!! shape.  Thus, the 'shape'_lev attributes of the PFASST levels should be
 !! set appropriately.  For example, before calling pf_pfasst_run we can
 !! set the shape of the coarsest level by doing:
 !!
-!!   allocate(pf%levels(1)%shape(2))
-!!   pf%levels(1)%shape = [ 3, 10 ]
-!!
-!! The helper routines array1, array2, array3, etc can be used to
-!! extract pointers to the encapsulated array without
-!! performing any copies.
+!!   allocate(pf%levels_lev(1)%shape(2))
+!!   pf%levels(1)%shape_lev = [ 3, 10 ]
 !!
 module pf_mod_pf_petscVec
 #include <petsc/finclude/petscvec.h>
@@ -37,7 +33,7 @@ module pf_mod_pf_petscVec
 
   !>  N-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_petscVec
-     integer             :: dim
+     integer             :: ndim
      integer,    allocatable :: shape(:)
      type(tVec) ::  petscVec
      integer :: ierr
@@ -51,18 +47,6 @@ module pf_mod_pf_petscVec
      procedure :: eprint => pf_petscVec_eprint
   end type pf_petscVec
 
-  !> Interfaces to output routines in pf_numpy.c
-  interface
-     !>  Subroutine to write an the array to a file
-     subroutine pf_petscVec_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, mpibuflen
-       integer,    intent(in   )        :: shape(dim)
-       real(c_double),    intent(in   )        :: array(mpibuflen)
-     end subroutine pf_petscVec_dump_numpy
-  end interface
-
 contains
   function cast_as_pf_petscVec(encap_polymorph) result(pf_petscVec_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
@@ -75,49 +59,47 @@ contains
   end function cast_as_pf_petscVec
 
   !>  Subroutine to allocate the array and set the size parameters
-  subroutine pf_petscVec_build(q, shape)
+  subroutine pf_petscVec_build(q, shape_in)
     use pf_mod_comm_mpi
     class(pf_encap_t), intent(inout) :: q
-    integer,           intent(in   ) :: shape(:)
+    integer,           intent(in   ) :: shape_in(:)
 
     integer nn,psize,rank,ierr
     select type (q)
     class is (pf_petscVec)
 
        call VecCreate(PETSC_COMM_WORLD,q%petscVec,ierr);CHKERRQ(ierr)
-       call VecSetSizes(q%petscVec,PETSC_DECIDE,shape(1),ierr);CHKERRQ(ierr)
+       call VecSetSizes(q%petscVec,PETSC_DECIDE,shape_in(1),ierr);CHKERRQ(ierr)
        
        call VecSetFromOptions(q%petscVec,ierr);CHKERRQ(ierr)
        call VecGetLocalSize(q%petscVec,psize,ierr);CHKERRQ(ierr)
        call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr);CHKERRQ(ierr)
-!       print *,'created petscVec, size=',shape(1), 'local size=', psize, 'rank=',rank
 
-
-       allocate(q%shape(size(shape)))
-       q%dim   = size(shape)
-       q%shape = shape
+       allocate(q%shape(SIZE(shape_in)))
+       q%ndim   = SIZE(shape_in)
+       q%shape = shape_in
     end select
   end subroutine pf_petscVec_build
 
   !> Subroutine to  create a single array
-  subroutine pf_petscVec_create_single(this, x, level, shape)
+  subroutine pf_petscVec_create_single(this, x, level, lev_shape)
     class(pf_petscVec_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level, lev_shape(:)
     integer :: i
     allocate(pf_petscVec::x)
-    call pf_petscVec_build(x, shape)
+    call pf_petscVec_build(x, lev_shape)
   end subroutine pf_petscVec_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine pf_petscVec_create_array(this, x, n, level,  shape)
+  subroutine pf_petscVec_create_array(this, x, n, level,  lev_shape)
     class(pf_petscVec_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n, level, lev_shape(:)
     integer :: i
     allocate(pf_petscVec::x(n))
     do i = 1, n
-       call pf_petscVec_build(x(i), shape)
+       call pf_petscVec_build(x(i), lev_shape)
     end do
   end subroutine pf_petscVec_create_array
 
@@ -143,9 +125,7 @@ contains
 
     select type (x)
     class is (pf_petscVec)
-!       print *,'destroying petscVec'
        call VecDestroy(x%petscVec,ierr);CHKERRQ(ierr)
-       
        deallocate(x%shape)
     end select
     deallocate(x)
@@ -159,8 +139,7 @@ contains
     integer                                            :: i,ierr
     select type(x)
     class is (pf_petscVec)
-       do i = 1,size(x)
-!          print *,'destroying  petscVec'
+       do i = 1,SIZE(x)
           call VecDestroy(x(i)%petscVec,ierr);CHKERRQ(ierr)
           deallocate(x(i)%shape)
        end do
@@ -268,9 +247,9 @@ contains
     integer,           intent(in   ), optional :: flags
     !  Just print the first few values
     if (product(this%shape) < 10) then
-!       print *, this%flatarray
+
     else
-!       print *, this%flatarray(1:10)
+
     endif
   end subroutine pf_petscVec_eprint
 

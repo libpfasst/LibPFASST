@@ -257,10 +257,6 @@ contains
 ! !       call pf_residual(pf, lev, dt, which)
 !     end if
 
-
-    !  Make some space
-!     call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)
-
     if (sweep_y) then
       !  Forward sweep on y
       t = t0
@@ -480,7 +476,7 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !!  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%lev_shape)
 
   end subroutine imexQ_oc_initialize
 

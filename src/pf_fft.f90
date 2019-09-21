@@ -123,7 +123,7 @@ contains
 
     this%wk_1d=ghat
     call this%fftb()
-    g=real(this%wk_1d,pfdp)
+    g=REAL(this%wk_1d,pfdp)
   end subroutine ifft_1d
 
   subroutine ifft_2d(this, ghat,g)
@@ -133,7 +133,7 @@ contains
 
     this%wk_2d=ghat
     call this%fftb()
-    g=real(this%wk_2d,pfdp)
+    g=REAL(this%wk_2d,pfdp)
   end subroutine ifft_2d
 
     subroutine ifft_3d(this, ghat,g)
@@ -143,7 +143,7 @@ contains
 
     this%wk_3d=ghat
     call this%fftb()
-    g=real(this%wk_3d)
+    g=REAL(this%wk_3d)
   end subroutine ifft_3d
 
   !++++++++++ Forward FFT complex to complex   ++++++++++++++++
@@ -220,7 +220,7 @@ contains
     call this%fftf()
     this%wk_1d = this%wk_1d * op
     call this%fftb()
-    c=real(this%wk_1d,pfdp)
+    c=REAL(this%wk_1d,pfdp)
   end subroutine conv_1d
 
   ! Convolve g with spectral op and return in c
@@ -234,7 +234,7 @@ contains
     call this%fftf()
     this%wk_2d = this%wk_2d * op
     call this%fftb()
-    c=real(this%wk_2d,pfdp)        
+    c=REAL(this%wk_2d,pfdp)        
   end subroutine conv_2d
   
   subroutine conv_3d(this, g,op,c)
@@ -247,7 +247,7 @@ contains
     call this%fftf()
     this%wk_3d = this%wk_3d * op
     call this%fftb()
-    c=real(this%wk_3d,pfdp)            
+    c=REAL(this%wk_3d,pfdp)            
   end subroutine conv_3d
 
   ! Convolution in real space 
@@ -441,7 +441,7 @@ contains
       select case (dir)
       case (1)  
          do i = 1, nx
-            deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(k)
+            deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(i)
          end do
       case (2)
          do j = 1, ny
@@ -462,8 +462,8 @@ contains
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp),         pointer :: yvec_f(:), yvec_c(:)
     integer :: nx_f, nx_c,irat
-    nx_f = size(yvec_f)
-    nx_c = size(yvec_c)
+    nx_f = SIZE(yvec_f)
+    nx_c = SIZE(yvec_c)
     irat  = nx_f/nx_c
 
     yvec_c = yvec_f(::irat)
@@ -473,8 +473,8 @@ contains
     real(pfdp),         pointer :: yvec_f(:,:), yvec_c(:,:)
     integer :: nx_f(2), nx_c(2), irat, jrat
 
-    nx_f = shape(yvec_f)
-    nx_c = shape(yvec_c)
+    nx_f = SHAPE(yvec_f)
+    nx_c = SHAPE(yvec_c)
 
     irat  = nx_f(1)/nx_c(1)
     jrat  = nx_f(2)/nx_c(2)
@@ -487,8 +487,8 @@ contains
     integer :: nx_f(3), nx_c(3)
     integer :: irat, jrat,krat
 
-    nx_f = shape(yvec_f)
-    nx_c = shape(yvec_c)
+    nx_f = SHAPE(yvec_f)
+    nx_c = SHAPE(yvec_c)
 
     irat  = nx_f(1)/nx_c(1)
     jrat  = nx_f(2)/nx_c(2)
@@ -502,8 +502,8 @@ contains
     complex(pfdp),  pointer :: yhat_f(:), yhat_c(:)
     integer :: nx_f, nx_c
 
-    nx_f = size(yhat_f)
-    nx_c = size(yhat_c)
+    nx_f = SIZE(yhat_f)
+    nx_c = SIZE(yhat_c)
 
     yhat_c=0.0_pfdp
     yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
@@ -515,8 +515,8 @@ contains
     complex(pfdp),         pointer :: yhat_f(:,:), yhat_c(:,:)
 
     integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
@@ -540,8 +540,8 @@ contains
     
     yhat_c = 0.0_pfdp
     
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2

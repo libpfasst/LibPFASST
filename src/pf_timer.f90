@@ -114,7 +114,7 @@ contains
        write(*, '("timer:",a16,", rank: ",i3,", step: ",i4, ", level: ", i3,' &
             // '", iter: ",i3, f23.8,f23.8,f23.8)') &
             timer_names(timer), pf%rank, &
-            pf%state%step, pf%state%level, pf%state%iter,  &
+            pf%state%step, pf%state%level_index, pf%state%iter,  &
             t-pf%timers(timer), pf%runtimes(timer), t-pf%timers(TTOTAL)
     end if
 

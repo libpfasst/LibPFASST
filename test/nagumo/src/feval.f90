@@ -277,7 +277,7 @@ contains
     integer,             intent(in)    :: level_index
     
     integer  :: nx, nnodes
-    nx=pf%levels(level_index)%shape(1)
+    nx=pf%levels(level_index)%lev_shape(1)
     nnodes=pf%levels(level_index)%nnodes
 
     !  Call the imex sweeper initialize
@@ -397,7 +397,7 @@ contains
     class(ad_sweeper_t), pointer :: sweeper
     sweeper => as_ad_sweeper(s)
 
-    nvars = product(pf%levels(pf%nlevels)%shape)
+    nvars = product(pf%levels(pf%nlevels)%lev_shape)
     nnodes = size(nodes,1)
 
     allocate(uexact(nvars))

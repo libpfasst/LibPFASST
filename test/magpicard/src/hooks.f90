@@ -12,8 +12,8 @@ contains
     integer,  intent(in   ) :: level_index
 
     class(magpicard_sweeper_t), pointer :: magpicard
-    type(zndarray) :: yexact
-    type(zndarray), pointer :: qend
+    type(pf_zndarray_t) :: yexact
+    type(pf_zndarray_t), pointer :: qend
     integer :: dim(2)
     real(pfdp) :: errd,t_end
     complex(pfdp),      pointer :: q_array(:,:)
@@ -51,7 +51,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
-    type(zndarray), pointer :: qend,Fend
+    type(pf_zndarray_t), pointer :: qend,Fend
     character(len=256) :: time, filename
     integer :: un,istat,system
     complex(pfdp),      pointer :: q_array(:,:)

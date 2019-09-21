@@ -146,7 +146,7 @@ program main
   end if
 
 
-  call ndarray_oc_build(q1, pf%levels(pf%nlevels)%shape)
+  call ndarray_oc_build(q1, pf%levels(pf%nlevels)%lev_shape)
   do l = 1, pf%nlevels
      call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, nvars(l), alpha)
   end do

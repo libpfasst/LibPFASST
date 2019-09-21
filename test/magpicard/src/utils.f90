@@ -16,13 +16,13 @@ module utils
   subroutine initial(L)
 
     class(pf_encap_t), intent(inout) :: L
-    class(zndarray), pointer :: L_p
+    class(pf_zndarray_t), pointer :: L_p
     complex(pfdp),      pointer :: L_array(:,:)
     integer :: Nmat
     
     L_p => cast_as_zndarray(L)
     L_array=>get_array2d(L)
-    Nmat = L_p%shape(1) !  Assumes a square matrix
+    Nmat = L_p%arr_shape(1) !  Assumes a square matrix
 
     select case(nprob)
     case (1)
@@ -124,13 +124,13 @@ module utils
   end subroutine init_Facke
   
   
-  subroutine compute_F_toda(L_array,B_array,Nmat,t,level)
+  subroutine compute_F_toda(L_array,B_array,Nmat,t,level_index)
     use probin, only: toda_periodic
     ! RHS for Toda lattice problem
     complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
     integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
     integer :: i
 
@@ -152,14 +152,14 @@ module utils
   end subroutine compute_F_toda
   
   
-  subroutine compute_Facke(L_array,B_array,Nmat,t,level)
+  subroutine compute_Facke(L_array,B_array,Nmat,t,level_index)
     use probin, only: Znuc,E0,Xmax
 
     !  RHS for fake Fock matrix example
     complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
     integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
     integer :: i,j,n,m
     real(pfdp) :: xi,xj,xn,xm,cst,dx

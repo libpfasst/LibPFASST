@@ -72,7 +72,7 @@ contains
        this%explicit=.TRUE.
     end if
 
-    nx=pf%levels(level_index)%shape(1)  !  local convenient grid size
+    nx=pf%levels(level_index)%lev_shape(1)  !  local convenient grid size
 
     !>  Set up the FFT 
     allocate(this%fft_tool)
@@ -214,7 +214,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
   subroutine initial_sol(y_0)
-    type(ndarray), intent(inout) :: y_0
+    type(pf_ndarray_t), intent(inout) :: y_0
     call exact(0.0_pfdp, y_0%flatarray)
   end subroutine initial_sol
 

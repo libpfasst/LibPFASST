@@ -24,7 +24,7 @@ contains
       type(pf_pfasst_t)  :: pf          !< pfasst data structure
       type(pf_comm_t)    :: comm        !< mpi communicator
 
-      type(zndarray) :: dmat_t0, dmat_tfinal
+      type(pf_zndarray_t) :: dmat_t0, dmat_tfinal
 
       character(256) :: probin_fname       !<  file name for input
       integer    :: err, l
@@ -44,7 +44,7 @@ contains
       do l = 1, pf%nlevels
           !  Allocate level structures
           allocate(magpicard_context::pf%levels(l)%ulevel)
-          allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
+          allocate(pf_zndarray_factory_t::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
           !  Set level size
