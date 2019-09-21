@@ -16,7 +16,7 @@ contains
 
     real(pfdp), pointer :: y_end(:,:),y_ex(:,:)
     real(pfdp) :: maxerr
-    type(ndarray), target :: y_exact      !<  the initial condition
+    type(pf_ndarray_t), target :: y_exact      !<  the initial condition
     y_end => get_array2d(pf%levels(level_index)%qend)
     call ndarray_build(y_exact, [ pf%levels(level_index)%lev_shape])
     y_ex => get_array2d(y_exact)    

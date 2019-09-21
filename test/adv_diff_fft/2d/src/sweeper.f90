@@ -199,7 +199,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !> Routine to set initial condition.
   subroutine initial(y_0)
-    type(ndarray), intent(inout) :: y_0
+    type(pf_ndarray_t), intent(inout) :: y_0
     real(pfdp), pointer :: yvec(:,:)
     yvec => get_array2d(y_0)    
     call exact(0.0_pfdp, yvec)

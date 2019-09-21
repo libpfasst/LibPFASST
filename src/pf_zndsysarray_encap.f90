@@ -28,16 +28,16 @@ module pf_mod_zndsysarray
   implicit none
 
   !>  Type to create and destroy the arrays
-  type, extends(pf_factory_t) :: zndsysarray_factory
+  type, extends(pf_factory_t) :: pf_zndsysarray_factory_t
    contains
      procedure :: create_single  => zndsysarray_create_single
      procedure :: create_array  => zndsysarray_create_array
      procedure :: destroy_single => zndsysarray_destroy_single
      procedure :: destroy_array => zndsysarray_destroy_array
-  end type zndsysarray_factory
+  end type pf_zndsysarray_factory_t
 
   !>  Type to extend the abstract encap and set procedure pointers
-  type, extends(pf_encap_t) :: zndsysarray
+  type, extends(pf_encap_t) :: pf_zndsysarray_t
      integer             :: ndim    !  The spatial dimension of each component in system
      integer             :: ncomp  !  The number of components in the system
      integer             :: ndof   !  The number of variables in each component
@@ -51,7 +51,7 @@ module pf_mod_zndsysarray
      procedure :: unpack => zndsysarray_unpack
      procedure :: axpy => zndsysarray_axpy
      procedure :: eprint => zndsysarray_eprint
-  end type zndsysarray
+  end type pf_zndsysarray_t
 
   !> Interfaces to output routines in pf_numpy.c
   interface
@@ -72,7 +72,7 @@ contains
     integer,           intent(in   ) :: arr_shape(:)
 
     select type (q)
-    class is (zndsysarray)
+    class is (pf_zndsysarray_t)
        allocate(q%arr_shape(SIZE(arr_shape)))
        q%ndim   = SIZE(arr_shape)-1
        q%ncomp = arr_shape(q%ndim+1)
@@ -85,24 +85,24 @@ contains
 
   !> Subroutine to  create a single array
   subroutine zndsysarray_create_single(this, x, level_index, lev_shape)
-    class(zndsysarray_factory), intent(inout)              :: this
+    class(pf_zndsysarray_factory_t), intent(inout)     :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
     integer :: i
-    allocate(zndsysarray::x)
+    allocate(pf_zndsysarray_t::x)
     call zndsysarray_build(x, lev_shape)
   end subroutine zndsysarray_create_single
 
   !> Subroutine to create an array of arrays
   subroutine zndsysarray_create_array(this, x, n, level_index,  lev_shape)
-    class(zndsysarray_factory), intent(inout)              :: this
+    class(pf_zndsysarray_factory_t), intent(inout)     :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer,                intent(in   )              :: n
     integer,                intent(in   )              ::  level_index
     integer,                intent(in   )              ::  lev_shape(:)
     integer :: i
-    allocate(zndsysarray::x(n))
+    allocate(pf_zndsysarray_t::x(n))
     do i = 1, n
        call zndsysarray_build(x(i), lev_shape)
     end do
@@ -111,7 +111,7 @@ contains
   !>  Subroutine to destroy array
   subroutine zndsysarray_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
-    type(zndsysarray), pointer :: zndsysarray_obj
+    type(pf_zndsysarray_t), pointer :: zndsysarray_obj
 
     zndsysarray_obj => cast_as_zndsysarray(encap)
 
@@ -124,11 +124,11 @@ contains
 
   !> Subroutine to destroy an single array
   subroutine zndsysarray_destroy_single(this, x)
-    class(zndsysarray_factory), intent(inout)              :: this
+    class(pf_zndsysarray_factory_t), intent(inout)     :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
 
     select type (x)
-    class is (zndsysarray)
+    class is (pf_zndsysarray_t)
        deallocate(x%arr_shape)
        deallocate(x%flatarray)
     end select
@@ -138,12 +138,12 @@ contains
 
   !> Subroutine to destroy an array of arrays
   subroutine zndsysarray_destroy_array(this, x)
-    class(zndsysarray_factory), intent(inout)              :: this
+    class(pf_zndsysarray_factory_t), intent(inout)     :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer                                            :: i
 
     select type(x)
-    class is (zndsysarray)
+    class is (pf_zndsysarray_t)
        do i = 1,SIZE(x)
           deallocate(x(i)%arr_shape)
           deallocate(x(i)%flatarray)
@@ -158,7 +158,7 @@ contains
   
   !> Subroutine to set array to a scalare  value.
   subroutine zndsysarray_setval(this, val, flags)
-    class(zndsysarray), intent(inout)           :: this
+    class(pf_zndsysarray_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
     this%flatarray = val
@@ -166,11 +166,11 @@ contains
 
   !> Subroutine to copy an array
   subroutine zndsysarray_copy(this, src, flags)
-    class(zndsysarray),    intent(inout)           :: this
+    class(pf_zndsysarray_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: src
     integer,           intent(in   ), optional :: flags
     select type(src)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        this%flatarray = src%flatarray
     class default
        stop "TYPE ERROR"
@@ -179,7 +179,7 @@ contains
 
   !> Subroutine to pack an array into a flat array for sending
   subroutine zndsysarray_pack(this, z, flags)
-    class(zndsysarray), intent(in   ) :: this
+    class(pf_zndsysarray_t), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
     integer :: ntot
@@ -191,7 +191,7 @@ contains
 
   !> Subroutine to unpack a flatarray after receiving
   subroutine zndsysarray_unpack(this, z, flags)
-    class(zndsysarray), intent(inout) :: this
+    class(pf_zndsysarray_t), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     integer,     intent(in   ), optional :: flags
 
@@ -204,7 +204,7 @@ contains
 
   !> Subroutine to define the norm of the array (here the max norm)
   function zndsysarray_norm(this, flags) result (norm)
-    class(zndsysarray), intent(in   ) :: this
+    class(pf_zndsysarray_t), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
     norm = maxval(abs(this%flatarray))
@@ -212,13 +212,13 @@ contains
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
   subroutine zndsysarray_axpy(this, a, x, flags)
-    class(zndsysarray),    intent(inout)           :: this
+    class(pf_zndsysarray_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
     select type(x)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
        stop "TYPE ERROR"
@@ -227,7 +227,7 @@ contains
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)
   subroutine zndsysarray_eprint(this,flags)
-    class(zndsysarray), intent(inout) :: this
+    class(pf_zndsysarray_t), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
     !  Just print the first few values
         print *, this%flatarray(1:10)
@@ -237,10 +237,10 @@ contains
 
   function cast_as_zndsysarray(encap_polymorph) result(zndsysarray_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
-    type(zndsysarray), pointer :: zndsysarray_obj
+    type(pf_zndsysarray_t), pointer :: zndsysarray_obj
     
     select type(encap_polymorph)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        zndsysarray_obj => encap_polymorph
     end select
   end function cast_as_zndsysarray
@@ -252,7 +252,7 @@ contains
     integer,           intent(in   ), optional :: flags
     complex(pfdp), pointer :: r(:)
     select type (x)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        r => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array1d
@@ -266,7 +266,7 @@ contains
 
 
     select type (x)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array2d
@@ -279,15 +279,9 @@ contains
     complex(pfdp), pointer :: r(:,:,:)
 
     select type (x)
-    type is (zndsysarray)
+    type is (pf_zndsysarray_t)
        r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array3d
-  
-
-
-
-
-
 
 end module pf_mod_zndsysarray

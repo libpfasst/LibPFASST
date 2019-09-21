@@ -148,7 +148,7 @@ contains
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
        call f_lev%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0)
     endif
-    if (pf%nlevels==1) return
+!    if (pf%nlevels==1) return
     !!
     !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'do coarsen  in predictor'
