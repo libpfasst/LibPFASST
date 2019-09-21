@@ -441,7 +441,7 @@ contains
       select case (dir)
       case (1)  
          do i = 1, nx
-            deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(k)
+            deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(i)
          end do
       case (2)
          do j = 1, ny

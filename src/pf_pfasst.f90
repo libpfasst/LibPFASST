@@ -112,7 +112,7 @@ contains
   subroutine pf_pfasst_setup(pf)
     type(pf_pfasst_t), intent(inout), target :: pf   !!  Main pfasst structure
 
-    class(pf_level_t), pointer :: lev_fine, lev_coarse  !!  Pointers to level structures for brevity
+    class(pf_level_t), pointer :: f_lev, c_lev  !!  Pointers to level structures for brevity
     integer                   :: l                      !!  Level loop index
     integer                   :: ierr                   !!  error flag
 
@@ -125,29 +125,29 @@ contains
     pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
     do l = pf%nlevels, 2, -1
-       lev_fine => pf%levels(l); lev_coarse => pf%levels(l-1)
-       allocate(lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes),stat=ierr)
+       f_lev => pf%levels(l); c_lev => pf%levels(l-1)
+       allocate(f_lev%tmat(f_lev%nnodes,c_lev%nnodes),stat=ierr)
        if (ierr /= 0) &
-          call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
+          call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
 
-       allocate(lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes),stat=ierr)
+       allocate(f_lev%rmat(c_lev%nnodes,f_lev%nnodes),stat=ierr)
        if (ierr /= 0) &
-          call pf_stop(__FILE__,__LINE__,"allocate fail",lev_fine%nnodes)
+          call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
        
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels
        if (pf%use_rk_stepper .eqv. .true.) then
-          lev_fine%tmat = 0.0_pfdp
-          lev_fine%rmat = 0.0_pfdp
+          f_lev%tmat = 0.0_pfdp
+          f_lev%rmat = 0.0_pfdp
 
-          lev_fine%tmat(1,1) = 1.0_pfdp
-          lev_fine%tmat(lev_fine%nnodes,lev_coarse%nnodes) = 1.0_pfdp
+          f_lev%tmat(1,1) = 1.0_pfdp
+          f_lev%tmat(f_lev%nnodes,c_lev%nnodes) = 1.0_pfdp
 
-          lev_fine%rmat(1,1) = 1.0_pfdp
-          lev_fine%rmat(lev_coarse%nnodes,lev_fine%nnodes) = 1.0_pfdp
+          f_lev%rmat(1,1) = 1.0_pfdp
+          f_lev%rmat(c_lev%nnodes,f_lev%nnodes) = 1.0_pfdp
        else         ! else compute the interpolation matrix
-          call pf_time_interpolation_matrix(lev_fine%nodes, lev_fine%nnodes, lev_coarse%nodes, lev_coarse%nnodes, lev_fine%tmat)
-          call pf_time_interpolation_matrix(lev_coarse%nodes, lev_coarse%nnodes, lev_fine%nodes, lev_fine%nnodes, lev_fine%rmat)
+          call pf_time_interpolation_matrix(f_lev%nodes, f_lev%nnodes, c_lev%nodes, c_lev%nnodes, f_lev%tmat)
+          call pf_time_interpolation_matrix(c_lev%nodes, c_lev%nnodes, f_lev%nodes, f_lev%nnodes, f_lev%rmat)
        endif
     end do
 

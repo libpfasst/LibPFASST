@@ -42,6 +42,7 @@ FSRC = pfasst.f90 \
        pf_hooks.f90 \
        pf_interpolate.f90 \
        pf_parallel.f90 \
+       pf_parareal.f90 \
        pf_parallel_oc.f90 \
        pf_pfasst.f90 \
        pf_quadrature.f90 \
