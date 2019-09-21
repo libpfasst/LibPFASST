@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.8% of total for modules and submodules.">430 statements</a>
+    title=" 4.7% of total for modules and submodules.">431 statements</a>
      </li> 
      
      
@@ -2780,7 +2780,7 @@ public subroutine pf_transfer_p(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     
     
     <h3>
-public subroutine pf_encap_create_single_p(this, x, level, shape)
+public subroutine pf_encap_create_single_p(this, x, level_index, lev_shape)
     
     
    
@@ -2845,7 +2845,7 @@ public subroutine pf_encap_create_single_p(this, x, level, shape)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2860,7 +2860,7 @@ public subroutine pf_encap_create_single_p(this, x, level, shape)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -2894,7 +2894,7 @@ public subroutine pf_encap_create_single_p(this, x, level, shape)
     
     
     <h3>
-public subroutine pf_encap_create_array_p(this, x, n, level, shape)
+public subroutine pf_encap_create_array_p(this, x, n, level_index, lev_shape)
     
     
    
@@ -2970,7 +2970,7 @@ public subroutine pf_encap_create_array_p(this, x, n, level, shape)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -2985,7 +2985,7 @@ public subroutine pf_encap_create_array_p(this, x, n, level, shape)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -4742,7 +4742,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -4798,11 +4798,11 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td><td></td><td><p>which level is currently being operated on</p></td>
+  <td><strong>level_index</strong></td><td></td><td></td><td><p>which level is currently being operated on</p></td>
   
 </tr>
 
@@ -4854,7 +4854,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-sweep%7E7"></span>integer,</td>
+  <td><span class="anchor" id="variable-sweep%7E12"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -5018,7 +5018,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -5051,28 +5051,28 @@ public subroutine pf_results_p(this)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_sweep_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-sweep%7E8'>sweep</a></strong>  </td>
+       <tr><td>procedure(pf_sweep_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-sweep%7E13'>sweep</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_initialize_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-initialize%7E8'>initialize</a></strong>  </td>
+       <tr><td>procedure(pf_initialize_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-initialize%7E12'>initialize</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_evaluate_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-evaluate%7E7'>evaluate</a></strong>  </td>
+       <tr><td>procedure(pf_evaluate_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-evaluate%7E11'>evaluate</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_integrate_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-integrate%7E7'>integrate</a></strong>  </td>
+       <tr><td>procedure(pf_integrate_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-integrate%7E12'>integrate</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_evaluate_all_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-evaluate_all%7E7'>evaluate_all</a></strong>  </td>
+       <tr><td>procedure(pf_evaluate_all_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-evaluate_all%7E11'>evaluate_all</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_residual_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-residual%7E7'>residual</a></strong>  </td>
+       <tr><td>procedure(pf_residual_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-residual%7E11'>residual</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_spreadq0_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-spreadq0%7E3'>spreadq0</a></strong>  </td>
+       <tr><td>procedure(pf_spreadq0_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-spreadq0'>spreadq0</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_destroy_sweeper_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-destroy%7E8'>destroy</a></strong>  </td>
+       <tr><td>procedure(pf_destroy_sweeper_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-destroy%7E12'>destroy</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -5110,7 +5110,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -5138,7 +5138,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -5157,13 +5157,13 @@ public subroutine pf_results_p(this)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_do_n_steps_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-do_n_steps%7E2'>do_n_steps</a></strong>  </td>
+       <tr><td>procedure(pf_do_n_steps_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-do_n_steps'>do_n_steps</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_initialize_stepper_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-initialize%7E9'>initialize</a></strong>  </td>
+       <tr><td>procedure(pf_initialize_stepper_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-initialize%7E13'>initialize</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_destroy_stepper_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-destroy%7E9'>destroy</a></strong>  </td>
+       <tr><td>procedure(pf_destroy_stepper_p), public :: <strong><a href='../type/pf_stepper_t.html#boundprocedure-destroy%7E13'>destroy</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -5191,25 +5191,25 @@ public subroutine pf_results_p(this)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_encap_setval_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-setval%7E2'>setval</a></strong>  </td>
+       <tr><td>procedure(pf_encap_setval_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-setval%7E6'>setval</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_copy_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-copy%7E2'>copy</a></strong>  </td>
+       <tr><td>procedure(pf_encap_copy_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-copy%7E6'>copy</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_norm_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-norm%7E2'>norm</a></strong>  </td>
+       <tr><td>procedure(pf_encap_norm_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-norm%7E6'>norm</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_pack_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-pack%7E2'>pack</a></strong>  </td>
+       <tr><td>procedure(pf_encap_pack_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-pack%7E6'>pack</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_unpack_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-unpack%7E2'>unpack</a></strong>  </td>
+       <tr><td>procedure(pf_encap_unpack_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-unpack%7E6'>unpack</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_axpy_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-axpy%7E2'>axpy</a></strong>  </td>
+       <tr><td>procedure(pf_encap_axpy_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-axpy%7E6'>axpy</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_eprint_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-eprint%7E2'>eprint</a></strong>  </td>
+       <tr><td>procedure(pf_encap_eprint_p), public :: <strong><a href='../type/pf_encap_t.html#boundprocedure-eprint%7E6'>eprint</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -5237,16 +5237,16 @@ public subroutine pf_results_p(this)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_encap_create_single_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-create_single%7E2'>create_single</a></strong>  </td>
+       <tr><td>procedure(pf_encap_create_single_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-create_single%7E6'>create_single</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_create_array_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-create_array%7E2'>create_array</a></strong>  </td>
+       <tr><td>procedure(pf_encap_create_array_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-create_array%7E6'>create_array</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_destroy_single_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-destroy_single%7E2'>destroy_single</a></strong>  </td>
+       <tr><td>procedure(pf_encap_destroy_single_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-destroy_single%7E6'>destroy_single</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_encap_destroy_array_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-destroy_array%7E2'>destroy_array</a></strong>  </td>
+       <tr><td>procedure(pf_encap_destroy_array_p), public :: <strong><a href='../type/pf_factory_t.html#boundprocedure-destroy_array%7E6'>destroy_array</a></strong>  </td>
        <td></td></tr>
       
        </tbody>
@@ -5331,7 +5331,7 @@ public subroutine pf_results_p(this)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_transfer_p), public :: <strong><a href='../type/pf_user_level_t.html#boundprocedure-restrict%7E3'>restrict</a></strong>  </td>
+       <tr><td>procedure(pf_transfer_p), public :: <strong><a href='../type/pf_user_level_t.html#boundprocedure-restrict%7E4'>restrict</a></strong>  </td>
        <td></td></tr>
       
        <tr><td>procedure(pf_transfer_p), public :: <strong><a href='../type/pf_user_level_t.html#boundprocedure-interpolate'>interpolate</a></strong>  </td>
@@ -5699,7 +5699,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-residual%7E8"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-residual%7E12"></span>real(kind=pfdp),</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -5779,7 +5779,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nodes"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-nodes%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -6050,7 +6050,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-q0%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-q0"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -6100,7 +6100,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qend%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-qend"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -6125,7 +6125,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-f%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-f"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>pointer</td><td>::</td>
@@ -6171,6 +6171,20 @@ public subroutine pf_results_p(this)
   
 <tr>
   
+  <td><span class="anchor" id="variable-restrict_workspace_allocated"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>restrict_workspace_allocated</strong></td><td> =</td><td>.false.</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
   <td><span class="anchor" id="variable-cf_delta"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
@@ -6199,11 +6213,25 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-f_encap_array_c"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td><td></td><td><p>user defined shape array</p></td>
+  <td><strong>f_encap_array_c</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-lev_shape"></span>integer,</td>
+  
+  <td>public,</td>
+  <td>allocatable</td><td>::</td>
+  <td><strong>lev_shape</strong>(:)</td><td></td><td></td><td><p>user defined shape array</p></td>
   
 </tr>
 
@@ -6601,11 +6629,11 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td><td></td><td></td>
+  <td><strong>level_index</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -6629,7 +6657,7 @@ public subroutine pf_results_p(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-destroy%7E10"></span>procedure(<a href='../interface/pf_results_p.html'>pf_results_p</a>),</td>
+  <td><span class="anchor" id="variable-destroy%7E14"></span>procedure(<a href='../interface/pf_results_p.html'>pf_results_p</a>),</td>
   
   <td>public,</td>
   <td>pointer, nopass</td><td>::</td>

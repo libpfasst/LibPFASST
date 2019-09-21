@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.0% of total for derived types.</p>Including implementation: 18 statements,  0.3% of total for derived types.">18 statements</a>
+    title="<p> 2.9% of total for derived types.</p>Including implementation: 18 statements,  0.3% of total for derived types.">18 statements</a>
      </li> 
      
      
@@ -175,7 +175,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-dt%7E3">dt</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps%7E2">nsteps</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps">nsteps</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-pfblock">pfblock</a>
       
@@ -183,7 +183,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-step">step</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-level">level</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-level_index">level_index</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-finest_level">finest_level</a>
       
@@ -191,7 +191,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-proc">proc</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E7">sweep</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E12">sweep</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-status">status</a>
       
@@ -263,7 +263,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-dt%7E3">dt</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps%7E2">nsteps</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-nsteps">nsteps</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-pfblock">pfblock</a>
       
@@ -271,7 +271,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-step">step</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-level">level</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-level_index">level_index</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-finest_level">finest_level</a>
       
@@ -279,7 +279,7 @@
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-proc">proc</a>
       
-      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E7">sweep</a>
+      <a class="list-group-item" href="../type/pf_state_t.html#variable-sweep%7E12">sweep</a>
       
       <a class="list-group-item" href="../type/pf_state_t.html#variable-status">status</a>
       
@@ -373,7 +373,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -429,11 +429,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-level"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td><td></td><td><p>which level is currently being operated on</p></td>
+  <td><strong>level_index</strong></td><td></td><td></td><td><p>which level is currently being operated on</p></td>
   
 </tr>
 
@@ -485,7 +485,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-sweep%7E7"></span>integer,</td>
+  <td><span class="anchor" id="variable-sweep%7E12"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -586,8 +586,8 @@
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">pfblock</span>  <span class="c">!! pfasst block being worked on</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">iter</span>     <span class="c">!! current iteration number</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">step</span>     <span class="c">!! current time step number assigned to processor</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level</span>    <span class="c">!! which level is currently being operated on</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">finest_level</span>    <span class="c">!! the current finest level (for variable depth V cycles)</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!! which level is currently being operated on</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">finest_level</span> <span class="c">!! the current finest level (for variable depth V cycles)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">hook</span>     <span class="c">!! which hook</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">proc</span>     <span class="c">!! which processor</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">sweep</span>    <span class="c">!! sweep number</span>

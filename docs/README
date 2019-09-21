@@ -22,7 +22,7 @@ Then:
 2. 'ford libpfasst.md' in LibPFASST/docs/FORD
 
 If you don't have FORD, try
-sudo pip install ford
+sudo pip3 install ford
 
 or goto
 

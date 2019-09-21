@@ -317,31 +317,31 @@
 <a name="ln-54"></a><span class="k">contains</span>
 <a name="ln-55"></a>
 <a name="ln-56"></a>  <span class="c">!&gt; Subroutine to add a procedure to the hook on the given level</span>
-<a name="ln-57"></a>  <span class="k">subroutine </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_ind</span><span class="p">,</span> <span class="n">hook</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+<a name="ln-57"></a>  <span class="k">subroutine </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">hook</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
 <a name="ln-58"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>            <span class="c">!! main pfasst structure</span>
-<a name="ln-59"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_ind</span>     <span class="c">!! which pfasst level to add hook</span>
+<a name="ln-59"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>     <span class="c">!! which pfasst level to add hook</span>
 <a name="ln-60"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">hook</span>          <span class="c">!! which hook to add</span>
 <a name="ln-61"></a>    <span class="k">procedure</span><span class="p">(</span><span class="n">pf_hook_p</span><span class="p">)</span>             <span class="kd">::</span> <span class="n">proc</span>          <span class="c">!! precudre to call from hook</span>
 <a name="ln-62"></a>
 <a name="ln-63"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span>   <span class="c">!</span>
 <a name="ln-64"></a>
-<a name="ln-65"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
+<a name="ln-65"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
 <a name="ln-66"></a>       <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
 <a name="ln-67"></a>          <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 <a name="ln-68"></a>          <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
 <a name="ln-69"></a>       <span class="k">end do</span>
-<a name="ln-70"></a><span class="k">    else</span>  <span class="c">! Do to just level level_ind</span>
-<a name="ln-71"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-<a name="ln-72"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
+<a name="ln-70"></a><span class="k">    else</span>  <span class="c">! Do to just level level_index</span>
+<a name="ln-71"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<a name="ln-72"></a>       <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
 <a name="ln-73"></a>    <span class="k">end if</span>
 <a name="ln-74"></a>
 <a name="ln-75"></a><span class="k">  end subroutine </span><span class="n">pf_add_hook</span>
 <a name="ln-76"></a>
 <a name="ln-77"></a>  <span class="c">!&gt; Subroutine to call hooks associated with the hook and level</span>
-<a name="ln-78"></a>  <span class="k">subroutine </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_ind</span><span class="p">,</span> <span class="n">hook</span><span class="p">)</span>
+<a name="ln-78"></a>  <span class="k">subroutine </span><span class="n">call_hooks</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">hook</span><span class="p">)</span>
 <a name="ln-79"></a>    <span class="k">use </span><span class="n">pf_mod_timer</span>
 <a name="ln-80"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">pf</span>         <span class="c">!! main pfasst structure</span>
-<a name="ln-81"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>            <span class="kd">::</span> <span class="n">level_ind</span>  <span class="c">!! which pfasst level to call hook</span>
+<a name="ln-81"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>            <span class="kd">::</span> <span class="n">level_index</span>  <span class="c">!! which pfasst level to call hook</span>
 <a name="ln-82"></a>    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>            <span class="kd">::</span> <span class="n">hook</span>       <span class="c">!! which hook to call</span>
 <a name="ln-83"></a>
 <a name="ln-84"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>  <span class="c">!!  hook loop index</span>
@@ -350,49 +350,48 @@
 <a name="ln-87"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">THOOKS</span><span class="p">)</span>
 <a name="ln-88"></a>
 <a name="ln-89"></a>    <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hook</span>
-<a name="ln-90"></a>
-<a name="ln-91"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
-<a name="ln-92"></a>       <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-<a name="ln-93"></a>          <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
-<a name="ln-94"></a>             <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
-<a name="ln-95"></a>          <span class="k">end do</span>
-<a name="ln-96"></a><span class="k">       end do</span>
-<a name="ln-97"></a><span class="k">    else</span>  <span class="c">! Do to just level level_ind</span>
-<a name="ln-98"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
-<a name="ln-99"></a>          <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_ind</span><span class="p">)</span>
-<a name="ln-100"></a>       <span class="k">end do</span>
-<a name="ln-101"></a><span class="k">    end if</span>
-<a name="ln-102"></a>
-<a name="ln-103"></a><span class="k">    call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">THOOKS</span><span class="p">)</span>
-<a name="ln-104"></a>  <span class="k">end subroutine </span><span class="n">call_hooks</span>
-<a name="ln-105"></a>
-<a name="ln-106"></a>  <span class="c">!&gt;  Subroutine defining log hook</span>
-<a name="ln-107"></a>  <span class="k">subroutine </span><span class="n">pf_logger_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">)</span>
-<a name="ln-108"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-109"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">level_index</span>
-<a name="ln-110"></a>    
-<a name="ln-111"></a>    <span class="k">print</span> <span class="s1">&#39;(&quot;PF:: trank: &quot;,i4,&quot;, step: &quot;,i6,&quot;, iter: &quot;,i3,&quot;, level: &quot;,i2,&quot; location: &quot;,a)&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
-<a name="ln-112"></a>         <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">hook_names</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">hook</span><span class="p">)</span>
-<a name="ln-113"></a>  <span class="k">end subroutine </span><span class="n">pf_logger_hook</span>
-<a name="ln-114"></a>
-<a name="ln-115"></a>  <span class="c">!&gt;  Subroutine to add log hook</span>
-<a name="ln-116"></a>  <span class="k">subroutine </span><span class="n">pf_logger_attach</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
-<a name="ln-117"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-<a name="ln-118"></a>    
-<a name="ln-119"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span>
-<a name="ln-120"></a>    
-<a name="ln-121"></a>    <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ONE</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-122"></a>       <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
-<a name="ln-123"></a>    <span class="k">end do</span>
-<a name="ln-124"></a><span class="k">    </span>
-<a name="ln-125"></a><span class="k">    do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-<a name="ln-126"></a>       <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_LAST</span>
-<a name="ln-127"></a>          <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
-<a name="ln-128"></a>       <span class="k">end do</span>
-<a name="ln-129"></a><span class="k">    end do</span>
-<a name="ln-130"></a><span class="k">  end subroutine </span><span class="n">pf_logger_attach</span>
-<a name="ln-131"></a>
-<a name="ln-132"></a><span class="k">end module </span><span class="n">pf_mod_hooks</span>
+<a name="ln-90"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
+<a name="ln-91"></a>       <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<a name="ln-92"></a>          <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-93"></a>             <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+<a name="ln-94"></a>          <span class="k">end do</span>
+<a name="ln-95"></a><span class="k">       end do</span>
+<a name="ln-96"></a><span class="k">    else</span>  <span class="c">! Do to just level level_index</span>
+<a name="ln-97"></a>       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-98"></a>          <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">i</span><span class="p">)%</span><span class="n">proc</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>
+<a name="ln-99"></a>       <span class="k">end do</span>
+<a name="ln-100"></a><span class="k">    end if</span>
+<a name="ln-101"></a>
+<a name="ln-102"></a><span class="k">    call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">THOOKS</span><span class="p">)</span>
+<a name="ln-103"></a>  <span class="k">end subroutine </span><span class="n">call_hooks</span>
+<a name="ln-104"></a>
+<a name="ln-105"></a>  <span class="c">!&gt;  Subroutine defining log hook</span>
+<a name="ln-106"></a>  <span class="k">subroutine </span><span class="n">pf_logger_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">)</span>
+<a name="ln-107"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-108"></a>    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">level_index</span>
+<a name="ln-109"></a>    
+<a name="ln-110"></a>    <span class="k">print</span> <span class="s1">&#39;(&quot;PF:: trank: &quot;,i4,&quot;, step: &quot;,i6,&quot;, iter: &quot;,i3,&quot;, level: &quot;,i2,&quot; location: &quot;,a)&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
+<a name="ln-111"></a>         <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">hook_names</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">hook</span><span class="p">)</span>
+<a name="ln-112"></a>  <span class="k">end subroutine </span><span class="n">pf_logger_hook</span>
+<a name="ln-113"></a>
+<a name="ln-114"></a>  <span class="c">!&gt;  Subroutine to add log hook</span>
+<a name="ln-115"></a>  <span class="k">subroutine </span><span class="n">pf_logger_attach</span><span class="p">(</span><span class="n">pf</span><span class="p">)</span>
+<a name="ln-116"></a>    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
+<a name="ln-117"></a>    
+<a name="ln-118"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span>
+<a name="ln-119"></a>    
+<a name="ln-120"></a>    <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ONE</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-121"></a>       <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
+<a name="ln-122"></a>    <span class="k">end do</span>
+<a name="ln-123"></a><span class="k">    </span>
+<a name="ln-124"></a><span class="k">    do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<a name="ln-125"></a>       <span class="k">do </span><span class="n">h</span> <span class="o">=</span> <span class="n">PF_HOOK_LOG_ALL</span><span class="p">,</span> <span class="n">PF_HOOK_LOG_LAST</span>
+<a name="ln-126"></a>          <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pf_logger_hook</span><span class="p">)</span>
+<a name="ln-127"></a>       <span class="k">end do</span>
+<a name="ln-128"></a><span class="k">    end do</span>
+<a name="ln-129"></a><span class="k">  end subroutine </span><span class="n">pf_logger_attach</span>
+<a name="ln-130"></a>
+<a name="ln-131"></a><span class="k">end module </span><span class="n">pf_mod_hooks</span>
 </pre></div>
 
     </section>

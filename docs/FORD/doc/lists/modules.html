@@ -147,7 +147,10 @@ All Modules &ndash; LibPFASST
 			 
 			   <tr class=""><td><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></td><td><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></td><td><p>Module for providing FFTs based on fftw
   To use this module, fftw must be installed.
-  This can be done by the libpfasst make system with the comment</p><a href="../module/pf_mod_fftpackage.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+  This can be done by the libpfasst make system with the command
+  make fftw3
+  You also have to specify USE_FFTW in Makefile.defaults and
+  make clean is recommended before remake</p></td></tr>
                
                <!---->
 			 
@@ -210,8 +213,8 @@ All Modules &ndash; LibPFASST
                <!---->
 			 
 			   <tr class="active"><td><a href='../module/pf_mod_ndarray_oc.html'>pf_mod_ndarray_oc</a></td><td><a href='../sourcefile/pf_ndarray_oc_encap.f90.html'>pf_ndarray_oc_encap.f90</a></td><td><p>When a new solution is created by a PFASST level, this encapsulation
- uses the levels 'shape' attribute to create a new array with that
- shape.  Thus, the 'shape' attributes of the PFASST levels should be
+ uses the levels 'lev_shape' attribute to create a new array with that
+ shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
  set appropriately.  For example, before calling pf_pfasst_run we can
  set the shape of the coarsest level by doing:</p><a href="../module/pf_mod_ndarray_oc.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
@@ -233,54 +236,58 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_pfasst.html'>pf_mod_pfasst</a></td><td><a href='../sourcefile/pf_pfasst.f90.html'>pf_pfasst.f90</a></td><td><p>Module containing the routines to create, setup, and destroy the main data structure in PFASST</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_pf_petscvec.html'>pf_mod_pf_petscVec</a></td><td><a href='../sourcefile/pf_petscvec_encap.f90.html'>pf_petscVec_encap.f90</a></td><td><p>N-dimensional array encapsulation.</p><a href="../module/pf_mod_pf_petscvec.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_quadrature.html'>pf_mod_quadrature</a></td><td><a href='../sourcefile/pf_quadrature.f90.html'>pf_quadrature.f90</a></td><td><p>Module to create quadrature matrices and accompanying routines</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_pfasst.html'>pf_mod_pfasst</a></td><td><a href='../sourcefile/pf_pfasst.f90.html'>pf_pfasst.f90</a></td><td><p>Module containing the routines to create, setup, and destroy the main data structure in PFASST</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_restrict.html'>pf_mod_restrict</a></td><td><a href='../sourcefile/pf_restrict.f90.html'>pf_restrict.f90</a></td><td><p>Module to restrict solutions between pfasst levels and create the FAS tau correction</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_quadrature.html'>pf_mod_quadrature</a></td><td><a href='../sourcefile/pf_quadrature.f90.html'>pf_quadrature.f90</a></td><td><p>Module to create quadrature matrices and accompanying routines</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_results.html'>pf_mod_results</a></td><td><a href='../sourcefile/pf_results.f90.html'>pf_results.f90</a></td><td><p>Module for the storing results for eventual output</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_restrict.html'>pf_mod_restrict</a></td><td><a href='../sourcefile/pf_restrict.f90.html'>pf_restrict.f90</a></td><td><p>Module to restrict solutions between pfasst levels and create the FAS tau correction</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_rkstepper.html'>pf_mod_rkstepper</a></td><td><a href='../sourcefile/pf_rkstepper.f90.html'>pf_rkstepper.f90</a></td><td><p>Module to do Runge-Kutta stepping</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_results.html'>pf_mod_results</a></td><td><a href='../sourcefile/pf_results.f90.html'>pf_results.f90</a></td><td><p>Module for the storing results for eventual output</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_rkstepper.html'>pf_mod_rkstepper</a></td><td><a href='../sourcefile/pf_rkstepper.f90.html'>pf_rkstepper.f90</a></td><td><p>Module to do Runge-Kutta stepping</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></td><td><a href='../sourcefile/pf_timer.f90.html'>pf_timer.f90</a></td><td><p>Module for setting timers</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></td><td><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></td><td><a href='../sourcefile/pf_timer.f90.html'>pf_timer.f90</a></td><td><p>Module for setting timers</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></td><td><a href='../sourcefile/pf_verlet_sweeper.f90.html'>pf_verlet_sweeper.f90</a></td><td><p>Verlet type sweeper for 2nd order problems</p><a href="../module/pf_mod_verlet.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></td><td><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../sourcefile/pf_zndarray_encap.f90.html'>pf_zndarray_encap.f90</a></td><td><p>N-dimensional complex array encapsulation.</p><a href="../module/pf_mod_zndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></td><td><a href='../sourcefile/pf_verlet_sweeper.f90.html'>pf_verlet_sweeper.f90</a></td><td><p>Verlet type sweeper for 2nd order problems</p><a href="../module/pf_mod_verlet.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></td><td><p>System of complex N-dimensional arrays encapsulation.</p><a href="../module/pf_mod_zndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../sourcefile/pf_zndarray_encap.f90.html'>pf_zndarray_encap.f90</a></td><td><p>N-ndimensional complex array encapsulation.</p><a href="../module/pf_mod_zndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pfasst.html'>pfasst</a></td><td><a href='../sourcefile/pfasst.f90.html'>pfasst.f90</a></td><td><p>Module containing a collection of "use" statements to simplify
+			   <tr class="active"><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></td><td><p>System of complex N-dimensional arrays encapsulation.</p><a href="../module/pf_mod_zndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+               
+               <!--active-->
+			 
+			   <tr class=""><td><a href='../module/pfasst.html'>pfasst</a></td><td><a href='../sourcefile/pfasst.f90.html'>pfasst.f90</a></td><td><p>Module containing a collection of "use" statements to simplify
   including the common main modules in writing applications that use libpfasst</p></td></tr>
                
-               <!--active-->
+               <!---->
 			 
 			 </tbody></table>
              

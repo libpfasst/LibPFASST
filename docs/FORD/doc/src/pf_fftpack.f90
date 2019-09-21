@@ -31,20 +31,22 @@ module pf_mod_fftpackage
   
 contains
   !>  Allocate and initialize FFT structure
-  subroutine fft_setup(this, grid_shape, dim, grid_size)
+  subroutine fft_setup(this, grid_shape, ndim, grid_size)
     class(pf_fft_t), intent(inout) :: this
-    integer,              intent(in   ) :: dim
-    integer,              intent(in   ) :: grid_shape(dim)
-    real(pfdp), optional, intent(in   ) :: grid_size(dim)    
+    integer,              intent(in   ) :: ndim
+    integer,              intent(in   ) :: grid_shape(ndim)
+    real(pfdp), optional, intent(in   ) :: grid_size(ndim)    
       
     integer     :: nx,ny,nz
-    this%dim=dim
+    integer     :: i,j,k
+    real(pfdp)  :: om
+    this%ndim=ndim
     
     !  FFT Storage parameters
-    nx=grid_shape(1)
+    nx=grid_SHAPE(1)
     this%nx = nx
     this%lensavx = 4*nx + 15
-    this%normfact=real(nx,pfdp)
+    this%normfact=REAL(nx,pfdp)
     
     allocate(this%workhatx(nx))   !  complex transform
     allocate(this%wsavex(this%lensavx))
@@ -52,12 +54,13 @@ contains
     if(present(grid_size)) this%Lx = grid_size(1)
     !  Initialize FFT
     call ZFFTI( nx, this%wsavex )
-    if (dim > 1) then
+    
+    if (ndim > 1) then
        !  FFT Storage
-       ny=grid_shape(2)       
+       ny=grid_SHAPE(2)       
        this%ny = ny
        this%lensavy = 4*ny + 15
-       this%normfact=real(nx*ny,pfdp)
+       this%normfact=REAL(nx*ny,pfdp)
        allocate(this%workhaty(ny))   !  complex transform
        allocate(this%wsavey(this%lensavy))
        this%Ly = 1.0_pfdp
@@ -65,12 +68,12 @@ contains
        !  Initialize FFT
        call ZFFTI( ny, this%wsavey)
        
-       if (dim > 2) then
+       if (ndim > 2) then
           !  FFT Storage
-          nz=grid_shape(3)       
+          nz=grid_SHAPE(3)       
           this%nz = nz
           this%lensavz = 4*nz + 15
-          this%normfact=real(nx*ny*nz,pfdp)
+          this%normfact=REAL(nx*ny*nz,pfdp)
           allocate(this%workhatz(nz))   !  complex transform
           allocate(this%wsavez(this%lensavz))
           this%Lz = 1.0_pfdp
@@ -79,7 +82,7 @@ contains
           call ZFFTI( nz, this%wsavez)
        endif
     endif
-    select case (this%dim)
+    select case (this%ndim)
     case (1)            
        allocate(this%wk_1d(nx))
     case (2)            
@@ -87,8 +90,44 @@ contains
     case (3)            
        allocate(this%wk_3d(nx,ny,nz))
     case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%ndim)
     end select
+
+    !  Assign wave numbers
+    allocate(this%kx(nx))
+    om=two_pi/this%Lx                
+    do i = 1, nx
+       if (i <= nx/2+1) then
+          this%kx(i) = om*REAL(i-1,pfdp)
+       else
+          this%kx(i) = om*REAL(-nx + i - 1,pfdp)
+       end if
+    end do
+
+    if (ndim > 1) then
+       allocate(this%ky(ny))          
+       om=two_pi/this%Ly 
+       do j = 1, ny
+          if (j <= ny/2+1) then
+             this%ky(j) = om*REAL(j-1,pfdp)
+          else
+             this%ky(j) = om*REAL(-ny + j - 1,pfdp)
+          end if
+       end do
+    end if
+    
+    if (ndim > 2) then
+       allocate(this%kz(nz))
+       om=two_pi / this%Lz 
+       do k = 1,nz
+          if (k <= nz/2+1) then
+             this%kz(k) = om*REAL(k-1,pfdp)
+          else
+             this%kz(k) = om*REAL(-nz + k - 1,pfdp)
+          end if
+       end do
+    end if
+
   end subroutine fft_setup
 
   !>  Deallocate and destroy fft structures
@@ -96,15 +135,18 @@ contains
     class(pf_fft_t), intent(inout) :: this
     deallocate(this%workhatx)
     deallocate(this%wsavex)
-    if (this%dim > 1) then
+    deallocate(this%kx)   
+    if (this%ndim > 1) then
        deallocate(this%workhaty)
        deallocate(this%wsavey)
-       if (this%dim > 2) then
+       deallocate(this%ky)   
+       if (this%ndim > 2) then
           deallocate(this%workhatz)
           deallocate(this%wsavez)
+          deallocate(this%kz)   
        end if
     end if
-    select case (this%dim)
+    select case (this%ndim)
     case (1)            
        deallocate(this%wk_1d)
     case (2)            
@@ -112,8 +154,10 @@ contains
     case (3)            
        deallocate(this%wk_3d)
     case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%ndim)
     end select
+
+    !  Deallocate wave number arrays
     
   end subroutine fft_destroy
 
@@ -123,7 +167,7 @@ contains
     
     integer i,j,k
     
-    select case (this%dim)       
+    select case (this%ndim)       
     case (1)            
        call zfftf(this%nx, this%wk_1d, this%wsavex )
        this%wk_1d=this%wk_1d/this%normfact
@@ -164,7 +208,7 @@ contains
        this%wk_3d=this%wk_3d/this%normfact
        
     case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%ndim)
     end select
   end subroutine fftf
 
@@ -174,7 +218,7 @@ contains
     
     integer i,j,k
     
-    select case (this%dim)       
+    select case (this%ndim)       
     case (1)
        this%wk_1d=this%wk_1d
        call zfftb(this%nx, this%wk_1d, this%wsavex )
@@ -213,20 +257,17 @@ contains
              this%wk_3d(i,j,:)=this%workhatz
           end do
        end do
-
     case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%dim)
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%ndim)
     end select
   end subroutine fftb
   
 
-      subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
-!      use pf_mod_fftpackage, only: pf_fft_t
-!        class(pf_fft_abs_t), intent(inout) :: this
-        class(pf_fft_t), intent(inout) :: this
-    real(pfdp), intent(inout),  pointer :: yvec_f(:)
-    real(pfdp), intent(inout),  pointer :: yvec_c(:)
-    type(pf_fft_t),  pointer,intent(in) :: fft_f
+  subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
+    class(pf_fft_t), intent(inout) :: this
+    real(pfdp), intent(inout), pointer :: yvec_f(:)
+    real(pfdp), intent(in),    pointer :: yvec_c(:)
+    type(pf_fft_t),intent(in), pointer :: fft_f
     integer :: nx_f, nx_c
 
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
@@ -235,24 +276,19 @@ contains
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
 
+    call this%fftf()      !  internal forward fft call    
     call this%zinterp_1d(wk_c, wk_f)
-    wk_f=wk_f
+    call fft_f%fftb()     !  internal inverse fft call
 
-    !  internal inverse fft call
-    call fft_f%fftb()
-
-    yvec_f=real(wk_f,pfdp)
+    yvec_f=REAL(wk_f,pfdp) !  grab the real part
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
-        class(pf_fft_t), intent(inout) :: this
-!    class(pf_fft_abs_t), intent(inout) :: this
-    real(pfdp), intent(inout),  pointer :: yvec_f(:,:)
-    real(pfdp), intent(inout),  pointer :: yvec_c(:,:)
-    type(pf_fft_t),  pointer,intent(in) :: fft_f
+    class(pf_fft_t), intent(inout) :: this
+    real(pfdp), intent(inout), pointer :: yvec_f(:,:)
+    real(pfdp), intent(in),    pointer :: yvec_c(:,:)
+    type(pf_fft_t),intent(in), pointer:: fft_f
 
     complex(pfdp),         pointer :: wk_f(:,:), wk_c(:,:)
 
@@ -260,68 +296,59 @@ contains
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
 
+    call this%fftf()       !  internal forward fft call     
     call this%zinterp_2d(wk_c, wk_f)
-    wk_f=wk_f
+    call fft_f%fftb()     !  internal inverse fft call
 
-    !  internal inverse fft call
-    call fft_f%fftb()
-
-    yvec_f=real(wk_f,pfdp)
+    yvec_f=REAL(wk_f,pfdp)  !  grab the real part
     
   end subroutine interp_2d
   subroutine interp_3d(this, yvec_c, fft_f,yvec_f)
-         class(pf_fft_t), intent(inout) :: this
-!   class(pf_fft_abs_t), intent(inout) :: this
+    class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:,:,:)
     real(pfdp), intent(inout),  pointer :: yvec_c(:,:,:)
-    type(pf_fft_t),  pointer,intent(in) :: fft_f
+    type(pf_fft_t),intent(in),  pointer :: fft_f
     complex(pfdp),         pointer :: wk_f(:,:,:), wk_c(:,:,:)
 
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
     wk_c=yvec_c
-    !  internal forward fft call    
-    call this%fftf()    
 
+    call this%fftf()      !  internal forward fft call    
     call this%zinterp_3d(wk_c, wk_f)
-    wk_f=wk_f
+    call fft_f%fftb()     !  internal inverse fft call
 
-    !  internal inverse fft call
-    call fft_f%fftb()
-
-    yvec_f=real(wk_f,pfdp)
-    
-
+    yvec_f=REAL(wk_f,pfdp)  !  grab the real part
   end subroutine interp_3d
 
-  !>  Interpolate from coarse  level to fine
+  !>  Interpolate from coarse  level to fine in spectral space
   subroutine zinterp_1d(this, yhat_c, yhat_f)
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp),         pointer :: yhat_f(:), yhat_c(:)
+    complex(pfdp),   pointer,intent(inout) :: yhat_f(:) 
+    complex(pfdp),   pointer,intent(in) :: yhat_c(:)
+
     integer :: nx_f, nx_c
-    real(pfdp) :: fct
-    nx_f = size(yhat_f)
-    nx_c = size(yhat_c)
-    fct=real(nx_f,pfdp)/real(nx_c,pfdp)
+
+    nx_f = SIZE(yhat_f)
+    nx_c = SIZE(yhat_c)
 
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
     yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
     
   end subroutine zinterp_1d
-  !>  Interpolate from coarse  level to fine
+
   subroutine zinterp_2d(this, yhat_c, yhat_f)
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp),         pointer :: yhat_f(:,:), yhat_c(:,:)
+    complex(pfdp),   pointer,intent(inout) :: yhat_f(:,:) 
+    complex(pfdp),   pointer,intent(in) :: yhat_c(:,:)
 
     integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
 
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
@@ -340,13 +367,14 @@ contains
   !>  Interpolate from coarse  level to fine
   subroutine zinterp_3d(this, yhat_c, yhat_f)
     class(pf_fft_t), intent(inout) :: this
-    complex(pfdp),         pointer :: yhat_f(:,:,:), yhat_c(:,:,:)
+    complex(pfdp),   pointer,intent(inout) :: yhat_f(:,:,:) 
+    complex(pfdp),   pointer,intent(in) :: yhat_c(:,:,:)
 
-  integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
+    integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
 
 
-    nx_f = shape(yhat_f)
-    nx_c = shape(yhat_c)
+    nx_f = SHAPE(yhat_f)
+    nx_c = SHAPE(yhat_c)
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2

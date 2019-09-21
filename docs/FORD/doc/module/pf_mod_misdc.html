@@ -176,9 +176,9 @@
   <div id="inters-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_eval_p%7E4">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_eval_p%7E7">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_comp_p%7E4">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_comp_p%7E5">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -288,9 +288,9 @@
   <div id="inters-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_eval_p%7E4">pf_f_eval_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_eval_p%7E7">pf_f_eval_p</a>
       
-      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_comp_p%7E4">pf_f_comp_p</a>
+      <a class="list-group-item" href="../module/pf_mod_misdc.html#interface-pf_f_comp_p%7E5">pf_f_comp_p</a>
       
     </div>
   </div>
@@ -360,7 +360,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E4"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_eval_p%7E7"></span><h3>interface 
     
   </h3></div>
   
@@ -495,7 +495,7 @@ public subroutine pf_f_eval_p(this, y, t, level, f, piece)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E4"></span><h3>interface 
+  <div class="panel-heading codesum"><span class="anchor" id="interface-pf_f_comp_p%7E5"></span><h3>interface 
     
   </h3></div>
   
@@ -696,7 +696,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-npieces%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-npieces"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -724,7 +724,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-sdiffe"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-sdiffe%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -738,7 +738,7 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
   
 <tr>
   
-  <td><span class="anchor" id="variable-sdiffi"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-sdiffi%7E2"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -757,34 +757,34 @@ public subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure(pf_spreadq0_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-spreadq0%7E3'>spreadq0</a></strong>  </td>
+       <tr><td>procedure(pf_spreadq0_p), public :: <strong><a href='../type/pf_sweeper_t.html#boundprocedure-spreadq0'>spreadq0</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-f_eval%7E4'>f_eval</a></strong>  </td>
+       <tr><td>procedure(pf_f_eval_p), public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-f_eval%7E7'>f_eval</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-f_comp%7E4'>f_comp</a></strong>  </td>
+       <tr><td>procedure(pf_f_comp_p), public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-f_comp%7E5'>f_comp</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-sweep%7E3'>sweep</a></strong>  => misdc_sweep </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-sweep%7E8'>sweep</a></strong>  => misdc_sweep </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-initialize%7E4'>initialize</a></strong>  => misdc_initialize </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-initialize%7E8'>initialize</a></strong>  => misdc_initialize </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-evaluate%7E3'>evaluate</a></strong>  => misdc_evaluate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-evaluate%7E8'>evaluate</a></strong>  => misdc_evaluate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-integrate%7E3'>integrate</a></strong>  => misdc_integrate </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-integrate%7E8'>integrate</a></strong>  => misdc_integrate </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-residual%7E3'>residual</a></strong>  => misdc_residual </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-residual%7E8'>residual</a></strong>  => misdc_residual </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-evaluate_all%7E3'>evaluate_all</a></strong>  => misdc_evaluate_all </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-evaluate_all%7E8'>evaluate_all</a></strong>  => misdc_evaluate_all </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-destroy%7E4'>destroy</a></strong>  => misdc_destroy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-destroy%7E8'>destroy</a></strong>  => misdc_destroy </td>
        <td></td></tr>
       
        <tr><td>procedure, public :: <strong><a href='../type/pf_misdc_t.html#boundprocedure-misdc_destroy'>misdc_destroy</a></strong>  </td>

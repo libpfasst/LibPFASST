@@ -10,7 +10,7 @@
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
-    <title>zndarray &ndash; LibPFASST </title>
+    <title>pf_ndsysarray_t &ndash; LibPFASST </title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -108,7 +108,7 @@
     
   
   <div class="row">
-    <h1>zndarray
+    <h1>pf_ndsysarray_t
     <small>Derived Type</small>
     
     </h1>
@@ -126,24 +126,24 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.3% of total for derived types.</p>Including implementation: 77 statements,  1.2% of total for derived types.">14 statements</a>
+    title="<p> 2.4% of total for derived types.</p>Including implementation: 67 statements,  1.0% of total for derived types.">15 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_zndarray_encap.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_ndsysarray_encap.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_zndarray_encap.f90.html'>pf_zndarray_encap.f90</a></li>
+     <li><a href='../sourcefile/pf_ndsysarray_encap.f90.html'>pf_ndsysarray_encap.f90</a></li>
     
-     <li><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></li>
+     <li><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></li>
     
   
-     <li class="active">zndarray</li>
+     <li class="active">pf_ndsysarray_t</li>
   </ol>
 </div>
 </div>
@@ -171,11 +171,15 @@
   <div id="vars-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-dim%7E2">dim</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ndim%7E2">ndim</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-shape">shape</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ncomp">ncomp</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-flatarray">flatarray</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ndof">ndof</a>
+      
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-arr_shape">arr_shape</a>
+      
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-flatarray">flatarray</a>
       
     </div>
   </div>
@@ -203,21 +207,19 @@
   <div id="boundprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-setval">setval</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-setval">setval</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-copy">copy</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-copy">copy</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-norm">norm</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-norm">norm</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-pack">pack</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-pack">pack</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-unpack">unpack</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-unpack">unpack</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-axpy">axpy</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-axpy">axpy</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-eprint">eprint</a>
-      
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-write_to_disk">write_to_disk</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-eprint">eprint</a>
       
     </div>
   </div>
@@ -229,7 +231,7 @@
 <div class="panel panel-primary">
   <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
   <div class="list-group">
-    <a class="list-group-item" href="../type/zndarray.html#src">zndarray</a>
+    <a class="list-group-item" href="../type/pf_ndsysarray_t.html#src">pf_ndsysarray_t</a>
   </div>
 </div>
 
@@ -240,8 +242,8 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: zndarray</h2>
-    <p>Complex ndarray</p>
+      <h2>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: pf_ndsysarray_t</h2>
+    <p>Type for system of  N-dimensional arrays,  extends the abstract encap type  </p>
     
     
     
@@ -259,11 +261,15 @@
   <div id="vars-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-dim%7E2">dim</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ndim%7E2">ndim</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-shape">shape</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ncomp">ncomp</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#variable-flatarray">flatarray</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-ndof">ndof</a>
+      
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-arr_shape">arr_shape</a>
+      
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#variable-flatarray">flatarray</a>
       
     </div>
   </div>
@@ -291,21 +297,19 @@
   <div id="boundprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-setval">setval</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-setval">setval</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-copy">copy</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-copy">copy</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-norm">norm</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-norm">norm</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-pack">pack</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-pack">pack</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-unpack">unpack</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-unpack">unpack</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-axpy">axpy</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-axpy">axpy</a>
       
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-eprint">eprint</a>
-      
-      <a class="list-group-item" href="../type/zndarray.html#boundprocedure-write_to_disk">write_to_disk</a>
+      <a class="list-group-item" href="../type/pf_ndsysarray_t.html#boundprocedure-eprint">eprint</a>
       
     </div>
   </div>
@@ -317,7 +321,7 @@
 <div class="panel panel-primary">
   <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
   <div class="list-group">
-    <a class="list-group-item" href="../type/zndarray.html#src">zndarray</a>
+    <a class="list-group-item" href="../type/pf_ndsysarray_t.html#src">pf_ndsysarray_t</a>
   </div>
 </div>
 
@@ -345,11 +349,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td><td></td><td></td>
+  <td><strong>ndim</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -359,11 +363,39 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape"></span>integer,</td>
+  <td><span class="anchor" id="variable-ncomp"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>ncomp</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-ndof"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>ndof</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-arr_shape"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td><td></td><td></td>
+  <td><strong>arr_shape</strong>(:)</td><td></td><td></td><td></td>
   
 </tr>
 
@@ -373,7 +405,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-flatarray"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-flatarray"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -398,7 +430,7 @@
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setval"></span><h3>procedure, public :: <strong>setval</strong>  => <a href='../proc/zndarray_setval.html'>zndarray_setval</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setval"></span><h3>procedure, public :: <strong>setval</strong>  => <a href='../proc/ndsysarray_setval.html'>ndsysarray_setval</a> 
     
   </h3></div>
   
@@ -410,7 +442,7 @@
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_setval.html'>zndarray_setval</a>(this, val, flags)
+public subroutine <a href='../proc/ndsysarray_setval.html'>ndsysarray_setval</a>(this, val, flags)
     
     
    
@@ -423,7 +455,7 @@ public subroutine <a href='../proc/zndarray_setval.html'>zndarray_setval</a>(thi
 
 
 
-<p>Set solution value.</p>
+<p>The following are the base subroutines that all encapsulations must provide</p><a href="../proc/ndsysarray_setval.html" class="pull-right"><emph>Read more&hellip;</emph></a>
     
     <h4>Arguments</h4>
     
@@ -444,7 +476,7 @@ public subroutine <a href='../proc/zndarray_setval.html'>zndarray_setval</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -500,7 +532,7 @@ public subroutine <a href='../proc/zndarray_setval.html'>zndarray_setval</a>(thi
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-copy"></span><h3>procedure, public :: <strong>copy</strong>  => <a href='../proc/zndarray_copy.html'>zndarray_copy</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-copy"></span><h3>procedure, public :: <strong>copy</strong>  => <a href='../proc/ndsysarray_copy.html'>ndsysarray_copy</a> 
     
   </h3></div>
   
@@ -512,7 +544,7 @@ public subroutine <a href='../proc/zndarray_setval.html'>zndarray_setval</a>(thi
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_copy.html'>zndarray_copy</a>(this, src, flags)
+public subroutine <a href='../proc/ndsysarray_copy.html'>ndsysarray_copy</a>(this, src, flags)
     
     
    
@@ -525,7 +557,7 @@ public subroutine <a href='../proc/zndarray_copy.html'>zndarray_copy</a>(this, s
 
 
 
-<p>Copy solution value.</p>
+<p>Subroutine to copy an array</p>
     
     <h4>Arguments</h4>
     
@@ -546,7 +578,7 @@ public subroutine <a href='../proc/zndarray_copy.html'>zndarray_copy</a>(this, s
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -602,7 +634,7 @@ public subroutine <a href='../proc/zndarray_copy.html'>zndarray_copy</a>(this, s
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-norm"></span><h3>procedure, public :: <strong>norm</strong>  => <a href='../proc/zndarray_norm.html'>zndarray_norm</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-norm"></span><h3>procedure, public :: <strong>norm</strong>  => <a href='../proc/ndsysarray_norm.html'>ndsysarray_norm</a> 
     
   </h3></div>
   
@@ -614,12 +646,20 @@ public subroutine <a href='../proc/zndarray_copy.html'>zndarray_copy</a>(this, s
           
     
     <h3>
-public function <a href='../proc/zndarray_norm.html'>zndarray_norm</a>(this, flags) result(norm)
+public function <a href='../proc/ndsysarray_norm.html'>ndsysarray_norm</a>(this, flags) result(norm)
     
     
    
 </h3>
     
+
+
+
+
+
+
+
+<p>Subroutine to define the norm of the array (here the max norm)</p>
     
     <h4>Arguments</h4>
     
@@ -640,7 +680,7 @@ public function <a href='../proc/zndarray_norm.html'>zndarray_norm</a>(this, fla
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -690,7 +730,7 @@ public function <a href='../proc/zndarray_norm.html'>zndarray_norm</a>(this, fla
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pack"></span><h3>procedure, public :: <strong>pack</strong>  => <a href='../proc/zndarray_pack.html'>zndarray_pack</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-pack"></span><h3>procedure, public :: <strong>pack</strong>  => <a href='../proc/ndsysarray_pack.html'>ndsysarray_pack</a> 
     
   </h3></div>
   
@@ -702,7 +742,7 @@ public function <a href='../proc/zndarray_norm.html'>zndarray_norm</a>(this, fla
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_pack.html'>zndarray_pack</a>(this, z, flags)
+public subroutine <a href='../proc/ndsysarray_pack.html'>ndsysarray_pack</a>(this, z, flags)
     
     
    
@@ -715,7 +755,7 @@ public subroutine <a href='../proc/zndarray_pack.html'>zndarray_pack</a>(this, z
 
 
 
-<p>Pack solution q into a flat array.</p>
+<p>Subroutine to pack an array into a flat array for sending</p>
     
     <h4>Arguments</h4>
     
@@ -736,7 +776,7 @@ public subroutine <a href='../proc/zndarray_pack.html'>zndarray_pack</a>(this, z
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -792,7 +832,7 @@ public subroutine <a href='../proc/zndarray_pack.html'>zndarray_pack</a>(this, z
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-unpack"></span><h3>procedure, public :: <strong>unpack</strong>  => <a href='../proc/zndarray_unpack.html'>zndarray_unpack</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-unpack"></span><h3>procedure, public :: <strong>unpack</strong>  => <a href='../proc/ndsysarray_unpack.html'>ndsysarray_unpack</a> 
     
   </h3></div>
   
@@ -804,12 +844,20 @@ public subroutine <a href='../proc/zndarray_pack.html'>zndarray_pack</a>(this, z
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_unpack.html'>zndarray_unpack</a>(this, z, flags)
+public subroutine <a href='../proc/ndsysarray_unpack.html'>ndsysarray_unpack</a>(this, z, flags)
     
     
    
 </h3>
     
+
+
+
+
+
+
+
+<p>Subroutine to unpack a flatarray after receiving</p>
     
     <h4>Arguments</h4>
     
@@ -830,7 +878,7 @@ public subroutine <a href='../proc/zndarray_unpack.html'>zndarray_unpack</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -886,7 +934,7 @@ public subroutine <a href='../proc/zndarray_unpack.html'>zndarray_unpack</a>(thi
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-axpy"></span><h3>procedure, public :: <strong>axpy</strong>  => <a href='../proc/zndarray_axpy.html'>zndarray_axpy</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-axpy"></span><h3>procedure, public :: <strong>axpy</strong>  => <a href='../proc/ndsysarray_axpy.html'>ndsysarray_axpy</a> 
     
   </h3></div>
   
@@ -898,12 +946,20 @@ public subroutine <a href='../proc/zndarray_unpack.html'>zndarray_unpack</a>(thi
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_axpy.html'>zndarray_axpy</a>(this, a, x, flags)
+public subroutine <a href='../proc/ndsysarray_axpy.html'>ndsysarray_axpy</a>(this, a, x, flags)
     
     
    
 </h3>
     
+
+
+
+
+
+
+
+<p>Subroutine to compute y = a x + y where a is a scalar and x and y are arrays</p>
     
     <h4>Arguments</h4>
     
@@ -924,7 +980,7 @@ public subroutine <a href='../proc/zndarray_axpy.html'>zndarray_axpy</a>(this, a
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -995,7 +1051,7 @@ public subroutine <a href='../proc/zndarray_axpy.html'>zndarray_axpy</a>(this, a
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-eprint"></span><h3>procedure, public :: <strong>eprint</strong>  => <a href='../proc/zndarray_eprint.html'>zndarray_eprint</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-eprint"></span><h3>procedure, public :: <strong>eprint</strong>  => <a href='../proc/ndsysarray_eprint.html'>ndsysarray_eprint</a> 
     
   </h3></div>
   
@@ -1007,12 +1063,20 @@ public subroutine <a href='../proc/zndarray_axpy.html'>zndarray_axpy</a>(this, a
           
     
     <h3>
-public subroutine <a href='../proc/zndarray_eprint.html'>zndarray_eprint</a>(this, flags)
+public subroutine <a href='../proc/ndsysarray_eprint.html'>ndsysarray_eprint</a>(this, flags)
     
     
    
 </h3>
     
+
+
+
+
+
+
+
+<p>Subroutine to print the array to the screen (mainly for debugging purposes)</p>
     
     <h4>Arguments</h4>
     
@@ -1033,7 +1097,7 @@ public subroutine <a href='../proc/zndarray_eprint.html'>zndarray_eprint</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1072,105 +1136,27 @@ public subroutine <a href='../proc/zndarray_eprint.html'>zndarray_eprint</a>(thi
 </div>
 
     
-     
-<div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-write_to_disk"></span><h3>procedure, public :: <strong>write_to_disk</strong>  
-    
-  </h3></div>
-  
-  <ul class="list-group">
-    
-      <li class="list-group-item">
-      
-        
-          
-    
-    <h3>
-public subroutine <a href='../proc/write_to_disk.html'>write_to_disk</a>(this, filename)
-    
-    
-   
-</h3>
-    
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/zndarray.html'>zndarray</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>this</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=*),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>filename</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-        
-      
-      </li>
-    
-  </ul>
-</div>
-
-    
     </section>
     
     
     
     <section>
     <h3><span class="anchor" id="src"></span>Source Code</h3>
-    <div class="highlight"><pre><span></span>  <span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">zndarray</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="nb">dim</span>
-<span class="nb">     </span><span class="kt">integer</span><span class="p">,</span>    <span class="k">allocatable</span> <span class="kd">::</span> <span class="nb">shape</span><span class="p">(:)</span>     
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">flatarray</span><span class="p">(:)</span>
-  <span class="k">contains</span>
-<span class="k">    procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">zndarray_setval</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">zndarray_copy</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">zndarray_norm</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">pack</span> <span class="o">=&gt;</span> <span class="n">zndarray_pack</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">unpack</span> <span class="o">=&gt;</span> <span class="n">zndarray_unpack</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">axpy</span> <span class="o">=&gt;</span> <span class="n">zndarray_axpy</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">eprint</span> <span class="o">=&gt;</span> <span class="n">zndarray_eprint</span>
-    <span class="k">procedure</span> <span class="kd">::</span> <span class="n">write_to_disk</span>
-  <span class="k">end type </span><span class="n">zndarray</span>
+    <div class="highlight"><pre><span></span>  <span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf_ndsysarray_t</span>
+     <span class="kt">integer</span>             <span class="kd">::</span> <span class="n">ndim</span>    <span class="c">!  The spatial dimension of each component in system</span>
+     <span class="kt">integer</span>             <span class="kd">::</span> <span class="n">ncomp</span>  <span class="c">!  The number of components in the system</span>
+     <span class="kt">integer</span>             <span class="kd">::</span> <span class="n">ndof</span>   <span class="c">!  The number of variables in each component</span>
+     <span class="kt">integer</span><span class="p">,</span>    <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">arr_shape</span><span class="p">(:)</span>
+     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">flatarray</span><span class="p">(:)</span>
+   <span class="k">contains</span>
+<span class="k">     procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_setval</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_copy</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_norm</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">pack</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_pack</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">unpack</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_unpack</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">axpy</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_axpy</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">eprint</span> <span class="o">=&gt;</span> <span class="n">ndsysarray_eprint</span>
+  <span class="k">end type </span><span class="n">pf_ndsysarray_t</span>
 </pre></div>
 
     </section>

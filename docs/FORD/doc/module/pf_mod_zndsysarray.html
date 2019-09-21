@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.2% of total for modules and submodules.">195 statements</a>
+    title=" 2.2% of total for modules and submodules.">198 statements</a>
      </li> 
      
      
@@ -190,9 +190,9 @@
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-zndsysarray_factory">zndsysarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-pf_zndsysarray_factory_t">pf_zndsysarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-zndsysarray">zndsysarray</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-pf_zndsysarray_t">pf_zndsysarray_t</a>
       
     </div>
   </div>
@@ -209,11 +209,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-cast_as_zndsysarray">cast_as_zndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E2">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E4">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E2">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E4">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E2">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E4">get_array3d</a>
       
     </div>
   </div>
@@ -270,15 +270,15 @@
     <div class="col-md-9" id='text'>
     <p>System of complex N-dimensional arrays encapsulation.</p>
 <p>When a new solution is created by a PFASST level, this encapsulation
- uses the levels 'arr_shape' attribute to create a new multi-component array with that
- shape.  Thus, the 'arr_shape' attributes of the PFASST levels should be
- set appropriately.  The last component of arr_shape is the number of components in the system</p>
+ uses the levels 'lev_shape' attribute to create a new multi-component array with that
+ shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
+ set appropriately.  The last component of lev_shape is the number of components in the system</p>
 <p>For example, before calling pf_pfasst_run we can
  set the arr_shape of the coarsest level by doing:</p>
-<p>allocate(pf%levels(1)%arr_shape(3))
-   pf%levels(1)%arr_shape = [ nx, ny, 3 ]</p>
+<p>allocate(pf%levels(1)%lev_shape(3))
+   pf%levels(1)%lev_shape = [ nx, ny, 3 ]</p>
 <p>Which would imply that a 3 component system of two-dimensional solutions.</p>
-<p>The helper routines array1, array2, array3, etc can be used to
+<p>The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
  extract pointers to a component of  encapsulated system
  performing any copies.</p>
       <br>
@@ -344,9 +344,9 @@
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-zndsysarray_factory">zndsysarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-pf_zndsysarray_factory_t">pf_zndsysarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-zndsysarray">zndsysarray</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#type-pf_zndsysarray_t">pf_zndsysarray_t</a>
       
     </div>
   </div>
@@ -363,11 +363,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-cast_as_zndsysarray">cast_as_zndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E2">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array1d%7E4">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E2">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array2d%7E4">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E2">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#proc-get_array3d%7E4">get_array3d</a>
       
     </div>
   </div>
@@ -447,7 +447,7 @@
     
     
     <h3>
-public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
+public subroutine zndsysarray_dump_numpy(dname, fname, endian, ndim, mpibuflen, arr_shape, array) bind(c)
     
     
    
@@ -527,7 +527,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   <td></td>
   
   <td>value</td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
+  <td><strong>ndim</strong></td><td></td>
   
 </tr>
 
@@ -557,7 +557,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>arr_shape</strong>(dim)</td><td></td>
+  <td><strong>arr_shape</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -601,7 +601,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-zndsysarray_factory"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_zndsysarray_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_zndsysarray_factory_t.html'>pf_zndsysarray_factory_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -617,16 +617,16 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_single%7E3'>create_single</a></strong>  => zndsysarray_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_factory_t.html#boundprocedure-create_single%7E5'>create_single</a></strong>  => zndsysarray_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-create_array%7E3'>create_array</a></strong>  => zndsysarray_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_factory_t.html#boundprocedure-create_array%7E5'>create_array</a></strong>  => zndsysarray_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_single%7E3'>destroy_single</a></strong>  => zndsysarray_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_factory_t.html#boundprocedure-destroy_single%7E5'>destroy_single</a></strong>  => zndsysarray_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray_factory.html#boundprocedure-destroy_array%7E3'>destroy_array</a></strong>  => zndsysarray_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_factory_t.html#boundprocedure-destroy_array%7E5'>destroy_array</a></strong>  => zndsysarray_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -638,7 +638,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
      
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-zndsysarray"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/zndsysarray.html'>zndsysarray</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_zndsysarray_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -664,11 +664,11 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E3"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E6"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td><td></td><td></td>
+  <td><strong>ndim</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -678,7 +678,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-ncomp"></span>integer,</td>
+  <td><span class="anchor" id="variable-ncomp%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -692,7 +692,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-ndof"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndof%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -706,7 +706,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-arr_shape"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E4"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -720,7 +720,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-flatarray%7E2"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-flatarray%7E4"></span>complex(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -739,25 +739,25 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-setval%7E3'>setval</a></strong>  => zndsysarray_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-setval%7E5'>setval</a></strong>  => zndsysarray_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-copy%7E3'>copy</a></strong>  => zndsysarray_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-copy%7E5'>copy</a></strong>  => zndsysarray_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-norm%7E3'>norm</a></strong>  => zndsysarray_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-norm%7E5'>norm</a></strong>  => zndsysarray_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-pack%7E3'>pack</a></strong>  => zndsysarray_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-pack%7E5'>pack</a></strong>  => zndsysarray_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-unpack%7E3'>unpack</a></strong>  => zndsysarray_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-unpack%7E5'>unpack</a></strong>  => zndsysarray_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-axpy%7E3'>axpy</a></strong>  => zndsysarray_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-axpy%7E5'>axpy</a></strong>  => zndsysarray_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/zndsysarray.html#boundprocedure-eprint%7E3'>eprint</a></strong>  => zndsysarray_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_zndsysarray_t.html#boundprocedure-eprint%7E5'>eprint</a></strong>  => zndsysarray_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -814,7 +814,7 @@ public function <a href='../proc/zndsysarray_norm.html'>zndsysarray_norm</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -909,7 +909,7 @@ public function <a href='../proc/cast_as_zndsysarray.html'>cast_as_zndsysarray</
   
   
   
-     <h4>Return Value <small>type(<a href='../type/zndsysarray.html'>zndsysarray</a>),
+     <h4>Return Value <small>type(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),
   pointer</small></h4>
   
     
@@ -920,8 +920,8 @@ public function <a href='../proc/cast_as_zndsysarray.html'>cast_as_zndsysarray</
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E2"></span><h3>
-public function <a href='../proc/get_array1d%7E2.html'>get_array1d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E4"></span><h3>
+public function <a href='../proc/get_array1d%7E4.html'>get_array1d</a>(x, n, flags) result(r)
     
     
    
@@ -1018,8 +1018,8 @@ public function <a href='../proc/get_array1d%7E2.html'>get_array1d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E2"></span><h3>
-public function <a href='../proc/get_array2d%7E2.html'>get_array2d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E4"></span><h3>
+public function <a href='../proc/get_array2d%7E4.html'>get_array2d</a>(x, n, flags) result(r)
     
     
    
@@ -1108,8 +1108,8 @@ public function <a href='../proc/get_array2d%7E2.html'>get_array2d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E2"></span><h3>
-public function <a href='../proc/get_array3d%7E2.html'>get_array3d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E4"></span><h3>
+public function <a href='../proc/get_array3d%7E4.html'>get_array3d</a>(x, n, flags) result(r)
     
     
    
@@ -1281,7 +1281,7 @@ public subroutine <a href='../proc/zndsysarray_build.html'>zndsysarray_build</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-zndsysarray_create_single"></span><h3>
-public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_create_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_create_single</a>(this, x, level_index, lev_shape)
     
     
    
@@ -1317,7 +1317,7 @@ public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_c
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_factory_t.html'>pf_zndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1352,7 +1352,7 @@ public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_c
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1367,7 +1367,7 @@ public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_c
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1385,7 +1385,7 @@ public subroutine <a href='../proc/zndsysarray_create_single.html'>zndsysarray_c
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-zndsysarray_create_array"></span><h3>
-public subroutine <a href='../proc/zndsysarray_create_array.html'>zndsysarray_create_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/zndsysarray_create_array.html'>zndsysarray_create_array</a>(this, x, n, level_index, lev_shape)
     
     
    
@@ -1421,7 +1421,7 @@ public subroutine <a href='../proc/zndsysarray_create_array.html'>zndsysarray_cr
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_factory_t.html'>pf_zndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1471,7 +1471,7 @@ public subroutine <a href='../proc/zndsysarray_create_array.html'>zndsysarray_cr
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1486,7 +1486,7 @@ public subroutine <a href='../proc/zndsysarray_create_array.html'>zndsysarray_cr
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1599,7 +1599,7 @@ public subroutine <a href='../proc/zndsysarray_destroy_single.html'>zndsysarray_
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_factory_t.html'>pf_zndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1673,7 +1673,7 @@ public subroutine <a href='../proc/zndsysarray_destroy_array.html'>zndsysarray_d
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray_factory.html'>zndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_factory_t.html'>pf_zndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1747,7 +1747,7 @@ public subroutine <a href='../proc/zndsysarray_setval.html'>zndsysarray_setval</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1836,7 +1836,7 @@ public subroutine <a href='../proc/zndsysarray_copy.html'>zndsysarray_copy</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1925,7 +1925,7 @@ public subroutine <a href='../proc/zndsysarray_pack.html'>zndsysarray_pack</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -2014,7 +2014,7 @@ public subroutine <a href='../proc/zndsysarray_unpack.html'>zndsysarray_unpack</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2103,7 +2103,7 @@ public subroutine <a href='../proc/zndsysarray_axpy.html'>zndsysarray_axpy</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2207,7 +2207,7 @@ public subroutine <a href='../proc/zndsysarray_eprint.html'>zndsysarray_eprint</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   

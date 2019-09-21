@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.4% of total for modules and submodules.">213 statements</a>
+    title=" 2.7% of total for modules and submodules.">249 statements</a>
      </li> 
      
      
@@ -232,10 +232,10 @@
     <div class="col-md-9" id='text'>
     <p>Module for providing FFTs based on fftw
   To use this module, fftw must be installed.
-  This can be done by the libpfasst make system with the comment</p>
-<blockquote>
-<p>make fftw3</p>
-</blockquote>
+  This can be done by the libpfasst make system with the command
+  make fftw3
+  You also have to specify USE_FFTW in Makefile.defaults and
+  make clean is recommended before remake</p>
       <br>
     
   
@@ -425,11 +425,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td><td></td><td><p>spatial dimension</p></td>
+  <td><strong>ndim</strong></td><td></td><td></td><td><p>number of spatial dimensions</p></td>
   
 </tr>
 
@@ -523,6 +523,48 @@
   
 <tr>
   
+  <td><span class="anchor" id="variable-kx"></span>real(kind=pfdp),</td>
+  
+  <td>public,</td>
+  <td>allocatable</td><td>::</td>
+  <td><strong>kx</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-ky"></span>real(kind=pfdp),</td>
+  
+  <td>public,</td>
+  <td>allocatable</td><td>::</td>
+  <td><strong>ky</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-kz"></span>real(kind=pfdp),</td>
+  
+  <td>public,</td>
+  <td>allocatable</td><td>::</td>
+  <td><strong>kz</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
   <td><span class="anchor" id="variable-ffftw"></span>type(c_ptr),</td>
   
   <td>public</td>
@@ -570,43 +612,43 @@
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft%7E2'>fft</a></strong>  => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft'>fft</a></strong>  => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-ifft%7E2'>ifft</a></strong>  => ifft_1d, ifft_2d, ifft_3d, izfft_1d, izfft_2d, izfft_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-ifft'>ifft</a></strong>  => ifft_1d, ifft_2d, ifft_3d, izfft_1d, izfft_2d, izfft_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-conv%7E2'>conv</a></strong>  => conv_1d, conv_2d, conv_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-conv'>conv</a></strong>  => conv_1d, conv_2d, conv_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-zconv%7E2'>zconv</a></strong>  => zconv_1d, zconv_2d, zconv_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-zconv'>zconv</a></strong>  => zconv_1d, zconv_2d, zconv_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-get_wk_ptr%7E2'>get_wk_ptr</a></strong>  => get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-get_wk_ptr'>get_wk_ptr</a></strong>  => get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_lap%7E2'>make_lap</a></strong>  => make_lap_1d, make_lap_2d, make_lap_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_lap'>make_lap</a></strong>  => make_lap_1d, make_lap_2d, make_lap_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_ilap%7E2'>make_ilap</a></strong>  => make_ilap_1d, make_ilap_2d, make_ilap_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_ilap'>make_ilap</a></strong>  => make_ilap_1d, make_ilap_2d, make_ilap_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_deriv%7E2'>make_deriv</a></strong>  => make_deriv_1d, make_deriv_2d, make_deriv_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-make_deriv'>make_deriv</a></strong>  => make_deriv_1d, make_deriv_2d, make_deriv_3d </td>
        <td></td></tr>
       
-       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-restrict%7E2'>restrict</a></strong>  => restrict_1d, restrict_2d, restrict_3d, zrestrict_1d, zrestrict_2d, zrestrict_3d </td>
+       <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-restrict'>restrict</a></strong>  => restrict_1d, restrict_2d, restrict_3d, zrestrict_1d, zrestrict_2d, zrestrict_3d </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_setup%7E2'>fft_setup</a></strong>  </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_setup'>fft_setup</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_destroy%7E2'>fft_destroy</a></strong>  </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_destroy'>fft_destroy</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fftf%7E2'>fftf</a></strong>  </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fftf'>fftf</a></strong>  </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fftb%7E2'>fftb</a></strong>  </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-fftb'>fftb</a></strong>  </td>
        <td></td></tr>
       
        <tr><td>generic, public :: <strong><a href='../type/pf_fft_t.html#boundprocedure-interp'>interp</a></strong>  => interp_1d, interp_2d, interp_3d, zinterp_1d, zinterp_2d, zinterp_3d </td>
@@ -632,7 +674,7 @@
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-fft_setup"></span><h3>
-public subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shape, dim, grid_size)
+public subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shape, ndim, grid_size)
     
     
    
@@ -688,7 +730,7 @@ public subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shap
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>grid_shape</strong>(dim)</td><td></td>
+  <td><strong>grid_shape</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -703,7 +745,7 @@ public subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shap
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
+  <td><strong>ndim</strong></td><td></td>
   
 </tr>
 
@@ -718,7 +760,7 @@ public subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shap
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>grid_size</strong>(dim)</td><td></td>
+  <td><strong>grid_size</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -957,7 +999,7 @@ public subroutine <a href='../proc/interp_1d.html'>interp_1d</a>(this, yvec_c, f
 <tr>
   
   <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout),</td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1053,7 +1095,7 @@ public subroutine <a href='../proc/interp_2d.html'>interp_2d</a>(this, yvec_c, f
 <tr>
   
   <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout),</td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1149,7 +1191,7 @@ public subroutine <a href='../proc/interp_3d.html'>interp_3d</a>(this, yvec_c, f
 <tr>
   
   <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout),</td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1216,7 +1258,7 @@ public subroutine <a href='../proc/zinterp_1d.html'>zinterp_1d</a>(this, yhat_c,
 
 
 
-<p>Interpolate from coarse  level to fine</p>
+<p>Interpolate from coarse  level to fine in spectral space</p>
     
     <h4>Arguments</h4>
     
@@ -1253,7 +1295,7 @@ public subroutine <a href='../proc/zinterp_1d.html'>zinterp_1d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1268,7 +1310,7 @@ public subroutine <a href='../proc/zinterp_1d.html'>zinterp_1d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(inout),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1298,14 +1340,6 @@ public subroutine <a href='../proc/zinterp_2d.html'>zinterp_2d</a>(this, yhat_c,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Interpolate from coarse  level to fine</p>
     
     <h4>Arguments</h4>
     
@@ -1342,7 +1376,7 @@ public subroutine <a href='../proc/zinterp_2d.html'>zinterp_2d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1357,7 +1391,7 @@ public subroutine <a href='../proc/zinterp_2d.html'>zinterp_2d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(inout),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1387,14 +1421,6 @@ public subroutine <a href='../proc/zinterp_3d.html'>zinterp_3d</a>(this, yhat_c,
   <div class="panel-body">
        
     
-
-
-
-
-
-
-
-<p>Interpolate from coarse  level to fine</p>
     
     <h4>Arguments</h4>
     
@@ -1431,7 +1457,7 @@ public subroutine <a href='../proc/zinterp_3d.html'>zinterp_3d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -1446,7 +1472,7 @@ public subroutine <a href='../proc/zinterp_3d.html'>zinterp_3d</a>(this, yhat_c,
 <tr>
   
   <td><span class="anchor" ></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td>intent(inout),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>

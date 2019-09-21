@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.1% of total for modules and submodules.">188 statements</a>
+    title=" 2.0% of total for modules and submodules.">182 statements</a>
      </li> 
      
      
@@ -171,18 +171,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
-  <div id="inters-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#interface-ndsysarray_dump_numpy">ndsysarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -190,9 +178,9 @@
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-ndsysarray_factory">ndsysarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-pf_ndsysarray_factory_t">pf_ndsysarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-ndsysarray">ndsysarray</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-pf_ndsysarray_t">pf_ndsysarray_t</a>
       
     </div>
   </div>
@@ -209,11 +197,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-cast_as_ndsysarray">cast_as_ndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array1d%7E3">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array1d">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array2d%7E3">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array2d">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array3d%7E3">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array3d">get_array3d</a>
       
     </div>
   </div>
@@ -278,7 +266,7 @@
 <p>allocate(pf%levels(1)%arr_shape(3))
    pf%levels(1)%arr_shape = [ nx, ny, 3 ]</p>
 <p>Which would imply that a 3 component system of two-dimensional solutions.</p>
-<p>The helper routines array1, array2, array3, etc can be used to
+<p>The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
  extract pointers to a component of  encapsulated system
  performing any copies.</p>
 <p>$</p>
@@ -326,18 +314,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
-  <div id="inters-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#interface-ndsysarray_dump_numpy">ndsysarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -345,9 +321,9 @@
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-ndsysarray_factory">ndsysarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-pf_ndsysarray_factory_t">pf_ndsysarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-ndsysarray">ndsysarray</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#type-pf_ndsysarray_t">pf_ndsysarray_t</a>
       
     </div>
   </div>
@@ -364,11 +340,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-cast_as_ndsysarray">cast_as_ndsysarray</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array1d%7E3">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array1d">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array2d%7E3">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array2d">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array3d%7E3">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndsysarray.html#proc-get_array3d">get_array3d</a>
       
     </div>
   </div>
@@ -428,171 +404,6 @@
     
     
     
-    <section>
-   <h2>Interfaces</h2>
-   
-     
-<div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-ndsysarray_dump_numpy"></span><h3>interface 
-    
-  </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Interfaces to output routines in pf_numpy.c</p>
-  </div>
-  
-  <ul class="list-group">
-  
-    <li class="list-group-item">
-    
-    
-    <h3>
-public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
-    
-    
-   
-</h3>
-    
-
-
-
-<p>Subroutine to write an the array to a file</p>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>fname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>endian</strong>(5)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>mpibuflen</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>arr_shape</strong>(dim)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=c_double),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>array</strong>(mpibuflen)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-    </li>
-  
-  </ul>
-</div>
-
-    
-    </section>
-  <br>
-    
 
     
     
@@ -602,7 +413,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndsysarray_factory"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndsysarray_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_ndsysarray_factory_t.html'>pf_ndsysarray_factory_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -618,16 +429,16 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray_factory.html#boundprocedure-create_single%7E4'>create_single</a></strong>  => ndsysarray_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_factory_t.html#boundprocedure-create_single'>create_single</a></strong>  => ndsysarray_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray_factory.html#boundprocedure-create_array%7E4'>create_array</a></strong>  => ndsysarray_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_factory_t.html#boundprocedure-create_array'>create_array</a></strong>  => ndsysarray_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray_factory.html#boundprocedure-destroy_single%7E4'>destroy_single</a></strong>  => ndsysarray_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_factory_t.html#boundprocedure-destroy_single'>destroy_single</a></strong>  => ndsysarray_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray_factory.html#boundprocedure-destroy_array%7E4'>destroy_array</a></strong>  => ndsysarray_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_factory_t.html#boundprocedure-destroy_array'>destroy_array</a></strong>  => ndsysarray_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -639,7 +450,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
      
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndsysarray"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/ndsysarray.html'>ndsysarray</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndsysarray_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -665,11 +476,11 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E2"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td><td></td><td></td>
+  <td><strong>ndim</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -679,7 +490,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-ncomp%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-ncomp"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -693,7 +504,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-ndof%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndof"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -707,7 +518,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-arr_shape%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -721,7 +532,7 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
   
 <tr>
   
-  <td><span class="anchor" id="variable-flatarray%7E3"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-flatarray"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -740,25 +551,25 @@ public subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, ar
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-setval%7E4'>setval</a></strong>  => ndsysarray_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-setval'>setval</a></strong>  => ndsysarray_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-copy%7E4'>copy</a></strong>  => ndsysarray_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-copy'>copy</a></strong>  => ndsysarray_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-norm%7E4'>norm</a></strong>  => ndsysarray_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-norm'>norm</a></strong>  => ndsysarray_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-pack%7E4'>pack</a></strong>  => ndsysarray_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-pack'>pack</a></strong>  => ndsysarray_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-unpack%7E4'>unpack</a></strong>  => ndsysarray_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-unpack'>unpack</a></strong>  => ndsysarray_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-axpy%7E4'>axpy</a></strong>  => ndsysarray_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-axpy'>axpy</a></strong>  => ndsysarray_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndsysarray.html#boundprocedure-eprint%7E4'>eprint</a></strong>  => ndsysarray_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndsysarray_t.html#boundprocedure-eprint'>eprint</a></strong>  => ndsysarray_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -815,7 +626,7 @@ public function <a href='../proc/ndsysarray_norm.html'>ndsysarray_norm</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -910,7 +721,7 @@ public function <a href='../proc/cast_as_ndsysarray.html'>cast_as_ndsysarray</a>
   
   
   
-     <h4>Return Value <small>type(<a href='../type/ndsysarray.html'>ndsysarray</a>),
+     <h4>Return Value <small>type(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),
   pointer</small></h4>
   
     
@@ -921,8 +732,8 @@ public function <a href='../proc/cast_as_ndsysarray.html'>cast_as_ndsysarray</a>
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E3"></span><h3>
-public function <a href='../proc/get_array1d%7E3.html'>get_array1d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d"></span><h3>
+public function <a href='../proc/get_array1d.html'>get_array1d</a>(x, n, flags) result(r)
     
     
    
@@ -1019,8 +830,8 @@ public function <a href='../proc/get_array1d%7E3.html'>get_array1d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E3"></span><h3>
-public function <a href='../proc/get_array2d%7E3.html'>get_array2d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d"></span><h3>
+public function <a href='../proc/get_array2d.html'>get_array2d</a>(x, n, flags) result(r)
     
     
    
@@ -1109,8 +920,8 @@ public function <a href='../proc/get_array2d%7E3.html'>get_array2d</a>(x, n, fla
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E3"></span><h3>
-public function <a href='../proc/get_array3d%7E3.html'>get_array3d</a>(x, n, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d"></span><h3>
+public function <a href='../proc/get_array3d.html'>get_array3d</a>(x, n, flags) result(r)
     
     
    
@@ -1282,7 +1093,7 @@ public subroutine <a href='../proc/ndsysarray_build.html'>ndsysarray_build</a>(q
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndsysarray_create_single"></span><h3>
-public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_create_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_create_single</a>(this, x, level_index, lev_shape)
     
     
    
@@ -1318,7 +1129,7 @@ public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_cre
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_factory_t.html'>pf_ndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1353,7 +1164,7 @@ public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_cre
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1368,7 +1179,7 @@ public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_cre
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1386,7 +1197,7 @@ public subroutine <a href='../proc/ndsysarray_create_single.html'>ndsysarray_cre
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndsysarray_create_array"></span><h3>
-public subroutine <a href='../proc/ndsysarray_create_array.html'>ndsysarray_create_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/ndsysarray_create_array.html'>ndsysarray_create_array</a>(this, x, n, level_index, lev_shape)
     
     
    
@@ -1422,7 +1233,7 @@ public subroutine <a href='../proc/ndsysarray_create_array.html'>ndsysarray_crea
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_factory_t.html'>pf_ndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1472,7 +1283,7 @@ public subroutine <a href='../proc/ndsysarray_create_array.html'>ndsysarray_crea
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1487,7 +1298,7 @@ public subroutine <a href='../proc/ndsysarray_create_array.html'>ndsysarray_crea
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1600,7 +1411,7 @@ public subroutine <a href='../proc/ndsysarray_destroy_single.html'>ndsysarray_de
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_factory_t.html'>pf_ndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1674,7 +1485,7 @@ public subroutine <a href='../proc/ndsysarray_destroy_array.html'>ndsysarray_des
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray_factory.html'>ndsysarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_factory_t.html'>pf_ndsysarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1748,7 +1559,7 @@ public subroutine <a href='../proc/ndsysarray_setval.html'>ndsysarray_setval</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1837,7 +1648,7 @@ public subroutine <a href='../proc/ndsysarray_copy.html'>ndsysarray_copy</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1926,7 +1737,7 @@ public subroutine <a href='../proc/ndsysarray_pack.html'>ndsysarray_pack</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -2015,7 +1826,7 @@ public subroutine <a href='../proc/ndsysarray_unpack.html'>ndsysarray_unpack</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2104,7 +1915,7 @@ public subroutine <a href='../proc/ndsysarray_axpy.html'>ndsysarray_axpy</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2208,7 +2019,7 @@ public subroutine <a href='../proc/ndsysarray_eprint.html'>ndsysarray_eprint</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   

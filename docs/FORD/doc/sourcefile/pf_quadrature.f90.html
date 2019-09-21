@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.1% of total for source files.">436 statements</a>
+    title=" 4.0% of total for source files.">436 statements</a>
      </li> 
      
      
@@ -868,7 +868,7 @@
 <a name="ln-605"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">a</span><span class="p">(:)</span>
 <a name="ln-606"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">iq</span>
 <a name="ln-607"></a>
-<a name="ln-608"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<a name="ln-608"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <a name="ln-609"></a><span class="k">       call </span><span class="n">qsort_partition</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">iq</span><span class="p">)</span>
 <a name="ln-610"></a>       <span class="k">call </span><span class="n">qsort</span><span class="p">(</span><span class="n">a</span><span class="p">(:</span><span class="n">iq</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
 <a name="ln-611"></a>       <span class="k">call </span><span class="n">qsort</span><span class="p">(</span><span class="n">a</span><span class="p">(</span><span class="n">iq</span><span class="p">:))</span>
@@ -884,7 +884,7 @@
 <a name="ln-621"></a>
 <a name="ln-622"></a>    <span class="n">x</span> <span class="o">=</span> <span class="n">a</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <a name="ln-623"></a>    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="ln-624"></a>    <span class="n">j</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<a name="ln-624"></a>    <span class="n">j</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 <a name="ln-625"></a>
 <a name="ln-626"></a>    <span class="k">do</span>
 <a name="ln-627"></a><span class="k">       </span><span class="n">j</span> <span class="o">=</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span>

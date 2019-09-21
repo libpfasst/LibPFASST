@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.6% of total for source files.">167 statements</a>
+    title=" 1.5% of total for source files.">167 statements</a>
      </li> 
      
      
@@ -307,8 +307,8 @@
 <a name="ln-44"></a>
 <a name="ln-45"></a>    <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 <a name="ln-46"></a>   
-<a name="ln-47"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-48"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-47"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+<a name="ln-48"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 <a name="ln-49"></a>    
 <a name="ln-50"></a>    <span class="c">! compute integrals and add fas correction</span>
 <a name="ln-51"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
@@ -336,10 +336,10 @@
 <a name="ln-73"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 <a name="ln-74"></a>    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
 <a name="ln-75"></a>
-<a name="ln-76"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-77"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-78"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-<a name="ln-79"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-76"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+<a name="ln-77"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+<a name="ln-78"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+<a name="ln-79"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 <a name="ln-80"></a>
 <a name="ln-81"></a>    <span class="k">call </span><span class="n">QA</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
 <a name="ln-82"></a>    <span class="k">call </span><span class="n">QB</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
@@ -417,8 +417,8 @@
 <a name="ln-154"></a>
 <a name="ln-155"></a>    <span class="c">! call start_timer(pf, TLEVEL+lev%index-1)</span>
 <a name="ln-156"></a>   
-<a name="ln-157"></a>    <span class="c">! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-158"></a>    <span class="c">! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
+<a name="ln-157"></a>    <span class="c">! call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%lev_shape)</span>
+<a name="ln-158"></a>    <span class="c">! call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%lev_shape)</span>
 <a name="ln-159"></a>    
 <a name="ln-160"></a>    <span class="c">! ! compute integrals and add fas correction</span>
 <a name="ln-161"></a>    <span class="c">! do m = 1, lev%nnodes-1</span>
@@ -446,10 +446,10 @@
 <a name="ln-183"></a>    <span class="c">! call this%f2eval(lev%Q(1), t0, lev%index, lev%F(1,2))</span>
 <a name="ln-184"></a>    <span class="c">! call this%f3eval(lev%Q(1), t0, lev%index, lev%F(1,3))</span>
 <a name="ln-185"></a>
-<a name="ln-186"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsA, lev%index,  lev%shape)</span>
-<a name="ln-187"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%shape)</span>
-<a name="ln-188"></a>    <span class="c">! call lev%ulevel%factory%create_single(QA,   lev%index,  lev%shape)</span>
-<a name="ln-189"></a>    <span class="c">! call lev%ulevel%factory%create_single(QB,   lev%index,  lev%shape)</span>
+<a name="ln-186"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsA, lev%index,  lev%lev_shape)</span>
+<a name="ln-187"></a>    <span class="c">! call lev%ulevel%factory%create_single(rhsB, lev%index,  lev%lev_shape)</span>
+<a name="ln-188"></a>    <span class="c">! call lev%ulevel%factory%create_single(QA,   lev%index,  lev%lev_shape)</span>
+<a name="ln-189"></a>    <span class="c">! call lev%ulevel%factory%create_single(QB,   lev%index,  lev%lev_shape)</span>
 <a name="ln-190"></a>
 <a name="ln-191"></a>    <span class="c">! call QA%setval(0.0_pfdp)</span>
 <a name="ln-192"></a>    <span class="c">! call QB%setval(0.0_pfdp)</span>
@@ -496,12 +496,12 @@
 <a name="ln-233"></a>
 <a name="ln-234"></a>    <span class="c">! call lev%qend%copy(lev%Q(lev%nnodes))</span>
 <a name="ln-235"></a>
-<a name="ln-236"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-237"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%shape)</span>
-<a name="ln-238"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%shape)</span>
-<a name="ln-239"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%shape)</span>
-<a name="ln-240"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%shape)</span>
-<a name="ln-241"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%shape)</span>
+<a name="ln-236"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S2,lev%nnodes-1,lev%index,lev%lev_shape)</span>
+<a name="ln-237"></a>    <span class="c">! call lev%ulevel%factory%destroy_array(S3,lev%nnodes-1,lev%index,lev%lev_shape)</span>
+<a name="ln-238"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsA, lev%index,   lev%lev_shape)</span>
+<a name="ln-239"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(rhsB, lev%index,   lev%lev_shape)</span>
+<a name="ln-240"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QA,   lev%index,   lev%lev_shape)</span>
+<a name="ln-241"></a>    <span class="c">! call lev%ulevel%factory%destroy_single(QB,   lev%index,   lev%lev_shape)</span>
 <a name="ln-242"></a>
 <a name="ln-243"></a>    <span class="c">! call end_timer(pf, TLEVEL+lev%index-1)</span>
 <a name="ln-244"></a>        

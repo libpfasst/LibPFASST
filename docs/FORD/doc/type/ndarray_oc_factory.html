@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 1.2% of total for derived types.</p>Including implementation: 53 statements,  0.8% of total for derived types.">7 statements</a>
+    title="<p> 1.1% of total for derived types.</p>Including implementation: 56 statements,  0.9% of total for derived types.">7 statements</a>
      </li> 
      
      
@@ -187,13 +187,13 @@
   <div id="boundprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_single%7E6">create_single</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_single%7E3">create_single</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_array%7E6">create_array</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_array%7E3">create_array</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_single%7E6">destroy_single</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_single%7E3">destroy_single</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_array%7E6">destroy_array</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_array%7E3">destroy_array</a>
       
     </div>
   </div>
@@ -251,13 +251,13 @@
   <div id="boundprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_single%7E6">create_single</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_single%7E3">create_single</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_array%7E6">create_array</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-create_array%7E3">create_array</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_single%7E6">destroy_single</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_single%7E3">destroy_single</a>
       
-      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_array%7E6">destroy_array</a>
+      <a class="list-group-item" href="../type/ndarray_oc_factory.html#boundprocedure-destroy_array%7E3">destroy_array</a>
       
     </div>
   </div>
@@ -290,7 +290,7 @@
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-create_single%7E6"></span><h3>procedure, public :: <strong>create_single</strong>  => <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_create_single</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-create_single%7E3"></span><h3>procedure, public :: <strong>create_single</strong>  => <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_create_single</a> 
     
   </h3></div>
   
@@ -302,7 +302,7 @@
           
     
     <h3>
-public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_create_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_create_single</a>(this, x, level_index, lev_shape)
     
     
    
@@ -371,7 +371,7 @@ public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_cre
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -386,7 +386,7 @@ public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_cre
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -407,7 +407,7 @@ public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_cre
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-create_array%7E6"></span><h3>procedure, public :: <strong>create_array</strong>  => <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_create_array</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-create_array%7E3"></span><h3>procedure, public :: <strong>create_array</strong>  => <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_create_array</a> 
     
   </h3></div>
   
@@ -419,7 +419,7 @@ public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_cre
           
     
     <h3>
-public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_create_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_create_array</a>(this, x, n, level_index, lev_shape)
     
     
    
@@ -503,7 +503,7 @@ public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_crea
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -518,7 +518,7 @@ public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_crea
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -539,7 +539,7 @@ public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_crea
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy_single%7E6"></span><h3>procedure, public :: <strong>destroy_single</strong>  => <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_destroy_single</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy_single%7E3"></span><h3>procedure, public :: <strong>destroy_single</strong>  => <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_destroy_single</a> 
     
   </h3></div>
   
@@ -626,7 +626,7 @@ public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_de
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy_array%7E6"></span><h3>procedure, public :: <strong>destroy_array</strong>  => <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_destroy_array</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-destroy_array%7E3"></span><h3>procedure, public :: <strong>destroy_array</strong>  => <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_destroy_array</a> 
     
   </h3></div>
   

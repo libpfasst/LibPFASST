@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.1% of total for modules and submodules.">187 statements</a>
+    title=" 2.0% of total for modules and submodules.">181 statements</a>
      </li> 
      
      
@@ -171,18 +171,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
-  <div id="inters-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#interface-ndarray_dump_numpy">ndarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -190,9 +178,9 @@
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-ndarray_factory">ndarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-pf_ndarray_factory_t">pf_ndarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-ndarray">ndarray</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-pf_ndarray_t">pf_ndarray_t</a>
       
     </div>
   </div>
@@ -209,11 +197,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-ndarray_norm">ndarray_norm</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array1d%7E4">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array1d%7E3">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array2d%7E4">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array2d%7E3">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array3d%7E4">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array3d%7E3">get_array3d</a>
       
     </div>
   </div>
@@ -270,13 +258,13 @@
     <div class="col-md-9" id='text'>
     <p>N-dimensional array encapsulation.</p>
 <p>When a new solution is created by a PFASST level, this encapsulation
- uses the levels 'shape' attribute to create a new array with that
- shape.  Thus, the 'shape' attributes of the PFASST levels should be
+ uses the levels 'lev_shape' attribute to create a new array with that
+ shape.  Thus, the 'lev_shape' attributes of the PFASST levels should be
  set appropriately.  For example, before calling pf_pfasst_run we can
  set the shape of the coarsest level by doing:</p>
-<p>allocate(pf%levels(1)%shape(2))
-   pf%levels(1)%shape = [ 3, 10 ]</p>
-<p>The helper routines array1, array2, array3, etc can be used to
+<p>allocate(pf%levels(1)%lev_shape(2))
+   pf%levels(1)%lev_shape = [ 3, 10 ]</p>
+<p>The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
  extract pointers to the encapsulated array without
  performing any copies.</p>
       <br>
@@ -325,18 +313,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
-  <div id="inters-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#interface-ndarray_dump_numpy">ndarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -344,9 +320,9 @@
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-ndarray_factory">ndarray_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-pf_ndarray_factory_t">pf_ndarray_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-ndarray">ndarray</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#type-pf_ndarray_t">pf_ndarray_t</a>
       
     </div>
   </div>
@@ -363,11 +339,11 @@
       
       <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-ndarray_norm">ndarray_norm</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array1d%7E4">get_array1d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array1d%7E3">get_array1d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array2d%7E4">get_array2d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array2d%7E3">get_array2d</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array3d%7E4">get_array3d</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray.html#proc-get_array3d%7E3">get_array3d</a>
       
     </div>
   </div>
@@ -427,171 +403,6 @@
     
     
     
-    <section>
-   <h2>Interfaces</h2>
-   
-     
-<div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-ndarray_dump_numpy"></span><h3>interface 
-    
-  </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Interfaces to output routines in pf_numpy.c</p>
-  </div>
-  
-  <ul class="list-group">
-  
-    <li class="list-group-item">
-    
-    
-    <h3>
-public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape, array) bind(c)
-    
-    
-   
-</h3>
-    
-
-
-
-<p>Subroutine to write an the array to a file</p>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>fname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>endian</strong>(5)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>mpibuflen</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>shape</strong>(dim)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=c_double),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>array</strong>(mpibuflen)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-    </li>
-  
-  </ul>
-</div>
-
-    
-    </section>
-  <br>
-    
 
     
     
@@ -601,7 +412,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndarray_factory"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/ndarray_factory.html'>ndarray_factory</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndarray_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -617,16 +428,16 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_factory.html#boundprocedure-create_single%7E5'>create_single</a></strong>  => ndarray_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_factory_t.html#boundprocedure-create_single%7E4'>create_single</a></strong>  => ndarray_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_factory.html#boundprocedure-create_array%7E5'>create_array</a></strong>  => ndarray_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_factory_t.html#boundprocedure-create_array%7E4'>create_array</a></strong>  => ndarray_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_factory.html#boundprocedure-destroy_single%7E5'>destroy_single</a></strong>  => ndarray_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_factory_t.html#boundprocedure-destroy_single%7E4'>destroy_single</a></strong>  => ndarray_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_factory.html#boundprocedure-destroy_array%7E5'>destroy_array</a></strong>  => ndarray_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_factory_t.html#boundprocedure-destroy_array%7E4'>destroy_array</a></strong>  => ndarray_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -638,7 +449,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
      
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndarray"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/ndarray.html'>ndarray</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndarray_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -664,11 +475,11 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E5"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E5"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td><td></td><td></td>
+  <td><strong>ndim</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -678,11 +489,11 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E3"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E3"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td><td></td><td></td>
+  <td><strong>arr_shape</strong>(:)</td><td></td><td></td><td></td>
   
 </tr>
 
@@ -692,7 +503,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
   
 <tr>
   
-  <td><span class="anchor" id="variable-flatarray%7E4"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-flatarray%7E3"></span>real(kind=pfdp),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -711,25 +522,25 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, dim, mpibuflen, shape
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-setval%7E5'>setval</a></strong>  => ndarray_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-setval%7E4'>setval</a></strong>  => ndarray_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-copy%7E5'>copy</a></strong>  => ndarray_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-copy%7E4'>copy</a></strong>  => ndarray_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-norm%7E5'>norm</a></strong>  => ndarray_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-norm%7E4'>norm</a></strong>  => ndarray_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-pack%7E5'>pack</a></strong>  => ndarray_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-pack%7E4'>pack</a></strong>  => ndarray_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-unpack%7E5'>unpack</a></strong>  => ndarray_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-unpack%7E4'>unpack</a></strong>  => ndarray_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-axpy%7E5'>axpy</a></strong>  => ndarray_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-axpy%7E4'>axpy</a></strong>  => ndarray_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray.html#boundprocedure-eprint%7E5'>eprint</a></strong>  => ndarray_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_t.html#boundprocedure-eprint%7E4'>eprint</a></strong>  => ndarray_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -798,7 +609,7 @@ public function <a href='../proc/cast_as_ndarray.html'>cast_as_ndarray</a>(encap
   
   
   
-     <h4>Return Value <small>type(<a href='../type/ndarray.html'>ndarray</a>),
+     <h4>Return Value <small>type(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),
   pointer</small></h4>
   
     
@@ -846,7 +657,7 @@ public function <a href='../proc/ndarray_norm.html'>ndarray_norm</a>(this, flags
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -892,8 +703,8 @@ public function <a href='../proc/ndarray_norm.html'>ndarray_norm</a>(this, flags
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E4"></span><h3>
-public function <a href='../proc/get_array1d%7E4.html'>get_array1d</a>(x, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array1d%7E3"></span><h3>
+public function <a href='../proc/get_array1d%7E3.html'>get_array1d</a>(x, flags) result(r)
     
     
    
@@ -975,8 +786,8 @@ public function <a href='../proc/get_array1d%7E4.html'>get_array1d</a>(x, flags)
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E4"></span><h3>
-public function <a href='../proc/get_array2d%7E4.html'>get_array2d</a>(x, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array2d%7E3"></span><h3>
+public function <a href='../proc/get_array2d%7E3.html'>get_array2d</a>(x, flags) result(r)
     
     
    
@@ -1050,8 +861,8 @@ public function <a href='../proc/get_array2d%7E4.html'>get_array2d</a>(x, flags)
     
     
   <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E4"></span><h3>
-public function <a href='../proc/get_array3d%7E4.html'>get_array3d</a>(x, flags) result(r)
+  <div class="panel-heading codesum"><span class="anchor" id="proc-get_array3d%7E3"></span><h3>
+public function <a href='../proc/get_array3d%7E3.html'>get_array3d</a>(x, flags) result(r)
     
     
    
@@ -1134,7 +945,7 @@ public function <a href='../proc/get_array3d%7E4.html'>get_array3d</a>(x, flags)
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_build"></span><h3>
-public subroutine <a href='../proc/ndarray_build.html'>ndarray_build</a>(q, shape)
+public subroutine <a href='../proc/ndarray_build.html'>ndarray_build</a>(q, shape_in)
     
     
    
@@ -1190,7 +1001,7 @@ public subroutine <a href='../proc/ndarray_build.html'>ndarray_build</a>(q, shap
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>shape_in</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1208,7 +1019,7 @@ public subroutine <a href='../proc/ndarray_build.html'>ndarray_build</a>(q, shap
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_create_single"></span><h3>
-public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_single</a>(this, x, level, shape)
+public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_single</a>(this, x, level_index, lev_shape)
     
     
    
@@ -1244,7 +1055,7 @@ public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_si
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_factory.html'>ndarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1279,7 +1090,7 @@ public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_si
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1294,7 +1105,7 @@ public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_si
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1312,7 +1123,7 @@ public subroutine <a href='../proc/ndarray_create_single.html'>ndarray_create_si
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-ndarray_create_array"></span><h3>
-public subroutine <a href='../proc/ndarray_create_array.html'>ndarray_create_array</a>(this, x, n, level, shape)
+public subroutine <a href='../proc/ndarray_create_array.html'>ndarray_create_array</a>(this, x, n, level_index, lev_shape)
     
     
    
@@ -1348,7 +1159,7 @@ public subroutine <a href='../proc/ndarray_create_array.html'>ndarray_create_arr
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_factory.html'>ndarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1398,7 +1209,7 @@ public subroutine <a href='../proc/ndarray_create_array.html'>ndarray_create_arr
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1413,7 +1224,7 @@ public subroutine <a href='../proc/ndarray_create_array.html'>ndarray_create_arr
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
   
 </tr>
 
@@ -1526,7 +1337,7 @@ public subroutine <a href='../proc/ndarray_destroy_single.html'>ndarray_destroy_
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_factory.html'>ndarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1600,7 +1411,7 @@ public subroutine <a href='../proc/ndarray_destroy_array.html'>ndarray_destroy_a
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_factory.html'>ndarray_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1674,7 +1485,7 @@ public subroutine <a href='../proc/ndarray_setval.html'>ndarray_setval</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1763,7 +1574,7 @@ public subroutine <a href='../proc/ndarray_copy.html'>ndarray_copy</a>(this, src
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1852,7 +1663,7 @@ public subroutine <a href='../proc/ndarray_pack.html'>ndarray_pack</a>(this, z, 
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1941,7 +1752,7 @@ public subroutine <a href='../proc/ndarray_unpack.html'>ndarray_unpack</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2030,7 +1841,7 @@ public subroutine <a href='../proc/ndarray_axpy.html'>ndarray_axpy</a>(this, a, 
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2134,7 +1945,7 @@ public subroutine <a href='../proc/ndarray_eprint.html'>ndarray_eprint</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray.html'>ndarray</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   

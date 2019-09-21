@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 3.5% of total for source files.">368 statements</a>
+    title=" 3.4% of total for source files.">368 statements</a>
      </li> 
      
      
@@ -542,10 +542,10 @@
 <a name="ln-279"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
 <a name="ln-280"></a>
 <a name="ln-281"></a>    <span class="c">!&gt;  Make space for rhs</span>
-<a name="ln-282"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-282"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 <a name="ln-283"></a>
 <a name="ln-284"></a>    <span class="c">!&gt;  Make space for extra integration piece</span>
-<a name="ln-285"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+<a name="ln-285"></a>    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 <a name="ln-286"></a>
 <a name="ln-287"></a>  <span class="k">end subroutine </span><span class="n">misdcQ_oc_initialize</span>
 <a name="ln-288"></a>
