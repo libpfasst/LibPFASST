@@ -77,9 +77,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = ad_cos_ex(t, x,nu,v,kfreq,Lx)
     end do
 
@@ -93,9 +93,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = ad_cos_ex(t, x,nu,v,kfreq,Lx)       
     end do
 
@@ -109,14 +109,14 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
 
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        uy=ad_cos_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = ad_cos_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy
        end do
     end do
@@ -131,13 +131,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        uy=ad_cos_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = ad_cos_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy
        end do
     end do
@@ -151,18 +151,18 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
 
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        uz=ad_cos_ex(t, z,nu,v(3),kfreq(3),Lx(3))              
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           uy=ad_cos_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = ad_cos_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy*uz
           end do
        end do
@@ -178,18 +178,18 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
 
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        uz=ad_cos_ex(t, z,nu,v(3),kfreq(3),Lx(3))              
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           uy=ad_cos_ex(t, y,nu,v(2),kfreq(2),Lx(2))              
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = ad_cos_ex(t, x,nu,v(1),kfreq(1),Lx(1))*uy*uz
           end do
        end do
@@ -214,13 +214,13 @@ contains
        t0=0.0025_pfdp/nu
        nbox = ceiling(sqrt(4.0_pfdp*nu*(t0+t)*37.0_pfdp))  !  Decide how many periodic images
        do k = -nbox,nbox
-          xx = x- 0.5_pfdp*Lx - t*v + real(k,pfdp)*Lx
+          xx = x- 0.5_pfdp*Lx - t*v + REAL(k,pfdp)*Lx
           u = u + sqrt(t0)/sqrt(t0+t)*exp(-xx*xx/(4.0_pfdp*nu*(t0+t)))
        end do
     else
        nbox = ceiling(sqrt(37.0d0))  !  Decide how many periodic images
        do k = -nbox,nbox
-          xx = x - 0.5_pfdp*Lx- t*v  + real(k,pfdp)*Lx
+          xx = x - 0.5_pfdp*Lx- t*v  + REAL(k,pfdp)*Lx
           u = u + exp(-xx*xx/(4.0_pfdp*0.0025_pfdp))
        end do
        
@@ -236,9 +236,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = ad_exp_ex(t, x,nu,v,Lx)
     end do
 
@@ -252,9 +252,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = ad_exp_ex(t, x,nu,v,Lx)       
     end do
 
@@ -268,14 +268,14 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
 
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
        end do
     end do
@@ -290,13 +290,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy
        end do
     end do
@@ -310,18 +310,18 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
 
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
           end do
        end do
@@ -337,18 +337,18 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,uy,uz
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
 
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        uz=ad_exp_ex(t, z,nu,v(3),Lx(3))              
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           uy=ad_exp_ex(t, y,nu,v(2),Lx(2))              
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = ad_exp_ex(t, x,nu,v(1),Lx(1))*uy*uz
           end do
        end do
@@ -375,7 +375,7 @@ contains
 
     if (t .gt. 0.0_pfdp) then
        do n =  nterms,1,-1
-          rn = real(n,pfdp)
+          rn = REAL(n,pfdp)
           u=u - 2.0_pfdp*bessel_jn(n,rn*ts)/(rn*ts)*sin(rn*xs)
        end do
     else
@@ -394,9 +394,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = burg_sin_ex(t, x,nu,Lx)
     end do
 
@@ -411,9 +411,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = burg_sin_ex(t, x,nu,Lx)       
     end do
 
@@ -428,13 +428,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,uy,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
     L=0.5_pfdp*(Lx(1)+Lx(2))
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = burg_sin_ex(2.0_pfdp*t, x+y,nu,L)
        end do
     end do
@@ -450,13 +450,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
     L=0.5_pfdp*(Lx(1)+Lx(2))
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = burg_sin_ex(2.0_pfdp*t,x+y,nu,L)
        end do
     end do
@@ -471,16 +471,16 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
     L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = burg_sin_ex(3.0_pfdp*t, x+y+z,nu,L)
           end do
        end do
@@ -497,16 +497,16 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
     L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = burg_sin_ex(3.0_pfdp*t,x+y+z,nu,L)
           end do
        end do
@@ -546,9 +546,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = nls_ex(t, x,Lx)       
     end do
 
@@ -562,13 +562,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
     L=0.5_pfdp*(Lx(1)+Lx(2))
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = nls_ex(2.0_pfdp*t,x+y,L)
        end do
     end do
@@ -583,16 +583,16 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
     L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = nls_ex(3.0_pfdp*t,x+y+z,L)
           end do
        end do
@@ -625,9 +625,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = kdv_ex(t, x,beta,Lx)       
     end do
 
@@ -641,9 +641,9 @@ contains
     integer    :: nx, i
     real(pfdp) :: x
     
-    nx = size(uex)
+    nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*real(i-1,pfdp)/real(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
        uex(i) = kdv_ex(t, x,beta,Lx)       
     end do
 
@@ -658,13 +658,13 @@ contains
     integer    :: nx,ny, i,j
     real(pfdp) :: x, y,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
     L=0.5_pfdp*(Lx(1)+Lx(2))
     do j = 1, ny
-       y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        do i = 1, nx
-          x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
           uex(i,j) = kdv_ex(2.0_pfdp*t,x,beta,L)
        end do
     end do
@@ -680,16 +680,16 @@ contains
     integer    :: nx,ny,nz, i,j,k
     real(pfdp) :: x, y,z,L
     
-    nx = size(uex,1)
-    ny = size(uex,2)    
-    nz = size(uex,3)    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
     L=(Lx(1)+Lx(2)+Lx(3))/3.0_pfdp
     do k = 1, nz
-       z = Lx(3)*real(k-1,pfdp)/real(nz,pfdp) 
+       z = Lx(3)*REAL(k-1,pfdp)/REAL(nz,pfdp) 
        do j = 1, ny
-          y = Lx(2)*real(j-1,pfdp)/real(ny,pfdp)
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
           do i = 1, nx
-             x = Lx(1)*real(i-1,pfdp)/real(nx,pfdp) 
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
              uex(i,j,k) = kdv_ex(3.0_pfdp*t,x,beta,L)
           end do
        end do

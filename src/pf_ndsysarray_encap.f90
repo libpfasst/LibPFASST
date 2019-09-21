@@ -18,7 +18,7 @@
 !!
 !! Which would imply that a 3 component system of two-dimensional solutions.
 !!
-!! The helper routines array1, array2, array3, etc can be used to
+!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
 !! extract pointers to a component of  encapsulated system
 !! performing any copies.
 !!
@@ -28,17 +28,17 @@ module pf_mod_ndsysarray
   implicit none
 
   !>  Type to create and destroy systems of N-dimensional arrays
-  type, extends(pf_factory_t) :: ndsysarray_factory
+  type, extends(pf_factory_t) :: pf_ndsysarray_factory_t
    contains
      procedure :: create_single  => ndsysarray_create_single
      procedure :: create_array  => ndsysarray_create_array
      procedure :: destroy_single => ndsysarray_destroy_single
      procedure :: destroy_array => ndsysarray_destroy_array
-  end type ndsysarray_factory
+  end type pf_ndsysarray_factory_t
 
   !> Type for system of  N-dimensional arrays,  extends the abstract encap type  
-  type, extends(pf_encap_t) :: ndsysarray
-     integer             :: dim    !  The spatial dimension of each component in system
+  type, extends(pf_encap_t) :: pf_ndsysarray_t
+     integer             :: ndim    !  The spatial dimension of each component in system
      integer             :: ncomp  !  The number of components in the system
      integer             :: ndof   !  The number of variables in each component
      integer,    allocatable :: arr_shape(:)
@@ -51,19 +51,7 @@ module pf_mod_ndsysarray
      procedure :: unpack => ndsysarray_unpack
      procedure :: axpy => ndsysarray_axpy
      procedure :: eprint => ndsysarray_eprint
-  end type ndsysarray
-
-  !> Interfaces to output routines in pf_numpy.c
-  interface
-     !>  Subroutine to write an the array to a file
-     subroutine ndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
-       use iso_c_binding
-       character(c_char), intent(in   )        :: dname, fname, endian(5)
-       integer,    intent(in   ), value :: dim, mpibuflen
-       integer,    intent(in   )        :: arr_shape(dim)
-       real(c_double),    intent(in   )        :: array(mpibuflen)
-     end subroutine ndsysarray_dump_numpy
-  end interface
+  end type pf_ndsysarray_t
 
 contains
   !>  Subroutine to allocate the array and set the size parameters
@@ -72,11 +60,11 @@ contains
     integer,           intent(in   ) :: arr_shape(:)
 
     select type (q)
-    class is (ndsysarray)
-       allocate(q%arr_shape(size(arr_shape)))
-       q%dim   = size(arr_shape)-1
-       q%ncomp = arr_shape(q%dim+1)
-       q%ndof = product(arr_shape(1:q%dim))
+    class is (pf_ndsysarray_t)
+       allocate(q%arr_shape(SIZE(arr_shape)))
+       q%ndim   = SIZE(arr_shape)-1
+       q%ncomp = arr_shape(q%ndim+1)
+       q%ndof = product(arr_shape(1:q%ndim))
        q%arr_shape = arr_shape
 
        allocate(q%flatarray(product(arr_shape)))
@@ -84,31 +72,34 @@ contains
   end subroutine ndsysarray_build
 
   !> Subroutine to  create a single array
-  subroutine ndsysarray_create_single(this, x, level, shape)
-    class(ndsysarray_factory), intent(inout)              :: this
+  subroutine ndsysarray_create_single(this, x, level_index, lev_shape)
+    class(pf_ndsysarray_factory_t), intent(inout)      :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
 
-    allocate(ndsysarray::x)
-    call ndsysarray_build(x, shape)
+    allocate(pf_ndsysarray_t::x)
+    call ndsysarray_build(x, lev_shape)
   end subroutine ndsysarray_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine ndsysarray_create_array(this, x, n, level,  shape)
-    class(ndsysarray_factory), intent(inout)              :: this
+  subroutine ndsysarray_create_array(this, x, n, level_index,  lev_shape)
+    class(pf_ndsysarray_factory_t), intent(inout)      :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, shape(:)
+    integer,                intent(in   )              :: n
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
-    allocate(ndsysarray::x(n))
+    allocate(pf_ndsysarray_t::x(n))
     do i = 1, n
-       call ndsysarray_build(x(i), shape)
+       call ndsysarray_build(x(i), lev_shape)
     end do
   end subroutine ndsysarray_create_array
 !!$
   !>  Subroutine to destroy array (simple)
   subroutine ndsysarray_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
-    type(ndsysarray), pointer :: ndsysarray_obj
+    type(pf_ndsysarray_t), pointer :: ndsysarray_obj
 
     ndsysarray_obj => cast_as_ndsysarray(encap)
 
@@ -121,11 +112,11 @@ contains
 
   !> Subroutine to destroy an single array
   subroutine ndsysarray_destroy_single(this, x)
-    class(ndsysarray_factory), intent(inout)              :: this
+    class(pf_ndsysarray_factory_t), intent(inout)      :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
 
     select type (x)
-    class is (ndsysarray)
+    class is (pf_ndsysarray_t)
        deallocate(x%arr_shape)
        deallocate(x%flatarray)
     end select
@@ -135,13 +126,13 @@ contains
 
   !> Subroutine to destroy an array of arrays
   subroutine ndsysarray_destroy_array(this, x)
-    class(ndsysarray_factory), intent(inout)              :: this
+    class(pf_ndsysarray_factory_t), intent(inout)      :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer                                            :: i
 
     select type(x)
-    class is (ndsysarray)
-       do i = 1,size(x)
+    class is (pf_ndsysarray_t)
+       do i = 1,SIZE(x)
           deallocate(x(i)%arr_shape)
           deallocate(x(i)%flatarray)
        end do
@@ -155,7 +146,7 @@ contains
   
   !> Subroutine to set array to a scalare  value.
   subroutine ndsysarray_setval(this, val, flags)
-    class(ndsysarray), intent(inout)           :: this
+    class(pf_ndsysarray_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
     this%flatarray = val
@@ -163,11 +154,11 @@ contains
 
   !> Subroutine to copy an array
   subroutine ndsysarray_copy(this, src, flags)
-    class(ndsysarray),    intent(inout)           :: this
+    class(pf_ndsysarray_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: src
     integer,           intent(in   ), optional :: flags
     select type(src)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        this%flatarray = src%flatarray
     class default
        stop "TYPE ERROR"
@@ -176,7 +167,7 @@ contains
 
   !> Subroutine to pack an array into a flat array for sending
   subroutine ndsysarray_pack(this, z, flags)
-    class(ndsysarray), intent(in   ) :: this
+    class(pf_ndsysarray_t), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
     z = this%flatarray
@@ -184,7 +175,7 @@ contains
 
   !> Subroutine to unpack a flatarray after receiving
   subroutine ndsysarray_unpack(this, z, flags)
-    class(ndsysarray), intent(inout) :: this
+    class(pf_ndsysarray_t), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     integer,     intent(in   ), optional :: flags
     this%flatarray = z
@@ -192,7 +183,7 @@ contains
 
   !> Subroutine to define the norm of the array (here the max norm)
   function ndsysarray_norm(this, flags) result (norm)
-    class(ndsysarray), intent(in   ) :: this
+    class(pf_ndsysarray_t), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
     norm = maxval(abs(this%flatarray))
@@ -200,13 +191,13 @@ contains
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
   subroutine ndsysarray_axpy(this, a, x, flags)
-    class(ndsysarray),    intent(inout)           :: this
+    class(pf_ndsysarray_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
     select type(x)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
        stop "TYPE ERROR"
@@ -215,7 +206,7 @@ contains
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)
   subroutine ndsysarray_eprint(this,flags)
-    class(ndsysarray), intent(inout) :: this
+    class(pf_ndsysarray_t), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
     !  Just print the first few values
         print *, this%flatarray(1:10)
@@ -225,10 +216,10 @@ contains
 
   function cast_as_ndsysarray(encap_polymorph) result(ndsysarray_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
-    type(ndsysarray), pointer :: ndsysarray_obj
+    type(pf_ndsysarray_t), pointer :: ndsysarray_obj
     
     select type(encap_polymorph)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        ndsysarray_obj => encap_polymorph
     end select
   end function cast_as_ndsysarray
@@ -240,7 +231,7 @@ contains
     integer,           intent(in   ), optional :: flags
     real(pfdp), pointer :: r(:)
     select type (x)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        r => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array1d
@@ -254,7 +245,7 @@ contains
 
 
     select type (x)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array2d
@@ -267,15 +258,9 @@ contains
     real(pfdp), pointer :: r(:,:,:)
 
     select type (x)
-    type is (ndsysarray)
+    type is (pf_ndsysarray_t)
        r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
     end select
   end function get_array3d
-  
-
-
-
-
-
 
 end module pf_mod_ndsysarray

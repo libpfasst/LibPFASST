@@ -166,7 +166,7 @@ contains
 !     ierror = 0
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
-!     if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%send), 'send buffer=',level%send
+!     if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%send), 'send buffer=',level%send
 
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
     if (ierror /= 0) then
@@ -199,7 +199,7 @@ contains
                                   .and. dir == 1) then
        source=pf%rank-1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-!        if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%recv), 'recv buffer=',level%recv
+!        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
 
        if (ierror .eq. 0) then
@@ -213,7 +213,7 @@ contains
                                      .and. dir == 2) then
        source=pf%rank+1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-!        if (pf%debug) print*,  'DEBUG --',pf%rank, size(level%recv), 'recv buffer=',level%recv
+!        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
 
        if (ierror .eq. 0) then
@@ -268,7 +268,7 @@ contains
        do m = 1, lev%nnodes
           call lev%pQ(m)%copy(lev%Q(m), flags)
           if (lev%Finterp) then
-             do p = 1,size(lev%F(1,:))
+             do p = 1,SIZE(lev%F(1,:))
                 call lev%pF(m,p)%copy(lev%F(m,p), flags)
              end do
           end if

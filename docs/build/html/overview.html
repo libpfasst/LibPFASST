@@ -1,19 +1,20 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Overview &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" /> 
@@ -42,43 +43,43 @@
 implicit, and implicit-explicit (IMEX) systems.</p>
 <p>The user provides:</p>
 <ol class="arabic simple">
-<li>Function evaluation routines: <span class="math notranslate nohighlight">\(F(U, t)\)</span>.  These functions may
+<li><p>Function evaluation routines: <span class="math notranslate nohighlight">\(F(U, t)\)</span>.  These functions may
 depend on the PFASST level, which allows for multi-order and/or
-multi-physics operators.</li>
-<li>For implicit or IMEX schemes, a backward Euler solver: <span class="math notranslate nohighlight">\(U -
-dt F(U) = RHS\)</span>.</li>
-<li>Spatial interpolation and restriction routines: <span class="math notranslate nohighlight">\(R(U)\)</span> and
-<span class="math notranslate nohighlight">\(P(U)\)</span>.</li>
-<li>Solution encapsulation routines to tell LibPFASST how to manipulate
+multi-physics operators.</p></li>
+<li><p>For implicit or IMEX schemes, a backward Euler solver: <span class="math notranslate nohighlight">\(U -
+dt F(U) = RHS\)</span>.</p></li>
+<li><p>Spatial interpolation and restriction routines: <span class="math notranslate nohighlight">\(R(U)\)</span> and
+<span class="math notranslate nohighlight">\(P(U)\)</span>.</p></li>
+<li><p>Solution encapsulation routines to tell LibPFASST how to manipulate
 solutions.  This enables LibPFASST to interoperate nicely with
 other libraries that have particular ways of storing solutions (eg,
 BoxLib, PEPC, or PETSc).  In particular, this allows LibPFASST to
-work with spatially distributed solutions.</li>
+work with spatially distributed solutions.</p></li>
 </ol>
 <p>User interactions with LibPFASST are typically marshaled through the
 <code class="docutils literal notranslate"><span class="pre">type(pf_pfasst_t)</span></code> class.  This class acts as the overall
 controller of the algorithm.  Implementing a ODE/PDE solver in
 LibPFASST generally consists of the following steps:</p>
 <ol class="arabic simple">
-<li>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_pfasst_t)</span></code> controller.</li>
-<li>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_encap_t)</span></code> encapsulation object.  This
-may be level dependent.</li>
-<li>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_comm_t)</span></code> communicator object.  This allows
+<li><p>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_pfasst_t)</span></code> controller.</p></li>
+<li><p>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_encap_t)</span></code> encapsulation object.  This
+may be level dependent.</p></li>
+<li><p>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_comm_t)</span></code> communicator object.  This allows
 LibPFASST to use MPI parallelization (independent of any spatial
-parallelization).</li>
-<li>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_sweeper_t)</span></code> SDC sweeper.  Builtin
+parallelization).</p></li>
+<li><p>Create an <code class="docutils literal notranslate"><span class="pre">type(pf_sweeper_t)</span></code> SDC sweeper.  Builtin
 sweepers include: explicit, implicit, or imex.  Custom sweepers can
-also be built.  This can also be level dependent.</li>
-<li>Add levels to the <code class="docutils literal notranslate"><span class="pre">type(pf_pfasst_t)</span></code> controller.  This
+also be built.  This can also be level dependent.</p></li>
+<li><p>Add levels to the <code class="docutils literal notranslate"><span class="pre">type(pf_pfasst_t)</span></code> controller.  This
 includes telling LibPFASST how many degrees-of-freedom are on each
 level, how many SDC nodes should be used on each level and their
 type, which interpolation and restriction routines to use, which
-encapsulation object to use etc.</li>
-<li>Add any desired hooks to the controller and set any controller
-options.</li>
-<li>Call the communicator’s and controller’s setup routines.</li>
-<li>Run.</li>
-<li>Tidy up.</li>
+encapsulation object to use etc.</p></li>
+<li><p>Add any desired hooks to the controller and set any controller
+options.</p></li>
+<li><p>Call the communicator’s and controller’s setup routines.</p></li>
+<li><p>Run.</p></li>
+<li><p>Tidy up.</p></li>
 </ol>
 </div>
 
@@ -96,13 +97,11 @@ options.</li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -122,7 +121,7 @@ options.</li>
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

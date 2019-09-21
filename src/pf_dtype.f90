@@ -44,8 +44,8 @@ module pf_mod_dtype
     integer :: pfblock  !! pfasst block being worked on
     integer :: iter     !! current iteration number
     integer :: step     !! current time step number assigned to processor
-    integer :: level    !! which level is currently being operated on
-    integer :: finest_level    !! the current finest level (for variable depth V cycles)
+    integer :: level_index  !! which level is currently being operated on
+    integer :: finest_level !! the current finest level (for variable depth V cycles)
     integer :: hook     !! which hook
     integer :: proc     !! which processor
     integer :: sweep    !! sweep number
@@ -191,12 +191,13 @@ module pf_mod_dtype
 
      !>  Interpolation and restriction data structures
      logical :: interp_workspace_allocated = .false.
+     logical :: restrict_workspace_allocated = .false.
      class(pf_encap_t), allocatable :: &
           cf_delta(:), &   ! delta fine in space and coarse in time
-          c_delta(:)       ! delta on the coarse level
-
+          c_delta(:), &    ! delta on the coarse level
+          f_encap_array_c(:)  !  fine solution restricted in space only
      
-     integer, allocatable :: shape(:)   !! user defined shape array
+     integer, allocatable :: lev_shape(:)   !! user defined shape array
      type(pf_sdcmats_t), allocatable :: sdcmats
      logical :: allocated = .false.
   end type pf_level_t
@@ -236,7 +237,7 @@ module pf_mod_dtype
      integer :: nblocks
      integer :: nsweeps
      integer :: rank
-     integer :: level
+     integer :: level_index
 
      character(len=128) :: datpath
      procedure(pf_results_p), pointer, nopass :: destroy 
@@ -446,18 +447,18 @@ module pf_mod_dtype
      end subroutine pf_transfer_p
 
      !> encapsulation interfaces
-     subroutine pf_encap_create_single_p(this, x, level, shape)
+     subroutine pf_encap_create_single_p(this, x, level_index, lev_shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x
-       integer,      intent(in   )              :: level,  shape(:)
+       integer,      intent(in   )              :: level_index,  lev_shape(:)
      end subroutine pf_encap_create_single_p
 
-     subroutine pf_encap_create_array_p(this, x, n, level, shape)
+     subroutine pf_encap_create_array_p(this, x, n, level_index, lev_shape)
        import pf_factory_t, pf_encap_t
        class(pf_factory_t), intent(inout)              :: this
        class(pf_encap_t),   intent(inout), allocatable :: x(:)
-       integer,      intent(in   )              :: n, level, shape(:)
+       integer,      intent(in   )              :: n, level_index, lev_shape(:)
      end subroutine pf_encap_create_array_p
 
      subroutine pf_encap_destroy_single_p(this, x)

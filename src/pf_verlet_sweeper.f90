@@ -314,12 +314,11 @@ contains
     select case (this%whichQQ)
     case (0)  !  Collocation (make it the product)
        print *,'Making QQ by collocation Q*Q'
-       print *,size(this%Qmat)
+       print *,SIZE(this%Qmat)
        qtemp=0.0_pfdp
        qtemp(2:nnodes,:)=lev%sdcmats%qmat
        qtemp=matmul(qtemp,qtemp)
        this%QQmat = qtemp(2:nnodes,:)
-       print *,shape(this%QQmat)
     case (1)  !  Make the pair like in Lobatto A/B pair
        print *,'Making QQ by collocation Lobatto pair'
        qtemp=0.0_pfdp
@@ -383,7 +382,7 @@ contains
     deallocate(qtemp2)
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
     
   end subroutine verlet_initialize
   

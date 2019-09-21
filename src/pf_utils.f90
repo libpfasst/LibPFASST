@@ -28,12 +28,16 @@ contains
     call lev%ulevel%sweeper%residual(pf,level_index, dt, flag)
 
     ! compute max residual norm
-    sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint
-    do m = 1, lev%nnodes-1
-       res_norms(m) = lev%R(m)%norm(flag)
-       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right? 
-    end do
-
+    !   sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint
+     sol_norms = lev%Q(1)%norm(flag) ! for adjoint    
+!    do m = 1, lev%nnodes-1
+!       res_norms(m) = lev%R(m)%norm(flag)
+       res_norms = lev%R(lev%nnodes-1)%norm(flag)
+       !       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right?
+!       sol_norms(m+1) = sol_norms(1) ! only the value at lev%nnodes is needed for forward integration, right?        
+!    end do
+    call end_timer(pf, TRESIDUAL)
+    
     !    lev%residual = res_norms(lev%nnodes-1)
     m = lev%nnodes  ! for usual forward integration
     if(present(flag)) then
@@ -51,7 +55,7 @@ contains
 !       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
 !    end if
 
-    call end_timer(pf, TRESIDUAL)
+!    call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
 
@@ -110,7 +114,7 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
-    print '("resid: time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
+    print '("resid: time: ", f10.4," step: ",i4.4," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
     call flush(6)
@@ -234,8 +238,8 @@ contains
     lzero = .true.; if (present(zero_first)) lzero = zero_first
     which = 1;      if(present(flags)) which = flags
         
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
+    n = SIZE(mat, dim=1)
+    m = SIZE(mat, dim=2)
         
     do i = 1, n
       if (lzero) call dst(i)%setval(0.0_pfdp, flags)
@@ -268,8 +272,8 @@ contains
     if( which /= 2 ) &
       stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
 
-    n = size(mat, dim=1)
-    m = size(mat, dim=2)
+    n = SIZE(mat, dim=1)
+    m = SIZE(mat, dim=2)
         
     do i = 1, n
       if (lzero) call dst(n+1-i)%setval(0.0_pfdp, 2)

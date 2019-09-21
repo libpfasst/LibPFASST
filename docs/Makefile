@@ -3,8 +3,9 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = LIBPFASST
+#SPHINXBUILD   = sphinx3-build
+SPHINXBUILD   = python3 -msphinx
+SPHINXPROJ    = LibPFASST
 SOURCEDIR     = source
 BUILDDIR      = build
 #BUILDDIR      = ../../sphinxdoc-test-docs/docs

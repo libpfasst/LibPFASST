@@ -1,19 +1,20 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>LibPFASST User’s Guide &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
@@ -42,15 +43,15 @@
 <p>LibPFASST is a Fortran implementation of the PFASST algorithm.</p>
 <p><strong>Main parts of the documentation</strong></p>
 <ul class="simple">
-<li><a class="reference internal" href="copyright.html"><span class="doc">Copyright</span></a> - Copyright for the code</li>
-<li><a class="reference internal" href="license.html"><span class="doc">License</span></a> - Details of the open source license</li>
-<li><a class="reference internal" href="download.html"><span class="doc">Download</span></a> - download instructions.</li>
-<li><a class="reference internal" href="compiling.html"><span class="doc">Compile</span></a> - installation and compiling instructions.</li>
-<li><a class="reference internal" href="tutorial.html"><span class="doc">Tutorial</span></a> - getting started and basic usage.</li>
-<li><a class="reference internal" href="parameters.html"><span class="doc">Parameters</span></a> - controlling the behavior of LibPFASST</li>
-<li><a class="reference internal" href="sweepers.html"><span class="doc">Sweepers</span></a> - sweepers provided by LibPFASST</li>
-<li><a class="reference internal" href="encap.html"><span class="doc">Data encapsulation</span></a> - data encapsulations provided by LibPFASST</li>
-<li><a class="reference internal" href="output.html"><span class="doc">Output</span></a>      - controlling the behavior of LibPFASST</li>
+<li><p><a class="reference internal" href="copyright.html"><span class="doc">Copyright</span></a> - Copyright for the code</p></li>
+<li><p><a class="reference internal" href="license.html"><span class="doc">License</span></a> - Details of the open source license</p></li>
+<li><p><a class="reference internal" href="download.html"><span class="doc">Download</span></a> - download instructions.</p></li>
+<li><p><a class="reference internal" href="compiling.html"><span class="doc">Compile</span></a> - installation and compiling instructions.</p></li>
+<li><p><a class="reference internal" href="tutorial.html"><span class="doc">Tutorial</span></a> - getting started and basic usage.</p></li>
+<li><p><a class="reference internal" href="parameters.html"><span class="doc">Parameters</span></a> - controlling the behavior of LibPFASST</p></li>
+<li><p><a class="reference internal" href="sweepers.html"><span class="doc">Sweepers</span></a> - sweepers provided by LibPFASST</p></li>
+<li><p><a class="reference internal" href="encap.html"><span class="doc">Data encapsulation</span></a> - data encapsulations provided by LibPFASST</p></li>
+<li><p><a class="reference internal" href="output.html"><span class="doc">Output</span></a>      - controlling the behavior of LibPFASST</p></li>
 </ul>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
@@ -89,7 +90,7 @@
 </ul>
 </div>
 <ul class="simple">
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 <div class="section" id="source-code">
@@ -104,7 +105,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
+  <h3><a href="#">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">LibPFASST User’s Guide</a><ul>
 <li><a class="reference internal" href="#contents">Contents</a></li>
@@ -124,13 +125,11 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -153,7 +152,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

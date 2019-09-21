@@ -1,19 +1,20 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Parameters and variables &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
@@ -58,18 +59,18 @@ variants of PFASST.</p>
 <div class="section" id="types-of-parameters">
 <h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>LibPFASST static parameters:  are hard coded and cannot be changed at run time</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time because
-the use of default values will result in program termination.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time, but
-the use of default values will result in default execution.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time because
-the use of default values will result in default execution.</li>
-<li><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time, but
-the use of default values will result in default execution.</li>
-<li>local mandatory parameters: must be passed in a call to <code class="docutils literal notranslate"><span class="pre">pf_run_pfasst</span></code></li>
-<li>local optional parameters: specified by the user application and
-unrelated to the workings of LibPFASST</li>
+<li><p>LibPFASST static parameters:  are hard coded and cannot be changed at run time</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time because
+the use of default values will result in program termination.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> optional parameters: can be reassigned at run time, but
+the use of default values will result in default execution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> mandatory parameters: must be reassigned at run time because
+the use of default values will result in default execution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code> optional parameters: can  be reassigned at run time, but
+the use of default values will result in default execution.</p></li>
+<li><p>local mandatory parameters: must be passed in a call to <code class="docutils literal notranslate"><span class="pre">pf_run_pfasst</span></code></p></li>
+<li><p>local optional parameters: specified by the user application and
+unrelated to the workings of LibPFASST</p></li>
 </ul>
 </div>
 <div class="section" id="passt-static-parameters">
@@ -158,7 +159,8 @@ per level as the levels are  initialized.</p>
 <div class="section" id="optional-level-parameters">
 <h2>Optional level parameters<a class="headerlink" href="#optional-level-parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
-<div>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, there are a set of parameters that are given values from the corresponding copies in the <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code>.  This redundancy is simply for convenience.</div></blockquote>
+<div><p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, there are a set of parameters that are given values from the corresponding copies in the <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code>.  This redundancy is simply for convenience.</p>
+</div></blockquote>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!  level parameters set by the pfasst_t values</span>
 <span class="kt">integer</span>  <span class="kd">::</span> <span class="nb">index</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! level number (1 is the coarsest)</span>
 <span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nnodes</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc nodes</span>
@@ -183,12 +185,13 @@ variable <code class="docutils literal notranslate"><span class="pre">nsteps</sp
 </div>
 <p>Finally, <code class="docutils literal notranslate"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
 <blockquote>
-<div>The usual default input file is “probin.nml” wherein the namelist
+<div><p>The usual default input file is “probin.nml” wherein the namelist
 PARAMS (defined locally in probin.f90) can be specified.
 Alternatively, a different input file can be specified on the command
 line by adding the file name directly after the executable.  The
 alternative input file must be specified first before any command line
-parameter specifications (see next section).</div></blockquote>
+parameter specifications (see next section).</p>
+</div></blockquote>
 </div>
 <div class="section" id="file-input-for-pfasst-variables">
 <h2>File input for pfasst  variables<a class="headerlink" href="#file-input-for-pfasst-variables" title="Permalink to this headline">¶</a></h2>
@@ -201,7 +204,8 @@ Typically the main routine specifies this input file (the default
 being probin.nml), and this file can be changed by specifying the
 value of</p>
 <blockquote>
-<div>pfasst_nml = ‘probin.nml’</div></blockquote>
+<div><p>pfasst_nml = ‘probin.nml’</p>
+</div></blockquote>
 <p>either in the local input file or the command line.</p>
 </div>
 <div class="section" id="command-line-input">
@@ -225,39 +229,39 @@ the parameter nsweeps_pred on the coarsest level great some subtle
 differences in how the predictor performs.</p>
 <p>Some cases:</p>
 <ol class="arabic simple">
-<li>If PFASST_pred is false and pipeline_pred is false, then the predictor
+<li><p>If PFASST_pred is false and pipeline_pred is false, then the predictor
 is a serial application of SDC with nsweeps_pred sweeps.  This can be done
 without communication wherein every processor mimics the behavior
-of the processors previous to it in time.</li>
-<li>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is one,
+of the processors previous to it in time.</p></li>
+<li><p>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is one,
 then the predictor is a serial application of SDC with 1 sweep.  As
-above, there is no communication necessary.</li>
-<li>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is
+above, there is no communication necessary.</p></li>
+<li><p>If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is
 greater than one, then the predictor is a version of pipelined
 SDC. There is no communication necessary until the second sweep on
 each processor is done.  After that, each processor must
-recieve a new initial value before each new sweep.</li>
-<li>If PFASST_pred is true, and nsweeps_pred equals one, then it doesn’t
+recieve a new initial value before each new sweep.</p></li>
+<li><p>If PFASST_pred is true, and nsweeps_pred equals one, then it doesn’t
 matter what pipeline_pred is.  No communication is necessary, and we
 simply reuse the function values from the previous iteration in
 each SDC sweep.  Some care must be taken here as to how to
 interpret the variable t0 especially in light of time dependent
 boundary conditions.  Currently t0 does not change in these
 iterations, hence one should use caution using PFASST_pred = true
-with time dependent boundary conditions.</li>
-<li>If PFASST_pred is true, and nsweeps_pred is greater than one and
+with time dependent boundary conditions.</p></li>
+<li><p>If PFASST_pred is true, and nsweeps_pred is greater than one and
 pipeline_pred is true, then the predictor will act like the normal
 PFASST_pred with nsweeps equals one, but more iterations will be
 taken.  This choice is a bit strange.  No communication is needed
 until each processor is doing the P+1st iteration, then new initial
 data must be used and in all cases, previous f values are used in
-the SDCsweeps.  The caveat about t0 is still valid.</li>
-<li>Finally, if PFASST_pred is true, and nsweeps_pred is greater than one
+the SDCsweeps.  The caveat about t0 is still valid.</p></li>
+<li><p>Finally, if PFASST_pred is true, and nsweeps_pred is greater than one
 and pipeline_pred is false, then the predictor will act like the
 normal PFASST_pred with nsweeps equals one, but additional
 iterations are taken before the initial conditions at each
 processor are reset.  This can be done without communication.  The
-caveat about t0 is still valid.</li>
+caveat about t0 is still valid.</p></li>
 </ol>
 <p>How is this implemented?  There are two pieces to the initialization.
 The first consists of the process of giving every processor an initial
@@ -272,7 +276,7 @@ without communication in all cases.  Then,  additional sweeps are done if specif
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Parameters and variables</a><ul>
 <li><a class="reference internal" href="#types-of-parameters">Types of parameters</a></li>
@@ -303,13 +307,11 @@ without communication in all cases.  Then,  additional sweeps are done if specif
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -335,7 +337,7 @@ without communication in all cases.  Then,  additional sweeps are done if specif
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

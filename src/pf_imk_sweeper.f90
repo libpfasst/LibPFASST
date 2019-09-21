@@ -343,7 +343,7 @@ contains
 
     !>  Make space for temporary variables
     call lev%ulevel%factory%create_array(this%A, nnodes, &
-         lev%index,   lev%shape)
+         lev%index,   lev%lev_shape)
 
     do m = 1, nnodes
        call this%A(m)%setval(0.0_pfdp)

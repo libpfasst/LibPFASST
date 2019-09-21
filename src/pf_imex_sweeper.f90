@@ -246,7 +246,7 @@ contains
           this%QtilI(2:nnodes-1,:) = this%QtilI(2:nnodes-1,:)- this%QtilI(1:nnodes-2,:)
     end if
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%shape)
+    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
 
   end subroutine imex_initialize
 

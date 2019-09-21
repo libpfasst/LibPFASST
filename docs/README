@@ -12,6 +12,10 @@ In particular, the Fortran source code in src will need to be refreshed with
 
 git checkout master -- src
 
+If the computer doesn't have sphinx
+
+apt-get install python3-sphinx
+
 Then:
 
 1. 'make html' in LibPFASST/docs/

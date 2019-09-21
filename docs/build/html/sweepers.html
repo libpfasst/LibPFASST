@@ -1,19 +1,20 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Sweepers &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
@@ -46,14 +47,14 @@
 <p>Under construction!</p>
 <p>LibPFASST contains several sweeper types for solving different types of equations.  These are contained in <code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that contain <code class="docutils literal notranslate"><span class="pre">sweeper</span></code> in the name.</p>
 <ul class="simple">
-<li>exp:  Exponential integrator</li>
-<li>imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</li>
-<li>misdc: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</li>
-<li>imk:  Implicit Munthe-Kass Runge-Kutta integrators</li>
-<li>magpicard:   Magnus  integrator based on Picard iterations</li>
-<li>verlet:   Verlet type integrator for 2nd order equations</li>
-<li>imex_oc:  Optimal control version of imex</li>
-<li>misdc_oc:  Optimal control version of misdc</li>
+<li><p>exp:  Exponential integrator</p></li>
+<li><p>imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</p></li>
+<li><p>misdc: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</p></li>
+<li><p>imk:  Implicit Munthe-Kass Runge-Kutta integrators</p></li>
+<li><p>magpicard:   Magnus  integrator based on Picard iterations</p></li>
+<li><p>verlet:   Verlet type integrator for 2nd order equations</p></li>
+<li><p>imex_oc:  Optimal control version of imex</p></li>
+<li><p>misdc_oc:  Optimal control version of misdc</p></li>
 </ul>
 <p>For historical reasons, there are two versions of some of these sweeper, with a <cite>Q</cite> denoting the more modern version that can utilize DIRK style sweepers.</p>
 </div>
@@ -78,13 +79,11 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -110,7 +109,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>
