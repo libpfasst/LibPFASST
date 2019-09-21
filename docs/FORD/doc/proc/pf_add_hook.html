@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine pf_add_hook(pf, level_ind, hook, proc)
+public subroutine pf_add_hook(pf, level_index, hook, proc)
     
     
    
@@ -230,7 +230,7 @@ public subroutine pf_add_hook(pf, level_ind, hook, proc)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E144"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E63"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,12 +245,12 @@ public subroutine pf_add_hook(pf, level_ind, hook, proc)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_ind"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E73"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level_ind</strong></td><td><p>which pfasst level to add hook</p></td>
+  <td><strong>level_index</strong></td><td><p>which pfasst level to add hook</p></td>
   
 </tr>
 
@@ -351,22 +351,22 @@ public subroutine pf_add_hook(pf, level_ind, hook, proc)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_ind</span><span class="p">,</span> <span class="n">hook</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">hook</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>            <span class="c">!! main pfasst structure</span>
-    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_ind</span>     <span class="c">!! which pfasst level to add hook</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index</span>     <span class="c">!! which pfasst level to add hook</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">hook</span>          <span class="c">!! which hook to add</span>
     <span class="k">procedure</span><span class="p">(</span><span class="n">pf_hook_p</span><span class="p">)</span>             <span class="kd">::</span> <span class="n">proc</span>          <span class="c">!! precudre to call from hook</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">l</span>   <span class="c">!</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">level_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>  <span class="c">! Do to all levels</span>
        <span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
           <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
           <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
        <span class="k">end do</span>
-<span class="k">    else</span>  <span class="c">! Do to just level level_ind</span>
-       <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-       <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_ind</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
+<span class="k">    else</span>  <span class="c">! Do to just level level_index</span>
+       <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+       <span class="n">pf</span><span class="p">%</span><span class="n">hooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">nhooks</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="n">hook</span><span class="p">))%</span><span class="n">proc</span> <span class="o">=&gt;</span> <span class="n">proc</span>
     <span class="k">end if</span>
 
 <span class="k">  end subroutine </span><span class="n">pf_add_hook</span>

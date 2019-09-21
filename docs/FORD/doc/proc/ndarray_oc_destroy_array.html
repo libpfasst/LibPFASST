@@ -230,7 +230,7 @@ public subroutine ndarray_oc_destroy_array(this, x)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E264"></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
+  <td><span class="anchor" id="variable-this%7E157"></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndarray_oc_destroy_array(this, x)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E52"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-x%7E26"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -328,7 +328,7 @@ public subroutine ndarray_oc_destroy_array(this, x)
     
     <span class="k">select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">class is</span> <span class="p">(</span><span class="n">ndarray_oc</span><span class="p">)</span>
-       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+       <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">SIZE</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
           <span class="k">deallocate</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">pflatarray</span><span class="p">)</span>
           <span class="k">deallocate</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">yflatarray</span><span class="p">)</span>
           <span class="k">deallocate</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="nb">shape</span><span class="p">)</span>

@@ -228,7 +228,7 @@ public subroutine exact_ad_exp_1d(t, uex, nu, v, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E40"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E49"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -273,7 +273,7 @@ public subroutine exact_ad_exp_1d(t, uex, nu, v, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-v%7E9"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-v%7E11"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -372,9 +372,9 @@ public subroutine exact_ad_exp_1d(t, uex, nu, v, Lx)
     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span> <span class="n">i</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span>
     
-    <span class="n">nx</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">)</span>
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">uex</span><span class="p">)</span>
     <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
-       <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+       <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
        <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">ad_exp_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">Lx</span><span class="p">)</span>
     <span class="k">end do</span>
 

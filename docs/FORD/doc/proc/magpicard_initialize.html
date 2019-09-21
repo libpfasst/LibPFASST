@@ -228,7 +228,7 @@ public subroutine magpicard_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E95"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E174"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine magpicard_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E41"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E80"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine magpicard_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E41"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E84"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -353,10 +353,10 @@ public subroutine magpicard_initialize(this, pf, level_index)
     <span class="k">call </span><span class="n">get_commutator_coefs</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">qtype</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">commutator_coefs</span><span class="p">)</span>
 
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">omega</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
-         <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+         <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">time_ev_op</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
-         <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+         <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
         <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">omega</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>

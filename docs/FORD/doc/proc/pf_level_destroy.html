@@ -255,7 +255,7 @@ public subroutine pf_level_destroy(pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E26"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E107"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -270,7 +270,7 @@ public subroutine pf_level_destroy(pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E28"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E108"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -394,8 +394,8 @@ public subroutine pf_level_destroy(pf, level_index)
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">destroy</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>
 
     <span class="c">!&gt; deallocate misc. arrays</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">))</span> <span class="k">then</span>
-<span class="k">       deallocate</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">       deallocate</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
     <span class="k">end if</span>
 
 <span class="k">    if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">tmat</span><span class="p">))</span> <span class="k">then</span>

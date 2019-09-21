@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">30 statements</a>
+    title=" 0.2% of total for procedures.">27 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine pf_residual(pf, level_index, dt, flag)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E95"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E152"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_residual(pf, level_index, dt, flag)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E80"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E133"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_residual(pf, level_index, dt, flag)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E34"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E62"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -368,12 +368,16 @@ public subroutine pf_residual(pf, level_index, dt, flag)
     <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">flag</span><span class="p">)</span>
 
     <span class="c">! compute max residual norm</span>
-    <span class="n">sol_norms</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="c">! for adjoint</span>
-    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-       <span class="n">res_norms</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
-       <span class="n">sol_norms</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="c">! only the value at lev%nnodes is needed for forward integration, right? </span>
-    <span class="k">end do</span>
-
+    <span class="c">!   sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint</span>
+     <span class="n">sol_norms</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="c">! for adjoint    </span>
+<span class="c">!    do m = 1, lev%nnodes-1</span>
+<span class="c">!       res_norms(m) = lev%R(m)%norm(flag)</span>
+       <span class="n">res_norms</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)%</span><span class="n">norm</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span>
+       <span class="c">!       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right?</span>
+<span class="c">!       sol_norms(m+1) = sol_norms(1) ! only the value at lev%nnodes is needed for forward integration, right?        </span>
+<span class="c">!    end do</span>
+    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TRESIDUAL</span><span class="p">)</span>
+    
     <span class="c">!    lev%residual = res_norms(lev%nnodes-1)</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>  <span class="c">! for usual forward integration</span>
     <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flag</span><span class="p">))</span> <span class="k">then</span>
@@ -391,7 +395,7 @@ public subroutine pf_residual(pf, level_index, dt, flag)
 <span class="c">!       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual</span>
 <span class="c">!    end if</span>
 
-    <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TRESIDUAL</span><span class="p">)</span>
+<span class="c">!    call end_timer(pf, TRESIDUAL)</span>
 
   <span class="k">end subroutine </span><span class="n">pf_residual</span>
 </pre></div>

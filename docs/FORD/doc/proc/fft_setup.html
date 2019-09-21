@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">53 statements</a>
+    title=" 0.5% of total for procedures.">85 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine fft_setup(this, grid_shape, dim, grid_size)
+public subroutine fft_setup(this, grid_shape, ndim, grid_size)
     
     
    
@@ -230,7 +230,7 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E73"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E13"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,12 +245,12 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-grid_shape%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-grid_shape"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>grid_shape</strong>(dim)</td><td></td>
+  <td><strong>grid_shape</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -260,12 +260,12 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E8"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
+  <td><strong>ndim</strong></td><td></td>
   
 </tr>
 
@@ -275,12 +275,12 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-grid_size%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-grid_size"></span>real(kind=pfdp),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>grid_size</strong>(dim)</td><td></td>
+  <td><strong>grid_size</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -351,30 +351,30 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">fft_setup</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">grid_shape</span><span class="p">,</span> <span class="nb">dim</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">fft_setup</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">grid_shape</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="nb">dim</span>
-<span class="nb">    </span><span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">grid_shape</span><span class="p">(</span><span class="nb">dim</span><span class="p">)</span>    
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">grid_size</span><span class="p">(</span><span class="nb">dim</span><span class="p">)</span>    
+    <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">ndim</span>
+    <span class="kt">integer</span><span class="p">,</span>             <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">grid_shape</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>    
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">grid_size</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>    
 
     <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">kx</span><span class="p">,</span><span class="n">ky</span>
+    <span class="kt">integer</span>     <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">om</span>
     <span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span> <span class="kd">::</span> <span class="n">wk</span>
 
-    <span class="n">this</span><span class="p">%</span><span class="nb">dim</span><span class="o">=</span><span class="nb">dim</span>
-<span class="nb">    </span><span class="n">nx</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">this</span><span class="p">%</span><span class="n">ndim</span><span class="o">=</span><span class="n">ndim</span>
+    <span class="n">nx</span><span class="o">=</span><span class="n">grid_SHAPE</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">this</span><span class="p">%</span><span class="n">nx</span> <span class="o">=</span> <span class="n">nx</span>
 
     <span class="c">! Defaults for grid_size</span>
     <span class="n">this</span><span class="p">%</span><span class="n">Lx</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
     <span class="n">this</span><span class="p">%</span><span class="n">Ly</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
     <span class="n">this</span><span class="p">%</span><span class="n">Lz</span> <span class="o">=</span> <span class="mf">1.0_pfdp</span>
-    
 
-    <span class="k">select case</span> <span class="p">(</span><span class="nb">dim</span><span class="p">)</span>
+    <span class="k">select case</span> <span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>            
        <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">grid_size</span><span class="p">))</span> <span class="n">this</span><span class="p">%</span><span class="n">Lx</span> <span class="o">=</span> <span class="n">grid_size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
        <span class="n">wk</span> <span class="o">=</span> <span class="n">fftw_alloc_complex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="kt">c_size_t</span><span class="p">))</span>
        <span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">wk</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">])</span>          
        
@@ -388,9 +388,9 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
           <span class="n">this</span><span class="p">%</span><span class="n">Ly</span> <span class="o">=</span> <span class="n">grid_size</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">       </span>
-<span class="k">       </span><span class="n">ny</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          
+<span class="k">       </span><span class="n">ny</span><span class="o">=</span><span class="n">grid_SHAPE</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          
        <span class="n">this</span><span class="p">%</span><span class="n">ny</span> <span class="o">=</span> <span class="n">ny</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
        <span class="c">! create in-place, complex fft plans</span>
        <span class="n">wk</span> <span class="o">=</span> <span class="n">fftw_alloc_complex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">,</span> <span class="kt">c_size_t</span><span class="p">))</span>
        <span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">wk</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">])</span>
@@ -399,6 +399,7 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
             <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span> <span class="n">FFTW_FORWARD</span><span class="p">,</span> <span class="n">FFTW_ESTIMATE</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">ifftw</span> <span class="o">=</span> <span class="n">fftw_plan_dft_2d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span> <span class="p">&amp;</span>
             <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span> <span class="n">FFTW_BACKWARD</span><span class="p">,</span> <span class="n">FFTW_ESTIMATE</span><span class="p">)</span>
+       <span class="c">!  Allocate wave number arrays</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span>
        <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">grid_size</span><span class="p">))</span><span class="k">then</span>
 <span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">Lx</span> <span class="o">=</span> <span class="n">grid_size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -406,11 +407,11 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
           <span class="n">this</span><span class="p">%</span><span class="n">Lz</span> <span class="o">=</span> <span class="n">grid_size</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">    </span>
-<span class="k">       </span><span class="n">ny</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          
-       <span class="n">nz</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>          
+<span class="k">       </span><span class="n">ny</span><span class="o">=</span><span class="n">grid_SHAPE</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>          
+       <span class="n">nz</span><span class="o">=</span><span class="n">grid_SHAPE</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>          
        <span class="n">this</span><span class="p">%</span><span class="n">ny</span> <span class="o">=</span> <span class="n">ny</span>
        <span class="n">this</span><span class="p">%</span><span class="n">nz</span> <span class="o">=</span> <span class="n">nz</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>          
+       <span class="n">this</span><span class="p">%</span><span class="n">normfact</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>          
        <span class="n">wk</span> <span class="o">=</span> <span class="n">fftw_alloc_complex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="o">*</span><span class="n">nz</span><span class="p">,</span> <span class="kt">c_size_t</span><span class="p">))</span>
        <span class="k">call </span><span class="nb">c_f_pointer</span><span class="p">(</span><span class="n">wk</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">,</span> <span class="p">[</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">])</span>
        <span class="n">this</span><span class="p">%</span><span class="n">ffftw</span> <span class="o">=</span> <span class="n">fftw_plan_dft_3d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">,</span> <span class="p">&amp;</span>
@@ -418,8 +419,44 @@ public subroutine fft_setup(this, grid_shape, dim, grid_size)
        <span class="n">this</span><span class="p">%</span><span class="n">ifftw</span> <span class="o">=</span> <span class="n">fftw_plan_dft_3d</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">,</span> <span class="p">&amp;</span>
             <span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">,</span> <span class="n">FFTW_BACKWARD</span><span class="p">,</span> <span class="n">FFTW_ESTIMATE</span><span class="p">)</span>
     <span class="k">case </span><span class="n">DEFAULT</span>
-       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="nb">dim</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">ndim</span><span class="p">)</span>
     <span class="k">end select</span>
+    
+    <span class="c">!  Assign wave numbers</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">(</span><span class="n">nx</span><span class="p">))</span>   
+    <span class="n">om</span><span class="o">=</span><span class="n">two_pi</span><span class="o">/</span><span class="n">this</span><span class="p">%</span><span class="n">Lx</span>                
+    <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">nx</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+       <span class="k">else</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="o">-</span><span class="n">nx</span> <span class="o">+</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+       <span class="k">end if</span>
+<span class="k">    end do</span>
+
+<span class="k">    if</span> <span class="p">(</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ky</span><span class="p">(</span><span class="n">ny</span><span class="p">))</span>          
+       <span class="n">om</span><span class="o">=</span><span class="n">two_pi</span><span class="o">/</span><span class="n">this</span><span class="p">%</span><span class="n">Ly</span> 
+       <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;=</span> <span class="n">ny</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">             </span><span class="n">this</span><span class="p">%</span><span class="n">ky</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="k">else</span>
+<span class="k">             </span><span class="n">this</span><span class="p">%</span><span class="n">ky</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="o">-</span><span class="n">ny</span> <span class="o">+</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="k">end if</span>
+<span class="k">       end do</span>
+<span class="k">    end if</span>
+<span class="k">    </span>
+<span class="k">    if</span> <span class="p">(</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">       allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kz</span><span class="p">(</span><span class="n">nz</span><span class="p">))</span>          
+       <span class="n">om</span><span class="o">=</span><span class="n">two_pi</span> <span class="o">/</span> <span class="n">this</span><span class="p">%</span><span class="n">Lz</span> 
+       <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">nz</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&lt;=</span> <span class="n">nz</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">             </span><span class="n">this</span><span class="p">%</span><span class="n">kz</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="k">else</span>
+<span class="k">             </span><span class="n">this</span><span class="p">%</span><span class="n">kz</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">om</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="o">-</span><span class="n">nz</span> <span class="o">+</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="k">end if</span>
+<span class="k">       end do</span>
+<span class="k">    end if</span>
+
 <span class="k">  end subroutine </span><span class="n">fft_setup</span>
 </pre></div>
 

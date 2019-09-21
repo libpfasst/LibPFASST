@@ -230,7 +230,7 @@ public subroutine ndsysarray_pack(this, z, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E176"></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E54"></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndsysarray_pack(this, z, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-z%7E7"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-z%7E2"></span>real(kind=pfdp),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine ndsysarray_pack(this, z, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E72"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E22"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -337,7 +337,7 @@ public subroutine ndsysarray_pack(this, z, flags)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ndsysarray_pack</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">ndsysarray</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>     <span class="k">intent</span><span class="p">(</span>  <span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">z</span><span class="p">(:)</span>
     <span class="kt">integer</span><span class="p">,</span>     <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="n">z</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>

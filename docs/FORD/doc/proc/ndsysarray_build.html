@@ -230,7 +230,7 @@ public subroutine ndsysarray_build(q, arr_shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-q%7E4"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-q"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -326,11 +326,11 @@ public subroutine ndsysarray_build(q, arr_shape)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">arr_shape</span><span class="p">(:)</span>
 
     <span class="k">select type</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="k">class is</span> <span class="p">(</span><span class="n">ndsysarray</span><span class="p">)</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)))</span>
-       <span class="n">q</span><span class="p">%</span><span class="nb">dim</span>   <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
-       <span class="n">q</span><span class="p">%</span><span class="n">ncomp</span> <span class="o">=</span> <span class="n">arr_shape</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="nb">dim</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-       <span class="n">q</span><span class="p">%</span><span class="n">ndof</span> <span class="o">=</span> <span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">q</span><span class="p">%</span><span class="nb">dim</span><span class="p">))</span>
+    <span class="k">class is</span> <span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">)</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)))</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">ndim</span>   <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">ncomp</span> <span class="o">=</span> <span class="n">arr_shape</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">ndof</span> <span class="o">=</span> <span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">q</span><span class="p">%</span><span class="n">ndim</span><span class="p">))</span>
        <span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span> <span class="o">=</span> <span class="n">arr_shape</span>
 
        <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)))</span>

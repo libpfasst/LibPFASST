@@ -249,7 +249,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E241"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E24"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -264,7 +264,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E137"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E3"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -279,7 +279,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E105"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E9"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -294,7 +294,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E33"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E4"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -309,7 +309,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E53"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E9"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -324,7 +324,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E13"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -339,7 +339,7 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E120"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -456,10 +456,10 @@ public subroutine exp_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
               <span class="k">call </span><span class="n">LocalDerivsAtNode</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">)</span>  <span class="c">! phi expansion for exponential picard integral              </span>
               <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c">! add term \phi_0(tL) y_n</span>
 
-              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">REAL</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>         <span class="c">! add -\phi_1(tL) F_j^{[k]}</span>
               <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>      <span class="c">! compute F_j^{[k+1]}</span>
 
-              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
+              <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="kt">REAL</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>          <span class="c">! add \phi_1(tL) F_j^{[k+1]}</span>
 
 
               <span class="c">! compute phi products</span>

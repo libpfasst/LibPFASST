@@ -228,7 +228,7 @@ public subroutine exp_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E240"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E23"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine exp_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E136"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E2"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine exp_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E104"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E8"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -359,14 +359,14 @@ public subroutine exp_initialize(this, pf, level_index)
         <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">))</span>
         <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="n">q</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span> <span class="o">-</span> <span class="n">this</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
-            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,:,:))</span>
+            <span class="k">call </span><span class="n">weights</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="kt">REAL</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">),</span> <span class="n">q</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">W</span><span class="p">(</span><span class="n">i</span><span class="p">,:,:))</span>
         <span class="k">end do</span>
         <span class="c">! set number of rhs components</span>
         <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="c">! initialize temporary storage objects</span>
-        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">newF</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">b</span><span class="p">,</span> <span class="n">nnodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">f_old</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="k">end subroutine </span><span class="n">exp_initialize</span>
 </pre></div>

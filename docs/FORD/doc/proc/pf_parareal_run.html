@@ -235,7 +235,7 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E154"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E73"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -250,7 +250,7 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
   
 <tr>
   
-  <td><span class="anchor" id="variable-q0%7E8"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-q0%7E6"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -265,7 +265,7 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E60"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E40"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -295,7 +295,7 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps%7E7"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps%7E6"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -310,7 +310,7 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qend%7E7"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-qend%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout),</td>
   <td>optional</td>
   
@@ -408,11 +408,11 @@ public subroutine pf_parareal_run(pf, q0, dt, tend, nsteps, qend)
     <span class="c">!!  pass in the time step size and length of run</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">nsteps</span><span class="p">))</span> <span class="k">then</span>
 <span class="k">      </span><span class="n">nsteps_loc</span> <span class="o">=</span> <span class="n">nsteps</span>
-      <span class="n">tend_loc</span><span class="o">=</span><span class="nb">dble</span><span class="p">(</span><span class="n">nsteps_loc</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>
+      <span class="n">tend_loc</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">nsteps_loc</span><span class="o">*</span><span class="n">dt</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
     <span class="k">else</span>
 <span class="k">      </span><span class="n">nsteps_loc</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
       <span class="c">!  Do  sanity check on steps</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="n">nsteps_loc</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">-</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dt</span><span class="o">/</span><span class="mi">10</span><span class="mf">0.0</span><span class="p">)</span> <span class="k">then</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="n">nsteps_loc</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">-</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">dt</span><span class="o">/</span><span class="mi">1</span><span class="n">d</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">        print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;dt=&#39;</span><span class="p">,</span><span class="n">dt</span>
         <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;nsteps=&#39;</span><span class="p">,</span><span class="n">nsteps_loc</span>
         <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;tend=&#39;</span><span class="p">,</span><span class="n">tend</span>

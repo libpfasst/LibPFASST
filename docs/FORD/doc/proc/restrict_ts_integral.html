@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">24 statements</a>
+    title=" 0.2% of total for procedures.">27 statements</a>
      </li> 
      
      
@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_array, f_time, flags)
+public subroutine restrict_ts_integral(f_lev, c_lev, f_encap_array, c_encap_array, f_time, flags)
     
     
    
@@ -232,12 +232,12 @@ public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_
   
 <tr>
   
-  <td><span class="anchor" id="variable-f_lev_p%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-f_lev%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>f_lev_p</strong></td><td><p>pointer to fine level</p></td>
+  <td><strong>f_lev</strong></td><td><p>pointer to fine level</p></td>
   
 </tr>
 
@@ -247,12 +247,12 @@ public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_
   
 <tr>
   
-  <td><span class="anchor" id="variable-c_lev_p%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-c_lev%7E2"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>c_lev_p</strong></td><td><p>pointer to coarse level</p></td>
+  <td><strong>c_lev</strong></td><td><p>pointer to coarse level</p></td>
   
 </tr>
 
@@ -307,7 +307,7 @@ public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E90"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E32"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -383,13 +383,13 @@ public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">restrict_ts_integral</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_encap_array</span><span class="p">,</span> <span class="n">c_encap_array</span><span class="p">,</span><span class="n">f_time</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">restrict_ts_integral</span><span class="p">(</span><span class="n">f_lev</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">,</span> <span class="n">f_encap_array</span><span class="p">,</span> <span class="n">c_encap_array</span><span class="p">,</span><span class="n">f_time</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
 
     <span class="c">!! Restrict (in time and space) f_sol_array  to c_sol_array</span>
     <span class="c">!! This version is for integrals</span>
     
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_lev_p</span>   <span class="c">!!   pointer to fine level</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_lev_p</span>   <span class="c">!!   pointer to coarse level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_lev</span>   <span class="c">!!   pointer to fine level</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_lev</span>   <span class="c">!!   pointer to coarse level</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_encap_array</span><span class="p">(:)</span>   <span class="c">!! array of fine level data to be restricted</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c_encap_array</span><span class="p">(:)</span>   <span class="c">!! array of coarse level data to be computed</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">f_time</span><span class="p">(:)</span>             <span class="c">!! time at the fine nodes</span>
@@ -400,30 +400,33 @@ public subroutine restrict_ts_integral(f_lev_p, c_lev_p, f_encap_array, c_encap_
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">f_nnodes</span><span class="p">,</span><span class="n">c_nnodes</span>
 
 
-    <span class="n">f_nnodes</span> <span class="o">=</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
-    <span class="n">c_nnodes</span> <span class="o">=</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">nnodes</span>
+    <span class="n">f_nnodes</span> <span class="o">=</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">nnodes</span>
+    <span class="n">c_nnodes</span> <span class="o">=</span> <span class="n">c_lev</span><span class="p">%</span><span class="n">nnodes</span>
 
     <span class="c">!!  Create a temp array for the spatial restriction</span>
-    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">f_encap_array_c</span><span class="p">,</span> <span class="n">f_nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">restrict_workspace_allocated</span>   <span class="p">.</span><span class="n">eqv</span><span class="p">.</span> <span class="p">.</span><span class="n">false</span><span class="p">.)</span> <span class="k">then      </span>
+<span class="k">       print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;create in restrict&#39;</span>
+       <span class="k">call </span><span class="n">c_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">f_encap_array_c</span><span class="p">,</span> <span class="n">f_nnodes</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+       <span class="n">f_lev</span><span class="p">%</span><span class="n">restrict_workspace_allocated</span>  <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>
+    <span class="k">end if</span>
 
     <span class="c">!  spatial restriction</span>
     <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f_nnodes</span><span class="o">-</span><span class="mi">1</span>
-       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">f_encap_array</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">f_encap_array_c</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">f_time</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">restrict</span><span class="p">(</span><span class="n">f_lev</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">,</span> <span class="n">f_encap_array</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">f_encap_array_c</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">f_time</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
     <span class="k">end do</span>
     
     <span class="c">! temporal restriction</span>
     <span class="c">! when restricting &#39;0 to node&#39; integral terms, skip the first entry since it is zero</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="k">then</span>
 <span class="k">       if</span> <span class="p">((</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span> <span class="p">&amp;</span>
-            <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
        <span class="k">if</span> <span class="p">((</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">))</span> <span class="p">&amp;</span>
-            <span class="k">call </span><span class="n">pf_apply_mat_backward</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">call </span><span class="n">pf_apply_mat_backward</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="k">else</span>
-<span class="k">       call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span>
+<span class="k">       call </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">c_encap_array</span><span class="p">,</span> <span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">rmat</span><span class="p">(</span><span class="mi">2</span><span class="p">:,</span><span class="mi">2</span><span class="p">:),</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">f_encap_array_c</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.)</span>
     <span class="k">end if</span>
-<span class="k">    call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_array</span><span class="p">(</span><span class="n">f_encap_array_c</span><span class="p">)</span>
 
-  <span class="k">end subroutine </span><span class="n">restrict_ts_integral</span>
+<span class="k">  end subroutine </span><span class="n">restrict_ts_integral</span>
 </pre></div>
 
     </section>

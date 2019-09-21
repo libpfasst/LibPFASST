@@ -230,7 +230,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E130"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E91"></span>type(pf_pfasst_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E33"></span>type(pf_level_t),</td>
+  <td><span class="anchor" id="variable-level%7E6"></span>type(pf_level_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tag%7E15"></span>integer,</td>
+  <td><span class="anchor" id="variable-tag%7E5"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-blocking%7E6"></span>logical,</td>
+  <td><span class="anchor" id="variable-blocking%7E2"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -386,7 +386,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
                                   <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">source</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
-<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, size(level%recv), &#39;recv buffer=&#39;,level%recv</span>
+<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%recv), &#39;recv buffer=&#39;,level%recv</span>
 
 
        <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
@@ -400,7 +400,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
                                      <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">source</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
-<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, size(level%recv), &#39;recv buffer=&#39;,level%recv</span>
+<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%recv), &#39;recv buffer=&#39;,level%recv</span>
 
 
        <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>

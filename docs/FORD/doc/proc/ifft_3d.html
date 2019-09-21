@@ -228,7 +228,7 @@ public subroutine ifft_3d(this, ghat, g)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E43"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E88"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -341,7 +341,7 @@ public subroutine ifft_3d(this, ghat, g)
 
     <span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="o">=</span><span class="n">ghat</span>
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>
-    <span class="n">g</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">ifft_3d</span>
 </pre></div>
 

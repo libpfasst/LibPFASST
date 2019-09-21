@@ -228,7 +228,7 @@ public function ad_exp_ex(t, x, nu, v, Lx) result(u)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E30"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E39"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public function ad_exp_ex(t, x, nu, v, Lx) result(u)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E23"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-x%7E37"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -273,7 +273,7 @@ public function ad_exp_ex(t, x, nu, v, Lx) result(u)
   
 <tr>
   
-  <td><span class="anchor" id="variable-v%7E2"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-v%7E4"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -390,13 +390,13 @@ public function ad_exp_ex(t, x, nu, v, Lx) result(u)
 <span class="k">       </span><span class="n">t0</span><span class="o">=</span><span class="mf">0.0025_pfdp</span><span class="o">/</span><span class="n">nu</span>
        <span class="n">nbox</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="nb">sqrt</span><span class="p">(</span><span class="mf">4.0_pfdp</span><span class="o">*</span><span class="n">nu</span><span class="o">*</span><span class="p">(</span><span class="n">t0</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span><span class="mf">7.0_pfdp</span><span class="p">))</span>  <span class="c">!  Decide how many periodic images</span>
        <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">nbox</span><span class="p">,</span><span class="n">nbox</span>
-          <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span> <span class="mf">0.5_pfdp</span><span class="o">*</span><span class="n">Lx</span> <span class="o">-</span> <span class="n">t</span><span class="o">*</span><span class="n">v</span> <span class="o">+</span> <span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">Lx</span>
+          <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span> <span class="mf">0.5_pfdp</span><span class="o">*</span><span class="n">Lx</span> <span class="o">-</span> <span class="n">t</span><span class="o">*</span><span class="n">v</span> <span class="o">+</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">Lx</span>
           <span class="n">u</span> <span class="o">=</span> <span class="n">u</span> <span class="o">+</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">t0</span><span class="o">+</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="n">xx</span><span class="o">*</span><span class="n">xx</span><span class="o">/</span><span class="p">(</span><span class="mf">4.0_pfdp</span><span class="o">*</span><span class="n">nu</span><span class="o">*</span><span class="p">(</span><span class="n">t0</span><span class="o">+</span><span class="n">t</span><span class="p">)))</span>
        <span class="k">end do</span>
 <span class="k">    else</span>
 <span class="k">       </span><span class="n">nbox</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="nb">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="mf">7.0d0</span><span class="p">))</span>  <span class="c">!  Decide how many periodic images</span>
        <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="o">-</span><span class="n">nbox</span><span class="p">,</span><span class="n">nbox</span>
-          <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">0.5_pfdp</span><span class="o">*</span><span class="n">Lx</span><span class="o">-</span> <span class="n">t</span><span class="o">*</span><span class="n">v</span>  <span class="o">+</span> <span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">Lx</span>
+          <span class="n">xx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">0.5_pfdp</span><span class="o">*</span><span class="n">Lx</span><span class="o">-</span> <span class="n">t</span><span class="o">*</span><span class="n">v</span>  <span class="o">+</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">*</span><span class="n">Lx</span>
           <span class="n">u</span> <span class="o">=</span> <span class="n">u</span> <span class="o">+</span> <span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="n">xx</span><span class="o">*</span><span class="n">xx</span><span class="o">/</span><span class="p">(</span><span class="mf">4.0_pfdp</span><span class="o">*</span><span class="mf">0.0025_pfdp</span><span class="p">))</span>
        <span class="k">end do</span>
 <span class="k">       </span>

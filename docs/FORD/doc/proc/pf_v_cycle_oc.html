@@ -234,7 +234,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E107"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E117"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -249,7 +249,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-iteration"></span>integer,</td>
+  <td><span class="anchor" id="variable-iteration%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -264,7 +264,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E26"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E31"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -279,7 +279,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E39"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E54"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -294,7 +294,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index_c"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index_c%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -309,7 +309,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index_f"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index_f%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -324,7 +324,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E94"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E113"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -410,7 +410,7 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">level_index_f</span>  <span class="c">!! Finest level of V-cycle</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">flags</span>
 
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">c_lev</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">which</span><span class="p">,</span> <span class="n">dir</span>
 
     <span class="n">which</span> <span class="o">=</span> <span class="mi">1</span>
@@ -423,62 +423,62 @@ public subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c, level_inde
     <span class="c">!&gt;  Post the nonblocking receives on the all the levels that will be recieving later</span>
     <span class="c">!&gt;    (for single level this will be skipped)</span>
     <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">level_index_f</span>
-       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">pf_post</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="n">f_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_post</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="n">dir</span><span class="p">)</span>
     <span class="k">end do</span>
 
     <span class="c">!&gt; move from fine to coarse doing sweeps</span>
     <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_f</span><span class="p">,</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
-       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
-       <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="n">f_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
+       <span class="n">c_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
        <span class="k">call </span><span class="n">restrict_time_space_fas</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">which</span><span class="p">)</span>
-       <span class="k">call save</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">call save</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
     <span class="k">end do</span>
 
     <span class="c">!&gt; Do the coarsest level</span>
     <span class="n">level_index</span><span class="o">=</span><span class="n">level_index_c</span>
-    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+    <span class="n">f_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">pipeline_pred</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">       do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span>
-          <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
-          <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
-          <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+<span class="k">       do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">nsweeps</span>
+          <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="o">+</span><span class="n">j</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
        <span class="k">end do</span>
 <span class="k">    else</span>
-<span class="k">       call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+<span class="k">       call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
     <span class="n">endif</span>
 
 
     <span class="c">!&gt; Now move coarse to fine interpolating and sweeping</span>
     <span class="k">do </span><span class="n">level_index</span> <span class="o">=</span> <span class="n">level_index_c</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">level_index_f</span>
-       <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
-       <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">interpolate_time_space</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">which</span><span class="p">)</span>
+       <span class="n">f_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">);</span>
+       <span class="n">c_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">interpolate_time_space</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">%</span><span class="n">Finterp</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">which</span><span class="p">)</span>
 
-       <span class="k">if</span> <span class="p">((</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span>  <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-       <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                        <span class="k">call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">((</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span>  <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                        <span class="k">call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-       <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">pf_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">level_index</span><span class="o">*</span><span class="mi">10000</span><span class="o">+</span><span class="n">iteration</span><span class="p">,</span> <span class="p">.</span><span class="n">false</span><span class="p">.,</span> <span class="n">dir</span><span class="p">)</span>
 
        <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
           <span class="c">! interpolate increment to q0 -- the fine initial condition</span>
           <span class="c">! needs the same increment that Q(1) got, but applied to the</span>
           <span class="c">! new fine initial condition</span>
-          <span class="k">if</span> <span class="p">((</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span> <span class="k">call </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+          <span class="k">if</span> <span class="p">((</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">))</span> <span class="k">call </span><span class="n">interpolate_q0</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span> <span class="o">/=</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">          if</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                       <span class="k">call </span><span class="n">interpolate_qend</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">)</span>
+<span class="k">          if</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span>                       <span class="k">call </span><span class="n">interpolate_qend</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">)</span>
        <span class="k">end if</span>
 
        <span class="c">! don&#39;t sweep on the finest level since that is only done at beginning</span>
        <span class="k">if</span> <span class="p">(</span><span class="n">level_index</span> <span class="o">&lt;</span> <span class="n">level_index_f</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">          call </span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+<span class="k">          call </span><span class="n">f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">%</span><span class="n">sweep</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
        <span class="k">else</span>  <span class="c">!  compute residual for diagnostics since we didn&#39;t sweep</span>
-          <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev_p</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">pf_residual</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">f_lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">which</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">    end do</span>
 

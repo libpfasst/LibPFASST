@@ -204,7 +204,7 @@
      
     
       <h2>
-public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, arr_shape, array) bind(c)
+public subroutine zndsysarray_dump_numpy(dname, fname, endian, ndim, mpibuflen, arr_shape, array) bind(c)
     
     
    
@@ -233,7 +233,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-dname"></span>character(len=c_char),</td>
+  <td><span class="anchor" id="variable-dname%7E2"></span>character(len=c_char),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -248,7 +248,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-fname%7E3"></span>character(len=c_char),</td>
+  <td><span class="anchor" id="variable-fname%7E4"></span>character(len=c_char),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -263,7 +263,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-endian"></span>character(len=c_char),</td>
+  <td><span class="anchor" id="variable-endian%7E2"></span>character(len=c_char),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -278,12 +278,12 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E9"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E11"></span>integer,</td>
   <td>intent(in),</td>
   <td></td>
   
   <td>value</td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
+  <td><strong>ndim</strong></td><td></td>
   
 </tr>
 
@@ -308,12 +308,12 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-arr_shape%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E7"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>arr_shape</strong>(dim)</td><td></td>
+  <td><strong>arr_shape</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -323,7 +323,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, dim, mpibuflen, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-array"></span>real(kind=c_double),</td>
+  <td><span class="anchor" id="variable-array%7E2"></span>real(kind=c_double),</td>
   <td>intent(in)</td>
   <td></td>
   

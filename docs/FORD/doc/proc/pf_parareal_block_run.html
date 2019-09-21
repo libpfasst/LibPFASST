@@ -239,7 +239,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E155"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E74"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -254,7 +254,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-q0%7E9"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-q0%7E7"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -269,7 +269,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E61"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E41"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -284,7 +284,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps%7E7"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -299,7 +299,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-qend%7E8"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-qend%7E6"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout),</td>
   <td>optional</td>
   
@@ -314,7 +314,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E139"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E84"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -398,7 +398,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">qend</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span><span class="p">(:)</span>
 
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev_p</span>  <span class="c">!!  pointer to the one level we are operating on</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">lev</span>  <span class="c">!!  pointer to the one level we are operating on</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">nblocks</span> <span class="c">!!  The number of blocks of steps to do</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">nproc</span>   <span class="c">!!  The number of processors being used</span>
@@ -417,10 +417,10 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
     <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
 
     <span class="c">!  pointer to finest  level to start</span>
-    <span class="n">lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
+    <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
 
     <span class="c">!  Stick the initial condition into q0 (will happen on all processors)</span>
-    <span class="k">call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">q0</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
     <span class="n">nproc</span> <span class="o">=</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span>
@@ -454,11 +454,11 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
 
        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">          if</span> <span class="p">(</span><span class="n">nproc</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>  <span class="k">then</span>
-<span class="k">             call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">lev_p</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>    <span class="c">!!  Pack away your last solution</span>
-             <span class="k">call </span><span class="n">pf_broadcast</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">lev_p</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="n">lev_p</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-             <span class="k">call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="nb">unpack</span><span class="p">(</span><span class="n">lev_p</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>    <span class="c">!!  Everyone resets their q0</span>
+<span class="k">             call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="nb">pack</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>    <span class="c">!!  Pack away your last solution</span>
+             <span class="k">call </span><span class="n">pf_broadcast</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">send</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+             <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="nb">unpack</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">send</span><span class="p">)</span>    <span class="c">!!  Everyone resets their q0</span>
           <span class="k">else</span>
-<span class="k">             call </span><span class="n">lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>    <span class="c">!!  Just stick qend in q0</span>
+<span class="k">             call </span><span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>    <span class="c">!!  Just stick qend in q0</span>
           <span class="k">end if</span>
 
           <span class="c">!&gt;  Update the step and t0 variables for new block</span>
@@ -497,7 +497,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
 
     <span class="c">!  Grab the last solution for return (if wanted)</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">qend</span><span class="p">))</span> <span class="k">then</span>
-<span class="k">       call </span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">       call </span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">end if</span>
 <span class="k">  end subroutine </span><span class="n">pf_parareal_block_run</span>
 </pre></div>

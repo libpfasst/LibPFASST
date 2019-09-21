@@ -235,7 +235,7 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dst"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-dst%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -250,7 +250,7 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-a%7E7"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-a%7E11"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -280,7 +280,7 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-src%7E5"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-src%7E9"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -310,7 +310,7 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E86"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E147"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -410,8 +410,8 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
     <span class="n">lzero</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">zero_first</span><span class="p">))</span> <span class="n">lzero</span> <span class="o">=</span> <span class="n">zero_first</span>
     <span class="n">which</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>      <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
         
-    <span class="n">n</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         
     <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">lzero</span><span class="p">)</span> <span class="k">call </span><span class="n">dst</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>

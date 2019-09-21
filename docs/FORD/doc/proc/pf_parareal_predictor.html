@@ -233,7 +233,7 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E156"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E75"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -248,7 +248,7 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E38"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E24"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -263,7 +263,7 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E62"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E42"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -278,7 +278,7 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E140"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E85"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -360,8 +360,8 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>         <span class="kd">::</span> <span class="n">dt</span>     <span class="c">!! time step</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span><span class="p">(:)</span>  <span class="c">!!  User defined flags</span>
 
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">c_lev_p</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev_p</span>     <span class="c">!!</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">c_lev</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">f_lev</span>     <span class="c">!!</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">k</span><span class="p">,</span><span class="n">n</span>               <span class="c">!!  Loop indices</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">nsteps_c</span><span class="p">,</span><span class="n">nsteps_f</span>    <span class="c">!!  Number of RK  steps</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">level_index</span>     <span class="c">!!  Local variable for looping over levels</span>
@@ -372,29 +372,29 @@ public subroutine pf_parareal_predictor(pf, t0, dt, flags)
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TPREDICTOR</span><span class="p">)</span>
 
     <span class="c">!  This is for one two levels only or one if only RK is done</span>
-    <span class="n">c_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">f_lev_p</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
+    <span class="n">c_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f_lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;beginning parareal predictor&#39;</span>
 
     <span class="c">!! Step 1. Getting the initial condition on the coarsest level</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">finest_level</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">q0_style</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>  <span class="c">!  Copy coarse</span>
-          <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
+          <span class="k">call </span><span class="n">c_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">f_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
        <span class="k">end if</span>
 <span class="k">    end if</span>
 <span class="k">    </span><span class="n">level_index</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="c">!!</span>
     <span class="c">!! Step 2. Do coarse level integration, no communication necessary</span>
-    <span class="n">nsteps_c</span><span class="o">=</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">nsteps</span>  <span class="c">!  Each processor integrates alone</span>
+    <span class="n">nsteps_c</span><span class="o">=</span> <span class="n">c_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">nsteps</span>  <span class="c">!  Each processor integrates alone</span>
     <span class="k">do </span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
-       <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="p">.</span><span class="n">gt</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">)</span>       
+       <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="p">.</span><span class="n">gt</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="k">call </span><span class="n">c_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">)</span>       
        <span class="n">t0k</span>      <span class="o">=</span> <span class="n">dt</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
-       <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">do_n_steps</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t0k</span><span class="p">,</span> <span class="n">c_lev_p</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span> <span class="n">nsteps_c</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">c_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">do_n_steps</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">t0k</span><span class="p">,</span> <span class="n">c_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span><span class="n">c_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span> <span class="n">nsteps_c</span><span class="p">)</span>
     <span class="k">end do</span>
     <span class="c">! Save the coarse level value</span>
-    <span class="k">call </span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev_p</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>     
+    <span class="k">call </span><span class="n">c_lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">2</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">c_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>     
 
     <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TPREDICTOR</span><span class="p">)</span>
 

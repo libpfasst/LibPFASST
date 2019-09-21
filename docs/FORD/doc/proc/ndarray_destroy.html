@@ -308,11 +308,11 @@ public subroutine ndarray_destroy(encap)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ndarray_destroy</span><span class="p">(</span><span class="n">encap</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">encap</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">ndarray</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">ndarray_obj</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_ndarray_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">ndarray_obj</span>
 
     <span class="n">ndarray_obj</span> <span class="o">=&gt;</span> <span class="n">cast_as_ndarray</span><span class="p">(</span><span class="n">encap</span><span class="p">)</span>
 
-    <span class="k">deallocate</span><span class="p">(</span><span class="n">ndarray_obj</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">deallocate</span><span class="p">(</span><span class="n">ndarray_obj</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">)</span>
     <span class="k">deallocate</span><span class="p">(</span><span class="n">ndarray_obj</span><span class="p">%</span><span class="n">flatarray</span><span class="p">)</span>
 
     <span class="k">nullify</span><span class="p">(</span><span class="n">ndarray_obj</span><span class="p">)</span>

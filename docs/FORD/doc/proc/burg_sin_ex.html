@@ -231,7 +231,7 @@ See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Mat
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E31"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E40"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -246,7 +246,7 @@ See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Mat
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E24"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-x%7E38"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -378,7 +378,7 @@ See "A Simple Illustration of a Weak Spectral Cascade", Muraki D,SIAM J Appl Mat
 
     <span class="k">if</span> <span class="p">(</span><span class="n">t</span> <span class="p">.</span><span class="n">gt</span><span class="p">.</span> <span class="mf">0.0_pfdp</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       do </span><span class="n">n</span> <span class="o">=</span>  <span class="n">nterms</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span>
-          <span class="n">rn</span> <span class="o">=</span> <span class="kt">real</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="n">rn</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
           <span class="n">u</span><span class="o">=</span><span class="n">u</span> <span class="o">-</span> <span class="mf">2.0_pfdp</span><span class="o">*</span><span class="nb">bessel_jn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">rn</span><span class="o">*</span><span class="n">ts</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">rn</span><span class="o">*</span><span class="n">ts</span><span class="p">)</span><span class="o">*</span><span class="nb">sin</span><span class="p">(</span><span class="n">rn</span><span class="o">*</span><span class="n">xs</span><span class="p">)</span>
        <span class="k">end do</span>
 <span class="k">    else</span>

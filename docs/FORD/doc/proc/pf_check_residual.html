@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">16 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine pf_check_residual(pf, level_index, residual_converged)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E122"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E21"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_check_residual(pf, level_index, residual_converged)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E101"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E29"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_check_residual(pf, level_index, residual_converged)
   
 <tr>
   
-  <td><span class="anchor" id="variable-residual_converged%7E2"></span>logical,</td>
+  <td><span class="anchor" id="variable-residual_converged"></span>logical,</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -347,13 +347,11 @@ public subroutine pf_check_residual(pf, level_index, residual_converged)
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual_rel</span> <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">rel_res_tol</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39; residual relative tol met&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual_rel</span>
        <span class="n">residual_converged</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>
-       <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;residual_rel tol met&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual_rel</span>              
     <span class="k">end if</span>
     <span class="c">! Check to see if absolute tolerance is met</span>
     <span class="k">if</span>   <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual</span>     <span class="o">&lt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">abs_res_tol</span><span class="p">)</span>  <span class="k">then</span>
 <span class="k">       if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;residual tol met&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual</span>
        <span class="n">residual_converged</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>
-       <span class="k">print</span><span class="o">*</span><span class="p">,</span> <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;residual tol met&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual</span>       
     <span class="k">end if</span>
 
 <span class="k">  end subroutine </span><span class="n">pf_check_residual</span>

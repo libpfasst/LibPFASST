@@ -230,7 +230,7 @@ public function zndsysarray_norm(this, flags) result(norm)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E158"></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E207"></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public function zndsysarray_norm(this, flags) result(norm)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E56"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E114"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -264,7 +264,7 @@ public function zndsysarray_norm(this, flags) result(norm)
     
     
     
-   <h3>Return Value <small><span class="anchor" id="variable-norm%7E9"></span>real(kind=pfdp)
+   <h3>Return Value <small><span class="anchor" id="variable-norm%7E12"></span>real(kind=pfdp)
   </small></h3>
     
     
@@ -331,7 +331,7 @@ public function zndsysarray_norm(this, flags) result(norm)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">zndsysarray_norm</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span> <span class="k">result</span> <span class="p">(</span><span class="n">norm</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">zndsysarray</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">integer</span><span class="p">,</span>     <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">norm</span>
     <span class="n">norm</span> <span class="o">=</span> <span class="nb">maxval</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">flatarray</span><span class="p">))</span>

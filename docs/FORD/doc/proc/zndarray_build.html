@@ -199,7 +199,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine zndarray_build(q, shape)
+public subroutine zndarray_build(q, shape_in)
     
     
    
@@ -245,12 +245,12 @@ public subroutine zndarray_build(q, shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E5"></span>integer,</td>
+  <td><span class="anchor" id="variable-shape_in"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td>
+  <td><strong>shape_in</strong>(:)</td><td></td>
   
 </tr>
 
@@ -321,22 +321,21 @@ public subroutine zndarray_build(q, shape)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zndarray_build</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">shape</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zndarray_build</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">shape_in</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">q</span>
-    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="nb">shape</span><span class="p">(:)</span>
+    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">shape_in</span><span class="p">(:)</span>
 
-    <span class="k">type</span><span class="p">(</span><span class="n">zndarray</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">zndarray_obj</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_zndarray_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">zndarray_obj</span>
 
     <span class="k">select type</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="k">class is</span> <span class="p">(</span><span class="n">zndarray</span><span class="p">)</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="nb">shape</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="nb">shape</span><span class="p">)))</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="nb">shape</span><span class="p">)))</span>
-       <span class="n">q</span><span class="p">%</span><span class="nb">dim</span>   <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="nb">shape</span><span class="p">)</span>
-       <span class="n">q</span><span class="p">%</span><span class="nb">shape</span> <span class="o">=</span> <span class="nb">shape</span>
-<span class="nb">       </span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="nb">cmplx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+    <span class="k">class is</span> <span class="p">(</span><span class="n">pf_zndarray_t</span><span class="p">)</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">ndim</span>   <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span> <span class="o">=</span> <span class="n">shape_in</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="nb">cmplx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
        
     <span class="k">end select</span>
-
 
 <span class="k">    nullify</span><span class="p">(</span><span class="n">zndarray_obj</span><span class="p">)</span>
   <span class="k">end subroutine </span><span class="n">zndarray_build</span>

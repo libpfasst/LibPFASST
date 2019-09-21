@@ -232,7 +232,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E106"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E116"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E38"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E53"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsteps%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsteps%7E8"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E93"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E112"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -307,7 +307,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-step%7E25"></span>integer,</td>
+  <td><span class="anchor" id="variable-step%7E28"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -392,7 +392,7 @@ public subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
     <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">step</span>
     <span class="c">! not yet clear how to handle send and receive for forward and backward combined</span>
 
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fine_lev_p</span><span class="p">,</span> <span class="n">coarse_lev_p</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fine_lev</span><span class="p">,</span> <span class="n">coarse_lev</span>
     <span class="kt">integer</span>                   <span class="kd">::</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">which</span><span class="p">,</span> <span class="n">pred_flags</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">dir</span><span class="p">,</span> <span class="n">ierror</span> <span class="c">!dir to choose forward or backward send</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span>                <span class="kd">::</span> <span class="n">residual</span>
 

@@ -228,7 +228,7 @@ public subroutine zrestrict_2d(this, yhat_f, yhat_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E69"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E114"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine zrestrict_2d(this, yhat_f, yhat_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yhat_f%7E2"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yhat_f%7E5"></span>complex(kind=pfdp),</td>
   <td></td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine zrestrict_2d(this, yhat_f, yhat_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yhat_c%7E2"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yhat_c%7E5"></span>complex(kind=pfdp),</td>
   <td></td>
   <td></td>
   
@@ -339,8 +339,8 @@ public subroutine zrestrict_2d(this, yhat_f, yhat_c)
     <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">pointer</span> <span class="kd">::</span> <span class="n">yhat_f</span><span class="p">(:,:),</span> <span class="n">yhat_c</span><span class="p">(:,:)</span>
 
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nx_f</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">nx_c</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">nf1</span><span class="p">,</span><span class="n">nf2</span><span class="p">,</span><span class="n">nc1</span><span class="p">,</span><span class="n">nc2</span>
-    <span class="n">nx_f</span> <span class="o">=</span> <span class="nb">shape</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
-    <span class="n">nx_c</span> <span class="o">=</span> <span class="nb">shape</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
+    <span class="n">nx_f</span> <span class="o">=</span> <span class="nb">SHAPE</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
+    <span class="n">nx_c</span> <span class="o">=</span> <span class="nb">SHAPE</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
     
     <span class="n">nf1</span><span class="o">=</span><span class="n">nx_f</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="n">nx_c</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span>
     <span class="n">nf2</span><span class="o">=</span><span class="n">nx_f</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">nx_c</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span>

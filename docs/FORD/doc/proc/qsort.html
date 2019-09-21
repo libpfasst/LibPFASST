@@ -231,7 +231,7 @@ public recursive subroutine qsort(a)
   
 <tr>
   
-  <td><span class="anchor" id="variable-a%7E10"></span>real(kind=pfqp),</td>
+  <td><span class="anchor" id="variable-a"></span>real(kind=pfqp),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -311,7 +311,7 @@ public recursive subroutine qsort(a)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfqp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">a</span><span class="p">(:)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">iq</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       call </span><span class="n">qsort_partition</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">iq</span><span class="p">)</span>
        <span class="k">call </span><span class="n">qsort</span><span class="p">(</span><span class="n">a</span><span class="p">(:</span><span class="n">iq</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
        <span class="k">call </span><span class="n">qsort</span><span class="p">(</span><span class="n">a</span><span class="p">(</span><span class="n">iq</span><span class="p">:))</span>

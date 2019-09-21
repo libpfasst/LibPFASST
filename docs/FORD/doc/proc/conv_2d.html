@@ -228,7 +228,7 @@ public subroutine conv_2d(this, g, op, c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E51"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E96"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -354,12 +354,12 @@ public subroutine conv_2d(this, g, op, c)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">g</span><span class="p">(:,:)</span>
     <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">op</span><span class="p">(:,:)</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">c</span><span class="p">(:,:)</span>
+
     <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="o">=</span><span class="n">g</span>
-    <span class="c">! Compute Convolution</span>
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftf</span><span class="p">()</span>
     <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span> <span class="o">*</span> <span class="n">op</span>
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>
-    <span class="n">c</span><span class="o">=</span><span class="kt">real</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>        
+    <span class="n">c</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>        
   <span class="k">end subroutine </span><span class="n">conv_2d</span>
 </pre></div>
 

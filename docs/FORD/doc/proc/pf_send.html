@@ -230,7 +230,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E129"></span>type(pf_pfasst_t),</td>
+  <td><span class="anchor" id="variable-pf%7E90"></span>type(pf_pfasst_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level%7E32"></span>class(pf_level_t),</td>
+  <td><span class="anchor" id="variable-level%7E5"></span>class(pf_level_t),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tag%7E14"></span>integer,</td>
+  <td><span class="anchor" id="variable-tag%7E4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
   
 <tr>
   
-  <td><span class="anchor" id="variable-blocking%7E5"></span>logical,</td>
+  <td><span class="anchor" id="variable-blocking"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -407,7 +407,7 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
 <span class="c">!     ierror = 0</span>
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TSEND</span> <span class="o">+</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;begin send, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span><span class="p">,</span><span class="s1">&#39; pf%state%status =&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span>
-<span class="c">!     if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, size(level%send), &#39;send buffer=&#39;,level%send</span>
+<span class="c">!     if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%send), &#39;send buffer=&#39;,level%send</span>
 
     <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>

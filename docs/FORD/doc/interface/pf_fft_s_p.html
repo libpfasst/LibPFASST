@@ -199,7 +199,7 @@
     
       <h2>interface <br>
       
-public subroutine pf_fft_s_p(this, grid_shape, dim, grid_size)
+public subroutine pf_fft_s_p(this, grid_shape, ndim, grid_size)
     
     
    
@@ -228,7 +228,7 @@ public subroutine pf_fft_s_p(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E71"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E116"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,12 +243,12 @@ public subroutine pf_fft_s_p(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-grid_shape"></span>integer,</td>
+  <td><span class="anchor" id="variable-grid_shape%7E2"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>grid_shape</strong>(dim)</td><td></td>
+  <td><strong>grid_shape</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -258,12 +258,12 @@ public subroutine pf_fft_s_p(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dim%7E7"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E9"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>dim</strong></td><td></td>
+  <td><strong>ndim</strong></td><td></td>
   
 </tr>
 
@@ -273,12 +273,12 @@ public subroutine pf_fft_s_p(this, grid_shape, dim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-grid_size"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-grid_size%7E2"></span>real(kind=pfdp),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>grid_size</strong>(dim)</td><td></td>
+  <td><strong>grid_size</strong>(ndim)</td><td></td>
   
 </tr>
 

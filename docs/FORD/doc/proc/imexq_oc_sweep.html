@@ -251,7 +251,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E180"></span>class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E118"></span>class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -266,7 +266,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E87"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E36"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -281,7 +281,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E70"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E44"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -296,7 +296,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E21"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E13"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -311,7 +311,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E31"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E23"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -326,7 +326,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsweeps%7E11"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsweeps%7E7"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -341,7 +341,7 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E76"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E51"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -600,10 +600,6 @@ public subroutine imexQ_oc_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <span class="c">!       call pf_residual(pf, lev, dt, 2)</span>
 <span class="c">! !       call pf_residual(pf, lev, dt, which)</span>
 <span class="c">!     end if</span>
-
-
-    <span class="c">!  Make some space</span>
-<span class="c">!     call Lev%encap%create(rhs, Lev%level, SDC_KIND_SOL_FEVAL, Lev%nvars, Lev%shape, Lev%ctx)</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">sweep_y</span><span class="p">)</span> <span class="k">then</span>
       <span class="c">!  Forward sweep on y</span>

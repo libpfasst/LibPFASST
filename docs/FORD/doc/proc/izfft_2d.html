@@ -228,7 +228,7 @@ public subroutine izfft_2d(this, ghat, g)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E48"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E93"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -336,8 +336,8 @@ public subroutine izfft_2d(this, ghat, g)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">izfft_2d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">ghat</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">g</span><span class="p">(:,:)</span>
     <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">ghat</span><span class="p">(:,:)</span>
+    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">g</span><span class="p">(:,:)</span>
 
     <span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="o">=</span><span class="n">ghat</span>
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>

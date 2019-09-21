@@ -228,7 +228,7 @@ public subroutine exact_ad_cos_3d(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E38"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E47"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -273,7 +273,7 @@ public subroutine exact_ad_cos_3d(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-v%7E7"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-v%7E9"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -387,18 +387,18 @@ public subroutine exact_ad_cos_3d(t, uex, nu, v, kfreq, Lx)
     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">,</span><span class="n">nz</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">uy</span><span class="p">,</span><span class="n">uz</span>
     
-    <span class="n">nx</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">ny</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>    
-    <span class="n">nz</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>    
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>    
+    <span class="n">nz</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">uex</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>    
 
     <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nz</span>
-       <span class="n">z</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+       <span class="n">z</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
        <span class="n">uz</span><span class="o">=</span><span class="n">ad_cos_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">kfreq</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">Lx</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>              
        <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ny</span>
-          <span class="n">y</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+          <span class="n">y</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
           <span class="n">uy</span><span class="o">=</span><span class="n">ad_cos_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">kfreq</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">Lx</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>              
           <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
-             <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="kt">real</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">real</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
+             <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
              <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="n">ad_cos_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">kfreq</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">Lx</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">uy</span><span class="o">*</span><span class="n">uz</span>
           <span class="k">end do</span>
 <span class="k">       end do</span>

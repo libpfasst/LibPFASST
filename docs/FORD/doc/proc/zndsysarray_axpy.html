@@ -230,7 +230,7 @@ public subroutine zndsysarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E167"></span>class(<a href='../type/zndsysarray.html'>zndsysarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E216"></span>class(<a href='../type/pf_zndsysarray_t.html'>pf_zndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine zndsysarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-a%7E5"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-a%7E8"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine zndsysarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E21"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-x%7E48"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine zndsysarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E64"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E122"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -352,13 +352,13 @@ public subroutine zndsysarray_axpy(this, a, x, flags)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zndsysarray_axpy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">zndsysarray</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">x</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">a</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
 
     <span class="k">select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">zndsysarray</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
     <span class="k">class </span><span class="n">default</span>
        <span class="k">stop</span> <span class="s2">&quot;TYPE ERROR&quot;</span>

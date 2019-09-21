@@ -230,7 +230,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E22"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E103"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E26"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E106"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape_in"></span>integer,</td>
+  <td><span class="anchor" id="variable-shape_in%7E4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -360,8 +360,8 @@ public subroutine pf_level_set_size(pf, level_index, shape_in, buflen_in)
     <span class="kt">integer</span> <span class="kd">::</span>  <span class="n">buflen_local</span>
 
     <span class="c">! Allocate and set shape array for the level</span>
-    <span class="k">allocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="nb">shape</span><span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
-    <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="nb">shape</span> <span class="o">=</span> <span class="n">shape_in</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">lev_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
+    <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">lev_shape</span> <span class="o">=</span> <span class="n">shape_in</span>
 
     <span class="c">!  Set the size of mpi buffer</span>
     <span class="n">buflen_local</span><span class="o">=</span> <span class="nb">product</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span>

@@ -230,7 +230,7 @@ public subroutine ndsysarray_copy(this, src, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E175"></span>class(<a href='../type/ndsysarray.html'>ndsysarray</a>),</td>
+  <td><span class="anchor" id="variable-this%7E53"></span>class(<a href='../type/pf_ndsysarray_t.html'>pf_ndsysarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndsysarray_copy(this, src, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-src%7E4"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-src%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine ndsysarray_copy(this, src, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E71"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E21"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -337,11 +337,11 @@ public subroutine ndsysarray_copy(this, src, flags)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">ndsysarray_copy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">ndsysarray</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">),</span>    <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">src</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="k">select type</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">ndsysarray</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">src</span><span class="p">%</span><span class="n">flatarray</span>
     <span class="k">class </span><span class="n">default</span>
        <span class="k">stop</span> <span class="s2">&quot;TYPE ERROR&quot;</span>

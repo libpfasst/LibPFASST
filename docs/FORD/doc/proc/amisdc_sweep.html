@@ -247,7 +247,7 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E203"></span>class(<a href='../type/pf_amisdc_t.html'>pf_amisdc_t</a>),</td>
+  <td><span class="anchor" id="variable-this"></span>class(<a href='../type/pf_amisdc_t.html'>pf_amisdc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E108"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -277,7 +277,7 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev%7E9"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
+  <td><span class="anchor" id="variable-lev"></span>class(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t0%7E27"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t0%7E3"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -307,7 +307,7 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E40"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E4"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -417,10 +417,10 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f2eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f3eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">t0</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
 
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="k">call </span><span class="n">QA</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
     <span class="k">call </span><span class="n">QB</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
@@ -460,10 +460,10 @@ public subroutine amisdc_sweep(this, pf, lev, t0, dt)
 <span class="k">    call </span><span class="n">lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">))</span>
 
     <span class="c">! Destroy the temporary variables</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsA</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">rhsB</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QA</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">destroy_single</span><span class="p">(</span><span class="n">QB</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>  <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="k">call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TLEVEL</span><span class="o">+</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 

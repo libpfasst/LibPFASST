@@ -228,7 +228,7 @@ public subroutine LocalDerivsAtNode(this, i, nnodes, N_eval, N_deriv)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E248"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E31"></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine LocalDerivsAtNode(this, i, nnodes, N_eval, N_deriv)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nnodes%7E5"></span>integer,</td>
+  <td><span class="anchor" id="variable-nnodes%7E4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -376,7 +376,7 @@ public subroutine LocalDerivsAtNode(this, i, nnodes, N_eval, N_deriv)
 
         <span class="c">! form nonlinear derivative vectors b</span>
         <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                                <span class="c">! loop over derivatives j = 1 ... n</span>
-            <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="kt">real</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">))</span>
+            <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="kt">REAL</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">pfdp</span><span class="p">))</span>
             <span class="k">do </span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span>                                            <span class="c">! look over nodes k = 1 ... n</span>
                 <span class="k">call </span><span class="n">N_deriv</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">w</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">N_eval</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
             <span class="k">end do</span>

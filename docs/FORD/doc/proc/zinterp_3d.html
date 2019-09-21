@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">25 statements</a>
+    title=" 0.1% of total for procedures.">24 statements</a>
      </li> 
      
      
@@ -209,8 +209,6 @@ public subroutine zinterp_3d(this, yhat_c, yhat_f)
 
 
     
-    <p>Interpolate from coarse  level to fine</p>
-    
 
     <h3>Arguments</h3>
     
@@ -230,7 +228,7 @@ public subroutine zinterp_3d(this, yhat_c, yhat_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E82"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E22"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,8 +243,8 @@ public subroutine zinterp_3d(this, yhat_c, yhat_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yhat_c%7E6"></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td><span class="anchor" id="variable-yhat_c%7E3"></span>complex(kind=pfdp),</td>
+  <td>intent(in),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -260,8 +258,8 @@ public subroutine zinterp_3d(this, yhat_c, yhat_f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yhat_f%7E6"></span>complex(kind=pfdp),</td>
-  <td></td>
+  <td><span class="anchor" id="variable-yhat_f%7E3"></span>complex(kind=pfdp),</td>
+  <td>intent(inout),</td>
   <td></td>
   
   <td>pointer</td><td>::</td>
@@ -338,18 +336,16 @@ public subroutine zinterp_3d(this, yhat_c, yhat_f)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">zinterp_3d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">yhat_c</span><span class="p">,</span> <span class="n">yhat_f</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">pointer</span> <span class="kd">::</span> <span class="n">yhat_f</span><span class="p">(:,:,:),</span> <span class="n">yhat_c</span><span class="p">(:,:,:)</span>
+    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>   <span class="k">pointer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">yhat_f</span><span class="p">(:,:,:)</span> 
+    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>   <span class="k">pointer</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">yhat_c</span><span class="p">(:,:,:)</span>
 
-  <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nx_f</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">nx_c</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">nf1</span><span class="p">,</span><span class="n">nf2</span><span class="p">,</span><span class="n">nf3</span><span class="p">,</span><span class="n">nc1</span><span class="p">,</span><span class="n">nc2</span><span class="p">,</span><span class="n">nc3</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nx_f</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">nx_c</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">nf1</span><span class="p">,</span><span class="n">nf2</span><span class="p">,</span><span class="n">nf3</span><span class="p">,</span><span class="n">nc1</span><span class="p">,</span><span class="n">nc2</span><span class="p">,</span><span class="n">nc3</span>
 
-
-    <span class="n">nx_f</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
-    <span class="n">nx_c</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
 
     <span class="n">yhat_f</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
   
-    <span class="n">nx_f</span> <span class="o">=</span> <span class="nb">shape</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
-    <span class="n">nx_c</span> <span class="o">=</span> <span class="nb">shape</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
+    <span class="n">nx_f</span> <span class="o">=</span> <span class="nb">SHAPE</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
+    <span class="n">nx_c</span> <span class="o">=</span> <span class="nb">SHAPE</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
     
     <span class="n">nf1</span><span class="o">=</span><span class="n">nx_f</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="n">nx_c</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span>
     <span class="n">nf2</span><span class="o">=</span><span class="n">nx_f</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">nx_c</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span>

@@ -228,7 +228,7 @@ public subroutine restrict_1d(this, yvec_f, yvec_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E65"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E110"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine restrict_1d(this, yvec_f, yvec_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yvec_f"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yvec_f%7E4"></span>real(kind=pfdp),</td>
   <td></td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine restrict_1d(this, yvec_f, yvec_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-yvec_c"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-yvec_c%7E4"></span>real(kind=pfdp),</td>
   <td></td>
   <td></td>
   
@@ -338,8 +338,8 @@ public subroutine restrict_1d(this, yvec_f, yvec_c)
     <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_abs_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">pointer</span> <span class="kd">::</span> <span class="n">yvec_f</span><span class="p">(:),</span> <span class="n">yvec_c</span><span class="p">(:)</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nx_f</span><span class="p">,</span> <span class="n">nx_c</span><span class="p">,</span><span class="n">irat</span>
-    <span class="n">nx_f</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">yvec_f</span><span class="p">)</span>
-    <span class="n">nx_c</span> <span class="o">=</span> <span class="n">size</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">)</span>
+    <span class="n">nx_f</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_f</span><span class="p">)</span>
+    <span class="n">nx_c</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">)</span>
     <span class="n">irat</span>  <span class="o">=</span> <span class="n">nx_f</span><span class="o">/</span><span class="n">nx_c</span>
 
     <span class="n">yvec_c</span> <span class="o">=</span> <span class="n">yvec_f</span><span class="p">(</span><span class="kd">::</span><span class="n">irat</span><span class="p">)</span>
