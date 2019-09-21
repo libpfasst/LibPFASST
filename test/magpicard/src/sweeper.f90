@@ -133,7 +133,7 @@ contains
   end subroutine initialize
 
 
-  subroutine compute_B(this, y, t, level, f)
+  subroutine compute_B(this, y, t, level_index, f)
     use probin, only: Nprob
 
     
@@ -141,9 +141,9 @@ contains
     class(pf_encap_t), intent(inout) :: y ! prev solution
     class(pf_encap_t), intent(inout) :: f ! output RHS
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
-    type(zndarray), pointer :: L
+    type(pf_zndarray_t), pointer :: L
     complex(pfdp),      pointer :: L_array(:,:), B_array(:,:)
     integer :: i,j,n,m,dhalf,Nmat
     real(pfdp) :: xi,xj,xn,xm,cst
@@ -151,12 +151,12 @@ contains
     L => cast_as_zndarray(y)
     L_array=>get_array2d(y)
     B_array=>get_array2d(f)    
-    Nmat = L%shape(1)  !  Assume square matrix
+    Nmat = L%arr_shape(1)  !  Assume square matrix
     
     if (nprob .eq. 1) then
-       call compute_F_toda(L_array,B_array,Nmat,t,level)
+       call compute_F_toda(L_array,B_array,Nmat,t,level_index)
     else
-       call compute_Facke(L_array,B_array,Nmat,t,level)
+       call compute_Facke(L_array,B_array,Nmat,t,level_index)
     endif
     nullify(L)
     
@@ -167,7 +167,7 @@ contains
     class(magpicard_sweeper_t), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: f(:,:)
 
-    class(zndarray), pointer :: f1, f2
+    class(pf_zndarray_t), pointer :: f1, f2
     complex(pfdp),      pointer :: f1_array(:,:), f2_array(:,:)    
 
     integer :: i, j, k, nnodes, node_offset
@@ -210,7 +210,7 @@ contains
    real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
    integer, intent(in) :: this_node
 
-   class(zndarray), pointer :: omega_p, ints
+   class(pf_zndarray_t), pointer :: omega_p, ints
    integer ::  dim
    complex(pfdp),      pointer :: omega_array(:,:), ints_array(:,:)
    
@@ -296,7 +296,7 @@ contains
    real(pfdp), intent(in) :: coef, nodes(:), qmat(:,:), dt
    integer, intent(in) :: N, this_node
 
-   class(zndarray), pointer :: f1
+   class(pf_zndarray_t), pointer :: f1
    complex(pfdp),      pointer :: f1_array(:,:)
    
    complex(pfdp), allocatable :: tmp(:,:), a(:,:,:)
@@ -349,15 +349,15 @@ contains
 
 
  !> Computes the P_t = U*P_t0*U^dagger
- subroutine propagate_solution(this, sol_t0, sol_tn, omega, level)
+ subroutine propagate_solution(this, sol_t0, sol_tn, omega, level_index)
    use probin, only: nprob, exptol
    class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: sol_t0
    class(pf_encap_t), intent(inout) :: sol_tn
    class(pf_encap_t), intent(inout) :: omega !< Time-evolution operator
-   integer, intent(in) :: level
+   integer, intent(in) :: level_index
    integer :: dim !< size of dimensions of P, U
-   class(zndarray), pointer :: sol_t0_p ! , sol_tn_p, omega_p
+   class(pf_zndarray_t), pointer :: sol_t0_p ! , sol_tn_p, omega_p
    complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
    complex(pfdp),      pointer :: sol_t0_array(:,:), sol_tn_array(:,:),omega_array(:,:)
    
@@ -366,11 +366,11 @@ contains
    sol_tn_array =>get_array2d(sol_tn)       
    omega_array =>get_array2d(omega)       
 
-   dim = sol_t0_p%shape(1)  !  Assumes square matrix
+   dim = sol_t0_p%arr_shape(1)  !  Assumes square matrix
    allocate(tmp(dim, dim), time_ev_op(dim, dim))
 
    time_ev_op = cmplx(0.0, 0.0, pfdp)
-   time_ev_op = compute_matrix_exp(omega_array, dim, exptol(level))
+   time_ev_op = compute_matrix_exp(omega_array, dim, exptol(level_index))
 
    if (nprob < 10) then
       call zgemm('n', 'n', dim, dim, dim, &
@@ -512,7 +512,7 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
     real(pfdp),        intent(in   ) :: t
    integer,           intent(in   ), optional :: flags
 
-   class(zndarray), pointer :: f, g
+   class(pf_zndarray_t), pointer :: f, g
    f => cast_as_zndarray(f_vec)
    g => cast_as_zndarray(c_vec)
 
@@ -527,7 +527,7 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
    real(pfdp),        intent(in   ) :: t
    integer,           intent(in   ), optional :: flags
 
-   class(zndarray), pointer :: f, g
+   class(pf_zndarray_t), pointer :: f, g
    f => cast_as_zndarray(f_vec)
    g => cast_as_zndarray(c_vec)
 
@@ -539,7 +539,7 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
    integer :: i, dim, shp(2)
 
-   shp = shape(matrix)
+   shp = SHAPE(matrix)
    dim = shp(1)
 
    matrix = 0.0_pfdp
@@ -551,7 +551,7 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
    integer :: i, dim, shp(2)
 
-   shp = shape(zmatrix)
+   shp = SHAPE(zmatrix)
    dim = shp(1)
 
    zmatrix = z0

@@ -33,12 +33,12 @@ module pf_mod_magnus_picard
   end type pf_magpicard_t
 
   interface
-     subroutine pf_f_eval_p(this, y, t, level, f)
+     subroutine pf_f_eval_p(this, y, t, level_index, f)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: y
        real(pfdp),        intent(in   ) :: t
-       integer,           intent(in   ) :: level
+       integer,           intent(in   ) :: level_index
        class(pf_encap_t), intent(inout) :: f
      end subroutine pf_f_eval_p
      subroutine pf_compute_single_commutators_p(this, f)
@@ -54,13 +54,13 @@ module pf_mod_magnus_picard
        real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
        integer, intent(in) :: this_node
      end subroutine pf_compute_omega_p
-     subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level)
+     subroutine pf_propagate_solution_p(this, sol_t0, sol_tn, omega, level_index)
        import pf_magpicard_t, pf_encap_t, pfdp
        class(pf_magpicard_t),  intent(inout) :: this
        class(pf_encap_t), intent(inout) :: sol_t0
        class(pf_encap_t), intent(inout) :: omega
        class(pf_encap_t), intent(inout) :: sol_tn
-       integer, intent(in) :: level
+       integer, intent(in) :: level_index
      end subroutine pf_propagate_solution_p
   end interface
 contains
