@@ -23,18 +23,18 @@ module pf_mod_pf_petscVec
   implicit none
 
   !>  Type to create and destroy N-dimenstional arrays 
-  type, extends(pf_factory_t) :: pf_petscVec_factory
+  type, extends(pf_factory_t) :: pf_petscVec_factory_t
    contains
      procedure :: create_single  => pf_petscVec_create_single
      procedure :: create_array  => pf_petscVec_create_array
      procedure :: destroy_single => pf_petscVec_destroy_single
      procedure :: destroy_array => pf_petscVec_destroy_array
-  end type pf_petscVec_factory
-
+  end type pf_petscVec_factory_t
+  
   !>  N-dimensional array type,  extends the abstract encap type
-  type, extends(pf_encap_t) :: pf_petscVec
+  type, extends(pf_encap_t) :: pf_petscVec_t
      integer             :: ndim
-     integer,    allocatable :: shape(:)
+     integer,    allocatable :: arr_shape(:)
      type(tVec) ::  petscVec
      integer :: ierr
    contains
@@ -45,15 +45,15 @@ module pf_mod_pf_petscVec
      procedure :: unpack => pf_petscVec_unpack
      procedure :: axpy => pf_petscVec_axpy
      procedure :: eprint => pf_petscVec_eprint
-  end type pf_petscVec
+  end type pf_petscVec_t
 
 contains
   function cast_as_pf_petscVec(encap_polymorph) result(pf_petscVec_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
-    type(pf_petscVec), pointer :: pf_petscVec_obj
+    type(pf_petscVec_t), pointer :: pf_petscVec_obj
     
     select type(encap_polymorph)
-    type is (pf_petscVec)
+    type is (pf_petscVec_t)
        pf_petscVec_obj => encap_polymorph
     end select
   end function cast_as_pf_petscVec
@@ -66,7 +66,7 @@ contains
 
     integer nn,psize,rank,ierr
     select type (q)
-    class is (pf_petscVec)
+    class is (pf_petscVec_t)
 
        call VecCreate(PETSC_COMM_WORLD,q%petscVec,ierr);CHKERRQ(ierr)
        call VecSetSizes(q%petscVec,PETSC_DECIDE,shape_in(1),ierr);CHKERRQ(ierr)
@@ -75,29 +75,32 @@ contains
        call VecGetLocalSize(q%petscVec,psize,ierr);CHKERRQ(ierr)
        call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr);CHKERRQ(ierr)
 
-       allocate(q%shape(SIZE(shape_in)))
+       allocate(q%arr_shape(SIZE(shape_in)))
        q%ndim   = SIZE(shape_in)
-       q%shape = shape_in
+       q%arr_shape = shape_in
     end select
   end subroutine pf_petscVec_build
 
   !> Subroutine to  create a single array
-  subroutine pf_petscVec_create_single(this, x, level, lev_shape)
-    class(pf_petscVec_factory), intent(inout)              :: this
+  subroutine pf_petscVec_create_single(this, x, level_index, lev_shape)
+    class(pf_petscVec_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
-    integer,                intent(in   )              :: level, lev_shape(:)
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
-    allocate(pf_petscVec::x)
+    allocate(pf_petscVec_t::x)
     call pf_petscVec_build(x, lev_shape)
   end subroutine pf_petscVec_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine pf_petscVec_create_array(this, x, n, level,  lev_shape)
-    class(pf_petscVec_factory), intent(inout)              :: this
+  subroutine pf_petscVec_create_array(this, x, n, level_index,  lev_shape)
+    class(pf_petscVec_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer,                intent(in   )              :: n, level, lev_shape(:)
+    integer,                intent(in   )              :: n
+    integer,                intent(in   )              :: level_index
+    integer,                intent(in   )              :: lev_shape(:)
     integer :: i
-    allocate(pf_petscVec::x(n))
+    allocate(pf_petscVec_t::x(n))
     do i = 1, n
        call pf_petscVec_build(x(i), lev_shape)
     end do
@@ -106,12 +109,12 @@ contains
   !>  Subroutine to destroy array
   subroutine pf_petscVec_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
-    type(pf_petscVec), pointer :: pf_petscVec_obj
+    type(pf_petscVec_t), pointer :: pf_petscVec_obj
     integer ::  ierr
     pf_petscVec_obj => cast_as_pf_petscVec(encap)
 !    print *,'destroying petscVec'
     call VecDestroy(pf_petscVec_obj%petscVec,ierr);CHKERRQ(ierr)
-    deallocate(pf_petscVec_obj%shape)
+    deallocate(pf_petscVec_obj%arr_shape)
 
     nullify(pf_petscVec_obj)
 
@@ -119,14 +122,14 @@ contains
 
   !> Subroutine to destroy an single array
   subroutine pf_petscVec_destroy_single(this, x)
-    class(pf_petscVec_factory), intent(inout)              :: this
+    class(pf_petscVec_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer ::  ierr
 
     select type (x)
-    class is (pf_petscVec)
+    class is (pf_petscVec_t)
        call VecDestroy(x%petscVec,ierr);CHKERRQ(ierr)
-       deallocate(x%shape)
+       deallocate(x%arr_shape)
     end select
     deallocate(x)
   end subroutine pf_petscVec_destroy_single
@@ -134,14 +137,14 @@ contains
 
   !> Subroutine to destroy an array of arrays
   subroutine pf_petscVec_destroy_array(this, x)
-    class(pf_petscVec_factory), intent(inout)              :: this
+    class(pf_petscVec_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout),allocatable :: x(:)
     integer                                            :: i,ierr
     select type(x)
-    class is (pf_petscVec)
+    class is (pf_petscVec_t)
        do i = 1,SIZE(x)
           call VecDestroy(x(i)%petscVec,ierr);CHKERRQ(ierr)
-          deallocate(x(i)%shape)
+          deallocate(x(i)%arr_shape)
        end do
     end select
     deallocate(x)
@@ -153,7 +156,7 @@ contains
   
   !> Subroutine to set array to a scalar  value.
   subroutine pf_petscVec_setval(this, val, flags)
-    class(pf_petscVec), intent(inout)           :: this
+    class(pf_petscVec_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
     call VecSet(this%petscVec,val,this%ierr);CHKERRQ(this%ierr)
@@ -161,14 +164,14 @@ contains
 
   !> Subroutine to copy an array
   subroutine pf_petscVec_copy(this, src, flags)
-    class(pf_petscVec),    intent(inout)           :: this
+    class(pf_petscVec_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: src
     integer,           intent(in   ), optional :: flags
 
     integer m,n ! for debug
 
     select type(src)
-    type is (pf_petscVec)
+    type is (pf_petscVec_t)
 
         call VecGetSize(src%petscVec,m, this%ierr);CHKERRQ(this%ierr)
         call VecGetSize(this%petscVec,n, this%ierr);CHKERRQ(this%ierr)
@@ -182,7 +185,7 @@ contains
 
   !> Subroutine to pack an array into a flat array for sending
   subroutine pf_petscVec_pack(this, z, flags)
-    class(pf_petscVec), intent(in   ) :: this
+    class(pf_petscVec_t), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
 
@@ -199,7 +202,7 @@ contains
 
   !> Subroutine to unpack a flatarray after receiving
   subroutine pf_petscVec_unpack(this, z, flags)
-    class(pf_petscVec), intent(inout) :: this
+    class(pf_petscVec_t), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     integer,     intent(in   ), optional :: flags
 
@@ -216,7 +219,7 @@ contains
 
   !> Subroutine to define the norm of the array (here the max norm)
   function pf_petscVec_norm(this, flags) result (norm)
-    class(pf_petscVec), intent(in   ) :: this
+    class(pf_petscVec_t), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
 
@@ -225,13 +228,13 @@ contains
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
   subroutine pf_petscVec_axpy(this, a, x, flags)
-    class(pf_petscVec),    intent(inout)       :: this
+    class(pf_petscVec_t),    intent(inout)       :: this
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
     select type(x)
-    type is (pf_petscVec)
+    type is (pf_petscVec_t)
 
 
        call VecAXPY(this%petscVec,a,x%petscVec,this%ierr);CHKERRQ(this%ierr)
@@ -243,10 +246,10 @@ contains
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)
   subroutine pf_petscVec_eprint(this,flags)
-    class(pf_petscVec), intent(inout) :: this
+    class(pf_petscVec_t), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
     !  Just print the first few values
-    if (product(this%shape) < 10) then
+    if (product(this%arr_shape) < 10) then
 
     else
 
