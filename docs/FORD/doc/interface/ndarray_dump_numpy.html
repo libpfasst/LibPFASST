@@ -199,7 +199,7 @@
     
       <h2>interface <br>
       
-public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, array) bind(c)
+public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape_in, nvars, array) bind(c)
     
     
    
@@ -288,12 +288,12 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E3"></span>integer(kind=c_int),</td>
+  <td><span class="anchor" id="variable-shape_in%7E3"></span>integer(kind=c_int),</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(ndim)</td><td></td>
+  <td><strong>shape_in</strong>(ndim)</td><td></td>
   
 </tr>
 

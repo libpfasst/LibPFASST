@@ -264,7 +264,7 @@ public subroutine pf_petscVec_build(q, shape_in)
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape_in%7E5"></span>integer,</td>
+  <td><span class="anchor" id="variable-shape_in%7E6"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -347,7 +347,7 @@ public subroutine pf_petscVec_build(q, shape_in)
 
     <span class="kt">integer </span><span class="n">nn</span><span class="p">,</span><span class="n">psize</span><span class="p">,</span><span class="n">rank</span><span class="p">,</span><span class="n">ierr</span>
     <span class="k">select type</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="k">class is</span> <span class="p">(</span><span class="n">pf_petscVec</span><span class="p">)</span>
+    <span class="k">class is</span> <span class="p">(</span><span class="n">pf_petscVec_t</span><span class="p">)</span>
 
        <span class="k">call </span><span class="n">VecCreate</span><span class="p">(</span><span class="n">PETSC_COMM_WORLD</span><span class="p">,</span><span class="n">q</span><span class="p">%</span><span class="n">petscVec</span><span class="p">,</span><span class="n">ierr</span><span class="p">);</span><span class="n">CHKERRQ</span><span class="p">(</span><span class="n">ierr</span><span class="p">)</span>
        <span class="k">call </span><span class="n">VecSetSizes</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">petscVec</span><span class="p">,</span><span class="n">PETSC_DECIDE</span><span class="p">,</span><span class="n">shape_in</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">ierr</span><span class="p">);</span><span class="n">CHKERRQ</span><span class="p">(</span><span class="n">ierr</span><span class="p">)</span>
@@ -356,9 +356,9 @@ public subroutine pf_petscVec_build(q, shape_in)
        <span class="k">call </span><span class="n">VecGetLocalSize</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">petscVec</span><span class="p">,</span><span class="n">psize</span><span class="p">,</span><span class="n">ierr</span><span class="p">);</span><span class="n">CHKERRQ</span><span class="p">(</span><span class="n">ierr</span><span class="p">)</span>
        <span class="k">call </span><span class="n">mpi_comm_rank</span><span class="p">(</span><span class="n">PETSC_COMM_WORLD</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span><span class="n">ierr</span><span class="p">);</span><span class="n">CHKERRQ</span><span class="p">(</span><span class="n">ierr</span><span class="p">)</span>
 
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="nb">shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
        <span class="n">q</span><span class="p">%</span><span class="n">ndim</span>   <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span>
-       <span class="n">q</span><span class="p">%</span><span class="nb">shape</span> <span class="o">=</span> <span class="n">shape_in</span>
+       <span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span> <span class="o">=</span> <span class="n">shape_in</span>
     <span class="k">end select</span>
 <span class="k">  end subroutine </span><span class="n">pf_petscVec_build</span>
 </pre></div>

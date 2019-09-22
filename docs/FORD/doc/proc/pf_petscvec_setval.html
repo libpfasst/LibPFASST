@@ -231,7 +231,7 @@ public subroutine pf_petscVec_setval(this, val, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E269"></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" id="variable-this%7E269"></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -338,7 +338,7 @@ public subroutine pf_petscVec_setval(this, val, flags)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_petscVec_setval</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_petscVec</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_petscVec_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>           <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>     <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">val</span>
     <span class="kt">integer</span><span class="p">,</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="k">call </span><span class="n">VecSet</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">petscVec</span><span class="p">,</span><span class="n">val</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">ierr</span><span class="p">);</span><span class="n">CHKERRQ</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ierr</span><span class="p">)</span>

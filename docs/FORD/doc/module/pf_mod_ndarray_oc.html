@@ -190,9 +190,9 @@
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-ndarray_oc_factory">ndarray_oc_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-pf_ndarray_oc_factory_t">pf_ndarray_oc_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-ndarray_oc">ndarray_oc</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-pf_ndarray_oc_t">pf_ndarray_oc_t</a>
       
     </div>
   </div>
@@ -347,9 +347,9 @@
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-ndarray_oc_factory">ndarray_oc_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-pf_ndarray_oc_factory_t">pf_ndarray_oc_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-ndarray_oc">ndarray_oc</a>
+      <a class="list-group-item" href="../module/pf_mod_ndarray_oc.html#type-pf_ndarray_oc_t">pf_ndarray_oc_t</a>
       
     </div>
   </div>
@@ -449,7 +449,7 @@
     
     
     <h3>
-public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, array) bind(c)
+public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape_in, nvars, array) bind(c)
     
     
    
@@ -540,7 +540,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>shape</strong>(ndim)</td><td></td>
+  <td><strong>shape_in</strong>(ndim)</td><td></td>
   
 </tr>
 
@@ -599,7 +599,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndarray_oc_factory"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndarray_oc_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_ndarray_oc_factory_t.html'>pf_ndarray_oc_factory_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -615,16 +615,16 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc_factory.html#boundprocedure-create_single%7E3'>create_single</a></strong>  => ndarray_oc_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_factory_t.html#boundprocedure-create_single%7E3'>create_single</a></strong>  => ndarray_oc_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc_factory.html#boundprocedure-create_array%7E3'>create_array</a></strong>  => ndarray_oc_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_factory_t.html#boundprocedure-create_array%7E3'>create_array</a></strong>  => ndarray_oc_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc_factory.html#boundprocedure-destroy_single%7E3'>destroy_single</a></strong>  => ndarray_oc_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_factory_t.html#boundprocedure-destroy_single%7E3'>destroy_single</a></strong>  => ndarray_oc_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc_factory.html#boundprocedure-destroy_array%7E3'>destroy_array</a></strong>  => ndarray_oc_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_factory_t.html#boundprocedure-destroy_array%7E3'>destroy_array</a></strong>  => ndarray_oc_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -636,7 +636,7 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
      
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-ndarray_oc"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/ndarray_oc.html'>ndarray_oc</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_ndarray_oc_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -676,11 +676,11 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E3"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td><td></td><td></td>
+  <td><strong>arr_shape</strong>(:)</td><td></td><td></td><td></td>
   
 </tr>
 
@@ -723,25 +723,25 @@ public subroutine ndarray_dump_numpy(dname, fname, endian, ndim, shape, nvars, a
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-setval%7E3'>setval</a></strong>  => ndarray_oc_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-setval%7E3'>setval</a></strong>  => ndarray_oc_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-copy%7E3'>copy</a></strong>  => ndarray_oc_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-copy%7E3'>copy</a></strong>  => ndarray_oc_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-norm%7E3'>norm</a></strong>  => ndarray_oc_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-norm%7E3'>norm</a></strong>  => ndarray_oc_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-pack%7E3'>pack</a></strong>  => ndarray_oc_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-pack%7E3'>pack</a></strong>  => ndarray_oc_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-unpack%7E3'>unpack</a></strong>  => ndarray_oc_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-unpack%7E3'>unpack</a></strong>  => ndarray_oc_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-axpy%7E3'>axpy</a></strong>  => ndarray_oc_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-axpy%7E3'>axpy</a></strong>  => ndarray_oc_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/ndarray_oc.html#boundprocedure-eprint%7E3'>eprint</a></strong>  => ndarray_oc_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_ndarray_oc_t.html#boundprocedure-eprint%7E3'>eprint</a></strong>  => ndarray_oc_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -798,7 +798,7 @@ public function <a href='../proc/ndarray_oc_norm.html'>ndarray_oc_norm</a>(this,
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -893,7 +893,7 @@ public function <a href='../proc/cast_as_ndarray_oc.html'>cast_as_ndarray_oc</a>
   
   
   
-     <h4>Return Value <small>type(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),
+     <h4>Return Value <small>type(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),
   pointer</small></h4>
   
     
@@ -1248,7 +1248,7 @@ public subroutine <a href='../proc/ndarray_oc_create_single.html'>ndarray_oc_cre
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_factory_t.html'>pf_ndarray_oc_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1352,7 +1352,7 @@ public subroutine <a href='../proc/ndarray_oc_create_array.html'>ndarray_oc_crea
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_factory_t.html'>pf_ndarray_oc_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1530,7 +1530,7 @@ public subroutine <a href='../proc/ndarray_oc_destroy_single.html'>ndarray_oc_de
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_factory_t.html'>pf_ndarray_oc_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1604,7 +1604,7 @@ public subroutine <a href='../proc/ndarray_oc_destroy_array.html'>ndarray_oc_des
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc_factory.html'>ndarray_oc_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_factory_t.html'>pf_ndarray_oc_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1678,7 +1678,7 @@ public subroutine <a href='../proc/ndarray_oc_setval.html'>ndarray_oc_setval</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1767,7 +1767,7 @@ public subroutine <a href='../proc/ndarray_oc_copy.html'>ndarray_oc_copy</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1856,7 +1856,7 @@ public subroutine <a href='../proc/ndarray_oc_pack.html'>ndarray_oc_pack</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1945,7 +1945,7 @@ public subroutine <a href='../proc/ndarray_oc_unpack.html'>ndarray_oc_unpack</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2034,7 +2034,7 @@ public subroutine <a href='../proc/ndarray_oc_axpy.html'>ndarray_oc_axpy</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -2270,7 +2270,7 @@ public subroutine <a href='../proc/ndarray_oc_eprint.html'>ndarray_oc_eprint</a>
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   

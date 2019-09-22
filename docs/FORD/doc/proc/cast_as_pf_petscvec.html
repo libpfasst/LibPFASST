@@ -247,7 +247,7 @@ public function cast_as_pf_petscVec(encap_polymorph) result(pf_petscVec_obj)
     
     
     
-   <h3>Return Value <small><span class="anchor" id="variable-pf_petscvec_obj"></span>type(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),
+   <h3>Return Value <small><span class="anchor" id="variable-pf_petscvec_obj"></span>type(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),
   pointer</small></h3>
     
     
@@ -315,10 +315,10 @@ public function cast_as_pf_petscVec(encap_polymorph) result(pf_petscVec_obj)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">cast_as_pf_petscVec</span><span class="p">(</span><span class="n">encap_polymorph</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">pf_petscVec_obj</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">encap_polymorph</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_petscVec</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">pf_petscVec_obj</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_petscVec_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">pf_petscVec_obj</span>
     
     <span class="k">select type</span><span class="p">(</span><span class="n">encap_polymorph</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_petscVec</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_petscVec_t</span><span class="p">)</span>
        <span class="n">pf_petscVec_obj</span> <span class="o">=&gt;</span> <span class="n">encap_polymorph</span>
     <span class="k">end select</span>
 <span class="k">  end function </span><span class="n">cast_as_pf_petscVec</span>

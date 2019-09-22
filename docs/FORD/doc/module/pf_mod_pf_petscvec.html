@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.1% of total for modules and submodules.">192 statements</a>
+    title=" 2.1% of total for modules and submodules.">195 statements</a>
      </li> 
      
      
@@ -178,9 +178,9 @@
   <div id="types-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_factory">pf_petscVec_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_factory_t">pf_petscVec_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec">pf_petscVec</a>
+      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_t">pf_petscVec_t</a>
       
     </div>
   </div>
@@ -313,9 +313,9 @@
   <div id="types-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_factory">pf_petscVec_factory</a>
+      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_factory_t">pf_petscVec_factory_t</a>
       
-      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec">pf_petscVec</a>
+      <a class="list-group-item" href="../module/pf_mod_pf_petscvec.html#type-pf_petscvec_t">pf_petscVec_t</a>
       
     </div>
   </div>
@@ -399,7 +399,7 @@
    
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-pf_petscvec_factory"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_petscvec_factory.html'>pf_petscVec_factory</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_petscvec_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_petscvec_factory_t.html'>pf_petscVec_factory_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -415,16 +415,16 @@
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory.html#boundprocedure-create_single%7E7'>create_single</a></strong>  => pf_petscVec_create_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory_t.html#boundprocedure-create_single%7E7'>create_single</a></strong>  => pf_petscVec_create_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory.html#boundprocedure-create_array%7E7'>create_array</a></strong>  => pf_petscVec_create_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory_t.html#boundprocedure-create_array%7E7'>create_array</a></strong>  => pf_petscVec_create_array </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory.html#boundprocedure-destroy_single%7E7'>destroy_single</a></strong>  => pf_petscVec_destroy_single </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory_t.html#boundprocedure-destroy_single%7E7'>destroy_single</a></strong>  => pf_petscVec_destroy_single </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory.html#boundprocedure-destroy_array%7E7'>destroy_array</a></strong>  => pf_petscVec_destroy_array </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_factory_t.html#boundprocedure-destroy_array%7E7'>destroy_array</a></strong>  => pf_petscVec_destroy_array </td>
        <td></td></tr>
       
        </tbody>
@@ -436,7 +436,7 @@
      
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="type-pf_petscvec"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_petscvec.html'>pf_petscVec</a>
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_petscvec_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>
     
   </h3></div>
   <div class="panel-body">
@@ -476,11 +476,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-shape%7E2"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E6"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
-  <td><strong>shape</strong>(:)</td><td></td><td></td><td></td>
+  <td><strong>arr_shape</strong>(:)</td><td></td><td></td><td></td>
   
 </tr>
 
@@ -523,25 +523,25 @@
       <table class="table table-striped varlist">
       <tbody>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-setval%7E7'>setval</a></strong>  => pf_petscVec_setval </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-setval%7E7'>setval</a></strong>  => pf_petscVec_setval </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-copy%7E7'>copy</a></strong>  => pf_petscVec_copy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-copy%7E7'>copy</a></strong>  => pf_petscVec_copy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-norm%7E7'>norm</a></strong>  => pf_petscVec_norm </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-norm%7E7'>norm</a></strong>  => pf_petscVec_norm </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-pack%7E7'>pack</a></strong>  => pf_petscVec_pack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-pack%7E7'>pack</a></strong>  => pf_petscVec_pack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-unpack%7E7'>unpack</a></strong>  => pf_petscVec_unpack </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-unpack%7E7'>unpack</a></strong>  => pf_petscVec_unpack </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-axpy%7E7'>axpy</a></strong>  => pf_petscVec_axpy </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-axpy%7E7'>axpy</a></strong>  => pf_petscVec_axpy </td>
        <td></td></tr>
       
-       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec.html#boundprocedure-eprint%7E7'>eprint</a></strong>  => pf_petscVec_eprint </td>
+       <tr><td>procedure, public :: <strong><a href='../type/pf_petscvec_t.html#boundprocedure-eprint%7E7'>eprint</a></strong>  => pf_petscVec_eprint </td>
        <td></td></tr>
       
        </tbody>
@@ -610,7 +610,7 @@ public function <a href='../proc/cast_as_pf_petscvec.html'>cast_as_pf_petscVec</
   
   
   
-     <h4>Return Value <small>type(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),
+     <h4>Return Value <small>type(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),
   pointer</small></h4>
   
     
@@ -658,7 +658,7 @@ public function <a href='../proc/pf_petscvec_norm.html'>pf_petscVec_norm</a>(thi
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -787,7 +787,7 @@ public subroutine <a href='../proc/pf_petscvec_build.html'>pf_petscVec_build</a>
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_petscvec_create_single"></span><h3>
-public subroutine <a href='../proc/pf_petscvec_create_single.html'>pf_petscVec_create_single</a>(this, x, level, lev_shape)
+public subroutine <a href='../proc/pf_petscvec_create_single.html'>pf_petscVec_create_single</a>(this, x, level_index, lev_shape)
     
     
    
@@ -823,7 +823,7 @@ public subroutine <a href='../proc/pf_petscvec_create_single.html'>pf_petscVec_c
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory.html'>pf_petscVec_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory_t.html'>pf_petscVec_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -858,7 +858,7 @@ public subroutine <a href='../proc/pf_petscvec_create_single.html'>pf_petscVec_c
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -891,7 +891,7 @@ public subroutine <a href='../proc/pf_petscvec_create_single.html'>pf_petscVec_c
     
   <div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="proc-pf_petscvec_create_array"></span><h3>
-public subroutine <a href='../proc/pf_petscvec_create_array.html'>pf_petscVec_create_array</a>(this, x, n, level, lev_shape)
+public subroutine <a href='../proc/pf_petscvec_create_array.html'>pf_petscVec_create_array</a>(this, x, n, level_index, lev_shape)
     
     
    
@@ -927,7 +927,7 @@ public subroutine <a href='../proc/pf_petscvec_create_array.html'>pf_petscVec_cr
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory.html'>pf_petscVec_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory_t.html'>pf_petscVec_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -977,7 +977,7 @@ public subroutine <a href='../proc/pf_petscvec_create_array.html'>pf_petscVec_cr
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>level</strong></td><td></td>
+  <td><strong>level_index</strong></td><td></td>
   
 </tr>
 
@@ -1105,7 +1105,7 @@ public subroutine <a href='../proc/pf_petscvec_destroy_single.html'>pf_petscVec_
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory.html'>pf_petscVec_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory_t.html'>pf_petscVec_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1179,7 +1179,7 @@ public subroutine <a href='../proc/pf_petscvec_destroy_array.html'>pf_petscVec_d
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory.html'>pf_petscVec_factory</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_factory_t.html'>pf_petscVec_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1253,7 +1253,7 @@ public subroutine <a href='../proc/pf_petscvec_setval.html'>pf_petscVec_setval</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1342,7 +1342,7 @@ public subroutine <a href='../proc/pf_petscvec_copy.html'>pf_petscVec_copy</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1431,7 +1431,7 @@ public subroutine <a href='../proc/pf_petscvec_pack.html'>pf_petscVec_pack</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -1520,7 +1520,7 @@ public subroutine <a href='../proc/pf_petscvec_unpack.html'>pf_petscVec_unpack</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1609,7 +1609,7 @@ public subroutine <a href='../proc/pf_petscvec_axpy.html'>pf_petscVec_axpy</a>(t
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -1713,7 +1713,7 @@ public subroutine <a href='../proc/pf_petscvec_eprint.html'>pf_petscVec_eprint</
   
 <tr>
   
-  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" ></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   

@@ -339,7 +339,7 @@ public function get_array1d_oc(x, flags) result(r)
 <span class="c">!     if(.not.present(flags)) print *, &quot;array1d_oc without flags&quot;</span>
     
     <span class="k">select type</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">ndarray_oc</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndarray_oc_t</span><span class="p">)</span>
       <span class="k">select case</span> <span class="p">(</span><span class="n">which</span><span class="p">)</span>
         <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
           <span class="n">r</span> <span class="o">=&gt;</span> <span class="n">x</span><span class="p">%</span><span class="n">yflatarray</span>

@@ -247,7 +247,7 @@ public function cast_as_ndarray_oc(encap_polymorph) result(ndarray_oc_obj)
     
     
     
-   <h3>Return Value <small><span class="anchor" id="variable-ndarray_oc_obj"></span>type(<a href='../type/ndarray_oc.html'>ndarray_oc</a>),
+   <h3>Return Value <small><span class="anchor" id="variable-ndarray_oc_obj"></span>type(<a href='../type/pf_ndarray_oc_t.html'>pf_ndarray_oc_t</a>),
   pointer</small></h3>
     
     
@@ -315,10 +315,10 @@ public function cast_as_ndarray_oc(encap_polymorph) result(ndarray_oc_obj)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">function </span><span class="n">cast_as_ndarray_oc</span><span class="p">(</span><span class="n">encap_polymorph</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">ndarray_oc_obj</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">target</span> <span class="kd">::</span> <span class="n">encap_polymorph</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">ndarray_oc</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">ndarray_oc_obj</span>
+    <span class="k">type</span><span class="p">(</span><span class="n">pf_ndarray_oc_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">ndarray_oc_obj</span>
     
     <span class="k">select type</span><span class="p">(</span><span class="n">encap_polymorph</span><span class="p">)</span>
-    <span class="k">type is</span> <span class="p">(</span><span class="n">ndarray_oc</span><span class="p">)</span>
+    <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndarray_oc_t</span><span class="p">)</span>
        <span class="n">ndarray_oc_obj</span> <span class="o">=&gt;</span> <span class="n">encap_polymorph</span>
     <span class="k">class </span><span class="n">default</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Type error&#39;</span><span class="p">)</span>

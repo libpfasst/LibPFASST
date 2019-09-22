@@ -230,7 +230,7 @@ public subroutine pf_petscVec_eprint(this, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E274"></span>class(<a href='../type/pf_petscvec.html'>pf_petscVec</a>),</td>
+  <td><span class="anchor" id="variable-this%7E274"></span>class(<a href='../type/pf_petscvec_t.html'>pf_petscVec_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -322,10 +322,10 @@ public subroutine pf_petscVec_eprint(this, flags)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_petscVec_eprint</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_petscVec</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+    <span class="k">class</span><span class="p">(</span><span class="n">pf_petscVec_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="c">!  Just print the first few values</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="nb">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="k">then</span>
 
 <span class="k">    else</span>
 

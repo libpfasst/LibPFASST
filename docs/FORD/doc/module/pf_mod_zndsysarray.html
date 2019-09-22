@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 2.2% of total for modules and submodules.">198 statements</a>
+    title=" 2.1% of total for modules and submodules.">189 statements</a>
      </li> 
      
      
@@ -169,18 +169,6 @@
 
 
 
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
-  <div id="inters-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#interface-zndsysarray_dump_numpy">zndsysarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -325,18 +313,6 @@
 
 
 
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
-  <div id="inters-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../module/pf_mod_zndsysarray.html#interface-zndsysarray_dump_numpy">zndsysarray_dump_numpy</a>
-      
-    </div>
-  </div>
-</div>
-
-
 
 
 <div class="panel panel-primary">
@@ -426,171 +402,6 @@
     
     
     
-    
-    <section>
-   <h2>Interfaces</h2>
-   
-     
-<div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="interface-zndsysarray_dump_numpy"></span><h3>interface 
-    
-  </h3></div>
-  
-  <div class="panel-body">
-    
-    <p>Interfaces to output routines in pf_numpy.c</p>
-  </div>
-  
-  <ul class="list-group">
-  
-    <li class="list-group-item">
-    
-    
-    <h3>
-public subroutine zndsysarray_dump_numpy(dname, fname, endian, ndim, mpibuflen, arr_shape, array) bind(c)
-    
-    
-   
-</h3>
-    
-
-
-
-<p>Subroutine to write an the array to a file</p>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>fname</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>character(len=c_char),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>endian</strong>(5)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>ndim</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>value</td><td>::</td>
-  <td><strong>mpibuflen</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>arr_shape</strong>(ndim)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=c_double),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>array</strong>(mpibuflen)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-    </li>
-  
-  </ul>
-</div>
-
-    
-    </section>
-  <br>
     
 
     
@@ -706,7 +517,7 @@ public subroutine zndsysarray_dump_numpy(dname, fname, endian, ndim, mpibuflen, 
   
 <tr>
   
-  <td><span class="anchor" id="variable-arr_shape%7E4"></span>integer,</td>
+  <td><span class="anchor" id="variable-arr_shape%7E5"></span>integer,</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
