@@ -23,7 +23,7 @@ contains
 
   subroutine evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objective, L2NormUSq, savedAdjoint, predictAdj)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc),          intent(inout) :: q1
+    type(pf_ndarray_oc_t),     intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha
     integer,                   intent(in   ) :: nsteps
     logical,                   intent(in   ) :: predict
@@ -107,7 +107,7 @@ contains
   ! how to do that dimension independent? this is just for 1d because of the gradient array
   subroutine evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedAdjoint)
     type(pf_pfasst_t),        intent(inout) :: pf
-    type(ndarray_oc), target, intent(inout) :: q1
+    type(pf_ndarray_oc_t), target, intent(inout) :: q1
     real(pfdp),               intent(in   ) :: dt
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
@@ -205,7 +205,7 @@ contains
   subroutine armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
                          globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc), target,  intent(inout) :: q1
+    type(pf_ndarray_oc_t), target,  intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint
@@ -261,7 +261,7 @@ contains
 !                    pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
 !                    globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepTooSmall, globObjLowIn)
 !      type(pf_pfasst_t),         intent(inout) :: pf
-!      type(ndarray_oc), target,  intent(inout) :: q1
+!      type(pf_ndarray_oc_t), target,  intent(inout) :: q1
 !      real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
 !      integer,                   intent(in   ) :: nsteps
 !      integer,                   intent(inout) :: itersState, itersAdjoint
@@ -341,7 +341,7 @@ contains
 !    subroutine wolfe_powell_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
 !                                 globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
 !     type(pf_pfasst_t),         intent(inout) :: pf
-!     type(ndarray_oc), target,  intent(inout) :: q1
+!     type(pf_ndarray_oc_t), target,  intent(inout) :: q1
 !     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
 !     integer,                   intent(in   ) :: nsteps
 !     integer,                   intent(inout) :: itersState, itersAdjoint
@@ -421,7 +421,7 @@ contains
   subroutine strong_wolfe_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
                           globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc), target,  intent(inout) :: q1
+    type(pf_ndarray_oc_t), target,  intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint

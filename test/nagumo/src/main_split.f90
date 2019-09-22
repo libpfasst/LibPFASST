@@ -18,7 +18,7 @@ program main
   class(ad_sweeper_t), pointer   :: ad_sweeper_ptr     !<  pointer to SDC sweeper 
 
 
-  type(ndarray_oc) :: q1, qend
+  type(pf_ndarray_oc_t) :: q1, qend
   integer        :: ierror, iprovided, l, m, k, i, p
   character(len = 64) :: fout
   character(len =128) :: logfilename
@@ -75,7 +75,7 @@ program main
 
        !  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
-       allocate(ndarray_oc_factory::pf%levels(l)%ulevel%factory)
+       allocate(pf_ndarray_oc_factory_t::pf%levels(l)%ulevel%factory)
 
        !  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
