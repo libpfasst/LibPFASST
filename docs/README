@@ -32,5 +32,9 @@ Unfortunately the second step currently fails unless the include statements in t
 
 3.  commit the new files to the git repo  (on the gh-pages branch!)
 
+A good start is
+
+git add doc/index.html doc/*/*.html
+
 This should update the documentation page at
 https://libpfasst.github.io/LibPFASST/
