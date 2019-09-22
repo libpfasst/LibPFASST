@@ -14,7 +14,7 @@
 !!   allocate(pf%levels_lev(1)%shape(2))
 !!   pf%levels(1)%shape_lev = [ 3, 10 ]
 !!
-module pf_mod_pf_petscVec
+module pf_mod_petscVec
 #include <petsc/finclude/petscvec.h>
   use iso_c_binding
   use pf_mod_dtype
@@ -257,4 +257,4 @@ contains
   end subroutine pf_petscVec_eprint
 
 
-end module pf_mod_pf_petscVec
+end module pf_mod_petscVec
