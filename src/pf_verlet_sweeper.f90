@@ -344,7 +344,7 @@ contains
 !!$          end do
 !!$       end do
 !!$       this%QQmat = matmul(this%QQmat,this%Qmat)
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%whichQQ)
     end select
 

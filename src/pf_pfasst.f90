@@ -501,7 +501,7 @@ contains
        write(un,*) 'qtype:', pf%qtype,'! Uniform  nodes are used'
     case (SDC_CHEBYSHEV)
        write(un,*) 'qtype:', pf%qtype,'! Chebyshev  nodes are used'
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',pf%qtype)
     end select
 

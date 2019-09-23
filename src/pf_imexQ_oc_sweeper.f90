@@ -633,7 +633,7 @@ contains
             call lev%F(m,p)%copy(lev%F(lev%nnodes,p), 2)
           end do
         end do
-      case default
+      case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
 

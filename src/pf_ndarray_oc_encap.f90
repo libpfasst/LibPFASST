@@ -77,7 +77,7 @@ contains
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_oc_build
@@ -135,7 +135,7 @@ contains
        deallocate(x%pflatarray)
        deallocate(x%yflatarray)
        deallocate(x%arr_shape)
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
     deallocate(x)
@@ -154,7 +154,7 @@ contains
           deallocate(x(i)%yflatarray)
           deallocate(x(i)%arr_shape)
        end do
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
     deallocate(x)
@@ -180,7 +180,7 @@ contains
       this%yflatarray = val
     case (2)
       this%pflatarray = val
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Select case error',which)
     end select
 
@@ -207,10 +207,10 @@ contains
         this%yflatarray = src%yflatarray
       case (2)
         this%pflatarray = src%pflatarray
-      case default
+      case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
       end select
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end subroutine ndarray_oc_copy
@@ -235,7 +235,7 @@ contains
        z = this%yflatarray
     case (2)
        z = this%pflatarray
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end subroutine ndarray_oc_pack
@@ -257,7 +257,7 @@ contains
        this%yflatarray = z
     case (2)
        this%pflatarray = z 
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end subroutine ndarray_oc_unpack
@@ -281,7 +281,7 @@ contains
        norm = maxval(abs(this%yflatarray))
     case (2)
        norm = maxval(abs(this%pflatarray))  
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
   end function ndarray_oc_norm
@@ -309,10 +309,10 @@ contains
         this%yflatarray = a * x%yflatarray + this%yflatarray
       case (2)
         this%pflatarray = a * x%pflatarray + this%pflatarray
-      case default
+      case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
       end select
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select  
   end subroutine ndarray_oc_axpy
@@ -326,7 +326,7 @@ contains
     select type(encap_polymorph)
     type is (pf_ndarray_oc_t)
        ndarray_oc_obj => encap_polymorph
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function cast_as_ndarray_oc
@@ -349,10 +349,10 @@ contains
           r => x%yflatarray
         case (2)
           r => x%pflatarray
-       case default
+       case DEFAULT
           call pf_stop(__FILE__,__LINE__,'gerarray1d: only 1, 2 allowed as flags, which=',which)
        end select
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array1d_oc
@@ -375,10 +375,10 @@ contains
           r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%yflatarray
         case (2)
           r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%pflatarray
-       case default
+       case DEFAULT
           call pf_stop(__FILE__,__LINE__,'gerarray2d: only 1, 2 allowed as flags, which=',which)          
        end select
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array2d_oc
@@ -398,10 +398,10 @@ contains
           r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%yflatarray
         case (2)
           r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%pflatarray
-        case default
+        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'gerarray3d: only 1, 2 allowed as flags, which=',which)          
        end select
-    class default
+    class DEFAULT
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
   end function get_array3d_oc

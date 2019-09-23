@@ -209,7 +209,7 @@ contains
     print *,msg
     if (present(N))   print *,'value=',N
     print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    call EXIT(0)
+    call EXIT(-1)
     
   end subroutine pf_stop
 

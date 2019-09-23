@@ -384,8 +384,7 @@ contains
        do j = 1, nnodes
           flags(j) = ibset(flags(j), 0)
        end do
-
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',qtype)
     end select
 
