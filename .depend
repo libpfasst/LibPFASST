@@ -29,4 +29,4 @@
 ./build/pf_misdcQ_oc_sweeper.o : src/pf_misdcQ_oc_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_verlet_sweeper.o : src/pf_verlet_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_fftpack.o : src/pf_fftpack.f90 ./build/pf_fft.o ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_mpi.o : src/pf_mpi.f90 ./build/pf_dtype.o 
+./build/pf_mpi.o : src/pf_mpi.f90 ./build/pf_utils.o ./build/pf_dtype.o 

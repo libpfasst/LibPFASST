@@ -47,6 +47,7 @@ contains
   !! This should be called soon after adding levels to the PFASST controller 
   subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
+    use pf_mod_utils, only: pf_stop
 
     type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator 
     type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
