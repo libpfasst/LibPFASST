@@ -55,8 +55,7 @@ contains
 
     !>  allocate level pointers
     allocate(pf%levels(pf%nlevels),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
-         "allocate error",pf%nlevels)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error",pf%nlevels)
     !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        pf%levels(l)%index = l
@@ -69,17 +68,14 @@ contains
     
     !>  allocate hooks
     allocate(pf%hooks(pf%nlevels, PF_MAX_HOOK, PF_MAX_HOOKS),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
-         "allocate error hooks")
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error hooks")
     allocate(pf%nhooks(pf%nlevels, PF_MAX_HOOK),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
-         "allocate error nhooks")
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error nhooks")
     pf%nhooks = 0
 
     !>  allocate status
     allocate(pf%state,stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,&
-         "allocate error state")
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error state")
     pf%state%pstatus = 0
     pf%state%status  = 0
 
@@ -93,10 +89,10 @@ contains
     integer, intent(in)  ::  shape_in(:)
     integer, intent(in),optional  ::  buflen_in
 
-    integer ::  buflen_local
+    integer ::  buflen_local,ierr
 
     ! Allocate and set shape array for the level
-    allocate(pf%levels(level_index)%lev_shape(SIZE(shape_in)))
+    allocate(pf%levels(level_index)%lev_shape(SIZE(shape_in)),stat=ierr)
     pf%levels(level_index)%lev_shape = shape_in
 
     !  Set the size of mpi buffer
@@ -127,12 +123,10 @@ contains
     do l = pf%nlevels, 2, -1
        f_lev => pf%levels(l); c_lev => pf%levels(l-1)
        allocate(f_lev%tmat(f_lev%nnodes,c_lev%nnodes),stat=ierr)
-       if (ierr /= 0) &
-          call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
+       if (ierr /= 0)  call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
 
        allocate(f_lev%rmat(c_lev%nnodes,f_lev%nnodes),stat=ierr)
-       if (ierr /= 0) &
-          call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
+       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
        
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels

@@ -2,7 +2,7 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Old style Asynchronous MISDC sweeper
+!> Module for old style Asynchronous MISDC sweeper
 module pf_mod_amisdc
   use pf_mod_dtype
   use pf_mod_utils
@@ -183,13 +183,15 @@ contains
     class(pf_level_t), intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
-    integer    :: m, nnodes
+    integer    :: m, nnodes,ierr
 
     this%npieces = 3
 
     nnodes = lev%nnodes
-    allocate(this%SdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%SdiffI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%SdiffE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+    allocate(this%SdiffI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
 
     this%SdiffE = lev%s0mat
     this%SdiffI = lev%s0mat

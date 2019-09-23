@@ -2,17 +2,11 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Module with useful subroutines that don't  fit in other modules
+!> Module defining exact solutions for various PDEs
 module pf_mod_solutions
   use pf_mod_dtype
   implicit none
-  
 
-
-
-  !  Advection diffusion example
-!  procedure, private  :: exact_ad_1d, exact_ad_2d, exact_ad_3d,zexact_ad_1d, zexact_ad_2d, zexact_ad_3d  
-!  generic :: exact_ad => exact_ad_1d, exact_ad_2d, exact_ad_3d,zexact_ad_1d, zexact_ad_2d, zexact_ad_3d  
   interface exact_ad_cos
      module procedure exact_ad_cos_1d
      module procedure exact_ad_cos_1dz

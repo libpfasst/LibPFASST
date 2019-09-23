@@ -2,16 +2,15 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  IMEX Sweeper Module
-!!  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
+!>  Module for the IMEX Sweeper  of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
 !!         $$   y' = f_1(y) + f_2(y)  $$
-!!  The \(f_1\) piece is treated explicitly and \(f_2\) implicitl
+!!  The \(f_1\) piece is treated explicitly and \(f_2\) implicitly
 !!  Afer this sweeper is initialized (usually in main), the logical flags can be changed if desired
-!!
+!! ---
 !!     explicit:  Make false if there is no explicit piece
 !!
 !!     implicit:  Make false if there is no implicit piece
-!!
+!! ---
 !!  The user needs to supply the feval and fcomp routines for a given example
 module pf_mod_imex_sweeper
   use pf_mod_dtype

@@ -157,18 +157,23 @@ contains
     class(pf_misdcQ_t), intent(inout) :: this
     type(pf_pfasst_t),  target, intent(inout) :: pf
     integer,              intent(in)    :: level_index    
-    integer    :: m, n, nnodes
+    integer    :: m, n, nnodes,ierr
     type(pf_level_t), pointer:: lev
     lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 3
 
     nnodes = lev%nnodes
-    allocate(this%QdiffE(nnodes-1,nnodes)) ! S-FE
-    allocate(this%QdiffI(nnodes-1,nnodes)) ! S-BE 
-    allocate(this%QtilE(nnodes-1,nnodes)) ! S-FE
-    allocate(this%QtilI(nnodes-1,nnodes)) ! S-BE
-    allocate(this%dtsdc(nnodes-1))
+    allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr) ! S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr) ! S-BE 
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QtilE(nnodes-1,nnodes),stat=ierr) ! S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QtilI(nnodes-1,nnodes),stat=ierr) ! S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%dtsdc(nnodes-1),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
     

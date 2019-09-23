@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 
-!> N-ndimensional complex array encapsulation.
+!> Module to define and encapsulation for an N-ndimensional complex array 
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'lev_shape' attribute to create a new array with that
@@ -67,11 +67,13 @@ module pf_mod_zndarray
     integer,           intent(in   ) :: shape_in(:)
 
     type(pf_zndarray_t), pointer :: zndarray_obj
-
+    integer :: ierr
     select type (q)
     class is (pf_zndarray_t)
-       allocate(q%arr_shape(SIZE(shape_in)))
-       allocate(q%flatarray(product(shape_in)))
+       allocate(q%arr_shape(SIZE(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                         
+       allocate(q%flatarray(product(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                         
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
        q%flatarray = cmplx(0.0, 0.0,pfdp)
@@ -100,7 +102,9 @@ module pf_mod_zndarray
     integer, intent(in) :: level_index
     integer, intent(in) :: lev_shape(:)
 
-    allocate(pf_zndarray_t::x)
+    integer :: ierr
+    allocate(pf_zndarray_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                      
     call zndarray_build(x, lev_shape)
 
   end subroutine zndarray_create_single
@@ -112,9 +116,11 @@ module pf_mod_zndarray
     integer, intent(in) :: n
     integer, intent(in) :: level_index
     integer, intent(in) :: lev_shape(:)
-    integer :: i
+    integer :: i,ierr
 
-    allocate(pf_zndarray_t::x(n))
+    allocate(pf_zndarray_t::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                      
+    
     do i = 1, n
        call zndarray_build(x(i), lev_shape)
     end do

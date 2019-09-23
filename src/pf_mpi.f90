@@ -2,9 +2,8 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module to hold include statement
+!>  Module to hold use mpi statement
 module pf_mod_mpi
-  !  include "mpif.h"
   use  mpi
 end module pf_mod_mpi
 
@@ -57,8 +56,10 @@ contains
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
 
     !>  allocate arrarys for and and receive requests
-    allocate(pf_comm%recvreq(pf%nlevels))
-    allocate(pf_comm%sendreq(pf%nlevels))
+    allocate(pf_comm%recvreq(pf%nlevels),stat=ierror)
+    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
+    allocate(pf_comm%sendreq(pf%nlevels),stat=ierror)
+    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)    
 
     pf_comm%sendreq = MPI_REQUEST_NULL
     pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive

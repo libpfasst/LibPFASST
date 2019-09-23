@@ -209,7 +209,7 @@ contains
     print *,msg
     if (present(N))   print *,'value=',N
     print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    stop
+    call EXIT(0)
     
   end subroutine pf_stop
 
@@ -270,7 +270,7 @@ contains
     which = 2;      if(present(flags)) which = flags
     
     if( which /= 2 ) &
-      stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
+         call pf_stop(__FILE__,__LINE__,'pf_apply_mat_backward can only be used for restricting the backward integrals with which==2')
 
     n = SIZE(mat, dim=1)
     m = SIZE(mat, dim=2)
