@@ -30,7 +30,7 @@ contains
     class(pf_level_t), pointer :: c_lev    
     class(pf_level_t), pointer :: f_lev
 
-    integer    :: m, step
+    integer    :: m, step,ierr
 
     real(pfdp), allocatable :: c_times(:)  !!  Simulation time at coarse nodes  
     real(pfdp), allocatable :: f_times(:)  !!  Simulation time at fine nodes
@@ -46,8 +46,10 @@ contains
     call start_timer(pf, TRESTRICT + level_index - 1)
     
 
-    allocate(c_times(c_lev%nnodes))
-    allocate(f_times(f_lev%nnodes))
+    allocate(c_times(c_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+    allocate(f_times(f_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
 
     !> restrict q's and recompute f's
     c_times = t0 + dt*c_lev%nodes

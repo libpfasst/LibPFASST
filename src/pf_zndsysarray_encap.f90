@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 
-!> System of complex N-dimensional arrays encapsulation.
+!> !> Module to define and encapsulation for a system of N-ndimensional complex arrays 
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'lev_shape' attribute to create a new multi-component array with that
@@ -59,15 +59,21 @@ contains
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: arr_shape(:)
 
+    integer :: ierr
+
     select type (q)
     class is (pf_zndsysarray_t)
-       allocate(q%arr_shape(SIZE(arr_shape)))
+       allocate(q%arr_shape(SIZE(arr_shape)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                      
+       
        q%ndim   = SIZE(arr_shape)-1
        q%ncomp = arr_shape(q%ndim+1)
        q%ndof = product(arr_shape(1:q%ndim))
        q%arr_shape = arr_shape
 
-       allocate(q%flatarray(product(arr_shape)))
+       allocate(q%flatarray(product(arr_shape)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
+       
     end select
   end subroutine zndsysarray_build
 
@@ -77,8 +83,9 @@ contains
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_zndsysarray_t::x)
+    integer :: i,ierr
+    allocate(pf_zndsysarray_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
     call zndsysarray_build(x, lev_shape)
   end subroutine zndsysarray_create_single
 
@@ -89,8 +96,9 @@ contains
     integer,                intent(in   )              :: n
     integer,                intent(in   )              ::  level_index
     integer,                intent(in   )              ::  lev_shape(:)
-    integer :: i
-    allocate(pf_zndsysarray_t::x(n))
+    integer :: i,ierr
+    allocate(pf_zndsysarray_t::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                 
     do i = 1, n
        call zndsysarray_build(x(i), lev_shape)
     end do
@@ -161,7 +169,7 @@ contains
     type is (pf_zndsysarray_t)
        this%flatarray = src%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'unsupported type ')
     end select
   end subroutine zndsysarray_copy
 
@@ -204,12 +212,12 @@ contains
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
-
+    if (a .eq. 0.0_pfdp) return
     select type(x)
     type is (pf_zndsysarray_t)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'unsupported type ')
     end select
   end subroutine zndsysarray_axpy
 

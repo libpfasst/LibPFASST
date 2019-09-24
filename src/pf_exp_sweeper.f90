@@ -1,4 +1,4 @@
-!!  Exponential integrator sweeper  module 
+!! Module for Exponential-SDC  sweeper
 ! =====================================================================================
 ! MODULE: pf_mod_exp
 ! !> @author
@@ -6,8 +6,8 @@
 !
 ! Last Modified: Dec 28, 2018
 !
-!> Exponential integrator module
-!!
+!> Module for Exponential-SDC sweeper.
+!! ==================================
 !!  This module extends pf_sweeper_t and is used for creating an exponential sweeper 
 !!  that solves equations of the form
 !!         $$   y' = L y + N(t,y)  $$
@@ -222,20 +222,25 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
         
         ! local variables
-        integer :: i, nnodes
+        integer :: i, nnodes,ierr
         real(pfdp), allocatable :: q(:)
 
         type(pf_level_t), pointer :: lev
         lev => pf%levels(level_index)
         nnodes = lev%nnodes
-        allocate(this%eta(nnodes - 1))
-        allocate(this%nodes(nnodes))
-        allocate(q(nnodes))
+        allocate(this%eta(nnodes - 1),stat=ierr)
+        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+        allocate(this%nodes(nnodes),stat=ierr)
+        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)            
+        allocate(q(nnodes),stat=ierr)
+        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
         ! set nodes and substeps
         this%nodes = lev%sdcmats%qnodes
         this%eta = this%nodes(2 : nnodes) - this%nodes(1 : nnodes - 1) ! substeps
         ! compute weights
-        allocate(this%w(nnodes - 1, nnodes, nnodes))
+        allocate(this%w(nnodes - 1, nnodes, nnodes),stat=ierr)
+        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+        
         do i = 1, nnodes - 1
             q = this%nodes - this%nodes(i);
             call weights(this, REAL(0.0, pfdp), q, nnodes - 1, this%W(i,:,:))

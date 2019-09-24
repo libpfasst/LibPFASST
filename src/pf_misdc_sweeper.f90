@@ -2,7 +2,10 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Multi-implicit SDC sweeper type (old style), extends abstract sweeper
+!>  Module for multi-implicit SDC sweeper type (old style), extends abstract sweeper class for an equation
+!!   of the form
+!!         $$   y' = f_1(y) + f_2(y) + f_2(y)  $$
+
 module pf_mod_misdc
   use pf_mod_dtype
   use pf_mod_utils
@@ -138,13 +141,15 @@ contains
     class(pf_level_t), intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
-    integer    :: m, nnodes
+    integer    :: m, nnodes,ierr
 
     this%npieces = 3
 
     nnodes = lev%nnodes
-    allocate(this%SdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%SdiffI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%SdiffE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%SdiffI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
 
     this%SdiffE = lev%s0mat
     this%SdiffI = lev%s0mat

@@ -48,7 +48,7 @@ contains
         print *,'dt=',dt
         print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
-        stop "Invalid nsteps"
+       call pf_stop(__FILE__,__LINE__,'Invalid nsteps ,nsteps=',nsteps)
       end if
     end if
     pf%state%nsteps = nsteps_loc
@@ -57,7 +57,7 @@ contains
     call pf_initialize_results(pf)
 
     !  do sanity checks on Nproc
-    if (mod(nsteps,nproc) > 0) stop "ERROR: nsteps must be multiple of nproc (pf_parallel.f90)."
+    if (mod(nsteps,nproc) > 0)  call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
 
     if (present(qend)) then
        call pf_parareal_block_run(pf, q0, dt, nsteps_loc,qend=qend)

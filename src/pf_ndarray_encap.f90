@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 
-!> N-dimensional array encapsulation.
+!> Module to define and encapsulation for an N-dimensional array 
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'lev_shape' attribute to create a new array with that
@@ -65,10 +65,13 @@ contains
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: shape_in(:)
 
+    integer :: ierr
     select type (q)
     class is (pf_ndarray_t)
-       allocate(q%arr_shape(SIZE(shape_in)))
-       allocate(q%flatarray(product(shape_in)))
+       allocate(q%arr_shape(SIZE(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+       allocate(q%flatarray(product(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
     end select
@@ -80,8 +83,10 @@ contains
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_ndarray_t::x)
+    integer :: ierr
+    allocate(pf_ndarray_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    
     call ndarray_build(x, lev_shape)
   end subroutine ndarray_create_single
 
@@ -92,8 +97,10 @@ contains
     integer,                intent(in   )              :: n
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_ndarray_t::x(n))
+    integer :: i,ierr
+    allocate(pf_ndarray_t::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    
     do i = 1, n
        call ndarray_build(x(i), lev_shape)
     end do
