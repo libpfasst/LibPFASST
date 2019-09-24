@@ -5,7 +5,7 @@
 !> Module for setting timers
 module pf_mod_timer
   use pf_mod_dtype
-  use pf_mod_mpi
+  use pf_mod_mpi, only: MPI_Wtime
   implicit none
   !  List of timers 
   integer, parameter :: &

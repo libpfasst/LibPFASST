@@ -47,7 +47,7 @@ contains
   !! This should be called soon after adding levels to the PFASST controller 
   subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
-    use pf_mod_utils, only: pf_stop
+    use pf_mod_stop, only: pf_stop
 
     type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator 
     type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
@@ -173,8 +173,6 @@ contains
     integer,           intent(inout) :: ierror  !!  error flag
     integer,           intent(in)    :: source
     integer ::  stat(MPI_STATUS_SIZE)
-
-    
     
     if (blocking) then
        call mpi_recv(level%recv, level%mpibuflen, myMPI_Datatype, &

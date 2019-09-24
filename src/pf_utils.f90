@@ -1,11 +1,12 @@
 !! Useful subroutines that don't  fit in other modules
 !
 ! This file is part of LIBPFASST.
-!
+
 !> Module with useful subroutines that don't  fit in other modules
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
+  use pf_mod_stop
   implicit none
   
 contains
@@ -196,22 +197,6 @@ contains
        end do
     end do
   end subroutine pf_generic_spreadq0
-
-  subroutine pf_stop(pf_file,Nline,msg, N)
-    character(len=*), intent(in) :: pf_file
-    integer, intent(in):: Nline
-    character(len=*), intent(in) :: msg
-    integer, intent(in), optional :: N
-
-    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    print *,'Stopping in File: ', pf_file    
-    print *,'Line number: ', Nline
-    print *,msg
-    if (present(N))   print *,'value=',N
-    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    call EXIT(-1)
-    
-  end subroutine pf_stop
 
 
 
