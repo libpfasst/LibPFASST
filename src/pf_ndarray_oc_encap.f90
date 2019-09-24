@@ -71,8 +71,6 @@ contains
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
        allocate(q%yflatarray(product(shape_in)),stat=ierr)
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
-       allocate(q%yflatarray(product(shape_in)),stat=ierr)       
-       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
        allocate(q%pflatarray(product(shape_in)),stat=ierr)
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
        q%ndim   = SIZE(shape_in)
