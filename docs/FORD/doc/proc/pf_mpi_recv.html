@@ -411,8 +411,6 @@ public subroutine pf_mpi_recv(pf, level, tag, blocking, ierror, source)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">ierror</span>  <span class="c">!!  error flag</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">source</span>
     <span class="kt">integer</span> <span class="kd">::</span>  <span class="nb">stat</span><span class="p">(</span><span class="n">MPI_STATUS_SIZE</span><span class="p">)</span>
-
-    
     
     <span class="k">if</span> <span class="p">(</span><span class="n">blocking</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       call </span><span class="n">mpi_recv</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">recv</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="n">mpibuflen</span><span class="p">,</span> <span class="n">myMPI_Datatype</span><span class="p">,</span> <span class="p">&amp;</span>

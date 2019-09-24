@@ -2,7 +2,8 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module for using fftpack
+!>  Module for using fftpack.  This is the default fft package when fftw is not used as
+!!  indicated by setting the USE_FFTW=FALSE in Makefile.defauls
 module pf_mod_fftpackage
   use pf_mod_dtype
   use pf_mod_utils
@@ -39,6 +40,7 @@ contains
       
     integer     :: nx,ny,nz
     integer     :: i,j,k
+    integer     :: ierr
     real(pfdp)  :: om
     this%ndim=ndim
     
@@ -48,8 +50,10 @@ contains
     this%lensavx = 4*nx + 15
     this%normfact=REAL(nx,pfdp)
     
-    allocate(this%workhatx(nx))   !  complex transform
-    allocate(this%wsavex(this%lensavx))
+    allocate(this%workhatx(nx),stat=ierr)   !  complex transform
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
+    allocate(this%wsavex(this%lensavx),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
     this%Lx = 1.0_pfdp
     if(present(grid_size)) this%Lx = grid_size(1)
     !  Initialize FFT
@@ -61,8 +65,10 @@ contains
        this%ny = ny
        this%lensavy = 4*ny + 15
        this%normfact=REAL(nx*ny,pfdp)
-       allocate(this%workhaty(ny))   !  complex transform
-       allocate(this%wsavey(this%lensavy))
+       allocate(this%workhaty(ny),stat=ierr)   !  complex transform
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+       allocate(this%wsavey(this%lensavy),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
        this%Ly = 1.0_pfdp
        if(present(grid_size)) this%Ly = grid_size(2)
        !  Initialize FFT
@@ -74,8 +80,10 @@ contains
           this%nz = nz
           this%lensavz = 4*nz + 15
           this%normfact=REAL(nx*ny*nz,pfdp)
-          allocate(this%workhatz(nz))   !  complex transform
-          allocate(this%wsavez(this%lensavz))
+          allocate(this%workhatz(nz),stat=ierr)   !  complex transform
+          if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+          allocate(this%wsavez(this%lensavz),stat=ierr)
+          if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
           this%Lz = 1.0_pfdp
           if(present(grid_size)) this%Lz = grid_size(3)
           !  Initialize FFT
@@ -84,17 +92,21 @@ contains
     endif
     select case (this%ndim)
     case (1)            
-       allocate(this%wk_1d(nx))
+       allocate(this%wk_1d(nx),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
     case (2)            
-       allocate(this%wk_2d(nx,ny))
+       allocate(this%wk_2d(nx,ny),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
     case (3)            
-       allocate(this%wk_3d(nx,ny,nz))
+       allocate(this%wk_3d(nx,ny,nz),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%ndim)
     end select
 
     !  Assign wave numbers
-    allocate(this%kx(nx))
+    allocate(this%kx(nx),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
     om=two_pi/this%Lx                
     do i = 1, nx
        if (i <= nx/2+1) then
@@ -105,7 +117,8 @@ contains
     end do
 
     if (ndim > 1) then
-       allocate(this%ky(ny))          
+       allocate(this%ky(ny),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
        om=two_pi/this%Ly 
        do j = 1, ny
           if (j <= ny/2+1) then
@@ -117,7 +130,8 @@ contains
     end if
     
     if (ndim > 2) then
-       allocate(this%kz(nz))
+       allocate(this%kz(nz),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
        om=two_pi / this%Lz 
        do k = 1,nz
           if (k <= nz/2+1) then

@@ -235,8 +235,8 @@ contains
          call pf_residual(pf, level_index, dt, 1)
        else if (sweep_p ) then
          call pf_residual(pf, level_index, dt, 2)
-       else
-         stop "neither sweep on p nor on y : that should not happen"
+      else
+         call pf_stop(__FILE__,__LINE__,'invalid sweep')         
        end if
        ! done
        call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -249,18 +249,23 @@ contains
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
-    integer    :: m,n, nnodes
+    integer    :: m,n, nnodes,ierr
     type(pf_level_t), pointer :: lev
     lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 3
 
     nnodes = lev%nnodes
-    allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
-    allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
-    allocate(this%dtsdc(nnodes-1))
+    allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QtilE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%QtilI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+    allocate(this%dtsdc(nnodes-1),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
 
@@ -382,8 +387,8 @@ contains
     type(pf_level_t), pointer :: lev
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    if (.not.present(flags)) stop "MISDCQ_OC EVAL_ALL WITHOUT FLAGS"
-    if (.not.present(step)) stop "MISDCQ_OC EVAL_ALL WITHOUT step"
+    if (.not.present(flags)) call pf_stop(__FILE__,__LINE__,'MISDCQ_OC EVAL_ALL WITHOUT FLAGS')
+    if (.not.present(step))  call pf_stop(__FILE__,__LINE__,'MISDCQ_OC EVAL_ALL WITHOUT step')
 
 
     do m = 1, lev%nnodes
@@ -446,14 +451,13 @@ contains
 
     which = 3
     if(present(flags)) which = flags
-    if (.not.present(flags)) stop "IMEXQ_OC SPREADQ0 WITHOUT FLAGS"
+    if (.not.present(flags)) call pf_stop(__FILE__,__LINE__,'MISDCQ_OC  WITHOUT FLAGS')          
 
     mystep = 1
     if(present(step))  then
-      mystep = step !needed for sequential version
+       mystep = step !needed for sequential version
     else
-      print *, "step not present in spreadq0", which
-      stop
+       call pf_stop(__FILE__,__LINE__,'MISDCQ_OC  WITHOUT step')                
     end if
 
     select case(which)
@@ -481,9 +485,8 @@ contains
             call lev%F(m,p)%copy(lev%F(lev%nnodes,p), 2)
           end do
         end do
-      case default
+      case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
-        stop
     end select
 
   end subroutine misdcQ_oc_spreadq0

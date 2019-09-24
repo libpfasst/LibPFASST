@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">41 statements</a>
+    title=" 0.2% of total for procedures.">43 statements</a>
      </li> 
      
      
@@ -386,7 +386,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
                                   <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">source</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
-<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%recv), &#39;recv buffer=&#39;,level%recv</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">recv</span><span class="p">),</span> <span class="s1">&#39;recv buffer=&#39;</span><span class="p">,</span><span class="n">level</span><span class="p">%</span><span class="n">recv</span>
 
 
        <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
@@ -400,7 +400,7 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
                                      <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">dir</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">       </span><span class="n">source</span><span class="o">=</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
        <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
-<span class="c">!        if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%recv), &#39;recv buffer=&#39;,level%recv</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">recv</span><span class="p">),</span> <span class="s1">&#39;recv buffer=&#39;</span><span class="p">,</span><span class="n">level</span><span class="p">%</span><span class="n">recv</span>
 
 
        <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
@@ -415,8 +415,8 @@ public subroutine pf_recv(pf, level, tag, blocking, direction)
 
 <span class="k">    if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;end recv, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span>
     <span class="k">if</span><span class="p">(</span><span class="n">ierror</span> <span class="p">.</span><span class="n">ne</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;warning: mpi error during receive&#39;</span><span class="p">,</span> <span class="n">ierror</span>
-      <span class="k">stop</span> <span class="s2">&quot;pf_parallel:pf_recv&quot;</span>
+<span class="k">       print</span> <span class="o">*</span><span class="p">,</span> <span class="s1">&#39;Rank=&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span>
+       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;error during receive&#39;</span><span class="p">,</span><span class="n">ierror</span><span class="p">)</span>
     <span class="k">end if</span>
 
 <span class="k">    call </span><span class="n">end_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TRECEIVE</span> <span class="o">+</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.7% of total for source files.">185 statements</a>
+    title=" 1.7% of total for source files.">187 statements</a>
      </li> 
      
      
@@ -265,7 +265,7 @@
 <a name="ln-2"></a><span class="c">!</span>
 <a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
 <a name="ln-4"></a><span class="c">!</span>
-<a name="ln-5"></a><span class="c">!&gt; Old style Asynchronous MISDC sweeper</span>
+<a name="ln-5"></a><span class="c">!&gt; Module for old style Asynchronous MISDC sweeper</span>
 <a name="ln-6"></a><span class="k">module </span><span class="n">pf_mod_amisdc</span>
 <a name="ln-7"></a>  <span class="k">use </span><span class="n">pf_mod_dtype</span>
 <a name="ln-8"></a>  <span class="k">use </span><span class="n">pf_mod_utils</span>
@@ -446,70 +446,72 @@
 <a name="ln-183"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
 <a name="ln-184"></a>
 <a name="ln-185"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-186"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span>
+<a name="ln-186"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span><span class="n">ierr</span>
 <a name="ln-187"></a>
 <a name="ln-188"></a>    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">3</span>
 <a name="ln-189"></a>
 <a name="ln-190"></a>    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-191"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
-<a name="ln-192"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-<a name="ln-193"></a>
-<a name="ln-194"></a>    <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span>
-<a name="ln-195"></a>    <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span>
-<a name="ln-196"></a>
-<a name="ln-197"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-198"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-199"></a>       <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>   <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>   <span class="o">-</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<a name="ln-200"></a>       <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<a name="ln-201"></a>    <span class="k">end do</span>
-<a name="ln-202"></a><span class="k">  end subroutine </span><span class="n">amisdc_initialize</span>
-<a name="ln-203"></a>
-<a name="ln-204"></a>  <span class="c">! Destroy the matrices</span>
-<a name="ln-205"></a>  <span class="k">subroutine </span><span class="n">amisdc_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-<a name="ln-206"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-207"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-208"></a>    
-<a name="ln-209"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">)</span>
-<a name="ln-210"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">)</span>
-<a name="ln-211"></a>  <span class="k">end subroutine </span><span class="n">amisdc_destroy</span>
-<a name="ln-212"></a>
-<a name="ln-213"></a>  <span class="c">! Compute SDC integral</span>
-<a name="ln-214"></a>  <span class="k">subroutine </span><span class="n">amisdc_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
-<a name="ln-215"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-216"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-217"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
-<a name="ln-218"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
-<a name="ln-219"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
-<a name="ln-220"></a>
-<a name="ln-221"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
+<a name="ln-191"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-FE</span>
+<a name="ln-192"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>    
+<a name="ln-193"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-BE</span>
+<a name="ln-194"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>    
+<a name="ln-195"></a>
+<a name="ln-196"></a>    <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span>
+<a name="ln-197"></a>    <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span>
+<a name="ln-198"></a>
+<a name="ln-199"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-200"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-201"></a>       <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>   <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="p">)</span>   <span class="o">-</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<a name="ln-202"></a>       <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<a name="ln-203"></a>    <span class="k">end do</span>
+<a name="ln-204"></a><span class="k">  end subroutine </span><span class="n">amisdc_initialize</span>
+<a name="ln-205"></a>
+<a name="ln-206"></a>  <span class="c">! Destroy the matrices</span>
+<a name="ln-207"></a>  <span class="k">subroutine </span><span class="n">amisdc_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+<a name="ln-208"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-209"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-210"></a>    
+<a name="ln-211"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffE</span><span class="p">)</span>
+<a name="ln-212"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">SdiffI</span><span class="p">)</span>
+<a name="ln-213"></a>  <span class="k">end subroutine </span><span class="n">amisdc_destroy</span>
+<a name="ln-214"></a>
+<a name="ln-215"></a>  <span class="c">! Compute SDC integral</span>
+<a name="ln-216"></a>  <span class="k">subroutine </span><span class="n">amisdc_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
+<a name="ln-217"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-218"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-219"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
+<a name="ln-220"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-221"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
 <a name="ln-222"></a>
-<a name="ln-223"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-224"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-225"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-226"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
-<a name="ln-227"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
-<a name="ln-228"></a>          <span class="k">end do</span>
-<a name="ln-229"></a><span class="k">       end do</span>
-<a name="ln-230"></a><span class="k">    end do    </span>
-<a name="ln-231"></a><span class="k">  end subroutine </span><span class="n">amisdc_integrate</span>
-<a name="ln-232"></a>
-<a name="ln-233"></a>  <span class="k">subroutine </span><span class="n">amisdc_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-234"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-235"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-236"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>       <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
-<a name="ln-237"></a>
-<a name="ln-238"></a>    <span class="k">call </span><span class="n">pf_generic_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-<a name="ln-239"></a>  <span class="k">end subroutine </span><span class="n">amisdc_residual</span>
-<a name="ln-240"></a>  
-<a name="ln-241"></a>  <span class="k">subroutine </span><span class="n">amisdc_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-<a name="ln-242"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-243"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-244"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>       <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t</span><span class="p">(:)</span>
-<a name="ln-245"></a>
-<a name="ln-246"></a>    <span class="k">call </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-<a name="ln-247"></a>  <span class="k">end subroutine </span><span class="n">amisdc_evaluate_all</span>
-<a name="ln-248"></a>  
-<a name="ln-249"></a><span class="k">end module </span><span class="n">pf_mod_amisdc</span>
+<a name="ln-223"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
+<a name="ln-224"></a>
+<a name="ln-225"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-226"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-227"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-228"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
+<a name="ln-229"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">s0mat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
+<a name="ln-230"></a>          <span class="k">end do</span>
+<a name="ln-231"></a><span class="k">       end do</span>
+<a name="ln-232"></a><span class="k">    end do    </span>
+<a name="ln-233"></a><span class="k">  end subroutine </span><span class="n">amisdc_integrate</span>
+<a name="ln-234"></a>
+<a name="ln-235"></a>  <span class="k">subroutine </span><span class="n">amisdc_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-236"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-237"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-238"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>       <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-239"></a>
+<a name="ln-240"></a>    <span class="k">call </span><span class="n">pf_generic_residual</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<a name="ln-241"></a>  <span class="k">end subroutine </span><span class="n">amisdc_residual</span>
+<a name="ln-242"></a>  
+<a name="ln-243"></a>  <span class="k">subroutine </span><span class="n">amisdc_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a name="ln-244"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdc_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-245"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-246"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>       <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">t</span><span class="p">(:)</span>
+<a name="ln-247"></a>
+<a name="ln-248"></a>    <span class="k">call </span><span class="n">pf_generic_evaluate_all</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+<a name="ln-249"></a>  <span class="k">end subroutine </span><span class="n">amisdc_evaluate_all</span>
+<a name="ln-250"></a>  
+<a name="ln-251"></a><span class="k">end module </span><span class="n">pf_mod_amisdc</span>
 </pre></div>
 
     </section>

@@ -1,11 +1,12 @@
 !! Useful subroutines that don't  fit in other modules
 !
 ! This file is part of LIBPFASST.
-!
+
 !> Module with useful subroutines that don't  fit in other modules
 module pf_mod_utils
   use pf_mod_dtype
   use pf_mod_timer
+  use pf_mod_stop
   implicit none
   
 contains
@@ -197,22 +198,6 @@ contains
     end do
   end subroutine pf_generic_spreadq0
 
-  subroutine pf_stop(pf_file,Nline,msg, N)
-    character(len=*), intent(in) :: pf_file
-    integer, intent(in):: Nline
-    character(len=*), intent(in) :: msg
-    integer, intent(in), optional :: N
-
-    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    print *,'Stopping in File: ', pf_file    
-    print *,'Line number: ', Nline
-    print *,msg
-    if (present(N))   print *,'value=',N
-    print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    stop
-    
-  end subroutine pf_stop
-
 
 
   subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
@@ -270,7 +255,7 @@ contains
     which = 2;      if(present(flags)) which = flags
     
     if( which /= 2 ) &
-      stop "pf_apply_mat_backward can only be used for restricting the backward integrals with which==2"
+         call pf_stop(__FILE__,__LINE__,'pf_apply_mat_backward can only be used for restricting the backward integrals with which==2')
 
     n = SIZE(mat, dim=1)
     m = SIZE(mat, dim=2)

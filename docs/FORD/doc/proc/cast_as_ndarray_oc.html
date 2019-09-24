@@ -320,7 +320,7 @@ public function cast_as_ndarray_oc(encap_polymorph) result(ndarray_oc_obj)
     <span class="k">select type</span><span class="p">(</span><span class="n">encap_polymorph</span><span class="p">)</span>
     <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndarray_oc_t</span><span class="p">)</span>
        <span class="n">ndarray_oc_obj</span> <span class="o">=&gt;</span> <span class="n">encap_polymorph</span>
-    <span class="k">class </span><span class="n">default</span>
+    <span class="k">class </span><span class="n">DEFAULT</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Type error&#39;</span><span class="p">)</span>
     <span class="k">end select</span>
 <span class="k">  end function </span><span class="n">cast_as_ndarray_oc</span>

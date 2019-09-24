@@ -6,7 +6,7 @@
 !!  To use this module, fftw must be installed.
 !!  This can be done by the libpfasst make system with the command
 !!  make fftw3
-!!  You also have to specify USE_FFTW in Makefile.defaults and
+!!  You also have to specify USE_FFTW=TRUE in Makefile.defaults and
 !!  make clean is recommended before remake
 module pf_mod_fftpackage
   use pf_mod_dtype
@@ -14,7 +14,7 @@ module pf_mod_fftpackage
   use pf_mod_fft_abs
   use, intrinsic :: iso_c_binding  
   implicit none
-!  include 'fftw3.f03'
+! include 'fftw3.f03'
   
   !>  Variables and storage for FFTW
   type,extends(pf_fft_abs_t) :: pf_fft_t
@@ -41,6 +41,7 @@ contains
 
     integer     :: nx,ny,nz
     integer     :: i,j,k
+    integer     :: ierr
     real(pfdp)  :: om
     type(c_ptr) :: wk
 
@@ -81,7 +82,6 @@ contains
             this%wk_2d, this%wk_2d, FFTW_FORWARD, FFTW_ESTIMATE)
        this%ifftw = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_BACKWARD, FFTW_ESTIMATE)
-       !  Allocate wave number arrays
     case (3)
        if(present(grid_size))then
           this%Lx = grid_size(1)
@@ -105,7 +105,8 @@ contains
     end select
     
     !  Assign wave numbers
-    allocate(this%kx(nx))   
+    allocate(this%kx(nx),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
     om=two_pi/this%Lx                
     do i = 1, nx
        if (i <= nx/2+1) then
@@ -116,7 +117,8 @@ contains
     end do
 
     if (ndim > 1) then
-       allocate(this%ky(ny))          
+       allocate(this%ky(ny),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                  
        om=two_pi/this%Ly 
        do j = 1, ny
           if (j <= ny/2+1) then
@@ -128,7 +130,8 @@ contains
     end if
     
     if (ndim > 2) then
-       allocate(this%kz(nz))          
+       allocate(this%kz(nz),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                  
        om=two_pi / this%Lz 
        do k = 1,nz
           if (k <= nz/2+1) then

@@ -240,17 +240,18 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>IMEX Sweeper Module
-  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
+    <p>Module for the IMEX Sweeper  of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
          <script type="math/tex; mode=display">   y' = f_1(y) + f_2(y)  </script>
-  The <script type="math/tex">f_1</script> piece is treated explicitly and <script type="math/tex">f_2</script> implicitl
+  The <script type="math/tex">f_1</script> piece is treated explicitly and <script type="math/tex">f_2</script> implicitly
   Afer this sweeper is initialized (usually in main), the logical flags can be changed if desired</p>
+<hr>
 <div class="codehilite"><pre><span></span> <span class="nv">explicit</span>:  <span class="nv">Make</span> <span class="nv">false</span> <span class="k">if</span> <span class="nv">there</span> <span class="nv">is</span> <span class="nv">no</span> <span class="nv">explicit</span> <span class="nv">piece</span>
 
  <span class="nv">implicit</span>:  <span class="nv">Make</span> <span class="nv">false</span> <span class="k">if</span> <span class="nv">there</span> <span class="nv">is</span> <span class="nv">no</span> <span class="nv">implicit</span> <span class="nv">piece</span>
 </pre></div>
 
 
+<hr>
 <p>The user needs to supply the feval and fcomp routines for a given example</p>
       <br>
     

@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 
-!> System of N-dimensional arrays encapsulation.
+!> Module to define and encapsulation for a system of N-dimensional arrays 
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'arr_shape' attribute to create a new multi-component array with that
@@ -59,15 +59,19 @@ contains
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: arr_shape(:)
 
+    integer :: ierr
     select type (q)
     class is (pf_ndsysarray_t)
-       allocate(q%arr_shape(SIZE(arr_shape)))
+       allocate(q%arr_shape(SIZE(arr_shape)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                         
+       
        q%ndim   = SIZE(arr_shape)-1
        q%ncomp = arr_shape(q%ndim+1)
        q%ndof = product(arr_shape(1:q%ndim))
        q%arr_shape = arr_shape
 
-       allocate(q%flatarray(product(arr_shape)))
+       allocate(q%flatarray(product(arr_shape)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                
     end select
   end subroutine ndsysarray_build
 
@@ -78,7 +82,9 @@ contains
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
 
-    allocate(pf_ndsysarray_t::x)
+    integer :: ierr
+    allocate(pf_ndsysarray_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
     call ndsysarray_build(x, lev_shape)
   end subroutine ndsysarray_create_single
 
@@ -89,8 +95,9 @@ contains
     integer,                intent(in   )              :: n
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_ndsysarray_t::x(n))
+    integer :: i,ierr
+    allocate(pf_ndsysarray_t::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                 
     do i = 1, n
        call ndsysarray_build(x(i), lev_shape)
     end do
@@ -161,7 +168,7 @@ contains
     type is (pf_ndsysarray_t)
        this%flatarray = src%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'invalid type')              
     end select
   end subroutine ndsysarray_copy
 
@@ -196,12 +203,14 @@ contains
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
+    if (a .eq. 0.0_pfdp) return
     select type(x)
     type is (pf_ndsysarray_t)
        this%flatarray = a * x%flatarray + this%flatarray
     class default
-       stop "TYPE ERROR"
+       call pf_stop(__FILE__,__LINE__,'invalid type')              
     end select
+
   end subroutine ndsysarray_axpy
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)

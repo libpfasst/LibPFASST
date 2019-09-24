@@ -26,7 +26,7 @@ contains
     class(pf_level_t), pointer :: c_lev   !  Pointer to coarse level
     class(pf_level_t), pointer :: f_lev   !  Pointer to fine level
 
-    integer    :: m, p, step
+    integer    :: m, p, step,ierr
     real(pfdp), allocatable :: c_times(:)   ! coarse level node times
     real(pfdp), allocatable :: f_times(:)   ! fine level node times
 
@@ -47,8 +47,10 @@ contains
        f_lev%interp_workspace_allocated  = .true.     
     end if
     !> set time at coarse and fine nodes
-    allocate(c_times(c_lev%nnodes))
-    allocate(f_times(f_lev%nnodes))
+    allocate(c_times(c_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(f_times(f_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
 
     c_times = t0 + dt*c_lev%nodes
     f_times = t0 + dt*f_lev%nodes

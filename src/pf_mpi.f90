@@ -2,9 +2,8 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  Module to hold include statement
+!>  Module to hold use mpi statement
 module pf_mod_mpi
-  !  include "mpif.h"
   use  mpi
 end module pf_mod_mpi
 
@@ -48,6 +47,7 @@ contains
   !! This should be called soon after adding levels to the PFASST controller 
   subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
+    use pf_mod_stop, only: pf_stop
 
     type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator 
     type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
@@ -57,8 +57,10 @@ contains
     call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
 
     !>  allocate arrarys for and and receive requests
-    allocate(pf_comm%recvreq(pf%nlevels))
-    allocate(pf_comm%sendreq(pf%nlevels))
+    allocate(pf_comm%recvreq(pf%nlevels),stat=ierror)
+    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
+    allocate(pf_comm%sendreq(pf%nlevels),stat=ierror)
+    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)    
 
     pf_comm%sendreq = MPI_REQUEST_NULL
     pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive
@@ -171,8 +173,6 @@ contains
     integer,           intent(inout) :: ierror  !!  error flag
     integer,           intent(in)    :: source
     integer ::  stat(MPI_STATUS_SIZE)
-
-    
     
     if (blocking) then
        call mpi_recv(level%recv, level%mpibuflen, myMPI_Datatype, &

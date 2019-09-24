@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">13 statements</a>
+    title=" 0.1% of total for procedures.">16 statements</a>
      </li> 
      
      
@@ -325,15 +325,21 @@ public subroutine zndsysarray_build(q, arr_shape)
     <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">q</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">arr_shape</span><span class="p">(:)</span>
 
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ierr</span>
+
     <span class="k">select type</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="k">class is</span> <span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="p">)</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)))</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                      
+       
        <span class="n">q</span><span class="p">%</span><span class="n">ndim</span>   <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
        <span class="n">q</span><span class="p">%</span><span class="n">ncomp</span> <span class="o">=</span> <span class="n">arr_shape</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">ndim</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
        <span class="n">q</span><span class="p">%</span><span class="n">ndof</span> <span class="o">=</span> <span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">q</span><span class="p">%</span><span class="n">ndim</span><span class="p">))</span>
        <span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span> <span class="o">=</span> <span class="n">arr_shape</span>
 
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)))</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">arr_shape</span><span class="p">)),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                             
+       
     <span class="k">end select</span>
 <span class="k">  end subroutine </span><span class="n">zndsysarray_build</span>
 </pre></div>

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">36 statements</a>
+    title=" 0.2% of total for procedures.">35 statements</a>
      </li> 
      
      
@@ -428,12 +428,10 @@ public subroutine imexQ_oc_integrate(this, pf, level_index, qSDC, fSDC, dt, fint
     <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="k">then</span>
 <span class="k">      </span><span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
     <span class="k">else</span>
-<span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="s2">&quot;flags not present in integrate&quot;</span><span class="p">,</span> <span class="n">which</span>
-      <span class="k">stop</span>
-<span class="k">    end if</span>
-<span class="c">!     print *, &quot;IMEXQ_OC INTEGRATE &quot;, which</span>
+<span class="k">       call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;flags not present in integrate&#39;</span><span class="p">)</span>  
+    <span class="k">end if</span>
 
-    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span>
+<span class="k">    do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">Nnodes</span><span class="o">-</span><span class="mi">1</span>
        <span class="c">!  Forward in y</span>
        <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">which</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="k">then</span>
 <span class="k">          call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>

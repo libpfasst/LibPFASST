@@ -2,21 +2,15 @@
 !
 ! This file is part of LIBPFASST.
 !
-!>  This module implements fully implicit Munthe-Kaas Runge Kutta methods using explicit SDC sweeping
-!!
+!>  Module to implement fully implicit Munthe-Kaas Runge Kutta sweeper using explicit SDC sweeping
+!! --
 !!  The equation to be solved is 
-!! 
-!! $$ y'=A(y,t)y  $$
-!!
-!! where \(A\) is a matrix and \(y)\ is  a vector or matrix or if Lax_pair = true
-!!
-!! $$Y'=[A(Y,t),Y]$$ where both \(A\) and \(Y\) are matrices
-!!
-!!  We solve this by finding the solution to
-!!
+!!  $$ y'=A(y,t)y  $$
+!!  where \(A\) is a matrix and \(y)\ is  a vector or matrix or if Lax_pair = true
+!!  $$Y'=[A(Y,t),Y]$$ where both \(A\) and \(Y\) are matrices
+!!  This is done by solving 
 !!  $$Q' = dexpinv_Q(A)$$
-!!
-!!  Using PFASST
+!!  Using SDC sweeps
 module pf_mod_imk
   use pf_mod_dtype
   use pf_mod_utils
@@ -312,16 +306,21 @@ contains
     type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
     integer,           intent(in)    :: level_index  !!  level on which to initialize
 
-    integer :: m, nnodes
+    integer :: m, nnodes,ierr
     type(pf_level_t), pointer  :: lev        !!  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 1
     nnodes = lev%nnodes
 
-    allocate(this%QdiffE(nnodes-1,nnodes), this%QtilE(nnodes-1,nnodes))
-    allocate(this%dtsdc(nnodes-1))
-    allocate(this%tsdc(nnodes))
+    allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
+    allocate(this%QtilE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
+    allocate(this%dtsdc(nnodes-1),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
+    allocate(this%tsdc(nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)              
 
 
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)

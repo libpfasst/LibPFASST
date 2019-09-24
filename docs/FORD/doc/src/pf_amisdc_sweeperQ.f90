@@ -2,7 +2,7 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Asynchronous multi-implicit sweeper
+!> Module for Asynchronous multi-implicit sweeper
 module pf_mod_amisdcQ
   use pf_mod_amisdc
   implicit none
@@ -263,15 +263,19 @@ contains
     class(pf_level_t), intent(inout) :: lev
 
     real(pfdp) :: dsdc(lev%nnodes-1)
-    integer    :: m, n, nnodes
+    integer    :: m, n, nnodes,ierr
 
     this%npieces = 3
 
     nnodes = lev%nnodes
-    allocate(this%QdiffE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QdiffI(nnodes-1,nnodes))  !  S-BE
-    allocate(this%QtilE(nnodes-1,nnodes))  !  S-FE
-    allocate(this%QtilI(nnodes-1,nnodes))  !  S-BE
+    allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+    allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+    allocate(this%QtilE(nnodes-1,nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
+    allocate(this%QtilI(nnodes-1,nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp

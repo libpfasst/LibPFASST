@@ -268,7 +268,7 @@
 <a name="ln-5"></a><span class="c">!&gt; Module for setting timers</span>
 <a name="ln-6"></a><span class="k">module </span><span class="n">pf_mod_timer</span>
 <a name="ln-7"></a>  <span class="k">use </span><span class="n">pf_mod_dtype</span>
-<a name="ln-8"></a>  <span class="k">use </span><span class="n">pf_mod_mpi</span>
+<a name="ln-8"></a>  <span class="k">use </span><span class="n">pf_mod_mpi</span><span class="p">,</span> <span class="n">only</span><span class="p">:</span> <span class="n">MPI_Wtime</span>
 <a name="ln-9"></a>  <span class="k">implicit none</span>
 <a name="ln-10"></a>  <span class="c">!  List of timers </span>
 <a name="ln-11"></a>  <span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="p">&amp;</span>

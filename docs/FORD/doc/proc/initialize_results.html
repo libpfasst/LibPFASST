@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">36 statements</a>
+    title=" 0.2% of total for procedures.">39 statements</a>
      </li> 
      
      
@@ -434,7 +434,7 @@ public subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nswe
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fname</span>  <span class="c">!!  output file name for residuals</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">128</span><span class="p">)</span> <span class="kd">::</span> <span class="n">datpath</span>  <span class="c">!!  path to output files</span>
     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span> <span class="o">=</span> <span class="mi">256</span><span class="p">)</span> <span class="kd">::</span> <span class="n">fullname</span>  <span class="c">!!  output file name for residuals</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="nb">system</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">istat</span><span class="p">,</span><span class="nb">system</span><span class="p">,</span><span class="n">ierr</span>
     
     <span class="c">!  Set up the directory to dump results</span>
     <span class="n">istat</span><span class="o">=</span> <span class="nb">system</span><span class="p">(</span><span class="s1">&#39;mkdir -p dat&#39;</span><span class="p">)</span>
@@ -466,9 +466,12 @@ public subroutine initialize_results(this, nsteps_in, niters_in, nprocs_in, nswe
     <span class="n">this</span><span class="p">%</span><span class="n">nsweeps</span><span class="o">=</span><span class="n">nsweeps_in</span>
     <span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">=</span><span class="n">rank_in</span>
     <span class="n">this</span><span class="p">%</span><span class="n">level_index</span><span class="o">=</span><span class="n">level_index</span>    
-    
-    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
-    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">))</span>
+
+    <span class="n">ierr</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>               
+    <span class="k">if</span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="nb">allocated</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">))</span> <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">niters_in</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span><span class="p">,</span> <span class="n">nsweeps_in</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                   
 
     <span class="n">this</span><span class="p">%</span><span class="n">errors</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0_pfdp</span>
     <span class="n">this</span><span class="p">%</span><span class="n">residuals</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0_pfdp</span>

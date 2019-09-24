@@ -3,7 +3,7 @@
 ! This file is part of LIBPFASST.
 !
 
-!> N-dimensional array encapsulation.
+!> Module to define and encapsulation of a Petsc Vector.
 !!
 !! When a new solution is created by a PFASST level, this encapsulation
 !! uses the levels 'shape_lev' attribute to create a new array with that
@@ -75,7 +75,8 @@ contains
        call VecGetLocalSize(q%petscVec,psize,ierr);CHKERRQ(ierr)
        call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr);CHKERRQ(ierr)
 
-       allocate(q%arr_shape(SIZE(shape_in)))
+       allocate(q%arr_shape(SIZE(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
     end select
@@ -87,8 +88,9 @@ contains
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_petscVec_t::x)
+    integer :: ierr
+    allocate(pf_petscVec_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
     call pf_petscVec_build(x, lev_shape)
   end subroutine pf_petscVec_create_single
 
@@ -99,8 +101,9 @@ contains
     integer,                intent(in   )              :: n
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
-    integer :: i
-    allocate(pf_petscVec_t::x(n))
+    integer :: i,ierr
+    allocate(pf_petscVec_t::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
     do i = 1, n
        call pf_petscVec_build(x(i), lev_shape)
     end do

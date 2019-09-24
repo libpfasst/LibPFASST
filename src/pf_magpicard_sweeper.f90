@@ -145,7 +145,7 @@ contains
     type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
     integer,           intent(in)    :: level_index  !!  level on which to initialize
 
-    integer :: m, nnodes
+    integer :: m, nnodes,ierr
     type(pf_level_t), pointer  :: lev    !!  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
@@ -153,7 +153,8 @@ contains
     this%npieces = 1
     nnodes = lev%nnodes
 
-    allocate(this%dtsdc(nnodes-1))
+    allocate(this%dtsdc(nnodes-1),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
     this%dtsdc = lev%nodes(2:nnodes) - lev%nodes(1:nnodes-1)   !  SDC time step size (unscaled)
 
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
@@ -309,7 +310,7 @@ contains
 
        coefs(1, 3, 4) = dt**4 / 60.d0
     else
-       stop 'oh no! unsupported qtype'
+       call pf_stop(__FILE__,__LINE__,'unsupported qtype ',qtype)
     endif
   end subroutine get_commutator_coefs
 end module pf_mod_magnus_picard

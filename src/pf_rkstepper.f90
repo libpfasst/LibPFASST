@@ -164,7 +164,8 @@ contains
     type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
     integer,           intent(in)    :: level_index  !!  level on which to initialize
 
-    integer    :: nstages,npieces,i   !  Local copies for convenience
+    integer    :: nstages,npieces   !  Local copies for convenience
+    integer    :: i,ierr   
     real(pfdp) :: gamma, delta
     type(pf_level_t), pointer  :: lev    !  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
@@ -183,17 +184,21 @@ contains
     case (4) ! Fourth-order Kennedy-Carpenter
        nstages = 6 
     case DEFAULT
-       stop "ark_initialize: This RK order is not supported"
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'RK order is not supported ,order=',this%order)              
     end select
     this%nstages = nstages
     this%npieces = npieces
 
-    allocate(this%AmatE(nstages,nstages))  !  Explicit Butcher matrix
-    allocate(this%AmatI(nstages,nstages))  !  Implicit Butcher matrix
-    allocate(this%cvec(nstages))           !  stage times
-    allocate(this%bvecE(nstages))          !  quadrature weights on explicit
-    allocate(this%bvecI(nstages))          !  quadrature weights on implicit
+    allocate(this%AmatE(nstages,nstages),stat=ierr)  !  Explicit Butcher matrix
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
+    allocate(this%AmatI(nstages,nstages),stat=ierr)  !  Implicit Butcher matrix
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
+    allocate(this%cvec(nstages),stat=ierr)           !  stage times
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
+    allocate(this%bvecE(nstages),stat=ierr)          !  quadrature weights on explicit
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
+    allocate(this%bvecI(nstages),stat=ierr)          !  quadrature weights on implicit
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)           
     
     this%AmatE = 0.0_pfdp
     this%AmatI = 0.0_pfdp
@@ -293,8 +298,7 @@ contains
        this%bvecI      = this%bvecE   
 
     case DEFAULT
-       stop "ark_initialize: This RK order is not supported"
-       call exit(0)
+       call pf_stop(__FILE__,__LINE__,'RK order is not supported ,order=',this%order)              
     end select
 
     ! Allocate space for local variables

@@ -2,8 +2,7 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Verlet type sweeper for 2nd order problems
-!!
+!> Module to define a Verlet type sweeper for 2nd order problems.
 !!  This is intended for Hamiltonian problems of the form
 !!
 !! $$   q'=p, p'=f(q) $$
@@ -264,38 +263,38 @@ contains
     nnodes = Lev%nnodes
     
     allocate(this%Qmat(nnodes-1,nnodes),stat=ierr)  !  0  to node integral
-    if (ierr /=0) stop "allocate fail in verlet_initialize for Qmat"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%QQmat(nnodes-1,nnodes),stat=ierr)  !  0 to node double integral (like Qmat*Qmat)
-    if (ierr /=0) stop "allocate fail in verlet_initialize for QQmat"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
 
     allocate(this%Qtil(nnodes-1,nnodes),stat=ierr)  !  0  to node integral  approximation of Qmat 
-    if (ierr /=0) stop "allocate fail in verlet_initialize for Qtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%QQtil(nnodes-1,nnodes),stat=ierr)  !  0 to node QQmat  aproximation
-    if (ierr /=0) stop "allocate fail in verlet_initialize for QQtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%Qver(nnodes-1,nnodes),stat=ierr)  !  0 to node verlet  aproximation (trap)
-    if (ierr /=0) stop "allocate fail in verlet_initialize for Qver"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%QQver(nnodes-1,nnodes),stat=ierr)  !  0 to node verlet  aproximation
-    if (ierr /=0) stop "allocate fail in verlet_initialize for QQver"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     allocate(this%DQtil(nnodes-1,nnodes),stat=ierr)  !  0 to node Qmat-Qtil
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DQtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%DQQtil(nnodes-1,nnodes),stat=ierr)  !  node to node QQmat-QQtil
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DQQtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%DQver(nnodes-1,nnodes),stat=ierr)  !  0 to node Qmat-Qtil
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DQtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%DQQver(nnodes-1,nnodes),stat=ierr)  !  node to node QQmat-QQtil
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DQQtil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     allocate(this%bvec(nnodes),stat=ierr)  !  Integration rule for v
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DStil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%bbarvec(nnodes),stat=ierr)  !  Integration rule for x
-    if (ierr /=0) stop "allocate fail in verlet_initialize for DSStil"
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     allocate(this%dtsdc(nnodes-1),stat=ierr)
-    if (ierr /=0) stop "allocate fail in verlet_initialize for dtsdc"    
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     allocate(this%tsdc(nnodes),stat=ierr)
-    if (ierr /=0) stop "allocate fail in verlet_initialize for tsdc"    
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
     
     !>  Array of substep sizes
     this%dtsdc = lev%sdcmats%qnodes(2:nnodes) - lev%sdcmats%qnodes(1:nnodes-1)
@@ -308,8 +307,10 @@ contains
     this%bvec=this%Qmat(nnodes-1,:);
 
     allocate(qtemp(nnodes,nnodes),stat=ierr)
-    allocate(qtemp2(nnodes,nnodes),stat=ierr)    
-
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(qtemp2(nnodes,nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    
     !  form the QQ matrix depending on what you want
     select case (this%whichQQ)
     case (0)  !  Collocation (make it the product)
@@ -343,7 +344,7 @@ contains
 !!$          end do
 !!$       end do
 !!$       this%QQmat = matmul(this%QQmat,this%Qmat)
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',this%whichQQ)
     end select
 

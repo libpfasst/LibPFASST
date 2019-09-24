@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">39 statements</a>
+    title=" 0.2% of total for procedures.">41 statements</a>
      </li> 
      
      
@@ -387,8 +387,8 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
     <span class="k">if</span><span class="p">(</span><span class="n">blocking</span> <span class="p">.</span><span class="n">eqv</span><span class="p">.</span> <span class="p">.</span><span class="n">false</span><span class="p">.)</span> <span class="p">&amp;</span>
         <span class="k">call </span><span class="n">pf_mpi_wait</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;warning: error during send (wait)&#39;</span><span class="p">,</span> <span class="n">ierror</span>
-      <span class="k">stop</span> <span class="s2">&quot;pf_parallel:pf_send&quot;</span>
+<span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="s1">&#39;Rank=&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span>
+      <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;error during send (wait)&#39;</span><span class="p">,</span><span class="n">ierror</span><span class="p">)</span>
     <span class="k">end if</span>
 
 
@@ -404,15 +404,15 @@ public subroutine pf_send(pf, level, tag, blocking, direction)
        <span class="k">end if</span>
 <span class="k">    end if</span>
 
-<span class="c">!     ierror = 0</span>
+<span class="k">     </span><span class="n">ierror</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">call </span><span class="n">start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">TSEND</span> <span class="o">+</span> <span class="n">level</span><span class="p">%</span><span class="nb">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;begin send, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span><span class="p">,</span><span class="s1">&#39; pf%state%status =&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">status</span>
-<span class="c">!     if (pf%debug) print*,  &#39;DEBUG --&#39;,pf%rank, SIZE(level%send), &#39;send buffer=&#39;,level%send</span>
+     <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">level</span><span class="p">%</span><span class="n">send</span><span class="p">),</span> <span class="s1">&#39;send buffer=&#39;</span><span class="p">,</span><span class="n">level</span><span class="p">%</span><span class="n">send</span>
 
     <span class="k">call </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">blocking</span><span class="p">,</span> <span class="n">ierror</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">ierror</span> <span class="o">/=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">      print</span> <span class="o">*</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;warning: error during send&#39;</span><span class="p">,</span> <span class="n">ierror</span>
-      <span class="k">stop</span> <span class="s2">&quot;pf_parallel:pf_send&quot;</span>
+<span class="k">       print</span> <span class="o">*</span><span class="p">,</span> <span class="s1">&#39;Rank=&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span>
+       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;error during send&#39;</span><span class="p">,</span><span class="n">ierror</span><span class="p">)</span>
    <span class="n">endif</span>
 
    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">debug</span><span class="p">)</span> <span class="k">print</span><span class="o">*</span><span class="p">,</span>  <span class="s1">&#39;DEBUG --&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="s1">&#39;end send, tag=&#39;</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">blocking</span>

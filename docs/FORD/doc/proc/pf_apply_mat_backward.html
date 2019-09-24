@@ -402,7 +402,7 @@ public subroutine pf_apply_mat_backward(dst, a, mat, src, zero_first, flags)
     <span class="n">which</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>      <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
     
     <span class="k">if</span><span class="p">(</span> <span class="n">which</span> <span class="o">/=</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">&amp;</span>
-      <span class="k">stop</span> <span class="s2">&quot;pf_apply_mat_backward can only be used for restricting the backward integrals with which==2&quot;</span>
+         <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;pf_apply_mat_backward can only be used for restricting the backward integrals with which==2&#39;</span><span class="p">)</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.6% of total for procedures.">99 statements</a>
+    title=" 0.5% of total for procedures.">99 statements</a>
      </li> 
      
      
@@ -383,7 +383,7 @@ public subroutine pf_print_options(pf, un_opt, show_mats_opt)
        <span class="k">write</span><span class="p">(</span><span class="n">un</span><span class="p">,</span><span class="o">*</span><span class="p">)</span> <span class="s1">&#39;qtype:&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">qtype</span><span class="p">,</span><span class="s1">&#39;! Uniform  nodes are used&#39;</span>
     <span class="k">case</span> <span class="p">(</span><span class="n">SDC_CHEBYSHEV</span><span class="p">)</span>
        <span class="k">write</span><span class="p">(</span><span class="n">un</span><span class="p">,</span><span class="o">*</span><span class="p">)</span> <span class="s1">&#39;qtype:&#39;</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">qtype</span><span class="p">,</span><span class="s1">&#39;! Chebyshev  nodes are used&#39;</span>
-    <span class="k">case </span><span class="n">default</span>
+    <span class="k">case </span><span class="n">DEFAULT</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">qtype</span><span class="p">)</span>
     <span class="k">end select</span>
 

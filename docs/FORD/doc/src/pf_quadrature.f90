@@ -49,8 +49,7 @@ contains
 
      !  Allocate nodes and collocation matrices
      allocate(SDCmats%qnodes(nnodes),stat=ierr)
-     if (ierr /= 0) call pf_stop(__FILE__, &
-          __LINE__,"allocate error qnodes")
+     if (ierr /= 0) call pf_stop(__FILE__, __LINE__,"allocate error qnodes")
      allocate(SDCmats%Qmat(nnodes-1,nnodes),stat=ierr)
      if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error Qmat")
      allocate(SDCmats%Smat(nnodes-1,nnodes),stat=ierr)
@@ -276,7 +275,7 @@ contains
     real(pfqp),  intent(out)        :: qnodes(nnodes)  !!  The computed quadrature nodes
     integer ,       intent(out)        :: flags(nnodes)   !!
 
-    integer :: j, degree
+    integer :: j, degree,ierr
     real(pfqp), allocatable :: roots(:)
     real(pfqp), allocatable :: coeffs(:), coeffs2(:)
 
@@ -288,8 +287,10 @@ contains
     case (SDC_GAUSS_LEGENDRE)
 
        degree = nnodes-2
-       allocate(roots(degree))
-       allocate(coeffs(degree+1))
+       allocate(roots(degree),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+       allocate(coeffs(degree+1),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
 
        call poly_legendre(coeffs, degree)
        call poly_roots(roots, coeffs, degree)
@@ -308,8 +309,9 @@ contains
     case (SDC_GAUSS_LOBATTO)
        
        degree = nnodes - 1
-       allocate(roots(degree-1))
-       allocate(coeffs(degree+1))
+       allocate(roots(degree-1),stat=ierr)
+
+       allocate(coeffs(degree+1),stat=ierr)
 
        call poly_legendre(coeffs, degree)
        call poly_diff(coeffs, degree)
@@ -329,9 +331,9 @@ contains
     case (SDC_GAUSS_RADAU)
 
        degree = nnodes - 1
-       allocate(roots(degree))
-       allocate(coeffs(degree+1))
-       allocate(coeffs2(degree))
+       allocate(roots(degree),stat=ierr)
+       allocate(coeffs(degree+1),stat=ierr)
+       allocate(coeffs2(degree),stat=ierr)
 
 
        call poly_legendre(coeffs, degree)
@@ -382,8 +384,7 @@ contains
        do j = 1, nnodes
           flags(j) = ibset(flags(j), 0)
        end do
-
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',qtype)
     end select
 

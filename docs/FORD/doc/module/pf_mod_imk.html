@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 4.5% of total for modules and submodules.">406 statements</a>
+    title=" 4.5% of total for modules and submodules.">411 statements</a>
      </li> 
      
      
@@ -252,19 +252,15 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <p>This module implements fully implicit Munthe-Kaas Runge Kutta methods using explicit SDC sweeping</p>
-<p>The equation to be solved is </p>
-<p>
-<script type="math/tex; mode=display"> y'=A(y,t)y  </script>
-</p>
-<p>where <script type="math/tex">A</script> is a matrix and (y)\ is  a vector or matrix or if Lax_pair = true</p>
-<p>
-<script type="math/tex; mode=display">Y'=[A(Y,t),Y]</script> where both <script type="math/tex">A</script> and <script type="math/tex">Y</script> are matrices</p>
-<p>We solve this by finding the solution to</p>
-<p>
-<script type="math/tex; mode=display">Q' = dexpinv_Q(A)</script>
-</p>
-<p>Using PFASST</p>
+    <p>Module to implement fully implicit Munthe-Kaas Runge Kutta sweeper using explicit SDC sweeping
+ --
+  The equation to be solved is 
+  <script type="math/tex; mode=display"> y'=A(y,t)y  </script>
+  where <script type="math/tex">A</script> is a matrix and <script type="math/tex">y)\ is  a vector or matrix or if Lax_pair = true
+  <script type="math/tex; mode=display">Y'=[A(Y,t),Y]</script> where both \(A</script> and <script type="math/tex">Y</script> are matrices
+  This is done by solving 
+  <script type="math/tex; mode=display">Q' = dexpinv_Q(A)</script>
+  Using SDC sweeps</p>
       <br>
     
   

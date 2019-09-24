@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 1.5% of total for source files.">167 statements</a>
+    title=" 1.6% of total for source files.">171 statements</a>
      </li> 
      
      
@@ -265,7 +265,7 @@
 <a name="ln-2"></a><span class="c">!</span>
 <a name="ln-3"></a><span class="c">! This file is part of LIBPFASST.</span>
 <a name="ln-4"></a><span class="c">!</span>
-<a name="ln-5"></a><span class="c">!&gt; Asynchronous multi-implicit sweeper</span>
+<a name="ln-5"></a><span class="c">!&gt; Module for Asynchronous multi-implicit sweeper</span>
 <a name="ln-6"></a><span class="k">module </span><span class="n">pf_mod_amisdcQ</span>
 <a name="ln-7"></a>  <span class="k">use </span><span class="n">pf_mod_amisdc</span>
 <a name="ln-8"></a>  <span class="k">implicit none</span>
@@ -526,76 +526,80 @@
 <a name="ln-263"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
 <a name="ln-264"></a>
 <a name="ln-265"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dsdc</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-266"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nnodes</span>
+<a name="ln-266"></a>    <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span><span class="n">ierr</span>
 <a name="ln-267"></a>
 <a name="ln-268"></a>    <span class="n">this</span><span class="p">%</span><span class="n">npieces</span> <span class="o">=</span> <span class="mi">3</span>
 <a name="ln-269"></a>
 <a name="ln-270"></a>    <span class="n">nnodes</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-271"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
-<a name="ln-272"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-<a name="ln-273"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-FE</span>
-<a name="ln-274"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">))</span>  <span class="c">!  S-BE</span>
-<a name="ln-275"></a>
-<a name="ln-276"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-277"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
-<a name="ln-278"></a>
-<a name="ln-279"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-280"></a>    <span class="c">! Implicit matrix</span>
-<a name="ln-281"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq_</span><span class="p">)</span> <span class="k">then</span> 
-<a name="ln-282"></a>       <span class="c">! Get the LU</span>
-<a name="ln-283"></a>       <span class="k">call </span><span class="n">myLUq</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<a name="ln-284"></a>       <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span>
-<a name="ln-285"></a>    <span class="k">else </span>
-<a name="ln-286"></a><span class="k">       do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-287"></a>          <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
-<a name="ln-288"></a>             <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<a name="ln-289"></a>          <span class="k">end do</span>
-<a name="ln-290"></a><span class="k">       end do</span>
-<a name="ln-291"></a><span class="k">    end if</span>
-<a name="ln-292"></a>    <span class="c">! Explicit matrix</span>
-<a name="ln-293"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-294"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
-<a name="ln-295"></a>          <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>   <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-<a name="ln-296"></a>       <span class="k">end do</span>
-<a name="ln-297"></a><span class="k">    end do</span>
-<a name="ln-298"></a>
-<a name="ln-299"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span>
-<a name="ln-300"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
-<a name="ln-301"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_initialize</span>
+<a name="ln-271"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-FE</span>
+<a name="ln-272"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>    
+<a name="ln-273"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-BE</span>
+<a name="ln-274"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>    
+<a name="ln-275"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-FE</span>
+<a name="ln-276"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>    
+<a name="ln-277"></a>    <span class="k">allocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nnodes</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>  <span class="c">!  S-BE</span>
+<a name="ln-278"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>
+<a name="ln-279"></a>
+<a name="ln-280"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-281"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>
+<a name="ln-282"></a>
+<a name="ln-283"></a>    <span class="n">dsdc</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">)</span> <span class="o">-</span> <span class="n">lev</span><span class="p">%</span><span class="n">nodes</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-284"></a>    <span class="c">! Implicit matrix</span>
+<a name="ln-285"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">use_LUq_</span><span class="p">)</span> <span class="k">then</span> 
+<a name="ln-286"></a>       <span class="c">! Get the LU</span>
+<a name="ln-287"></a>       <span class="k">call </span><span class="n">myLUq</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<a name="ln-288"></a>       <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">LUmat</span>
+<a name="ln-289"></a>    <span class="k">else </span>
+<a name="ln-290"></a><span class="k">       do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-291"></a>          <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
+<a name="ln-292"></a>             <span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a name="ln-293"></a>          <span class="k">end do</span>
+<a name="ln-294"></a><span class="k">       end do</span>
+<a name="ln-295"></a><span class="k">    end if</span>
+<a name="ln-296"></a>    <span class="c">! Explicit matrix</span>
+<a name="ln-297"></a>    <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-298"></a>       <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">m</span>
+<a name="ln-299"></a>          <span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>   <span class="o">=</span>  <span class="n">dsdc</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a name="ln-300"></a>       <span class="k">end do</span>
+<a name="ln-301"></a><span class="k">    end do</span>
 <a name="ln-302"></a>
-<a name="ln-303"></a>  <span class="c">! Destroy the matrices</span>
-<a name="ln-304"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
-<a name="ln-305"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-306"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-307"></a>    
-<a name="ln-308"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
-<a name="ln-309"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">)</span>
-<a name="ln-310"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">)</span>
-<a name="ln-311"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">)</span>
-<a name="ln-312"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_destroy</span>
-<a name="ln-313"></a>
-<a name="ln-314"></a>
-<a name="ln-315"></a>  <span class="c">! Compute SDC integral</span>
-<a name="ln-316"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
-<a name="ln-317"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-<a name="ln-318"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>      <span class="kd">::</span> <span class="n">lev</span>
-<a name="ln-319"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
-<a name="ln-320"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">dt</span>
-<a name="ln-321"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
-<a name="ln-322"></a>
-<a name="ln-323"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
-<a name="ln-324"></a>    
-<a name="ln-325"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
-<a name="ln-326"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
-<a name="ln-327"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
-<a name="ln-328"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
-<a name="ln-329"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
-<a name="ln-330"></a>          <span class="k">end do</span>
-<a name="ln-331"></a><span class="k">       end do</span>
-<a name="ln-332"></a><span class="k">    end do  </span>
-<a name="ln-333"></a><span class="k">  end subroutine </span><span class="n">amisdcQ_integrate</span>
-<a name="ln-334"></a> 
-<a name="ln-335"></a><span class="k">end module </span><span class="n">pf_mod_amisdcQ</span>
+<a name="ln-303"></a><span class="k">    </span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span>
+<a name="ln-304"></a>    <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
+<a name="ln-305"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_initialize</span>
+<a name="ln-306"></a>
+<a name="ln-307"></a>  <span class="c">! Destroy the matrices</span>
+<a name="ln-308"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">)</span>
+<a name="ln-309"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-310"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-311"></a>    
+<a name="ln-312"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffE</span><span class="p">)</span>
+<a name="ln-313"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span><span class="p">)</span>
+<a name="ln-314"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilE</span><span class="p">)</span>
+<a name="ln-315"></a>    <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span><span class="p">)</span>
+<a name="ln-316"></a>  <span class="k">end subroutine </span><span class="n">amisdcQ_destroy</span>
+<a name="ln-317"></a>
+<a name="ln-318"></a>
+<a name="ln-319"></a>  <span class="c">! Compute SDC integral</span>
+<a name="ln-320"></a>  <span class="k">subroutine </span><span class="n">amisdcQ_integrate</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">lev</span><span class="p">,</span> <span class="n">qSDC</span><span class="p">,</span> <span class="n">fSDC</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">fintSDC</span><span class="p">)</span>
+<a name="ln-321"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_amisdcQ_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+<a name="ln-322"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>      <span class="kd">::</span> <span class="n">lev</span>
+<a name="ln-323"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">qSDC</span><span class="p">(:),</span> <span class="n">fSDC</span><span class="p">(:,</span> <span class="p">:)</span>
+<a name="ln-324"></a>    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>       <span class="kd">::</span> <span class="n">dt</span>
+<a name="ln-325"></a>    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">fintSDC</span><span class="p">(:)</span>
+<a name="ln-326"></a>
+<a name="ln-327"></a>    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">p</span>
+<a name="ln-328"></a>    
+<a name="ln-329"></a>    <span class="k">do </span><span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>
+<a name="ln-330"></a>       <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">)</span>
+<a name="ln-331"></a>       <span class="k">do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span>
+<a name="ln-332"></a>          <span class="k">do </span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">npieces</span>
+<a name="ln-333"></a>             <span class="k">call </span><span class="n">fintSDC</span><span class="p">(</span><span class="n">n</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">dt</span><span class="o">*</span><span class="n">lev</span><span class="p">%</span><span class="n">qmat</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">),</span> <span class="n">fSDC</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">))</span>
+<a name="ln-334"></a>          <span class="k">end do</span>
+<a name="ln-335"></a><span class="k">       end do</span>
+<a name="ln-336"></a><span class="k">    end do  </span>
+<a name="ln-337"></a><span class="k">  end subroutine </span><span class="n">amisdcQ_integrate</span>
+<a name="ln-338"></a> 
+<a name="ln-339"></a><span class="k">end module </span><span class="n">pf_mod_amisdcQ</span>
 </pre></div>
 
     </section>

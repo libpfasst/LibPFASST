@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">12 statements</a>
+    title=" 0.1% of total for procedures.">13 statements</a>
      </li> 
      
      
@@ -372,8 +372,9 @@ public subroutine zndsysarray_create_array(this, x, n, level_index, lev_shape)
     <span class="kt">integer</span><span class="p">,</span>                <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>              <span class="kd">::</span> <span class="n">n</span>
     <span class="kt">integer</span><span class="p">,</span>                <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>              <span class="kd">::</span>  <span class="n">level_index</span>
     <span class="kt">integer</span><span class="p">,</span>                <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>              <span class="kd">::</span>  <span class="n">lev_shape</span><span class="p">(:)</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span>
-    <span class="k">allocate</span><span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="kd">::</span><span class="n">x</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">ierr</span>
+    <span class="k">allocate</span><span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="kd">::</span><span class="n">x</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                                 
     <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span>
        <span class="k">call </span><span class="n">zndsysarray_build</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">lev_shape</span><span class="p">)</span>
     <span class="k">end do</span>

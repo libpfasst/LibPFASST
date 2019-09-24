@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">14 statements</a>
+    title=" 0.1% of total for procedures.">17 statements</a>
      </li> 
      
      
@@ -326,11 +326,13 @@ public subroutine zndarray_build(q, shape_in)
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span> <span class="kd">::</span> <span class="n">shape_in</span><span class="p">(:)</span>
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_zndarray_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">zndarray_obj</span>
-
+    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">ierr</span>
     <span class="k">select type</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="k">class is</span> <span class="p">(</span><span class="n">pf_zndarray_t</span><span class="p">)</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
-       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)))</span>
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                         
+       <span class="k">allocate</span><span class="p">(</span><span class="n">q</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="nb">product</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)),</span><span class="nb">stat</span><span class="o">=</span><span class="n">ierr</span><span class="p">)</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>                         
        <span class="n">q</span><span class="p">%</span><span class="n">ndim</span>   <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span>
        <span class="n">q</span><span class="p">%</span><span class="n">arr_shape</span> <span class="o">=</span> <span class="n">shape_in</span>
        <span class="n">q</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="nb">cmplx</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>

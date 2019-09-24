@@ -35,10 +35,9 @@ contains
        call pf%comm%post(pf, level, tag, ierror, source)
     end if
 
-
     if (ierror /= 0) then
-      print *, pf%rank, 'warning: error during post', ierror
-      stop "pf_parallel:pf_post"
+       print *, 'Rank',pf%rank
+       call pf_stop(__FILE__,__LINE__,'error during post',ierror)
    endif
    if (pf%debug) print*,'DEBUG --', pf%rank, 'is leaving pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
   end subroutine pf_post
@@ -67,8 +66,7 @@ contains
     elseif (dir == 2) then
        dest=pf%rank-1
     else
-       print *, pf%rank, 'warning: bad dir during send_status', dir
-      stop "pf_parallel:pf_send_status"
+      call pf_stop(__FILE__,__LINE__,'invalid dir during send_status',dir)
     end if
 
     if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag
@@ -76,8 +74,8 @@ contains
     if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status'
 
     if (ierror /= 0) then
-      print *, pf%rank, 'warning: error during send_status', ierror
-      stop "pf_parallel:pf_send_status"
+       print *, 'Rank',pf%rank
+       call pf_stop(__FILE__,__LINE__,'error during send_status',ierror)
     endif
 
   end subroutine pf_send_status
@@ -106,8 +104,8 @@ contains
     elseif (dir == 2) then
        source=pf%rank+1
     else
-      print *, pf%rank, 'warning: bad dir in recv_status', dir
-      stop "pf_parallel_oc:pf_recv_status"
+      print *, 'Rank',pf%rank
+      call pf_stop(__FILE__,__LINE__,'invalid bad dir in recv_status',dir)
    end if
 
    if (pf%debug) print*, pf%rank,  'is receiving status with tag ', tag
@@ -117,8 +115,8 @@ contains
    if (ierror .eq. 0) then
       pf%state%pstatus = istatus
    else
-      print *, pf%rank, 'warning: error during recv_status', ierror
-      stop "pf_parallel_oc:pf_recv_status"
+      print *, 'Rank=',pf%rank
+      call pf_stop(__FILE__,__LINE__,'error during recv_status',ierror)      
     endif
 
    if (pf%debug) print *, pf%rank, 'status recvd = ', istatus
@@ -146,8 +144,8 @@ contains
     if(blocking .eqv. .false.) &
         call pf_mpi_wait(pf, level%index, ierror)
     if (ierror /= 0) then
-      print *, pf%rank, 'warning: error during send (wait)', ierror
-      stop "pf_parallel:pf_send"
+      print *, 'Rank=',pf%rank
+      call pf_stop(__FILE__,__LINE__,'error during send (wait)',ierror)
     end if
 
 
@@ -163,15 +161,15 @@ contains
        end if
     end if
 
-!     ierror = 0
+     ierror = 0
     call start_timer(pf, TSEND + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
-!     if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%send), 'send buffer=',level%send
+     if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%send), 'send buffer=',level%send
 
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
     if (ierror /= 0) then
-      print *, pf%rank, 'warning: error during send', ierror
-      stop "pf_parallel:pf_send"
+       print *, 'Rank=',pf%rank
+       call pf_stop(__FILE__,__LINE__,'error during send',ierror)
    endif
 
    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking
@@ -199,7 +197,7 @@ contains
                                   .and. dir == 1) then
        source=pf%rank-1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-!        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
 
        if (ierror .eq. 0) then
@@ -213,7 +211,7 @@ contains
                                      .and. dir == 2) then
        source=pf%rank+1
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-!        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
 
        if (ierror .eq. 0) then
@@ -228,8 +226,8 @@ contains
 
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv, tag=',tag,blocking
     if(ierror .ne. 0) then
-      print *, pf%rank, 'warning: mpi error during receive', ierror
-      stop "pf_parallel:pf_recv"
+       print *, 'Rank=',pf%rank
+       call pf_stop(__FILE__,__LINE__,'error during receive',ierror)
     end if
 
     call end_timer(pf, TRECEIVE + level%index - 1)
@@ -249,8 +247,8 @@ contains
     if(pf%debug) print *,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
     if (ierror /= 0) then
-       print *, pf%rank, 'warning:  error during broadcast', ierror
-       stop "pf_parallel:pf_broadcast"
+       print *, 'Rank',pf%rank
+       call pf_stop(__FILE__,__LINE__,'error during broadcast',ierror)
     endif
     call end_timer(pf, TBROADCAST)
     if(pf%debug)print *,'ending broadcast'

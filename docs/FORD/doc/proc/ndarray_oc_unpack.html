@@ -347,12 +347,12 @@ public subroutine ndarray_oc_unpack(this, z, flags)
 
     <span class="k">select case</span> <span class="p">(</span><span class="n">which</span><span class="p">)</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-       <span class="k">stop</span> <span class="s2">&quot;ERROR in ndarray_oc_unpack: only 1, 2 allowed as flags&quot;</span>
+       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;ndarray_oc_unpack: only 1, 2 allowed as flags, which=&#39;</span><span class="p">,</span><span class="n">which</span><span class="p">)</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">yflatarray</span> <span class="o">=</span> <span class="n">z</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">pflatarray</span> <span class="o">=</span> <span class="n">z</span> 
-    <span class="k">case </span><span class="n">default</span>
+    <span class="k">case </span><span class="n">DEFAULT</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">which</span><span class="p">)</span>
     <span class="k">end select</span>
 <span class="k">  end subroutine </span><span class="n">ndarray_oc_unpack</span>

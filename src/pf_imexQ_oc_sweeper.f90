@@ -94,7 +94,7 @@ contains
 
     logical     :: sweep_y, sweep_p
     real(pfdp), allocatable  :: norms_y(:) !, norms_p(Lev%nnodes-1)
-    integer     ::step
+    integer     ::step, ierr
 
     lev => pf%levels(level_index)   !  Assign level pointer
 
@@ -104,8 +104,7 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if (.not.present(flags)) stop "IMEXQ_OC SWEEPER WITHOUT FLAGS"
-!     print *, "IMEXQ_OC SWEEP", which
+    if (.not.present(flags))  call pf_stop(__FILE__,__LINE__,'IMEXQ_OC SWEEPER WITHOUT FLAGS')
 
     Nnodes = lev%nnodes
     tend = t0+dt
@@ -122,7 +121,8 @@ contains
     else
        sweep_y = .true.
        sweep_p = .true.
-       allocate(norms_y(lev%nnodes-1))
+       allocate(norms_y(lev%nnodes-1),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
        do m = 1, Nnodes-1
           norms_y(m) = lev%R(m)%norm(1)
        end do
@@ -370,7 +370,7 @@ contains
 !     else if (sweep_p ) then
 !       call pf_residual(pf, lev, dt, 2)
 !     else
-!       stop "neither sweep on p nor on y : that should not happen"
+!       call pf_stop(__FILE__,__LINE__,'invalid sweep')
 !     end if
     call pf_residual(pf, lev%index, dt, which)
     ! done
@@ -397,16 +397,14 @@ contains
 
     which = 0
     if (present(flags)) which = flags
-    if (.not.present(flags)) stop "IMEXQ_OC EVAL WITHOUT FLAGS"
+    if (.not.present(flags)) call pf_stop(__FILE__,__LINE__,'IMEXQ_OC EVAL WITHOUT FLAGS')
 
     mystep = 1
     if(present(step)) then
-      mystep = step
+       mystep = step
     else
-      print *, "step not present in evaluate", which
-      stop
+       call pf_stop(__FILE__,__LINE__,'step not present in evaluate, which=',which)  
     end if
-!     print *, "IMEXQ_OC EVAL ", which
 
     if (this%explicit) &
       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, which, m, mystep)
@@ -428,8 +426,8 @@ contains
     type(pf_level_t), pointer  :: lev    !  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    if (.not.present(flags)) stop "IMEXQ_OC EVAL_ALL WITHOUT FLAGS"
-    if (.not.present(step)) stop "IMEXQ_OC EVAL_ALL WITHOUT step"
+    if (.not.present(flags)) call pf_stop(__FILE__,__LINE__,'IMEXQ_OC EVAL_ALL WITHOUT FLAGS')  
+    if (.not.present(step)) call pf_stop(__FILE__,__LINE__,'IMEXQ_OC EVAL_ALL WITHOUT step')  
 
 
     do m = 1, lev%nnodes
@@ -444,17 +442,21 @@ contains
     type(pf_pfasst_t),  target,  intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
-    integer    ::  Nnodes
+    integer    ::  Nnodes,ierr
     type(pf_level_t), pointer  :: lev    !  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
     this%npieces = 2
 
     Nnodes = lev%nnodes
-    allocate(this%QdiffE(Nnodes-1,Nnodes))  !  S-FE
-    allocate(this%QdiffI(Nnodes-1,Nnodes))  !  S-BE
-    allocate(this%QtilE(Nnodes-1,Nnodes))  !  S-FE
-    allocate(this%QtilI(Nnodes-1,Nnodes))  !  S-BE
+    allocate(this%QdiffE(Nnodes-1,Nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(this%QdiffI(Nnodes-1,Nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(this%QtilE(Nnodes-1,Nnodes),stat=ierr)  !  S-FE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(this%QtilI(Nnodes-1,Nnodes),stat=ierr)  !  S-BE
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     this%QtilE = 0.0_pfdp
     this%QtilI = 0.0_pfdp
@@ -502,10 +504,8 @@ contains
     if(present(flags)) then
       which = flags
     else
-      print *, "flags not present in integrate", which
-      stop
+       call pf_stop(__FILE__,__LINE__,'flags not present in integrate')  
     end if
-!     print *, "IMEXQ_OC INTEGRATE ", which
 
     do n = 1, Nnodes-1
        !  Forward in y
@@ -551,10 +551,9 @@ contains
 
     which = 0
     if(present(flags)) then
-      which = flags
+       which = flags
     else
-      print *, "flags not present in residual", which
-      stop
+       call pf_stop(__FILE__,__LINE__,'flags not present in residual')        
     end if
 !     print *, "IMEXQ_OC RESIDUAL ", which
 
@@ -597,19 +596,18 @@ contains
     
     which = 3
     if(present(flags)) which = flags
-    if (.not.present(flags)) stop "IMEXQ_OC SPREADQ0 WITHOUT FLAGS"
+    if (.not.present(flags))  call pf_stop(__FILE__,__LINE__,'flags not present in spreadq0')        
 
 !     print *, "IMEXQ_OC SPREADQ0", which
 
 
     mystep = 1
     if(present(step))  then
-      mystep = step !needed for sequential version
+       mystep = step !needed for sequential version
     else
-      print *, "step not present in spreadq0", which
-      stop
+       call pf_stop(__FILE__,__LINE__,'step not present in spreadq0')              
     end if
-
+    
     select case(which)
       case(1)
         !  Stick initial condition into first node slot
@@ -635,7 +633,7 @@ contains
             call lev%F(m,p)%copy(lev%F(lev%nnodes,p), 2)
           end do
         end do
-      case default
+      case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',which)
     end select
 

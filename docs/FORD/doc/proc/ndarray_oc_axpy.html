@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">25 statements</a>
+    title=" 0.1% of total for procedures.">26 statements</a>
      </li> 
      
      
@@ -358,7 +358,8 @@ public subroutine ndarray_oc_axpy(this, a, x, flags)
     <span class="kt">integer</span><span class="p">,</span>     <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">which</span>
 
-    <span class="n">which</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mf">0.0_pfdp</span><span class="p">)</span> <span class="k">return</span>
+<span class="k">    </span><span class="n">which</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
 <span class="c">!     if (.not.present(flags)) stop &quot;axpy without flags&quot; </span>
     
@@ -372,10 +373,10 @@ public subroutine ndarray_oc_axpy(this, a, x, flags)
         <span class="n">this</span><span class="p">%</span><span class="n">yflatarray</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">%</span><span class="n">yflatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">yflatarray</span>
       <span class="k">case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">this</span><span class="p">%</span><span class="n">pflatarray</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">%</span><span class="n">pflatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">pflatarray</span>
-      <span class="k">case </span><span class="n">default</span>
+      <span class="k">case </span><span class="n">DEFAULT</span>
          <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">which</span><span class="p">)</span>
       <span class="k">end select</span>
-<span class="k">    class </span><span class="n">default</span>
+<span class="k">    class </span><span class="n">DEFAULT</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Type error&#39;</span><span class="p">)</span>
     <span class="k">end select  </span>
 <span class="k">  end subroutine </span><span class="n">ndarray_oc_axpy</span>

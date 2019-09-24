@@ -19,7 +19,7 @@ contains
     character(len = 128) :: fname  !!  output file name for residuals
     character(len = 128) :: datpath  !!  path to output files
     character(len = 256) :: fullname  !!  output file name for residuals
-    integer :: istat,system
+    integer :: istat,system,ierr
     
     !  Set up the directory to dump results
     istat= system('mkdir -p dat')
@@ -51,9 +51,12 @@ contains
     this%nsweeps=nsweeps_in
     this%rank=rank_in
     this%level_index=level_index    
-    
-    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in))
-    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in))
+
+    ierr=0
+    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
+    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
 
     this%errors = -1.0_pfdp
     this%residuals = -1.0_pfdp
@@ -163,7 +166,7 @@ contains
 
   subroutine destroy_results(this)
     type(pf_results_t), intent(inout) :: this
-
+    
     if(allocated(this%errors))  deallocate(this%errors)
     if(allocated(this%residuals))  deallocate(this%residuals)
   end subroutine destroy_results

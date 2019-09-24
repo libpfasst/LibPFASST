@@ -117,11 +117,11 @@ All Modules &ndash; LibPFASST
 			 <tbody>
              
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_amisdc.html'>pf_mod_amisdc</a></td><td><a href='../sourcefile/pf_amisdc_sweeper.f90.html'>pf_amisdc_sweeper.f90</a></td><td><p>Old style Asynchronous MISDC sweeper</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_amisdc.html'>pf_mod_amisdc</a></td><td><a href='../sourcefile/pf_amisdc_sweeper.f90.html'>pf_amisdc_sweeper.f90</a></td><td><p>Module for old style Asynchronous MISDC sweeper</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_amisdcq.html'>pf_mod_amisdcQ</a></td><td><a href='../sourcefile/pf_amisdc_sweeperq.f90.html'>pf_amisdc_sweeperQ.f90</a></td><td><p>Asynchronous multi-implicit sweeper</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_amisdcq.html'>pf_mod_amisdcQ</a></td><td><a href='../sourcefile/pf_amisdc_sweeperq.f90.html'>pf_amisdc_sweeperQ.f90</a></td><td><p>Module for Asynchronous multi-implicit sweeper</p></td></tr>
                
                <!---->
 			 
@@ -137,7 +137,16 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></td><td><a href='../sourcefile/pf_exp_sweeper.f90.html'>pf_exp_sweeper.f90</a></td><td><p>Exponential integrator module</p><a href="../module/pf_mod_exp.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></td><td><a href='../sourcefile/pf_exp_sweeper.f90.html'>pf_exp_sweeper.f90</a></td><td><p>Module for Exponential-SDC sweeper.
+ ==================================
+  This module extends pf_sweeper_t and is used for creating an exponential sweeper 
+  that solves equations of the form
+         <script type="math/tex; mode=display">   y' = L y + N(t,y)  </script>
+  When extending this class, you must supply the functions phib, swpPhib, and resPhib
+  that each compute matrix-vector products of the form
+         <script type="math/tex; mode=display"> \sum_{i=0}^n t^i \varphi_i(tL)b_i </script>
+  in addition to the function f_eval for compluting the nonlinear term N(t,y).
+  The complete description of these three functions is contained below.</p></td></tr>
                
                <!---->
 			 
@@ -149,12 +158,13 @@ All Modules &ndash; LibPFASST
   To use this module, fftw must be installed.
   This can be done by the libpfasst make system with the command
   make fftw3
-  You also have to specify USE_FFTW in Makefile.defaults and
+  You also have to specify USE_FFTW=TRUE in Makefile.defaults and
   make clean is recommended before remake</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></td><td><a href='../sourcefile/pf_fftpack.f90.html'>pf_fftpack.f90</a></td><td><p>Module for using fftpack</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_fftpackage.html'>pf_mod_fftpackage</a></td><td><a href='../sourcefile/pf_fftpack.f90.html'>pf_fftpack.f90</a></td><td><p>Module for using fftpack.  This is the default fft package when fftw is not used as
+  indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p></td></tr>
                
                <!--active-->
 			 
@@ -162,10 +172,9 @@ All Modules &ndash; LibPFASST
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_imex_sweeper.html'>pf_mod_imex_sweeper</a></td><td><a href='../sourcefile/pf_imex_sweeper.f90.html'>pf_imex_sweeper.f90</a></td><td><p>IMEX Sweeper Module
-  Module of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
+			   <tr class="active"><td><a href='../module/pf_mod_imex_sweeper.html'>pf_mod_imex_sweeper</a></td><td><a href='../sourcefile/pf_imex_sweeper.f90.html'>pf_imex_sweeper.f90</a></td><td><p>Module for the IMEX Sweeper  of the  the derived sweeper class for doing IMEX sweeps for an equation of the form
          <script type="math/tex; mode=display">   y' = f_1(y) + f_2(y)  </script>
-  The <script type="math/tex">f_1</script> piece is treated explicitly and <script type="math/tex">f_2</script> implicitl
+  The <script type="math/tex">f_1</script> piece is treated explicitly and <script type="math/tex">f_2</script> implicitly
   Afer this sweeper is initialized (usually in main), the logical flags can be changed if desired</p><a href="../module/pf_mod_imex_sweeper.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!--active-->
@@ -174,7 +183,15 @@ All Modules &ndash; LibPFASST
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_imk.html'>pf_mod_imk</a></td><td><a href='../sourcefile/pf_imk_sweeper.f90.html'>pf_imk_sweeper.f90</a></td><td><p>This module implements fully implicit Munthe-Kaas Runge Kutta methods using explicit SDC sweeping</p><a href="../module/pf_mod_imk.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_imk.html'>pf_mod_imk</a></td><td><a href='../sourcefile/pf_imk_sweeper.f90.html'>pf_imk_sweeper.f90</a></td><td><p>Module to implement fully implicit Munthe-Kaas Runge Kutta sweeper using explicit SDC sweeping
+ --
+  The equation to be solved is 
+  <script type="math/tex; mode=display"> y'=A(y,t)y  </script>
+  where <script type="math/tex">A</script> is a matrix and <script type="math/tex">y)\ is  a vector or matrix or if Lax_pair = true
+  <script type="math/tex; mode=display">Y'=[A(Y,t),Y]</script> where both \(A</script> and <script type="math/tex">Y</script> are matrices
+  This is done by solving 
+  <script type="math/tex; mode=display">Q' = dexpinv_Q(A)</script>
+  Using SDC sweeps</p></td></tr>
                
                <!--active-->
 			 
@@ -186,7 +203,10 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_misdc.html'>pf_mod_misdc</a></td><td><a href='../sourcefile/pf_misdc_sweeper.f90.html'>pf_misdc_sweeper.f90</a></td><td><p>Multi-implicit SDC sweeper type (old style), extends abstract sweeper</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_misdc.html'>pf_mod_misdc</a></td><td><a href='../sourcefile/pf_misdc_sweeper.f90.html'>pf_misdc_sweeper.f90</a></td><td><p>Module for multi-implicit SDC sweeper type (old style), extends abstract sweeper class for an equation
+   of the form
+         <script type="math/tex; mode=display">   y' = f_1(y) + f_2(y) + f_2(y)  </script>
+</p></td></tr>
                
                <!---->
 			 
@@ -204,11 +224,11 @@ All Modules &ndash; LibPFASST
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_mpi.html'>pf_mod_mpi</a></td><td><a href='../sourcefile/pf_mpi.f90.html'>pf_mpi.f90</a></td><td><p>Module to hold include statement</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_mpi.html'>pf_mod_mpi</a></td><td><a href='../sourcefile/pf_mpi.f90.html'>pf_mpi.f90</a></td><td><p>Module to hold use mpi statement</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></td><td><a href='../sourcefile/pf_ndarray_encap.f90.html'>pf_ndarray_encap.f90</a></td><td><p>N-dimensional array encapsulation.</p><a href="../module/pf_mod_ndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_ndarray.html'>pf_mod_ndarray</a></td><td><a href='../sourcefile/pf_ndarray_encap.f90.html'>pf_ndarray_encap.f90</a></td><td><p>Module to define and encapsulation for an N-dimensional array </p><a href="../module/pf_mod_ndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
@@ -220,7 +240,7 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></td><td><a href='../sourcefile/pf_ndsysarray_encap.f90.html'>pf_ndsysarray_encap.f90</a></td><td><p>System of N-dimensional arrays encapsulation.</p><a href="../module/pf_mod_ndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></td><td><a href='../sourcefile/pf_ndsysarray_encap.f90.html'>pf_ndsysarray_encap.f90</a></td><td><p>Module to define and encapsulation for a system of N-dimensional arrays </p><a href="../module/pf_mod_ndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
@@ -236,7 +256,7 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_petscvec.html'>pf_mod_petscVec</a></td><td><a href='../sourcefile/pf_petscvec_encap.f90.html'>pf_petscVec_encap.f90</a></td><td><p>N-dimensional array encapsulation.</p><a href="../module/pf_mod_petscvec.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_petscvec.html'>pf_mod_petscVec</a></td><td><a href='../sourcefile/pf_petscvec_encap.f90.html'>pf_petscVec_encap.f90</a></td><td><p>Module to define and encapsulation of a Petsc Vector.</p><a href="../module/pf_mod_petscvec.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
@@ -260,34 +280,39 @@ All Modules &ndash; LibPFASST
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_solutions.html'>pf_mod_solutions</a></td><td><a href='../sourcefile/pf_solutions.f90.html'>pf_solutions.f90</a></td><td><p>Module defining exact solutions for various PDEs</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></td><td><a href='../sourcefile/pf_timer.f90.html'>pf_timer.f90</a></td><td><p>Module for setting timers</p></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_stop.html'>pf_mod_stop</a></td><td><a href='../sourcefile/pf_stop.f90.html'>pf_stop.f90</a></td><td><p>Module to exit gracefully and informatively</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></td><td><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></td><td><a href='../sourcefile/pf_timer.f90.html'>pf_timer.f90</a></td><td><p>Module for setting timers</p></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></td><td><a href='../sourcefile/pf_verlet_sweeper.f90.html'>pf_verlet_sweeper.f90</a></td><td><p>Verlet type sweeper for 2nd order problems</p><a href="../module/pf_mod_verlet.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></td><td><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></td><td><p>Module with useful subroutines that don't  fit in other modules</p></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../sourcefile/pf_zndarray_encap.f90.html'>pf_zndarray_encap.f90</a></td><td><p>N-ndimensional complex array encapsulation.</p><a href="../module/pf_mod_zndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class=""><td><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></td><td><a href='../sourcefile/pf_verlet_sweeper.f90.html'>pf_verlet_sweeper.f90</a></td><td><p>Module to define a Verlet type sweeper for 2nd order problems.
+  This is intended for Hamiltonian problems of the form</p><a href="../module/pf_mod_verlet.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!---->
 			 
-			   <tr class="active"><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></td><td><p>System of complex N-dimensional arrays encapsulation.</p><a href="../module/pf_mod_zndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr class="active"><td><a href='../module/pf_mod_zndarray.html'>pf_mod_zndarray</a></td><td><a href='../sourcefile/pf_zndarray_encap.f90.html'>pf_zndarray_encap.f90</a></td><td><p>Module to define and encapsulation for an N-ndimensional complex array </p><a href="../module/pf_mod_zndarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
                
                <!--active-->
 			 
-			   <tr class=""><td><a href='../module/pfasst.html'>pfasst</a></td><td><a href='../sourcefile/pfasst.f90.html'>pfasst.f90</a></td><td><p>Module containing a collection of "use" statements to simplify
+			   <tr class=""><td><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></td><td><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></td><td><p>!&gt; Module to define and encapsulation for a system of N-ndimensional complex arrays </p><a href="../module/pf_mod_zndsysarray.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+               
+               <!---->
+			 
+			   <tr class="active"><td><a href='../module/pfasst.html'>pfasst</a></td><td><a href='../sourcefile/pfasst.f90.html'>pfasst.f90</a></td><td><p>Module containing a collection of "use" statements to simplify
   including the common main modules in writing applications that use libpfasst</p></td></tr>
                
-               <!---->
+               <!--active-->
 			 
 			 </tbody></table>
              

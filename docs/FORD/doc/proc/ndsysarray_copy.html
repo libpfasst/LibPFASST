@@ -344,7 +344,7 @@ public subroutine ndsysarray_copy(this, src, flags)
     <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">)</span>
        <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">src</span><span class="p">%</span><span class="n">flatarray</span>
     <span class="k">class </span><span class="n">default</span>
-       <span class="k">stop</span> <span class="s2">&quot;TYPE ERROR&quot;</span>
+       <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;invalid type&#39;</span><span class="p">)</span>              
     <span class="k">end select</span>
 <span class="k">  end subroutine </span><span class="n">ndsysarray_copy</span>
 </pre></div>
