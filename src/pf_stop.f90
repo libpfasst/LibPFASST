@@ -1,3 +1,4 @@
+!! File holding the module to exit gracefully and informatively
 !
 ! This file is part of LIBPFASST.
 !
