@@ -12,5 +12,5 @@ jobs:
                 name: make_and_test
                 command: ["/bin/sh", "-c"]
                 args:
-                   make;
+                 - make;
                    cd test/magpicard &&  make  && cd ../imk &&  make && cd ../nagumo && make && cd ../EXP_adv_diff_fft/1d && make && cd ../../adv_diff_fft/1d && make && cd ../2d/ && make && cd ../../.. && pytest;
