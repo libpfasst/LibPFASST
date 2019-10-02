@@ -61,8 +61,10 @@ contains
   subroutine scalar_destroy_single(this, x)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
+    integer                                            :: ierr
 
-    deallocate(x)
+    deallocate(x,stat=ierr)
+    print *, 'deallocate', ierr    
   end subroutine scalar_destroy_single
 
 
@@ -70,10 +72,10 @@ contains
   subroutine scalar_destroy_array(this, x)
     class(scalar_factory), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
-    integer                                            :: i
+    integer                                            :: i,ierr
 
-    deallocate(x)
-
+    deallocate(x,stat=ierr)
+    print *, 'deallocate array', ierr
   end subroutine scalar_destroy_array
 
 
