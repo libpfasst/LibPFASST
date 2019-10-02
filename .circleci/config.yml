@@ -8,8 +8,8 @@ jobs:
             - run:
                 name: env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
-            - run: # Modify the commands below to build all the examples
-                name: make_examples
+            - run: # Modify the commands below to build all the tests
+                name: make_tests
                 command: >
                   make  &&
                   cd test/magpicard &&  make &&
@@ -19,11 +19,11 @@ jobs:
                   cd ../../adv_diff_fft/1d && make &&
                   cd ../2d/ && make &&
                   cd ../../.. 
-            - run: # Modify the commands below to build all the examples
+            - run: # Modify the commands below to build all the tutorials
                 name: make_tutorials
                 command: >
                   cd Tutorials/EX1_Dahlquist &&  make &&
-                  mpirun -n 16 main.exe multi_level.nml &&
+                  mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX2_Dahlquist &&  make &&
                   cd ../EX3_adv_diff &&  make &&
                   cd ../..
