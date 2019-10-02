@@ -80,21 +80,23 @@ contains
        print *,'10'    
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
-
+    print *,'11'
+    
     !>  Add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
-
+    print *,'12'    
     !>  Output run parameters
     call print_loc_options(pf,un_opt=6)
 
-    print *,'11'    
+    print *,'13'    
     !> Set the initial condition
     call y_0%setval(1.0_pfdp)
 
-    print *,'12'    
+    print *,'14'    
     !> Do the PFASST time stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
 
+    print *,'15'    
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
     
