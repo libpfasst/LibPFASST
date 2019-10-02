@@ -24,8 +24,6 @@ jobs:
                 command: >
                   cd Tutorials/EX1_Dahlquist &&  make &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
-                  cd ../EX2_Dahlquist &&  make &&
-                  mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX3_adv_diff &&  make &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../..
