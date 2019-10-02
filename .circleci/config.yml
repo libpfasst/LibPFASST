@@ -11,7 +11,7 @@ jobs:
             - run: # Modify the commands below to build all the tests
                 name: make_tests
                 command: >
-                  make  &&
+                  make  DEBUG=TRUE &&
                   cd test/magpicard &&  make &&
                   cd ../imk &&  make &&
                   cd ../nagumo && make &&
@@ -23,6 +23,8 @@ jobs:
                 name: check_tutorials
                 command: >
                   cd Tutorials/EX1_Dahlquist &&  make &&
+                  mpirun -n 16 ./main.exe multi_level.nml &&
+                  cd Tutorials/EX2_Dahlquist &&  make DEBUG=TRUE &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX3_adv_diff &&  make &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
