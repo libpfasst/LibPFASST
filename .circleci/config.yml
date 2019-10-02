@@ -19,6 +19,3 @@ jobs:
                   cd ../../adv_diff_fft/1d && make
                   cd ../2d/ && make
                   cd ../../.. && pytest
-
-		  
-
