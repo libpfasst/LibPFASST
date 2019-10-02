@@ -19,13 +19,15 @@ jobs:
                   cd ../../adv_diff_fft/1d && make &&
                   cd ../2d/ && make &&
                   cd ../../.. 
-            - run: # Modify the commands below to build all the tutorials
-                name: make_tutorials
+            - run: # Modify the commands below to build and check all the tutorials
+                name: check_tutorials
                 command: >
                   cd Tutorials/EX1_Dahlquist &&  make &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX2_Dahlquist &&  make &&
+                  mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX3_adv_diff &&  make &&
+                  mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../..
             - run: # Run the python tests in test
                 name: do_pytests
