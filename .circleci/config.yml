@@ -12,5 +12,5 @@ jobs:
                 name: make_and_test
                 command: >
                   make  &&
-		  cd test
+                  cd test
 
