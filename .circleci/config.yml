@@ -10,7 +10,7 @@ jobs:
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
             - run: # Modify the commands below to build your repository.
                 name: make_and_test
-                command: ["/bin/sh", "-c"]
+                command: ["/bin/sh","-c"]
                 args:
                  - make;
 
