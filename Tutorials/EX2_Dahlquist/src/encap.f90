@@ -41,9 +41,10 @@ contains
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
-    integer :: i
+    integer :: ierr
 
-    allocate(scalar_encap::x)
+    allocate(scalar_encap::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
   end subroutine scalar_create_single
 
   !> Subroutine to create an array of encaps
@@ -53,8 +54,10 @@ contains
     integer,               intent(in   )              :: n  ! size of array to build
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
-    integer :: i
-    allocate(scalar_encap::x(n))
+    integer :: ierr
+    print *,'allocating scalar_encap',n
+    allocate(scalar_encap::x(n),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',n)    
   end subroutine scalar_create_array
 
   !> Subroutine to destroy a single array encap

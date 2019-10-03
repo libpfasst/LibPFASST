@@ -22,10 +22,10 @@ jobs:
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
-                  cd Tutorials/EX1_Dahlquist &&  make &&
-                  mpirun -n 16 ./main.exe multi_level.nml &&
-                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE &&
+                  cd Tutorials/EX2_Dahlquist &&  make DEBUG=TRUE &&
                   ./main.exe multi_level.nml &&
+                  cd ../EX1_Dahlquist &&  make &&
+                  mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../EX3_adv_diff &&  make &&
                   mpirun -n 16 ./main.exe multi_level.nml &&
                   cd ../..
