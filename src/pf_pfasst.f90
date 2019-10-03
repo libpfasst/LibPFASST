@@ -211,7 +211,10 @@ contains
     print *,'npieces',npieces
 
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
-    print *,'i in level_setup '            
+    print *,'l in level_setup ',lev%index,  lev%lev_shape                    
+    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
+    print *,'i in level_setup '
+    
     call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%lev_shape)
     print *,'g in level_setup '                
     do i = 1, nnodes*npieces
@@ -219,8 +222,6 @@ contains
     end do
     print *,'k in level_setup '                
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    print *,'l in level_setup ',lev%index,  lev%lev_shape                    
-    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
     print *,'m in level_setup '                        
     call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%lev_shape)
     print *,'n in level_setup '                        
