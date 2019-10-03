@@ -113,8 +113,7 @@ contains
     integer                   :: ierr                   !!  error flag
 
 
-    print *,'a in pfasst_setup '
-   !>  loop over levels to set parameters
+    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        call pf_level_setup(pf, l)
     end do
@@ -174,51 +173,43 @@ contains
     if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',nnodes)    
 
     lev%residual = -1.0_pfdp
-    print *,'a in level_setup '           
 
     !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
        call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
     end if
 
-    print *,'b in level_setup '
-    
     !> skip the rest if we're already allocated
     if (lev%allocated) return
     lev%allocated = .true.
 
-    print *,'c in level_setup '    
     !> allocate flat buffers for send, and recv
     allocate(lev%send(mpibuflen),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%recv(mpibuflen),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
-    print *,'d in level_setup '    
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%nflags(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
-    print *,'e in level_setup '    
     !>  Allocate and compute all the matrices
     allocate(lev%sdcmats,stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
     call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
-    print *,'f in level_setup '    
     lev%nodes = lev%sdcmats%qnodes
 
     !>  initialize sweeper
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
     call lev%ulevel%sweeper%initialize(pf,level_index)
 
-    print *,'g in level_setup '        
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(pf,level_index)
 
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
+    print *,'npieces',npieces
 
-    print *,'h in level_setup '        
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
     print *,'i in level_setup '            
     call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%lev_shape)
