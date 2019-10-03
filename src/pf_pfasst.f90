@@ -219,8 +219,6 @@ contains
     end do
     print *,'k in level_setup '                
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    print *,'Fflt ',lev%Fflt
-    print *,'F ',lev%F
     print *,'l in level_setup '                    
     call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
     print *,'m in level_setup '                        

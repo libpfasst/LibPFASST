@@ -18,7 +18,9 @@ jobs:
                   cd ../EXP_adv_diff_fft/1d && make &&
                   cd ../../adv_diff_fft/1d && make &&
                   cd ../2d/ && make &&
-                  cd ../../.. 
+                  cd ../../..
+                  cd Tutorials/EX2_Dahlquist &&  make DEBUG=TRUE &&
+                  ./main.exe multi_level.nml &&
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
