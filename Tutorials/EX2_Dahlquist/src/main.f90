@@ -45,58 +45,45 @@ contains
 
     integer           ::  l   !  loop variable over levels
 
-    print *,'2'
     !> Read problem parameters
     call probin_init(pf_fname)
 
-    print *,'3'
     !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
-    print *,'4'    
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
 
-    print *,'5'    
     !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
-       print *,'6'       
        !>  Allocate the user specific level object
        allocate(my_level_t::pf%levels(l)%ulevel)
 
-       print *,'7'
        !>  Allocate the user specific data constructor
        allocate(scalar_factory::pf%levels(l)%ulevel%factory)
 
-       print *,'8'
        !>  Add the sweeper to the level
        allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-       print *,'9'
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
     end do
 
-       print *,'10'    
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
-    print *,'11'
     
     !>  Add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
-    print *,'12'    
+
     !>  Output run parameters
     call print_loc_options(pf,un_opt=6)
 
-    print *,'13'    
     !> Set the initial condition
     call y_0%setval(1.0_pfdp)
 
-    print *,'14'    
     !> Do the PFASST time stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
 
-    print *,'15'    
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
     

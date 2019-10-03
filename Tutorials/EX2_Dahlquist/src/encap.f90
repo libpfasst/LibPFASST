@@ -55,10 +55,9 @@ contains
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: ierr
-    print *,'allocating scalar_encap array',n,level_index,lev_shape
+
     allocate(scalar_encap::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',n)
-    print *,'done allocating scalar_encap array',n,level_index,lev_shape
     
   end subroutine scalar_create_array
 
@@ -69,7 +68,6 @@ contains
     integer                                            :: ierr
 
     deallocate(x,stat=ierr)
-    print *, 'deallocate', ierr    
   end subroutine scalar_destroy_single
 
 
@@ -80,7 +78,7 @@ contains
     integer                                            :: i,ierr
 
     deallocate(x,stat=ierr)
-    print *, 'deallocate array', ierr
+
   end subroutine scalar_destroy_array
 
 

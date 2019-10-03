@@ -117,7 +117,7 @@ contains
     do l = 1, pf%nlevels
        call pf_level_setup(pf, l)
     end do
-    print *,'b in pfasst_setup '    
+
     !>  set default finest level
     pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
@@ -128,7 +128,7 @@ contains
 
        allocate(f_lev%rmat(c_lev%nnodes,f_lev%nnodes),stat=ierr)
        if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
-       print *,'c in pfasst_setup '    
+
        
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels
@@ -145,7 +145,6 @@ contains
           call pf_time_interpolation_matrix(f_lev%nodes, f_lev%nnodes, c_lev%nodes, c_lev%nnodes, f_lev%tmat)
           call pf_time_interpolation_matrix(c_lev%nodes, c_lev%nnodes, f_lev%nodes, f_lev%nnodes, f_lev%rmat)
        endif
-       print *,'d in pfasst_setup '           
     end do
 
   end subroutine pf_pfasst_setup
@@ -208,34 +207,32 @@ contains
 
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
-    print *,'npieces',npieces
 
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
-    print *,'l in level_setup ',lev%index,  lev%lev_shape                    
     call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
-    print *,'i in level_setup '
+
     
     call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%lev_shape)
-    print *,'g in level_setup '                
-!    do i = 1, nnodes*npieces
-!       call lev%Fflt(i)%setval(0.0_pfdp, 0)
-!    end do
-    print *,'k in level_setup '                
+
+    do i = 1, nnodes*npieces
+       call lev%Fflt(i)%setval(0.0_pfdp, 0)
+    end do
+
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    print *,'m in level_setup '                        
+
     call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%lev_shape)
-    print *,'n in level_setup '                        
+
     !  Need space for old function values in im sweepers
     call lev%ulevel%factory%create_array(lev%pFflt, nnodes*npieces, lev%index, lev%lev_shape)
     lev%pF(1:nnodes,1:npieces) => lev%pFflt
     if (lev%index < pf%nlevels) then
        call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%lev_shape)
     end if
-    print *,'o in level_setup '                            
+
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%lev_shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%lev_shape)
     call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%lev_shape)
-    print *,'p in level_setup '                            
+
   end subroutine pf_level_setup
 
 
