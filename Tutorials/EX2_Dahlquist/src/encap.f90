@@ -58,7 +58,7 @@ contains
     print *,'allocating scalar_encap array',n
     allocate(scalar_encap::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',n)
-    print *,'done allocating scalar_encap array',n,lev_index
+    print *,'done allocating scalar_encap array',n,level_index
     
   end subroutine scalar_create_array
 
