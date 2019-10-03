@@ -21,7 +21,7 @@ jobs:
                   cd ../../.. &&
                   cd Tutorials/EX2_Dahlquist &&  make DEBUG=TRUE &&
                   ./main.exe multi_level.nml &&
-		  cd ../.. &&
+                  cd ../.. &&
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
