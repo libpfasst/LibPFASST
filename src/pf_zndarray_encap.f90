@@ -21,7 +21,7 @@
 module pf_mod_zndarray
   use iso_c_binding  
   use pf_mod_dtype
-  use pf_mod_utils  
+  use pf_mod_stop
   implicit none
 
   !>  Factory for making zndarray
@@ -223,8 +223,17 @@ module pf_mod_zndarray
     integer, intent(in), optional :: flags
     class(pf_zndarray_t), pointer :: zndarray_obj
 
+    if (a .eq. 0.0_pfdp) return
+    
     zndarray_obj => cast_as_zndarray(x)
-    this%flatarray = a * zndarray_obj%flatarray + this%flatarray
+    if (a .eq. 1.0_pfdp) then
+       this%flatarray = zndarray_obj%flatarray + this%flatarray
+    elseif (a .eq. -1.0_pfdp) then
+       this%flatarray = -zndarray_obj%flatarray + this%flatarray
+    else
+       this%flatarray = a*zndarray_obj%flatarray + this%flatarray
+    end if
+    
   end subroutine zndarray_axpy
 
   subroutine zndarray_eprint(this,flags)
