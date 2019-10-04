@@ -2,21 +2,18 @@
 # Default build settings for libpfasst.
 #
 
-FC = mpif90
-CC = mpicc
-
-AR = ar rcs
 
 DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
 USE_FFTW=FALSE
 
-#  Set some compiler flags 
-INTEL=FALSE  #  Make true for intel on cori
+#  Make true for intel on cori
+USE_INTEL=FALSE  
 
+#  Set some compiler flags
 AR = ar rcs
-ifeq ($(INTEL),TRUE)
+ifeq ($(USE_INTEL),TRUE)
 FC = ftn
 CC = ftn
 FFLAGS = -Ibuild -module include -cpp
@@ -26,7 +23,7 @@ endif
 else
 FC = mpif90
 CC = mpicc
-FFLAGS = -Ibuild -Jinclude -cpp
+FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
 else
@@ -35,19 +32,9 @@ endif
 
 endif
 
-FFLAGS = -Ibuild -Jinclude -cpp
-
-ifeq ($(DEBUG),TRUE)
-FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
-else
-FFLAGS += -O3 -ffree-line-length-none
-endif
-
-include $(wildcard $(LIBPFASST)/*.defs)
 
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
-
 
 ifeq ($(USE_FFTW),FALSE)
 F77SRC = src/dfftpack.o
@@ -83,6 +70,7 @@ FSRC = pfasst.f90 \
        pf_exp_sweeper.f90 \
        pf_fexp_sweeper.f90 \
        pf_imex_sweeper.f90 \
+       pf_imexR_sweeper.f90 \
        pf_imexQ_oc_sweeper.f90 \
        pf_imk_sweeper.f90 \
        pf_magpicard_sweeper.f90 \

@@ -21,7 +21,7 @@
 module pf_mod_ndarray
   use iso_c_binding
   use pf_mod_dtype
-  use pf_mod_utils  
+  use pf_mod_stop
   implicit none
 
   !>  Type to create and destroy N-dimenstional arrays
@@ -206,10 +206,17 @@ contains
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
 
-
+    if (a .eq. 0.0_pfdp) return
     select type(x)
     type is (pf_ndarray_t)
-       this%flatarray = a * x%flatarray + this%flatarray
+       if (a .eq. 1.0_pfdp) then
+          this%flatarray = x%flatarray + this%flatarray
+       elseif (a .eq. -1.0_pfdp) then
+          this%flatarray = -x%flatarray + this%flatarray
+       else
+          this%flatarray = a*x%flatarray + this%flatarray
+       end if
+          
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
