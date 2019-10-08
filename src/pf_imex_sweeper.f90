@@ -28,7 +28,7 @@ module pf_mod_imex_sweeper
 
      logical    :: explicit  !!  True if there is an explicit piece (must set in derived sweeper)
      logical    :: implicit  !!  True if there an implicit piece (must set in derived sweeper)
-
+     integer    :: m_sub     !!  Substep loop variable (useful in the function evaluation routines in derived sweepers)
      class(pf_encap_t), allocatable :: rhs   !! holds rhs for implicit solve
 
    contains
@@ -94,7 +94,7 @@ contains
     !>  Local variables
     type(pf_level_t), pointer :: lev    !!  points to current level
 
-    integer     :: m, n,k   !!  Loop variables
+    integer     :: m,n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
 
     lev => pf%levels(level_index)   !  Assign level pointer
@@ -149,8 +149,8 @@ contains
        t = t0
        ! do the sub-stepping in sweep
        do m = 1, lev%nnodes-1  !!  Loop over substeps
-          t = t + dt*this%dtsdc(m)
-
+          t = t + dt*this%dtsdc(m) 
+          this%m_sub=m
           !>  Accumulate rhs
           call this%rhs%setval(0.0_pfdp)
           do n = 1, m
