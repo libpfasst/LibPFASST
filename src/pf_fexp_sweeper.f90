@@ -241,6 +241,7 @@ contains
     nnodes = lev%nnodes
     call start_timer(pf, TLEVEL+lev%index-1)
     ! error sweeps
+
     do k = 1, nsweeps
       pf%state%sweep=k
 
