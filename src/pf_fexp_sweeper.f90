@@ -59,11 +59,11 @@ module pf_mod_fexp
     ! =================================================================================
     ! EXPSWEEPSUBSTEP: Computes the jth substep of the exponential sweeper
     !
-    !     		exp(x L) y_n^{k+1} + h \varphi_1(x L) [N_{j}^{[k+1]} - N_{j}^{[k]}] + I_{j}
+    !     		exp(x L) y_{n,j}^{k+1} + h \varphi_1(x L) [N_{n,j}^{[k+1]} - N_{n,j}^{[k]}] + I_{n,j}
     !
     !	where x = dt * (t_{n,j+1} - t_{n,j}), I_{j} are the exponential integrals
     !
-    !		I_{j} = x \int_{0}^{1} exp(x L(1-s)) Q_j(s) ds
+    !		I_{n,j} = x \int_{0}^{1} exp(x L(1-s)) Q_j(s) ds
     !
     !	and Q_j(s) is a Lagrange interpolating polynomial that satisfies
     !
@@ -72,54 +72,44 @@ module pf_mod_fexp
     !	for \tau_{j,i} = (t_{n,i} - t_{n,j}) / (t{n,j+1} - t_{n,j})
     !
     !	NOTE: The operator L is not passed in as a parameter, and must be
-    !       implemented appropriately within the function.
+    !       implemented appropriately within the class.
     !
     ! Arguments
     !
     !   j   	(input) Integer
     !       	substep index for determining t: t = t_{n,j+1} - t_{n,j}
     !
+    !   y_jp1 (inout) pf_encap_t
+    !		      stores the solution y_{n,j+1}^{k+1}
+    !
     !   dt  	(input) real
     !       	stepsize
     !
-    !   y_n   	(input) pf_encap_t
-    !		stores the solution y_n^{k+1}
+    !   y_j  (input) pf_encap_t
+    !		     stores the solution y_{n,j}^{k+1}
     !
-    !   N_n   	(input) pf_encap_t
-    !		stores N(y_n^{k+1})
+    !   F    (input) pf_encap_t(:,:)
+    !		     should be the lev%F matrix of dimension (nnodes-1 x 2). First component
+    !        stores the nonlinear term, and the second component is used by this
+    !        function to store the exponential integral terms I_{n,j}
     !
-    !   Ns_old  	(input) pf_encap_t(:)
+    !   Nk  	(input) pf_encap_t(:)
     !		stores N(y^{k+1}_j) for j = 1 ... m
     ! =================================================================================
 
-    subroutine pf_expSweepSubstep(this, y_np1, j, dt, y_n, N_n, Nk)
+    subroutine pf_expSweepSubstep(this, y_jp1, j, dt, y_j, F, Nk)
       import pf_fexp_t, pf_encap_t, pfdp
       class(pf_fexp_t),   intent(inout) :: this
-      class(pf_encap_t),  intent(inout) :: y_np1
+      class(pf_encap_t),  intent(inout) :: y_jp1
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
-      class(pf_encap_t),  intent(in)    :: y_n
-      class(pf_encap_t),  intent(in)    :: N_n
+      class(pf_encap_t),  intent(in)    :: y_j
+      class(pf_encap_t),  intent(in)    :: F(:,:)
       class(pf_encap_t),  intent(in)    :: Nk(:)
     end subroutine pf_expSweepSubstep
 
     ! =================================================================================
-    ! EXPRESSUBSTEP: Computes the jth substep of the exponential sweeper
-    !
-    !     		exp(x L) y_n^{k+1} + h \varphi_1(x L) [N_{j}^{[k+1]} - N_{j}^{[k]}] + I_{j}
-    !
-    !	where x = dt * (t_{n,j+1} - t_{n,j}), I_{j} are the exponential integrals
-    !
-    !		I_{j} = x \int_{0}^{1} exp(x L(1-s)) Q_j(s) ds
-    !
-    !	and Q_j(s) is a Lagrange interpolating polynomial that satisfies
-    !
-    !		Q_j(\tau_{j,i}) = N(y(t_{n,i})) for i = 1 ... m
-    !
-    !	for \tau_{j,i} = (t_{n,i} - t_{n,j}) / (t{n,j+1} - t_{n,j})
-    !
-    !	NOTE: The operator L is not passed in as a parameter, and must be
-    !       implemented appropriately within the function.
+    ! EXPRESSUBSTEP: Computes the jth residual
     !
     ! Arguments
     !
@@ -132,19 +122,21 @@ module pf_mod_fexp
     !   y_n   	(input) pf_encap_t
     !		stores the solution y_n^{k+1}
     !
-    !   N_n   	(input) pf_encap_t
-    !		stores N(y_n^{k+1})
+    !   F    (input) pf_encap_t(:,:)
+    !		     should be the lev%F matrix of dimension (nnodes-1 x 2). First component
+    !        stores the nonlinear term, and the second component is used by this
+    !        function to store the exponential integral terms I_{n,j}
     !
     ! =================================================================================
 
-    subroutine pf_expResidualSubstep(this, y_np1, j, dt, y_n, Nk)
+    subroutine pf_expResidualSubstep(this, y_np1, j, dt, y_n, F)
       import pf_fexp_t, pf_encap_t, pfdp
       class(pf_fexp_t),   intent(inout) :: this
       class(pf_encap_t),  intent(inout) :: y_np1
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
       class(pf_encap_t),  intent(in)    :: y_n
-      class(pf_encap_t),  intent(in)    :: Nk(:)
+      class(pf_encap_t),  intent(in)    :: F(:,:)
     end subroutine pf_expResidualSubstep
 
     ! =================================================================================
@@ -210,7 +202,7 @@ contains
     this%nodes = lev%sdcmats%qnodes
     this%eta = this%nodes(2 : nnodes) - this%nodes(1 : nnodes - 1) ! substeps
     ! set number of rhs components
-    this%npieces = 1
+    this%npieces = 2
     ! initialize temporary storage objects
     call lev%ulevel%factory%create_single(this%newF, lev%index, lev%lev_shape)
     call lev%ulevel%factory%create_array(this%F_old, nnodes, lev%index, lev%lev_shape)
@@ -257,7 +249,7 @@ contains
       do j = 1, nnodes - 1
         t = t0 + dt * this%eta(j)
         call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      			! compute F_j^{[k+1]}
-        call this%expSweepSubstep(lev%Q(j+1), j, dt, lev%Q(j), lev%F(j,1), this%F_old)	! compute exp(h_j L) y_{j} + \varphi_1(h_j L) * (F^{k+1}_j - F^{k}_j) + I_j
+        call this%expSweepSubstep(lev%Q(j+1), j, dt, lev%Q(j), lev%F, this%F_old)	! compute exp(h_j L) y_{j} + \varphi_1(h_j L) * (F^{k+1}_j - F^{k}_j) + I_j
         !  Now we have to add in the tauQ
         if (level_index < pf%state%finest_level) then
           call lev%Q(j+1)%axpy(1.0_pfdp, lev%tauQ(j))
@@ -311,13 +303,8 @@ contains
     lev => pf%levels(level_index)   !  Assign level pointer
 
     nnodes = lev%nnodes
-
-    do i = 1, nnodes
-      call this%F_old(i)%copy(fSDC(i,1))  ! Save old f
-    end do
-
     do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-      call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), this%F_old)
+      call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), fSDC)
       call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
       if (i > 1) then
         call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
