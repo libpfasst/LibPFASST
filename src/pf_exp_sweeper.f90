@@ -326,7 +326,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            call call_hooks(pf, level_index, PF_POST_SWEEP)
            
         end do  !  Sweeps
-        call stop_timer(pf, TLEVEL+lev%index-1)                
+        call end_timer(pf, TLEVEL+lev%index-1)                
     end subroutine exp_sweep
 
     ! =================================================================================
