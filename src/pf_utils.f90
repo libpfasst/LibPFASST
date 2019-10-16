@@ -37,12 +37,12 @@ contains
        !       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right?
 !       sol_norms(m+1) = sol_norms(1) ! only the value at lev%nnodes is needed for forward integration, right?        
 !    end do
-    call end_timer(pf, TRESIDUAL)
     
     !    lev%residual = res_norms(lev%nnodes-1)
     m = lev%nnodes  ! for usual forward integration
     if(present(flag)) then
       if(flag==2) m = 1
+
     end if
     lev%residual = maxval(res_norms)    
     if (sol_norms(m) > 0.0d0) then
@@ -52,11 +52,8 @@ contains
     end if
 
     call pf_set_resid(pf,lev%index,lev%residual)
-!    if (pf%save_residuals .and. pf%state%iter>0)  then
-!       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
-!    end if
 
-!    call end_timer(pf, TRESIDUAL)
+    call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
 
@@ -138,7 +135,7 @@ contains
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
-    
+
     if (pf%save_residuals .and. pf%state%iter>0)  then
        pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
     end if
