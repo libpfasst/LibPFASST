@@ -437,9 +437,9 @@ contains
 !          print *,pf%rank, ' post res'
           call call_hooks(pf, -1, PF_POST_ITERATION)
 
-          !  If we are converged, exit block
+          !  If we are converged, exit block (can do one last sweep if desired)
           if (pf%state%status == PF_STATUS_CONVERGED)  then
-!             call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             if (pf%sweep_at_conv) call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
              exit             
           end if
 
@@ -513,7 +513,7 @@ contains
        c_lev => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev%Finterp)
        call f_lev%qend%copy(f_lev%Q(f_lev%nnodes), flags=0)
-       call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)
+       call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
 
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition
@@ -531,5 +531,90 @@ contains
     end do
 
   end subroutine pf_v_cycle
+
+  !> Execute a V-cycle between levels nfine and ncoarse like in pySDC
+  subroutine pf_v_cycle_pySDC(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
+
+
+    type(pf_pfasst_t), intent(inout), target :: pf
+    real(pfdp),        intent(in)    :: t0, dt
+    integer,           intent(in)    :: iteration
+    integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle
+    integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle
+    integer, optional, intent(in)    :: flags
+
+    type(pf_level_t), pointer :: f_lev, c_lev
+    integer :: level_index, j
+
+    !>  Post the nonblocking receives on the all the levels that will be recieving later
+    !>    (for single level this will be skipped)
+!    do level_index = level_index_c+1, level_index_f
+!       f_lev => pf%levels(level_index)
+!       call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+!    end do
+
+
+    !> move from fine to coarse doing sweeps
+    do level_index = level_index_f, level_index_c+1, -1
+       f_lev => pf%levels(level_index);
+       c_lev => pf%levels(level_index-1)
+       call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
+       call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
+       call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+       call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above       
+       call restrict_time_space_fas(pf, t0, dt, level_index)
+       call save(pf,c_lev)
+    end do
+
+
+    ! Do the coarsest level
+    level_index=level_index_c
+    f_lev => pf%levels(level_index)
+    if (pf%pipeline_pred) then
+       do j = 1, f_lev%nsweeps
+          call pf_recv(pf, f_lev, f_lev%index*10000+iteration+j, .true.)
+          call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
+          call pf_send(pf, f_lev, f_lev%index*10000+iteration+j, .false.)
+       end do
+    else
+       call pf_recv(pf, f_lev, f_lev%index*10000+iteration, .true.)
+       call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
+       call pf_send(pf, f_lev, f_lev%index*10000+iteration, .false.)
+    endif
+
+    ! Now move coarse to fine interpolating and sweeping
+    do level_index = level_index_c+1,level_index_f
+       f_lev => pf%levels(level_index);
+       c_lev => pf%levels(level_index-1)
+       call interpolate_time_space(pf, t0, dt, level_index, c_lev%Finterp)
+       call f_lev%qend%copy(f_lev%Q(f_lev%nnodes), flags=0)  !  Key to skipping interp q0 below
+
+
+       !  Shouldn't need this interpolate_q0 as long as qend is interpolated previously
+       if (pf%rank /= 0) then
+          ! interpolate increment to q0 -- the fine initial condition
+          ! needs the same increment that Q(1) got, but applied to the
+          ! new fine initial condition
+          call interpolate_q0(pf, f_lev, c_lev,flags=0)
+       end if
+       ! don't sweep on the finest level since that is only done at beginning
+       if (level_index <= level_index_f) then
+          call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
+          call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
+          call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+          call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
+          
+          call pf_residual(pf, f_lev%index, dt)
+       else  !  compute residual for diagnostics since we didn't sweep
+          pf%state%sweep=1
+          call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
+          call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+          call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
+          
+          call pf_residual(pf, f_lev%index, dt)
+       end if
+    end do
+
+  end subroutine pf_v_cycle_pySDC
 
 end module pf_mod_parallel

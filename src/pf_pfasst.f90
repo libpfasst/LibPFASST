@@ -112,11 +112,12 @@ contains
     integer                   :: l                      !!  Level loop index
     integer                   :: ierr                   !!  error flag
 
-    
-   !>  loop over levels to set parameters
+
+    !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        call pf_level_setup(pf, l)
     end do
+
     !>  set default finest level
     pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
@@ -127,6 +128,7 @@ contains
 
        allocate(f_lev%rmat(c_lev%nnodes,f_lev%nnodes),stat=ierr)
        if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail",f_lev%nnodes)
+
        
        ! with the RK stepper, no need to interpolate and restrict in time
        ! we only copy the first node and last node betweem levels
@@ -171,7 +173,6 @@ contains
 
     lev%residual = -1.0_pfdp
 
-
     !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
        call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
@@ -186,39 +187,39 @@ contains
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%recv(mpibuflen),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
-
     !> allocate nodes, flags, and integration matrices
     allocate(lev%nodes(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     allocate(lev%nflags(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
-
     !>  Allocate and compute all the matrices
     allocate(lev%sdcmats,stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
     call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
-
     lev%nodes = lev%sdcmats%qnodes
 
     !>  initialize sweeper
     lev%ulevel%sweeper%use_LUq=pf%use_LUq
     call lev%ulevel%sweeper%initialize(pf,level_index)
 
-    
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(pf,level_index)
 
     !> allocate solution and function arrays
     npieces = lev%ulevel%sweeper%npieces
 
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
+    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
+
+    
     call lev%ulevel%factory%create_array(lev%Fflt, nnodes*npieces, lev%index,  lev%lev_shape)
+
     do i = 1, nnodes*npieces
        call lev%Fflt(i)%setval(0.0_pfdp, 0)
     end do
 
     lev%F(1:nnodes,1:npieces) => lev%Fflt
-    call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
+
     call lev%ulevel%factory%create_array(lev%R, nnodes-1, lev%index,  lev%lev_shape)
 
     !  Need space for old function values in im sweepers
@@ -227,10 +228,11 @@ contains
     if (lev%index < pf%nlevels) then
        call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%lev_shape)
     end if
+
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%lev_shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%lev_shape)
     call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%lev_shape)
-    
+
   end subroutine pf_level_setup
 
 

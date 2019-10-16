@@ -57,51 +57,12 @@ contains
 
   end function cast_as_magpicard_sweeper
 
-  subroutine initialize_magpicard_sweeper(this,pf, level_index)
-    use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
-    class(pf_sweeper_t), intent(inout) :: this
-   type(pf_pfasst_t),  target, intent(inout) :: pf
-    integer, intent(in) :: level_index
-
-
-    class(magpicard_sweeper_t), pointer :: magpicard !< context data containing integrals, etc
-    integer :: coefs=9
-
-    magpicard => cast_as_magpicard_sweeper(this)
-
-    magpicard%qtype = pf%qtype
-    magpicard%dt = dt
-    magpicard%magnus_order = magnus_order(level_index)
-    magpicard%exp_iterations = 0
-    magpicard%debug = pf%debug
-    magpicard%dim = nparticles
-
-    ! inouts necessary for the base class structure
-
-    allocate(magpicard%commutator(nparticles, nparticles), &
-         magpicard%commutators(magpicard%dim, magpicard%dim, 9))
-
-    magpicard%commutators(:,:,:) = z0
-    magpicard%commutator = z0
-
-    magpicard%indices(1,1) = 1
-    magpicard%indices(1,2) = 2
-
-    magpicard%indices(2,1) = 1
-    magpicard%indices(2,2) = 3
-
-    magpicard%indices(3,1) = 2
-    magpicard%indices(3,2) = 3
-
-    nullify(magpicard)
-  end subroutine initialize_magpicard_sweeper
-
-    subroutine initialize(this,pf, level_index)
+  subroutine initialize(this,pf, level_index)
     use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
     class(magpicard_sweeper_t), intent(inout) :: this
-   type(pf_pfasst_t),  target, intent(inout) :: pf
+    type(pf_pfasst_t),  target, intent(inout) :: pf
     integer, intent(in) :: level_index
-
+    
 
     integer :: ncoefs=9
 
@@ -112,7 +73,7 @@ contains
     this%debug = pf%debug
     this%dim = nparticles
 
-    ! inouts necessary for the base class structure
+    ! initialize the base class structure
     call this%magpicard_initialize(pf,level_index)
 
     allocate(this%commutator(nparticles, nparticles), &

@@ -25,6 +25,8 @@ module sweeper
      procedure :: dexpinv
      procedure :: propagate => propagate_solution
      procedure :: commutator_p
+     procedure :: initialize
+     procedure :: destroy
   end type imk_sweeper_t
 
 contains
@@ -43,29 +45,37 @@ contains
 
   end function cast_as_imk_sweeper
 
-  subroutine initialize_imk_sweeper(this, level, debug, use_sdc, rk, mkrk, qtype, nterms)
-    use probin, only: nparticles, dt
-    class(pf_sweeper_t), intent(inout) :: this
-    integer, intent(in) :: level, qtype, nterms
-    logical, intent(in) :: debug, use_sdc, rk, mkrk
+  subroutine initialize(this,pf, level_index)
+    use probin, only: nparticles, dt,  use_sdc, rk, mkrk,  nterms
+    class(imk_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout),target :: pf
+    integer,             intent(in)    :: level_index
 
-    class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
+!    integer, intent(in) :: level, qtype, nterms
+!    logical, intent(in) :: debug, use_sdc, rk, mkrk
 
-    imk => cast_as_imk_sweeper(this)
+ !   class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
 
-    imk%qtype = qtype
-    imk%nterms = nterms
-    imk%debug = debug
-    imk%dim = nparticles
-    imk%use_sdc = use_sdc
-    imk%rk = rk
-    imk%mkrk = mkrk
+ !   imk => cast_as_imk_sweeper(this)
+    !  Call the imk sweeper initialize
 
-    allocate(imk%commutator(nparticles, nparticles))
-    imk%commutator = z0
 
-    nullify(imk)
-  end subroutine initialize_imk_sweeper
+    this%qtype = pf%qtype
+    this%nterms = nterms(level_index)
+    this%debug = pf%debug
+    this%dim = nparticles
+    this%use_sdc = use_sdc
+    this%rk = rk
+    this%mkrk = mkrk
+
+    print *,'calling sweeper initialize',rk,mkrk,use_sdc,nparticles
+    call this%imk_initialize(pf,level_index)    
+
+    allocate(this%commutator(nparticles, nparticles))
+    this%commutator = z0
+
+!    nullify(imk)
+  end subroutine initialize
 
   subroutine f_eval(this, y, t, level, f)
     use probin, only: toda_periodic
@@ -336,16 +346,21 @@ contains
 
   end function compute_inf_norm
 
- !> array of ctx data deallocation
- subroutine destroy_imk_sweeper(this)
-   class(pf_sweeper_t), intent(inout) :: this
-   integer :: io
+ !> Destroy sweeper (bypasses base sweeper destroy)
+ subroutine destroy(this,pf,level_index)
+   class(imk_sweeper_t), intent(inout) :: this
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+   integer,              intent(in)    :: level_index
+   
+!   class(imk_sweeper_t), pointer :: sweeper
+   !>  Call base sweeper destroy
+   print *,'calling base sweeper destroy'
+   call this%imk_destroy(pf,level_index)
+   
+   deallocate(this%commutator)
 
-   class(imk_sweeper_t), pointer :: sweeper
-   sweeper => cast_as_imk_sweeper(this)
-   deallocate(sweeper%commutator)
-
- end subroutine destroy_imk_sweeper
+ end subroutine destroy
+ 
 
 
  subroutine initialize_as_identity_real(matrix,dim)

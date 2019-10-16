@@ -45,30 +45,27 @@ contains
       call pf_mpi_create(comm, MPI_COMM_WORLD)
       call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-
-      !---- Create the levels -------------------------------------------------------
+      !---- Create the levels ---------------------------------------------
       do l = 1, pf%nlevels
-          allocate(imk_context::pf%levels(l)%ulevel)
-          allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
+         !>  Allocate the user specific level object
+         allocate(imk_context::pf%levels(l)%ulevel)
 
-          allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
+         !>  Allocate the user specific data factory
+         allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
 
-          call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
-               l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
+         !>  Add the sweeper to the level
+         allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          mpibuflen = nparticles * nparticles * 2
-          call pf_level_set_size(pf,l,[nparticles],mpibuflen)
+         mpibuflen = nparticles * nparticles * 2
+         call pf_level_set_size(pf,l,[nparticles],mpibuflen)
       end do
 
       if(pf%rank == 0) print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
-!      call pf_add_hook(pf, -1, PF_PRE_ITERATION, echo_residual)
-!      call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_residual)      
-!      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+      call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, echo_error)
       !      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)      
-
 
       !>  output the run options 
       call pf_print_options(pf,un_opt=6)
@@ -98,11 +95,6 @@ contains
       call zmkpair_destroy(q0)
       call zmkpair_destroy(qend)
 
-      !> deallocate local sweeper stuff
-      do l = 1, pf%nlevels
-         call destroy_imk_sweeper(pf%levels(l)%ulevel%sweeper)
-      end do
-      
       if(pf%rank == 0) print *,'destroying pf'
       call pf_pfasst_destroy(pf)
 
