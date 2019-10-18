@@ -224,13 +224,15 @@ contains
              call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1+k, .false.)
           end do ! k = 1, c_lev%nsweeps_pred-1
        else  !  Don't pipeline
-          !  Get new initial conditions
-          call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank, .true.)
-
-          !  Do a sweeps
-          call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred)
-          !  Send forward
-          call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1, .false.)
+          if (c_lev%nsweeps_pred .gt. 0) then
+             !  Get new initial conditions
+             call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank, .true.)
+             
+             !  Do a sweeps
+             call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred)
+             !  Send forward
+             call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1, .false.)
+          endif
        endif  ! (Pipeline_pred .eq. .true) then
     end if
 
