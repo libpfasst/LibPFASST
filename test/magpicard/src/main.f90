@@ -60,7 +60,7 @@ contains
 
       end do
 
-!      print *,'Initializing mpi and pfasst...'
+      if(pf%rank == 0)   print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
 
       call pf_add_hook(pf, 1, PF_POST_SWEEP, echo_error)

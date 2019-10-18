@@ -11,7 +11,7 @@
     niters = 15   !  default is 5
     nnodes =    2  3  5
 
-    nsweeps_pred= 1 1 
+    nsweeps_pred= 1 1 1
     nsweeps= 1 1 1
     
    

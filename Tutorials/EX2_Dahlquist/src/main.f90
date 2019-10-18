@@ -71,7 +71,7 @@ contains
 
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
-
+    
     !>  Add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 

@@ -37,6 +37,8 @@ module pf_mod_imk
     procedure :: spreadq0     => imk_spreadq0
     procedure :: evaluate_all => imk_evaluate_all
     procedure :: destroy   => imk_destroy
+    procedure :: imk_destroy
+    procedure :: imk_initialize  
     procedure(pf_f_eval_p), deferred :: f_eval
     procedure(pf_dexpinv_p), deferred :: dexpinv
     procedure(pf_propagate_p), deferred :: propagate

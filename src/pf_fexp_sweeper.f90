@@ -1,5 +1,5 @@
 !!  Exponential integrator sweeper  module
-! =====================================================================================
+
 ! MODULE: pf_mod_exp
 ! !> @author
 ! Tommaso Buvoli
@@ -8,7 +8,7 @@
 !
 !> Exponential integrator module
 !!
-!!  This module extends pf_sweeper_t and is used for creating an exponential sweeper
+!!  This module extends pf_sweeper_t and is used for creating an exponential sweeper 
 !!  that solves equations of the form
 !!         $$   y' = L y + N(t,y)  $$
 !!  When extending this class, you must supply the functions phib, swpPhib, and resPhib
@@ -408,5 +408,6 @@ contains
     deallocate(this%newF)
     call lev%ulevel%factory%destroy_array(this%F_old)
   end subroutine exp_destroy
+
 
 end module pf_mod_fexp
