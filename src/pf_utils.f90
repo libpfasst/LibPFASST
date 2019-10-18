@@ -136,7 +136,7 @@ contains
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
 
-    if (pf%save_residuals .and. pf%state%iter>0)  then
+    if (pf%save_errors .and. pf%state%iter>0)  then
        pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
     end if
     

@@ -99,7 +99,7 @@ contains
     close(istream)
 
     !  output residuals only for last iteration
-    write (fname, "(A5,I0.1,A8)") '/Lev_',this%level_index,'_end.dat'
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
     fullname = trim(datpath) // trim(fname)
     istream=5000+this%rank
     open(istream, file=trim(fullname), form='formatted')
@@ -142,7 +142,7 @@ contains
     istream=2000+this%rank                                !  define unit number
     open(istream, file=trim(fullname), form='formatted')  !  open file
 
-    !  output errors  per sweep  
+    !  output errors  per sweep
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
        do i = 1 , this%niters
@@ -156,7 +156,7 @@ contains
     close(istream)
 
     !  Build file name for output at end of step
-    write (fname, "(A5,I0.1,A8)") '/Lev_',this%level_index,'_end.dat'
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
     fullname = trim(datpath) // trim(fname)               !  full path to file
     istream=2000+this%rank                               !  define unit number
     open(istream, file=trim(fullname), form='formatted')  !  open file
@@ -165,10 +165,10 @@ contains
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
        do i = this%niters,1,-1
-             if (this%errors(i, j, this%nsweeps) .ge. 0.0) then
-                write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%errors(i, j, this%nsweeps)
-                exit
-             end if
+          if (this%errors(i, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%errors(i, j, this%nsweeps)
+             exit
+          end if
        end do
     enddo
     flush(istream)
