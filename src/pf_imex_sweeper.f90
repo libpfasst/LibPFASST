@@ -101,7 +101,7 @@ contains
     
     call start_timer(pf, TLEVEL+lev%index-1)
 
-    do k = 1,nsweeps   !!  Loop over sweeps
+    sweeps: do k = 1,nsweeps   !!  Loop over sweeps
        pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
@@ -148,8 +148,10 @@ contains
 
        t = t0
        ! do the sub-stepping in sweep
-       do m = 1, lev%nnodes-1  !!  Loop over substeps
-          t = t + dt*this%dtsdc(m) 
+
+       substeps: do m = 1, lev%nnodes-1  !!  Loop over substeps
+          t = t + dt*this%dtsdc(m)
+
           this%m_sub=m
           !>  Accumulate rhs
           call this%rhs%setval(0.0_pfdp)
@@ -180,12 +182,12 @@ contains
                call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1),1)
 
 
-       end do  !!  End substep loop
+       end do substeps !!  End substep loop
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
-    end do  !  End loop on sweeps
+    end do sweeps  !  End loop on sweeps
 
     call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imex_sweep

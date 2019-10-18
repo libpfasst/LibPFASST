@@ -635,7 +635,7 @@ contains
     end if
     
     if (pf%save_timings) then
-       call  dump_timings(pf)
+       call  dump_timings(pf%results(pf%nlevels),pf)
     end if
   
 

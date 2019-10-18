@@ -76,7 +76,8 @@ FSRC = pfasst.f90 \
        pf_magpicard_sweeper.f90 \
        pf_misdcQ_sweeper.f90 \
        pf_misdcQ_oc_sweeper.f90 \
-       pf_verlet_sweeper.f90 
+       pf_verlet_sweeper.f90 \
+       pf_fexp_sweeper.f90
        #       pf_amisdc.f90 \
 #       pf_amisdcQ.f90 \
 
