@@ -13,6 +13,16 @@ USE_INTEL=FALSE
 
 #  Set some compiler flags
 AR = ar rcs
+
+FC = mpif90
+CC = mpicc
+FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
+ifeq ($(DEBUG),TRUE)
+FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
+else
+FFLAGS += -O3
+endif
+
 ifeq ($(USE_INTEL),TRUE)
 FC = ftn
 CC = ftn
@@ -20,16 +30,15 @@ FFLAGS = -Ibuild -module include -cpp
 ifeq ($(DEBUG),TRUE)
 FFLAGS +=   -g 
 endif
-else
-FC = mpif90
-CC = mpicc
-FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
-ifeq ($(DEBUG),TRUE)
-FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
-else
-FFLAGS += -O3 
 endif
 
+ifeq ($(USE_CRAY),TRUE)
+FC = ftn
+CC = ftn
+FFLAGS = -Ibuild  -F -cpp -eZ 
+ifeq ($(DEBUG),TRUE)
+FFLAGS +=   -g 
+endif
 endif
 
 
@@ -76,8 +85,7 @@ FSRC = pfasst.f90 \
        pf_magpicard_sweeper.f90 \
        pf_misdcQ_sweeper.f90 \
        pf_misdcQ_oc_sweeper.f90 \
-       pf_verlet_sweeper.f90 \
-       pf_fexp_sweeper.f90
+       pf_verlet_sweeper.f90 
        #       pf_amisdc.f90 \
 #       pf_amisdcQ.f90 \
 
@@ -85,13 +93,13 @@ FSRC = pfasst.f90 \
 #  Before using petsc, one must set the environment variables
 #  PETSC_DIR and PETSC_ARCH
 #  These are displayed at the end of the petsc configuration step
-
-
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
 FSRC+= pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
+
+
 
 ifeq ($(USE_FFTW),FALSE)
 FSRC+=pf_fftpack.f90

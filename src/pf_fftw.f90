@@ -147,20 +147,22 @@ contains
   !>  Destroy the package
   subroutine fft_destroy(this)
     class(pf_fft_t), intent(inout) :: this
+
+    type(c_ptr) :: wk    
     call fftw_destroy_plan(this%ffftw)
     call fftw_destroy_plan(this%ifftw)
     select case (this%ndim)
-    case (1)            
-       deallocate(this%wk_1d)
-       !  Deallocate wave number arrays
-       deallocate(this%kx)   
+    case (1)
+       call fftw_free(c_loc(this%wk_1d))
+       deallocate(this%kx)
     case (2)            
-       deallocate(this%wk_2d)
+       call fftw_free(c_loc(this%wk_2d))
        !  Deallocate wave number arrays
        deallocate(this%kx)   
        deallocate(this%ky)   
     case (3)            
-       deallocate(this%wk_3d)
+       call fftw_free(c_loc(this%wk_3d))
+
        !  Deallocate wave number arrays
        deallocate(this%kx)   
        deallocate(this%ky)   

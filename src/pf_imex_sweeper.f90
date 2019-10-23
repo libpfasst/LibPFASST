@@ -99,11 +99,11 @@ contains
 
     lev => pf%levels(level_index)   !  Assign level pointer
     
-    call start_timer(pf, TLEVEL+lev%index-1)
 
     sweeps: do k = 1,nsweeps   !!  Loop over sweeps
        pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
+       call start_timer(pf, TLEVEL+lev%index-1)
 
        !  Add terms from previous iteration  (not passing CI tests)
        !do m = 1, lev%nnodes-1
@@ -183,13 +183,14 @@ contains
 
 
        end do substeps !!  End substep loop
+       call end_timer(pf, TLEVEL+lev%index-1)
+       
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do sweeps  !  End loop on sweeps
 
-    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imex_sweep
 
   !> Subroutine to initialize matrices and space for sweeper

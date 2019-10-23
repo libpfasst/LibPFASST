@@ -231,13 +231,14 @@ contains
 
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
-    call start_timer(pf, TLEVEL+lev%index-1)
     ! error sweeps
 
     do k = 1, nsweeps
       pf%state%sweep=k
 
       call call_hooks(pf, level_index, PF_PRE_SWEEP)      ! NOTE: ensure that lev%F has been properly initialized here
+      call start_timer(pf, TLEVEL+lev%index-1)
+      
       do j = 1, nnodes
         call this%F_old(j)%copy(lev%F(j,1))  ! Save old f
       end do
@@ -247,8 +248,8 @@ contains
       end if
       t = t0
       do j = 1, nnodes - 1
-        t = t0 + dt * this%eta(j)
-        call this%f_eval(lev%Q(j), t, lev%index, lev%F(j,1))      			! compute F_j^{[k+1]}
+        t = t0 + dt * this%nodes(j+1)
+
         call this%expSweepSubstep(lev%Q(j+1), j, dt, lev%Q(j), lev%F, this%F_old)	! compute exp(h_j L) y_{j} + \varphi_1(h_j L) * (F^{k+1}_j - F^{k}_j) + I_j
         !  Now we have to add in the tauQ
         if (level_index < pf%state%finest_level) then
@@ -257,15 +258,17 @@ contains
             call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))
           end if
         end if
-
+        call this%f_eval(lev%Q(j+1), t, lev%index, lev%F(j+1,1))      			! compute F_j^{[k+1]}
       end do  !  Substepping over nodes
-      call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))   ! eval last nonlinear term
+!      call this%f_eval(lev%Q(nnodes), t0 + dt, lev%index, lev%F(nnodes,1))   ! eval last nonlinear term
+      call end_timer(pf, TLEVEL+lev%index-1)
 
       call pf_residual(pf, level_index, dt)
       call lev%qend%copy(lev%Q(lev%nnodes))
       call call_hooks(pf, level_index, PF_POST_SWEEP)
 
-    end do  !  Sweeps
+   end do  !  Sweeps
+   
   end subroutine exp_sweep
 
   ! =================================================================================
