@@ -35,7 +35,7 @@ contains
        q_diag = real(qend%flatarray(1:400:21))
        errd = maxval(abs(q_diag-q_ex))
       
-       print *,'Rank ',pf%rank,'Nsteps ',pf%state%step+1,' Iter ',pf%state%iter,' error at end=',errd, 'totTime=',pf%runtimes(1),'Ord=',magnus_order, 'Nnodes=',nnodes(1), 'qtype=',pf%qtype
+       print *,'Rank ',pf%rank,'Nsteps ',pf%state%step+1,' Iter ',pf%state%iter,' error at end=',errd, 'totTime=',pf%pf_runtimes%t_total,'Ord=',magnus_order, 'Nnodes=',nnodes(1), 'qtype=',pf%qtype
     endif
 
   end subroutine echo_error
