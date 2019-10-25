@@ -84,7 +84,7 @@ contains
     integer :: i  !!  hook loop index
     integer :: l  !!  level loop index
 
-    call start_timer(pf, THOOKS)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_HOOKS,level_index)
 
     pf%state%hook = hook
     if (level_index == -1) then  ! Do to all levels
@@ -99,7 +99,8 @@ contains
        end do
     end if
 
-    call end_timer(pf, THOOKS)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,level_index)
+    
   end subroutine call_hooks
 
   !>  Subroutine defining log hook

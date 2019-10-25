@@ -63,11 +63,13 @@ contains
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
 
+    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
        call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)
     else
        call pf_block_run(pf, q0, dt,  nsteps_loc,q0,flags=flags)
     end if
+    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_results(pf)
 
@@ -138,7 +140,7 @@ contains
     pf%state%iter = -1          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    call start_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
     !!
@@ -252,7 +254,7 @@ contains
        end if
     end do
 
-    call end_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
@@ -357,7 +359,6 @@ contains
     integer                   :: level_max_depth !!  Finest level in V-cycle
 
 
-    call start_timer(pf, TTOTAL)
 
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
@@ -382,6 +383,8 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_STEP)
+
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
        !  1.  predictor
@@ -423,9 +426,9 @@ contains
        pf%state%iter = 0
        call call_hooks(pf, -1, PF_POST_ITERATION)
 
-       call start_timer(pf, TITERATION)
        do j = 1, pf%niters
 
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           pf%state%iter = j
@@ -438,20 +441,20 @@ contains
 
 !          print *,pf%rank, ' post res'
           call call_hooks(pf, -1, PF_POST_ITERATION)
-
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
           !  If we are converged, exit block (can do one last sweep if desired)
           if (pf%state%status == PF_STATUS_CONVERGED)  then
              if (pf%sweep_at_conv) call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             call call_hooks(pf, -1, PF_POST_CONVERGENCE)
              exit             
           end if
 
        end do  !  Loop over the iteration in this bloc
-       call call_hooks(pf, -1, PF_POST_CONVERGENCE)
-       call end_timer(pf, TITERATION)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_STEP)
        call call_hooks(pf, -1, PF_POST_STEP)
+       
     end do !  Loop over the blocks
 
-    call end_timer(pf, TTOTAL)
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
@@ -487,6 +490,7 @@ contains
     do level_index = level_index_f, level_index_c+1, -1
        f_lev => pf%levels(level_index);
        c_lev => pf%levels(level_index-1)
+       
        call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
        call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, level_index)

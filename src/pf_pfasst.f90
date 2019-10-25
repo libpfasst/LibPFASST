@@ -339,7 +339,8 @@ contains
     integer    ::  nsweeps_burn, q0_style, taui0
     logical    ::  Vcycle,Finterp, use_LUq, use_Sform
     logical    :: debug, use_rk_stepper
-    logical    :: save_timings,echo_timings, save_residuals, save_errors
+    logical    :: save_residuals, save_errors
+    integer    :: save_timings
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
     ! stuff for reading the command line
@@ -354,7 +355,7 @@ contains
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, echo_timings, debug, save_timings,save_residuals, save_errors, use_rk_stepper
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
 
     !> set local variables to pf_pfasst defaults
@@ -381,7 +382,6 @@ contains
     save_residuals = pf%save_residuals
     save_errors = pf%save_errors
     save_timings = pf%save_timings
-    echo_timings = pf%echo_timings
 
 
     nsteps_rk    = pf%nsteps_rk
@@ -435,7 +435,6 @@ contains
 
     pf%outdir       = outdir
     pf%debug        = debug
-    pf%echo_timings = echo_timings
     pf%save_residuals = save_residuals
     pf%save_timings = save_timings
     pf%save_errors = save_errors
@@ -456,16 +455,20 @@ contains
   end subroutine pf_read_opts
 
   !>  Subroutine to write out run parameters
-  subroutine pf_print_options(pf, un_opt, show_mats_opt)
+  subroutine pf_print_options(pf, un_opt, show_mats_opt,json_opt)
     type(pf_pfasst_t), intent(inout)           :: pf   
     integer,           intent(in   ), optional :: un_opt
     logical,           intent(in   ), optional :: show_mats_opt
+    logical,           intent(in   ), optional :: json_opt
 
     integer :: un = 6
     logical :: show_mats = .FALSE.
-    integer :: l, i
+    logical :: dump_json = .TRUE.
+    integer :: l, i,istat
     character(8)   :: date
     character(10)  :: time
+    character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 128) :: datpath  !!  path to output files
 
     if (pf%rank /= 0) return
     if (present(un_opt)) un = un_opt
@@ -496,7 +499,7 @@ contains
     case (SDC_GAUSS_LOBATTO)
        write(un,*) 'qtype:',pf%qtype,'! Gauss Lobatto nodes are used'
     case (SDC_GAUSS_RADAU)
-       write(un,*) 'qtype:',pf%qtype,'! Gauss Radua nodes are used'
+       write(un,*) 'qtype:',pf%qtype,'! Gauss Radau nodes are used'
     case (SDC_CLENSHAW_CURTIS)
        write(un,*) 'qtype:',pf%qtype,'! Clenshaw Curtis nodes are used'
     case (SDC_UNIFORM)
@@ -511,7 +514,6 @@ contains
     if (pf%use_composite_nodes)  write(un,*) 'Using composite node nesting'
     if (pf%use_no_left_q)  write(un,*) ' Skipping left end point in quadruture rule '        
     write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
-    
     write(un,*) 'mpibuflen:   ', pf%levels(1:pf%nlevels)%mpibuflen, '! size of data send between time steps'
     write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
     write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
@@ -568,9 +570,50 @@ contains
           end do
        end do
     end if
- 
-
-
+    if (present(json_opt)) dump_json=json_opt
+    if (dump_json) then
+       ! Create a json file of all the pfasst parameters
+       istat= system('mkdir -p dat')
+       if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")       
+       istat= system('mkdir -p dat/' // trim(pf%outdir))       
+       if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")
+       datpath= 'dat/' // trim(pf%outdir) 
+       fname=trim(datpath) // 'pfasst_params.json'
+       print*, fname
+       open(unit=321, file=trim(fname), form='formatted')
+       write(321,*) '{'
+       write(321,"(A24,I15,A1)")  '"nproc" :',       pf%comm%nproc, ','
+       write(321,"(A24,I15,A1)")  '"nlevels" :',     pf%nlevels, ','
+       write(321,"(A24,I15,A1)")  '"niters" :',      pf%niters, ','
+       write(321,"(A24,I15,A1)")  '"qtype" :',       pf%qtype, ','
+       write(321,"(A24,I15,A1)")  '"q0_style" :',    pf%q0_style, ','
+       write(321,"(A24,I15,A1)")  '"taui0" :',       pf%taui0, ','
+       write(321,"(A24,I15,A1)")  '"nsweeps_burn" :',pf%nsweeps_burn, ','
+       write(321,"(A24,A15,A1)")  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
+       write(321,"(A24,A15,A1)")  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
+       write(321,"(A24,A15,A1)")  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
+       write(321,"(A24,A15,A1)")  '"nsteps_rk" :',   adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
+       write(321,"(A24,e15.6,A1)") '"abs_res_tol" :',pf%abs_res_tol, ','
+       write(321,"(A24,e15.6,A1)") '"rel_res_tol" :',pf%abs_res_tol, ','
+       
+       write(321,"(A24,A15,A1)")  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
+       write(321,"(A24,A15,A1)")  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
+       write(321,"(A24,A15,A1)")  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
+       write(321,"(A24,A15,A1)")  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
+       write(321,"(A24,A15,A1)")  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
+       write(321,"(A24,A15,A1)")  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
+       write(321,"(A24,A15,A1)")  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
+       write(321,"(A24,A15,A1)")  '"Finterp" :',            convert_logical(pf%Finterp), ','
+       write(321,"(A24,A15,A1)")  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
+       write(321,"(A24,A15,A1)")  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
+       write(321,"(A24,A15,A1)")  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
+       write(321,"(A24,A15,A1)")  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
+       write(321,"(A24,A15,A1)")  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
+       write(321,"(A24,I15,A1)")  '"save_timings" :',       pf%save_timings, ','
+       write(321,"(A24,A15,A1)")  '"save_errors" :',        convert_logical(pf%save_errors), ','    
+       write(321,"(A24,A15)")  '"debug" :',                 convert_logical(pf%debug)
+       write(321,*) '}'    
+    end if
   end subroutine pf_print_options
 
   !> Subroutine to make the matrices for interpolation  between noodes
@@ -634,7 +677,7 @@ contains
        end do
     end if
     
-    if (pf%save_timings) then
+    if (pf%save_timings > 0) then
        call  dump_timings(pf%results(pf%nlevels),pf)
     end if
   

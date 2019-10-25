@@ -122,7 +122,6 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
     nnodes = lev%nnodes
 
-    call start_timer(pf, TLEVEL+lev%index-1)
 
     !
     ! check hamiltonian
@@ -140,6 +139,9 @@ contains
     !
     dtsq = dt*dt
     do k = 1,nsweeps
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)       
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       
        pf%state%sweep=k
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)
@@ -161,7 +163,9 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+          call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1))
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
        end if
 
        t = t0
@@ -194,7 +198,10 @@ contains
           call lev%Q(m+1)%copy(this%rhs,2)
           
           !  update function values
-          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1))  
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+          call this%f_eval(Lev%Q(m+1), t, level_index, Lev%F(m+1,1))  
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+          
 
           !  Now do the v peice
           call this%rhs%setval(0.0_pfdp,1)          
@@ -236,13 +243,12 @@ contains
        
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
-       
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     
     end do ! end loop on sweeps
 
 
-    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine verlet_sweep
 
 
@@ -383,7 +389,7 @@ contains
     deallocate(qtemp2)
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index,   lev%lev_shape)
     
   end subroutine verlet_initialize
   
@@ -530,8 +536,9 @@ contains
 
     type(pf_level_t),    pointer :: lev
     lev => pf%levels(level_index)   !!  Assign level pointer
-
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
   end subroutine verlet_evaluate
 
   !> Subroutine to evaluate the function values at all nodes

@@ -110,7 +110,6 @@ contains
     tend = t0+dt
 
 
-    call start_timer(pf, TLEVEL+lev%index-1)
 
     if (which .eq. 1) then
         sweep_y = .true.
@@ -140,6 +139,7 @@ contains
   do k = 1,nsweeps   !!  Loop over sweeps
      pf%state%sweep=k
      call call_hooks(pf, level_index, PF_PRE_SWEEP)    
+     if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
 
     ! compute integrals from previous iteration and add fas correction
 !     do m = 1, Nnodes-1
@@ -201,10 +201,17 @@ contains
     if (sweep_y) then
       if (k .eq. 1) then
         call lev%Q(1)%copy(lev%q0, 1)
-        if (this%explicit) &
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1), 1, 1, 1, step)
-        if (this%implicit) &
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2), 2, 1, 1, step)
+        if (this%explicit) then
+           if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)           
+           call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1), 1, 1, 1, step)
+           if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)           
+        end if
+    
+        if (this%implicit) then
+           if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)           
+           call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,2), 2, 1, 1, step)
+           if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+        end if
       end if
 !        call Lev%encap%copy(Lev%Q(1), Lev%q0, 1)
 !        call imexQ_oc%f1eval(Lev%Q(1), t0, Lev%level, Lev%ctx, Lev%F(1,1), 1, 1, step)
@@ -215,9 +222,9 @@ contains
 !       if (k .eq. 1) then
 !         call lev%Q(Nnodes)%copy(lev%qend, 2)
 !         if (this%explicit) &
-!           call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+!           call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
 !         if (this%implicit) &
-!           call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+!           call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
 !       end if
 ! !        call Lev%encap%copy(Lev%Q(Nnodes), Lev%qend, 2)
 ! !        call imexQ_oc%f1eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,1), 2, Nnodes, step)
@@ -244,12 +251,12 @@ contains
 !
 !          !  Do implicit solve
 !          if (this%implicit) then
-!            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
+!            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, level_index, lev%F(m,2), 2, 2)
 !          else
 !             call lev%Q(m)%copy(this%rhs,2)
 !          end if
 !          if (this%explicit) &
-!            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
+!            call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1), 1, 2, m, step)
 !       end do
 !       ! reset first value
 !       call lev%q0%copy(lev%Q(1), 2)
@@ -277,13 +284,20 @@ contains
 
         ! Do implicit solve
          if (this%implicit) then
-            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,2), 2, 1)
+            if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
+            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index, lev%F(m+1,2), 2, 1)
+            if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
+            
          else
             call lev%Q(m+1)%copy(this%rhs,1)
          end if
           !  Compute explicit piece on new value
-         if (this%explicit) &
-            call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, 1, m+1, step)
+         if (this%explicit) then
+            if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)           
+            call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,1), 1, 1, m+1, step)
+            if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)           
+         end if
+         
       end do
       !  Reset last values
       call lev%qend%copy(lev%Q(Nnodes), 1)
@@ -319,10 +333,17 @@ contains
 
       if (k .eq. 1) then
         call lev%Q(Nnodes)%copy(lev%qend, 2)
-        if (this%explicit) &
-          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
-        if (this%implicit) &
-          call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+        if (this%explicit) then
+           if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+           call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+           if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+        end if
+        if (this%implicit) then
+           if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+           call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+           if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+        end if
+        
       end if
 !        call Lev%encap%copy(Lev%Q(Nnodes), Lev%qend, 2)
 !        call imexQ_oc%f1eval(Lev%Q(Nnodes), tend, Lev%level, Lev%ctx, Lev%F(Nnodes,1), 2, Nnodes, step)
@@ -349,12 +370,17 @@ contains
 
          !  Do implicit solve
          if (this%implicit) then
-           call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
+           if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
+           call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, level_index, lev%F(m,2), 2, 2)
+           if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
          else
             call lev%Q(m)%copy(this%rhs,2)
          end if
-         if (this%explicit) &
-           call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
+         if (this%explicit) then
+            if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+            call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1), 1, 2, m, step)
+            if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+         end if
       end do
       ! reset first value
       call lev%q0%copy(lev%Q(1), 2)
@@ -372,13 +398,13 @@ contains
 !     else
 !       call pf_stop(__FILE__,__LINE__,'invalid sweep')
 !     end if
-    call pf_residual(pf, lev%index, dt, which)
+    call pf_residual(pf, level_index, dt, which)
     ! done
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
     call call_hooks(pf, level_index, PF_POST_SWEEP)
 
    end do !nsweeps
 
-   call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imexQ_oc_sweep
 
 
@@ -406,10 +432,17 @@ contains
        call pf_stop(__FILE__,__LINE__,'step not present in evaluate, which=',which)  
     end if
 
-    if (this%explicit) &
-      call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, which, m, mystep)
-    if (this%implicit) &
-      call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, which, m, mystep)
+    if (this%explicit) then
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)         
+       call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1), 1, which, m, mystep)
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+    end if
+    
+    if (this%implicit) then
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)           
+       call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2), 2, which, m, mystep)
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+    end if
   end subroutine imexQ_oc_evaluate
 
 
@@ -478,7 +511,7 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !!  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index, lev%lev_shape)
 
   end subroutine imexQ_oc_initialize
 

@@ -5,7 +5,6 @@
 	nsweeps_pred = 1 1
 	nsweeps = 1 1
 	qtype = 5 
-	echo_timings = .false.
 	abs_res_tol = 0e-13
 	rel_res_tol = 0e-13
 	pipeline_pred = .true.

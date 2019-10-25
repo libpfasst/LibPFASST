@@ -244,6 +244,28 @@ module pf_mod_dtype
 
   end type pf_results_t
 
+  !>  Type for storing timings  later output
+  type :: pf_timer_t
+     real(pfdp) :: t_total= 0.0_pfdp
+     real(pfdp) :: t_predictor= 0.0_pfdp
+     real(pfdp) :: t_iteration= 0.0_pfdp
+     real(pfdp) :: t_broadcast = 0.0_pfdp
+     real(pfdp) :: t_step= 0.0_pfdp
+     real(pfdp) :: t_hooks(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_sweeps(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_aux(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_residual(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_interpolate(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_restrict(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_wait(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_send(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_receive(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_feval(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_fcomp(PF_MAXLEVS) = 0.0_pfdp
+
+  end type pf_timer_t
+  
+
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
      !> === Mandatory pfasst parameters (must be set on command line or input file)  ===
@@ -281,7 +303,7 @@ module pf_mod_dtype
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
-     integer :: taui0 = -999999      !! iteration cutoff for tau inclusion
+     integer :: taui0 = -99          !! iteration cutoff for tau inclusion
 
 
      ! -- RK and Parareal options
@@ -294,8 +316,7 @@ module pf_mod_dtype
 
      ! -- controller for the results 
      logical :: save_residuals = .false.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
-     logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
+     integer :: save_timings  = 2         !!  0=none, 1=total only, 2=all, 3=all and echo
      logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
      integer :: rank    = -1            !! rank of current processor
@@ -305,15 +326,14 @@ module pf_mod_dtype
      type(pf_level_t), allocatable :: levels(:) !! Holds the levels
      type(pf_comm_t),  pointer :: comm    !! Points to communicator
      type(pf_results_t),allocatable :: results(:)   !!  Hold results for each level
-
+ 
      !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !!  Holds the hooks
      integer,  allocatable :: nhooks(:,:)   !!  Holds the number hooks
 
      !> timing variables
-     double precision :: timers(100)   = 0.0d0
-     double precision :: runtimes(100) = 0.0d0
-
+     type(pf_timer_t) :: pf_timers
+     type(pf_timer_t) :: pf_runtimes
      !> output directory
      character(len=256) :: outdir
 

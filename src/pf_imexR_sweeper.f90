@@ -101,12 +101,12 @@ contains
 
     lev => pf%levels(level_index)   !  Assign level pointer
     
-    call start_timer(pf, TLEVEL+lev%index-1)
     call pf_residual(pf, level_index, dt)
     do k = 1,nsweeps   !!  Loop over sweeps
-       pf%state%sweep=k
-       call call_hooks(pf, level_index, PF_PRE_SWEEP)
 
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       pf%state%sweep=k
        !  Store the current F values
        if (k .eq. 1) then
           m0=1
@@ -123,10 +123,18 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          if (this%explicit) &
-               call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1),1)
-          if (this%implicit) &
-               call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2),2)
+          if (this%explicit) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1),1)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+          end if
+          
+          if (this%implicit) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,2),2)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+          end if
+          
        end if
 
        t = t0
@@ -152,22 +160,28 @@ contains
           !>  Solve for the implicit piece
           if (this%implicit) then
              call this%rhs%axpy(-dt*this%QtilI(m,m+1), this%F_oldI(m+1))
-             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index,lev%F(m+1,2),2)
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
+             call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index,lev%F(m+1,2),2)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)             
           else
              call lev%Q(m+1)%copy(this%rhs)
           end if
           !>  Compute explicit function on new value
-          if (this%explicit) &
-               call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1),1)
+          if (this%explicit) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,1),1)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+          end if
+          
 
        end do  !!  End substep loop
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
 
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
 
-    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine imex_sweep
 
   !> Subroutine to initialize matrices and space for sweeper
@@ -225,9 +239,9 @@ contains
           this%QtilI(2:nnodes-1,:) = this%QtilI(2:nnodes-1,:)- this%QtilI(1:nnodes-2,:)
     end if
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
-    call lev%ulevel%factory%create_array(this%F_oldE, nnodes,lev%index,lev%lev_shape)
-    call lev%ulevel%factory%create_array(this%F_oldI, nnodes,lev%index,lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index,   lev%lev_shape)
+    call lev%ulevel%factory%create_array(this%F_oldE, nnodes,level_index,lev%lev_shape)
+    call lev%ulevel%factory%create_array(this%F_oldI, nnodes,level_index,lev%lev_shape)
     
   end subroutine imex_initialize
 
@@ -319,10 +333,16 @@ contains
     type(pf_level_t), pointer :: lev        !  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    if (this%explicit) &
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1),1)
-    if (this%implicit) &
-         call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2),2)
+    if (this%explicit) then
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1),1)
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    end if
+    if (this%implicit) then
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2),2)
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    end if
   end subroutine imex_evaluate
 
   !> Subroutine to evaluate the function values at all nodes
