@@ -163,7 +163,7 @@ contains
 
     if (pf%save_timings .eq. 3) then
        write(*, '("timer:",a16,", rank: ",i3,", step: ",i4, ", level: ", i3,' &
-            // '", iter: ",i3, "Current t: ",f23.8, "Delta t: ")') &
+            // '", iter: ",i3, " Current t: ",f23.8, " Delta t: ",f23.8)') &
             timer_names(timer), pf%rank, &
             pf%state%step, pf%state%level_index, pf%state%iter,  &
             t_wall,delta_t
