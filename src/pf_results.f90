@@ -221,13 +221,13 @@ contains
        strng=trim(convert_real_array(pf%pf_runtimes%t_receive(1:nlev),nlev))
        write(iout,"(A24,A60,A1)")  '"receive" :', adjustl(strng), ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_residual(1:nlev),nlev))
-       write(iout,"(A24,A60)")  '"residual" :', adjustl(strng)
+       write(iout,"(A24,A60,A1)")  '"residual" :', adjustl(strng), ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_feval(1:nlev),nlev))
-       write(iout,"(A24,A60)")  '"feval" :', adjustl(strng)
+       write(iout,"(A24,A60,A1)")  '"feval" :', adjustl(strng), ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_fcomp(1:nlev),nlev))
-       write(iout,"(A24,A60)")  '"fcomp" :', adjustl(strng)
+       write(iout,"(A24,A60,A1)")  '"fcomp" :', adjustl(strng), ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_aux(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"aux" :', adjustl(strng), ','
+       write(iout,"(A24,A60)")  '"aux" :', adjustl(strng)
     end if
     
     write(iout,*) '}'
