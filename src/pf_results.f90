@@ -179,46 +179,61 @@ contains
   subroutine dump_timings(this,pf)
     type(pf_results_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
-    character(len = 128   ) :: fname  !!  output file name for runtimes
+    character(len = 128   ) :: pname     !!  processor name
     character(len = 256   ) :: fullname  !!  output file name for runtimes
     character(len = 128   ) :: datpath  !!  directory path
-    character(len = 128   ) :: dirname  !!  directory name
-    integer :: istat,j, istream,system
+    character(len = 128   ) :: strng      !  used for string conversion
+    integer :: istat,j, iout,system,nlev
 
-    datpath = trim(this%datpath) // '/runtimes'
+    datpath = trim(this%datpath) // '/runtimes/'
     istat= system('mkdir -p '// trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 
     ! Create directory for this processor
-    write (dirname, "(A6,I0.3)") '/Proc_',this%rank
-    datpath=trim(datpath) // trim(dirname) 
-    istat= system('mkdir -p ' // trim(datpath))
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")    
+    write (pname, "(A5,I0.3)") 'Proc_',this%rank
+    datpath=trim(datpath) // trim(pname) 
 
-    !  Write a file with timer names and times
-    fullname = trim(datpath) // '/rtimes.txt'
-    istream = 3000+pf%rank !  Use processor dependent file number
+    !  Write a json file with timer numbers and times
+    fullname = trim(datpath) // '_times.json'
+    iout = 4000+pf%rank !  Use processor dependent file number
+    nlev=pf%nlevels
     !  output timings
-    open(istream, file=trim(fullname), form='formatted')
-    do j = 1, 100
-       if (pf%runtimes(j) > 0.0d0) then
-          write(istream, '(a16,  f23.8)') timer_names(j),pf%runtimes(j)
-       end if
-    end do
-    close(istream)
+    open(iout, file=trim(fullname), form='formatted')
+    write(iout,*) '{'
+    write(iout,"(A24,e12.6,A1)")  '"total" :',       pf%pf_runtimes%t_total, ','
+    if (pf%save_timings > 1) then
+       write(iout,"(A24,e12.6,A1)")  '"predictor" :',   pf%pf_runtimes%t_predictor, ','
+       write(iout,"(A24,e12.6,A1)")  '"iteration" :',   pf%pf_runtimes%t_iteration, ','
+       write(iout,"(A24,e12.6,A1)")  '"broadcast" :',   pf%pf_runtimes%t_broadcast, ','
+       write(iout,"(A24,e12.6,A1)")  '"step" :',        pf%pf_runtimes%t_step, ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_hooks(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"hooks" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_sweeps(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"sweeps" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_interpolate(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"interpolate" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_restrict(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"restrict" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_send(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"wait" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_wait(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"send" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_receive(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"receive" :', adjustl(strng), ','
+       strng=trim(convert_real_array(pf%pf_runtimes%t_residual(1:nlev),nlev))
+       write(iout,"(A24,A60)")  '"residual" :', adjustl(strng)
+       strng=trim(convert_real_array(pf%pf_runtimes%t_feval(1:nlev),nlev))
+       write(iout,"(A24,A60)")  '"feval" :', adjustl(strng)
+       strng=trim(convert_real_array(pf%pf_runtimes%t_fcomp(1:nlev),nlev))
+       write(iout,"(A24,A60)")  '"fcomp" :', adjustl(strng)
+       strng=trim(convert_real_array(pf%pf_runtimes%t_aux(1:nlev),nlev))
+       write(iout,"(A24,A60,A1)")  '"aux" :', adjustl(strng), ','
+    end if
     
-    !  Write a file with timer numbers and times
-    fullname = trim(datpath) // '/rtimes.dat'
-    istream = 4000+pf%rank !  Use processor dependent file number
-    !  output timings
-    open(istream, file=trim(fullname), form='formatted')
-    do j = 1, 100
-       if (pf%runtimes(j) > 0.0d0) then
-          write(istream, '(I0.3,  f23.8)') j,pf%runtimes(j)
-       end if
-    end do
-    close(istream)
-
+    write(iout,*) '}'
+    
+    close(iout)
+    
   end subroutine dump_timings
 
   subroutine destroy_results(this)

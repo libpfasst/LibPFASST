@@ -14,7 +14,7 @@
 ./build/pf_rkstepper.o : src/pf_rkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_solutions.o : src/pf_solutions.f90 ./build/pf_dtype.o 
 ./build/pf_stop.o : src/pf_stop.f90 
-./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_dtype.o 
+./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_stop.o ./build/pf_dtype.o 
 ./build/pf_utils.o : src/pf_utils.f90 ./build/pf_stop.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_ndarray_encap.o : src/pf_ndarray_encap.f90 ./build/pf_stop.o ./build/pf_dtype.o 
 ./build/pf_ndarray_oc_encap.o : src/pf_ndarray_oc_encap.f90 ./build/pf_utils.o ./build/pf_dtype.o 

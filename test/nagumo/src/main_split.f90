@@ -68,8 +68,6 @@ program main
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, comm,  fname=pfasst_nml)
   
-  pf%echo_timings = .false.
-       
   do l = 1, pf%nlevels
        pf%levels(l)%nnodes = nnodes(l)
 

@@ -23,7 +23,7 @@ contains
     integer :: m
     type(pf_level_t), pointer   :: lev
     
-    call start_timer(pf, TRESIDUAL)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_RESIDUAL,level_index)
 
     lev => pf%levels(level_index)
     call lev%ulevel%sweeper%residual(pf,level_index, dt, flag)
@@ -53,7 +53,8 @@ contains
 
     call pf_set_resid(pf,lev%index,lev%residual)
 
-    call end_timer(pf, TRESIDUAL)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESIDUAL,level_index)
+
 
   end subroutine pf_residual
 
@@ -264,5 +265,40 @@ contains
       end do
     end do
   end subroutine pf_apply_mat_backward
+  
+  function convert_logical(q) result(q_string)
+    logical,intent(in) :: q  ! true or false
+    character(len=5)::  q_string
+    if (q) then
+       q_string=' true'
+    else
+       q_string='false'
+    end if
+  end function convert_logical
+
+  function convert_int_array(q,n) result(q_string)
+    integer,intent(in) :: n     ! length of array
+    integer,intent(in) :: q(n)  ! integer array
+    character(len=15)::  q_string
+
+    character(len=15)::  f_string  !  format string
+    integer i
+    write(f_string,"(*(G0,:,','))") q
+    q_string=adjustr('['//trim(f_string)//']')
+
+  end function convert_int_array
+
+  function convert_real_array(q,n) result(q_string)
+    integer,intent(in) :: n     ! length of array
+    real(pfdp) , intent(in) :: q(n)  ! real array
+    character(len=128)::  q_string
+
+    character(len=128)::  f_string  !  format string
+    integer i
+    write(f_string,"(*(e12.6,:,','))") q
+    q_string=adjustl('['//trim(f_string)//']')
+
+  end function convert_real_array
+  
   
 end module pf_mod_utils

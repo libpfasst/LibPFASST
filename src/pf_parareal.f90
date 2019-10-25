@@ -59,12 +59,13 @@ contains
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0)  call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
 
+    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
        call pf_parareal_block_run(pf, q0, dt, nsteps_loc,qend=qend)
     else
        call pf_parareal_block_run(pf, q0, dt,  nsteps_loc)
     end if
-
+    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_results(pf)
 
@@ -90,8 +91,6 @@ contains
     integer                   :: level_max_depth !!  Finest level in V-cycle
     integer::  nsteps_c,nsteps_f  
 
-    call start_timer(pf, TTOTAL)
-
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
     pf%state%step    = pf%rank
@@ -115,6 +114,8 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_STEP)
+       
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
        !  1.  predictor
@@ -154,10 +155,9 @@ contains
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
 
        !>  Start the parareal iterations
-       call start_timer(pf, TITERATION)
        do j = 1, pf%niters
-
           call call_hooks(pf, -1, PF_PRE_ITERATION)
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
 
           pf%state%iter = j
 
@@ -167,17 +167,17 @@ contains
           !  Check for convergence
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
 
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
           call call_hooks(pf, -1, PF_POST_ITERATION)
-
           !  If we are converged, exit block
-          if (pf%state%status == PF_STATUS_CONVERGED)  exit
+          if (pf%state%status == PF_STATUS_CONVERGED)  then
+             call call_hooks(pf, -1, PF_POST_CONVERGENCE)
+             exit
+          end if
        end do  !  Loop over the iteration in this bloc
-       call call_hooks(pf, -1, PF_POST_CONVERGENCE)
-       call end_timer(pf, TITERATION)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_STEP)
        call call_hooks(pf, -1, PF_POST_STEP)
     end do !  Loop over the blocks
-
-    call end_timer(pf, TTOTAL)
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
@@ -202,7 +202,7 @@ contains
     pf%state%iter = 0          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    call start_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
 
     !  This is for one two levels only or one if only RK is done
     c_lev => pf%levels(1)
@@ -229,7 +229,7 @@ contains
     ! Save the coarse level value
     call c_lev%Q(2)%copy(c_lev%qend, flags=0)     
 
-    call end_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
 
     pf%state%iter   = 1
     pf%state%status = PF_STATUS_ITERATING

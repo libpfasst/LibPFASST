@@ -85,11 +85,11 @@ contains
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
 
-    call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
 
-    call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1, nsweeps
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k       
 
        ! Copy values into residual
@@ -101,8 +101,10 @@ contains
        !$omp parallel do private(m, t)
        do m = 1, nnodes
 !          t = t + dt*this%dtsdc(m)
-           t=t0+dt*lev%nodes(m)
-          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+          t=t0+dt*lev%nodes(m)
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+          call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
        end do
        !$omp end parallel do
 
@@ -111,32 +113,32 @@ contains
        call magpicard_integrate(this, pf,level_index, lev%Q, lev%F, dt, lev%I)
 
        if (this%magnus_order > 1 .and. nnodes > 2) then
-          call start_timer(pf, TAUX)
+          call pf_start_timer(pf, T_AUX)
           call this%compute_single_commutators(lev%F)
-          call end_timer(pf, TAUX)
+          call pf_stop_timer(pf, T_AUX)
        endif
 
        !! this loop not OMP'd because the deferred procs are OMP'd
        do m = 1, nnodes-1
-          call start_timer(pf, TAUX+1)
+          call pf_start_timer(pf, T_AUX)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
                lev%nodes, lev%sdcmats%qmat, dt, m, this%commutator_coefs(:,:,m))
-          call end_timer(pf, TAUX+1)
+          call pf_stop_timer(pf, T_AUX)
        end do
 
        !$omp parallel do private(m)
        do m = 1, nnodes-1
-          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%omega(m), lev%index)
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%omega(m), level_index)
        end do
        !$omp end parallel do
 
        call pf_residual(pf, level_index, dt)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
 
     call lev%qend%copy(lev%Q(nnodes))
-    call end_timer(pf, TLEVEL+lev%index-1)
 
   end subroutine magpicard_sweep
 
@@ -160,10 +162,10 @@ contains
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-         lev%index,  lev%lev_shape)
+         level_index,  lev%lev_shape)
 
     call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
-         lev%index,  lev%lev_shape)
+         level_index,  lev%lev_shape)
 
     do m = 1, nnodes-1
         call this%omega(m)%setval(0.0_pfdp)
@@ -207,7 +209,10 @@ contains
 
     type(pf_level_t), pointer  :: lev    !!  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
-    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
   end subroutine magpicard_evaluate
 
   subroutine magpicard_evaluate_all(this, pf,level_index, t, flags, step)

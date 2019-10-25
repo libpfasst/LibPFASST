@@ -141,13 +141,16 @@ contains
 
     ierror = 0
     ! need to wait here
-    if(blocking .eqv. .false.) &
-        call pf_mpi_wait(pf, level%index, ierror)
-    if (ierror /= 0) then
-      print *, 'Rank=',pf%rank
-      call pf_stop(__FILE__,__LINE__,'error during send (wait)',ierror)
+    if(blocking .eqv. .false.) then
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_WAIT, level%index)
+       call pf_mpi_wait(pf, level%index, ierror)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_WAIT, level%index)
+       if (ierror /= 0) then
+          print *, 'Rank=',pf%rank
+          call pf_stop(__FILE__,__LINE__,'error during send (wait)',ierror)
+       end if
     end if
-
+    
 
     if(dir == 2) then
        call level%q0%pack(level%send, 2)
@@ -162,7 +165,7 @@ contains
     end if
 
      ierror = 0
-    call start_timer(pf, TSEND + level%index - 1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SEND, level%index)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
      if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%send), 'send buffer=',level%send
 
@@ -173,7 +176,7 @@ contains
    endif
 
    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking
-    call end_timer(pf, TSEND + level%index - 1)
+   if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
   end subroutine pf_send
 
   !>  Subroutine to recieve the solution from the previous processor
@@ -191,14 +194,16 @@ contains
     if(present(direction)) dir = direction
 
     ierror = 0
-    call start_timer(pf, TRECEIVE + level%index - 1)
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin recv, tag=',tag,blocking, "pf%state%pstatus=",pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
        source=pf%rank-1
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_RECEIVE, level%index)
+       
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
+       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
        if (ierror .eq. 0) then
           if (present(direction)) then
@@ -210,8 +215,11 @@ contains
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                      .and. dir == 2) then
        source=pf%rank+1
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_RECEIVE, level%index)
+       
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
+       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
 
        if (ierror .eq. 0) then
@@ -230,7 +238,6 @@ contains
        call pf_stop(__FILE__,__LINE__,'error during receive',ierror)
     end if
 
-    call end_timer(pf, TRECEIVE + level%index - 1)
   end subroutine pf_recv
 
 
@@ -243,14 +250,14 @@ contains
 
     if (pf%comm%nproc .eq. 1) return
 
-    call start_timer(pf, TBROADCAST)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_BROADCAST)
     if(pf%debug) print *,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during broadcast',ierror)
     endif
-    call end_timer(pf, TBROADCAST)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_BROADCAST)
     if(pf%debug)print *,'ending broadcast'
   end subroutine pf_broadcast
 
