@@ -85,7 +85,6 @@ contains
     integer :: l  !!  level loop index
 
 
-
     pf%state%hook = hook
     if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
@@ -101,10 +100,9 @@ contains
           call pf%hooks(level_index,hook,i)%proc(pf,level_index)
        end do
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,level_index)
-       
     end if
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,level_index)
+
     
   end subroutine call_hooks
 
