@@ -455,6 +455,7 @@ contains
        
     end do !  Loop over the blocks
 
+    call call_hooks(pf, -1, PF_POST_ALL)
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then

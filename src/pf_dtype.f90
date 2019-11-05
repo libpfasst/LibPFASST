@@ -6,11 +6,9 @@
 module pf_mod_dtype
   use iso_c_binding
   implicit none
-
   !>  pfasst static  paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
-  !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
-
+!  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
   integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variables
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
@@ -19,13 +17,14 @@ module pf_mod_dtype
   real(pfdp), parameter :: HALF  = 0.5_pfdp
   complex(pfdp), parameter :: ZI  = cmplx(0.0,1.0,pfdp)
   complex(pfdp), parameter :: Z0  = cmplx(0.0,0.0,pfdp)  
-  real(pfdp),parameter ::  two_pi = 6.2831853071795862_pfdp  
+  real(pfqp),parameter ::  qpi = 3.1415926535897932384626433832795_pfqp
+  real(pfdp),parameter ::  two_pi = 2.0_pfqp*qpi
   integer, parameter :: PF_MAXLEVS = 4
   integer, parameter :: PF_MAX_HOOKS = 32
 
   !> Quadrature node varieties
   integer, parameter :: SDC_GAUSS_LOBATTO   = 1
-  integer, parameter :: SDC_GAUSS_RADAU     = 2
+  integer, parameter :: SDC_GAUSS_RADAU  = 2
   integer, parameter :: SDC_CLENSHAW_CURTIS = 3
   integer, parameter :: SDC_UNIFORM         = 4
   integer, parameter :: SDC_GAUSS_LEGENDRE  = 5
@@ -284,8 +283,8 @@ module pf_mod_dtype
      integer :: nnodes(PF_MAXLEVS)=3          !! number of nodes
 
      ! --  tolerances
-     real(pfdp) :: abs_res_tol = 0.d0   !!  absolute convergence tolerance
-     real(pfdp) :: rel_res_tol = 0.d0   !!  relative convergence tolerance
+     real(pfdp) :: abs_res_tol = 0.0_pfdp   !!  absolute convergence tolerance
+     real(pfdp) :: rel_res_tol = 0.0_pfdp   !!  relative convergence tolerance
 
      ! --  predictor options  (should be set before pfasst_run is called)
      logical :: PFASST_pred = .true.    !!  true if the PFASST type predictor is used

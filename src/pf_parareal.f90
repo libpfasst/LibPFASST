@@ -178,6 +178,7 @@ contains
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_STEP)
        call call_hooks(pf, -1, PF_POST_STEP)
     end do !  Loop over the blocks
+    call call_hooks(pf, -1, PF_POST_ALL)
 
     !  Grab the last solution for return (if wanted)
     if (present(qend)) then
@@ -288,7 +289,7 @@ contains
     
     !  Compute the jump in the initial condition
     call f_lev%q0_delta%copy(c_lev%q0, flags=0)
-    call f_lev%q0_delta%axpy(-1.0d0,f_lev%q0, flags=0)
+    call f_lev%q0_delta%axpy(-1.0_pfdp,f_lev%q0, flags=0)
     f_lev%residual=f_lev%q0_delta%norm(flags=0)
     call pf_set_resid(pf,2,f_lev%residual)
 

@@ -172,7 +172,7 @@ contains
        ! do the sub-stepping in sweep
        do m = 1, nnodes-1
           t = t + dt*this%dtsdc(m)
-          dtmhalf = 0.5d0*dt*this%dtsdc(m)
+          dtmhalf = 0.5_pfdp*dt*this%dtsdc(m)
           call this%rhs%setval(0.0_pfdp)
           !  Lower triangular verlet to  new piece
           if (pf%state%iter .eq. 1)  then
@@ -370,11 +370,9 @@ contains
 !      this%QQLU=U
 !      print *, 'U from LU',this%QQLU
 !   else
-   this%Qtil=this%Qver  !  Normal verlet all the time
-   this%QQtil=this%QQver  !  Normal verlet all the time        
    !   end if
-   this%Qver=0.0d0 !  Normal verlet all the time
-   this%QQver=0.0d0   !  Normal verlet all the time        
+!   this%Qver=0.0_pfdp !  Normal verlet all the time
+!   this%QQver=0.0_pfdp   !  Normal verlet all the time        
    
    this%Qtil=this%Qver  !  Normal verlet all the time
    this%QQtil=this%QQver  !  Normal verlet all the time        

@@ -31,6 +31,7 @@ module pf_mod_zndarray
      procedure :: create_array => zndarray_create_array
      procedure :: destroy_single => zndarray_destroy_single
      procedure :: destroy_array => zndarray_destroy_array
+
   end type pf_zndarray_factory_t
   
   !>  Complex ndarray
@@ -46,7 +47,9 @@ module pf_mod_zndarray
     procedure :: unpack => zndarray_unpack
     procedure :: axpy => zndarray_axpy
     procedure :: eprint => zndarray_eprint
-    procedure :: write_to_disk
+    procedure, private  :: get_array_1d  ,get_array_2d,get_array_3d,get_array_4d
+    generic :: get_array => get_array_1d ,get_array_2d,get_array_3d,get_array_4d
+    
   end type pf_zndarray_t
 
   contains
@@ -243,20 +246,34 @@ module pf_mod_zndarray
     print*, this%flatarray(1:2)
   end subroutine zndarray_eprint
 
-  subroutine write_to_disk(this, filename)
-    class(pf_zndarray_t), intent(inout) :: this
-    character(len=*), intent(in) :: filename
 
-    complex(pfdp),      pointer :: z_array(:,:)    
-    open(unit=1, file=trim(filename), form='unformatted')
+  !>  Helper function to return the array part
+  subroutine get_array_1d(this,r,flags) 
+    class(pf_zndarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:)
+    integer,    intent(in   ), optional :: flags
+    r => this%flatarray
+  end subroutine get_array_1d
+  subroutine get_array_2d(this,r,flags) 
+    class(pf_zndarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2)) => this%flatarray
+  end subroutine get_array_2d
+  subroutine get_array_3d(this,r,flags) 
+    class(pf_zndarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3)) => this%flatarray
+  end subroutine get_array_3d
+  subroutine get_array_4d(this,r,flags) 
+    class(pf_zndarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3),1:this%arr_shape(4)) => this%flatarray
+  end subroutine get_array_4d
 
-    write(1) this%flatarray
-    !z_array=>get_array2d(this)
-    !write(1) z_array
-    close(1)
-  end subroutine write_to_disk
-
-    !>  Helper function to return the array part
+  !>  Helper function to return the array part
   function get_array1d(x,flags) result(r)
     class(pf_encap_t), target, intent(in) :: x
     integer,           intent(in   ), optional :: flags

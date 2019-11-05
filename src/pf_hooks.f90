@@ -25,7 +25,8 @@ module pf_mod_hooks
        PF_POST_RESTRICT_ALL = 14, &
        PF_PRE_CONVERGENCE   = 15, &
        PF_POST_CONVERGENCE  = 16, &
-       PF_MAX_HOOK          = 16
+       PF_POST_ALL          = 17, &
+       PF_MAX_HOOK          = 17
 
   integer, parameter :: &
        PF_HOOK_LOG_ONE  = 1, &
@@ -49,7 +50,8 @@ module pf_mod_hooks
        'pre-restrict-all   ',  &
        'post-restrict-all  ',  &
        'pre-convergence    ',  &
-       'post-convergence   ' /)
+       'post-convergence   ',  & 
+       'post-all           ' /)
 
 contains
 
