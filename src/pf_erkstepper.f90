@@ -334,19 +334,33 @@ contains
                 do i = 1, this%nstages - 1
                         call this%compD(dt, i, this%y_n, this%y_stage)
                         do j = 1, i
-                                if(this%AF(j,i) .gt. 0) then
-                                        call this%compA(dt, i, j, this%F, this%PFY)
-                                        call this%y_stage%axpy(1.0_pfdp, this%PFY)
-                                endif
+                           if(this%AF(j,i) .gt. 0) then
+                              call this%compA(dt, i, j, this%F, this%PFY)
+                              call this%y_stage%axpy(1.0_pfdp, this%PFY)
+                           endif
                         enddo
                         call this%f_eval(this%y_stage, tn + dt * this%c(i), level_index, this%F(i+1,1))
-                enddo
-
+                     enddo
+                print *,'y_n'     
+                call this%y_n%eprint()
+                print *,'y_np1'     
+                call this%y_np1%eprint()
+                print *,'F(1,1)'     
+                call this%F(1,1)%eprint()
+                print *,'dt=',dt
                 call this%compD(dt, this%nstages, this%y_n, this%y_np1)
+                print *,'Results of compD'
+
+                call this%y_np1%eprint()
+                print *,this%nstages
                 do i = 1, this%nstages
-                        call this%compB(dt, i, this%F, this%PFY)        
-                        call this%y_np1%axpy(1.0_pfdp, this%PFY)
+                   call this%compB(dt, i, this%F, this%PFY)
+                   print *,'print PFY'
+                   call this%PFY%eprint()
+                   call this%y_np1%axpy(1.0_pfdp, this%PFY)
                 enddo
+                   print *,'print y_np1 after'                
+                   call this%y_np1%eprint()
                 tn = t0 + dt             
         end do ! End Loop over time steps
         call qend%copy(this%y_np1)
