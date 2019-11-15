@@ -119,7 +119,6 @@ contains
 
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    write (*,*) "Initializing Coefficients"
     select case (this%order)
         case(1) ! Exponential Euler
                 s = 1 ! number of stages (including explicit first stage)
@@ -146,7 +145,7 @@ contains
 
                 ! -- c Vector ------------------------------------------------------------------------
 
-        case(2) ! Eqn (3.6) from S. M. Cox and P. C. Matthews, "Exponential time differencing for stiff systems." 2002 
+        case(2) ! Eqn (22) from S. M. Cox and P. C. Matthews, "Exponential time differencing for stiff systems." 2002 
 
                 s = 2 ! number of stages (including explicit first stage)
                 m = 3 ! number of phi functions (including \varphi_0)
@@ -173,12 +172,54 @@ contains
                 this%b(:, 3, 2)    = [1.0_pfdp,  1.0_pfdp]
 
                 ! -- d Vector ------------------------------------------------------------------------
-                this%d(:, 1)       = [1.0_pfdp,  1.0_pfdp] ! y_n
+                this%d(:, 1)       = [1.0_pfdp,  1.0_pfdp] ! exp(h L) y_n
                 this%d(:, 2)       = [1.0_pfdp,  1.0_pfdp] ! exp(h L) y_n
 
                 ! -- c Vector ------------------------------------------------------------------------
                 this%c(:)          = [1.0_pfdp]
+
+        case(3) ! Eqn (23)-(25) from S. M. Cox and P. C. Matthews, "Exponential time differencing for stiff systems." 2002 
+
+                s = 3 ! number of stages (including explicit first stage)
+                m = 4 ! number of phi functions (including \varphi_0)
+
+                allocate(this%A(2, m, s - 1, s - 1))
+                allocate(this%b(2, m, s))
+                allocate(this%d(2, s))
+                allocate(this%c(s - 1)) 
                 
+                this%A = 0.0_pfdp
+                this%b = 0.0_pfdp
+                this%d = 0.0_pfdp
+                this%c = 0.0_pfdp
+
+                ! -- A Matrix ------------------------------------------------------------------------
+                this%A(:, 2, 1, 1) = [0.5_pfdp,  0.5_pfdp] ! (1/2) \varphi_1(hL/2)
+                this%A(:, 2, 1, 2) = [-1.0_pfdp, 1.0_pfdp] ! -1 \varphi_1(hL) 
+                this%A(:, 2, 2, 2) = [2.0_pfdp,  1.0_pfdp] ! 2  \varphi_1(hL)
+
+                ! -- b Vector ------------------------------------------------------------------------
+                ! (\varphi_1(hL) - 3 \varphi_2(hL) + 4 \varphi_3(hL)) * F(Y1)
+                this%b(:, 2, 1)    = [1.0_pfdp, 1.0_pfdp]
+                this%b(:, 3, 1)    = [-3.0_pfdp, 1.0_pfdp] 
+                this%b(:, 4, 1)    = [4.0_pfdp, 1.0_pfdp] 
+                ! (4 \varphi_2(hL) - 8 \varphi_3(hL)) * F(Y2)
+                this%b(:, 3, 2)    = [4.0_pfdp, 1.0_pfdp] 
+                this%b(:, 4, 2)    = [-8.0_pfdp, 1.0_pfdp]
+                ! (- \varphi_2(hL) + 4 \varphi_3(hL)) * F(Y3) 
+                this%b(:, 3, 3)    = [-1.0_pfdp, 1.0_pfdp] 
+                this%b(:, 4, 3)    = [4.0_pfdp, 1.0_pfdp]
+
+                ! -- d Vector ------------------------------------------------------------------------
+                this%d(:, 1)       = [1.0_pfdp,  0.5_pfdp] ! exp(h L / 2) y_n
+                this%d(:, 2)       = [1.0_pfdp,  1.0_pfdp] ! exp(h L) y_n
+                this%d(:, 3)       = [1.0_pfdp,  1.0_pfdp] ! exp(h L) y_n
+
+                ! -- c Vector ------------------------------------------------------------------------
+                this%c(:)          = [0.5_pfdp, 1.0_pfdp]
+
+
+
         case (4) ! Eqn (51) from S. Krogstad. "Generalized integrating factor methods for stiff PDEs", 2005
 
                 s = 4 ! number of stages 
@@ -228,7 +269,7 @@ contains
 
                 ! (-1 \varphi_2(hL) - 4 \varphi_3(hL)) * F(Y_3)
                 this%b(:, 3, 4) = (/ -1.0_pfdp, 1.0_pfdp /)
-                this%b(:, 4, 4) = (/ -4.0_pfdp, 1.0_pfdp /)
+                this%b(:, 4, 4) = (/ 4.0_pfdp, 1.0_pfdp /)
 
                 ! -- d Vector ------------------------------------------------------------------------
                 this%d(:, 1) = [1.0_pfdp,  0.5_pfdp] ! exp(h/2 L) y_n
@@ -241,11 +282,10 @@ contains
     
         end select
 
-        write (*,*) "order", this%order
-        write (*,*) "stages", s
-        write (*,*) "m", m
+        !write (*,*) "order", this%order
+        !write (*,*) "stages", s
+        !write (*,*) "m", m
 
-        write (*,*) "Setting A_flag"
         ! Form the Matrix A_flag
         allocate(this%AF(s - 1, s - 1))
         this%nnz_A = 0
@@ -341,26 +381,11 @@ contains
                         enddo
                         call this%f_eval(this%y_stage, tn + dt * this%c(i), level_index, this%F(i+1,1))
                      enddo
-                print *,'y_n'     
-                call this%y_n%eprint()
-                print *,'y_np1'     
-                call this%y_np1%eprint()
-                print *,'F(1,1)'     
-                call this%F(1,1)%eprint()
-                print *,'dt=',dt
                 call this%compD(dt, this%nstages, this%y_n, this%y_np1)
-                print *,'Results of compD'
-
-                call this%y_np1%eprint()
-                print *,this%nstages
                 do i = 1, this%nstages
                    call this%compB(dt, i, this%F, this%PFY)
-                   print *,'print PFY'
-                   call this%PFY%eprint()
                    call this%y_np1%axpy(1.0_pfdp, this%PFY)
                 enddo
-                   print *,'print y_np1 after'                
-                   call this%y_np1%eprint()
                 tn = t0 + dt             
         end do ! End Loop over time steps
         call qend%copy(this%y_np1)
