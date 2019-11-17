@@ -157,13 +157,13 @@ module pf_mod_fexp
     !         N(t,y)
     ! =================================================================================
 
-    subroutine pf_f_eval_p(this, y, t, level_index, n)
+    subroutine pf_f_eval_p(this, y, t, level_index, f)
       import pf_fexp_t, pf_encap_t, pfdp
       class(pf_fexp_t),   intent(inout) :: this
       class(pf_encap_t), intent(in)    :: y
       real(pfdp),        intent(in)    :: t
       integer,           intent(in)    :: level_index
-      class(pf_encap_t), intent(inout) :: n
+      class(pf_encap_t), intent(inout) :: f
     end subroutine pf_f_eval_p
 
   end interface
