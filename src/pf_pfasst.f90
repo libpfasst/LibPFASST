@@ -578,8 +578,8 @@ contains
        istat= system('mkdir -p dat/' // trim(pf%outdir))       
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")
        datpath= 'dat/' // trim(pf%outdir) 
-       fname=trim(datpath) // '/pfasst_params.json'
-       print*, fname
+       fname=trim(datpath) // 'pfasst_params.json'
+
        open(unit=321, file=trim(fname), form='formatted')
        write(321,*) '{'
        write(321,"(A24,I15,A1)")  '"nproc" :',       pf%comm%nproc, ','
