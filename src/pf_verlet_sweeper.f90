@@ -45,6 +45,7 @@ module pf_mod_verlet
    contains
      procedure(pf_f_eval_p), deferred :: f_eval        !!  RHS function evaluations
      procedure(pf_f_comp_p), deferred :: f_comp        !!  Implicit solver
+     procedure(pf_comp_dt_p), deferred :: comp_dt      !!  computes the time step
      procedure(pf_hamiltonian_p), deferred :: hamiltonian   !!  Hamiltonian
      !>  Set the generic functions
      procedure :: sweep      => verlet_sweep
@@ -53,6 +54,7 @@ module pf_mod_verlet
      procedure :: integrate  => verlet_integrate
      procedure :: residual   => verlet_residual
      procedure :: spreadq0   => verlet_spreadq0
+     procedure :: compute_dt => verlet_compute_dt
      procedure :: evaluate_all => verlet_evaluate_all
      procedure :: destroy   => verlet_destroy
   end type pf_verlet_t
@@ -93,8 +95,17 @@ module pf_mod_verlet
        integer,    intent(in   ) :: level_index   !!  Level index       
        real(pfdp) :: H
      end function pf_hamiltonian_p
-     
-end interface
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       !>  Evaluate f_piece(y), where piece is one or two 
+       import pf_verlet_t, pf_encap_t, pfdp
+       class(pf_verlet_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
+
+  end interface
 contains
 
   !-----------------------------------------------------------------------------
@@ -521,6 +532,22 @@ contains
     
     call pf_generic_spreadq0(this,pf,level_index, t0)
   end subroutine verlet_spreadq0
+
+  !> Spread the intial data for Verlet sweepers
+  subroutine verlet_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_verlet_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
+    call this%comp_dt(lev%q0,t0,level_index, dt)
+  end subroutine verlet_compute_dt
+  
 
   !> Subroutine to evaluate function value at node m
   subroutine verlet_evaluate(this, pf,level_index, t, m, flags, step)

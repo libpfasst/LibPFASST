@@ -293,7 +293,6 @@ contains
        return
     end if
     
-
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     

@@ -268,7 +268,7 @@ contains
 
       call pf_residual(pf, level_index, dt)
       call lev%qend%copy(lev%Q(lev%nnodes))
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)      
+      if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
       call call_hooks(pf, level_index, PF_POST_SWEEP)
 
    end do  !  Sweeps
@@ -349,7 +349,6 @@ contains
       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
       call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
     end do
-
 
   end subroutine exp_residual
 

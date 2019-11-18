@@ -7,8 +7,8 @@ module pf_mod_dtype
   use iso_c_binding
   implicit none
   !>  pfasst static  paramters
-  integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
-!  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
+!  integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
+  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
   integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variables
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
@@ -72,6 +72,7 @@ module pf_mod_dtype
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
      procedure(pf_spreadq0_p),     deferred :: spreadq0
+     procedure(pf_compute_dt_p),   deferred :: compute_dt
      procedure(pf_destroy_sweeper_p),      deferred :: destroy
   end type pf_sweeper_t
 
@@ -421,6 +422,17 @@ module pf_mod_dtype
        real(pfdp),          intent(in)    :: t0 !!  Time at beginning of step; if flags == 2, time at end of step
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
+
+     subroutine pf_compute_dt_p(this, pf, level_index, t0, dt, flags)
+       import pf_sweeper_t,pf_pfasst_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: this
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
+       real(pfdp),          intent(in)    :: t0
+       real(pfdp),          intent(inout)    :: dt
+       integer, optional,   intent(in)    :: flags
+     end subroutine pf_compute_dt_p
+
 
      subroutine pf_destroy_p(this, pf,level_index)
        import pf_sweeper_t,pf_pfasst_t, pfdp

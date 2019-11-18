@@ -23,7 +23,7 @@ contains
   subroutine pf_pfasst_run(pf, q0, dt, tend, nsteps, qend, flags)
     type(pf_pfasst_t), intent(inout), target   :: pf   !!  The complete PFASST structure
     class(pf_encap_t), intent(inout   )           :: q0   !!  The initial condition
-    real(pfdp),        intent(in   )           :: dt   !!  The time step for each processor
+    real(pfdp),        intent(inout)           :: dt   !!  The time step for each processor
     real(pfdp),        intent(in   )           :: tend !!  The final time of run
     integer,           intent(in   ), optional :: nsteps  !!  The number of time steps
     class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
@@ -129,7 +129,7 @@ contains
   subroutine pf_predictor(pf, t0, dt, flags)
     type(pf_pfasst_t), intent(inout), target :: pf     !! PFASST main data structure
     real(pfdp),        intent(in   )         :: t0     !! Initial time of this processor
-    real(pfdp),        intent(in   )         :: dt     !! time step
+    real(pfdp),        intent(inout)         :: dt     !! time step
     integer,           intent(in   ), optional :: flags(:)  !!  User defined flags
 
     class(pf_level_t), pointer :: c_lev
@@ -143,13 +143,17 @@ contains
     if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
+    f_lev => pf%levels(pf%state%finest_level)
+    !! Step 0.  Pick the time step for this block
+    call f_lev%ulevel%sweeper%compute_dt(pf,pf%state%finest_level, t0,dt)    
     !!
     !! Step 1. Getting the  initial condition on the finest level at each processor
     !!         If we are doing multiple levels, then we need to coarsen to fine level
-    f_lev => pf%levels(pf%state%finest_level)
     if (pf%q0_style < 2) then  !  Spread q0 to all the nodes
        call f_lev%ulevel%sweeper%spreadq0(pf,pf%state%finest_level, t0)
     endif
+    !!  Step 1.5  Compute the time step for this block given the initial q0 and function values
+    
 !    if (pf%nlevels==1) return
     !!
     !!  Step 2:   Proceed fine to coarse levels coarsening the fine solution and computing tau correction
@@ -229,8 +233,7 @@ contains
           if (c_lev%nsweeps_pred .gt. 0) then
              !  Get new initial conditions
              call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank, .true.)
-             
-             !  Do a sweeps
+             !  Do a sweeps             
              call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred)
              !  Send forward
              call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1, .false.)
@@ -241,13 +244,14 @@ contains
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'returning to fine level in predictor'
     !!
     !!  Step 5:  Return to fine level sweeping on any level in between coarsest and finest
+    
     do level_index = 2, pf%state%finest_level  !  Will do nothing with one level
        f_lev => pf%levels(level_index);
        c_lev => pf%levels(level_index-1)
        call interpolate_time_space(pf, t0, dt, level_index, c_lev%Finterp)
        call f_lev%qend%copy(f_lev%Q(f_lev%nnodes), flags=0)
        if (pf%rank /= 0) call interpolate_q0(pf, f_lev, c_lev,flags=0)
-
+       
        !  Do a sweep on level unless we are at the finest level
        if (level_index < pf%state%finest_level) then
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps_pred)
@@ -346,8 +350,8 @@ contains
   subroutine pf_block_run(pf, q0, dt, nsteps, qend,flags)
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
-    real(pfdp),        intent(in   )           :: dt
-    integer,           intent(in   )           :: nsteps
+    real(pfdp),        intent(inout)           :: dt
+    integer,           intent(inout)           :: nsteps
     class(pf_encap_t), intent(inout), optional :: qend
     integer,           intent(in   ), optional :: flags(:)
 
@@ -387,6 +391,7 @@ contains
 
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
+       !  0.  choose time step
        !  1.  predictor
        !  2.  Vcycle until max iterations, or tolerances met
        !  3.  Move solution to next block
@@ -403,7 +408,6 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
-
 
        if (k > 1) then
           if (nproc > 1)  then
