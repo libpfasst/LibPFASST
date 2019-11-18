@@ -21,7 +21,9 @@ ifeq ($(DEBUG),TRUE)
 FFLAGS +=   -g 
 endif
 else
-FC = mpif90
+
+
+FC = mpifort
 CC = mpicc
 FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
 ifeq ($(DEBUG),TRUE)
@@ -80,6 +82,7 @@ FSRC = src/pfasst.f90 \
        src/pf_verlet_sweeper.f90 \
        src/pf_fexp_sweeper.f90
        #       pf_amisdc.f90 \
+#       src/pf_erkstepper.f90 \
 #       pf_amisdcQ.f90 \
 
 
