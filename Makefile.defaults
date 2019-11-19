@@ -13,16 +13,6 @@ USE_INTEL=FALSE
 
 #  Set some compiler flags
 AR = ar rcs
-
-FC = mpif90
-CC = mpicc
-FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
-ifeq ($(DEBUG),TRUE)
-FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
-else
-FFLAGS += -O3
-endif
-
 ifeq ($(USE_INTEL),TRUE)
 FC = ftn
 CC = ftn
@@ -30,15 +20,18 @@ FFLAGS = -Ibuild -module include -cpp
 ifeq ($(DEBUG),TRUE)
 FFLAGS +=   -g 
 endif
+else
+
+
+FC = mpifort
+CC = mpicc
+FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
+ifeq ($(DEBUG),TRUE)
+FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
+else
+FFLAGS += -O3 
 endif
 
-ifeq ($(USE_CRAY),TRUE)
-FC = ftn
-CC = ftn
-FFLAGS = -Ibuild  -F -cpp -eZ 
-ifeq ($(DEBUG),TRUE)
-FFLAGS +=   -g 
-endif
 endif
 
 
@@ -53,39 +46,42 @@ FFLAGS  +=  -I$(FFTW)/include
 LDFLAGS += -L$(FFTW)/lib -lfftw3
 endif
 
-FSRC = pfasst.f90 \
-       pf_comm.f90 \
-       pf_dtype.f90 \
-       pf_fft.f90 \
-       pf_hooks.f90 \
-       pf_interpolate.f90 \
-       pf_parallel.f90 \
-       pf_parareal.f90 \
-       pf_parallel_oc.f90 \
-       pf_pfasst.f90 \
-       pf_quadrature.f90 \
-       pf_restrict.f90 \
-       pf_results.f90 \
-       pf_rkstepper.f90 \
-       pf_solutions.f90 \
-       pf_stop.f90 \
-       pf_timer.f90 \
-       pf_utils.f90 \
-       pf_ndarray_encap.f90 \
-       pf_ndarray_oc_encap.f90 \
-       pf_ndsysarray_encap.f90 \
-       pf_zndsysarray_encap.f90 \
-       pf_zndarray_encap.f90 \
-       pf_exp_sweeper.f90 \
-       pf_fexp_sweeper.f90 \
-       pf_imex_sweeper.f90 \
-       pf_imexR_sweeper.f90 \
-       pf_imexQ_oc_sweeper.f90 \
-       pf_imk_sweeper.f90 \
-       pf_magpicard_sweeper.f90 \
-       pf_misdcQ_sweeper.f90 \
-       pf_misdcQ_oc_sweeper.f90 \
-       pf_verlet_sweeper.f90 
+FSRC = src/pfasst.f90 \
+       src/pf_comm.f90 \
+       src/pf_dtype.f90 \
+       src/pf_fft.f90 \
+       src/pf_hooks.f90 \
+       src/pf_interpolate.f90 \
+       src/pf_parallel.f90 \
+       src/pf_parareal.f90 \
+       src/pf_parallel_oc.f90 \
+       src/pf_pfasst.f90 \
+       src/pf_quadrature.f90 \
+       src/pf_restrict.f90 \
+       src/pf_results.f90 \
+       src/pf_rkstepper.f90 \
+       src/pf_erkstepper.f90 \
+       src/pf_solutions.f90 \
+       src/pf_stop.f90 \
+       src/pf_timer.f90 \
+       src/pf_utils.f90 \
+       src/pf_ham_sys_encap.f90 \
+       src/pf_ndarray_encap.f90 \
+       src/pf_ndarray_oc_encap.f90 \
+       src/pf_ndsysarray_encap.f90 \
+       src/pf_zndsysarray_encap.f90 \
+       src/pf_zndarray_encap.f90 \
+       src/pf_exp_sweeper.f90 \
+       src/pf_fexp_sweeper.f90 \
+       src/pf_imex_sweeper.f90 \
+       src/pf_imexR_sweeper.f90 \
+       src/pf_imexQ_oc_sweeper.f90 \
+       src/pf_imk_sweeper.f90 \
+       src/pf_magpicard_sweeper.f90 \
+       src/pf_misdcQ_sweeper.f90 \
+       src/pf_misdcQ_oc_sweeper.f90 \
+       src/pf_verlet_sweeper.f90 \
+       src/pf_fexp_sweeper.f90
        #       pf_amisdc.f90 \
 #       pf_amisdcQ.f90 \
 
@@ -93,31 +89,32 @@ FSRC = pfasst.f90 \
 #  Before using petsc, one must set the environment variables
 #  PETSC_DIR and PETSC_ARCH
 #  These are displayed at the end of the petsc configuration step
+
+
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
 FSRC+= pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
 
-
-
 ifeq ($(USE_FFTW),FALSE)
-FSRC+=pf_fftpack.f90
+FSRC+=src/pf_fftpack.f90
 else
-FSRC+=pf_fftw.f90
+FSRC+=src/pf_fftw.f90
 endif
 
 ifdef NOMPI
   FFLAGS += -DNOMPI
 else
-  FSRC += pf_mpi.f90
+  FSRC += src/pf_mpi.f90
 endif
 
 ifdef OMP
   FFLAGS += -fopenmp
 endif
 
-OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+OBJ  = $(subst src, build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+#OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 ifeq ($(USE_FFTW),FALSE)
 OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif

@@ -533,7 +533,7 @@ contains
     call pf_generic_spreadq0(this,pf,level_index, t0)
   end subroutine verlet_spreadq0
 
-  !> Spread the intial data for Verlet sweepers
+  !> Set the time step
   subroutine verlet_compute_dt(this,pf,level_index,  t0, dt,flags)
     class(pf_verlet_t),  intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf

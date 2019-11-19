@@ -14,7 +14,7 @@
 !!   allocate(pf%levels(1)%lev_shape(2))
 !!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
+!! The helper routine get_array, etc can be used to
 !! extract pointers to the encapsulated array  without
 !! performing any copies.
 !!

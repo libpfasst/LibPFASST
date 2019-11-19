@@ -42,6 +42,7 @@ module pf_mod_imex_sweeper
      procedure :: integrate  => imex_integrate
      procedure :: residual   => imex_residual
      procedure :: spreadq0   => imex_spreadq0
+     procedure :: compute_dt => imex_compute_dt
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy   => imex_destroy
      procedure :: imex_destroy
@@ -336,6 +337,19 @@ contains
 
     call pf_generic_spreadq0(this, pf,level_index, t0)
   end subroutine imex_spreadq0
+  subroutine imex_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_imex_sweeper_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine imex_compute_dt
 
   !> Subroutine to evaluate function value at node m
   subroutine imex_evaluate(this, pf,level_index, t, m, flags, step)
