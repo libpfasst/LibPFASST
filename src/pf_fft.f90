@@ -16,7 +16,7 @@ module pf_mod_fft_abs
      complex(pfdp), pointer :: wk_1d(:)            ! work space
      complex(pfdp), pointer :: wk_2d(:,:)          ! work space
      complex(pfdp), pointer :: wk_3d(:,:,:)        ! work space                    
-     real(pfdp), allocatable :: kx(:),ky(:),kz(:)              ! work space                    
+     real(pfdp), allocatable :: kx(:),ky(:),kz(:)              ! work space
    contains
      procedure(pf_fft_s_p),deferred :: fft_setup
      procedure(pf_fft_p),deferred :: fft_destroy
@@ -570,6 +570,7 @@ contains
     yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3))
     
   end subroutine zrestrict_3d
+
 
   end module pf_mod_fft_abs
   

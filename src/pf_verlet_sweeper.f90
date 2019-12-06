@@ -331,8 +331,8 @@ contains
     !  form the QQ matrix depending on what you want
     select case (this%whichQQ)
     case (0)  !  Collocation (make it the product)
-       print *,'Making QQ by collocation Q*Q'
-       print *,SIZE(this%Qmat)
+!       print *,'Making QQ by collocation Q*Q,  shape',shape(this%Qmat)
+
        qtemp=0.0_pfdp
        qtemp(2:nnodes,:)=lev%sdcmats%qmat
        qtemp=matmul(qtemp,qtemp)

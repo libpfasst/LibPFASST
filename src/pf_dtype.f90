@@ -299,7 +299,7 @@ module pf_mod_dtype
 
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
-     logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
+     logical :: sweep_at_conv = .true. !!  decides if one final sweep after convergence is done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
@@ -307,6 +307,7 @@ module pf_mod_dtype
 
 
      ! -- RK and Parareal options
+     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
      integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST

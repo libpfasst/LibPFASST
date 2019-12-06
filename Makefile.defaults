@@ -6,6 +6,7 @@
 DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
+USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
 
 #  Make true for intel on cori
@@ -89,8 +90,6 @@ FSRC = src/pfasst.f90 \
 #  Before using petsc, one must set the environment variables
 #  PETSC_DIR and PETSC_ARCH
 #  These are displayed at the end of the petsc configuration step
-
-
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
 FSRC+= pf_petscVec_encap.f90
@@ -101,6 +100,17 @@ ifeq ($(USE_FFTW),FALSE)
 FSRC+=src/pf_fftpack.f90
 else
 FSRC+=src/pf_fftw.f90
+endif
+
+ifeq ($(USE_SUNDIALS),TRUE)
+SUNDIALS_DIR=../sundials.5.0.0
+LDFLAGS += -L/usr/local/lib/
+LDFLAGS += -lsundials_farkode_mod
+LDFLAGS += -lsundials_farkode
+LDFLAGS += -lsundials_fnvecserial_mod
+LDFLAGS += -lsundials_nvecserial
+FFLAGS  += -I/usr/local/fortran/
+FSRC+= src/pf_sundials_vec.f90
 endif
 
 ifdef NOMPI
