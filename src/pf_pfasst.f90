@@ -117,7 +117,6 @@ contains
     do l = 1, pf%nlevels
        call pf_level_setup(pf, l)
     end do
-
     !>  set default finest level
     pf%state%finest_level=pf%nlevels
     !>  Loop over levels setting interpolation and restriction matrices (in time)
@@ -166,10 +165,10 @@ contains
     
     !> do some sanity checks
     mpibuflen  = lev%mpibuflen
-    if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',mpibuflen)
+    if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'bad value for mpibulen=',mpibuflen)
 
     nnodes = lev%nnodes
-    if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'allocate fail',nnodes)    
+    if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'bad value for nnodes=',nnodes)    
 
     lev%residual = -1.0_pfdp
 
@@ -204,7 +203,6 @@ contains
        lev%ulevel%sweeper%use_LUq=pf%use_LUq
        call lev%ulevel%sweeper%initialize(pf,level_index)
     end if
-
     if (pf%use_rk_stepper)  call lev%ulevel%stepper%initialize(pf,level_index)
     !>  Allocate space for solutions 
     call lev%ulevel%factory%create_array(lev%Q, nnodes, lev%index,  lev%lev_shape)
@@ -235,7 +233,7 @@ contains
     
     call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%lev_shape)
     call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%lev_shape)
-    call lev%ulevel%factory%create_single(lev%q0_delta, lev%index,   lev%lev_shape)
+    call lev%ulevel%factory%create_single(lev%delta_q0, lev%index,   lev%lev_shape)
 
   end subroutine pf_level_setup
 
@@ -307,7 +305,7 @@ contains
     call lev%ulevel%factory%destroy_array(lev%R)
     call lev%ulevel%factory%destroy_single(lev%qend)
     call lev%ulevel%factory%destroy_single(lev%q0)
-    call lev%ulevel%factory%destroy_single(lev%q0_delta)
+    call lev%ulevel%factory%destroy_single(lev%delta_q0)
 
     !> destroy the sweeper
     if (pf%use_sdc_sweeper)  call lev%ulevel%sweeper%destroy(pf,level_index)
@@ -344,8 +342,8 @@ contains
     real(pfdp) :: abs_res_tol, rel_res_tol
     logical    :: PFASST_pred, RK_pred, pipeline_pred
     integer    ::  nsweeps_burn, q0_style, taui0
-    logical    ::  Vcycle,Finterp, use_LUq, use_Sform
-    logical    :: debug, use_rk_stepper, use_sdc_sweeper
+    logical    ::  Vcycle,use_pysdc_V,Finterp, use_LUq, use_Sform
+    logical    :: debug, use_rk_stepper, use_sdc_sweeper, sweep_at_conv
     logical    :: save_residuals, save_errors
     integer    :: save_timings
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
@@ -362,7 +360,7 @@ contains
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper, use_sdc_sweeper
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
 
     !> set local variables to pf_pfasst defaults
@@ -395,6 +393,8 @@ contains
     rk_pred      = pf%rk_pred
     use_rk_stepper= pf%use_rk_stepper
     use_sdc_sweeper= pf%use_sdc_sweeper
+    use_pysdc_V= pf%use_pysdc_V
+    sweep_at_conv= pf%sweep_at_conv
     
     use_no_left_q      = pf%use_no_left_q
     use_composite_nodes= pf%use_composite_nodes
@@ -451,6 +451,8 @@ contains
     pf%use_sdc_sweeper=use_sdc_sweeper
     pf%nsteps_rk    = nsteps_rk    
     pf%rk_pred      = rk_pred
+    pf%use_pysdc_V= use_pysdc_V
+    pf%sweep_at_conv= sweep_at_conv
 
     pf%use_no_left_q       = use_no_left_q
     pf%use_composite_nodes = use_composite_nodes
@@ -677,6 +679,7 @@ contains
     if (pf%save_residuals) then
        do level_index = 1,pf%nlevels
           call  dump_resids(pf%results(level_index))
+          call  dump_delta_q0(pf%results(level_index))
        end do
     end if
     

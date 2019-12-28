@@ -106,8 +106,8 @@ module pf_mod_fexp_sweeper
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
       class(pf_encap_t),  intent(in)    :: y_j
-      class(pf_encap_t),  intent(in)    :: F(:,:)
-      class(pf_encap_t),  intent(in)    :: Nk(:)
+      class(pf_encap_t),  intent(inout) :: F(:,:)
+      class(pf_encap_t),  intent(inout) :: Nk(:)
     end subroutine pf_expSweepSubstep
 
     ! =================================================================================
@@ -131,13 +131,13 @@ module pf_mod_fexp_sweeper
     !
     ! =================================================================================
 
-    subroutine pf_expResidualSubstep(this, y_np1, j, dt, y_n, F)
+    subroutine pf_expResidualSubstep(this, y_jp1, j, dt, y_j, F)
       import pf_fexp_sweeper_t, pf_encap_t, pfdp
       class(pf_fexp_sweeper_t),   intent(inout) :: this
-      class(pf_encap_t),  intent(inout) :: y_np1
+      class(pf_encap_t),  intent(inout) :: y_jp1
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
-      class(pf_encap_t),  intent(in)    :: y_n
+      class(pf_encap_t),  intent(in)    :: y_j
       class(pf_encap_t),  intent(in)    :: F(:,:)
     end subroutine pf_expResidualSubstep
 
@@ -322,10 +322,13 @@ contains
 
     nnodes = lev%nnodes
     do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-      call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), fSDC)
-      call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
-      if (i > 1) then
-        call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
+       call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), fSDC)
+       if (i .eq. 1) then
+          call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
+       else
+!      if (i > 1) then
+          call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
+          call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
       end if
     end do
 
@@ -358,7 +361,15 @@ contains
     do m = 1, lev%nnodes-1
       call lev%R(m)%copy(lev%I(m))
       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
-      call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       if (present(flags)) then
+          if (flags .eq. 0) then
+             call lev%R(m)%axpy(1.0_pfdp, lev%q0)
+          else
+             call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+          end if
+       else
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       end if
     end do
 
   end subroutine exp_residual

@@ -16,7 +16,7 @@
 !!         $$ \sum_{i=0}^n t^i \varphi_i(tL)b_i $$
 !!  in addition to the function f_eval for compluting the nonlinear term N(t,y).
 !!  The complete description of these three functions is contained below.
-module pf_mod_exp
+module pf_mod_exp_sweeper
 
 use pf_mod_dtype
 use pf_mod_utils
@@ -606,4 +606,5 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         
 end subroutine weights
 
-end module pf_mod_exp
+end module pf_mod_exp_sweeper
+

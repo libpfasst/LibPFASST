@@ -309,7 +309,7 @@ contains
                call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,2))
        end do
     end do
-       
+
 
 !    if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
 !    if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
@@ -323,8 +323,33 @@ contains
     integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: dt           !!  Time step
     integer, intent(in), optional   :: flags
+
+    integer :: m
+    type(pf_level_t), pointer :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
+
+    call imex_integrate(this,pf,level_index, lev%Q, lev%F, dt, lev%I, flags)
+    !> add tau if it exists
+    if (lev%index < pf%state%finest_level) then    
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
+       end do
+    end if
+    do m = 1, lev%nnodes-1      
+       call lev%R(m)%copy(lev%I(m))
+       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+       if (present(flags)) then
+          if (flags .eq. 0) then
+             call lev%R(m)%axpy(1.0_pfdp, lev%q0)
+          else
+             call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+          end if
+       else
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       end if
+    end do
     
-    call pf_generic_residual(this, pf, level_index, dt)
+!    call pf_generic_residual(this, pf, level_index, dt)
   end subroutine imex_residual
 
 

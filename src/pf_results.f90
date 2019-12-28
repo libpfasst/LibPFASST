@@ -57,9 +57,12 @@ contains
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
     if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
+    if(.not.allocated(this%delta_q0)) allocate(this%delta_q0(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
 
     this%errors = -1.0_pfdp
     this%residuals = -1.0_pfdp
+    this%delta_q0 = -1.0_pfdp
   end subroutine initialize_results
 
   subroutine dump_resids(this)
@@ -116,6 +119,60 @@ contains
     close(istream)
     
   end subroutine dump_resids
+  subroutine dump_delta_q0(this)
+    type(pf_results_t), intent(inout) :: this
+    integer :: i, j, k, istat,system,istream,nstep
+    character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 256) :: fullname  !!  output file name for residuals
+    character(len = 128) :: datpath  !!  directory path
+    character(len = 128) :: dirname  !!  directory name
+
+    ! Create directory for residual output if necessary
+    datpath = trim(this%datpath) // 'delta_q0'
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_delta_q0")
+    ! Create directory for this processor
+    write (dirname, "(A6,I0.3)") '/Proc_',this%rank
+    datpath=trim(datpath) // trim(dirname) 
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_delta_q0")
+
+    !  output delta_q0 for each sweep and block and iteration
+    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level_index,'.dat'
+    fullname = trim(datpath) // trim(fname)
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = 1 , this%niters
+          do k = 1, this%nsweeps
+             if (this%delta_q0(i, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%delta_q0(i, j, k)
+             end if
+          end do
+       end do
+    enddo
+    close(istream)
+
+    !  output delta_q0 only for last iteration
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
+    fullname = trim(datpath) // trim(fname)
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = this%niters,1,-1
+          if (this%delta_q0(i, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%delta_q0(i, j, this%nsweeps)
+             exit
+          end if
+       end do
+    enddo
+    close(istream)
+    
+  end subroutine dump_delta_q0
   subroutine dump_errors(this)
     type(pf_results_t), intent(inout) :: this
 
@@ -241,6 +298,7 @@ contains
     
     if(allocated(this%errors))  deallocate(this%errors)
     if(allocated(this%residuals))  deallocate(this%residuals)
+    if(allocated(this%delta_q0))  deallocate(this%delta_q0)
   end subroutine destroy_results
 
 end module pf_mod_results

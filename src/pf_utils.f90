@@ -89,7 +89,8 @@ contains
       do m = 1, lev%nnodes-1      
         if( (flags .eq. 0) .or. (flags .eq. 1) ) then
           call lev%R(m)%copy(lev%I(m), 1)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          !          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          call lev%R(m)%axpy(1.0_pfdp, lev%q0, 1)          
           call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
         end if
         if( (flags .eq. 0) .or. (flags .eq. 2) ) then
@@ -101,7 +102,7 @@ contains
     else
       do m = 1, lev%nnodes-1      
         call lev%R(m)%copy(lev%I(m))
-        call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+        call lev%R(m)%axpy(1.0_pfdp, lev%q0)
         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
       end do
     end if
@@ -127,10 +128,23 @@ contains
     
     if (pf%save_residuals .and. pf%state%iter>0)  then
        pf%results(level_index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = resid
+       pf%results(level_index)%delta_q0(pf%state%iter, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
     end if
     
   end subroutine pf_set_resid
 
+  !>  Subroutine to store a residual value
+  subroutine pf_set_delta_q0(pf,level_index,delta)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: delta
+    
+    if (pf%save_delta_q0 .and. pf%state%iter>0)  then
+       pf%results(level_index)%delta_q0(pf%state%iter, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
+    end if
+    
+  end subroutine pf_set_delta_q0
+  
   !>  Subroutine to store a residual value
   subroutine pf_set_error(pf,level_index,error)
     type(pf_pfasst_t), intent(inout)           :: pf
@@ -168,6 +182,15 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
+  subroutine pf_delta_q0(pf,level_index)
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to sweep
+
+    class(pf_level_t), pointer :: lev  !!  Level on which to spread
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    call lev%delta_q0%axpy(-1.0_pfdp,lev%q0)
+    lev%max_delta_q0=lev%delta_q0%norm()
+  end subroutine pf_delta_q0
   
   !> Generic routine to spread initial conditions
   !! Each sweeper can define its own spreadq0 or use this generic one

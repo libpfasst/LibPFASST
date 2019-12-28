@@ -181,9 +181,9 @@ module pf_mod_dtype
           tauQ(:),  &           !! fas correction in Q form
           pFflt(:), &           !! functions at sdc nodes, previous sweep (flat)
           q0,       &           !! initial condition
-          q0_delta, &           !! Space for interpolating q0, qend
+          delta_q0, &           !! Space for interpolating q0, qend
           qend                  !! solution at end time
-
+     real(pfdp) :: max_delta_q0=0.0_pfdp
      !>  Function  storage
      class(pf_encap_t), pointer :: &
           F(:,:), &                     !! functions values at sdc nodes
@@ -230,6 +230,7 @@ module pf_mod_dtype
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:)
      real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
+     real(pfdp), allocatable :: delta_q0(:,:,:)  !  (block,iter,sweep)
      integer :: nsteps
      integer :: niters
      integer :: nprocs
@@ -299,6 +300,7 @@ module pf_mod_dtype
 
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
+     logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
      logical :: sweep_at_conv = .true. !!  decides if one final sweep after convergence is done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
@@ -316,9 +318,10 @@ module pf_mod_dtype
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
-     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
+     logical :: save_delta_q0 = .true.   !!  If true, delta_q0 is  saved and output
+     logical :: save_errors  = .true.    !!  If true, errors  are saved and output
      integer :: save_timings  = 2         !!  0=none, 1=total only, 2=all, 3=all and echo
-     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
      integer :: rank    = -1            !! rank of current processor
 
@@ -443,14 +446,14 @@ module pf_mod_dtype
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
-     subroutine pf_do_n_steps_p(this, pf, level_index, t0,q0,qend, big_dt,nsteps_rk)
+     subroutine pf_do_n_steps_p(this, pf, level_index, t0,y0,yend, big_dt,nsteps_rk)
        import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp, pf_encap_t
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: big_dt !!  Time step size
        real(pfdp),          intent(in)    :: t0
-       class(pf_encap_t), intent(in   )         :: q0           !!  Starting value
-       class(pf_encap_t), intent(inout)         :: qend         !!  Final value
+       class(pf_encap_t), intent(in   )         :: y0           !!  Starting value
+       class(pf_encap_t), intent(inout)         :: yend         !!  Final value
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
      end subroutine pf_do_n_steps_p
