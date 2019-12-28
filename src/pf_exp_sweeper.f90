@@ -50,6 +50,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         procedure :: integrate    => exp_integrate
         procedure :: residual     => exp_residual
         procedure :: spreadq0     => exp_spreadq0
+        procedure :: compute_dt   => exp_compute_dt
         procedure :: evaluate_all => exp_evaluate_all
         procedure :: destroy      => exp_destroy
         ! functions that can be accessed directly by types that inherit pf_exp_t
@@ -605,6 +606,19 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 !        end do
         
 end subroutine weights
+        subroutine exp_compute_dt(this,pf,level_index,  t0, dt,flags)
+          class(pf_exp_t),  intent(inout) :: this
+          type(pf_pfasst_t), target, intent(inout) :: pf
+          integer,              intent(in)    :: level_index
+          real(pfdp),        intent(in   ) :: t0
+          real(pfdp),        intent(inout) :: dt
+          integer, optional,   intent(in)    :: flags
+          
+          type(pf_level_t),    pointer :: lev
+          lev => pf%levels(level_index)   !!  Assign level pointer
+          !  Do nothing now
+          return
+        end subroutine exp_compute_dt
 
 end module pf_mod_exp_sweeper
 

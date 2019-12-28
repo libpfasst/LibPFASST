@@ -10,7 +10,7 @@
 module pf_my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray
-  use pf_mod_exp
+  use pf_mod_exp_sweeper
   use phi_mod
   use pf_mod_fftpackage
   implicit none
