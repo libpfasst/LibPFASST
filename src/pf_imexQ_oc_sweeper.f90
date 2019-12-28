@@ -34,6 +34,7 @@ module pf_mod_imexQ_oc
      procedure :: evaluate_all => imexQ_oc_evaluate_all
      procedure :: spreadq0     => imexQ_oc_spreadq0
      procedure :: destroy      => imexQ_oc_destroy
+     procedure :: compute_dt      => imexQ_oc_compute_dt
      procedure :: imexQ_oc_destroy
      procedure :: imexQ_oc_initialize
   end type pf_imexQ_oc_t
@@ -69,6 +70,15 @@ module pf_mod_imexQ_oc
 
        integer,            intent(in)    :: flags
      end subroutine pf_f_comp_p
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       import pf_imexQ_oc_t, pf_encap_t, pfdp
+       class(pf_imexQ_oc_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
+     
   end interface
 contains
 
@@ -689,6 +699,20 @@ contains
 
     call lev%ulevel%factory%destroy_single(this%rhs)
   end subroutine imexQ_oc_destroy
+  !> Set the time step
+  subroutine imexQ_oc_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_imexQ_oc_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+!    call this%comp_dt(lev%q0,t0,level_index, dt)
+    
+  end subroutine imexQ_oc_compute_dt
 
 end module pf_mod_imexQ_oc
 
