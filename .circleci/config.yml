@@ -11,15 +11,15 @@ jobs:
             - run: # Modify the commands below to build all the tests
                 name: make_tests
                 command: >
-	          echo "Compiling Libfasst"
+                  echo "Compiling Libfasst"
                   make  DEBUG=TRUE &&
-	          echo "Compiling magpicard"		  
+                  echo "Compiling magpicard"		  
                   cd test/magpicard &&  make &&
-	          echo "Compiling imk"		  
+                  echo "Compiling imk"		  
                   cd ../imk &&  make &&
-	          echo "Compiling nagumo"		  
+                  echo "Compiling nagumo"		  
                   cd ../nagumo && make &&
-	          echo "Compiling IMEX"		  
+                  echo "Compiling IMEX"		  
                   cd ../EXP_adv_diff_fft/1d && make &&
                   cd ../../adv_diff_fft/1d && make &&
                   cd ../2d/ && make &&
