@@ -226,7 +226,8 @@ contains
 
 
     !  Call exact solution from Libpfasst for ad problem
-    call exact_ad_cos_1d(t,yex,nu,v,kfreq,Lx)
+    !    call exact_ad_cos_1d(t,yex,nu,v,[kfreq],Lx)
+    call exact_ad_cos(t,yex,nu,v,kfreq,Lx)    
   end subroutine exact
 
 

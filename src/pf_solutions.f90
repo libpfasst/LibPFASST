@@ -9,6 +9,7 @@ module pf_mod_solutions
 
   interface exact_ad_cos
      module procedure exact_ad_cos_1d
+     module procedure exact_ad_cos_1ds
      module procedure exact_ad_cos_1dz
      module procedure exact_ad_cos_2d
      module procedure exact_ad_cos_2dz
@@ -86,6 +87,21 @@ contains
     end do
 
   end subroutine exact_ad_cos_1d
+  subroutine exact_ad_cos_1ds(t, uex,nu,v,kfreq,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu,v,kfreq,Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       uex(i) = ad_cos_ex(t, x,nu,v,kfreq,Lx)
+    end do
+
+  end subroutine exact_ad_cos_1ds
   
   subroutine exact_ad_cos_1dz(t, uex,nu,v,kfreq,Lx)
     real(pfdp), intent(in)  :: t
