@@ -37,6 +37,7 @@ module pf_mod_imk
     procedure :: spreadq0     => imk_spreadq0
     procedure :: evaluate_all => imk_evaluate_all
     procedure :: destroy   => imk_destroy
+    procedure :: compute_dt => imk_compute_dt
     procedure :: imk_destroy
     procedure :: imk_initialize  
     procedure(pf_f_eval_p), deferred :: f_eval
@@ -74,6 +75,15 @@ module pf_mod_imk
        class(pf_encap_t), intent(inout) :: a, b, out
        integer, intent(in), optional :: flags
      end subroutine pf_commutator_p
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       import pf_imk_t, pf_encap_t, pfdp
+       class(pf_imk_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
+     
   end interface
 
 contains
@@ -596,5 +606,18 @@ contains
 
       call lev%ulevel%factory%destroy_array(this%A)
   end subroutine imk_destroy
+  subroutine imk_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_imk_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine imk_compute_dt
 
 end module pf_mod_imk

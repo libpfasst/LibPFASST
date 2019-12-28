@@ -96,7 +96,6 @@ module pf_mod_verlet
        real(pfdp) :: H
      end function pf_hamiltonian_p
      subroutine pf_comp_dt_p(this,y, t, level_index, dt)
-       !>  Evaluate f_piece(y), where piece is one or two 
        import pf_verlet_t, pf_encap_t, pfdp
        class(pf_verlet_t),  intent(inout) :: this
        class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
