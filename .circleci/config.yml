@@ -38,5 +38,3 @@ jobs:
                 name: do_pytests
                 command: >  # pytest
                  ./test/run_me.csh
-
-		  
