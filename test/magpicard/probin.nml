@@ -19,7 +19,6 @@
 	nsteps = 32
 	exptol = 1.d-15
 	nparticles = 20
-	save_solutions = .true.
 	toda_periodic = .true.
 	use_sdc = .false.
 	Znuc=1.0

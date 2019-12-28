@@ -10,8 +10,6 @@
 	pipeline_pred = .true.
 	pfasst_pred = .true.
 	vcycle = .false.
-	save_residuals=.true.
-	save_timings=.true.
 /
 
 &params
