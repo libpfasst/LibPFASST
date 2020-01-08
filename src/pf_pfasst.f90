@@ -475,7 +475,7 @@ contains
     integer :: un = 6
     logical :: show_mats = .FALSE.
     logical :: dump_json = .TRUE.
-    integer :: l, i,istat
+    integer :: l, i,istat,system
     character(8)   :: date
     character(10)  :: time
     character(len = 128) :: fname  !!  output file name for residuals
