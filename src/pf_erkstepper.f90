@@ -337,55 +337,56 @@ contains
 
   !> Perform N steps of ark on level level_index and set yend appropriately.
   subroutine erk_do_n_steps(this, pf, level_index, t0, y0,yend,big_dt, nsteps_rk)
-        use pf_mod_timer
-        use pf_mod_hooks
-
-        class(pf_erk_stepper_t),   intent(inout) :: this
-        type(pf_pfasst_t), intent(inout), target :: pf
-        real(pfdp),        intent(in   )         :: t0           !!  Time at start of time interval
-        class(pf_encap_t), intent(in   )         :: y0           !!  Starting value
-        class(pf_encap_t), intent(inout)         :: yend         !!  Final value
-        real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrato on
-        integer,           intent(in)            :: level_index  !!  Level of the index to step on
-        integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
-
-        class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
-        integer                                  :: i, j, n      !!  Loop counters
-        real(pfdp)                               :: tn           !!  Time at beginning of RKstep
-        real(pfdp)                               :: dt           !!  Size of each ark step
-        real(pfdp)                               :: tc           !!  stage time
+    use pf_mod_timer
+    use pf_mod_hooks
     
-        lev => pf%levels(level_index)   !! Assign pointer to appropriate level
-        dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
-
-        call this%y_n%copy(y0)
-        tn = t0
+    class(pf_erk_stepper_t),   intent(inout) :: this
+    type(pf_pfasst_t), intent(inout), target :: pf
+    real(pfdp),        intent(in   )         :: t0           !!  Time at start of time interval
+    class(pf_encap_t), intent(in   )         :: y0           !!  Starting value
+    class(pf_encap_t), intent(inout)         :: yend         !!  Final value
+    real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrato on
+    integer,           intent(in)            :: level_index  !!  Level of the index to step on
+    integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
     
-        do n = 1, nsteps_rk      ! Loop over time steps
-                ! Reset initial condition
-                if (n > 1) then
-                        call this%y_n%copy(this%y_np1)
-                endif 
-                ! Loop over stage values
-                call this%f_eval(this%y_n, tn, level_index, this%F(1,1))
-                do i = 1, this%nstages - 1
-                        call this%compD(dt, i, this%y_n, this%y_stage)
-                        do j = 1, i
-                           if(this%AF(j,i) .gt. 0) then
-                              call this%compA(dt, i, j, this%F, this%PFY)
-                              call this%y_stage%axpy(1.0_pfdp, this%PFY)
-                           endif
-                        enddo
-                        call this%f_eval(this%y_stage, tn + dt * this%c(i), level_index, this%F(i+1,1))
-                     enddo
-                call this%compD(dt, this%nstages, this%y_n, this%y_np1)
-                do i = 1, this%nstages
-                   call this%compB(dt, i, this%F, this%PFY)
-                   call this%y_np1%axpy(1.0_pfdp, this%PFY)
-                enddo
-                tn = t0 + dt             
-        end do ! End Loop over time steps
-        call yend%copy(this%y_np1)
+    class(pf_level_t), pointer               :: lev          !!  Pointer to level level_index
+    integer                                  :: i, j, n      !!  Loop counters
+    real(pfdp)                               :: tn           !!  Time at beginning of RKstep
+    real(pfdp)                               :: dt           !!  Size of each ark step
+    real(pfdp)                               :: tc           !!  stage time
+    
+    lev => pf%levels(level_index)   !! Assign pointer to appropriate level
+    dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
+    
+    call this%y_n%copy(y0)
+    tn = t0
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)    
+    do n = 1, nsteps_rk      ! Loop over time steps
+       ! Reset initial condition
+       if (n > 1) then
+          call this%y_n%copy(this%y_np1)
+       endif
+       ! Loop over stage values
+       call this%f_eval(this%y_n, tn, level_index, this%F(1,1))
+       do i = 1, this%nstages - 1
+          call this%compD(dt, i, this%y_n, this%y_stage)
+          do j = 1, i
+             if(this%AF(j,i) .gt. 0) then
+                call this%compA(dt, i, j, this%F, this%PFY)
+                call this%y_stage%axpy(1.0_pfdp, this%PFY)
+             endif
+          enddo
+          call this%f_eval(this%y_stage, tn + dt * this%c(i), level_index, this%F(i+1,1))
+       enddo
+       call this%compD(dt, this%nstages, this%y_n, this%y_np1)
+       do i = 1, this%nstages
+          call this%compB(dt, i, this%F, this%PFY)
+          call this%y_np1%axpy(1.0_pfdp, this%PFY)
+       enddo
+       tn = t0 + dt             
+    end do ! End Loop over time steps
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
+    call yend%copy(this%y_np1)
   end subroutine erk_do_n_steps
   
 end module pf_mod_erkstepper
