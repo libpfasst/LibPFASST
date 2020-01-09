@@ -360,7 +360,8 @@ contains
     
     call this%y_n%copy(y0)
     tn = t0
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)    
+
+    print *,'rank: ', pf%rank,' doing ',nsteps_rk,' steps on level ',level_index
     do n = 1, nsteps_rk      ! Loop over time steps
        ! Reset initial condition
        if (n > 1) then
@@ -385,7 +386,7 @@ contains
        enddo
        tn = t0 + dt             
     end do ! End Loop over time steps
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
+
     call yend%copy(this%y_np1)
   end subroutine erk_do_n_steps
   

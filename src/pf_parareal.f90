@@ -204,6 +204,7 @@ contains
     integer                   :: nsteps_c,nsteps_f    !!  Number of RK  steps
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
+    real(pfdp)                :: dt_all             !!  Initial time at time step k
     pf%state%iter = 0          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
@@ -225,12 +226,14 @@ contains
 
     !!
     !! Step 2. Do coarse level integration, no communication necessary
-    nsteps_c= c_lev%ulevel%stepper%nsteps  !  Each processor integrates alone
-    do n=1,pf%rank+1
-       if (n .gt. 1) call c_lev%q0%copy(c_lev%qend)       
-       t0k      = dt*real(n-1,pfdp)
-       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,c_lev%qend,dt, nsteps_c)
-    end do
+    nsteps_c= c_lev%ulevel%stepper%nsteps*(pf%rank+1)  !  Each processor integrates alone
+    dt_all=dt*real(pf%rank+1,pfdp)
+!    nsteps_c= c_lev%ulevel%stepper%nsteps  !  Each processor integrates alone
+!    do n=1,pf%rank+1
+!       if (n .gt. 1) call c_lev%q0%copy(c_lev%qend)       
+!       t0k      = dt*real(n-1,pfdp)
+       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, c_lev%q0,c_lev%qend,dt_all, nsteps_c)
+!    end do
     ! Save the coarse level value
     call c_lev%Q(1)%copy(c_lev%qend, flags=0)     
     ! Save the fine level value
@@ -279,13 +282,18 @@ contains
        call f_lev%q0%copy(c_lev%q0, flags=0)       !  Get fine initial condition
     end if
     !  Step and store in Q(1)
-    call f_lev%ulevel%stepper%do_n_steps(pf, 2,pf%state%t0, f_lev%q0,f_lev%Q(1), dt, nsteps_f)
-
+    level_index=2
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+    call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,f_lev%Q(1), dt, nsteps_f)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
     ! Get a new initial condition on coarse (will be put in q0
     call pf_recv(pf, c_lev, 10000+iteration, .true.)
 
     !  Step on coarse and stave in Q(2)
-    call c_lev%ulevel%stepper%do_n_steps(pf, 1,pf%state%t0, c_lev%q0,c_lev%Q(2), dt, nsteps_c)
+    level_index=1    
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
+    call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, c_lev%q0,c_lev%Q(2), dt, nsteps_c)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
 
     !  Compute the correction new update (store in coarse qend)
     call c_lev%qend%copy(f_lev%Q(1), flags=0)  !  Old fine-old coarse + new coarse
