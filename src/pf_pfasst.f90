@@ -493,16 +493,18 @@ contains
     write(un,*) 'double precision:   ', pfdp   ,'  bytes'
     write(un,*) 'quad precision:   ', pfqp   ,'  bytes'    
     write(un,*) 'Output directory: ', trim(pf%outdir)    
-    write(un,*) 'nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
+    write(un,*) 'Nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
     if (pf%use_sdc_sweeper) then
-       write(un,*) 'nlevels:     ', pf%nlevels, '! number of pfasst levels'
+       write(un,*) 'Nlevels:     ', pf%nlevels, '! number of pfasst levels'
        if (pf%comm%nproc == 1) then
           write(un,*) '            ', '             ', ' ! since 1 time proc is being used, this is a serial sdc run'
        else
           write(un,*) '            ', '             ', ' ! since >1 time procs are being used, this is a parallel pfasst run'
        end if
-       write(un,*) 'niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
-       write(un,*) 'nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
+       write(un,*) 'Niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
+       write(un,*) 'Nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
+       write(un,*) 'Nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
+       write(un,*) 'Nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
        select case(pf%qtype)
        case (SDC_GAUSS_LEGENDRE)
           write(un,*) 'qtype:',pf%qtype, '! Gauss Legendre nodes are used'
@@ -519,6 +521,16 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',pf%qtype)
        end select
+       if (pf%use_Luq) then
+          write(un,*) 'Implicit matrix is LU  '
+       else
+          write(un,*) 'Implicit matrix is backward Euler  '
+       end if
+       if (pf%use_Sform) then
+          write(un,*) 'The Smat form of stepping is being done'
+       else
+          write(un,*) 'The Qmat form of stepping is being done'       
+       end if
        if (present(show_mats_opt)) show_mats=show_mats_opt
        if (show_mats) then
           do l = 1, pf%nlevels
@@ -535,22 +547,10 @@ contains
        if (pf%use_proper_nodes)  write(un,*) 'Using proper node nesting'
        if (pf%use_composite_nodes)  write(un,*) 'Using composite node nesting'
        if (pf%use_no_left_q)  write(un,*) ' Skipping left end point in quadruture rule '        
-       write(un,*) 'nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
-       write(un,*) 'nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
        write(un,*) 'taui0:     ',   pf%taui0, '! cutoff for tau correction'
        write(un,*) 'abs_res_tol:', pf%abs_res_tol, '! absolute residual tolerance: '
        write(un,*) 'rel_res_tol:', pf%rel_res_tol, '! relative residual tolerance: '
        write(un,*) 'mpibuflen:   ', pf%levels(1:pf%nlevels)%mpibuflen, '! size of data send between time steps'
-       if (pf%use_Luq) then
-          write(un,*) 'Implicit matrix is LU  '
-       else
-          write(un,*) 'Implicit matrix is backward Euler  '
-       end if
-       if (pf%use_Sform) then
-          write(un,*) 'The Smat form of stepping is being done'
-       else
-          write(un,*) 'The Qmat form of stepping is being done'       
-       end if
        if (pf%Vcycle) then
           write(un,*) 'V-cycling is on'
        else
@@ -575,11 +575,6 @@ contains
        if (pf%debug) write(un,*) 'Debug mode is on '
     end if
 
-    if (pf%use_rk_stepper) then
-       write(un,*) 'nsteps_rk:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
-    end if
-    
-       
     if (present(json_opt)) dump_json=json_opt
     if (dump_json) then
        ! Create a json file of all the pfasst parameters

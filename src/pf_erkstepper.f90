@@ -361,7 +361,7 @@ contains
     call this%y_n%copy(y0)
     tn = t0
 
-    print *,'rank: ', pf%rank,' doing ',nsteps_rk,' steps on level ',level_index
+!    print *,'rank: ', pf%rank,' doing ',nsteps_rk,' steps on level ',level_index
     do n = 1, nsteps_rk      ! Loop over time steps
        ! Reset initial condition
        if (n > 1) then
