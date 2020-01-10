@@ -169,7 +169,7 @@ contains
              call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
              
              if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
-             call call_hooks(pf, 2, PF_POST_ITERATION)
+             call call_hooks(pf, -1, PF_POST_ITERATION)
              
              !  If we are converged, exit block
              if (pf%state%status == PF_STATUS_CONVERGED)  then
@@ -222,18 +222,20 @@ contains
           call c_lev%q0%copy(f_lev%q0)
        end if
     end if
-    level_index = 1
-
     !!
     !! Step 2. Do coarse level integration, no communication necessary
-    nsteps_c= c_lev%ulevel%stepper%nsteps*(pf%rank+1)  !  Each processor integrates alone
-    dt_all=dt*real(pf%rank+1,pfdp)
-!    nsteps_c= c_lev%ulevel%stepper%nsteps  !  Each processor integrates alone
-!    do n=1,pf%rank+1
-!       if (n .gt. 1) call c_lev%q0%copy(c_lev%qend)       
-!       t0k      = dt*real(n-1,pfdp)
-       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, c_lev%q0,c_lev%qend,dt_all, nsteps_c)
-!    end do
+    !  First mimic all the previous processors to get the correct q0
+    if (pf%rank > 0) then
+       nsteps_c= c_lev%ulevel%stepper%nsteps*(pf%rank)  
+       dt_all=dt*real(pf%rank,pfdp)
+       t0k=t0-real(pf%rank,pfdp)*dt  ! The actual initial time (usually 0)
+       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,c_lev%qend,dt_all, nsteps_c)
+       call c_lev%q0%copy(c_lev%qend)           
+    end if
+    ! Now do one time step
+    nsteps_c= c_lev%ulevel%stepper%nsteps
+    call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, c_lev%q0,c_lev%qend,dt, nsteps_c)    
+
     ! Save the coarse level value
     call c_lev%Q(1)%copy(c_lev%qend, flags=0)     
     ! Save the fine level value
