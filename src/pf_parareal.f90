@@ -283,23 +283,24 @@ contains
     if (pf%rank /= 0) then
        call f_lev%q0%copy(c_lev%q0, flags=0)       !  Get fine initial condition
     end if
-    !  Step and store in Q(1)
+    !  Step on fine and store in coarse qend
     level_index=2
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
-    call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,f_lev%Q(1), dt, nsteps_f)
+    call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%qend, dt, nsteps_f)
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
-    ! Get a new initial condition on coarse (will be put in q0
+    !  Subtract the old coarse
+    call c_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1))
+    
+    ! Get a new initial condition on coarse (will be put in q0)
     call pf_recv(pf, c_lev, 10000+iteration, .true.)
 
-    !  Step on coarse and stave in Q(2)
+    !  Step on coarse and save in Q(2)
     level_index=1    
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, c_lev%q0,c_lev%Q(2), dt, nsteps_c)
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
 
-    !  Compute the correction new update (store in coarse qend)
-    call c_lev%qend%copy(f_lev%Q(1), flags=0)  !  Old fine-old coarse + new coarse
-    call c_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1)) !       
+    !  Finishe the correction new update (store in coarse qend)
     call c_lev%qend%axpy(1.0_pfdp,c_lev%Q(2)) !       
 
     !  Send coarse forward  (nonblocking)
