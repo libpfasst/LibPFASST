@@ -247,7 +247,7 @@ contains
     do k = 1, nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
        if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
-      pf%state%sweep=k
+       pf%state%sweep=k
 
       ! NOTE: ensure that lev%F has been properly initialized here      
       do j = 1, nnodes

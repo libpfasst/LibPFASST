@@ -193,7 +193,9 @@ contains
           c_lev => pf%levels(level_index)
           do k = 1, pf%rank + 1
              pf%state%iter = -k
-             t0k = t0-(pf%rank)*dt + (k-1)*dt   ! Remember t0=pf%rank*dt is the beginning of this time slice so t0-(pf%rank)*dt is 0
+             ! Remember t0=(pf%rank)*dt is the beginning of this time slice so
+             ! t0-(pf%rank)*dt is 0             
+             t0k = t0-real(pf%rank+k-1,pfdp)*dt 
                                                 ! and we iterate up to the correct time step.
                                                 ! for optimal control problem t, t0k has no influence on f_eval, so there this does something else
 
