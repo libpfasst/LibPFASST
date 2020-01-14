@@ -110,52 +110,68 @@ contains
     t_wall=MPI_Wtime()
     select case(timer)
     case(T_TOTAL)
-       delta_t = t_wall - pf%pf_timers%t_total
+       t_prev=pf%pf_timers%t_total
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_total=pf%pf_runtimes%t_total + delta_t
     case(T_PREDICTOR)
-       delta_t = t_wall - pf%pf_timers%t_predictor
+       t_prev=pf%pf_runtimes%t_predictor
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_predictor=pf%pf_runtimes%t_predictor + delta_t
     case(T_ITERATION)
-       delta_t = t_wall - pf%pf_timers%t_iteration       
+       t_prev=pf%pf_timers%t_iteration       
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_iteration=pf%pf_runtimes%t_iteration + delta_t 
     case(T_STEP)
-       delta_t = t_wall - pf%pf_timers%t_step       
+       t_prev=pf%pf_timers%t_step       
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_step=pf%pf_runtimes%t_step + delta_t 
     case(T_HOOKS)
-       delta_t = t_wall - pf%pf_timers%t_hooks(l)       
+       t_prev=pf%pf_timers%t_hooks(l)       
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_hooks(l)=pf%pf_runtimes%t_hooks(l) + delta_t   
     case(T_SWEEP)
-       delta_t = t_wall - pf%pf_timers%t_sweeps(l)      
+       t_prev=pf%pf_timers%t_sweeps(l)      
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_sweeps(l)=pf%pf_runtimes%t_sweeps(l) + delta_t     
     case(T_FEVAL)
-       delta_t = t_wall - pf%pf_timers%t_feval(l)      
+       t_prev=pf%pf_timers%t_feval(l)      
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_feval(l)=pf%pf_runtimes%t_feval(l) + delta_t     
     case(T_FCOMP)
-       delta_t = t_wall - pf%pf_timers%t_fcomp(l)      
+       t_prev=pf%pf_timers%t_fcomp(l)      
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_fcomp(l)=pf%pf_runtimes%t_fcomp(l) + delta_t     
     case(T_AUX)
-       delta_t = t_wall - pf%pf_timers%t_aux(l)      
+       t_prev=pf%pf_timers%t_aux(l)      
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_aux(l)=pf%pf_runtimes%t_aux(l) + delta_t     
     case(T_BROADCAST)
-       delta_t = t_wall - pf%pf_timers%t_broadcast
+       t_prev=pf%pf_timers%t_broadcast
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_broadcast=pf%pf_runtimes%t_broadcast + delta_t   
     case(T_RESIDUAL)
-       delta_t = t_wall - pf%pf_timers%t_residual(l)       
+       t_prev=pf%pf_timers%t_residual(l)       
+       delta_t = t_wall - t_prev       
        pf%pf_runtimes%t_residual(l)=pf%pf_runtimes%t_residual(l) + delta_t   
     case(T_INTERPOLATE)
-       delta_t = t_wall - pf%pf_timers%t_interpolate(l)       
+       t_prev=pf%pf_timers%t_interpolate(l)       
+       delta_t = t_wall - t_prev       
        pf%pf_runtimes%t_interpolate(l)=pf%pf_runtimes%t_interpolate(l) + delta_t   
     case(T_RESTRICT)
-       delta_t = t_wall - pf%pf_timers%t_restrict(l)       
+       t_prev=pf%pf_timers%t_restrict(l)       
+       delta_t = t_wall - t_prev       
        pf%pf_runtimes%t_restrict(l)=pf%pf_runtimes%t_restrict(l) + delta_t    
     case(T_WAIT)
-       delta_t = t_wall - pf%pf_timers%t_wait(l)       
+       t_prev=pf%pf_timers%t_wait(l)       
+       delta_t = t_wall - t_prev       
        pf%pf_runtimes%t_wait(l)=pf%pf_runtimes%t_wait(l) + delta_t     
     case(T_SEND)
-       delta_t = t_wall - pf%pf_timers%t_send(l)       
+       t_prev=pf%pf_timers%t_send(l)       
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_send(l)=pf%pf_runtimes%t_send(l) + delta_t     
     case(T_RECEIVE)
-       delta_t = t_wall - pf%pf_timers%t_receive(l)       
+       t_prev=pf%pf_timers%t_receive(l)       
+       delta_t = t_wall - t_prev
        pf%pf_runtimes%t_receive(l)=pf%pf_runtimes%t_receive(l) + delta_t      
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',timer)
@@ -163,10 +179,10 @@ contains
 
     if (pf%save_timings .eq. 3) then
        write(*, '("timer:",a16,", rank: ",i3,", step: ",i4, ", level: ", i3,' &
-            // '", iter: ",i3, " Current t: ",f23.8, " Delta t: ",f23.8)') &
+            // '", iter: ",i3, " Current t: ",f20.8, " Elapse_begin: ",f20.8, " Elapse_end ",f20.8, " Delta t: ",f20.8)') &
             timer_names(timer), pf%rank, &
-            pf%state%step, pf%state%level_index, pf%state%iter,  &
-            t_wall,delta_t
+            pf%state%step, l, pf%state%iter,  &
+            t_wall,t_prev-pf%pf_timers%t_total,t_wall-pf%pf_timers%t_total,delta_t
     end if
 
   end subroutine pf_stop_timer

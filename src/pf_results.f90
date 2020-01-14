@@ -257,12 +257,12 @@ contains
     !  output timings
     open(iout, file=trim(fullname), form='formatted')
     write(iout,*) '{'
-    write(iout,"(A24,e12.6,A1)")  '"total" :',       pf%pf_runtimes%t_total, ','
+    write(iout,"(A24,e14.6,A1)")  '"total" :',       pf%pf_runtimes%t_total, ','
     if (pf%save_timings > 1) then
-       write(iout,"(A24,e12.6,A1)")  '"predictor" :',   pf%pf_runtimes%t_predictor, ','
-       write(iout,"(A24,e12.6,A1)")  '"iteration" :',   pf%pf_runtimes%t_iteration, ','
-       write(iout,"(A24,e12.6,A1)")  '"broadcast" :',   pf%pf_runtimes%t_broadcast, ','
-       write(iout,"(A24,e12.6,A1)")  '"step" :',        pf%pf_runtimes%t_step, ','
+       write(iout,"(A24,e14.6,A1)")  '"predictor" :',   pf%pf_runtimes%t_predictor, ','
+       write(iout,"(A24,e14.6,A1)")  '"iteration" :',   pf%pf_runtimes%t_iteration, ','
+       write(iout,"(A24,e14.6,A1)")  '"broadcast" :',   pf%pf_runtimes%t_broadcast, ','
+       write(iout,"(A24,e14.6,A1)")  '"step" :',        pf%pf_runtimes%t_step, ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_hooks(1:nlev),nlev))
        write(iout,"(A24,A60,A1)")  '"hooks" :', adjustl(strng), ','
        strng=trim(convert_real_array(pf%pf_runtimes%t_sweeps(1:nlev),nlev))
