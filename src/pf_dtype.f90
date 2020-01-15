@@ -34,7 +34,30 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_ITERATING = 1
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
+  integer, parameter :: PF_NUM_TIMERS = 16
 
+  !>  Type for storing timings  later output
+  type :: pf_timer_t
+     real(pfdp) :: timers(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0
+     real(pfdp) :: runtimes(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0
+     real(pfdp) :: t_total= 0.0_pfdp
+     real(pfdp) :: t_predictor= 0.0_pfdp
+     real(pfdp) :: t_iteration= 0.0_pfdp
+     real(pfdp) :: t_broadcast = 0.0_pfdp
+     real(pfdp) :: t_step= 0.0_pfdp
+     real(pfdp) :: t_hooks(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_sweeps(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_aux(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_residual(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_interpolate(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_restrict(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_wait(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_send(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_receive(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_feval(PF_MAXLEVS) = 0.0_pfdp
+     real(pfdp) :: t_fcomp(PF_MAXLEVS) = 0.0_pfdp
+  end type pf_timer_t
+  
   !>  The type that holds the state of the system
   type, bind(c) :: pf_state_t
     real(pfdp) :: t0  !!  Time at beginning of this time step
@@ -245,27 +268,6 @@ module pf_mod_dtype
 
   end type pf_results_t
 
-  !>  Type for storing timings  later output
-  type :: pf_timer_t
-     real(pfdp) :: t_total= 0.0_pfdp
-     real(pfdp) :: t_predictor= 0.0_pfdp
-     real(pfdp) :: t_iteration= 0.0_pfdp
-     real(pfdp) :: t_broadcast = 0.0_pfdp
-     real(pfdp) :: t_step= 0.0_pfdp
-     real(pfdp) :: t_hooks(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_sweeps(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_aux(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_residual(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_interpolate(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_restrict(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_wait(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_send(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_receive(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_feval(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_fcomp(PF_MAXLEVS) = 0.0_pfdp
-
-  end type pf_timer_t
-  
 
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t

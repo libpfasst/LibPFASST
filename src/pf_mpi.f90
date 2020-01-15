@@ -29,6 +29,7 @@ contains
 
     pf_comm%comm = mpi_comm       !! assign communicator
     
+    
     !> assign number of processors
     call mpi_comm_size(mpi_comm, pf_comm%nproc, ierror)
     

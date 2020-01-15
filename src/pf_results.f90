@@ -240,7 +240,7 @@ contains
     character(len = 256   ) :: fullname  !!  output file name for runtimes
     character(len = 128   ) :: datpath  !!  directory path
     character(len = 128   ) :: strng      !  used for string conversion
-    integer :: istat,j, iout,system,nlev
+    integer :: istat,j, iout,system,nlev,k,kmax
 
     datpath = trim(this%datpath) // '/runtimes/'
     istat= system('mkdir -p '// trim(datpath))
@@ -257,36 +257,18 @@ contains
     !  output timings
     open(iout, file=trim(fullname), form='formatted')
     write(iout,*) '{'
-    write(iout,"(A24,e14.6,A1)")  '"total" :',       pf%pf_runtimes%t_total, ','
+    kmax=1
+    if (pf%save_timings > 1) kmax=5
+
+    do k=1,kmax
+       write(iout,"(A24,A1,e14.6,A1)")  timer_names(k), ':', pf%pf_timers%runtimes(k,1), ','
+    end do
     if (pf%save_timings > 1) then
-       write(iout,"(A24,e14.6,A1)")  '"predictor" :',   pf%pf_runtimes%t_predictor, ','
-       write(iout,"(A24,e14.6,A1)")  '"iteration" :',   pf%pf_runtimes%t_iteration, ','
-       write(iout,"(A24,e14.6,A1)")  '"broadcast" :',   pf%pf_runtimes%t_broadcast, ','
-       write(iout,"(A24,e14.6,A1)")  '"step" :',        pf%pf_runtimes%t_step, ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_hooks(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"hooks" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_sweeps(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"sweeps" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_interpolate(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"interpolate" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_restrict(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"restrict" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_send(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"wait" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_wait(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"send" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_receive(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"receive" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_residual(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"residual" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_feval(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"feval" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_fcomp(1:nlev),nlev))
-       write(iout,"(A24,A60,A1)")  '"fcomp" :', adjustl(strng), ','
-       strng=trim(convert_real_array(pf%pf_runtimes%t_aux(1:nlev),nlev))
-       write(iout,"(A24,A60)")  '"aux" :', adjustl(strng)
+       do k=kmax+1,PF_NUM_TIMERS
+          strng=trim(convert_real_array(pf%pf_timers%runtimes(k,1:nlev),nlev))
+          write(iout,"(A24,A1,A60,A1)")  timer_names(k),':', adjustl(strng), ','
+       end do
     end if
-    
     write(iout,*) '}'
     
     close(iout)

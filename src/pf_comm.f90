@@ -140,7 +140,7 @@ contains
     if(pf%rank == pf%comm%nproc-1 .and. dir == 1) return
 
     ierror = 0
-    ! need to wait here
+    ! need to wait here to make sure last non-blocking send is done
     if(blocking .eqv. .false.) then
        if (pf%save_timings > 1) call pf_start_timer(pf, T_WAIT, level%index)
        call pf_mpi_wait(pf, level%index, ierror)
@@ -165,18 +165,16 @@ contains
     end if
 
      ierror = 0
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status, SIZE(level%send), 'send buffer=',level%send
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SEND, level%index)
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status
-     if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%send), 'send buffer=',level%send
-
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
+   if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
     if (ierror /= 0) then
        print *, 'Rank=',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during send',ierror)
    endif
 
    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking
-   if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
   end subroutine pf_send
 
   !>  Subroutine to recieve the solution from the previous processor
@@ -199,10 +197,9 @@ contains
                                   .and. dir == 1) then
        source=pf%rank-1
        if (pf%save_timings > 1) call pf_start_timer(pf, T_RECEIVE, level%index)
-       
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
-
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
+
        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
 
        if (ierror .eq. 0) then
@@ -215,8 +212,8 @@ contains
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                      .and. dir == 2) then
        source=pf%rank+1
+
        if (pf%save_timings > 1) call pf_start_timer(pf, T_RECEIVE, level%index)
-       
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
        if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv

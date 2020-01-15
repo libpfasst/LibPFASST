@@ -30,6 +30,7 @@ contains
     integer :: nproc  !!  Total number of processors
     integer :: nsteps_loc  !!  local number of time steps
     real(pfdp) :: tend_loc !!  The final time of run
+    integer :: ierr 
 
 
     ! make a local copy of nproc
@@ -58,6 +59,9 @@ contains
 
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0)  call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
+
+    !>  Try to sync everyone
+    call mpi_barrier(pf%comm%comm, ierr)
 
     if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
@@ -229,17 +233,17 @@ contains
        nsteps_c= c_lev%ulevel%stepper%nsteps*(pf%rank)  
        dt_all=dt*real(pf%rank,pfdp)
        t0k=t0-real(pf%rank,pfdp)*dt  ! The actual initial time (usually 0)
-       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,c_lev%qend,dt_all, nsteps_c)
-       call c_lev%q0%copy(c_lev%qend)           
+       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,f_lev%q0,dt_all, nsteps_c)
     end if
     ! Now do one time step
     nsteps_c= c_lev%ulevel%stepper%nsteps
-    call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, c_lev%q0,c_lev%qend,dt, nsteps_c)    
+    call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, f_lev%q0,f_lev%qend,dt, nsteps_c)    
 
-    ! Save the coarse level value
-    call c_lev%Q(1)%copy(c_lev%qend, flags=0)     
+    ! Save the coarse level value to be used in parareal iteration
+    call c_lev%Q(1)%copy(f_lev%qend, flags=0)     
     ! Save the fine level value
-    call f_lev%qend%copy(c_lev%qend, flags=0)     
+    call f_lev%qend%copy(f_lev%qend, flags=0)     
+    call c_lev%q0%copy(f_lev%q0, flags=0)     
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
 
@@ -276,56 +280,49 @@ contains
     nsteps_c= c_lev%ulevel%stepper%nsteps
     nsteps_f= f_lev%ulevel%stepper%nsteps  
 
-    !  Move old coarse propagator from Q(2) to Q(1)
-    call f_lev%q0%copy(c_lev%q0, flags=0)       !  Get fine initial condition
-
-    !  Do fine steps with old initial condition
+    !  Save the old value of q0 and qend so that we can compute difference
     if (pf%rank /= 0) then
-       call f_lev%q0%copy(c_lev%q0, flags=0)       !  Get fine initial condition
+       call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
     end if
-    !  Step on fine and store in coarse qend
+    call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
+
+    !  Step on fine and store in  fine qend 
     level_index=2
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
-    call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%qend, dt, nsteps_f)
+    call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,f_lev%qend, dt, nsteps_f)
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
-    !  Subtract the old coarse
-    call c_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1))
-    
-    ! Get a new initial condition on coarse (will be put in q0)
-    call pf_recv(pf, c_lev, 10000+iteration, .true.)
 
-    !  Step on coarse and save in Q(2)
+    !  Subtract the old coarse to get parareal correction  in c_lev%qend
+    call f_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1))
+    
+    ! Get a new initial condition on fine (will be put in q0)
+    call pf_recv(pf, f_lev, 10000+iteration, .true.)
+
+    !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
-    call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, c_lev%q0,c_lev%Q(2), dt, nsteps_c)
+    call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
 
-    !  Finishe the correction new update (store in coarse qend)
-    call c_lev%qend%axpy(1.0_pfdp,c_lev%Q(2)) !       
+    !  Finish the parareal update (store in coarse qend) F_old-G_old+G_new
+    call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
-    !  Send coarse forward  (nonblocking)
-    call pf_send(pf, c_lev, 10000+iteration, .false.)
+    !  Send new solution  forward  (nonblocking)
+    call pf_send(pf, f_lev, 10000+iteration, .false.)
 
-    ! Save the result of the coarse sweep
-    call c_lev%Q(1)%copy(c_lev%Q(2), flags=0)     
+    !  Complete the delta_q0 on coarse with new initial condition
+    if (pf%rank /= 0) then
+       call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
+    end if
 
-    
-    !  Compute q0 jump
-    call f_lev%delta_q0%copy(f_lev%q0, flags=0)
-    call f_lev%delta_q0%axpy(-1.0_pfdp,c_lev%q0, flags=0)
-    f_lev%max_delta_q0=f_lev%delta_q0%norm(flags=0)
+    !  Complete the jump at the end
+    call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
 
-    !  Compute the jump at the end
-    ! correct coarse level solution at end (the parareal correction)
-    call f_lev%qend%axpy(-1.0_pfdp,c_lev%qend)    
-    f_lev%residual=f_lev%qend%norm(flags=0)
-
-    !  Save the final solution of this iteration in fine level qend
-    call f_lev%qend%copy(c_lev%qend, flags=0)
-
-    !  Save jumps 
+    !  Save jumps
+    c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
+    f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
     call pf_set_resid(pf,2,f_lev%residual)
-    call pf_set_delta_q0(pf,2,f_lev%max_delta_q0)
+    call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
 
   end subroutine pf_parareal_v_cycle
   
