@@ -9,31 +9,7 @@ USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
 
-#  Make true for intel on cori
-USE_INTEL=FALSE  
-
-#  Set some compiler flags
-AR = ar rcs
-ifeq ($(USE_INTEL),TRUE)
-FC = ftn
-CC = ftn
-FFLAGS = -Ibuild -module include -cpp
-ifeq ($(DEBUG),TRUE)
-FFLAGS +=   -g 
-endif
-else
-
-
-FC = mpifort
-CC = mpicc
-FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
-ifeq ($(DEBUG),TRUE)
-FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
-else
-FFLAGS += -O3 
-endif
-
-endif
+include $(LIBPFASST)/Makefile.local
 
 
 VPATHS = $(LIBPFASST)/src

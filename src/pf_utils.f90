@@ -318,7 +318,7 @@ contains
 
     character(len=128)::  f_string  !  format string
     integer i
-    write(f_string,"(*(e12.6,:,','))") q
+    write(f_string,"(*(e15.6,:,','))") q
     q_string=adjustl('['//trim(f_string)//']')
 
   end function convert_real_array
