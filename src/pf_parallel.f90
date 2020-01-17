@@ -34,6 +34,7 @@ contains
     integer :: nproc  !!  Total number of processors
     integer :: nsteps_loc  !!  local number of time steps
     real(pfdp) :: tend_loc !!  The final time of run
+    integer :: ierr
 
 
     ! make a local copy of nproc
@@ -63,7 +64,11 @@ contains
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
 
+    !>  Try to sync everyone
+    call mpi_barrier(pf%comm%comm, ierr)
+
     if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+
     if (present(qend)) then
        call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)
     else
