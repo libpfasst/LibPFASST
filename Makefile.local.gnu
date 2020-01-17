@@ -1,6 +1,9 @@
 #  Compilers for gnu Linux
 FC = mpifort
 CC = mpicc
+
+AR=ar rcs
+
 FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
 
 ifeq ($(DEBUG),TRUE)
