@@ -48,7 +48,7 @@ contains
        print *,q_ex
        errd = maxval(abs(q_diag-q_ex))
        
-       print *,'Rank ',pf%rank,'Nsteps ',pf%state%step+1,' Iter ',pf%state%iter,' error at end=',errd, 'totTime=',pf%pf_runtimes%t_total, 'Nnodes=',pf%nnodes(level_index), 'qtype=',pf%qtype
+       print *,'Rank ',pf%rank,'Nsteps ',pf%state%step+1,' Iter ',pf%state%iter,' error at end=',errd, 'Nnodes=',pf%nnodes(level_index), 'qtype=',pf%qtype
     endif
     
     deallocate(yexact%array)
