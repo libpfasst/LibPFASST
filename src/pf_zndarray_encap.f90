@@ -240,7 +240,7 @@ contains
     class(pf_zndarray_t), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
 
-    print*, this%flatarray(1:2)
+    print*, this%flatarray(1)
   end subroutine zndarray_eprint
 
 

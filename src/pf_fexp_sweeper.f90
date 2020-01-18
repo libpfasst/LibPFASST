@@ -160,8 +160,10 @@ module pf_mod_fexp_sweeper
     ! =================================================================================
 
     subroutine pf_f_eval_p(this, y, t, level_index, f)
+
       import pf_fexp_sweeper_t, pf_encap_t, pfdp
       class(pf_fexp_sweeper_t),   intent(inout) :: this
+
       class(pf_encap_t), intent(in)    :: y
       real(pfdp),        intent(in)    :: t
       integer,           intent(in)    :: level_index

@@ -50,6 +50,7 @@ module pf_mod_erkstepper
      class(pf_encap_t), allocatable  :: PFY           !!  temp storage variable for storing phi products with stage derivatives         
      class(pf_encap_t), allocatable  :: y_n           !!  Local y0
      class(pf_encap_t), allocatable  :: y_np1         !!  Local yend
+
      class(pf_encap_t), pointer      :: F(:,:)        !!  Pointer to F
 
    contains
@@ -300,6 +301,7 @@ contains
 !!$        enddo
 
 
+
         npieces = 1
         nstages = s
         this%nstages = nstages
@@ -332,7 +334,6 @@ contains
    call lev%ulevel%factory%destroy_single(this%PFY)
    call lev%ulevel%factory%destroy_array(lev%Frkflt)
   end subroutine erk_destroy
-
 
 
   !> Perform N steps of ark on level level_index and set yend appropriately.
@@ -392,6 +393,7 @@ contains
     end do ! End Loop over time steps
 
     call yend%copy(this%y_np1)
+
   end subroutine erk_do_n_steps
   
 end module pf_mod_erkstepper

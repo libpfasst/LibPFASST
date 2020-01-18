@@ -9,6 +9,7 @@ USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
 
+
 include $(LIBPFASST)/Makefile.local
 
 
@@ -60,12 +61,15 @@ FSRC = src/pfasst.f90 \
        src/pf_verlet_sweeper.f90 \
        src/pf_fexp_sweeper.f90
        #       pf_amisdc.f90 \
+#       src/pf_erkstepper.f90 \
 #       pf_amisdcQ.f90 \
 
 
 #  Before using petsc, one must set the environment variables
 #  PETSC_DIR and PETSC_ARCH
 #  These are displayed at the end of the petsc configuration step
+
+
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
 FSRC+= pf_petscVec_encap.f90
