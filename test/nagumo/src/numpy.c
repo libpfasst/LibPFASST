@@ -20,7 +20,7 @@ void ndarray_dump_numpy(char *dname, char *fname, char endian[5], int dim, int *
   FILE*           fp;
   char            errmsg[BUFLEN];
   char            header[256*256];
-  char            buf[BUFLEN], shp[BUFLEN];
+  char            buf[128], shp[BUFLEN];
 
   /* open output file */
   snprintf(buf, BUFLEN, "%s/%s", dname, fname);

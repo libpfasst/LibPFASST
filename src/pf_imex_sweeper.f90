@@ -42,6 +42,7 @@ module pf_mod_imex_sweeper
      procedure :: integrate  => imex_integrate
      procedure :: residual   => imex_residual
      procedure :: spreadq0   => imex_spreadq0
+     procedure :: compute_dt => imex_compute_dt
      procedure :: evaluate_all => imex_evaluate_all
      procedure :: destroy   => imex_destroy
      procedure :: imex_destroy
@@ -308,7 +309,7 @@ contains
                call fintSDC(n)%axpy(dt*lev%sdcmats%qmat(n,m), fSDC(m,2))
        end do
     end do
-       
+
 
 !    if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
 !    if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
@@ -322,8 +323,33 @@ contains
     integer,           intent(in)    :: level_index  !!  level on which to initialize
     real(pfdp),        intent(in   ) :: dt           !!  Time step
     integer, intent(in), optional   :: flags
+
+    integer :: m
+    type(pf_level_t), pointer :: lev        !  Current level
+    lev => pf%levels(level_index)   !  Assign level pointer
+
+    call imex_integrate(this,pf,level_index, lev%Q, lev%F, dt, lev%I, flags)
+    !> add tau if it exists
+    if (lev%index < pf%state%finest_level) then    
+       do m = 1, lev%nnodes-1
+          call lev%I(m)%axpy(1.0_pfdp, lev%tauQ(m), flags)
+       end do
+    end if
+    do m = 1, lev%nnodes-1      
+       call lev%R(m)%copy(lev%I(m))
+       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
+       if (present(flags)) then
+          if (flags .eq. 0) then
+             call lev%R(m)%axpy(1.0_pfdp, lev%q0)
+          else
+             call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+          end if
+       else
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       end if
+    end do
     
-    call pf_generic_residual(this, pf, level_index, dt)
+!    call pf_generic_residual(this, pf, level_index, dt)
   end subroutine imex_residual
 
 
@@ -336,6 +362,19 @@ contains
 
     call pf_generic_spreadq0(this, pf,level_index, t0)
   end subroutine imex_spreadq0
+  subroutine imex_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_imex_sweeper_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine imex_compute_dt
 
   !> Subroutine to evaluate function value at node m
   subroutine imex_evaluate(this, pf,level_index, t, m, flags, step)

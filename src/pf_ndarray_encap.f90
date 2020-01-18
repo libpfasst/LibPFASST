@@ -14,7 +14,7 @@
 !!   allocate(pf%levels(1)%lev_shape(2))
 !!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
+!! The helper routine get_array, etc can be used to
 !! extract pointers to the encapsulated array without
 !! performing any copies.
 !!
@@ -24,7 +24,7 @@ module pf_mod_ndarray
   use pf_mod_stop
   implicit none
 
-  !>  Type to create and destroy N-dimenstional arrays
+  !>  Type to create and destroy N-dimensional arrays
   type, extends(pf_factory_t) :: pf_ndarray_factory_t
    contains
      procedure :: create_single  => ndarray_create_single
@@ -32,7 +32,6 @@ module pf_mod_ndarray
      procedure :: destroy_single => ndarray_destroy_single
      procedure :: destroy_array => ndarray_destroy_array
   end type pf_ndarray_factory_t
-  
 
   !>  N-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_ndarray_t
@@ -47,9 +46,12 @@ module pf_mod_ndarray
      procedure :: unpack => ndarray_unpack
      procedure :: axpy => ndarray_axpy
      procedure :: eprint => ndarray_eprint
+     procedure, private  :: get_array_1d  ,get_array_2d,get_array_3d,get_array_4d
+     generic :: get_array => get_array_1d ,get_array_2d,get_array_3d,get_array_4d
   end type pf_ndarray_t
-
+  
 contains
+
   function cast_as_ndarray(encap_polymorph) result(ndarray_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
     type(pf_ndarray_t), pointer :: ndarray_obj
@@ -59,12 +61,12 @@ contains
        ndarray_obj => encap_polymorph
     end select
   end function cast_as_ndarray
-
+  
   !>  Subroutine to allocate the array and set the size parameters
   subroutine ndarray_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: shape_in(:)
-
+    
     integer :: ierr
     select type (q)
     class is (pf_ndarray_t)
@@ -74,9 +76,10 @@ contains
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
+       q%flatarray = 0.0_pfdp       
     end select
   end subroutine ndarray_build
-
+  
   !> Subroutine to  create a single array
   subroutine ndarray_create_single(this, x, level_index, lev_shape)
     class(pf_ndarray_factory_t), intent(inout)              :: this
@@ -88,6 +91,7 @@ contains
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
     
     call ndarray_build(x, lev_shape)
+    
   end subroutine ndarray_create_single
 
   !> Subroutine to create an array of arrays
@@ -98,12 +102,14 @@ contains
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
     integer :: i,ierr
+    
     allocate(pf_ndarray_t::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
     
     do i = 1, n
        call ndarray_build(x(i), lev_shape)
     end do
+    
   end subroutine ndarray_create_array
 
   !>  Subroutine to destroy array
@@ -112,17 +118,15 @@ contains
     type(pf_ndarray_t), pointer :: ndarray_obj
 
     ndarray_obj => cast_as_ndarray(encap)
-
     deallocate(ndarray_obj%arr_shape)
     deallocate(ndarray_obj%flatarray)
-
     nullify(ndarray_obj)
 
   end subroutine ndarray_destroy
 
   !> Subroutine to destroy an single array
   subroutine ndarray_destroy_single(this, x)
-    class(pf_ndarray_factory_t), intent(inout)              :: this
+    class(pf_ndarray_factory_t), intent(inout)   :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
 
     select type (x)
@@ -131,14 +135,15 @@ contains
        deallocate(x%flatarray)
     end select
     deallocate(x)
+    
   end subroutine ndarray_destroy_single
 
 
   !> Subroutine to destroy an array of arrays
   subroutine ndarray_destroy_array(this, x)
-    class(pf_ndarray_factory_t), intent(inout)              :: this
-    class(pf_encap_t),      intent(inout),allocatable :: x(:)
-    integer                                            :: i
+    class(pf_ndarray_factory_t), intent(inout)  :: this
+    class(pf_encap_t), intent(inout),allocatable :: x(:)
+    integer :: i
 
     select type(x)
     class is (pf_ndarray_t)
@@ -148,13 +153,14 @@ contains
        end do
     end select
     deallocate(x)
+    
   end subroutine ndarray_destroy_array
 
 
   !>  The following are the base subroutines that all encapsulations must provide
   !!
   
-  !> Subroutine to set array to a scalare  value.
+  !> Subroutine to set array to a scalar  value.
   subroutine ndarray_setval(this, val, flags)
     class(pf_ndarray_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
@@ -183,7 +189,7 @@ contains
     z = this%flatarray
   end subroutine ndarray_pack
 
-  !> Subroutine to unpack a flatarray after receiving
+  !> Subroutine to unpack to a flatarray after receiving
   subroutine ndarray_unpack(this, z, flags)
     class(pf_ndarray_t), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
@@ -234,7 +240,31 @@ contains
     endif
   end subroutine ndarray_eprint
 
-
+  !>  Helper function to return the array part, these are called with get_array
+  subroutine get_array_1d(this,r,flags) 
+    class(pf_ndarray_t), target, intent(in) :: this
+    real(pfdp), pointer, intent(inout) :: r(:)
+    integer,    intent(in   ), optional :: flags
+    r => this%flatarray
+  end subroutine get_array_1d
+  subroutine get_array_2d(this,r,flags) 
+    class(pf_ndarray_t), target, intent(in) :: this
+    real(pfdp), pointer, intent(inout) :: r(:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2)) => this%flatarray
+  end subroutine get_array_2d
+  subroutine get_array_3d(this,r,flags) 
+    class(pf_ndarray_t), target, intent(in) :: this
+    real(pfdp), pointer, intent(inout) :: r(:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3)) => this%flatarray
+  end subroutine get_array_3d
+  subroutine get_array_4d(this,r,flags) 
+    class(pf_ndarray_t), target, intent(in) :: this
+    real(pfdp), pointer, intent(inout) :: r(:,:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3),1:this%arr_shape(4)) => this%flatarray
+  end subroutine get_array_4d
 
   !>  Helper function to return the array part
   function get_array1d(x,flags) result(r)
@@ -270,11 +300,5 @@ contains
        r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray
     end select
   end function get_array3d
-  
-
-
-
-
-
 
 end module pf_mod_ndarray

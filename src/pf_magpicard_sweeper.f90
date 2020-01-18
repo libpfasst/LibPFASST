@@ -30,6 +30,7 @@ module pf_mod_magnus_picard
      procedure :: destroy   => magpicard_destroy
      procedure :: magpicard_destroy     
      procedure :: magpicard_initialize
+     procedure :: compute_dt => magpicard_compute_dt
   end type pf_magpicard_t
 
   interface
@@ -62,6 +63,15 @@ module pf_mod_magnus_picard
        class(pf_encap_t), intent(inout) :: sol_tn
        integer, intent(in) :: level_index
      end subroutine pf_propagate_solution_p
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       !>  Evaluate f_piece(y), where piece is one or two 
+       import pf_magpicard_t, pf_encap_t, pfdp
+       class(pf_magpicard_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
   end interface
 contains
 
@@ -318,4 +328,18 @@ contains
        call pf_stop(__FILE__,__LINE__,'unsupported qtype ',qtype)
     endif
   end subroutine get_commutator_coefs
+  subroutine magpicard_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_magpicard_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine magpicard_compute_dt
+
 end module pf_mod_magnus_picard

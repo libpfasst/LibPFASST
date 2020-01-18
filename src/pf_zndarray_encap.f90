@@ -14,7 +14,7 @@
 !!   allocate(pf%levels(1)%lev_shape(2))
 !!   pf%levels(1)%lev_shape = [ 3, 10 ]
 !!
-!! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
+!! The helper routine get_array, etc can be used to
 !! extract pointers to the encapsulated array  without
 !! performing any copies.
 !!
@@ -23,53 +23,50 @@ module pf_mod_zndarray
   use pf_mod_dtype
   use pf_mod_stop
   implicit none
-
+  
   !>  Factory for making zndarray
   type, extends(pf_factory_t) :: pf_zndarray_factory_t
-  contains
+   contains
      procedure :: create_single => zndarray_create_single
      procedure :: create_array => zndarray_create_array
      procedure :: destroy_single => zndarray_destroy_single
      procedure :: destroy_array => zndarray_destroy_array
-
   end type pf_zndarray_factory_t
   
-  !>  Complex ndarray
+  !>  Complex N-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_zndarray_t
      integer :: ndim
      integer,    allocatable :: arr_shape(:)     
-    complex(pfdp), allocatable :: flatarray(:)
-  contains
-    procedure :: setval => zndarray_setval
-    procedure :: copy => zndarray_copy
-    procedure :: norm => zndarray_norm
-    procedure :: pack => zndarray_pack
-    procedure :: unpack => zndarray_unpack
-    procedure :: axpy => zndarray_axpy
-    procedure :: eprint => zndarray_eprint
-    procedure, private  :: get_array_1d  ,get_array_2d,get_array_3d,get_array_4d
-    generic :: get_array => get_array_1d ,get_array_2d,get_array_3d,get_array_4d
-    
+     complex(pfdp), allocatable :: flatarray(:)
+   contains
+     procedure :: setval => zndarray_setval
+     procedure :: copy => zndarray_copy
+     procedure :: norm => zndarray_norm
+     procedure :: pack => zndarray_pack
+     procedure :: unpack => zndarray_unpack
+     procedure :: axpy => zndarray_axpy
+     procedure :: eprint => zndarray_eprint
+     procedure, private  :: get_array_1d  ,get_array_2d,get_array_3d,get_array_4d
+     generic :: get_array => get_array_1d ,get_array_2d,get_array_3d,get_array_4d
   end type pf_zndarray_t
-
-  contains
-
+  
+contains
+  
   function cast_as_zndarray(encap_polymorph) result(zndarray_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
     type(pf_zndarray_t), pointer :: zndarray_obj
-
+    
     select type(encap_polymorph)
     type is (pf_zndarray_t)
        zndarray_obj => encap_polymorph
     end select
   end function cast_as_zndarray
-
+  
   !> Allocates complex ndarray
   subroutine zndarray_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
     integer,           intent(in   ) :: shape_in(:)
-
-    type(pf_zndarray_t), pointer :: zndarray_obj
+    
     integer :: ierr
     select type (q)
     class is (pf_zndarray_t)
@@ -80,24 +77,9 @@ module pf_mod_zndarray
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
        q%flatarray = cmplx(0.0, 0.0,pfdp)
-       
     end select
-
-    nullify(zndarray_obj)
   end subroutine zndarray_build
-
-  subroutine zndarray_destroy(encap)
-    class(pf_encap_t), intent(inout) :: encap
-    type(pf_zndarray_t), pointer :: zndarray_obj
-
-
-    zndarray_obj => cast_as_zndarray(encap)
-    deallocate(zndarray_obj%arr_shape)
-    deallocate(zndarray_obj%flatarray)
-    nullify(zndarray_obj)
-
-  end subroutine zndarray_destroy
-
+  
   !> Wrapper routine for allocation of a single zndarray type array
   subroutine zndarray_create_single(this, x, level_index,  lev_shape)
     class(pf_zndarray_factory_t), intent(inout) :: this
@@ -122,7 +104,7 @@ module pf_mod_zndarray
     integer :: i,ierr
 
     allocate(pf_zndarray_t::x(n),stat=ierr)
-    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                      
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
     
     do i = 1, n
        call zndarray_build(x(i), lev_shape)
@@ -130,6 +112,19 @@ module pf_mod_zndarray
 
   end subroutine zndarray_create_array
 
+  !>  Subroutine to destroy array
+  subroutine zndarray_destroy(encap)
+    class(pf_encap_t), intent(inout) :: encap
+    type(pf_zndarray_t), pointer :: zndarray_obj
+    
+    zndarray_obj => cast_as_zndarray(encap)
+    deallocate(zndarray_obj%arr_shape)
+    deallocate(zndarray_obj%flatarray)
+    nullify(zndarray_obj)
+
+  end subroutine zndarray_destroy
+
+  !> Subroutine to destroy an single array
   subroutine zndarray_destroy_single(this, x)
     class(pf_zndarray_factory_t), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
@@ -145,7 +140,7 @@ module pf_mod_zndarray
 
   !> Wrapper routine for looped allocation of many zndarray type arrays
   subroutine zndarray_destroy_array(this, x)
-    class(pf_zndarray_factory_t), intent(inout)       :: this
+    class(pf_zndarray_factory_t), intent(inout)  :: this
     class(pf_encap_t), intent(inout),allocatable :: x(:)
     integer :: i
 
@@ -160,8 +155,10 @@ module pf_mod_zndarray
     
   end subroutine zndarray_destroy_array
 
+  !>  The following are the base subroutines that all encapsulations must provide
+  !!
 
-  !> Set solution value.
+  !> Subroutine to set array to a scalar  value
   subroutine zndarray_setval(this, val, flags)
     class(pf_zndarray_t), intent(inout) :: this
     real(pfdp), intent(in) :: val
@@ -172,7 +169,7 @@ module pf_mod_zndarray
     this%flatarray = zval
   end subroutine zndarray_setval
 
-  !> Copy solution value.
+  !> Subroutine to copy an array
   subroutine zndarray_copy(this, src, flags)
     class(pf_zndarray_t), intent(inout) :: this
     class(pf_encap_t), intent(in) :: src
@@ -184,7 +181,7 @@ module pf_mod_zndarray
     this%flatarray =  zndarray_src%flatarray
   end subroutine zndarray_copy
 
-  !> Pack solution q into a flat array.
+  !> Subroutine to pack an array into a flat array for sending
   subroutine zndarray_pack(this, z,flags)
     class(pf_zndarray_t), intent(in) :: this
     real(pfdp), intent(out) :: z(:)
@@ -197,7 +194,7 @@ module pf_mod_zndarray
     end do
   end subroutine zndarray_pack
 
-  ! Unpack solution from a flat array.
+  !> Subroutine to unpack to a flatarray after receiving
   subroutine zndarray_unpack(this, z,flags)
     class(pf_zndarray_t), intent(inout) :: this
     real(pfdp), intent(in) :: z(:)
@@ -209,7 +206,7 @@ module pf_mod_zndarray
     enddo
   end subroutine zndarray_unpack
 
-  ! Compute norm of solution
+  ! Compute norm of array
   function zndarray_norm(this,flags) result (norm)
     class(pf_zndarray_t), intent(in) :: this
     integer,     intent(in   ), optional :: flags
@@ -218,7 +215,7 @@ module pf_mod_zndarray
     norm = maxval(abs(this%flatarray))
   end function zndarray_norm
 
-  ! Compute y = a x + y where a is a scalar and x and y are solutions.
+  ! Compute y = a x + y where a is a scalar and x and y are arrays
   subroutine zndarray_axpy(this, a, x, flags)
     class(pf_zndarray_t), intent(inout) :: this
     class(pf_encap_t), intent(in) :: x
@@ -247,7 +244,7 @@ module pf_mod_zndarray
   end subroutine zndarray_eprint
 
 
-  !>  Helper function to return the array part
+  !>  Helper function to return the array part, these are called with get_array
   subroutine get_array_1d(this,r,flags) 
     class(pf_zndarray_t), target, intent(in) :: this
     complex(pfdp), pointer, intent(inout) :: r(:)

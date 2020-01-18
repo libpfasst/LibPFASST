@@ -8,166 +8,100 @@ module pf_mod_timer
   use pf_mod_stop
   use pf_mod_mpi, only: MPI_Wtime
   implicit none
-!!$  ! if you add more timers here, make sure to update the timer def in pf_dtype.f90
-  character(len=14), parameter :: timer_names(16) = (/ &
-       'total       ',  &        ! 1
-       'predictor   ',  &        ! 2
-       'iteration   ',  &        ! 3
-       'hooks       ',  &        ! 4
-       'step        ',  &        ! 5
-       'residual    ',  &        ! 6
-       'broadcast   ',  &        ! 7
-       'interp      ',  &        ! 8
-       'restrict    ',  &        ! 9
-       'receive     ',  &        ! 10
-       'send        ',  &        ! 11
-       'wait        ',  &        ! 12
-       'sweep       ',  &        ! 13
-       'feval       ',  &        ! 14
-       'fcomp       ',  &        ! 15
-       'aux         '/)          ! 16
+  !!$  ! if you add more timers here, make sure to update the PF_NUM_TIMERS in pf_dtype.f90
+  character(len=10), parameter :: timer_names(PF_NUM_TIMERS) = (/ &
+       'total     ',  &   ! 1:  Total time to do all blocks
+       'predictor ',  &   ! 2:  Time in predictor   
+       'block     ',  &   ! 3:  Time for all blocks
+       'iteration ',  &   ! 4:  Time for all iterations 
+       'sweep     ',  &   ! 5:  Time for all sweeps (n-steps in parareal)
+       'feval     ',  &   ! 6:  Time for explicit function evaluations
+       'fcomp     ',  &   ! 7:  Time for implicit function evaluations
+       'residual  ',  &   ! 8:  Time for computing residuals
+       'interp    ',  &   ! 9:  Interpolation time
+       'restrict  ',  &   ! 10: Restricting time
+       'broadcast ',  &   ! 11: Time for broadcast (of initial conditions)
+       'receive   ',  &   ! 12: Time in receive in pf_comm
+       'send      ',  &   ! 13: Time in send in pf_comm
+       'wait      ',  &   ! 14: Time in wait in 
+       'pack      ',  &   ! 15: Time to pack solution
+       'unpack    ',  &   ! 16: Time to unpack solution
+       'hooks     ',  &   ! 17: Time in hooks routines
+       'aux       '/)     ! 18: Extra for whatever
 
+  ! Assign numbers to timer names
   integer, parameter :: &
        T_TOTAL       = 1,  &
        T_PREDICTOR   = 2,  &
-       T_ITERATION   = 3,  &
-       T_HOOKS       = 4,  &
-       T_STEP        = 5,  &
-       T_RESIDUAL    = 6,  &
-       T_BROADCAST   = 7,  &
-       T_INTERPOLATE = 8,  &
-       T_RESTRICT    = 9,  &
-       T_RECEIVE     = 10,  &
-       T_SEND        = 11,  &
-       T_WAIT        = 12,  &
-       T_SWEEP       = 13,  &  
-       T_FEVAL       = 14,  &  
-       T_FCOMP       = 15,  &  
-       T_AUX         = 16    
+       T_BLOCK       = 3,  &
+       T_ITERATION   = 4,  &
+       T_SWEEP       = 5,  &  
+       T_FEVAL       = 6,  &  
+       T_FCOMP       = 7,  &  
+       T_RESIDUAL    = 8,  &
+       T_INTERPOLATE = 9,  &
+       T_RESTRICT    = 10, &
+       T_BROADCAST   = 11, &
+       T_RECEIVE     = 12, &
+       T_SEND        = 13, &
+       T_WAIT        = 14, &
+       T_PACK        = 15, &
+       T_UNPACK      = 16, &
+       T_HOOKS       = 17, &
+       T_AUX         = 18    
   
 contains
   !>  Subroutine to start a timer
-  subroutine pf_start_timer(pf, timer, level_index)
+  subroutine pf_start_timer(pf, timer_index, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: timer
+    integer,           intent(in)    :: timer_index
     integer, optional, intent(in)    :: level_index
 
     double precision ::  t_wall
     integer :: l   !  Either the first index or level_index
     l=1
     if (present(level_index)) l=level_index
-    t_wall=MPI_Wtime()
-    select case(timer)
-    case(T_TOTAL)
-       pf%pf_timers%t_total=t_wall
-    case(T_PREDICTOR)
-       pf%pf_timers%t_predictor= t_wall
-    case(T_ITERATION)
-       pf%pf_timers%t_iteration= t_wall
-    case(T_STEP)
-       pf%pf_timers%t_step= t_wall
-    case(T_HOOKS)
-       pf%pf_timers%t_hooks(l) = t_wall
-    case(T_SWEEP)
-       pf%pf_timers%t_sweeps(l) = t_wall
-    case(T_FEVAL)
-       pf%pf_timers%t_feval(l) = t_wall
-    case(T_FCOMP)
-       pf%pf_timers%t_fcomp(l) = t_wall
-    case(T_AUX)
-       pf%pf_timers%t_aux(l) = t_wall
-    case(T_BROADCAST)
-       pf%pf_timers%t_broadcast = t_wall
-    case(T_RESIDUAL)
-       pf%pf_timers%t_residual(l) = t_wall
-    case(T_INTERPOLATE)
-       pf%pf_timers%t_interpolate(l) = t_wall
-    case(T_RESTRICT)
-       pf%pf_timers%t_restrict(l) = t_wall
-    case(T_WAIT)
-       pf%pf_timers%t_wait(l) = t_wall
-    case(T_SEND)
-       pf%pf_timers%t_send(l) = t_wall
-    case(T_RECEIVE)
-       pf%pf_timers%t_receive(l) = t_wall
-    case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',timer)
-    end select
+
+    pf%pf_timers%timers(timer_index,l) = MPI_Wtime()
+    if (pf%save_timings .eq. 3) then
+       write(*, '("start timer:",a10,", rank:",i3,", step:",i4,", level:",i1,", iter: ",i3, ' &
+            // '" Current t: ",f20.8, " Elapsed_time: ",f20.8)') &
+            timer_names(timer_index), pf%rank, pf%state%step, l, pf%state%iter,  &
+            pf%pf_timers%timers(timer_index,l),pf%pf_timers%timers(timer_index,l)-pf%pf_timers%timers(T_TOTAL,1)
+    end if
 
   end subroutine pf_start_timer
   
   !>  Subroutine to stop a timer
-  subroutine pf_stop_timer(pf, timer,level_index)
+  subroutine pf_stop_timer(pf, timer_index,level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    integer,           intent(in)    :: timer
+    integer,           intent(in)    :: timer_index
     integer, optional, intent(in)    :: level_index
 
-    double precision ::  t_wall,delta_t
+    double precision ::  t_wall  !  Current wall clock
+    double precision ::  t_prev  !  Time that timer was started (relative to T_TOTAL)
+    double precision ::  t_now   !  Current time relative to T_TOTAL)
+    double precision ::  delta_t !  Elapsed time for this time
     integer :: l   !  Either the first index or level_index
     l=1
     if (present(level_index)) l=level_index
 
     t_wall=MPI_Wtime()
-    select case(timer)
-    case(T_TOTAL)
-       delta_t = t_wall - pf%pf_timers%t_total
-       pf%pf_runtimes%t_total=pf%pf_runtimes%t_total + delta_t
-    case(T_PREDICTOR)
-       delta_t = t_wall - pf%pf_timers%t_predictor
-       pf%pf_runtimes%t_predictor=pf%pf_runtimes%t_predictor + delta_t
-    case(T_ITERATION)
-       delta_t = t_wall - pf%pf_timers%t_iteration       
-       pf%pf_runtimes%t_iteration=pf%pf_runtimes%t_iteration + delta_t 
-    case(T_STEP)
-       delta_t = t_wall - pf%pf_timers%t_step       
-       pf%pf_runtimes%t_step=pf%pf_runtimes%t_step + delta_t 
-    case(T_HOOKS)
-       delta_t = t_wall - pf%pf_timers%t_hooks(l)       
-       pf%pf_runtimes%t_hooks(l)=pf%pf_runtimes%t_hooks(l) + delta_t   
-    case(T_SWEEP)
-       delta_t = t_wall - pf%pf_timers%t_sweeps(l)      
-       pf%pf_runtimes%t_sweeps(l)=pf%pf_runtimes%t_sweeps(l) + delta_t     
-    case(T_FEVAL)
-       delta_t = t_wall - pf%pf_timers%t_feval(l)      
-       pf%pf_runtimes%t_feval(l)=pf%pf_runtimes%t_feval(l) + delta_t     
-    case(T_FCOMP)
-       delta_t = t_wall - pf%pf_timers%t_fcomp(l)      
-       pf%pf_runtimes%t_fcomp(l)=pf%pf_runtimes%t_fcomp(l) + delta_t     
-    case(T_AUX)
-       delta_t = t_wall - pf%pf_timers%t_aux(l)      
-       pf%pf_runtimes%t_aux(l)=pf%pf_runtimes%t_aux(l) + delta_t     
-    case(T_BROADCAST)
-       delta_t = t_wall - pf%pf_timers%t_broadcast
-       pf%pf_runtimes%t_broadcast=pf%pf_runtimes%t_broadcast + delta_t   
-    case(T_RESIDUAL)
-       delta_t = t_wall - pf%pf_timers%t_residual(l)       
-       pf%pf_runtimes%t_residual(l)=pf%pf_runtimes%t_residual(l) + delta_t   
-    case(T_INTERPOLATE)
-       delta_t = t_wall - pf%pf_timers%t_interpolate(l)       
-       pf%pf_runtimes%t_interpolate(l)=pf%pf_runtimes%t_interpolate(l) + delta_t   
-    case(T_RESTRICT)
-       delta_t = t_wall - pf%pf_timers%t_restrict(l)       
-       pf%pf_runtimes%t_restrict(l)=pf%pf_runtimes%t_restrict(l) + delta_t    
-    case(T_WAIT)
-       delta_t = t_wall - pf%pf_timers%t_wait(l)       
-       pf%pf_runtimes%t_wait(l)=pf%pf_runtimes%t_wait(l) + delta_t     
-    case(T_SEND)
-       delta_t = t_wall - pf%pf_timers%t_send(l)       
-       pf%pf_runtimes%t_send(l)=pf%pf_runtimes%t_send(l) + delta_t     
-    case(T_RECEIVE)
-       delta_t = t_wall - pf%pf_timers%t_receive(l)       
-       pf%pf_runtimes%t_receive(l)=pf%pf_runtimes%t_receive(l) + delta_t      
-    case DEFAULT
-       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',timer)
-    end select
+    t_prev=pf%pf_timers%timers(timer_index,l)-pf%pf_timers%timers(T_TOTAL,1)
+    t_now=t_wall-pf%pf_timers%timers(T_TOTAL,1)
+    delta_t = t_now - t_prev
+    
+    pf%pf_timers%timers(timer_index,l)=t_wall
+    pf%pf_timers%runtimes(timer_index,l)= pf%pf_timers%runtimes(timer_index,l) + delta_t
 
+    !  Echo timings 
     if (pf%save_timings .eq. 3) then
-       write(*, '("timer:",a16,", rank: ",i3,", step: ",i4, ", level: ", i3,' &
-            // '", iter: ",i3, " Current t: ",f23.8, " Delta t: ",f23.8)') &
-            timer_names(timer), pf%rank, &
-            pf%state%step, pf%state%level_index, pf%state%iter,  &
-            t_wall,delta_t
+       write(*, '("stop timer:",a10,", rank:",i3,", step:",i4,", level:",i1,", iter: ",i3, ' &
+            // '" Wall t: ",f20.8, " begin t: ",f20.8, " end t: ",f20.8, " Delta t: ",f20.8, " Cum: ",f20.8)') &
+            timer_names(timer_index), pf%rank, pf%state%step, l, pf%state%iter,  &
+            t_wall,t_prev,t_now,delta_t,pf%pf_timers%runtimes(timer_index,l)            
     end if
+
 
   end subroutine pf_stop_timer
 

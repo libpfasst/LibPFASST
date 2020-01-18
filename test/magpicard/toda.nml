@@ -20,7 +20,6 @@
 	nsteps = 128
 	exptol = 1.d-15
 	nparticles = 11
-	save_solutions = .true.
 	toda_periodic = .true.
 	use_sdc = .true.
 /

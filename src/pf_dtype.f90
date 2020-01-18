@@ -9,7 +9,7 @@ module pf_mod_dtype
   !>  pfasst static  paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
 !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
-  integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variables
+  integer, parameter :: pfqp = selected_real_kind(33, 4931) !!  Defines quad precision type for all real and complex variableso
   real(pfdp), parameter :: ZERO  = 0.0_pfdp
   real(pfdp), parameter :: ONE   = 1.0_pfdp
   real(pfdp), parameter :: TWO   = 2.0_pfdp
@@ -35,6 +35,13 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_CONVERGED = 2
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
+  !>  Type for storing timings  later output
+  integer, parameter :: PF_NUM_TIMERS = 18
+  type :: pf_timer_t
+     real(pfdp) :: timers(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0
+     real(pfdp) :: runtimes(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0
+  end type pf_timer_t
+  
   !>  The type that holds the state of the system
   type, bind(c) :: pf_state_t
     real(pfdp) :: t0  !!  Time at beginning of this time step
@@ -72,6 +79,7 @@ module pf_mod_dtype
      procedure(pf_evaluate_all_p), deferred :: evaluate_all
      procedure(pf_residual_p),     deferred :: residual
      procedure(pf_spreadq0_p),     deferred :: spreadq0
+     procedure(pf_compute_dt_p),   deferred :: compute_dt
      procedure(pf_destroy_sweeper_p),      deferred :: destroy
   end type pf_sweeper_t
 
@@ -180,9 +188,9 @@ module pf_mod_dtype
           tauQ(:),  &           !! fas correction in Q form
           pFflt(:), &           !! functions at sdc nodes, previous sweep (flat)
           q0,       &           !! initial condition
-          q0_delta, &           !! Space for interpolating q0, qend
+          delta_q0, &           !! Space for interpolating q0, qend
           qend                  !! solution at end time
-
+     real(pfdp) :: max_delta_q0=0.0_pfdp
      !>  Function  storage
      class(pf_encap_t), pointer :: &
           F(:,:), &                     !! functions values at sdc nodes
@@ -229,6 +237,7 @@ module pf_mod_dtype
   type :: pf_results_t
      real(pfdp), allocatable :: errors(:,:,:)
      real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
+     real(pfdp), allocatable :: delta_q0(:,:,:)  !  (block,iter,sweep)
      integer :: nsteps
      integer :: niters
      integer :: nprocs
@@ -243,27 +252,6 @@ module pf_mod_dtype
 
   end type pf_results_t
 
-  !>  Type for storing timings  later output
-  type :: pf_timer_t
-     real(pfdp) :: t_total= 0.0_pfdp
-     real(pfdp) :: t_predictor= 0.0_pfdp
-     real(pfdp) :: t_iteration= 0.0_pfdp
-     real(pfdp) :: t_broadcast = 0.0_pfdp
-     real(pfdp) :: t_step= 0.0_pfdp
-     real(pfdp) :: t_hooks(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_sweeps(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_aux(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_residual(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_interpolate(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_restrict(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_wait(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_send(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_receive(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_feval(PF_MAXLEVS) = 0.0_pfdp
-     real(pfdp) :: t_fcomp(PF_MAXLEVS) = 0.0_pfdp
-
-  end type pf_timer_t
-  
 
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
@@ -298,7 +286,8 @@ module pf_mod_dtype
 
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
-     logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
+     logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
+     logical :: sweep_at_conv = .true. !!  decides if one final sweep after convergence is done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
@@ -306,6 +295,7 @@ module pf_mod_dtype
 
 
      ! -- RK and Parareal options
+     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
      integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
@@ -314,9 +304,10 @@ module pf_mod_dtype
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
-     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
+     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
+     logical :: save_delta_q0 = .true.   !!  If true, delta_q0 is  saved and output
+     logical :: save_errors  = .true.    !!  If true, errors  are saved and output
      integer :: save_timings  = 2         !!  0=none, 1=total only, 2=all, 3=all and echo
-     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
 
      integer :: rank    = -1            !! rank of current processor
 
@@ -422,6 +413,17 @@ module pf_mod_dtype
        integer, optional,   intent(in)    :: flags, step
      end subroutine pf_spreadq0_p
 
+     subroutine pf_compute_dt_p(this, pf, level_index, t0, dt, flags)
+       import pf_sweeper_t,pf_pfasst_t, pfdp
+       class(pf_sweeper_t), intent(inout) :: this
+       type(pf_pfasst_t),   intent(inout),target :: pf
+       integer,             intent(in)    :: level_index
+       real(pfdp),          intent(in)    :: t0
+       real(pfdp),          intent(inout)    :: dt
+       integer, optional,   intent(in)    :: flags
+     end subroutine pf_compute_dt_p
+
+
      subroutine pf_destroy_p(this, pf,level_index)
        import pf_sweeper_t,pf_pfasst_t, pfdp
        class(pf_sweeper_t), intent(inout) :: this
@@ -430,14 +432,14 @@ module pf_mod_dtype
      end subroutine pf_destroy_p
 
      !>  time stepper interfaces
-     subroutine pf_do_n_steps_p(this, pf, level_index, t0,q0,qend, big_dt,nsteps_rk)
+     subroutine pf_do_n_steps_p(this, pf, level_index, t0,y0,yend, big_dt,nsteps_rk)
        import pf_pfasst_t, pf_stepper_t, pf_level_t, pfdp, pf_encap_t
        class(pf_stepper_t), intent(inout) :: this
        type(pf_pfasst_t),   intent(inout),target :: pf
        real(pfdp),          intent(in)    :: big_dt !!  Time step size
        real(pfdp),          intent(in)    :: t0
-       class(pf_encap_t), intent(in   )         :: q0           !!  Starting value
-       class(pf_encap_t), intent(inout)         :: qend         !!  Final value
+       class(pf_encap_t), intent(in   )         :: y0           !!  Starting value
+       class(pf_encap_t), intent(inout)         :: yend         !!  Final value
        integer,             intent(in)    :: level_index
        integer,             intent(in)    :: nsteps_rk
      end subroutine pf_do_n_steps_p

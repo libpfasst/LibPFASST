@@ -10,13 +10,13 @@
 !!
 !!  This module extends pf_sweeper_t and is used for creating an exponential sweeper 
 !!  that solves equations of the form
-!!         $$   y' = L y + N(t,y)  $$
+!!         $$   y' = L y + f(t,y)  $$
 !!  When extending this class, you must supply the functions phib, swpPhib, and resPhib
 !!  that each compute matrix-vector products of the form
 !!         $$ \sum_{i=0}^n t^i \varphi_i(tL)b_i $$
 !!  in addition to the function f_eval for compluting the nonlinear term N(t,y).
 !!  The complete description of these three functions is contained below.
-module pf_mod_fexp
+module pf_mod_fexp_sweeper
 
   use pf_mod_dtype
   use pf_mod_utils
@@ -24,7 +24,7 @@ module pf_mod_fexp
   implicit none
 
   !> Exponential SDC sweeper type, extends abstract pf_sweeper_t
-  type, extends(pf_sweeper_t), abstract :: pf_fexp_t
+  type, extends(pf_sweeper_t), abstract :: pf_fexp_sweeper_t
 
     real(pfdp),        allocatable :: nodes(:)   ! nodes
     real(pfdp),        allocatable :: eta(:)     ! normalized substeps (on interval [0, 1])
@@ -35,6 +35,7 @@ module pf_mod_fexp
 
     ! Specialized procedures for exponential integrator
     procedure(pf_f_eval_p),           deferred :: f_eval    ! computes nonlinear term in equation
+!    procedure(pf_comp_dt_p),          deferred :: comp_dt      !!  computes the time step    
     procedure(pf_expSweepSubstep),    deferred :: expSweepSubstep
     procedure(pf_expResidualSubstep), deferred :: expResidualSubstep
 
@@ -45,14 +46,15 @@ module pf_mod_fexp
     procedure :: integrate    => exp_integrate
     procedure :: residual     => exp_residual
     procedure :: spreadq0     => exp_spreadq0
+    procedure :: compute_dt   => exp_compute_dt
     procedure :: evaluate_all => exp_evaluate_all
     procedure :: destroy      => exp_destroy
 
-    ! functions that can be accessed directly by types that inherit pf_fexp_t
+    ! functions that can be accessed directly by types that inherit pf_fexp_sweeper_t
     procedure :: exp_destroy
     procedure :: exp_initialize
 
-  end type pf_fexp_t
+  end type pf_fexp_sweeper_t
 
   interface ! DESCRIPTION OF REQUIRED FUNCTIONS
 
@@ -98,14 +100,14 @@ module pf_mod_fexp
     ! =================================================================================
 
     subroutine pf_expSweepSubstep(this, y_jp1, j, dt, y_j, F, Nk)
-      import pf_fexp_t, pf_encap_t, pfdp
-      class(pf_fexp_t),   intent(inout) :: this
+      import pf_fexp_sweeper_t, pf_encap_t, pfdp
+      class(pf_fexp_sweeper_t),   intent(inout) :: this
       class(pf_encap_t),  intent(inout) :: y_jp1
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
       class(pf_encap_t),  intent(in)    :: y_j
-      class(pf_encap_t),  intent(in)    :: F(:,:)
-      class(pf_encap_t),  intent(in)    :: Nk(:)
+      class(pf_encap_t),  intent(inout) :: F(:,:)
+      class(pf_encap_t),  intent(inout) :: Nk(:)
     end subroutine pf_expSweepSubstep
 
     ! =================================================================================
@@ -129,13 +131,13 @@ module pf_mod_fexp
     !
     ! =================================================================================
 
-    subroutine pf_expResidualSubstep(this, y_np1, j, dt, y_n, F)
-      import pf_fexp_t, pf_encap_t, pfdp
-      class(pf_fexp_t),   intent(inout) :: this
-      class(pf_encap_t),  intent(inout) :: y_np1
+    subroutine pf_expResidualSubstep(this, y_jp1, j, dt, y_j, F)
+      import pf_fexp_sweeper_t, pf_encap_t, pfdp
+      class(pf_fexp_sweeper_t),   intent(inout) :: this
+      class(pf_encap_t),  intent(inout) :: y_jp1
       integer,            intent(in)    :: j
       real(pfdp),         intent(in)    :: dt
-      class(pf_encap_t),  intent(in)    :: y_n
+      class(pf_encap_t),  intent(in)    :: y_j
       class(pf_encap_t),  intent(in)    :: F(:,:)
     end subroutine pf_expResidualSubstep
 
@@ -158,14 +160,25 @@ module pf_mod_fexp
     ! =================================================================================
 
     subroutine pf_f_eval_p(this, y, t, level_index, f)
-      import pf_fexp_t, pf_encap_t, pfdp
-      class(pf_fexp_t),   intent(inout) :: this
+
+      import pf_fexp_sweeper_t, pf_encap_t, pfdp
+      class(pf_fexp_sweeper_t),   intent(inout) :: this
+
       class(pf_encap_t), intent(in)    :: y
       real(pfdp),        intent(in)    :: t
       integer,           intent(in)    :: level_index
       class(pf_encap_t), intent(inout) :: f
     end subroutine pf_f_eval_p
-
+    subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+      !>  Set the time step
+      import pf_fexp_sweeper_t, pf_encap_t, pfdp
+      class(pf_fexp_sweeper_t),  intent(inout) :: this
+      class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+      real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+      integer,    intent(in   ) :: level_index     !!  Level index
+      real(pfdp),        intent(inout) :: dt       !!  time step chosen
+    end subroutine pf_comp_dt_p
+    
   end interface
 
 contains
@@ -183,7 +196,7 @@ contains
   subroutine exp_initialize(this, pf,level_index)
 
     ! arguments
-    class(pf_fexp_t),   intent(inout) :: this
+    class(pf_fexp_sweeper_t),   intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
@@ -216,7 +229,7 @@ contains
     use pf_mod_hooks
 
     ! arguments
-    class(pf_fexp_t),   intent(inout) :: this
+    class(pf_fexp_sweeper_t),   intent(inout) :: this
     type(pf_pfasst_t), intent(inout), target :: pf   !!  PFASST structure
     integer,           intent(in)    :: level_index  !!  which level to sweep on
     real(pfdp),        intent(in)    :: t0           !!  Time at beginning of time step
@@ -236,7 +249,7 @@ contains
     do k = 1, nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
        if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
-      pf%state%sweep=k
+       pf%state%sweep=k
 
       ! NOTE: ensure that lev%F has been properly initialized here      
       do j = 1, nnodes
@@ -268,7 +281,7 @@ contains
 
       call pf_residual(pf, level_index, dt)
       call lev%qend%copy(lev%Q(lev%nnodes))
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)      
+      if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
       call call_hooks(pf, level_index, PF_POST_SWEEP)
 
    end do  !  Sweeps
@@ -295,7 +308,7 @@ contains
   ! =================================================================================
 
   subroutine exp_integrate(this, pf,level_index, qSDC, fSDC, dt, fintsdc, flags)
-    class(pf_fexp_t),   intent(inout) :: this
+    class(pf_fexp_sweeper_t),   intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
     class(pf_encap_t), intent(in   ) :: qSDC(:)      !!  Solution values
@@ -311,10 +324,13 @@ contains
 
     nnodes = lev%nnodes
     do i = 1, nnodes - 1 ! loop over integrals : compute \int_{t_{n,i}}^{t_{n, i + 1}}
-      call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), fSDC)
-      call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
-      if (i > 1) then
-        call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
+       call this%expResidualSubstep(fintsdc(i), i, dt, qSDC(i), fSDC)
+       if (i .eq. 1) then
+          call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
+       else
+!      if (i > 1) then
+          call fintsdc(i)%axpy(-1.0_pfdp,qSDC(i))
+          call fintsdc(i)%axpy(1.0_pfdp,fintsdc(i-1))
       end if
     end do
 
@@ -323,7 +339,7 @@ contains
   ! RESIDUAL: compute  residual (generic) ====================================
   subroutine exp_residual(this, pf, level_index, dt, flags)
 
-    class(pf_fexp_t),  intent(inout)  :: this
+    class(pf_fexp_sweeper_t),  intent(inout)  :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
     real(pfdp),             intent(in)    :: dt
@@ -347,15 +363,22 @@ contains
     do m = 1, lev%nnodes-1
       call lev%R(m)%copy(lev%I(m))
       call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
-      call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       if (present(flags)) then
+          if (flags .eq. 0) then
+             call lev%R(m)%axpy(1.0_pfdp, lev%q0)
+          else
+             call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+          end if
+       else
+          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+       end if
     end do
-
 
   end subroutine exp_residual
 
   ! SPREADQ: spread solution (generic) ======================================
   subroutine exp_spreadq0(this, pf,level_index, t0, flags, step)
-    class(pf_fexp_t),  intent(inout)  :: this
+    class(pf_fexp_sweeper_t),  intent(inout)  :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t0
@@ -367,11 +390,25 @@ contains
     call pf_generic_spreadq0(this, pf,level_index, t0)
 
   end subroutine exp_spreadq0
+  !> Set the time step
+  subroutine exp_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_fexp_sweeper_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine exp_compute_dt
 
   ! EVALUATE: evaluate the nonlinear term at node m ========================
   subroutine exp_evaluate(this, pf,level_index, t, m, flags, step)
     ! arguments
-    class(pf_fexp_t),   intent(inout) :: this
+    class(pf_fexp_sweeper_t),   intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t    !!  Time at which to evaluate
@@ -388,7 +425,7 @@ contains
   ! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================
   subroutine exp_evaluate_all(this, pf,level_index, t, flags, step)
     ! arguments
-    class(pf_fexp_t),  intent(inout)  :: this
+    class(pf_fexp_sweeper_t),  intent(inout)  :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
     real(pfdp),        intent(in   ) :: t(:)     !!  Array of times at each node
@@ -404,7 +441,7 @@ contains
   ! DEALLOCATE: deallocate sweeper variables
   subroutine exp_destroy(this, pf,level_index)
     ! arguments
-    class(pf_fexp_t),   intent(inout) :: this
+    class(pf_fexp_sweeper_t),   intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
@@ -418,4 +455,4 @@ contains
   end subroutine exp_destroy
 
 
-end module pf_mod_fexp
+end module pf_mod_fexp_sweeper

@@ -6,33 +6,11 @@
 DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
+USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
 
-#  Make true for intel on cori
-USE_INTEL=FALSE  
 
-#  Set some compiler flags
-AR = ar rcs
-ifeq ($(USE_INTEL),TRUE)
-FC = ftn
-CC = ftn
-FFLAGS = -Ibuild -module include -cpp
-ifeq ($(DEBUG),TRUE)
-FFLAGS +=   -g 
-endif
-else
-
-
-FC = mpifort
-CC = mpicc
-FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
-ifeq ($(DEBUG),TRUE)
-FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
-else
-FFLAGS += -O3 
-endif
-
-endif
+include $(LIBPFASST)/Makefile.local
 
 
 VPATHS = $(LIBPFASST)/src
@@ -65,6 +43,7 @@ FSRC = src/pfasst.f90 \
        src/pf_stop.f90 \
        src/pf_timer.f90 \
        src/pf_utils.f90 \
+       src/pf_ham_sys_encap.f90 \
        src/pf_ndarray_encap.f90 \
        src/pf_ndarray_oc_encap.f90 \
        src/pf_ndsysarray_encap.f90 \
@@ -101,6 +80,17 @@ ifeq ($(USE_FFTW),FALSE)
 FSRC+=src/pf_fftpack.f90
 else
 FSRC+=src/pf_fftw.f90
+endif
+
+ifeq ($(USE_SUNDIALS),TRUE)
+SUNDIALS_DIR=../sundials.5.0.0
+LDFLAGS += -L/usr/local/lib/
+LDFLAGS += -lsundials_farkode_mod
+LDFLAGS += -lsundials_farkode
+LDFLAGS += -lsundials_fnvecserial_mod
+LDFLAGS += -lsundials_nvecserial
+FFLAGS  += -I/usr/local/fortran/
+FSRC+= src/pf_sundials_vec.f90
 endif
 
 ifdef NOMPI

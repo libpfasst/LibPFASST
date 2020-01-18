@@ -9,6 +9,7 @@ module pf_mod_solutions
 
   interface exact_ad_cos
      module procedure exact_ad_cos_1d
+     module procedure exact_ad_cos_1ds
      module procedure exact_ad_cos_1dz
      module procedure exact_ad_cos_2d
      module procedure exact_ad_cos_2dz
@@ -36,6 +37,14 @@ module pf_mod_solutions
      module procedure exact_nls_2dz
      module procedure exact_nls_3dz
   end interface exact_nls
+  interface exact_nls_sg
+     module procedure exact_nls_sg_1dz
+     module procedure exact_nls_sg_2dz
+     module procedure exact_nls_sg_3dz
+     module procedure exact_nls_sg_1d
+     module procedure exact_nls_sg_2d
+     module procedure exact_nls_sg_3d
+  end interface exact_nls_sg
   interface exact_kdv
      module procedure exact_kdv_1d
      module procedure exact_kdv_1dz
@@ -66,6 +75,21 @@ contains
   subroutine exact_ad_cos_1d(t, uex,nu,v,kfreq,Lx)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: nu,v,kfreq(1),Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       uex(i) = ad_cos_ex(t, x,nu,v,kfreq(1),Lx)
+    end do
+
+  end subroutine exact_ad_cos_1d
+  subroutine exact_ad_cos_1ds(t, uex,nu,v,kfreq,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:)
     real(pfdp), intent(in) :: nu,v,kfreq,Lx
     
     integer    :: nx, i
@@ -77,12 +101,12 @@ contains
        uex(i) = ad_cos_ex(t, x,nu,v,kfreq,Lx)
     end do
 
-  end subroutine exact_ad_cos_1d
+  end subroutine exact_ad_cos_1ds
   
   subroutine exact_ad_cos_1dz(t, uex,nu,v,kfreq,Lx)
     real(pfdp), intent(in)  :: t
     complex(pfdp), intent(inout) :: uex(:)
-    real(pfdp), intent(in) :: nu,v,kfreq,Lx
+    real(pfdp), intent(in) :: nu,v,kfreq(1),Lx
     
     integer    :: nx, i
     real(pfdp) :: x
@@ -90,7 +114,7 @@ contains
     nx = SIZE(uex)
     do i = 1, nx
        x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
-       uex(i) = ad_cos_ex(t, x,nu,v,kfreq,Lx)       
+       uex(i) = ad_cos_ex(t, x,nu,v,kfreq(1),Lx)       
     end do
 
   end subroutine exact_ad_cos_1dz
@@ -593,6 +617,146 @@ contains
     end do
 
   end subroutine exact_nls_3dz
+  function nls_sg_ex(t, x,Lx) result(u)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(in)  :: x
+    real(pfdp), intent(in)  :: Lx        
+    real(pfdp)  :: u
+
+    real(pfdp) :: sigma,xx
+    complex(pfdp) :: ae,dn
+    sigma=0.2_pfdp
+    xx=(x-Lx*0.5_pfdp)/(sigma*Lx)   
+    u=exp(-(xx*xx*xx*xx))
+
+  end function nls_sg_ex
+  subroutine exact_nls_sg_1dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       uex(i) = nls_sg_ex(t, x,Lx)       
+    end do
+
+  end subroutine exact_nls_sg_1dz
+  
+  subroutine exact_nls_sg_2dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
+    do j = 1, ny
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+       sy=nls_sg_ex(t, y,Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+          uex(i,j) = nls_sg_ex(t, x,Lx(1))*sy
+       end do
+    end do
+       
+  end subroutine exact_nls_sg_2dz
+  
+  subroutine exact_nls_sg_3dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,L
+    real(pfdp) :: sz, sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
+       sz = nls_sg_ex(t, z,Lx(3))
+       do j = 1, ny
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+          sy = nls_sg_ex(t, y,Lx(2))
+          do i = 1, nx
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+             uex(i,j,k) = nls_sg_ex(t, x,Lx(1))*sy*sz
+          end do
+       end do
+    end do
+
+  end subroutine exact_nls_sg_3dz
+
+  subroutine exact_nls_sg_1d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       uex(i) = nls_sg_ex(t, x,Lx)       
+    end do
+
+  end subroutine exact_nls_sg_1d
+  
+  subroutine exact_nls_sg_2d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
+    do j = 1, ny
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+       sy=nls_sg_ex(t, y,Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+          uex(i,j) = nls_sg_ex(t, x,Lx(1))*sy
+       end do
+    end do
+       
+  end subroutine exact_nls_sg_2d
+  
+  subroutine exact_nls_sg_3d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,L
+    real(pfdp) :: sz, sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
+       sz = nls_sg_ex(t, z,Lx(3))
+       do j = 1, ny
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+          sy = nls_sg_ex(t, y,Lx(2))
+          do i = 1, nx
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+             uex(i,j,k) = nls_sg_ex(t, x,Lx(1))*sy*sz
+          end do
+       end do
+    end do
+
+  end subroutine exact_nls_sg_3d
 
     !  Soliton exact solution to kdv  moving at speed one (must scale equation properly)
     function kdv_ex(t, x,beta,Lx) result(u)
