@@ -19,12 +19,13 @@
 !! Which would imply that a 3 component system of two-dimensional solutions.
 !!
 !! The helper routines get_array1d, get_array2d, get_array3d, etc can be used to
-!! extract pointers to a component of  encapsulated system
-!! performing any copies.
+!! extract pointers to a component of  encapsulated system without
+!! performing any copies, or return a pointer to the whole array.
 !!
 module pf_mod_zndsysarray
   use iso_c_binding
   use pf_mod_dtype
+  use pf_mod_stop
   implicit none
 
   !>  Type to create and destroy the arrays
@@ -51,6 +52,10 @@ module pf_mod_zndsysarray
      procedure :: unpack => zndsysarray_unpack
      procedure :: axpy => zndsysarray_axpy
      procedure :: eprint => zndsysarray_eprint
+     procedure, private  :: get_sysarray_1d, get_sysarray_2d,get_sysarray_3d,get_sysarray_4d
+     generic :: get_sysarray => get_sysarray_1d ,get_sysarray_2d,get_sysarray_3d,get_sysarray_4d
+     procedure, private  :: get_array_1d  ,get_array_2d,get_array_3d,get_array_4d
+     generic :: get_array => get_array_1d ,get_array_2d,get_array_3d,get_array_4d
   end type pf_zndsysarray_t
 
 contains
@@ -215,7 +220,13 @@ contains
     if (a .eq. 0.0_pfdp) return
     select type(x)
     type is (pf_zndsysarray_t)
-       this%flatarray = a * x%flatarray + this%flatarray
+       if (a .eq. 1.0_pfdp) then
+          this%flatarray = x%flatarray + this%flatarray
+       elseif (a .eq. -1.0_pfdp) then
+          this%flatarray = -x%flatarray + this%flatarray
+       else
+          this%flatarray = a*x%flatarray + this%flatarray
+       end if
     class default
        call pf_stop(__FILE__,__LINE__,'unsupported type ')
     end select
@@ -241,7 +252,33 @@ contains
     end select
   end function cast_as_zndsysarray
 
-  !>  Helper function to return the array part
+  !>  Helper function to return the array part, these are called with get_array
+  subroutine get_sysarray_1d(this,r,flags) 
+    class(pf_zndsysarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:)
+    integer,    intent(in   ), optional :: flags
+    r => this%flatarray
+  end subroutine get_sysarray_1d
+  subroutine get_sysarray_2d(this,r,flags) 
+    class(pf_zndsysarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2)) => this%flatarray
+  end subroutine get_sysarray_2d
+  subroutine get_sysarray_3d(this,r,flags) 
+    class(pf_zndsysarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3)) => this%flatarray
+  end subroutine get_sysarray_3d
+  subroutine get_sysarray_4d(this,r,flags) 
+    class(pf_zndsysarray_t), target, intent(in) :: this
+    complex(pfdp), pointer, intent(inout) :: r(:,:,:,:)
+    integer,    intent(in   ), optional :: flags
+    r(1:this%arr_shape(1),1:this%arr_shape(2),1:this%arr_shape(3),1:this%arr_shape(4)) => this%flatarray
+  end subroutine get_sysarray_4d
+  
+  !>  Helper function to return the array part or whole
   function get_array1d(x,n,flags) result(r)
     class(pf_encap_t), target,intent(in) :: x
     integer, intent(in) :: n
@@ -249,7 +286,19 @@ contains
     complex(pfdp), pointer :: r(:)
     select type (x)
     type is (pf_zndsysarray_t)
-       r => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+       if (n .eq. 0) then  !  Return the whole array
+          if (x%ncomp .eq. 1 .and. x%ndim .eq. 1) then
+             r => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+          end if
+       else                !  Return the nth component
+          if (x%ndim .eq. 1) then
+             r => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+          end if
+       end if
     end select
   end function get_array1d
   
@@ -260,10 +309,22 @@ contains
     integer,           intent(in   ), optional :: flags
     complex(pfdp), pointer :: r(:,:)
 
-
     select type (x)
     type is (pf_zndsysarray_t)
-       r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+       if (n .eq. 0) then
+          if (x%ndim .eq. 1) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+          end if
+       else                   !  Return the nth component
+          if (x%ndim .eq. 2) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 2. ndim=',x%ndim)
+          end if
+          
+       endif
     end select
   end function get_array2d
   
@@ -276,8 +337,136 @@ contains
 
     select type (x)
     type is (pf_zndsysarray_t)
-       r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+       if (n .eq. 0) then        !  Return the whole array  
+          if (x%ndim .eq. 2) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 2. ndim=',x%ndim)
+          end if
+       else                     !  Return the nth component
+          if (x%ndim .eq. 3) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 3. ndim=',x%ndim)
+          end if
+       end if
     end select
   end function get_array3d
 
+  function get_array4d(x,n,flags) result(r)
+    class(pf_encap_t), target,intent(in) :: x
+    integer, intent(in) :: n
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:,:,:)
+
+    select type (x)
+    type is (pf_zndsysarray_t)
+       if (n .eq. 0) then        !  Return the whole array
+          if (x%ndim .eq. 3) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3),1:x%arr_shape(4)) => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 3. ndim=',x%ndim)
+          end if
+       else                       !  Return the nth component
+          if (x%ndim .eq. 4) then   
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3),1:x%arr_shape(4)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 4. ndim=',x%ndim)
+          end if
+       end if
+    end select
+  end function get_array4d
+
+  !>  Helper function to return the array part or whole
+  subroutine get_array_1d(x,r,n,flags) 
+    class(pf_zndsysarray_t), target,intent(in) :: x
+    integer, intent(in) :: n
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:)
+    if (n .eq. 0) then  !  Return the whole array
+       if (x%ncomp .eq. 1 .and. x%ndim .eq. 1) then
+          r => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+          end if
+       else                !  Return the nth component
+          if (x%ndim .eq. 1) then
+             r => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+          end if
+       end if
+
+  end subroutine get_array_1d
+  
+
+  subroutine get_array_2d(x,r,n,flags) 
+    class(pf_zndsysarray_t), target,intent(in) :: x
+    integer, intent(in) :: n    
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:)
+
+    if (n .eq. 0) then
+       if (x%ndim .eq. 1) then
+          r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray
+       else
+          call pf_stop(__FILE__,__LINE__,'bad dimension, must be 1. ndim=',x%ndim)
+       end if
+    else                   !  Return the nth component
+       if (x%ndim .eq. 2) then
+          r(1:x%arr_shape(1),1:x%arr_shape(2)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+       else
+          call pf_stop(__FILE__,__LINE__,'bad dimension, must be 2. ndim=',x%ndim)
+       end if
+       
+    endif
+   end subroutine get_array_2d
+  
+
+  subroutine get_array_3d(x,r,n,flags) 
+    class(pf_zndsysarray_t), target,intent(in) :: x
+    integer, intent(in) :: n
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:,:)
+
+    if (n .eq. 0) then        !  Return the whole array  
+       if (x%ndim .eq. 2) then
+          r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray
+       else
+          call pf_stop(__FILE__,__LINE__,'bad dimension, must be 2. ndim=',x%ndim)
+       end if
+    else                     !  Return the nth component
+       if (x%ndim .eq. 3) then
+          r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+       else
+          call pf_stop(__FILE__,__LINE__,'bad dimension, must be 3. ndim=',x%ndim)
+       end if
+    end if
+
+  end subroutine get_array_3d
+
+  subroutine get_array_4d(x,r,n,flags) 
+    class(pf_zndsysarray_t), target,intent(in) :: x
+    integer, intent(in) :: n
+    integer,           intent(in   ), optional :: flags
+    complex(pfdp), pointer :: r(:,:,:,:)
+
+    select type (x)
+    type is (pf_zndsysarray_t)
+       if (n .eq. 0) then        !  Return the whole array
+          if (x%ndim .eq. 3) then
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3),1:x%arr_shape(4)) => x%flatarray
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 3. ndim=',x%ndim)
+          end if
+       else                       !  Return the nth component
+          if (x%ndim .eq. 4) then   
+             r(1:x%arr_shape(1),1:x%arr_shape(2),1:x%arr_shape(3),1:x%arr_shape(4)) => x%flatarray(x%ndof*(n-1)+1:x%ndof*n)
+          else
+             call pf_stop(__FILE__,__LINE__,'bad dimension, must be 4. ndim=',x%ndim)
+          end if
+       end if
+    end select
+  end subroutine get_array_4d
+  
 end module pf_mod_zndsysarray

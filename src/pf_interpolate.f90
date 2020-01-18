@@ -35,7 +35,7 @@ contains
     c_lev => pf%levels(level_index-1) ! coarse level
 
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
-    call start_timer(pf, TINTERPOLATE + level_index - 1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE,level_index)
     
     
     step = pf%state%step+1
@@ -96,7 +96,7 @@ contains
     deallocate(c_times,f_times)
 
 
-    call end_timer(pf, TINTERPOLATE + f_lev%index - 1)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
@@ -112,23 +112,23 @@ contains
 
 
     call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + f_lev%index - 1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, f_lev%index )
 
 
-    call c_lev%q0_delta%setval(0.0_pfdp,flags)
-    call f_lev%q0_delta%setval(0.0_pfdp,flags)
+    call c_lev%delta_q0%setval(0.0_pfdp,flags)
+    call f_lev%delta_q0%setval(0.0_pfdp,flags)
     
 
     !>  restrict fine initial data to coarse
-    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%q0, c_lev%q0_delta, pf%state%t0, flags)
+    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%q0, c_lev%delta_q0, pf%state%t0, flags)
     !>  get coarse level correction
-    call c_lev%q0_delta%axpy(-1.0_pfdp, c_lev%q0, flags)    
+    call c_lev%delta_q0%axpy(-1.0_pfdp, c_lev%q0, flags)    
     !>  interpolate correction in space
-    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%q0_delta, c_lev%q0_delta, pf%state%t0, flags)
+    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%delta_q0, c_lev%delta_q0, pf%state%t0, flags)
     !> update fine inital condition
 
-    call f_lev%q0%axpy(-1.0_pfdp, f_lev%q0_delta, flags)
-    call end_timer(pf, TINTERPOLATE + f_lev%index - 1)
+    call f_lev%q0%axpy(-1.0_pfdp, f_lev%delta_q0, flags)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
   end subroutine interpolate_q0
@@ -142,23 +142,23 @@ contains
     class(pf_level_t),  intent(inout) :: c_lev  !!  coarse level
     
     call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + f_lev%index - 1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, f_lev%index)
     
-    call c_lev%q0_delta%setval(0.0_pfdp)
-    call f_lev%q0_delta%setval(0.0_pfdp)
+    call c_lev%delta_q0%setval(0.0_pfdp)
+    call f_lev%delta_q0%setval(0.0_pfdp)
 
     !>  restrict fine initial data to coarse
-    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%qend, c_lev%q0_delta, pf%state%t0, flags=2)
+    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%qend, c_lev%delta_q0, pf%state%t0, flags=2)
     !>  get coarse level correction
-    call c_lev%q0_delta%axpy(-1.0_pfdp, c_lev%qend, flags=2)    
+    call c_lev%delta_q0%axpy(-1.0_pfdp, c_lev%qend, flags=2)    
 
     !>  interpolate correction in space
-    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%q0_delta, c_lev%q0_delta, pf%state%t0, flags=2)
+    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%delta_q0, c_lev%delta_q0, pf%state%t0, flags=2)
 
     !> update fine inital condition
-    call f_lev%qend%axpy(-1.0_pfdp, f_lev%q0_delta, flags=2)
+    call f_lev%qend%axpy(-1.0_pfdp, f_lev%delta_q0, flags=2)
 
-    call end_timer(pf, TINTERPOLATE + f_lev%index - 1)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
 

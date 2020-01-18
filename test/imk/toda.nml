@@ -6,7 +6,6 @@
 	nsweeps_pred = 1 1
 	nsweeps = 1 1
 	qtype = 1
-	echo_timings = .false.
 	abs_res_tol = 1.0e-14
 	rel_res_tol = 1.0e-14
 	pipeline_pred = .false.
@@ -24,7 +23,6 @@
 	exptol = 1.d-15
 	nparticles = 11
 
-	save_solutions = .true.
 	toda_periodic = .true.
 	use_sdc = .true.
 

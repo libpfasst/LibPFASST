@@ -90,7 +90,8 @@ contains
     real(pfdp)                        :: dtsdc(1:lev%nnodes-1)
     class(pf_encap_t), allocatable    :: rhsA, rhsB, QA, QB
 
-    call start_timer(pf, TLEVEL+lev%index-1)
+
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,lev%index)
     
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -160,7 +161,7 @@ contains
     call lev%ulevel%factory%destroy_single(QA,   lev%index,  lev%lev_shape)
     call lev%ulevel%factory%destroy_single(QB,   lev%index,  lev%lev_shape)
 
-    call end_timer(pf, TLEVEL+lev%index-1)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,lev%index)
 
   end subroutine amisdc_sweep
      

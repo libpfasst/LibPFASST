@@ -21,7 +21,6 @@
      nsweeps_pred= 1 
      nsweeps= 1
      save_residuals=.false.
-     save_timings=.false.
      
 /
 

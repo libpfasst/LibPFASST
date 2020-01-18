@@ -45,6 +45,7 @@ module pf_mod_verlet
    contains
      procedure(pf_f_eval_p), deferred :: f_eval        !!  RHS function evaluations
      procedure(pf_f_comp_p), deferred :: f_comp        !!  Implicit solver
+     procedure(pf_comp_dt_p), deferred :: comp_dt      !!  computes the time step
      procedure(pf_hamiltonian_p), deferred :: hamiltonian   !!  Hamiltonian
      !>  Set the generic functions
      procedure :: sweep      => verlet_sweep
@@ -53,6 +54,7 @@ module pf_mod_verlet
      procedure :: integrate  => verlet_integrate
      procedure :: residual   => verlet_residual
      procedure :: spreadq0   => verlet_spreadq0
+     procedure :: compute_dt => verlet_compute_dt
      procedure :: evaluate_all => verlet_evaluate_all
      procedure :: destroy   => verlet_destroy
   end type pf_verlet_t
@@ -93,8 +95,16 @@ module pf_mod_verlet
        integer,    intent(in   ) :: level_index   !!  Level index       
        real(pfdp) :: H
      end function pf_hamiltonian_p
-     
-end interface
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       import pf_verlet_t, pf_encap_t, pfdp
+       class(pf_verlet_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
+
+  end interface
 contains
 
   !-----------------------------------------------------------------------------
@@ -122,7 +132,6 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
     nnodes = lev%nnodes
 
-    call start_timer(pf, TLEVEL+lev%index-1)
 
     !
     ! check hamiltonian
@@ -140,6 +149,9 @@ contains
     !
     dtsq = dt*dt
     do k = 1,nsweeps
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)       
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       
        pf%state%sweep=k
        do m = 1, lev%nnodes-1
           call lev%I(m)%setval(0.0_pfdp)
@@ -161,14 +173,16 @@ contains
        !  Recompute the first function value if this is first sweep
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1))
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+          call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1))
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
        end if
 
        t = t0
        ! do the sub-stepping in sweep
        do m = 1, nnodes-1
           t = t + dt*this%dtsdc(m)
-          dtmhalf = 0.5d0*dt*this%dtsdc(m)
+          dtmhalf = 0.5_pfdp*dt*this%dtsdc(m)
           call this%rhs%setval(0.0_pfdp)
           !  Lower triangular verlet to  new piece
           if (pf%state%iter .eq. 1)  then
@@ -194,7 +208,10 @@ contains
           call lev%Q(m+1)%copy(this%rhs,2)
           
           !  update function values
-          call this%f_eval(Lev%Q(m+1), t, lev%index, Lev%F(m+1,1))  
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+          call this%f_eval(Lev%Q(m+1), t, level_index, Lev%F(m+1,1))  
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+          
 
           !  Now do the v peice
           call this%rhs%setval(0.0_pfdp,1)          
@@ -236,13 +253,12 @@ contains
        
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
-       
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     
     end do ! end loop on sweeps
 
 
-    call end_timer(pf, TLEVEL+lev%index-1)
   end subroutine verlet_sweep
 
 
@@ -314,8 +330,8 @@ contains
     !  form the QQ matrix depending on what you want
     select case (this%whichQQ)
     case (0)  !  Collocation (make it the product)
-       print *,'Making QQ by collocation Q*Q'
-       print *,SIZE(this%Qmat)
+!       print *,'Making QQ by collocation Q*Q,  shape',shape(this%Qmat)
+
        qtemp=0.0_pfdp
        qtemp(2:nnodes,:)=lev%sdcmats%qmat
        qtemp=matmul(qtemp,qtemp)
@@ -364,11 +380,9 @@ contains
 !      this%QQLU=U
 !      print *, 'U from LU',this%QQLU
 !   else
-   this%Qtil=this%Qver  !  Normal verlet all the time
-   this%QQtil=this%QQver  !  Normal verlet all the time        
    !   end if
-   this%Qver=0.0d0 !  Normal verlet all the time
-   this%QQver=0.0d0   !  Normal verlet all the time        
+!   this%Qver=0.0_pfdp !  Normal verlet all the time
+!   this%QQver=0.0_pfdp   !  Normal verlet all the time        
    
    this%Qtil=this%Qver  !  Normal verlet all the time
    this%QQtil=this%QQver  !  Normal verlet all the time        
@@ -383,7 +397,7 @@ contains
     deallocate(qtemp2)
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index,   lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index,   lev%lev_shape)
     
   end subroutine verlet_initialize
   
@@ -518,6 +532,22 @@ contains
     call pf_generic_spreadq0(this,pf,level_index, t0)
   end subroutine verlet_spreadq0
 
+  !> Set the time step
+  subroutine verlet_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_verlet_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    
+    call this%comp_dt(lev%q0,t0,level_index, dt)
+  end subroutine verlet_compute_dt
+  
+
   !> Subroutine to evaluate function value at node m
   subroutine verlet_evaluate(this, pf,level_index, t, m, flags, step)
     class(pf_verlet_t),  intent(inout) :: this
@@ -530,8 +560,9 @@ contains
 
     type(pf_level_t),    pointer :: lev
     lev => pf%levels(level_index)   !!  Assign level pointer
-
-       call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
   end subroutine verlet_evaluate
 
   !> Subroutine to evaluate the function values at all nodes

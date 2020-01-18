@@ -5,14 +5,11 @@
 	nsweeps_pred = 1 
 	nsweeps = 1 
 	qtype = 5 
-	echo_timings = .false.
 	abs_res_tol = 1e-13
 	rel_res_tol = 1e-13
 	pipeline_pred = .true.
 	pfasst_pred = .true.
 	vcycle = .false.
-	save_residuals=.true.
-	save_timings=.true.
 /
 
 &params

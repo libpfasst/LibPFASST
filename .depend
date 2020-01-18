@@ -1,4 +1,4 @@
-./build/pfasst.o : src/pfasst.f90 ./build/pf_mpi.o ./build/pf_utils.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_results.o ./build/pf_hooks.o ./build/pf_dtype.o 
+./build/pfasst.o : src/pfasst.f90 ./build/pf_mpi.o ./build/pf_stop.o ./build/pf_utils.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_results.o ./build/pf_hooks.o ./build/pf_dtype.o 
 ./build/pf_comm.o : src/pf_comm.f90 ./build/pf_pfasst.o 
 ./build/pf_dtype.o : src/pf_dtype.f90 
 ./build/pf_fft.o : src/pf_fft.f90 ./build/pf_utils.o ./build/pf_dtype.o 
@@ -12,17 +12,21 @@
 ./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_results.o : src/pf_results.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_rkstepper.o : src/pf_rkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_erkstepper.o : src/pf_erkstepper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_solutions.o : src/pf_solutions.f90 ./build/pf_dtype.o 
 ./build/pf_stop.o : src/pf_stop.f90 
-./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_dtype.o 
+./build/pf_timer.o : src/pf_timer.f90 ./build/pf_mpi.o ./build/pf_stop.o ./build/pf_dtype.o 
 ./build/pf_utils.o : src/pf_utils.f90 ./build/pf_stop.o ./build/pf_timer.o ./build/pf_dtype.o 
-./build/pf_ndarray_encap.o : src/pf_ndarray_encap.f90 ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_ham_sys_encap.o : src/pf_ham_sys_encap.f90 ./build/pf_dtype.o 
+./build/pf_ndarray_encap.o : src/pf_ndarray_encap.f90 ./build/pf_stop.o ./build/pf_dtype.o 
 ./build/pf_ndarray_oc_encap.o : src/pf_ndarray_oc_encap.f90 ./build/pf_utils.o ./build/pf_dtype.o 
-./build/pf_ndsysarray_encap.o : src/pf_ndsysarray_encap.f90 ./build/pf_dtype.o 
-./build/pf_zndsysarray_encap.o : src/pf_zndsysarray_encap.f90 ./build/pf_dtype.o 
-./build/pf_zndarray_encap.o : src/pf_zndarray_encap.f90 ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_ndsysarray_encap.o : src/pf_ndsysarray_encap.f90 ./build/pf_stop.o ./build/pf_dtype.o 
+./build/pf_zndsysarray_encap.o : src/pf_zndsysarray_encap.f90 ./build/pf_stop.o ./build/pf_dtype.o 
+./build/pf_zndarray_encap.o : src/pf_zndarray_encap.f90 ./build/pf_stop.o ./build/pf_dtype.o 
 ./build/pf_exp_sweeper.o : src/pf_exp_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_fexp_sweeper.o : src/pf_fexp_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imex_sweeper.o : src/pf_imex_sweeper.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_imexR_sweeper.o : src/pf_imexR_sweeper.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imexQ_oc_sweeper.o : src/pf_imexQ_oc_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_imk_sweeper.o : src/pf_imk_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_magpicard_sweeper.o : src/pf_magpicard_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 

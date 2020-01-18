@@ -57,111 +57,222 @@ contains
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
     if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
+    if(.not.allocated(this%delta_q0)) allocate(this%delta_q0(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
 
     this%errors = -1.0_pfdp
     this%residuals = -1.0_pfdp
+    this%delta_q0 = -1.0_pfdp
   end subroutine initialize_results
 
   subroutine dump_resids(this)
     type(pf_results_t), intent(inout) :: this
-    integer :: i, j, k, istat,system
+    integer :: i, j, k, istat,system,istream,nstep
     character(len = 128) :: fname  !!  output file name for residuals
     character(len = 256) :: fullname  !!  output file name for residuals
     character(len = 128) :: datpath  !!  directory path
     character(len = 128) :: dirname  !!  directory name
-    
+
+    ! Create directory for residual output if necessary
     datpath = trim(this%datpath) // 'residuals'
     istat= system('mkdir -p ' // trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
-
+    ! Create directory for this processor
     write (dirname, "(A6,I0.3)") '/Proc_',this%rank
     datpath=trim(datpath) // trim(dirname) 
     istat= system('mkdir -p ' // trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_resids")
 
+    !  output residuals for each sweep and block and iteration
     write (fname, "(A5,I0.1,A4)") '/Lev_',this%level_index,'.dat'
     fullname = trim(datpath) // trim(fname)
-    !  output residuals
-    open(100+this%rank, file=trim(fullname), form='formatted')
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
     do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
        do i = 1 , this%niters
           do k = 1, this%nsweeps
-             if (this%residuals(i, j, k) .gt. 0.0) then
-                write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%residuals(i, j, k)
+             if (this%residuals(i, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%residuals(i, j, k)
              end if
           end do
        end do
     enddo
-    close(100+this%rank)
+    close(istream)
 
-  end subroutine dump_resids
-  subroutine dump_errors(this)
-    type(pf_results_t), intent(inout) :: this
-    integer :: i, j, k, istat,system
-    character(len = 128   ) :: fname  !!  output file name for residuals
-    character(len = 256   ) :: fullname  !!  output file name for residuals
-    character(len = 128   ) :: datpath  !!  directory path
-
-    
-    datpath = trim(this%datpath) // 'errors'
-    istat= system('mkdir -p ' // trim(datpath))
-    
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_errors")
-
-    write (fname, "(A6,I0.3,A5,I0.1,A4)") '/Proc_',this%rank,'_Lev_',this%level_index,'.dat'
+    !  output residuals only for last iteration
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
     fullname = trim(datpath) // trim(fname)
-    !  output errors
-    open(100+this%rank, file=trim(fullname), form='formatted')
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
     do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = this%niters,1,-1
+          if (this%residuals(i, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%residuals(i, j, this%nsweeps)
+             exit
+          end if
+       end do
+    enddo
+    close(istream)
+    
+  end subroutine dump_resids
+  subroutine dump_delta_q0(this)
+    type(pf_results_t), intent(inout) :: this
+    integer :: i, j, k, istat,system,istream,nstep
+    character(len = 128) :: fname  !!  output file name for residuals
+    character(len = 256) :: fullname  !!  output file name for residuals
+    character(len = 128) :: datpath  !!  directory path
+    character(len = 128) :: dirname  !!  directory name
+
+    ! Create directory for residual output if necessary
+    datpath = trim(this%datpath) // 'delta_q0'
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_delta_q0")
+    ! Create directory for this processor
+    write (dirname, "(A6,I0.3)") '/Proc_',this%rank
+    datpath=trim(datpath) // trim(dirname) 
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_delta_q0")
+
+    !  output delta_q0 for each sweep and block and iteration
+    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level_index,'.dat'
+    fullname = trim(datpath) // trim(fname)
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
        do i = 1 , this%niters
           do k = 1, this%nsweeps
-             write(100+this%rank, '(I4, I4, I4, e22.14)') j,i,k,this%errors(i, j, k)
+             if (this%delta_q0(i, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%delta_q0(i, j, k)
+             end if
           end do
        end do
     enddo
-    close(100+this%rank)
+    close(istream)
+
+    !  output delta_q0 only for last iteration
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
+    fullname = trim(datpath) // trim(fname)
+    istream=5000+this%rank
+    open(istream, file=trim(fullname), form='formatted')
+
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = this%niters,1,-1
+          if (this%delta_q0(i, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%delta_q0(i, j, this%nsweeps)
+             exit
+          end if
+       end do
+    enddo
+    close(istream)
+    
+  end subroutine dump_delta_q0
+  subroutine dump_errors(this)
+    type(pf_results_t), intent(inout) :: this
+
+    integer :: i, j, k, istat,system,istream,nstep
+    character(len = 128   ) :: fname  !!  output file name for residuals
+    character(len = 256   ) :: fullname  !!  output file name for residuals
+    character(len = 128   ) :: datpath  !!  directory path
+    character(len = 128) :: dirname  !!  directory name
+    
+    !  Create directory for output if necessary
+    datpath = trim(this%datpath) // 'errors'
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_errors")
+
+    ! Create directory for this processor
+    write (dirname, "(A6,I0.3)") '/Proc_',this%rank
+    datpath=trim(datpath) // trim(dirname) 
+    istat= system('mkdir -p ' // trim(datpath))
+    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_errors")    
+
+    !  Build file name for output per sweep
+    write (fname, "(A5,I0.1,A4)") '/Lev_',this%level_index,'.dat'
+    fullname = trim(datpath) // trim(fname)               !  full path to file
+    istream=2000+this%rank                                !  define unit number
+    open(istream, file=trim(fullname), form='formatted')  !  open file
+
+    !  output errors  per sweep
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = 1 , this%niters
+          do k = 1, this%nsweeps
+             if (this%errors(i, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4, I4, I4, e22.14)') nstep,j,i,k,this%errors(i, j, k)
+             end if
+          end do
+       end do
+    enddo
+    close(istream)
+
+    !  Build file name for output at end of step
+    write (fname, "(A5,I0.1,A9)") '/Lev_',this%level_index,'_iter.dat'
+    fullname = trim(datpath) // trim(fname)               !  full path to file
+    istream=2000+this%rank                               !  define unit number
+    open(istream, file=trim(fullname), form='formatted')  !  open file
+
+    !  output errors  per sweep
+    do j = 1, this%nblocks
+       nstep=(j-1)*this%nprocs+this%rank+1
+       do i = this%niters,1,-1
+          if (this%errors(i, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%errors(i, j, this%nsweeps)
+             exit
+          end if
+       end do
+    enddo
+    flush(istream)
+    close(istream)
 
   end subroutine dump_errors
 
-  subroutine dump_timings(pf)
+  subroutine dump_timings(this,pf)
+    type(pf_results_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout) :: pf
-    character(len = 128   ) :: fname  !!  output file name for runtimes
+    character(len = 128   ) :: pname     !!  processor name
     character(len = 256   ) :: fullname  !!  output file name for runtimes
     character(len = 128   ) :: datpath  !!  directory path
-    integer :: istat,j, istream,system
+    character(len = 128   ) :: strng      !  used for string conversion
+    integer :: istat,j, iout,system,nlev,k,kmax
 
-    datpath = 'dat/' // trim(pf%outdir) // '/runtimes'
+    datpath = trim(this%datpath) // '/runtimes/'
     istat= system('mkdir -p '// trim(datpath))
-
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
 
-    !  Write a file with timer names and times
-    write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.txt'    
-    fullname = trim(datpath) // trim(fname)
-    istream = 200+pf%rank !  Use processor dependent file number
-    !  output timings
-    open(istream, file=trim(fullname), form='formatted')
-    do j = 1, 100
-       if (pf%runtimes(j) > 0.0d0) then
-          write(istream, '(a16,  f23.8)') timer_names(j),pf%runtimes(j)
-       end if
-    end do
-    close(istream)
-    
-    !  Write a file with timer numbers and times
-    write (fname, "(A6,I0.3,A4)")  '/Proc_',pf%rank,'.dat'    
-    fullname = trim(datpath) // trim(fname)
-    istream = 200+pf%rank !  Use processor dependent file number
-    !  output timings
-    open(istream, file=trim(fullname), form='formatted')
-    do j = 1, 100
-       if (pf%runtimes(j) > 0.0d0) then
-          write(istream, '(I0.3,  f23.8)') j,pf%runtimes(j)
-       end if
-    end do
-    
-    close(istream)
+    ! Create directory for this processor
+    write (pname, "(A5,I0.3)") 'Proc_',this%rank
+    datpath=trim(datpath) // trim(pname) 
 
+    !  Write a json file with timer numbers and times
+    fullname = trim(datpath) // '_times.json'
+    iout = 4000+pf%rank !  Use processor dependent file number
+    nlev=pf%nlevels
+    !  output timings
+    open(iout, file=trim(fullname), form='formatted')
+    write(iout,*) '{'
+    kmax=1
+    if (pf%save_timings > 1) kmax=5
+
+    do k=1,kmax
+       write(iout,"(A24,A1,e14.6,A1)")  timer_names(k), ':', pf%pf_timers%runtimes(k,1), ','
+    end do
+    if (pf%save_timings > 1) then
+       do k=kmax+1,PF_NUM_TIMERS
+          strng=trim(convert_real_array(pf%pf_timers%runtimes(k,1:nlev),nlev))
+          write(iout,"(A24,A1,A60,A1)")  timer_names(k),':', adjustl(strng), ','
+       end do
+    end if
+    write(iout,*) '}'
+    
+    close(iout)
+    
   end subroutine dump_timings
 
   subroutine destroy_results(this)
@@ -169,6 +280,7 @@ contains
     
     if(allocated(this%errors))  deallocate(this%errors)
     if(allocated(this%residuals))  deallocate(this%residuals)
+    if(allocated(this%delta_q0))  deallocate(this%delta_q0)
   end subroutine destroy_results
 
 end module pf_mod_results

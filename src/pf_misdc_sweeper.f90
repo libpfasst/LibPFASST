@@ -66,7 +66,7 @@ contains
     class(pf_encap_t), allocatable :: S3(:)
     class(pf_encap_t), allocatable :: rhs
 
-    call start_timer(pf, TLEVEL+lev%index-1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,lev%index)
     
     ! compute integrals and add fas correction
     do m = 1, lev%nnodes-1
@@ -116,7 +116,7 @@ contains
     ! done
     call lev%ulevel%factory%destroy_single(rhs, lev%index,  lev%lev_shape)
 
-    call end_timer(pf, TLEVEL+lev%index-1)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,lev%index)
 
   end subroutine misdc_sweep
      

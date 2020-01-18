@@ -88,7 +88,6 @@ contains
 
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    call start_timer(pf, TLEVEL+lev%index-1)
     step = pf%state%step+1
 
     which = 0
@@ -109,8 +108,9 @@ contains
     tend = t0+dt
 
     do k = 1,nsweeps
-       pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
+       call pf_start_timer(pf, T_SWEEP,level_index)
+       pf%state%sweep=k
 
        ! compute integrals and add fas correction
         if( sweep_y ) then
@@ -153,15 +153,15 @@ contains
        if (k .eq. 1) then
          if( sweep_y ) then
             call lev%Q(1)%copy(lev%q0, 1)
-            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,1), 1, 1, 1, step)
-            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,2), 2, 1, 1, step)
-            call this%f_eval(lev%Q(1), t0, lev%index, lev%F(1,3), 3, 1, 1, step)
+            call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1), 1, 1, 1, step)
+            call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,2), 2, 1, 1, step)
+            call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,3), 3, 1, 1, step)
          end if
          if( sweep_p ) then
             call lev%Q(Nnodes)%copy(lev%qend, 2)
-            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
-            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
-            call this%f_eval(lev%Q(Nnodes), tend, lev%index, lev%F(Nnodes,3), 3, 2, Nnodes, step)
+            call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,1), 1, 2, Nnodes, step)
+            call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,2), 2, 2, Nnodes, step)
+            call this%f_eval(lev%Q(Nnodes), tend, level_index, lev%F(Nnodes,3), 3, 2, Nnodes, step)
          end if
        end if ! k .eq. 1
 
@@ -180,7 +180,7 @@ contains
             !  Add the starting value
             call this%rhs%axpy(1.0_pfdp, lev%Q(1), 1)
 
-            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,2), 2, 1)
+            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index, lev%F(m+1,2), 2, 1)
 
             !  Now we need to do the final subtraction for the f3 piece
             call this%rhs%copy(lev%Q(m+1), 1)
@@ -189,9 +189,9 @@ contains
             end do
 
             call this%rhs%axpy(-1.0_pfdp, this%I3(m), 1)
-            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, lev%index, lev%F(m+1,3), 3, 1)
-            call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,1), 1, 1, m+1, step)
-            call this%f_eval(lev%Q(m+1), t, lev%index, lev%F(m+1,2), 2, 1, m+1, step)
+            call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index, lev%F(m+1,3), 3, 1)
+            call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,1), 1, 1, m+1, step)
+            call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,2), 2, 1, m+1, step)
          end do
          !call pf_residual(pf, level_index, dt, 1)
          call lev%qend%copy(lev%Q(lev%nnodes), 1)
@@ -211,7 +211,7 @@ contains
             !  Add the starting value
             call this%rhs%axpy(1.0_pfdp, lev%Q(Nnodes), 2)
 
-            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,2), 2, 2)
+            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, level_index, lev%F(m,2), 2, 2)
 
             !  Now we need to do the final subtraction for the f3 piece
             call this%rhs%copy(lev%Q(m), 2)
@@ -221,9 +221,9 @@ contains
 
             call this%rhs%axpy(-1.0_pfdp, this%I3(m), 2)
 
-            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, lev%index, lev%F(m,3), 3, 2)
-            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, 2, m, step)
-            call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, 2, m, step)
+            call this%f_comp(lev%Q(m), t, dt*this%QtilI(Nnodes-m,Nnodes-m+1), this%rhs, level_index, lev%F(m,3), 3, 2)
+            call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1), 1, 2, m, step)
+            call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2), 2, 2, m, step)
          end do
          !call pf_residual(pf, level_index, dt, 2)
          call lev%q0%copy(lev%Q(1), 2)
@@ -239,6 +239,8 @@ contains
          call pf_stop(__FILE__,__LINE__,'invalid sweep')         
        end if
        ! done
+       call pf_stop_timer(pf, T_SWEEP,level_index)
+
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do ! k=1,nsweeps
   end subroutine misdcQ_oc_sweep
@@ -284,10 +286,10 @@ contains
     this%QdiffI = lev%sdcmats%qmat-this%QtilI
 
     !>  Make space for rhs
-    call lev%ulevel%factory%create_single(this%rhs, lev%index, lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%rhs, level_index, lev%lev_shape)
 
     !>  Make space for extra integration piece
-    call lev%ulevel%factory%create_array(this%I3,lev%nnodes-1,lev%index,lev%lev_shape)
+    call lev%ulevel%factory%create_array(this%I3,lev%nnodes-1,level_index,lev%lev_shape)
 
   end subroutine misdcQ_oc_initialize
 
@@ -369,9 +371,9 @@ contains
     mystep = 1
     if(present(step)) mystep = step
 
-    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1), 1, which, m, step)
-    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,2), 2, which, m, step)
-    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,3), 3, which, m, step)
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1), 1, which, m, step)
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2), 2, which, m, step)
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,3), 3, which, m, step)
   end subroutine misdcQ_oc_evaluate
 
 
