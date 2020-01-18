@@ -90,7 +90,7 @@ contains
     dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
 
     call this%y0%copy(y0)
-    
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)    
     do n = 1, nsteps_rk      ! Loop over time steps
        tn=t0+dt*real(n-1,pfdp)
        ! Reset initial condition
@@ -98,11 +98,12 @@ contains
 
 
        ! this assumes that cvec(1) == 0
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
        if (this%explicit) &
             call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,1),1)
        if (this%implicit) &
             call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,2),2)
-     
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)            
        ! Loop over stage values
        do m = 1, this%nstages-1  
           
@@ -126,15 +127,19 @@ contains
 
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
              call this%f_comp(this%ytemp, tc, dt*this%AmatI(m+1,m+1), this%rhs, level_index,this%F(m+1,2), 2)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
           else
              call this%ytemp%copy(this%rhs)
           end if
                     
           ! Reevaluate explicit rhs with the new solution
-          if (this%explicit) &
-               call this%f_eval(this%ytemp, tc, level_index, this%F(m+1,1), 1)
-          
+          if (this%explicit) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call this%f_eval(this%ytemp, tc, level_index, this%F(m+1,1), 1)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+          end if
        end do  ! End loop over stage values
        
        ! Compute final value using quadrature rule
@@ -154,6 +159,8 @@ contains
        end do ! End loop over stage values
 
     end do ! End Loop over time steps
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
+    
     call yend%copy(this%ytemp)
   end subroutine ark_do_n_steps
   

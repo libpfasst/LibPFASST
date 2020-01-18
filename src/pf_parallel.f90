@@ -285,14 +285,12 @@ contains
     
     ! Check to see if relative tolerance is met
     if (pf%levels(level_index)%residual_rel < pf%rel_res_tol) then
-!       if (pf%debug)
-       print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(level_index)%residual_rel
+       if (pf%debug)  print*, 'DEBUG --', pf%rank, ' residual relative tol met',pf%levels(level_index)%residual_rel
        residual_converged = .true.
     end if
     ! Check to see if absolute tolerance is met
     if   (pf%levels(level_index)%residual     < pf%abs_res_tol)  then
-       !       if (pf%debug)
-       print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
+       if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
        residual_converged = .true.
     end if
     if (pf%levels(level_index)%max_delta_q0 > pf%abs_res_tol*1.0e-2) then
@@ -398,7 +396,7 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_STEP)
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_BLOCK)
 
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
@@ -458,8 +456,6 @@ contains
 
           !  Check for convergence
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
-
-          print *,pf%rank, ' post check_convergence'
           call call_hooks(pf, -1, PF_POST_ITERATION)
           if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
           !  If we are converged, exit block (can do one last sweep if desired)
@@ -470,8 +466,8 @@ contains
           end if
 
        end do  !  Loop over the iteration in this bloc
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_STEP)
-       call call_hooks(pf, -1, PF_POST_STEP)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
+       call call_hooks(pf, -1, PF_POST_BLOCK)
        
     end do !  Loop over the blocks
 

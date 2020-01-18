@@ -10,41 +10,45 @@ module pf_mod_timer
   implicit none
   !!$  ! if you add more timers here, make sure to update the PF_NUM_TIMERS in pf_dtype.f90
   character(len=10), parameter :: timer_names(PF_NUM_TIMERS) = (/ &
-       'total     ',  &        ! 1
-       'predictor ',  &        ! 2
-       'iteration ',  &        ! 3
-       'step      ',  &        ! 4
-       'broadcast ',  &        ! 5
-       'hooks     ',  &        ! 6
-       'residual  ',  &        ! 7
-       'interp    ',  &        ! 8
-       'restrict  ',  &        ! 9
-       'receive   ',  &        ! 10
-       'send      ',  &        ! 11
-       'wait      ',  &        ! 12
-       'sweep     ',  &        ! 13
-       'feval     ',  &        ! 14
-       'fcomp     ',  &        ! 15
-       'aux       '/)          ! 16
+       'total     ',  &   ! 1:  Total time to do all blocks
+       'predictor ',  &   ! 2:  Time in predictor   
+       'block     ',  &   ! 3:  Time for all blocks
+       'iteration ',  &   ! 4:  Time for all iterations 
+       'sweep     ',  &   ! 5:  Time for all sweeps (n-steps in parareal)
+       'feval     ',  &   ! 6:  Time for explicit function evaluations
+       'fcomp     ',  &   ! 7:  Time for implicit function evaluations
+       'residual  ',  &   ! 8:  Time for computing residuals
+       'interp    ',  &   ! 9:  Interpolation time
+       'restrict  ',  &   ! 10: Restricting time
+       'broadcast ',  &   ! 11: Time for broadcast (of initial conditions)
+       'receive   ',  &   ! 12: Time in receive in pf_comm
+       'send      ',  &   ! 13: Time in send in pf_comm
+       'wait      ',  &   ! 14: Time in wait in 
+       'pack      ',  &   ! 15: Time to pack solution
+       'unpack    ',  &   ! 16: Time to unpack solution
+       'hooks     ',  &   ! 17: Time in hooks routines
+       'aux       '/)     ! 18: Extra for whatever
 
   ! Assign numbers to timer names
   integer, parameter :: &
        T_TOTAL       = 1,  &
        T_PREDICTOR   = 2,  &
-       T_ITERATION   = 3,  &
-       T_STEP        = 4,  &
-       T_BROADCAST   = 5,  &
-       T_HOOKS       = 6,  &
-       T_RESIDUAL    = 7,  &
-       T_INTERPOLATE = 8,  &
-       T_RESTRICT    = 9,  &
-       T_RECEIVE     = 10,  &
-       T_SEND        = 11,  &
-       T_WAIT        = 12,  &
-       T_SWEEP       = 13,  &  
-       T_FEVAL       = 14,  &  
-       T_FCOMP       = 15,  &  
-       T_AUX         = 16    
+       T_BLOCK       = 3,  &
+       T_ITERATION   = 4,  &
+       T_SWEEP       = 5,  &  
+       T_FEVAL       = 6,  &  
+       T_FCOMP       = 7,  &  
+       T_RESIDUAL    = 8,  &
+       T_INTERPOLATE = 9,  &
+       T_RESTRICT    = 10, &
+       T_BROADCAST   = 11, &
+       T_RECEIVE     = 12, &
+       T_SEND        = 13, &
+       T_WAIT        = 14, &
+       T_PACK        = 15, &
+       T_UNPACK      = 16, &
+       T_HOOKS       = 17, &
+       T_AUX         = 18    
   
 contains
   !>  Subroutine to start a timer

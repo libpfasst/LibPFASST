@@ -15,8 +15,8 @@ module pf_mod_hooks
        PF_POST_ITERATION    = 4, &
        PF_PRE_SWEEP         = 5, &
        PF_POST_SWEEP        = 6, &
-       PF_PRE_STEP          = 7, &
-       PF_POST_STEP         = 8, &
+       PF_PRE_BLOCK         = 7, &
+       PF_POST_BLOCK        = 8, &
        PF_PRE_INTERP_ALL    = 9, &
        PF_POST_INTERP_ALL   = 10, &
        PF_PRE_INTERP_Q0     = 11, &
@@ -41,8 +41,8 @@ module pf_mod_hooks
        'post-iteration     ',  &
        'pre-sweep          ',  &
        'post-sweep         ',  &
-       'pre-step           ',  &
-       'post-step          ',  &
+       'pre-block          ',  &
+       'post-block         ',  &
        'pre-interp-all     ',  &
        'post-interp-all    ',  &
        'pre-interp-q0      ',  &

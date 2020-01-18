@@ -406,7 +406,7 @@ contains
       
     end do  !  Loop over the iteration in this block
     pf%state%itcnt = pf%state%itcnt + pf%state%iter
-    call call_hooks(pf, -1, PF_POST_STEP)
+    call call_hooks(pf, -1, PF_POST_BLOCK)
 
     
     !  call pf_dump_results(pf)

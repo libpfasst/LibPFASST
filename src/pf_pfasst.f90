@@ -687,7 +687,6 @@ contains
     if (pf%save_timings > 0) then
        call  dump_timings(pf%results(pf%nlevels),pf)
     end if
-  
 
 end subroutine pf_dump_results
 

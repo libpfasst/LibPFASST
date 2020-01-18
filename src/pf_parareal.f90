@@ -118,8 +118,8 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_STEP)
-       
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_BLOCK)
+       call call_hooks(pf, -1, PF_PRE_BLOCK)
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
        !  1.  predictor
@@ -181,8 +181,8 @@ contains
                 exit
              end if
           end do  !  Loop over the iteration in this bloc
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_STEP)
-       call call_hooks(pf, -1, PF_POST_STEP)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
+       call call_hooks(pf, -1, PF_POST_BLOCK)
     end if
     
     end do !  Loop over the blocks
@@ -288,9 +288,7 @@ contains
 
     !  Step on fine and store in  fine qend 
     level_index=2
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
     call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,f_lev%qend, dt, nsteps_f)
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
 
     !  Subtract the old coarse to get parareal correction  in c_lev%qend
     call f_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1))
@@ -300,9 +298,7 @@ contains
 
     !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
 
     !  Finish the parareal update (store in coarse qend) F_old-G_old+G_new
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
