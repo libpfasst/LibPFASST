@@ -8,6 +8,7 @@ MKVERBOSE = FALSE
 USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
+USE_AMREX=TRUE
 
 
 include $(LIBPFASST)/Makefile.local
@@ -65,6 +66,7 @@ FSRC = src/pfasst.f90 \
 #       pf_amisdcQ.f90 \
 
 
+
 #  Before using petsc, one must set the environment variables
 #  PETSC_DIR and PETSC_ARCH
 #  These are displayed at the end of the petsc configuration step
@@ -74,6 +76,21 @@ ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
 FSRC+= pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
+endif
+
+ifeq ($(USE_AMREX),TRUE)
+AMREX_HOME=/home/mlminion/Codes/amrex
+AMREX_LIBRARY_HOME= $(AMREX_HOME)/amrexlib
+
+LIBDIR := $(AMREX_LIBRARY_HOME)/lib
+INCDIR := $(AMREX_LIBRARY_HOME)/include
+
+COMPILE_CPP_FLAGS ?= $(shell awk '/fflags:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
+COMPILE_LIB_FLAGS ?= $(shell awk '/Libs:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
+FSRC+= src/pf_amrex_encap.f90
+
+FFLAGS += -I$(INCDIR) $(COMPILE_CPP_FLAGS)
+LDFLAGS += -L$(LIBDIR) $(COMPILE_LIB_FLAGS) -lamrex
 endif
 
 ifeq ($(USE_FFTW),FALSE)

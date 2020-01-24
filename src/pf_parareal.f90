@@ -154,7 +154,7 @@ contains
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
        end if
-
+       call call_hooks(pf, -1, PF_POST_PREDICTOR)
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
        
