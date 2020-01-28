@@ -150,14 +150,12 @@ contains
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
-
-    if (pf%save_errors .and. pf%state%iter>0)  then
-       pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
+    if (pf%state%iter+1 < 1)  return
+    if (pf%save_errors)  then
+       pf%results(level_index)%errors(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = error
     end if
     
   end subroutine pf_set_error
-
-
   !
   !> Generic evaluate all
   !! Each sweeper can define its own evaluate_all or use this generic one

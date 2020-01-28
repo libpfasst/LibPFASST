@@ -53,11 +53,11 @@ contains
     this%level_index=level_index    
 
     ierr=0
-    if(.not.allocated(this%errors)) allocate(this%errors(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if(.not.allocated(this%errors)) allocate(this%errors(niters_in+1, this%nblocks, nsweeps_in),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
-    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if(.not.allocated(this%residuals)) allocate(this%residuals(niters_in+1, this%nblocks, nsweeps_in),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
-    if(.not.allocated(this%delta_q0)) allocate(this%delta_q0(niters_in, this%nblocks, nsweeps_in),stat=ierr)
+    if(.not.allocated(this%delta_q0)) allocate(this%delta_q0(niters_in+1, this%nblocks, nsweeps_in),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                   
 
     this%errors = -1.0_pfdp
@@ -91,10 +91,10 @@ contains
 
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = 1 , this%niters
+       do i = 0 , this%niters
           do k = 1, this%nsweeps
-             if (this%residuals(i, j, k) .ge. 0.0) then
-                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%residuals(i, j, k)
+             if (this%residuals(i+1, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%residuals(i+1, j, k)
              end if
           end do
        end do
@@ -109,9 +109,9 @@ contains
 
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = this%niters,1,-1
+       do i = this%niters,0,-1
           if (this%residuals(i, j, this%nsweeps) .ge. 0.0) then
-             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%residuals(i, j, this%nsweeps)
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%residuals(i+1, j, this%nsweeps)
              exit
           end if
        end do
@@ -145,10 +145,10 @@ contains
 
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = 1 , this%niters
+       do i = 0 , this%niters
           do k = 1, this%nsweeps
-             if (this%delta_q0(i, j, k) .ge. 0.0) then
-                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%delta_q0(i, j, k)
+             if (this%delta_q0(i+1, j, k) .ge. 0.0) then
+                write(istream, '(I5, I4,I4, I4, e22.14)') nstep,j,i,k,this%delta_q0(i+1, j, k)
              end if
           end do
        end do
@@ -163,9 +163,9 @@ contains
 
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = this%niters,1,-1
-          if (this%delta_q0(i, j, this%nsweeps) .ge. 0.0) then
-             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%delta_q0(i, j, this%nsweeps)
+       do i = this%niters,0,-1
+          if (this%delta_q0(i+1, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%delta_q0(i+1, j, this%nsweeps)
              exit
           end if
        end do
@@ -202,14 +202,15 @@ contains
     !  output errors  per sweep
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = 1 , this%niters
+       do i = 0 , this%niters
           do k = 1, this%nsweeps
-             if (this%errors(i, j, k) .ge. 0.0) then
-                write(istream, '(I5, I4, I4, I4, e22.14)') nstep,j,i,k,this%errors(i, j, k)
+             if (this%errors(i+1, j, k) .ge. 0.0) then
+                write(istream, '(I7, I7, I4, I4, e22.14)') nstep,j,i,k,this%errors(i+1, j, k)
              end if
           end do
        end do
     enddo
+
     close(istream)
 
     !  Build file name for output at end of step
@@ -221,9 +222,9 @@ contains
     !  output errors  per sweep
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
-       do i = this%niters,1,-1
-          if (this%errors(i, j, this%nsweeps) .ge. 0.0) then
-             write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%errors(i, j, this%nsweeps)
+       do i = this%niters,0,-1
+          if (this%errors(i+1, j, this%nsweeps) .ge. 0.0) then
+             write(istream, '(I7,I7, I4, e22.14)') nstep,j,i,this%errors(i+1, j, this%nsweeps)
              exit
           end if
        end do
@@ -241,7 +242,7 @@ contains
     character(len = 128   ) :: datpath  !!  directory path
     character(len = 128   ) :: strng      !  used for string conversion
     integer :: istat,j, iout,system,nlev,k,kmax
-
+    real(pfdp) :: qarr(pf%nlevels)
     datpath = trim(this%datpath) // '/runtimes/'
     istat= system('mkdir -p '// trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in dump_timings")
@@ -265,8 +266,13 @@ contains
     end do
     if (pf%save_timings > 1) then
        do k=kmax+1,PF_NUM_TIMERS
-          strng=trim(convert_real_array(pf%pf_timers%runtimes(k,1:nlev),nlev))
-          write(iout,"(A24,A1,A60,A1)")  timer_names(k),':', adjustl(strng), ','
+          if (nlev .eq. 1) then
+             write(iout,"(A24,A1,e14.6,A1)")  timer_names(k), ':', pf%pf_timers%runtimes(k,1), ','
+          else
+             qarr=pf%pf_timers%runtimes(k,1:nlev)
+             strng=trim(convert_real_array(qarr,nlev))       
+             write(iout,"(A24,A1,A60,A1)")  timer_names(k),':', adjustl(strng), ','
+          end if
        end do
     end if
     write(iout,*) '}'

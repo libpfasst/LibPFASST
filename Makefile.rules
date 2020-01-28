@@ -8,10 +8,10 @@ vpath %.f   $(VPATHS)
 
 $(EXE): $(OBJ)
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	$(LD) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 else
 	@echo "Linking..."
-	@$(FC) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	@$(LD) $(FFLAGS)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 endif
 
 build/%.o build/%.mod: %.f90

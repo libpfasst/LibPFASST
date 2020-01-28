@@ -192,14 +192,14 @@ contains
     allocate(lev%nflags(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
-    !>  Allocate and compute all the matrices
-    allocate(lev%sdcmats,stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
-    call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
-    lev%nodes = lev%sdcmats%qnodes
-
     !>  initialize sweeper
     if (pf%use_sdc_sweeper) then
+       !>  Allocate and compute all the matrices
+       allocate(lev%sdcmats,stat=ierr)
+       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
+       call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
+       lev%nodes = lev%sdcmats%qnodes
+       
        lev%ulevel%sweeper%use_LUq=pf%use_LUq
        call lev%ulevel%sweeper%initialize(pf,level_index)
     end if
@@ -278,16 +278,15 @@ contains
     !> deallocate nodes, flags, and integration matrices
     deallocate(lev%nodes)
     deallocate(lev%nflags)
-
-    call pf_destroy_sdcmats(lev%sdcmats)
-    deallocate(lev%sdcmats)
-
+    
     !> deallocate solution and function storage
     if ((lev%index < pf%nlevels) .and. allocated(lev%tauQ)) then
        call lev%ulevel%factory%destroy_array(lev%tauQ)
     end if
 
     if (pf%use_sdc_sweeper) then
+       call pf_destroy_sdcmats(lev%sdcmats)
+       deallocate(lev%sdcmats)
        call lev%ulevel%factory%destroy_array(lev%Fflt)
        call lev%ulevel%factory%destroy_array(lev%I)
        call lev%ulevel%factory%destroy_array(lev%pFflt)
@@ -494,8 +493,8 @@ contains
     write(un,*) 'quad precision:   ', pfqp   ,'  bytes'    
     write(un,*) 'Output directory: ', trim(pf%outdir)    
     write(un,*) 'Nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
+    write(un,*) 'Nlevels:     ', pf%nlevels, '! number of levels'
     if (pf%use_sdc_sweeper) then
-       write(un,*) 'Nlevels:     ', pf%nlevels, '! number of pfasst levels'
        if (pf%comm%nproc == 1) then
           write(un,*) '            ', '             ', ' ! since 1 time proc is being used, this is a serial sdc run'
        else
