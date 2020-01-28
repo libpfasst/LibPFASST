@@ -3,10 +3,10 @@
 #
 
 
-DEBUG = FALSE        
-MKVERBOSE = FALSE    
-USE_PETSC=FALSE      
-USE_SUNDIALS=FALSE   
+DEBUG = FALSE
+MKVERBOSE = FALSE
+USE_PETSC=FALSE
+USE_SUNDIALS=FALSE
 USE_FFTW=FALSE
 
 #  File for compiler options
@@ -77,6 +77,7 @@ endif
 #  FFT options
 ifeq ($(USE_FFTW),FALSE)
 F77SRC = src/dfftpack.o
+FSRC+=src/pf_fftpack.f90
 else
 FSRC+=src/pf_fftw.f90
 FFTW=$(LIBPFASST)/fftw3

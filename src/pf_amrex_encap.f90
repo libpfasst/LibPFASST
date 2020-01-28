@@ -20,14 +20,14 @@ module pf_mod_AMReX_mfab
   !>  Type to create and destroy N-dimenstional arrays 
   type, extends(pf_factory_t) :: pf_AMReX_mfab_factory_t
    contains
-     procedure :: create_single  => pf_AMReX_mfab_create_single
-     procedure :: create_array  => pf_AMReX_mfab_create_array
-     procedure :: destroy_single => pf_AMReX_mfab_destroy_single
-     procedure :: destroy_array => pf_AMReX_mfab_destroy_array
+     procedure :: create_single  => AMReX_mfab_create_single
+     procedure :: create_array  => AMReX_mfab_create_array
+     procedure :: destroy_single => AMReX_mfab_destroy_single
+     procedure :: destroy_array => AMReX_mfab_destroy_array
   end type pf_AMReX_mfab_factory_t
   
   !>  1-dimensional array type,  extends the abstract encap type
-  type, extends(pf_encap_t) :: pf_AMReX_mfab_t 
+  type, extends(pf_encap_t) :: pf_amrex_mfab_t
      integer             :: ndim
      integer   :: arr_shape(4)
      integer   :: pack_size(4)
@@ -41,17 +41,19 @@ module pf_mod_AMReX_mfab
      type(amrex_multifab)  :: mfab
      
    contains
-     procedure :: setval => pf_AMReX_mfab_setval
-     procedure :: copy => pf_AMReX_mfab_copy
-     procedure :: norm => pf_AMReX_mfab_norm
-     procedure :: pack => pf_AMReX_mfab_pack
-     procedure :: unpack => pf_AMReX_mfab_unpack
-     procedure :: axpy => pf_AMReX_mfab_axpy
-     procedure :: eprint => pf_AMReX_mfab_eprint
-  end type pf_AMReX_mfab_t
+     procedure :: setval => AMReX_mfab_setval
+     procedure :: copy => AMReX_mfab_copy
+     procedure :: norm => AMReX_mfab_norm
+     procedure :: pack => AMReX_mfab_pack
+     procedure :: unpack => AMReX_mfab_unpack
+     procedure :: axpy => AMReX_mfab_axpy
+     procedure :: eprint => AMReX_mfab_eprint
+  end type pf_amrex_mfab_t
+  
+  
 
 contains
-  function cast_as_pf_AMReX_mfab(encap_polymorph) result(pf_AMReX_mfab_obj)
+  function cast_as_AMReX_mfab(encap_polymorph) result(pf_AMReX_mfab_obj)
     class(pf_encap_t), intent(in), target :: encap_polymorph
     type(pf_AMReX_mfab_t), pointer :: pf_AMReX_mfab_obj
     
@@ -59,10 +61,10 @@ contains
     type is (pf_AMReX_mfab_t)
        pf_AMReX_mfab_obj => encap_polymorph
     end select
-  end function cast_as_pf_AMReX_mfab
+  end function cast_as_AMReX_mfab
 
   !>  Subroutine to allocate the array and set the size parameters
-  subroutine pf_AMReX_mfab_build(this, shape_in)
+  subroutine AMReX_mfab_build(this, shape_in)
     use pf_mod_comm_mpi
     class(pf_encap_t), intent(inout) :: this
     integer,           intent(in   ) :: shape_in(:)
@@ -108,10 +110,10 @@ contains
        
        
     end select
-  end subroutine pf_AMReX_mfab_build
+  end subroutine AMReX_mfab_build
 
   !> Subroutine to  create a single array
-  subroutine pf_AMReX_mfab_create_single(this, x, level_index, lev_shape)
+  subroutine AMReX_mfab_create_single(this, x, level_index, lev_shape)
     class(pf_AMReX_mfab_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer,                intent(in   )              :: level_index
@@ -119,11 +121,11 @@ contains
     integer :: ierr
     allocate(pf_AMReX_mfab_t::x,stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
-    call pf_AMReX_mfab_build(x, lev_shape)
-  end subroutine pf_AMReX_mfab_create_single
+    call AMReX_mfab_build(x, lev_shape)
+  end subroutine AMReX_mfab_create_single
 
   !> Subroutine to create an array of arrays
-  subroutine pf_AMReX_mfab_create_array(this, x, n, level_index,  lev_shape)
+  subroutine AMReX_mfab_create_array(this, x, n, level_index,  lev_shape)
     class(pf_AMReX_mfab_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x(:)
     integer,                intent(in   )              :: n
@@ -133,28 +135,28 @@ contains
     allocate(pf_AMReX_mfab_t::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
     do i = 1, n
-       call pf_AMReX_mfab_build(x(i), lev_shape)
+       call AMReX_mfab_build(x(i), lev_shape)
     end do
-  end subroutine pf_AMReX_mfab_create_array
+  end subroutine AMReX_mfab_create_array
 
   !>  Subroutine to destroy array
-  subroutine pf_AMReX_mfab_destroy(encap)
+  subroutine AMReX_mfab_destroy(encap)
     class(pf_encap_t), intent(inout) :: encap
     type(pf_AMReX_mfab_t), pointer :: pf_AMReX_mfab_obj
     integer ::  ierr
-    pf_AMReX_mfab_obj => cast_as_pf_AMReX_mfab(encap)
+    pf_AMReX_mfab_obj => cast_as_AMReX_mfab(encap)
 !    print *,'destroying AMReX_mfab'
 
     
     nullify(pf_AMReX_mfab_obj)
     call amrex_multifab_destroy(pf_AMReX_mfab_obj%mfab)
-    call amrex_geometry_destroy(pf_AMReX_mfab_obj%geom)
+    call amrex_geometry_destroy(pf_AMReX_mfab_obj%geom) 
 
 
-  end subroutine pf_AMReX_mfab_destroy
+  end subroutine AMReX_mfab_destroy
 
   !> Subroutine to destroy an single array
-  subroutine pf_AMReX_mfab_destroy_single(this, x)
+  subroutine AMReX_mfab_destroy_single(this, x)
     class(pf_AMReX_mfab_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout), allocatable :: x
     integer ::  ierr
@@ -165,11 +167,11 @@ contains
        call amrex_geometry_destroy(x%geom)
     end select
     deallocate(x)
-  end subroutine pf_AMReX_mfab_destroy_single
+  end subroutine AMReX_mfab_destroy_single
 
 
   !> Subroutine to destroy an array of arrays
-  subroutine pf_AMReX_mfab_destroy_array(this, x)
+  subroutine AMReX_mfab_destroy_array(this, x)
     class(pf_AMReX_mfab_factory_t), intent(inout)              :: this
     class(pf_encap_t),      intent(inout),allocatable :: x(:)
     integer                                            :: i,ierr
@@ -181,22 +183,22 @@ contains
        end do
     end select
     deallocate(x)
-  end subroutine pf_AMReX_mfab_destroy_array
+  end subroutine AMReX_mfab_destroy_array
 
 
   !>  The following are the base subroutines that all encapsulations must provide
   !!
   
   !> Subroutine to set array to a scalar  value.
-  subroutine pf_AMReX_mfab_setval(this, val, flags)
+  subroutine AMReX_mfab_setval(this, val, flags)
     class(pf_AMReX_mfab_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
     call this%mfab%setval(val,1,this%ncomp,this%nghost)       
-  end subroutine pf_AMReX_mfab_setval
+  end subroutine AMReX_mfab_setval
 
   !> Subroutine to copy an array
-  subroutine pf_AMReX_mfab_copy(this, src, flags)
+  subroutine AMReX_mfab_copy(this, src, flags)
     class(pf_AMReX_mfab_t),    intent(inout)           :: this
     class(pf_encap_t), intent(in   )           :: src
     integer,           intent(in   ), optional :: flags
@@ -218,10 +220,10 @@ contains
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
-  end subroutine pf_AMReX_mfab_copy
+  end subroutine AMReX_mfab_copy
 
   !> Subroutine to pack an array into a flat array for sending
-  subroutine pf_AMReX_mfab_pack(this, z, flags)
+  subroutine AMReX_mfab_pack(this, z, flags)
     class(pf_AMReX_mfab_t), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
@@ -233,10 +235,10 @@ contains
     z=reshape(mfab_data,[product(this%pack_size)])
 
     
-  end subroutine pf_AMReX_mfab_pack
+  end subroutine AMReX_mfab_pack
 
   !> Subroutine to unpack a flatarray after receiving
-  subroutine pf_AMReX_mfab_unpack(this, z, flags)
+  subroutine AMReX_mfab_unpack(this, z, flags)
     class(pf_AMReX_mfab_t), intent(inout) :: this
     real(pfdp),     intent(in   ) :: z(:)
     integer,     intent(in   ), optional :: flags
@@ -248,10 +250,10 @@ contains
     mfab_data=reshape(z,this%pack_size)
 
     
-  end subroutine pf_AMReX_mfab_unpack
+  end subroutine AMReX_mfab_unpack
 
   !> Subroutine to define the norm of the array (here the max norm)
-  function pf_AMReX_mfab_norm(this, flags) result (norm)
+  function AMReX_mfab_norm(this, flags) result (norm)
     class(pf_AMReX_mfab_t), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
@@ -263,10 +265,10 @@ contains
     end if
     
 !    call VecNorm(this%AMReX_mfab,NORM_INFINITY,norm,this%ierr);CHKERRQ(this%ierr)
-  end function pf_AMReX_mfab_norm
+  end function AMReX_mfab_norm
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
-  subroutine pf_AMReX_mfab_axpy(this, a, x, flags)
+  subroutine AMReX_mfab_axpy(this, a, x, flags)
     class(pf_AMReX_mfab_t),    intent(inout)       :: this
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
@@ -278,10 +280,10 @@ contains
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
-  end subroutine pf_AMReX_mfab_axpy
+  end subroutine AMReX_mfab_axpy
 
   !>  Subroutine to print the array to the screen (mainly for debugging purposes)
-  subroutine pf_AMReX_mfab_eprint(this,flags)
+  subroutine AMReX_mfab_eprint(this,flags)
     class(pf_AMReX_mfab_t), intent(inout) :: this
     integer,           intent(in   ), optional :: flags
     real(pfdp),  pointer :: mfab_data(:,:,:,:)
@@ -292,7 +294,7 @@ contains
     !  Just print the first few values
     print *,mfab_data(1,1:10,1,1)
 
-  end subroutine pf_AMReX_mfab_eprint
+  end subroutine AMReX_mfab_eprint
 
 
 end module pf_mod_AMReX_mfab
