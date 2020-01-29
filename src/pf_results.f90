@@ -110,7 +110,7 @@ contains
     do j = 1, this%nblocks
        nstep=(j-1)*this%nprocs+this%rank+1
        do i = this%niters,0,-1
-          if (this%residuals(i, j, this%nsweeps) .ge. 0.0) then
+          if (this%residuals(i+1, j, this%nsweeps) .ge. 0.0) then
              write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%residuals(i+1, j, this%nsweeps)
              exit
           end if
