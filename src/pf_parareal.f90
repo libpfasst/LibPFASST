@@ -180,7 +180,7 @@ contains
                 call call_hooks(pf, -1, PF_POST_CONVERGENCE)
                 exit
              end if
-          end do  !  Loop over the iteration in this bloc
+          end do  !  Loop over j, the iterations in this bloc
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
     end if

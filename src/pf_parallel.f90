@@ -196,7 +196,7 @@ contains
        else  !  Normal PFASST burn in
           level_index=1
           c_lev => pf%levels(level_index)
-          do k = 1, pf%rank + 1
+          do k = 1, pf%rank 
              pf%state%iter = -k
              ! Remember t0=(pf%rank)*dt is the beginning of this time slice so
              ! t0-(pf%rank)*dt is 0             
@@ -213,6 +213,7 @@ contains
                 end if
              end if
              !  Do some sweeps
+             if (pf%debug) print *,'sweep at pred 3,lev=',level_index             
              call c_lev%ulevel%sweeper%sweep(pf, level_index, t0k, dt,pf%nsweeps_burn)
           end do
        endif  !  RK_pred
@@ -232,6 +233,7 @@ contains
              call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank+k, .true.)
 
              !  Do a sweep
+             if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 4,lev=',level_index             
              call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
              !  Send forward
              call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1+k, .false.)
@@ -241,6 +243,7 @@ contains
              !  Get new initial conditions
              call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank, .true.)
              !  Do a sweeps             
+             if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 4,lev=',level_index
              call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred)
              !  Send forward
              call pf_send(pf, c_lev,  c_lev%index*110000+pf%rank+1, .false.)
@@ -261,14 +264,15 @@ contains
        
        !  Do a sweep on level unless we are at the finest level
        if (level_index < pf%state%finest_level) then
+          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 5,lev=',level_index                                 
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps_pred)
        end if
-    end do
+    end do 
+    pf%state%iter   = 0
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
-    pf%state%iter   = 0
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'ending predictor'
@@ -293,7 +297,7 @@ contains
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'residual tol met',pf%levels(level_index)%residual
        residual_converged = .true.
     end if
-    if (pf%levels(level_index)%max_delta_q0 > pf%abs_res_tol*1.0e-2) then
+    if (pf%levels(level_index)%max_delta_q0 > pf%abs_res_tol) then
        residual_converged = .false.
     end if
   end subroutine pf_check_residual
@@ -417,6 +421,7 @@ contains
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = -66
        pf%state%pfblock = k
+       pf%state%sweep = 1
 
        if (k > 1) then
           if (nproc > 1)  then
@@ -460,12 +465,20 @@ contains
           if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
           !  If we are converged, exit block (can do one last sweep if desired)
           if (pf%state%status == PF_STATUS_CONVERGED)  then
-             if (pf%sweep_at_conv) call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             if (pf%sweep_at_conv) then
+                if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at convergence'
+                call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+             end if
              call call_hooks(pf, -1, PF_POST_CONVERGENCE)
              exit             
           end if
 
        end do  !  Loop over the iteration in this bloc
+       if (pf%nlevels .gt. 1) then
+          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep after iterations on fine'
+          call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
+       end if
+       
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
        
@@ -507,7 +520,8 @@ contains
     do level_index = level_index_f, level_index_c+1, -1
        f_lev => pf%levels(level_index);
        c_lev => pf%levels(level_index-1)
-       
+
+       if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at beginning of Vycle lev=',level_index
        call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
        call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
        call restrict_time_space_fas(pf, t0, dt, level_index)
@@ -523,6 +537,7 @@ contains
           call f_lev%delta_q0%copy(f_lev%q0)
           call pf_recv(pf, f_lev, f_lev%index*10000+iteration+j, .true.)
           call pf_delta_q0(pf,level_index)
+          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep in mid of Vcycle,lev=',level_index          
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
           call pf_send(pf, f_lev, f_lev%index*10000+iteration+j, .false.)
        end do
@@ -530,6 +545,7 @@ contains
        call f_lev%delta_q0%copy(f_lev%q0)
        call pf_recv(pf, f_lev, f_lev%index*10000+iteration, .true.)
        call pf_delta_q0(pf,level_index)
+       if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep in mid of Vcycle,lev=',level_index                 
        call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
        call pf_send(pf, f_lev, f_lev%index*10000+iteration, .false.)
     endif
@@ -552,7 +568,8 @@ contains
        end if
 
        ! don't sweep on the finest level since that is only done at beginning
-       if (level_index <= level_index_f) then
+       if (level_index < level_index_f) then
+          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at end of Vcycle,lev=',level_index
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
        else  !  compute residual for diagnostics since we didn't sweep
           pf%state%sweep=1
@@ -637,6 +654,7 @@ contains
        
        ! don't sweep on the finest level since that is only done at beginning
        if (level_index <= level_index_f) then
+          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 3,lev=',level_index                       
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
           call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
           call pf_post(pf, f_lev, f_lev%index*10000+iteration)
