@@ -65,6 +65,7 @@ contains
        call c_lev%tauQ(m)%setval(0.0_pfdp, flags)
     end do
     if (pf%state%iter >= pf%taui0)  then
+
        ! compute '0 to node' integral on the coarse level
       call c_lev%ulevel%sweeper%integrate(pf,level_index-1,  c_lev%Q, &
            c_lev%F, dt, c_lev%I, flags)

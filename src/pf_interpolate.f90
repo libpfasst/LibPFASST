@@ -26,7 +26,7 @@ contains
     class(pf_level_t), pointer :: c_lev   !  Pointer to coarse level
     class(pf_level_t), pointer :: f_lev   !  Pointer to fine level
 
-    integer    :: m, p, step,ierr
+    integer    :: m, p, step,ierr,i,j
     real(pfdp), allocatable :: c_times(:)   ! coarse level node times
     real(pfdp), allocatable :: f_times(:)   ! fine level node times
 
@@ -72,7 +72,8 @@ contains
 
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
-      do p = 1,SIZE(c_lev%F(1,:))
+       do p = 1,SIZE(c_lev%F(1,:))
+          print *,'p in interp',p
           do m = 1, c_lev%nnodes
              call f_lev%c_delta(m)%setval(0.0_pfdp, flags)
              call f_lev%cf_delta(m)%setval(0.0_pfdp, flags)
@@ -85,8 +86,16 @@ contains
          end do
 
          ! interpolate corrections  in time
-          call pf_apply_mat(f_lev%F(:,p), 1.0_pfdp, f_lev%tmat, f_lev%cf_delta, .false., flags)
-
+!          call pf_apply_mat(f_lev%F(:,p), 1.0_pfdp, f_lev%tmat, f_lev%cf_delta, .false., flags)
+          do i = 1, SIZE(f_lev%tmat, dim=1)
+             do j = 1, SIZE(f_lev%tmat, dim=2)
+                if (abs(f_lev%tmat(i, j)) /= 0.0_pfdp) then
+!                   call dst(i)%axpy(f_lev%tmat(i, j), src(j), flags)
+                   call f_lev%F(i,p)%axpy(f_lev%tmat(i, j), f_lev%cf_delta(j), flags)
+                end if
+             end do
+          end do
+             
        end do !  Loop on npieces
     else    ! recompute function values
        call f_lev%ulevel%sweeper%evaluate_all(pf,level_index, f_times, flags=flags, step=step)

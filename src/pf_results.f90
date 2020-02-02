@@ -114,7 +114,7 @@ contains
              write(istream, '(I5,I4, I4, e22.14)') nstep,j,i,this%residuals(i+1, j, this%nsweeps)
              exit
           end if
-       end do
+       end doa
     enddo
     close(istream)
     
@@ -259,22 +259,23 @@ contains
     open(iout, file=trim(fullname), form='formatted')
     write(iout,*) '{'
     kmax=1
-    if (pf%save_timings > 1) kmax=5
+    if (pf%save_timings > 1) kmax=4
 
     do k=1,kmax
-       write(iout,"(A24,A1,e14.6,A1)")  timer_names(k), ':', pf%pf_timers%runtimes(k,1), ','
+       write(iout,"(A24,A1,e14.6,A1)") wrap_timer_name(timer_names(k)), ': ', pf%pf_timers%runtimes(k,1), ','
     end do
     if (pf%save_timings > 1) then
        do k=kmax+1,PF_NUM_TIMERS
           if (nlev .eq. 1) then
-             write(iout,"(A24,A1,e14.6,A1)")  timer_names(k), ':', pf%pf_timers%runtimes(k,1), ','
+             write(iout,"(A24,A1,e14.6,A1)") wrap_timer_name(timer_names(k)), ':', pf%pf_timers%runtimes(k,1), ','
           else
              qarr=pf%pf_timers%runtimes(k,1:nlev)
              strng=trim(convert_real_array(qarr,nlev))       
-             write(iout,"(A24,A1,A60,A1)")  timer_names(k),':', adjustl(strng), ','
+             write(iout,"(A24,A1,A60,A1)")  wrap_timer_name(timer_names(k)),':', adjustl(strng), ','
           end if
        end do
     end if
+    write(iout,*) '"foo":"0"'
     write(iout,*) '}'
     
     close(iout)

@@ -210,7 +210,7 @@ contains
     !> allocate solution and function arrays for sdc sweepers
     if (pf%use_sdc_sweeper) then
        npieces = lev%ulevel%sweeper%npieces
-
+       print *,'what is npieces',npieces
        call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
 
        !  Space for function values
@@ -584,41 +584,45 @@ contains
        datpath= 'dat/' // trim(pf%outdir) 
 
        fname=trim(datpath) // '/pfasst_params.json'
-
-       open(unit=321, file=trim(fname), form='formatted')
-       write(321,*) '{'
-       write(321,"(A24,I15,A1)")  '"nproc" :',       pf%comm%nproc, ','
-       write(321,"(A24,I15,A1)")  '"nlevels" :',     pf%nlevels, ','
-       write(321,"(A24,I15,A1)")  '"niters" :',      pf%niters, ','
-       write(321,"(A24,I15,A1)")  '"qtype" :',       pf%qtype, ','
-       write(321,"(A24,I15,A1)")  '"q0_style" :',    pf%q0_style, ','
-       write(321,"(A24,I15,A1)")  '"taui0" :',       pf%taui0, ','
-       write(321,"(A24,I15,A1)")  '"nsweeps_burn" :',pf%nsweeps_burn, ','
-       write(321,"(A24,A15,A1)")  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsteps_rk" :',   adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,e15.6,A1)") '"abs_res_tol" :',pf%abs_res_tol, ','
-       write(321,"(A24,e15.6,A1)") '"rel_res_tol" :',pf%abs_res_tol, ','
+       un=321
+       open(unit=un, file=trim(fname), form='formatted')
+       write(un,*) '{'
+       write(un,122)  '"nproc" :',       pf%comm%nproc, ','
+       write(un,122)  '"nlevels" :',     pf%nlevels, ','
+       write(un,122)  '"niters" :',      pf%niters, ','
+       write(un,122)  '"qtype" :',       pf%qtype, ','
+       write(un,122)  '"q0_style" :',    pf%q0_style, ','
+       write(un,122)  '"taui0" :',       pf%taui0, ','
+       write(un,122)  '"nsweeps_burn" :',pf%nsweeps_burn, ','
+       write(un,123)  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
+       write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
+       write(un,123)  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
+       write(un,123)  '"nsteps_rk" :',   adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
+       write(un,124) '"abs_res_tol" :',pf%abs_res_tol, ','
+       write(un,124) '"rel_res_tol" :',pf%abs_res_tol, ','
        
-       write(321,"(A24,A15,A1)")  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
-       write(321,"(A24,A15,A1)")  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
-       write(321,"(A24,A15,A1)")  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
-       write(321,"(A24,A15,A1)")  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
-       write(321,"(A24,A15,A1)")  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
-       write(321,"(A24,A15,A1)")  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
-       write(321,"(A24,A15,A1)")  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
-       write(321,"(A24,A15,A1)")  '"Finterp" :',            convert_logical(pf%Finterp), ','
-       write(321,"(A24,A15,A1)")  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
-       write(321,"(A24,A15,A1)")  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
-       write(321,"(A24,A15,A1)")  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
-       write(321,"(A24,A15,A1)")  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
-       write(321,"(A24,A15,A1)")  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
-       write(321,"(A24,A15,A1)")  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
-       write(321,"(A24,I15,A1)")  '"save_timings" :',       pf%save_timings, ','
-       write(321,"(A24,A15,A1)")  '"save_errors" :',        convert_logical(pf%save_errors), ','    
-       write(321,"(A24,A15)")  '"debug" :',                 convert_logical(pf%debug)
-       write(321,*) '}'    
+       write(un,123)  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
+       write(un,123)  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
+       write(un,123)  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
+       write(un,123)  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
+       write(un,123)  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
+       write(un,123)  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
+       write(un,123)  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
+       write(un,123)  '"Finterp" :',            convert_logical(pf%Finterp), ','
+       write(un,123)  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
+       write(un,123)  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
+       write(un,123)  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
+       write(un,123)  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
+       write(un,123)  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
+       write(un,123)  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
+       write(un,122)  '"save_timings" :',       pf%save_timings, ','
+       write(un,123)  '"save_errors" :',        convert_logical(pf%save_errors), ','    
+       write(un,123)  '"debug" :',                 convert_logical(pf%debug),','    
+       write(un,"(A24,A64)")  '"outdir" : ',       adjustr('"'//trim(pf%outdir)//'"')
+       write(un,*) '}'
+122    FORMAT (A24,I15,A1)
+123    FORMAT (A24,A15,A1)
+124    FORMAT (A24,e15.6,A1)
     end if
   end subroutine pf_print_options
 

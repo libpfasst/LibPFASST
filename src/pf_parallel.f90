@@ -167,7 +167,7 @@ contains
        do level_index = pf%state%finest_level, 2, -1
           f_lev => pf%levels(level_index);
           c_lev => pf%levels(level_index-1)
-          call pf_residual(pf, f_lev%index, dt,0)
+!          call pf_residual(pf, f_lev%index, dt,0)
           call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%q0, c_lev%q0, t0)
           call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
           call save(pf,c_lev)
@@ -263,10 +263,10 @@ contains
        if (pf%rank /= 0) call interpolate_q0(pf, f_lev, c_lev,flags=0)
        
        !  Do a sweep on level unless we are at the finest level
-       if (level_index < pf%state%finest_level) then
+!       if (level_index < pf%state%finest_level) then
           if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 5,lev=',level_index                                 
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps_pred)
-       end if
+!       end if
     end do 
     pf%state%iter   = 0
 

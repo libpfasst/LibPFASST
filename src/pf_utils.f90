@@ -122,13 +122,13 @@ contains
 
   !>  Subroutine to store a residual value
   subroutine pf_set_resid(pf,level_index,resid)
-    type(pf_pfasst_t), intent(inout)           :: pf
+    type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: resid
     
-    if (pf%save_residuals .and. pf%state%iter>0)  then
-       pf%results(level_index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = resid
-       pf%results(level_index)%delta_q0(pf%state%iter, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
+    if (pf%save_residuals .and. pf%state%iter>-1)  then
+       pf%results(level_index)%residuals(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = resid
+       pf%results(level_index)%delta_q0(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
     end if
     
   end subroutine pf_set_resid
@@ -244,11 +244,14 @@ contains
         
     n = SIZE(mat, dim=1)
     m = SIZE(mat, dim=2)
-        
+    
     do i = 1, n
       if (lzero) call dst(i)%setval(0.0_pfdp, flags)
       do j = 1, m
-         if (abs(a*mat(i, j)) /= 0.0_pfdp)  call dst(i)%axpy(a * mat(i, j), src(j), flags)
+         if (abs(a*mat(i, j)) /= 0.0_pfdp) then
+            call dst(i)%axpy(a * mat(i, j), src(j), flags)
+         end if
+         
       end do
     end do
   end subroutine pf_apply_mat
@@ -306,8 +309,17 @@ contains
     integer i
     write(f_string,"(*(G0,:,','))") q
     q_string=adjustr('['//trim(f_string)//']')
-
   end function convert_int_array
+  function wrap_timer_name(tname) result(q_string)
+    character(len=10)::  tname
+    character(len=12)::  q_string
+
+    integer i
+
+    q_string=adjustr('"'//trim(tname)//'"')
+
+  end function wrap_timer_name
+  
 
   function convert_real_array(q,n) result(q_string)
     integer,intent(in) :: n     ! length of array
