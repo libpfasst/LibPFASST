@@ -52,7 +52,7 @@ contains
     end if
 
     call pf_set_resid(pf,lev%index,lev%residual)
-
+    
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESIDUAL,level_index)
 
 
@@ -113,8 +113,9 @@ contains
   subroutine pf_echo_residual(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
-
-    print '("resid: time: ", f10.4," step: ",i4.4," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
+    if( pf%state%sweep < 0) print *, pf%state%sweep
+    if( pf%state%iter < 0) print *, pf%state%iter
+    print '("resid: time: ", f10.4," step: ",i8.8," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
     call flush(6)
@@ -125,37 +126,50 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: resid
-    
+    if( pf%state%sweep < 0) print *, pf%state%sweep
+    if( pf%state%pfblock < 0) print *, pf%state%pfblock
     if (pf%save_residuals .and. pf%state%iter>-1)  then
-       pf%results(level_index)%residuals(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = resid
-       pf%results(level_index)%delta_q0(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
+       pf%results%residuals(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = resid
     end if
     
   end subroutine pf_set_resid
-
-  !>  Subroutine to store a residual value
+  !>  Subroutine to store a delta_q0 value
   subroutine pf_set_delta_q0(pf,level_index,delta)
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: delta
-    
-    if (pf%save_delta_q0 .and. pf%state%iter>0)  then
-       pf%results(level_index)%delta_q0(pf%state%iter, pf%state%pfblock, pf%state%sweep) = pf%levels(level_index)%max_delta_q0
+
+    if( pf%state%sweep < 0) print *, pf%state%sweep    
+    if( pf%state%pfblock < 0) print *, pf%state%pfblock
+    if (pf%save_delta_q0 .and. pf%state%iter>-1)  then
+
     end if
     
   end subroutine pf_set_delta_q0
   
-  !>  Subroutine to store a residual value
+  !>  Subroutine to store an error value
   subroutine pf_set_error(pf,level_index,error)
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
+    if( pf%state%sweep < 0) print*, pf%state%sweep    
     if (pf%state%iter+1 < 1)  return
     if (pf%save_errors)  then
-       pf%results(level_index)%errors(pf%state%iter+1, pf%state%pfblock, pf%state%sweep) = error
+       pf%results%errors(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = error
     end if
     
   end subroutine pf_set_error
+
+  !>  Subroutine to set the final the iteration number for convergence
+  subroutine pf_set_iter(pf,iter)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: iter
+
+    pf%results%iters(pf%state%pfblock) = iter
+    
+  end subroutine pf_set_iter
+  
+
   !
   !> Generic evaluate all
   !! Each sweeper can define its own evaluate_all or use this generic one
@@ -188,6 +202,8 @@ contains
     lev => pf%levels(level_index)   !!  Assign level pointer
     call lev%delta_q0%axpy(-1.0_pfdp,lev%q0)
     lev%max_delta_q0=lev%delta_q0%norm()
+    call pf_set_delta_q0(pf,level_index,lev%max_delta_q0)
+
   end subroutine pf_delta_q0
   
   !> Generic routine to spread initial conditions

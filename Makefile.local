@@ -1,7 +1,7 @@
 #  Flags for GNU compilers on Linux
 FC = mpifort
 CC = mpicc
-LD = mpicxx
+LD = $(FC)
 AR=ar rcs
 
 FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none

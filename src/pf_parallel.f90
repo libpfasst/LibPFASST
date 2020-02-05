@@ -59,7 +59,7 @@ contains
     pf%state%nsteps = nsteps_loc
 
     !>  Allocate stuff for holding results
-    call pf_initialize_results(pf)
+    call initialize_results(pf)
 
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0) call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
@@ -76,10 +76,9 @@ contains
     end if
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
-    call pf_dump_results(pf)
+    call dump_results(pf%results)
+    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
 
-    !>   deallocate results data
-    call pf_destroy_results(pf)
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC
@@ -167,7 +166,7 @@ contains
        do level_index = pf%state%finest_level, 2, -1
           f_lev => pf%levels(level_index);
           c_lev => pf%levels(level_index-1)
-!          call pf_residual(pf, f_lev%index, dt,0)
+          call pf_residual(pf, f_lev%index, dt,0)
           call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%q0, c_lev%q0, t0)
           call restrict_time_space_fas(pf, t0, dt, level_index)  !  Restrict
           call save(pf,c_lev)
@@ -175,6 +174,7 @@ contains
     else
       level_index = 1
       c_lev => pf%levels(1)
+      call pf_residual(pf, f_lev%index, dt,0)
     end if
 
     !!
@@ -271,7 +271,7 @@ contains
     pf%state%iter   = 0
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
-    call call_hooks(pf, -1, PF_POST_PREDICTOR)
+    call call_hooks(pf, -1, PF_POST_ITERATION)
 
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
@@ -440,8 +440,11 @@ contains
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_predictor(pf, pf%state%t0, dt, flags)
 
+
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
+       call pf_set_resid(pf,lev%index,lev%residual)
+
        call call_hooks(pf, -1, PF_POST_ITERATION)
 
        do j = 1, pf%niters
@@ -463,6 +466,7 @@ contains
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
           call call_hooks(pf, -1, PF_POST_ITERATION)
           if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+          
           !  If we are converged, exit block (can do one last sweep if desired)
           if (pf%state%status == PF_STATUS_CONVERGED)  then
              if (pf%sweep_at_conv) then
@@ -470,6 +474,7 @@ contains
                 call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
              end if
              call call_hooks(pf, -1, PF_POST_CONVERGENCE)
+             call pf_set_iter(pf,j) 
              exit             
           end if
 

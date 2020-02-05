@@ -145,6 +145,7 @@ contains
           call pf_time_interpolation_matrix(c_lev%nodes, c_lev%nnodes, f_lev%nodes, f_lev%nnodes, f_lev%rmat)
        endif
     end do
+    
 
   end subroutine pf_pfasst_setup
 
@@ -210,7 +211,6 @@ contains
     !> allocate solution and function arrays for sdc sweepers
     if (pf%use_sdc_sweeper) then
        npieces = lev%ulevel%sweeper%npieces
-       print *,'what is npieces',npieces
        call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
 
        !  Space for function values
@@ -243,6 +243,9 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf  !!  Main pfasst structure
 
     integer :: l
+
+    !>   deallocate results data
+    call destroy_results(pf%results)
 
     !>  destroy all levels
     do l = 1, pf%nlevels
@@ -488,7 +491,11 @@ contains
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date
     write(un,*) 'time:        ', time
-
+    if(pf%use_sdc_sweeper) then
+       write(un,*) 'method:        ',' PFASST'
+    else
+       write(un,*) 'method:        ',' parareal'
+    end if
     write(un,*) 'double precision:   ', pfdp   ,'  bytes'
     write(un,*) 'quad precision:   ', pfqp   ,'  bytes'    
     write(un,*) 'Output directory: ', trim(pf%outdir)    
@@ -576,17 +583,22 @@ contains
 
     if (present(json_opt)) dump_json=json_opt
     if (dump_json) then
+    
        ! Create a json file of all the pfasst parameters
        istat= system('mkdir -p dat')
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")       
        istat= system('mkdir -p dat/' // trim(pf%outdir))       
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")
        datpath= 'dat/' // trim(pf%outdir) 
-
        fname=trim(datpath) // '/pfasst_params.json'
        un=321
        open(unit=un, file=trim(fname), form='formatted')
        write(un,*) '{'
+       if(pf%use_sdc_sweeper) then 
+          write(un,*) '      "method" :  "PFASST",'
+       else
+          write(un,*) '      "method" :  "parareal",'
+       end if
        write(un,122)  '"nproc" :',       pf%comm%nproc, ','
        write(un,122)  '"nlevels" :',     pf%nlevels, ','
        write(un,122)  '"niters" :',      pf%niters, ','
@@ -623,9 +635,9 @@ contains
 122    FORMAT (A24,I15,A1)
 123    FORMAT (A24,A15,A1)
 124    FORMAT (A24,e15.6,A1)
+       close(unit=un)       
     end if
   end subroutine pf_print_options
-
   !> Subroutine to make the matrices for interpolation  between noodes
   subroutine pf_time_interpolation_matrix(f_nodes, f_nnodes, c_nodes, c_nnodes, tmat)
     integer,    intent(in)  :: f_nnodes  !!  number of nodes on fine level
@@ -654,61 +666,4 @@ contains
     end do
   end subroutine pf_time_interpolation_matrix
 
-
-  !>  Subroutine to write out run parameters
-  subroutine pf_initialize_results(pf)
-  
-  type(pf_pfasst_t), intent(inout)           :: pf
-
-  integer :: level_index
-  ALLOCATE(pf%results(pf%nlevels))
-  do level_index = 1,pf%nlevels
-     call  initialize_results(pf%results(level_index),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(level_index),pf%rank,level_index,pf%outdir,pf%save_residuals)
-  end do
-  end subroutine pf_initialize_results
-
-
-  !>  Subroutine to write out run parameters
-  subroutine pf_dump_results(pf)
-    
-    type(pf_pfasst_t), intent(inout)           :: pf
-    
-    integer :: level_index
-    
-    if (pf%save_residuals) then
-       do level_index = 1,pf%nlevels
-          call  dump_resids(pf%results(level_index))
-          call  dump_delta_q0(pf%results(level_index))
-       end do
-    end if
-    
-    if (pf%save_errors) then
-       do level_index = 1,pf%nlevels
-          call  dump_errors(pf%results(level_index))
-       end do
-    end if
-    
-    if (pf%save_timings > 0) then
-       call  dump_timings(pf%results(pf%nlevels),pf)
-    end if
-
-end subroutine pf_dump_results
-
-!>  Subroutine to destroy the results
-  subroutine pf_destroy_results(pf)
-    
-    type(pf_pfasst_t), intent(inout)           :: pf
-    
-    integer :: level_index
-    
-       do level_index = 1,pf%nlevels
-          call  destroy_results(pf%results(level_index))
-       end do
-  
-
-end subroutine pf_destroy_results
-  
-  
-    
-  
 end module pf_mod_pfasst

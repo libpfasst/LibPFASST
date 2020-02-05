@@ -6,6 +6,8 @@
 module pf_mod_dtype
   use iso_c_binding
   implicit none
+
+  
   !>  pfasst static  paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
 !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
@@ -233,25 +235,28 @@ module pf_mod_dtype
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
-  !>  Type for storing results for later output
   type :: pf_results_t
-     real(pfdp), allocatable :: errors(:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
-     real(pfdp), allocatable :: delta_q0(:,:,:)  !  (block,iter,sweep)
+     real(pfdp), allocatable ::    errors(:,:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:,:)  !  (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  delta_q0(:,:,:,:)  !  (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  iters(:)  !           (block)
+     integer :: nlevs
      integer :: nsteps
-     integer :: niters
-     integer :: nprocs
+     integer :: niters  !  really the max niters
+     integer :: nprocs  
      integer :: p_index
      integer :: nblocks
-     integer :: nsweeps
+     integer :: nsweeps(PF_MAXLEVS)  !  nsweeps per level
+     integer :: max_nsweeps  !  max nsweeps for allocation
      integer :: rank
-     integer :: level_index
+     !  These are 0,1,2  for none, each, or only at end
+     integer :: save_residuals
+     integer :: save_errors
+     integer :: save_delta_q0
 
      character(len=128) :: datpath
      procedure(pf_results_p), pointer, nopass :: destroy 
-
   end type pf_results_t
-
 
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
@@ -312,10 +317,10 @@ module pf_mod_dtype
      integer :: rank    = -1            !! rank of current processor
 
      !> pf objects
-     type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm proc is
+     type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm  is
      type(pf_level_t), allocatable :: levels(:) !! Holds the levels
      type(pf_comm_t),  pointer :: comm    !! Points to communicator
-     type(pf_results_t),allocatable :: results(:)   !!  Hold results for each level
+     type(pf_results_t) :: results   !!  Hold results for each level
  
      !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !!  Holds the hooks
@@ -613,6 +618,11 @@ module pf_mod_dtype
        type(pf_results_t), intent(inout) :: this
 
      end subroutine pf_results_p
+     subroutine pf_resultsp_p(this,pf)
+       import pf_results_t,pf_pfasst_t
+       type(pf_results_t), intent(inout) :: this
+       type(pf_pfasst_t), intent(inout) :: pf
+     end subroutine pf_resultsp_p
 
 
 

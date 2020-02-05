@@ -13,6 +13,7 @@ module pf_mod_parareal
   use pf_mod_hooks
   use pf_mod_pfasst
   use pf_mod_comm
+  use pf_mod_results
   
   implicit none
   
@@ -47,19 +48,20 @@ contains
       !  Do  sanity check on steps
       if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/1d-7) then
         print *,'dt=',dt
-        print *,'nsteps=',nsteps_loc
+       print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
        call pf_stop(__FILE__,__LINE__,'Invalid nsteps ,nsteps=',nsteps)
       end if
     end if
     pf%state%nsteps = nsteps_loc
 
-    !>  Allocate stuff for holding results
-    call pf_initialize_results(pf)
 
     !  do sanity checks on Nproc
     if (mod(nsteps,nproc) > 0)  call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
 
+    !>  Allocate stuff for holding results 
+    call initialize_results(pf)
+    
     !>  Try to sync everyone
     call mpi_barrier(pf%comm%comm, ierr)
 
@@ -71,10 +73,8 @@ contains
     end if
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
-    call pf_dump_results(pf)
-
-    !>   deallocate results data
-    call pf_destroy_results(pf)
+    call dump_results(pf%results)
+    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
 
   end subroutine pf_parareal_run
 
@@ -127,11 +127,8 @@ contains
        !  3.  Move solution to next block
 
        !  Reset some flags
-       !>  When starting a new block, broadcast new initial conditions to all procs
        !>  For initial block, this is done when initial conditions are set
-
-       !> Reset some flags
-       pf%state%iter    = -1
+       pf%state%iter    = 0
        pf%state%itcnt   = 0
        pf%state%mysteps = 0
        pf%state%status  = PF_STATUS_PREDICTOR
@@ -142,6 +139,7 @@ contains
 
 
        if (k > 1) then
+          !>  When starting a new block, broadcast new initial conditions to all procs
           if (nproc > 1)  then
              call lev%qend%pack(lev%send)    !!  Pack away your last solution
              call pf_broadcast(pf, lev%send, lev%mpibuflen, pf%comm%nproc-1)
@@ -154,9 +152,10 @@ contains
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
        end if
-       call call_hooks(pf, -1, PF_POST_PREDICTOR)
+
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
+       call call_hooks(pf, -1, PF_POST_ITERATION)       !  This is the zero iteration
        
        if (pf%nlevels > 1) then
           !>  Start the parareal iterations
@@ -178,6 +177,7 @@ contains
              !  If we are converged, exit block
              if (pf%state%status == PF_STATUS_CONVERGED)  then
                 call call_hooks(pf, -1, PF_POST_CONVERGENCE)
+                call pf_set_iter(pf,j)                 
                 exit
              end if
           end do  !  Loop over j, the iterations in this bloc
@@ -247,7 +247,7 @@ contains
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
 
-    call call_hooks(pf, 1, PF_POST_PREDICTOR)
+    call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
@@ -317,8 +317,10 @@ contains
     !  Save jumps
     c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
     f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
+    call pf_set_resid(pf,1,f_lev%residual)
     call pf_set_resid(pf,2,f_lev%residual)
     call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
+    call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
 
   end subroutine pf_parareal_v_cycle
   
