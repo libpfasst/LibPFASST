@@ -155,6 +155,9 @@ contains
 
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
+       ! After the predictor, the residual and delta_q0 are just zero
+       call pf_set_delta_q0(pf,1,0.0_pfdp)       
+       call pf_set_resid(pf,pf%nlevels,0.0_pfdp)       
        call call_hooks(pf, -1, PF_POST_ITERATION)       !  This is the zero iteration
        
        if (pf%nlevels > 1) then
@@ -281,9 +284,9 @@ contains
     nsteps_f= f_lev%ulevel%stepper%nsteps  
 
     !  Save the old value of q0 and qend so that we can compute difference
-    if (pf%rank /= 0) then
-       call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
-    end if
+
+    call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+
     call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
 
     !  Step on fine and store in  fine qend 
@@ -307,9 +310,7 @@ contains
     call pf_send(pf, f_lev, 10000+iteration, .false.)
 
     !  Complete the delta_q0 on coarse with new initial condition
-    if (pf%rank /= 0) then
-       call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
-    end if
+    call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
 
     !  Complete the jump at the end
     call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)

@@ -142,7 +142,7 @@ contains
     if( pf%state%sweep < 0) print *, pf%state%sweep    
     if( pf%state%pfblock < 0) print *, pf%state%pfblock
     if (pf%save_delta_q0 .and. pf%state%iter>-1)  then
-
+       pf%results%delta_q0(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = delta
     end if
     
   end subroutine pf_set_delta_q0
