@@ -1,0 +1,53 @@
+           this%tmphat=this%ddx*omega            !  omega_x in spectral space
+           call fft%ifft(this%tmphat,this%tmp)   !  omega_x in real space
+           if (splitting .eq. 1) then
+              this%tmp = -(this%u+v0(1))*this%tmp !  -(u+v0(1)).omega_x in real space
+           else
+              this%tmp = -(this%u)*this%tmp       !  -u.omega_x in real space
+           end if
+           
+           call fft%fft(this%tmp,f_omega)        !  -(u+v0(1)).omega_x in spectral space
+           
+           this%tmphat=this%ddy*omega            !  omega_y in spectral space
+           call fft%ifft(this%tmphat,this%tmp)   !  omega_y in spectral
+           if (splitting .eq. 1) then           
+              this%tmp = (this%v+v0(2))*this%tmp   !  -(v+v0(2)).omega_y in real space
+           else
+              this%tmp = (this%v)*this%tmp      !  -v.omega_y in real space
+           end if
+           
+           call fft%fft(this%tmp,this%tmphat)    !  v.omega_y in spectral space
+           f_omega=f_omega-this%tmphat           !  f = -u.omega_x-v.omega_y
+
+           f_omega=f_omega-grav*this%ddy*rho     !  f = -u.omega_x-v.omega_y-g*rho_y
+           
+           this%tmphat=this%ddx*rho              !  rho_x in spectral space
+           call fft%ifft(this%tmphat,this%tmp)   !  rho_x in real space
+           if (splitting .eq. 1) then           
+              this%tmp = (this%u+v0(1))*this%tmp    !  u.rho_x in real space
+           else
+              this%tmp = (this%u)*this%tmp    !  u.rho_x in real space
+           end if
+           
+           call fft%fft(this%tmp,this%tmphat)    !  u.rho_x in spectral space
+           f_rho=  -this%tmphat                  !  f = -u.rho_x
+           
+           this%tmphat=this%ddy*rho              !  rho_y in spectral space
+           call fft%ifft(this%tmphat,this%tmp)   !  rho_y in real space
+           if (splitting .eq. 1) then           
+              this%tmp = (this%v+v0(2))*this%tmp    !  v.rho_y in real space
+           else
+              this%tmp = (this%v)*this%tmp    !  v.rho_y in real space
+           end if
+           
+           call fft%fft(this%tmp,this%tmphat)    !  v.rho_y in spectral space
+           f_rho = f_rho - this%tmphat           !  f = -u.rho_x-v.rho_y
+        else  !  Implicit
+           if (splitting .eq. 1) then                      
+              f_omega = nu*this%lap*omega           !  f = nu*Lap*omega
+              f_rho = kappa*this%lap*rho            !  f = kappa*Lap*rho
+           else
+              f_omega = (nu*this%lap-v0(1)*this%ddx-v0(2)*this%ddy)*omega         !  f = nu*Lap*omega
+              f_rho = (kappa*this%lap-v0(1)*this%ddx-v0(2)*this%ddy)*rho            !  f = kappa*Lap*rho
+           end if
+
