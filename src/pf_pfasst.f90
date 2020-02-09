@@ -339,7 +339,6 @@ contains
     integer :: nsweeps(PF_MAXLEVS)
     integer :: nsweeps_pred(PF_MAXLEVS) 
     integer :: nnodes(PF_MAXLEVS)
-    integer :: nsteps_rk(PF_MAXLEVS)
 
     real(pfdp) :: abs_res_tol, rel_res_tol
     logical    :: PFASST_pred, RK_pred, pipeline_pred
@@ -360,7 +359,7 @@ contains
 
     
     !> define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
+    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
     namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
@@ -391,7 +390,6 @@ contains
     save_timings = pf%save_timings
 
 
-    nsteps_rk    = pf%nsteps_rk
     rk_pred      = pf%rk_pred
     use_rk_stepper= pf%use_rk_stepper
     use_sdc_sweeper= pf%use_sdc_sweeper
@@ -451,7 +449,6 @@ contains
 
     pf%use_rk_stepper=use_rk_stepper
     pf%use_sdc_sweeper=use_sdc_sweeper
-    pf%nsteps_rk    = nsteps_rk    
     pf%rk_pred      = rk_pred
     pf%use_pysdc_V= use_pysdc_V
     pf%sweep_at_conv= sweep_at_conv
@@ -599,32 +596,35 @@ contains
        else
           write(un,*) '      "method" :  "parareal",'
        end if
+       write(un,123)  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
+       write(un,123)  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
        write(un,122)  '"nproc" :',       pf%comm%nproc, ','
        write(un,122)  '"nlevels" :',     pf%nlevels, ','
        write(un,122)  '"niters" :',      pf%niters, ','
-       write(un,122)  '"qtype" :',       pf%qtype, ','
-       write(un,122)  '"q0_style" :',    pf%q0_style, ','
-       write(un,122)  '"taui0" :',       pf%taui0, ','
-       write(un,122)  '"nsweeps_burn" :',pf%nsweeps_burn, ','
        write(un,123)  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
+       write(un,122)  '"q0_style" :',    pf%q0_style, ','
        write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
-       write(un,123)  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
-       write(un,123)  '"nsteps_rk" :',   adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
+       if(pf%use_sdc_sweeper) then 
+          write(un,122)  '"qtype" :',       pf%qtype, ','
+          write(un,123)  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
+          write(un,122)  '"nsweeps_burn" :',pf%nsweeps_burn, ','
+          write(un,122)  '"taui0" :',       pf%taui0, ','
+       end if
+       
        write(un,124) '"abs_res_tol" :',pf%abs_res_tol, ','
        write(un,124) '"rel_res_tol" :',pf%abs_res_tol, ','
-       
-       write(un,123)  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
-       write(un,123)  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
-       write(un,123)  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
-       write(un,123)  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
-       write(un,123)  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
+       if(pf%use_sdc_sweeper) then        
+          write(un,123)  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
+          write(un,123)  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
+          write(un,123)  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
+          write(un,123)  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
+          write(un,123)  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
+          write(un,123)  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
+          write(un,123)  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
+          write(un,123)  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
+          write(un,123)  '"Finterp" :',            convert_logical(pf%Finterp), ','
+       end if
        write(un,123)  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
-       write(un,123)  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
-       write(un,123)  '"Finterp" :',            convert_logical(pf%Finterp), ','
-       write(un,123)  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
-       write(un,123)  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
-       write(un,123)  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
-       write(un,123)  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
        write(un,123)  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
        write(un,123)  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
        write(un,122)  '"save_timings" :',       pf%save_timings, ','

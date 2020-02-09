@@ -254,7 +254,6 @@ contains
     if (pf%debug) print*,  'DEBUG --', pf%rank, 'returning to fine level in predictor'
     !!
     !!  Step 5:  Return to fine level sweeping on any level in between coarsest and finest
-    
     do level_index = 2, pf%state%finest_level  !  Will do nothing with one level
        f_lev => pf%levels(level_index);
        c_lev => pf%levels(level_index-1)
@@ -440,7 +439,6 @@ contains
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_predictor(pf, pf%state%t0, dt, flags)
 
-
        !>  Start the loops over SDC sweeps
        pf%state%iter = 0
        call pf_set_resid(pf,lev%index,lev%residual)
@@ -479,11 +477,12 @@ contains
           end if
 
        end do  !  Loop over the iteration in this bloc
+
        if (pf%nlevels .gt. 1) then
           if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep after iterations on fine'
           call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
        end if
-       
+
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
        

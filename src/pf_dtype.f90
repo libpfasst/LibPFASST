@@ -302,7 +302,7 @@ module pf_mod_dtype
      ! -- RK and Parareal options
      logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
+     integer :: nsteps_rk(PF_MAXLEVS)=-1 !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
