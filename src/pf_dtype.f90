@@ -244,15 +244,13 @@ module pf_mod_dtype
      integer :: nsteps
      integer :: niters  !  really the max niters
      integer :: nprocs  
-     integer :: p_index
      integer :: nblocks
-     integer :: nsweeps(PF_MAXLEVS)  !  nsweeps per level
      integer :: max_nsweeps  !  max nsweeps for allocation
      integer :: rank
-     !  These are 0,1,2  for none, each, or only at end
-     integer :: save_residuals
-     integer :: save_errors
-     integer :: save_delta_q0
+
+     logical :: save_residuals
+     logical :: save_errors
+     logical :: save_delta_q0
 
      character(len=128) :: datpath
      procedure(pf_results_p), pointer, nopass :: destroy 

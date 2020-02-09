@@ -113,8 +113,8 @@ contains
   subroutine pf_echo_residual(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
-    if( pf%state%sweep < 0) print *, pf%state%sweep
-    if( pf%state%iter < 0) print *, pf%state%iter
+
+
     print '("resid: time: ", f10.4," step: ",i8.8," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
@@ -126,9 +126,9 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: resid
-    if( pf%state%sweep < 0) print *, pf%state%sweep
-    if( pf%state%pfblock < 0) print *, pf%state%pfblock
-    if (pf%save_residuals .and. pf%state%iter>-1)  then
+    !  Make sure indices are valid
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return
+    if (pf%results%save_residuals)  then
        pf%results%residuals(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = resid
     end if
     
@@ -139,9 +139,8 @@ contains
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: delta
 
-    if( pf%state%sweep < 0) print *, pf%state%sweep    
-    if( pf%state%pfblock < 0) print *, pf%state%pfblock
-    if (pf%save_delta_q0 .and. pf%state%iter>-1)  then
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return
+    if (pf%results%save_delta_q0)  then
        pf%results%delta_q0(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = delta
     end if
     
@@ -152,9 +151,8 @@ contains
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
-    if( pf%state%sweep < 0) print*, pf%state%sweep    
-    if (pf%state%iter+1 < 1)  return
-    if (pf%save_errors)  then
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return    
+    if (pf%results%save_errors)  then
        pf%results%errors(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = error
     end if
     
@@ -164,7 +162,7 @@ contains
   subroutine pf_set_iter(pf,iter)
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: iter
-
+    if(pf%state%pfblock < 1) return
     pf%results%iters(pf%state%pfblock) = iter
     
   end subroutine pf_set_iter
