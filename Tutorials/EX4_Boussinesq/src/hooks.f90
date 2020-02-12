@@ -3,7 +3,7 @@
 !
 !>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
-  use pf_mod_dtype
+  use pfasst
   use pf_mod_zndsysarray
   implicit none
 contains
@@ -44,7 +44,7 @@ contains
          t,pf%state%step+1, pf%rank, pf%state%iter,level_index,maxerr_om,maxerr_rho,pf%levels(level_index)%residual    
 
 
-    call flush(6)
+    call pf_set_error(pf,level_index,maxerr_om)
 
     
   end subroutine echo_error

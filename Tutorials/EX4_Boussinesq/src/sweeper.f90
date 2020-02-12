@@ -23,8 +23,8 @@ module pf_my_sweeper
     
    contains
 
-     procedure :: f_eval       !  Computes the advection and diffusion terms
-     procedure :: f_comp       !  Computes the advection and diffusion terms
+     procedure :: f_eval       !  Computes the rhs terms in the equation
+     procedure :: f_comp       !  Computes solves for implicit terms
      procedure :: initialize
      procedure :: destroy
      procedure :: exact

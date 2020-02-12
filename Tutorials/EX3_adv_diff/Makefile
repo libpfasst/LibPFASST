@@ -6,11 +6,11 @@ LIBPFASST ?= ../..
 BUILDDIR = build
 
 EXE = main.exe
-
 include $(LIBPFASST)/Makefile.defaults
-FSRC = main.f90 level.f90 sweeper.f90 hooks.f90 probin.f90 
 
-OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o))
+FSRC = src/main.f90 src/level.f90 src/sweeper.f90 src/hooks.f90 src/probin.f90 
+
+OBJ  = $(subst src, build,$(FSRC:.f90=.o))
 
 FFLAGS  += -I$(LIBPFASST)/include 
 

@@ -13,7 +13,7 @@ module pf_my_sweeper
 
    contains
 
-     procedure :: f_eval    !  Computes the advection and diffusion terms
+     procedure :: f_eval    !  Computes the explicit rhs terms
      procedure :: f_comp    !  Does implicit solves 
 
   end type my_sweeper_t

@@ -3,7 +3,7 @@
 !
 !> Example of using LIBPFASST.
 !!
-!!  This program solves the 1-d advection diffusion problem on a periodic domain
+!!  This program solves the 2-d Boussinesq Equations on the periodic plane
 
 !>  The main program here just initializes mpi, calls the solver and then finalizes mpi
 program main
