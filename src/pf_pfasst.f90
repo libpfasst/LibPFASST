@@ -301,6 +301,10 @@ contains
        call lev%ulevel%factory%destroy_array(lev%cf_delta)
        lev%interp_workspace_allocated =.false.
     endif
+    if (lev%restrict_workspace_allocated   .eqv. .true.) then
+        call lev%ulevel%factory%destroy_array(lev%f_encap_array_c)
+        lev%restrict_workspace_allocated =.false.
+    endif
     call lev%ulevel%factory%destroy_array(lev%Q)
     call lev%ulevel%factory%destroy_array(lev%R)
     call lev%ulevel%factory%destroy_single(lev%qend)
