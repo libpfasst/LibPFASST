@@ -6,6 +6,8 @@
 module pf_mod_dtype
   use iso_c_binding
   implicit none
+
+  
   !>  pfasst static  paramters
   integer, parameter :: pfdp = selected_real_kind(15, 307)  !!  Defines double precision type for all real and complex variables
 !  integer, parameter :: pfdp = selected_real_kind(33, 4931)  !! For quad precision everywhere (use at your risk and see top of pf_mpi.f90)
@@ -233,25 +235,26 @@ module pf_mod_dtype
      procedure(pf_broadcast_p),   pointer, nopass :: broadcast
   end type pf_comm_t
 
-  !>  Type for storing results for later output
   type :: pf_results_t
-     real(pfdp), allocatable :: errors(:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:)  !  (block,iter,sweep)
-     real(pfdp), allocatable :: delta_q0(:,:,:)  !  (block,iter,sweep)
+     real(pfdp), allocatable ::    errors(:,:,:,:)
+     real(pfdp), allocatable :: residuals(:,:,:,:)  !  (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  delta_q0(:,:,:,:)  !  (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  iters(:)  !           (block)
+     integer :: nlevs
      integer :: nsteps
-     integer :: niters
-     integer :: nprocs
-     integer :: p_index
+     integer :: niters  !  really the max niters
+     integer :: nprocs  
      integer :: nblocks
-     integer :: nsweeps
+     integer :: max_nsweeps  !  max nsweeps for allocation
      integer :: rank
-     integer :: level_index
+
+     logical :: save_residuals
+     logical :: save_errors
+     logical :: save_delta_q0
 
      character(len=128) :: datpath
      procedure(pf_results_p), pointer, nopass :: destroy 
-
   end type pf_results_t
-
 
   !>  The main PFASST data type which includes pretty much everythingl
   type :: pf_pfasst_t
@@ -287,7 +290,7 @@ module pf_mod_dtype
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
      logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
-     logical :: sweep_at_conv = .true. !!  decides if one final sweep after convergence is done
+     logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
@@ -297,7 +300,7 @@ module pf_mod_dtype
      ! -- RK and Parareal options
      logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
+     integer :: nsteps_rk(PF_MAXLEVS)=-1 !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
@@ -312,10 +315,10 @@ module pf_mod_dtype
      integer :: rank    = -1            !! rank of current processor
 
      !> pf objects
-     type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm proc is
+     type(pf_state_t), allocatable :: state   !!  Describes where in the algorithm  is
      type(pf_level_t), allocatable :: levels(:) !! Holds the levels
      type(pf_comm_t),  pointer :: comm    !! Points to communicator
-     type(pf_results_t),allocatable :: results(:)   !!  Hold results for each level
+     type(pf_results_t) :: results   !!  Hold results for each level
  
      !> hooks variables
      type(pf_hook_t), allocatable :: hooks(:,:,:)  !!  Holds the hooks
@@ -613,6 +616,11 @@ module pf_mod_dtype
        type(pf_results_t), intent(inout) :: this
 
      end subroutine pf_results_p
+     subroutine pf_resultsp_p(this,pf)
+       import pf_results_t,pf_pfasst_t
+       type(pf_results_t), intent(inout) :: this
+       type(pf_pfasst_t), intent(inout) :: pf
+     end subroutine pf_resultsp_p
 
 
 

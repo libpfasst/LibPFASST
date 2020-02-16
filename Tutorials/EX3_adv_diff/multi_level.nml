@@ -29,8 +29,7 @@
      Vcycle=.TRUE.
 
 
-     save_residuals=.false.
-     use_Sform=.true.
+     outdir="ad"
 /
 
 !  Now define the local variables you need

@@ -26,8 +26,8 @@ contains
   !>  This subroutine implements pfasst to solve the advection diffusion equation
   subroutine run_pfasst()  
     use pfasst  !< This module has include statements for the main pfasst routines
-    use pf_my_sweeper  !< Local module for sweeper and function evaluations
-    use pf_my_level    !< Local module for the levels
+    use my_sweeper  !< Local module for sweeper and function evaluations
+    use my_level    !< Local module for the levels
     use hooks   !< Local module for diagnostics and i/o
     use probin  !< Local module reading/parsing problem parameters
 
@@ -54,13 +54,13 @@ contains
     !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
        !>  Allocate the user specific level object
-       allocate(ad_level_t::pf%levels(l)%ulevel)
+       allocate(my_level_t::pf%levels(l)%ulevel)
 
        !>  Allocate the user specific data factory
        allocate(pf_ndarray_factory_t::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
-       allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
+       allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[nx(l)])

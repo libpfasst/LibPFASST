@@ -27,14 +27,57 @@ jobs:
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
+                  echo "Making Tutorial 1"	&&	  		
                   cd Tutorials/EX1_Dahlquist &&  make &&
-                  mpirun -n 16 ./main.exe multi_level.nml &&
+                  echo "Running Tutorial 1"	&&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Making Tutorial 2"	&&	  		
                   cd ../EX2_Dahlquist &&  make DEBUG=TRUE &&
-                  mpirun -n 16 ./main.exe multi_level.nml &&
+                  echo "Running Tutorial 2" &&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Checking Tutorial 3" &&	  		
+                  cd ../EX3_adv_diff && 
+                  echo "Making Tutorial 3"   &&	  		
                   cd ../EX3_adv_diff &&  make &&
-                  mpirun -n 16 ./main.exe multi_level.nml &&
+                  echo "Running tutorial 3" &&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Done with Tutorials" &&	  		
                   cd ../..
-            - run: # Run the python tests in test
-                name: do_pytests
-                command: >  # pytest
-                 ./test/run_encaps.sh
+            - run: # Modify the commands below to build and check the zNdarray examples
+                name: check_zNdarray
+                command: >
+                  echo "Making ERK"	&&	  		
+                  cd test/zNdarray/ERK_stepper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running ERK 1-d"	&&	  		
+                  mpirun -n 4 ./main.1d.exe test_1d.nml &&
+                  echo "Running ERK 2-d"	&&	  		
+                  mpirun -n 4 ./main.2d.exe test_2d.nml &&
+                  echo "Running ERK 3-d"	&&	  		
+                  mpirun -n 4 ./main.3d.exe test_3d.nml &&
+                  echo "Making RK "	&&	  				  
+                  cd ../RK_stepper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running RK 1-d"	&&	  		
+                  mpirun -n 4 ./main.1d.exe test_1d.nml &&
+                  echo "Running RK 2-d"	&&	  		
+                  mpirun -n 4 ./main.2d.exe test_2d.nml &&
+                  echo "Running RK 3-d"	&&	  		
+                  mpirun -n 4 ./main.3d.exe test_3d.nml &&
+                  echo "Making Running IMEX SDC "	&&	  		
+                  cd ../IMEX_sweeper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running IMEX SDC 1-d"	&&	  		
+                  mpirun -n 4 ./main.1d.exe test_1d.nml &&
+                  echo "Running IMEX SDC 2-d"	&&	  		
+                  mpirun -n 4 ./main.2d.exe test_2d.nml &&
+                  echo "Running IMEX SDC 3-d"	&&	  		
+                  mpirun -n 4 ./main.3d.exe test_3d.nml &&
+                  echo "Making Running EXP SDC "	&&	  				  
+                  cd ../EXP_sweeper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running EXP SDC 1-d"	&&	  		
+                  mpirun -n 4 ./main.1d.exe test_1d.nml &&
+                  echo "Running EXP SDC 2-d"	&&	  		
+                  mpirun -n 4 ./main.2d.exe test_2d.nml &&
+                  echo "Running EXP SDC 3-d"	&&	  		
+                  mpirun -n 4 ./main.3d.exe test_3d.nml &&
+                  cd ../../..
+
+

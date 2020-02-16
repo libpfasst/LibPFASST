@@ -449,8 +449,8 @@ contains
     lev => pf%levels(level_index)   !  Assign level pointer
 
 
-    deallocate(this%eta)
-    deallocate(this%newF)
+    if(allocated(this%eta)) deallocate(this%eta)
+    if(allocated(this%eta)) deallocate(this%newF)
     call lev%ulevel%factory%destroy_array(this%F_old)
   end subroutine exp_destroy
 

@@ -1,21 +1,5 @@
-! ------------------------------------------------------------------
-! Programmer(s): Cody J. Balos @ LLNL
-!                Daniel R. Reynolds @ SMU
-! ------------------------------------------------------------------
-! SUNDIALS Copyright Start
-! Copyright (c) 2002-2019, Lawrence Livermore National Security
-! and Southern Methodist University.
-! All rights reserved.
-!
-! See the top-level LICENSE and NOTICE files for details.
-!
-! SPDX-License-Identifier: BSD-3-Clause
-! SUNDIALS Copyright End
-! ------------------------------------------------------------------
-! This is an example custom NVECTOR based on 2D Fortran arrays.
-! ------------------------------------------------------------------
-
-  !module fnvector_fortran_mod
+!  Libfasst encapsulation for Sundials
+!module fnvector_fortran_mod
 module pf_mod_sundialsVec
   use, intrinsic :: iso_c_binding
   use pf_mod_dtype
@@ -42,7 +26,7 @@ module pf_mod_sundialsVec
   end type FVec
   ! ----------------------------------------------------------------
 
-  !>  1-dimensional array type,  extends the abstract encap type
+  !>  N-dimensional Sundials array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_sundialsVec_t
      logical                 :: own_data
      integer(c_long)         :: length1
@@ -51,7 +35,7 @@ module pf_mod_sundialsVec
      integer             :: ndim
      integer,    allocatable :: arr_shape(:)
      type(N_Vector),     pointer :: sundialsVec
-     type(N_Vector_Ops), pointer :: ops
+
      integer :: ierr
    contains
      procedure :: setval => pf_sundialsVec_setval
@@ -74,6 +58,33 @@ contains
     end select
   end function cast_as_pf_sundialsVec
 
+  !>  Subroutine to allocate the array and set the size parameters
+  subroutine pf_sundialsVec_build(q, shape_in)
+    use pf_mod_comm_mpi
+    use fnvector_serial_mod        ! Fortran interface to serial N_Vector
+    class(pf_encap_t), intent(inout) :: q
+    integer,           intent(in   ) :: shape_in(:)
+
+    integer nn,psize,rank,ierr
+    integer(c_long)  :: neq 
+    neq=shape_in(1)
+    
+    select type (q)
+    class is (pf_sundialsVec_t)
+       ! create SUNDIALS N_Vector
+       q%sundialsVec => FN_VNew_Serial(neq)
+       if (.not. associated(q%sundialsVec)) then
+          call pf_stop(__FILE__,__LINE__,'sundial creation  fail')  
+       end if
+       
+       !       call mpi_comm_rank(PETSC_COMM_WORLD, rank,ierr);CHKERRQ(ierr)
+       
+       allocate(q%arr_shape(SIZE(shape_in)),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                
+       q%ndim   = SIZE(shape_in)
+       q%arr_shape = shape_in
+    end select
+  end subroutine pf_sundialsVec_build
 
   !> Subroutine to  create a single array
   subroutine pf_sundialsVec_create_single(this, x, level_index, lev_shape)
@@ -82,9 +93,10 @@ contains
     integer,                intent(in   )              :: level_index
     integer,                intent(in   )              :: lev_shape(:)
     integer :: ierr
- !   allocate(pf_sundialsVec_t::x,stat=ierr)
- !   if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
- !   call pf_sundialsVec_build(x, lev_shape)
+
+    allocate(pf_sundialsVec_t::x,stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                             
+    call pf_sundialsVec_build(x, lev_shape)
   end subroutine pf_sundialsVec_create_single
 
   !> Subroutine to create an array of arrays
@@ -155,7 +167,7 @@ contains
     integer,        intent(in   ), optional :: flags
 
     ! set all entries to const (whole array operation)
-    this%data = val
+    call fn_vconst(val,this%sundialsVec)
 
   end subroutine pf_sundialsVec_setval
 
@@ -169,7 +181,7 @@ contains
 
     select type(src)
     type is (pf_sundialsVec_t)
-       this%data = src%data
+       call fn_vscale(1.0_pfdp,src%sundialsVec,this%sundialsVec)
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
@@ -183,8 +195,9 @@ contains
 
     real(pfdp),  pointer :: p_sundialsVec(:)
     integer :: psize
-    z=this%data
-    
+    p_sundialsVec=>fn_vgetarraypointer(this%sundialsVec)
+    z=p_sundialsVec
+
   end subroutine pf_sundialsVec_pack
 
   !> Subroutine to unpack a flatarray after receiving
@@ -195,7 +208,9 @@ contains
 
     real(pfdp),  pointer :: p_sundialsVec(:)
     integer :: psize
-    this%data = z
+    p_sundialsVec=z
+    call fn_vsetarraypointer(p_sundialsVec,this%sundialsVec)
+    
   end subroutine pf_sundialsVec_unpack
 
   !> Subroutine to define the norm of the array (here the max norm)
@@ -204,7 +219,8 @@ contains
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
 
-    norm=0.0_pfdp
+    norm=fn_vmaxnorm(this%sundialsVec)
+    
   end function pf_sundialsVec_norm
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
@@ -216,7 +232,7 @@ contains
 
     select type(x)
     type is (pf_sundialsVec_t)
-       this%data = this%data+a*x%data
+       call fn_vlinearsum(a, x%sundialsVec,1.0_pfdp,this%sundialsVec,this%sundialsVec)          
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select

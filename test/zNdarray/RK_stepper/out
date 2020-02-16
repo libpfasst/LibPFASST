@@ -1,0 +1,27 @@
+ ================================================
+ ----------- LibPFASST Parameters ---------------
+ date:        20200208
+ time:        232757.274
+ method:         parareal
+ double precision:              8   bytes
+ quad precision:             16   bytes
+ Output directory: ARK4_N4096_P1
+ Nprocs:                 1 ! number of pfasst "time" processors
+ Nlevels:                1 ! number of levels
+ ==================================================
+  
+ Local Variables
+ ----------------
+ Ndim:              1 ! Number of dimensions
+ nsteps:         4096 ! Number of steps
+ nsteps_rk:            1 ! Number of rk substeps
+ rk_order:            4 ! Order of rk substeps
+ Dt:        4.8828125000000000E-004 ! Time step size
+ Tfin:      2.0000000000000000      ! Final time of run
+ nx:               64 ! grid size per level
+ Domain:        6.2831853071795862        6.2831853071795862        6.2831853071795862      ! domain size
+ splitting:           2 ! 1,2, or 3
+ Solving the nonlinear Schroedinger equation
+ PFASST parameters read from input file nls_serial.nml                  
+ ==================================================
+error: time:   2.0000 step:     4096 rank: 000 iter:  000 level: 01 error:  4.3275161E-10 resid: -1.0000000E+00 deltaq0:  0.0000000E+00

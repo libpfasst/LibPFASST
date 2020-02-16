@@ -7,7 +7,6 @@
 module pfasst
   use pf_mod_dtype
   use pf_mod_hooks
-  use pf_mod_results
   use pf_mod_parallel
   use pf_mod_pfasst
   use pf_mod_utils

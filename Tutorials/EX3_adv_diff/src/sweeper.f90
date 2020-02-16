@@ -4,7 +4,7 @@
 !
 !> Sweeper and RHS routines for 1-D advection/diffusion example.
 !>     u_t + v*u_x = nu*u_xx
-module pf_my_sweeper
+module my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray
   use pf_mod_imex_sweeper
@@ -13,7 +13,7 @@ module pf_my_sweeper
   implicit none
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
-  type, extends(pf_imex_sweeper_t) :: ad_sweeper_t
+  type, extends(pf_imex_sweeper_t) :: my_sweeper_t
      integer ::     nx   !  Grid size
 
      !>  FFT and Spectral derivatives
@@ -28,27 +28,27 @@ module pf_my_sweeper
      procedure :: initialize  !  Bypasses base sweeper initialize
      procedure :: destroy     !  Bypasses base sweeper destroy
 
-  end type ad_sweeper_t
+  end type my_sweeper_t
 
 contains
 
   !>  Helper function to return sweeper pointer
-  function as_ad_sweeper(sweeper) result(r)
+  function as_my_sweeper(sweeper) result(r)
     class(pf_sweeper_t), intent(inout), target :: sweeper
-    class(ad_sweeper_t), pointer :: r
+    class(my_sweeper_t), pointer :: r
     select type(sweeper)
-    type is (ad_sweeper_t)
+    type is (my_sweeper_t)
        r => sweeper
     class default
        stop
     end select
-  end function as_ad_sweeper
+  end function as_my_sweeper
 
 
   !>  Routine to initialize sweeper (bypasses imex sweeper initialize)
   subroutine initialize(this, pf,level_index)
     use probin, only:  imex_stat, v ,nu
-    class(ad_sweeper_t), intent(inout) :: this
+    class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t),   intent(inout),target :: pf
     integer,             intent(in)    :: level_index
 
@@ -113,7 +113,7 @@ contains
 
   !>  Destroy sweeper (bypasses base sweeper destroy)
   subroutine destroy(this,pf,level_index)
-    class(ad_sweeper_t), intent(inout) :: this
+    class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t),  target, intent(inout) :: pf
     integer,              intent(in)    :: level_index
 
@@ -136,7 +136,7 @@ contains
   ! Evaluate the explicit function at y, t.
   subroutine f_eval(this, y, t, level_index, f, piece)
     use probin, only:  imex_stat ,nu, v
-    class(ad_sweeper_t), intent(inout) :: this
+    class(my_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(in   ) :: y
     class(pf_encap_t),   intent(inout) :: f
     real(pfdp),          intent(in   ) :: t
@@ -168,7 +168,7 @@ contains
   !   y-dtq*f(y,t) = rhs
   subroutine f_comp(this, y, t, dtq, rhs, level_index, f,piece)
     use probin, only:  imex_stat ,nu,v
-    class(ad_sweeper_t), intent(inout) :: this
+    class(my_sweeper_t), intent(inout) :: this
     class(pf_encap_t),   intent(inout) :: y       !  The solution we seek
     real(pfdp),          intent(in   ) :: t       !  Equation time of implicit solve
     real(pfdp),          intent(in   ) :: dtq     !  The 
@@ -196,7 +196,7 @@ contains
     fft => this%fft_tool
 
     if (piece == 2) then
-       ! Apply the inverse opeator with the FFT convolution
+       ! Apply the inverse operator with the FFT convolution
        call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
        !  The function is easy to derive
@@ -231,4 +231,4 @@ contains
   end subroutine exact
 
 
-end module pf_my_sweeper
+end module my_sweeper

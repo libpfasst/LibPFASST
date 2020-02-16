@@ -3,14 +3,14 @@
 !
 !>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
-  use pf_mod_dtype
+  use pfasst
   use pf_mod_ndarray
   implicit none
 contains
 
   !>  Output the error and residual in the solution
   subroutine echo_error(pf, level_index)
-    use pf_my_sweeper, only: exact
+    use my_sweeper, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
@@ -27,6 +27,8 @@ contains
     
     print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es14.7)', &
          pf%state%step+1, pf%state%iter,level_index, maxerr,residual
-    call flush(6)
+
+    call pf_set_error(pf,level_index,maxerr)
+    
   end subroutine echo_error
 end module hooks
