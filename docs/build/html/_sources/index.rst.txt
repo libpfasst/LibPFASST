@@ -13,8 +13,8 @@ LibPFASST is a Fortran implementation of the PFASST algorithm.
 
 **Main parts of the documentation**
 
-* :doc:`Copyright <copyright>` - Copyright for the code
-* :doc:`License <license>` - Details of the open source license  
+* :doc:`Copyright <copyright>` - copyright for the code
+* :doc:`License <license>` - details of the open source license  
 * :doc:`Download <download>` - download instructions.
 * :doc:`Compile <compiling>` - installation and compiling instructions.  
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
@@ -38,6 +38,7 @@ Contents
    tutorial
    parameters
    sweepers
+   steppers
    encap
    output
 ..   self

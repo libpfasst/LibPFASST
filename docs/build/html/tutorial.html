@@ -220,15 +220,13 @@ function evaluations in spectral space, e.g.</p>
 </div>
 <div class="section" id="example-4">
 <h2>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h2>
-<p>In the directory <code class="docutils literal notranslate"><span class="pre">LibPFASST/Tutorials/EX4_Boussinesq</span></code> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">omega_t</span>  <span class="o">=</span> <span class="o">-</span> <span class="p">(</span>\<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> \<span class="n">cdot</span> \<span class="n">nabla</span><span class="p">)</span>\<span class="n">omega</span> <span class="o">+</span> \<span class="n">nu</span> \<span class="n">nabla</span><span class="o">^</span><span class="mi">2</span> \<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> <span class="o">-</span> <span class="n">g</span>\<span class="n">rho_x</span>
-\<span class="n">rho_t</span>  <span class="o">=</span> <span class="o">-</span> <span class="p">(</span>\<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> \<span class="n">cdot</span> \<span class="n">nabla</span><span class="p">)</span>\<span class="n">rho</span> <span class="o">+</span> \<span class="n">kappa</span> \<span class="n">nabla</span><span class="o">^</span><span class="mi">2</span> \<span class="n">rho</span> <span class="o">-</span> <span class="n">g</span>\<span class="n">rho_x</span><span class="o">.</span>
-</pre></div>
-</div>
-<p>Here (:math: omega) is the vorticity, (:math: bf{u})  is the velocity, and
-(:math: rho) a density or bouyancy term.  The constants (:math: nu and kappa) determine the diffusion terms, and (:math: g) if “gravity”.</p>
-<p>The example code is similar to Example 3 except is based on the encapsulation for an complex N-dimensional system of equations called zndsysarray.</p>
+<p>In the directory <code class="docutils literal notranslate"><span class="pre">LibPFASST/Tutorials/EX4_Boussinesq</span></code> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \omega - g\rho_x \\
+\rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho\end{split}\]</div>
+<p>Here (<span class="math notranslate nohighlight">\(\omega\)</span>) is the vorticity, (<span class="math notranslate nohighlight">\(\bf{u}\)</span>)  is the velocity, and
+(<span class="math notranslate nohighlight">\(\rho\)</span>) a density or bouyancy term.  The constants (<span class="math notranslate nohighlight">\(\nu\)</span>) and (<span class="math notranslate nohighlight">\(\kappa\)</span>) determine the diffusion terms, and (<span class="math notranslate nohighlight">\(g\)</span>)  “gravity”.</p>
+<p>The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called “zndsysarray”.</p>
 </div>
 </div>
 

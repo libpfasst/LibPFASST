@@ -244,12 +244,13 @@ When creating an example using a new data structure or equation, the most import
 Example 4
 ---------
 In the directory ``LibPFASST/Tutorials/EX4_Boussinesq`` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
+
 .. math::
 
-  \omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \bf{u} - g\rho_x
-  \rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho - g\rho_x.
+  \omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \omega - g\rho_x \\
+  \rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho
 
-Here (:math: \omega) is the vorticity, (:math: \bf{u})  is the velocity, and
-(:math: \rho) a density or bouyancy term.  The constants (:math: \nu and \kappa) determine the diffusion terms, and (:math: g) if "gravity".
+Here (:math:`\omega`) is the vorticity, (:math:`\bf{u}`)  is the velocity, and
+(:math:`\rho`) a density or bouyancy term.  The constants (:math:`\nu`) and (:math:`\kappa`) determine the diffusion terms, and (:math:`g`)  "gravity".
 
-The example code is similar to Example 3 except is based on the encapsulation for an complex N-dimensional system of equations called zndsysarray.
+The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called "zndsysarray".
