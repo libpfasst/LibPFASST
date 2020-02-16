@@ -51,6 +51,7 @@ jobs:
                   mpirun -n 4 ./main.2d.exe test_2d.nml &&
                   echo "Running ERK 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
+                  echo "Making RK "	&&	  				  
                   cd ../RK_stepper &&  make && make DIM=2 && make DIM=3  &&
                   echo "Running RK 1-d"	&&	  		
                   mpirun -n 4 ./main.1d.exe test_1d.nml &&
@@ -58,19 +59,21 @@ jobs:
                   mpirun -n 4 ./main.2d.exe test_2d.nml &&
                   echo "Running RK 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
-                  cd ../IMEX_stepper &&  make && make DIM=2 && make DIM=3  &&
-                  echo "Running IMEX 1-d"	&&	  		
+                  echo "Making Running IMEX SDC "	&&	  		
+                  cd ../IMEX_seeper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running IMEX SDC 1-d"	&&	  		
                   mpirun -n 4 ./main.1d.exe test_1d.nml &&
-                  echo "Running IMEX 2-d"	&&	  		
+                  echo "Running IMEX SDC 2-d"	&&	  		
                   mpirun -n 4 ./main.2d.exe test_2d.nml &&
-                  echo "Running IMEX 3-d"	&&	  		
+                  echo "Running IMEX SDC 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
-                  cd ../EXP_stepper &&  make && make DIM=2 && make DIM=3  &&
-                  echo "Running EXP 1-d"	&&	  		
+                  echo "Making Running EXP SDC "	&&	  				  
+                  cd ../EXP_sweeper &&  make && make DIM=2 && make DIM=3  &&
+                  echo "Running EXP SDC 1-d"	&&	  		
                   mpirun -n 4 ./main.1d.exe test_1d.nml &&
-                  echo "Running EXP 2-d"	&&	  		
+                  echo "Running EXP SDC 2-d"	&&	  		
                   mpirun -n 4 ./main.2d.exe test_2d.nml &&
-                  echo "Running EXP 3-d"	&&	  		
+                  echo "Running EXP SDC 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
                   cd ../../..
             - run: # Run the python tests in test
