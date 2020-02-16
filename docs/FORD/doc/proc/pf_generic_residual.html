@@ -236,7 +236,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E275"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E362"></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -251,7 +251,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E153"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E179"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -266,7 +266,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E136"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E179"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -281,7 +281,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-dt%7E63"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-dt%7E88"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -296,7 +296,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E145"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E205"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -347,25 +347,25 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
 </g>
 </g>
 <!-- proc~amisdc_residual&#45;&gt;proc~pf_generic_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_edge1" class="edge">
+<g id="proc~~pf_generic_residual~~CalledByGraph_edge2" class="edge">
 <title>proc~amisdc_residual&#45;&gt;proc~pf_generic_residual</title>
 <path fill="none" stroke="#000000" d="M72.7827,-125.8422C79.0924,-122.9589 85.789,-119.8831 92,-117 110.0071,-108.6412 130.003,-99.2178 146.4727,-91.4181"/>
 <polygon fill="#000000" stroke="#000000" points="148.184,-94.4803 155.7206,-87.0338 145.1853,-88.1551 148.184,-94.4803"/>
 </g>
-<!-- proc~misdcq_residual -->
+<!-- proc~imex_residual~2 -->
 <g id="proc~~pf_generic_residual~~CalledByGraph_node3" class="node">
-<title>proc~misdcq_residual</title>
-<g id="a_proc~~pf_generic_residual~~CalledByGraph_node3"><a xlink:href=".././proc/misdcq_residual.html" xlink:title="misdcQ_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="92,-108 0,-108 0,-84 92,-84 92,-108"/>
-<text text-anchor="middle" x="46" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">misdcQ_residual</text>
+<title>proc~imex_residual~2</title>
+<g id="a_proc~~pf_generic_residual~~CalledByGraph_node3"><a xlink:href=".././proc/imex_residual%7E2.html" xlink:title="imex_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="85.5,-108 6.5,-108 6.5,-84 85.5,-84 85.5,-108"/>
+<text text-anchor="middle" x="46" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imex_residual</text>
 </a>
 </g>
 </g>
-<!-- proc~misdcq_residual&#45;&gt;proc~pf_generic_residual -->
-<g id="proc~~pf_generic_residual~~CalledByGraph_edge2" class="edge">
-<title>proc~misdcq_residual&#45;&gt;proc~pf_generic_residual</title>
-<path fill="none" stroke="#000000" d="M92.0818,-88.8317C100.3169,-87.5507 109.0265,-86.1959 117.6456,-84.8551"/>
-<polygon fill="#000000" stroke="#000000" points="118.3452,-88.2885 127.6883,-83.2929 117.2692,-81.3717 118.3452,-88.2885"/>
+<!-- proc~imex_residual~2&#45;&gt;proc~pf_generic_residual -->
+<g id="proc~~pf_generic_residual~~CalledByGraph_edge1" class="edge">
+<title>proc~imex_residual~2&#45;&gt;proc~pf_generic_residual</title>
+<path fill="none" stroke="#000000" d="M85.7743,-89.8129C95.8974,-88.2382 107.0275,-86.5068 117.9984,-84.8002"/>
+<polygon fill="#000000" stroke="#000000" points="118.6524,-88.2407 127.9956,-83.2451 117.5764,-81.3239 118.6524,-88.2407"/>
 </g>
 <!-- proc~misdc_residual -->
 <g id="proc~~pf_generic_residual~~CalledByGraph_node4" class="node">
@@ -382,18 +382,18 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
 <path fill="none" stroke="#000000" d="M88.3444,-60.5869C97.7396,-62.0484 107.8935,-63.6279 117.9169,-65.1871"/>
 <polygon fill="#000000" stroke="#000000" points="117.4448,-68.6556 127.8639,-66.7344 118.5208,-61.7388 117.4448,-68.6556"/>
 </g>
-<!-- proc~imex_residual -->
+<!-- proc~misdcq_residual -->
 <g id="proc~~pf_generic_residual~~CalledByGraph_node5" class="node">
-<title>proc~imex_residual</title>
-<g id="a_proc~~pf_generic_residual~~CalledByGraph_node5"><a xlink:href=".././proc/imex_residual.html" xlink:title="imex_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="85.5,-24 6.5,-24 6.5,0 85.5,0 85.5,-24"/>
-<text text-anchor="middle" x="46" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imex_residual</text>
+<title>proc~misdcq_residual</title>
+<g id="a_proc~~pf_generic_residual~~CalledByGraph_node5"><a xlink:href=".././proc/misdcq_residual.html" xlink:title="misdcQ_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="92,-24 0,-24 0,0 92,0 92,-24"/>
+<text text-anchor="middle" x="46" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">misdcQ_residual</text>
 </a>
 </g>
 </g>
-<!-- proc~imex_residual&#45;&gt;proc~pf_generic_residual -->
+<!-- proc~misdcq_residual&#45;&gt;proc~pf_generic_residual -->
 <g id="proc~~pf_generic_residual~~CalledByGraph_edge4" class="edge">
-<title>proc~imex_residual&#45;&gt;proc~pf_generic_residual</title>
+<title>proc~misdcq_residual&#45;&gt;proc~pf_generic_residual</title>
 <path fill="none" stroke="#000000" d="M72.7827,-24.1578C79.0924,-27.0411 85.789,-30.1169 92,-33 110.0071,-41.3588 130.003,-50.7822 146.4727,-58.5819"/>
 <polygon fill="#000000" stroke="#000000" points="145.1853,-61.8449 155.7206,-62.9662 148.184,-55.5197 145.1853,-61.8449"/>
 </g>
@@ -546,7 +546,8 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
 <span class="k">      do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
         <span class="k">if</span><span class="p">(</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="k">then</span>
 <span class="k">          call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+          <span class="c">!          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)</span>
+          <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>          
           <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">end if</span>
 <span class="k">        if</span><span class="p">(</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">0</span><span class="p">)</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="p">(</span><span class="n">flags</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mi">2</span><span class="p">)</span> <span class="p">)</span> <span class="k">then</span>
@@ -558,7 +559,7 @@ public subroutine pf_generic_residual(this, pf, level_index, dt, flags)
 <span class="k">    else</span>
 <span class="k">      do </span><span class="n">m</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span>      
         <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">I</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
-        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">q0</span><span class="p">)</span>
         <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">R</span><span class="p">(</span><span class="n">m</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
       <span class="k">end do</span>
 <span class="k">    end if</span>

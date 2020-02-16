@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 4.1% of total for derived types.</p>Including implementation: 290 statements,  4.4% of total for derived types.">26 statements</a>
+    title="<p> 3.3% of total for derived types.</p>Including implementation: 311 statements,  3.6% of total for derived types.">27 statements</a>
      </li> 
      
      
@@ -140,7 +140,7 @@
     
      <li><a href='../sourcefile/pf_exp_sweeper.f90.html'>pf_exp_sweeper.f90</a></li>
     
-     <li><a href='../module/pf_mod_exp.html'>pf_mod_exp</a></li>
+     <li><a href='../module/pf_mod_exp_sweeper.html'>pf_mod_exp_sweeper</a></li>
     
   
      <li class="active">pf_exp_t</li>
@@ -235,6 +235,8 @@
       
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-spreadq0%7E2">spreadq0</a>
       
+      <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-compute_dt%7E2">compute_dt</a>
+      
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-evaluate_all%7E2">evaluate_all</a>
       
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-destroy%7E2">destroy</a>
@@ -290,36 +292,36 @@
 <polygon fill="none" stroke="#000000" points="229,-45 175,-45 175,-21 229,-21 229,-45"/>
 <text text-anchor="middle" x="202" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_exp_t</text>
 </g>
-<!-- type~pf_sweeper_t -->
-<g id="type~~pf_exp_t~~InheritsGraph_node2" class="node">
-<title>type~pf_sweeper_t</title>
-<g id="a_type~~pf_exp_t~~InheritsGraph_node2"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-66 0,-66 0,-42 77,-42 77,-66"/>
-<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sweeper_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_exp_t&#45;&gt;type~pf_sweeper_t -->
-<g id="type~~pf_exp_t~~InheritsGraph_edge2" class="edge">
-<title>type~pf_exp_t&#45;&gt;type~pf_sweeper_t</title>
-<path fill="none" stroke="#000000" d="M174.8961,-37.381C169.0024,-38.2875 162.7968,-39.207 157,-40 134.1581,-43.1248 108.7814,-46.1786 87.3905,-48.6325"/>
-<polygon fill="#000000" stroke="#000000" points="86.7789,-45.1794 77.2383,-49.7866 87.5697,-52.1346 86.7789,-45.1794"/>
-</g>
 <!-- type~pf_encap_t -->
-<g id="type~~pf_exp_t~~InheritsGraph_node3" class="node">
+<g id="type~~pf_exp_t~~InheritsGraph_node2" class="node">
 <title>type~pf_encap_t</title>
-<g id="a_type~~pf_exp_t~~InheritsGraph_node3"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="71.5,-24 5.5,-24 5.5,0 71.5,0 71.5,-24"/>
-<text text-anchor="middle" x="38.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_encap_t</text>
+<g id="a_type~~pf_exp_t~~InheritsGraph_node2"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="71.5,-66 5.5,-66 5.5,-42 71.5,-42 71.5,-66"/>
+<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_encap_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_exp_t&#45;&gt;type~pf_encap_t -->
 <g id="type~~pf_exp_t~~InheritsGraph_edge1" class="edge">
 <title>type~pf_exp_t&#45;&gt;type~pf_encap_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M174.6338,-29.4851C149.2622,-26.2263 111.1002,-21.3248 81.631,-17.5398"/>
-<polygon fill="#000000" stroke="#000000" points="81.9696,-14.0546 71.6051,-16.252 81.0777,-20.9975 81.9696,-14.0546"/>
-<text text-anchor="middle" x="126" y="-28.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">b, f_old, newF</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M174.6338,-36.5149C149.2622,-39.7737 111.1002,-44.6752 81.631,-48.4602"/>
+<polygon fill="#000000" stroke="#000000" points="81.0777,-45.0025 71.6051,-49.748 81.9696,-51.9454 81.0777,-45.0025"/>
+<text text-anchor="middle" x="126" y="-48.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">b, f_old, newF</text>
+</g>
+<!-- type~pf_sweeper_t -->
+<g id="type~~pf_exp_t~~InheritsGraph_node3" class="node">
+<title>type~pf_sweeper_t</title>
+<g id="a_type~~pf_exp_t~~InheritsGraph_node3"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-24 0,-24 0,0 77,0 77,-24"/>
+<text text-anchor="middle" x="38.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sweeper_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_exp_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~pf_exp_t~~InheritsGraph_edge2" class="edge">
+<title>type~pf_exp_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M174.6338,-29.4851C150.9113,-26.4381 116.0071,-21.955 87.4816,-18.2912"/>
+<polygon fill="#000000" stroke="#000000" points="87.6578,-14.7852 77.2934,-16.9826 86.766,-21.7281 87.6578,-14.7852"/>
 </g>
 </g>
 </svg>
@@ -439,6 +441,8 @@
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-residual%7E2">residual</a>
       
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-spreadq0%7E2">spreadq0</a>
+      
+      <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-compute_dt%7E2">compute_dt</a>
       
       <a class="list-group-item" href="../type/pf_exp_t.html#boundprocedure-evaluate_all%7E2">evaluate_all</a>
       
@@ -1961,6 +1965,153 @@ public subroutine <a href='../proc/exp_spreadq0.html'>exp_spreadq0</a>(this, pf,
     
      
 <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-compute_dt%7E2"></span><h3>procedure, public :: <strong>compute_dt</strong>  => <a href='../proc/exp_compute_dt.html'>exp_compute_dt</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/exp_compute_dt.html'>exp_compute_dt</a>(this, pf, level_index, t0, dt, flags)
+    
+    
+   
+</h3>
+    
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_exp_t.html'>pf_exp_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-evaluate_all%7E2"></span><h3>procedure, public :: <strong>evaluate_all</strong>  => <a href='../proc/exp_evaluate_all.html'>exp_evaluate_all</a> 
     
   </h3></div>
@@ -2412,6 +2563,7 @@ public subroutine <a href='../proc/exp_initialize.html'>exp_initialize</a>(this,
         <span class="k">procedure</span> <span class="kd">::</span> <span class="n">integrate</span>    <span class="o">=&gt;</span> <span class="n">exp_integrate</span>
         <span class="k">procedure</span> <span class="kd">::</span> <span class="n">residual</span>     <span class="o">=&gt;</span> <span class="n">exp_residual</span>
         <span class="k">procedure</span> <span class="kd">::</span> <span class="n">spreadq0</span>     <span class="o">=&gt;</span> <span class="n">exp_spreadq0</span>
+        <span class="k">procedure</span> <span class="kd">::</span> <span class="n">compute_dt</span>   <span class="o">=&gt;</span> <span class="n">exp_compute_dt</span>
         <span class="k">procedure</span> <span class="kd">::</span> <span class="n">evaluate_all</span> <span class="o">=&gt;</span> <span class="n">exp_evaluate_all</span>
         <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy</span>      <span class="o">=&gt;</span> <span class="n">exp_destroy</span>
         <span class="c">! functions that can be accessed directly by types that inherit pf_exp_t</span>

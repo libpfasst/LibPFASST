@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.9% of total for derived types.</p>Including implementation: 145 statements,  2.2% of total for derived types.">18 statements</a>
+    title="<p> 2.2% of total for derived types.</p>Including implementation: 145 statements,  1.7% of total for derived types.">18 statements</a>
      </li> 
      
      
@@ -206,6 +206,8 @@
     <div class="list-group">
       
       <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-spreadq0">spreadq0</a>
+      
+      <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-compute_dt">compute_dt</a>
       
       <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-f1eval">f1eval</a>
       
@@ -463,6 +465,8 @@
       
       <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-spreadq0">spreadq0</a>
       
+      <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-compute_dt">compute_dt</a>
+      
       <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-f1eval">f1eval</a>
       
       <a class="list-group-item" href="../type/pf_amisdc_t.html#boundprocedure-f2eval">f2eval</a>
@@ -713,6 +717,145 @@ subroutine pf_spreadq0_p(this, pf, level_index, t0, flags, step)
   
   <td></td><td>::</td>
   <td><strong>step</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-compute_dt"></span><h3>procedure(<a href='../interface/pf_compute_dt_p.html'>pf_compute_dt_p</a>), public, deferred :: <strong>compute_dt</strong>  
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+subroutine pf_compute_dt_p(this, pf, level_index, t0, dt, flags)
+    
+    
+   
+<small>Prototype</small></h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sweeper_t.html'>pf_sweeper_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
   
 </tr>
 

@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">10 statements</a>
+    title=" 0.0% of total for procedures.">10 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine ndarray_create_single(this, x, level_index, lev_shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E186"></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E241"></span>class(<a href='../type/pf_ndarray_factory_t.html'>pf_ndarray_factory_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndarray_create_single(this, x, level_index, lev_shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E31"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-x%7E48"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine ndarray_create_single(this, x, level_index, lev_shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E93"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E118"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine ndarray_create_single(this, x, level_index, lev_shape)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lev_shape%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-lev_shape%7E15"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -464,6 +464,7 @@ public subroutine ndarray_create_single(this, x, level_index, lev_shape)
     <span class="k">if</span> <span class="p">(</span><span class="n">ierr</span> <span class="o">/=</span><span class="mi">0</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;allocate fail, error=&#39;</span><span class="p">,</span><span class="n">ierr</span><span class="p">)</span>       
     
     <span class="k">call </span><span class="n">ndarray_build</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lev_shape</span><span class="p">)</span>
+    
   <span class="k">end subroutine </span><span class="n">ndarray_create_single</span>
 </pre></div>
 

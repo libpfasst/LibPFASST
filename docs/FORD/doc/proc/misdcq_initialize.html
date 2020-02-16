@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">33 statements</a>
+    title=" 0.1% of total for procedures.">33 statements</a>
      </li> 
      
      
@@ -232,7 +232,7 @@ public subroutine misdcQ_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E38"></span>class(<a href='../type/pf_misdcq_t.html'>pf_misdcQ_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E61"></span>class(<a href='../type/pf_misdcq_t.html'>pf_misdcQ_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine misdcQ_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E12"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E13"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine misdcQ_initialize(this, pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E18"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E22"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -379,10 +379,10 @@ public subroutine misdcQ_initialize(this, pf, level_index)
     <span class="n">this</span><span class="p">%</span><span class="n">QdiffI</span> <span class="o">=</span> <span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qmat</span><span class="o">-</span><span class="n">this</span><span class="p">%</span><span class="n">QtilI</span>
 
     <span class="c">!&gt;  Make space for rhs</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
     <span class="c">!&gt;  Make space for extra integration piece</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_array</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">I3</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span><span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
 
   <span class="k">end subroutine </span><span class="n">misdcQ_initialize</span>
 </pre></div>

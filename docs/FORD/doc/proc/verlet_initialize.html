@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.5% of total for procedures.">94 statements</a>
+    title=" 0.4% of total for procedures.">88 statements</a>
      </li> 
      
      
@@ -239,7 +239,7 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E197"></span>class(<a href='../type/pf_verlet_t.html'>pf_verlet_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E256"></span>class(<a href='../type/pf_verlet_t.html'>pf_verlet_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -254,7 +254,7 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E95"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E109"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -269,7 +269,7 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E96"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E121"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -511,8 +511,8 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
     <span class="c">!  form the QQ matrix depending on what you want</span>
     <span class="k">select case</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">whichQQ</span><span class="p">)</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c">!  Collocation (make it the product)</span>
-       <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="s1">&#39;Making QQ by collocation Q*Q&#39;</span>
-       <span class="k">print</span> <span class="o">*</span><span class="p">,</span><span class="n">SIZE</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">Qmat</span><span class="p">)</span>
+<span class="c">!       print *,&#39;Making QQ by collocation Q*Q,  shape&#39;,shape(this%Qmat)</span>
+
        <span class="n">qtemp</span><span class="o">=</span><span class="mf">0.0_pfdp</span>
        <span class="n">qtemp</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nnodes</span><span class="p">,:)</span><span class="o">=</span><span class="n">lev</span><span class="p">%</span><span class="n">sdcmats</span><span class="p">%</span><span class="n">qmat</span>
        <span class="n">qtemp</span><span class="o">=</span><span class="nb">matmul</span><span class="p">(</span><span class="n">qtemp</span><span class="p">,</span><span class="n">qtemp</span><span class="p">)</span>
@@ -561,11 +561,9 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
 <span class="c">!      this%QQLU=U</span>
 <span class="c">!      print *, &#39;U from LU&#39;,this%QQLU</span>
 <span class="c">!   else</span>
-   <span class="n">this</span><span class="p">%</span><span class="n">Qtil</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">Qver</span>  <span class="c">!  Normal verlet all the time</span>
-   <span class="n">this</span><span class="p">%</span><span class="n">QQtil</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">QQver</span>  <span class="c">!  Normal verlet all the time        </span>
    <span class="c">!   end if</span>
-   <span class="n">this</span><span class="p">%</span><span class="n">Qver</span><span class="o">=</span><span class="mf">0.0d0</span> <span class="c">!  Normal verlet all the time</span>
-   <span class="n">this</span><span class="p">%</span><span class="n">QQver</span><span class="o">=</span><span class="mf">0.0d0</span>   <span class="c">!  Normal verlet all the time        </span>
+<span class="c">!   this%Qver=0.0_pfdp !  Normal verlet all the time</span>
+<span class="c">!   this%QQver=0.0_pfdp   !  Normal verlet all the time        </span>
    
    <span class="n">this</span><span class="p">%</span><span class="n">Qtil</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">Qver</span>  <span class="c">!  Normal verlet all the time</span>
    <span class="n">this</span><span class="p">%</span><span class="n">QQtil</span><span class="o">=</span><span class="n">this</span><span class="p">%</span><span class="n">QQver</span>  <span class="c">!  Normal verlet all the time        </span>
@@ -580,7 +578,7 @@ $       this%QQmat = matmul(this%QQmat,this%Qmat)
     <span class="k">deallocate</span><span class="p">(</span><span class="n">qtemp2</span><span class="p">)</span>
 
     <span class="c">!&gt;  Make space for rhs</span>
-    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
+    <span class="k">call </span><span class="n">lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">%</span><span class="n">create_single</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">rhs</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span>   <span class="n">lev</span><span class="p">%</span><span class="n">lev_shape</span><span class="p">)</span>
     
   <span class="k">end subroutine </span><span class="n">verlet_initialize</span>
 </pre></div>

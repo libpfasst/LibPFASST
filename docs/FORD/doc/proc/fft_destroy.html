@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">21 statements</a>
+    title=" 0.1% of total for procedures.">22 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine fft_destroy(this)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E14"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E36"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -270,29 +270,29 @@ public subroutine fft_destroy(this)
 <polygon fill="none" stroke="#000000" points="63,-45 0,-45 0,-21 63,-21 63,-45"/>
 <text text-anchor="middle" x="31.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">fft_destroy</text>
 </g>
-<!-- pf_stop -->
-<g id="proc~~fft_destroy~~CallsGraph_node2" class="node">
-<title>pf_stop</title>
-<polygon fill="#777777" stroke="#777777" points="174.5,-66 120.5,-66 120.5,-42 174.5,-42 174.5,-66"/>
-<text text-anchor="middle" x="147.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
-</g>
-<!-- proc~fft_destroy&#45;&gt;pf_stop -->
-<g id="proc~~fft_destroy~~CallsGraph_edge1" class="edge">
-<title>proc~fft_destroy&#45;&gt;pf_stop</title>
-<path fill="none" stroke="#000000" d="M63.1975,-38.7383C77.6954,-41.363 94.975,-44.4912 110.1046,-47.2301"/>
-<polygon fill="#000000" stroke="#000000" points="109.7113,-50.7158 120.1749,-49.0532 110.9583,-43.8277 109.7113,-50.7158"/>
-</g>
 <!-- fftw_destroy_plan -->
-<g id="proc~~fft_destroy~~CallsGraph_node3" class="node">
+<g id="proc~~fft_destroy~~CallsGraph_node2" class="node">
 <title>fftw_destroy_plan</title>
-<polygon fill="#777777" stroke="#777777" points="196,-24 99,-24 99,0 196,0 196,-24"/>
-<text text-anchor="middle" x="147.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_destroy_plan</text>
+<polygon fill="#777777" stroke="#777777" points="196,-66 99,-66 99,-42 196,-42 196,-66"/>
+<text text-anchor="middle" x="147.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_destroy_plan</text>
 </g>
 <!-- proc~fft_destroy&#45;&gt;fftw_destroy_plan -->
-<g id="proc~~fft_destroy~~CallsGraph_edge2" class="edge">
+<g id="proc~~fft_destroy~~CallsGraph_edge1" class="edge">
 <title>proc~fft_destroy&#45;&gt;fftw_destroy_plan</title>
-<path fill="none" stroke="#000000" d="M63.1975,-27.2617C71.1906,-25.8146 80.0293,-24.2145 88.887,-22.611"/>
-<polygon fill="#000000" stroke="#000000" points="89.6352,-26.0325 98.8517,-20.807 88.3882,-19.1445 89.6352,-26.0325"/>
+<path fill="none" stroke="#000000" d="M63.1975,-38.7383C71.1906,-40.1854 80.0293,-41.7855 88.887,-43.389"/>
+<polygon fill="#000000" stroke="#000000" points="88.3882,-46.8555 98.8517,-45.193 89.6352,-39.9675 88.3882,-46.8555"/>
+</g>
+<!-- pf_stop -->
+<g id="proc~~fft_destroy~~CallsGraph_node3" class="node">
+<title>pf_stop</title>
+<polygon fill="#777777" stroke="#777777" points="174.5,-24 120.5,-24 120.5,0 174.5,0 174.5,-24"/>
+<text text-anchor="middle" x="147.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
+</g>
+<!-- proc~fft_destroy&#45;&gt;pf_stop -->
+<g id="proc~~fft_destroy~~CallsGraph_edge2" class="edge">
+<title>proc~fft_destroy&#45;&gt;pf_stop</title>
+<path fill="none" stroke="#000000" d="M63.1975,-27.2617C77.6954,-24.637 94.975,-21.5088 110.1046,-18.7699"/>
+<polygon fill="#000000" stroke="#000000" points="110.9583,-22.1723 120.1749,-16.9468 109.7113,-15.2842 110.9583,-22.1723"/>
 </g>
 </g>
 </svg>
@@ -420,20 +420,22 @@ public subroutine fft_destroy(this)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">fft_destroy</span><span class="p">(</span><span class="n">this</span><span class="p">)</span>
     <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
+
+    <span class="k">type</span><span class="p">(</span><span class="kt">c_ptr</span><span class="p">)</span> <span class="kd">::</span> <span class="n">wk</span>    
     <span class="k">call </span><span class="n">fftw_destroy_plan</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ffftw</span><span class="p">)</span>
     <span class="k">call </span><span class="n">fftw_destroy_plan</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ifftw</span><span class="p">)</span>
     <span class="k">select case</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ndim</span><span class="p">)</span>
-    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>            
-       <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span><span class="p">)</span>
-       <span class="c">!  Deallocate wave number arrays</span>
-       <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">)</span>   
+    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">fftw_free</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_1d</span><span class="p">))</span>
+       <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">)</span>
     <span class="k">case</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span>            
-       <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">fftw_free</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_2d</span><span class="p">))</span>
        <span class="c">!  Deallocate wave number arrays</span>
        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">)</span>   
        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ky</span><span class="p">)</span>   
     <span class="k">case</span> <span class="p">(</span><span class="mi">3</span><span class="p">)</span>            
-       <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">)</span>
+       <span class="k">call </span><span class="n">fftw_free</span><span class="p">(</span><span class="nb">c_loc</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">wk_3d</span><span class="p">))</span>
+
        <span class="c">!  Deallocate wave number arrays</span>
        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">kx</span><span class="p">)</span>   
        <span class="k">deallocate</span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">ky</span><span class="p">)</span>   

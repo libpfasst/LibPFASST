@@ -230,7 +230,7 @@ public subroutine pf_echo_residual(pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E154"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E180"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine pf_echo_residual(pf, level_index)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E137"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E180"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -325,7 +325,8 @@ public subroutine pf_echo_residual(pf, level_index)
     <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
     <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">level_index</span>
 
-    <span class="k">print</span> <span class="s1">&#39;(&quot;resid: time: &quot;, f10.4,&quot; step: &quot;,i4.4,&quot; rank: &quot;,i3.3,&quot; iter: &quot;,i4.3,&quot; level: &quot;,i2.2,&quot; resid: &quot;,es14.7)&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
+
+    <span class="k">print</span> <span class="s1">&#39;(&quot;resid: time: &quot;, f10.4,&quot; step: &quot;,i8.8,&quot; rank: &quot;,i3.3,&quot; iter: &quot;,i4.3,&quot; level: &quot;,i2.2,&quot; resid: &quot;,es14.7)&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
          <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">t0</span><span class="o">+</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">step</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)%</span><span class="n">residual</span>    
     
     <span class="k">call </span><span class="nb">flush</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>

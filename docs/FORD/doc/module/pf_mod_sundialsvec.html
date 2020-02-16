@@ -1,0 +1,4438 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="The library for running PFASST">
+    
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_mod_sundialsVec &ndash; LibPFASST</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>pf_mod_sundialsVec 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 5.1% of total for modules and submodules.">612 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/pf_sundials_vec.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/pf_sundials_vec.f90.html'>pf_sundials_vec.f90</a></li>
+    
+  
+     <li class="active">pf_mod_sundialsVec</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-pf_sundialsvec_factory_t">pf_sundialsVec_factory_t</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-fvec">FVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-pf_sundialsvec_t">pf_sundialsVec_t</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-cast_as_pf_sundialsvec">cast_as_pf_sundialsVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_norm">pf_sundialsVec_norm</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vnew_fortran">FN_VNew_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmake_fortran">FN_VMake_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetfvec">FN_VGetFVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetvectorid_fortran">FN_VGetVectorID_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetlength_fortran">FN_VGetLength_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdotprod_fortran">FN_VDotProd_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vclone_fortran">FN_VClone_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmaxnorm_fortran">FN_VMaxNorm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwsqrsum_fortran">FN_VWSqrSum_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwsqrsummask_fortran">FN_VWSqrSumMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwrmsnorm_fortran">FN_VWRMSNorm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwrmsnormmask_fortran">FN_VWRMSNormMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmin_fortran">FN_VMin_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwl2norm_fortran">FN_VWL2Norm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vl1norm_fortran">FN_VL1Norm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vinvtest_fortran">FN_VInvTest_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vconstrmask_fortran">FN_VConstrMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vminquotient_fortran">FN_VMinQuotient_Fortran</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_build">pf_sundialsVec_build</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_create_single">pf_sundialsVec_create_single</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_create_array">pf_sundialsVec_create_array</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy">pf_sundialsVec_destroy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy_single">pf_sundialsVec_destroy_single</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy_array">pf_sundialsVec_destroy_array</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_setval">pf_sundialsVec_setval</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_copy">pf_sundialsVec_copy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_pack">pf_sundialsVec_pack</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_unpack">pf_sundialsVec_unpack</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_axpy">pf_sundialsVec_axpy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_eprint">pf_sundialsVec_eprint</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdestroy_fortran">FN_VDestroy_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vconst_fortran">FN_VConst_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vspace_fortran">FN_VSpace_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vlinearsum_fortran">FN_VLinearSum_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vprod_fortran">FN_VProd_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdiv_fortran">FN_VDiv_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vscale_fortran">FN_VScale_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vabs_fortran">FN_VAbs_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vinv_fortran">FN_VInv_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vaddconst_fortran">FN_VAddConst_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vcompare_fortran">FN_VCompare_Fortran</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href="http://fortranwiki.org/fortran/show/ISO_C_BINDING">iso_c_binding</a></li>
+    
+    <li><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></li>
+    
+    <li><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
+    
+    <li>fsundials_nvector_mod</li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: module~~pf_mod_sundialsvec~~UsesGraph Pages: 1 -->
+<svg id="modulepf_mod_sundialsvecUsesGraph" width="625pt" height="196pt"
+ viewBox="0.00 0.00 625.00 196.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_sundialsvec~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 192)">
+<title>module~~pf_mod_sundialsvec~~UsesGraph</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-192 621,-192 621,4 -4,4"/>
+<!-- module~pf_mod_sundialsvec -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node1" class="node">
+<title>module~pf_mod_sundialsvec</title>
+<polygon fill="none" stroke="#000000" points="617,-148 505,-148 505,-124 617,-124 617,-148"/>
+<text text-anchor="middle" x="561" y="-133.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_mod_sundialsVec</text>
+</g>
+<!-- fsundials_nvector_mod -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node2" class="node">
+<title>fsundials_nvector_mod</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="469,-188 346,-188 346,-164 469,-164 469,-188"/>
+<text text-anchor="middle" x="407.5" y="-173.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fsundials_nvector_mod</text>
+</g>
+<!-- module~pf_mod_sundialsvec&#45;&gt;fsundials_nvector_mod -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge1" class="edge">
+<title>module~pf_mod_sundialsvec&#45;&gt;fsundials_nvector_mod</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M514.9449,-148.0013C498.7781,-152.2142 480.4358,-156.9939 463.5406,-161.3966"/>
+<polygon fill="#000000" stroke="#000000" points="462.5819,-158.0295 453.7876,-163.9381 464.3471,-164.8032 462.5819,-158.0295"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node3" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node3"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-128 0,-128 0,-104 78,-104 78,-128"/>
+<text text-anchor="middle" x="39" y="-113.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_sundialsvec&#45;&gt;iso_c_binding -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge2" class="edge">
+<title>module~pf_mod_sundialsvec&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M270.5,-136C207.8074,-129.7122 135.4418,-123.6522 88.5424,-119.8826"/>
+<polygon fill="#000000" stroke="#000000" points="88.6008,-116.3762 78.3536,-119.0675 88.0426,-123.3539 88.6008,-116.3762"/>
+</g>
+<!-- module~pf_mod_utils -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node4" class="node">
+<title>module~pf_mod_utils</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node4"><a xlink:href=".././module/pf_mod_utils.html" xlink:title="pf_mod_utils">
+<polygon fill="#337ab7" stroke="#337ab7" points="444,-88 371,-88 371,-64 444,-64 444,-88"/>
+<text text-anchor="middle" x="407.5" y="-73.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_utils</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_sundialsvec&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge3" class="edge">
+<title>module~pf_mod_sundialsvec&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M529.937,-123.8581C506.2446,-114.5972 473.4198,-101.7667 447.721,-91.7216"/>
+<polygon fill="#000000" stroke="#000000" points="448.8425,-88.4021 438.2545,-88.0213 446.2941,-94.9218 448.8425,-88.4021"/>
+</g>
+<!-- module~pf_mod_dtype -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node5" class="node">
+<title>module~pf_mod_dtype</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node5"><a xlink:href=".././module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-108 114,-108 114,-84 195,-84 195,-108"/>
+<text text-anchor="middle" x="154.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_dtype</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_sundialsvec&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge4" class="edge">
+<title>module~pf_mod_sundialsvec&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M504.9174,-138.8284C446.3212,-141.1216 351.78,-142.9556 270.5,-136"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M270.5,-136C241.5671,-133.0981 210.509,-121.9186 187.8178,-112.1138"/>
+<polygon fill="#000000" stroke="#000000" points="189.1948,-108.8957 178.6358,-108.024 186.3466,-115.2901 189.1948,-108.8957"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge7" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M370.9818,-78.8868C327.4172,-82.3307 254.3322,-88.1081 205.2807,-91.9857"/>
+<polygon fill="#000000" stroke="#000000" points="204.8907,-88.5055 195.1977,-92.7828 205.4424,-95.4838 204.8907,-88.5055"/>
+</g>
+<!-- module~pf_mod_timer -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node6" class="node">
+<title>module~pf_mod_timer</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node6"><a xlink:href=".././module/pf_mod_timer.html" xlink:title="pf_mod_timer">
+<polygon fill="#337ab7" stroke="#337ab7" points="310,-67 231,-67 231,-43 310,-43 310,-67"/>
+<text text-anchor="middle" x="270.5" y="-52.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_timer</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge6" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M370.7865,-70.3724C355.2962,-67.998 337.0193,-65.1964 320.3402,-62.6397"/>
+<polygon fill="#000000" stroke="#000000" points="320.6157,-59.1412 310.2008,-61.0855 319.555,-66.0604 320.6157,-59.1412"/>
+</g>
+<!-- module~pf_mod_stop -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node7" class="node">
+<title>module~pf_mod_stop</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node7"><a xlink:href=".././module/pf_mod_stop.html" xlink:title="pf_mod_stop">
+<polygon fill="#337ab7" stroke="#337ab7" points="192,-24 117,-24 117,0 192,0 192,-24"/>
+<text text-anchor="middle" x="154.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_stop</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge5" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M384.1054,-63.8178C364.7464,-54.2574 336.2626,-41.3716 310,-34 274.6228,-24.0701 233.3996,-18.4981 202.2892,-15.4477"/>
+<polygon fill="#000000" stroke="#000000" points="202.4301,-11.9458 192.1495,-14.5072 201.7835,-18.9159 202.4301,-11.9458"/>
+</g>
+<!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge8" class="edge">
+<title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.779,-103.0513C105.4698,-104.4901 96.644,-106.0184 88.0787,-107.5015"/>
+<polygon fill="#000000" stroke="#000000" points="87.4461,-104.0589 78.1899,-109.2139 88.6405,-110.9563 87.4461,-104.0589"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge11" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M236.3236,-67.0796C224.5113,-71.2546 211.1034,-75.9936 198.6092,-80.4097"/>
+<polygon fill="#000000" stroke="#000000" points="197.095,-77.2326 188.833,-83.8651 199.4278,-83.8325 197.095,-77.2326"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge10" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M237.8788,-42.9077C225.0451,-38.1503 210.1463,-32.6275 196.523,-27.5775"/>
+<polygon fill="#000000" stroke="#000000" points="197.4694,-24.1956 186.8763,-24.0016 195.0363,-30.7592 197.4694,-24.1956"/>
+</g>
+<!-- module~pf_mod_mpi -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node8" class="node">
+<title>module~pf_mod_mpi</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node8"><a xlink:href=".././module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="190.5,-66 118.5,-66 118.5,-42 190.5,-42 190.5,-66"/>
+<text text-anchor="middle" x="154.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge9" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.9038,-54.6587C221.2588,-54.5755 210.8563,-54.4858 200.9256,-54.4002"/>
+<polygon fill="#000000" stroke="#000000" points="200.829,-50.8994 190.7992,-54.3129 200.7686,-57.8991 200.829,-50.8994"/>
+</g>
+<!-- mpi -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_node9" class="node">
+<title>mpi</title>
+<g id="a_module~~pf_mod_sundialsvec~~UsesGraph_node9"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="66,-66 12,-66 12,-42 66,-42 66,-66"/>
+<text text-anchor="middle" x="39" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mpi&#45;&gt;mpi -->
+<g id="module~~pf_mod_sundialsvec~~UsesGraph_edge12" class="edge">
+<title>module~pf_mod_mpi&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.272,-54C105.0127,-54 89.987,-54 76.6097,-54"/>
+<polygon fill="#000000" stroke="#000000" points="76.2999,-50.5001 66.2999,-54 76.2998,-57.5001 76.2999,-50.5001"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="490pt" height="32pt"
+ viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,0 139.5,0 139.5,-24"/>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,0 222,0 222,-24"/>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,0 294,0 294,-24"/>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,0 366,0 366,-24"/>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="#000000" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-pf_sundialsvec_factory_t">pf_sundialsVec_factory_t</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-fvec">FVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#type-pf_sundialsvec_t">pf_sundialsVec_t</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-cast_as_pf_sundialsvec">cast_as_pf_sundialsVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_norm">pf_sundialsVec_norm</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vnew_fortran">FN_VNew_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmake_fortran">FN_VMake_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetfvec">FN_VGetFVec</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetvectorid_fortran">FN_VGetVectorID_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vgetlength_fortran">FN_VGetLength_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdotprod_fortran">FN_VDotProd_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vclone_fortran">FN_VClone_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmaxnorm_fortran">FN_VMaxNorm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwsqrsum_fortran">FN_VWSqrSum_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwsqrsummask_fortran">FN_VWSqrSumMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwrmsnorm_fortran">FN_VWRMSNorm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwrmsnormmask_fortran">FN_VWRMSNormMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vmin_fortran">FN_VMin_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vwl2norm_fortran">FN_VWL2Norm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vl1norm_fortran">FN_VL1Norm_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vinvtest_fortran">FN_VInvTest_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vconstrmask_fortran">FN_VConstrMask_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vminquotient_fortran">FN_VMinQuotient_Fortran</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_build">pf_sundialsVec_build</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_create_single">pf_sundialsVec_create_single</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_create_array">pf_sundialsVec_create_array</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy">pf_sundialsVec_destroy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy_single">pf_sundialsVec_destroy_single</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_destroy_array">pf_sundialsVec_destroy_array</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_setval">pf_sundialsVec_setval</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_copy">pf_sundialsVec_copy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_pack">pf_sundialsVec_pack</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_unpack">pf_sundialsVec_unpack</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_axpy">pf_sundialsVec_axpy</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-pf_sundialsvec_eprint">pf_sundialsVec_eprint</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdestroy_fortran">FN_VDestroy_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vconst_fortran">FN_VConst_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vspace_fortran">FN_VSpace_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vlinearsum_fortran">FN_VLinearSum_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vprod_fortran">FN_VProd_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vdiv_fortran">FN_VDiv_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vscale_fortran">FN_VScale_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vabs_fortran">FN_VAbs_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vinv_fortran">FN_VInv_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vaddconst_fortran">FN_VAddConst_Fortran</a>
+      
+      <a class="list-group-item" href="../module/pf_mod_sundialsvec.html#proc-fn_vcompare_fortran">FN_VCompare_Fortran</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    <section>
+     <h2>Derived Types</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_sundialsvec_factory_t"></span><h3>type, public, extends(<a href='../type/pf_factory_t.html'>pf_factory_t</a>) :: <a href='../type/pf_sundialsvec_factory_t.html'>pf_sundialsVec_factory_t</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+    
+    <p>Type to create and destroy N-dimenstional arrays </p>
+    
+     
+     
+          
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_factory_t.html#boundprocedure-create_single%7E2'>create_single</a></strong>  => pf_sundialsVec_create_single </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_factory_t.html#boundprocedure-create_array%7E2'>create_array</a></strong>  => pf_sundialsVec_create_array </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_factory_t.html#boundprocedure-destroy_single%7E2'>destroy_single</a></strong>  => pf_sundialsVec_destroy_single </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_factory_t.html#boundprocedure-destroy_array%7E2'>destroy_array</a></strong>  => pf_sundialsVec_destroy_array </td>
+       <td></td></tr>
+      
+       </tbody>
+       </table>
+     
+  </div>
+</div>
+
+     
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-fvec"></span><h3>type, public :: <a href='../type/fvec.html'>FVec</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+     
+     <h4>Components</h4>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-own_data"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>own_data</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-length1"></span>integer(kind=c_long),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>length1</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-length2"></span>integer(kind=c_long),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>length2</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-data"></span>real(kind=c_double),</td>
+  
+  <td>public,</td>
+  <td>pointer</td><td>::</td>
+  <td><strong>data</strong>(:,:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+     
+     
+          
+     
+  </div>
+</div>
+
+     
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-pf_sundialsvec_t"></span><h3>type, public, extends(<a href='../type/pf_encap_t.html'>pf_encap_t</a>) :: <a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+    
+    <p>N-dimensional Sundials array type,  extends the abstract encap type</p>
+    
+     
+     <h4>Components</h4>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-own_data%7E2"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>own_data</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-length1%7E2"></span>integer(kind=c_long),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>length1</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-length2%7E2"></span>integer(kind=c_long),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>length2</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-data%7E2"></span>real(kind=c_double),</td>
+  
+  <td>public,</td>
+  <td>pointer</td><td>::</td>
+  <td><strong>data</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-ndim%7E2"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>ndim</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-arr_shape"></span>integer,</td>
+  
+  <td>public,</td>
+  <td>allocatable</td><td>::</td>
+  <td><strong>arr_shape</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-sundialsvec"></span>type(N_Vector),</td>
+  
+  <td>public,</td>
+  <td>pointer</td><td>::</td>
+  <td><strong>sundialsVec</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-ierr"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>ierr</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+     
+     
+          
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-setval%7E2'>setval</a></strong>  => pf_sundialsVec_setval </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-copy%7E2'>copy</a></strong>  => pf_sundialsVec_copy </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-norm%7E2'>norm</a></strong>  => pf_sundialsVec_norm </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-pack%7E2'>pack</a></strong>  => pf_sundialsVec_pack </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-unpack%7E2'>unpack</a></strong>  => pf_sundialsVec_unpack </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-axpy%7E2'>axpy</a></strong>  => pf_sundialsVec_axpy </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/pf_sundialsvec_t.html#boundprocedure-eprint%7E2'>eprint</a></strong>  => pf_sundialsVec_eprint </td>
+       <td></td></tr>
+      
+       </tbody>
+       </table>
+     
+  </div>
+</div>
+
+     
+    </section>
+  <br>
+    
+    
+     
+    <section>
+    <h2>Functions</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-cast_as_pf_sundialsvec"></span><h3>
+public function <a href='../proc/cast_as_pf_sundialsvec.html'>cast_as_pf_sundialsVec</a>(encap_polymorph) result(pf_sundialsVec_obj)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(in),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>encap_polymorph</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),
+  pointer</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_norm"></span><h3>
+public function <a href='../proc/pf_sundialsvec_norm.html'>pf_sundialsVec_norm</a>(this, flags) result(norm)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to define the norm of the array (here the max norm)</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=pfdp)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vnew_fortran"></span><h3>
+public function <a href='../proc/fn_vnew_fortran.html'>FN_VNew_Fortran</a>(n1, n2) result(sunvec_y)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_long),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>n1</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_long),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>n2</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(N_Vector),
+  pointer</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vmake_fortran"></span><h3>
+public function <a href='../proc/fn_vmake_fortran.html'>FN_VMake_Fortran</a>(n1, n2, data) result(sunvec_y)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_long),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>n1</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_long),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>n2</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>data</strong>(:,:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(N_Vector),
+  pointer</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vgetfvec"></span><h3>
+public function <a href='../proc/fn_vgetfvec.html'>FN_VGetFVec</a>(sunvec_x) result(x)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/fvec.html'>FVec</a>),
+  pointer</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vgetvectorid_fortran"></span><h3>
+public function <a href='../proc/fn_vgetvectorid_fortran.html'>FN_VGetVectorID_Fortran</a>(sunvec_y) result(id) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer(kind=N_Vector_ID)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vgetlength_fortran"></span><h3>
+public function <a href='../proc/fn_vgetlength_fortran.html'>FN_VGetLength_Fortran</a>(sunvec_y) result(length) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer(kind=c_long)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vdotprod_fortran"></span><h3>
+public function <a href='../proc/fn_vdotprod_fortran.html'>FN_VDotProd_Fortran</a>(sunvec_x, sunvec_y) result(a) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vclone_fortran"></span><h3>
+public function <a href='../proc/fn_vclone_fortran.html'>FN_VClone_Fortran</a>(sunvec_x) result(y_ptr) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(c_ptr)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vmaxnorm_fortran"></span><h3>
+public function <a href='../proc/fn_vmaxnorm_fortran.html'>FN_VMaxNorm_Fortran</a>(sunvec_x) result(maxnorm) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vwsqrsum_fortran"></span><h3>
+public function <a href='../proc/fn_vwsqrsum_fortran.html'>FN_VWSqrSum_Fortran</a>(sunvec_x, sunvec_w) result(sqrsum) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_w</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vwsqrsummask_fortran"></span><h3>
+public function <a href='../proc/fn_vwsqrsummask_fortran.html'>FN_VWSqrSumMask_Fortran</a>(sunvec_x, sunvec_w, sunvec_id) result(sqrsum) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_w</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_id</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vwrmsnorm_fortran"></span><h3>
+public function <a href='../proc/fn_vwrmsnorm_fortran.html'>FN_VWRMSNorm_Fortran</a>(sunvec_x, sunvec_w) result(wrmsnorm) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_w</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vwrmsnormmask_fortran"></span><h3>
+public function <a href='../proc/fn_vwrmsnormmask_fortran.html'>FN_VWRMSNormMask_Fortran</a>(sunvec_x, sunvec_w, sunvec_id) result(wrmsnorm) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_w</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_id</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vmin_fortran"></span><h3>
+public function <a href='../proc/fn_vmin_fortran.html'>FN_VMin_Fortran</a>(sunvec_x) result(mnval) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vwl2norm_fortran"></span><h3>
+public function <a href='../proc/fn_vwl2norm_fortran.html'>FN_VWL2Norm_Fortran</a>(sunvec_x, sunvec_w) result(wl2norm) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_w</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vl1norm_fortran"></span><h3>
+public function <a href='../proc/fn_vl1norm_fortran.html'>FN_VL1Norm_Fortran</a>(sunvec_x) result(l1norm) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vinvtest_fortran"></span><h3>
+public function <a href='../proc/fn_vinvtest_fortran.html'>FN_VInvTest_Fortran</a>(sunvec_x, sunvec_z) result(no_zero_found) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer(kind=c_int)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vconstrmask_fortran"></span><h3>
+public function <a href='../proc/fn_vconstrmask_fortran.html'>FN_VConstrMask_Fortran</a>(sunvec_c, sunvec_x, sunvec_m) result(all_good) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_c</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_m</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer(kind=c_int)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vminquotient_fortran"></span><h3>
+public function <a href='../proc/fn_vminquotient_fortran.html'>FN_VMinQuotient_Fortran</a>(sunvec_n, sunvec_d) result(minq) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_n</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_d</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=c_double)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    </section>
+    <br>
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_build"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_build.html'>pf_sundialsVec_build</a>(q, shape_in)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to allocate the array and set the size parameters</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>q</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>shape_in</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_create_single"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_create_single.html'>pf_sundialsVec_create_single</a>(this, x, level_index, lev_shape)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to  create a single array</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_factory_t.html'>pf_sundialsVec_factory_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>allocatable</td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_create_array"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_create_array.html'>pf_sundialsVec_create_array</a>(this, x, n, level_index, lev_shape)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to create an array of arrays</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_factory_t.html'>pf_sundialsVec_factory_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>allocatable</td><td>::</td>
+  <td><strong>x</strong>(:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>n</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lev_shape</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_destroy"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_destroy.html'>pf_sundialsVec_destroy</a>(encap)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to destroy array</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>encap</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_destroy_single"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_destroy_single.html'>pf_sundialsVec_destroy_single</a>(this, x)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to destroy an single array</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_factory_t.html'>pf_sundialsVec_factory_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>allocatable</td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_destroy_array"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_destroy_array.html'>pf_sundialsVec_destroy_array</a>(this, x)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to destroy an array of arrays</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_factory_t.html'>pf_sundialsVec_factory_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>allocatable</td><td>::</td>
+  <td><strong>x</strong>(:)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_setval"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_setval.html'>pf_sundialsVec_setval</a>(this, val, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to set array to a scalar  value.</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>val</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_copy"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_copy.html'>pf_sundialsVec_copy</a>(this, src, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to copy an array</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>src</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_pack"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_pack.html'>pf_sundialsVec_pack</a>(this, z, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to pack an array into a flat array for sending</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>z</strong>(:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_unpack"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_unpack.html'>pf_sundialsVec_unpack</a>(this, z, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to unpack a flatarray after receiving</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>z</strong>(:)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_axpy"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_axpy.html'>pf_sundialsVec_axpy</a>(this, a, x, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to compute y = a x + y where a is a scalar and x and y are arrays</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_sundialsvec_eprint"></span><h3>
+public subroutine <a href='../proc/pf_sundialsvec_eprint.html'>pf_sundialsVec_eprint</a>(this, flags)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Subroutine to print the array to the screen (mainly for debugging purposes)</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_sundialsvec_t.html'>pf_sundialsVec_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vdestroy_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vdestroy_fortran.html'>FN_VDestroy_Fortran</a>(sunvec_y) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector),</td>
+  <td></td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vconst_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vconst_fortran.html'>FN_VConst_Fortran</a>(const, sunvec_y) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>const</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vspace_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vspace_fortran.html'>FN_VSpace_Fortran</a>(sunvec_x, lrw, liw) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_int64_t)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lrw</strong>(1)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=c_int64_t)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>liw</strong>(1)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vlinearsum_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vlinearsum_fortran.html'>FN_VLinearSum_Fortran</a>(a, sunvec_x, b, sunvec_y, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>b</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vprod_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vprod_fortran.html'>FN_VProd_Fortran</a>(sunvec_x, sunvec_y, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vdiv_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vdiv_fortran.html'>FN_VDiv_Fortran</a>(sunvec_x, sunvec_y, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_y</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vscale_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vscale_fortran.html'>FN_VScale_Fortran</a>(c, sunvec_x, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>c</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vabs_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vabs_fortran.html'>FN_VAbs_Fortran</a>(sunvec_x, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vinv_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vinv_fortran.html'>FN_VInv_Fortran</a>(sunvec_x, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vaddconst_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vaddconst_fortran.html'>FN_VAddConst_Fortran</a>(sunvec_x, b, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>b</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-fn_vcompare_fortran"></span><h3>
+public subroutine <a href='../proc/fn_vcompare_fortran.html'>FN_VCompare_Fortran</a>(c, sunvec_x, sunvec_z) bind(C)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_double),</td>
+  <td></td>
+  <td></td>
+  
+  <td>value</td><td>::</td>
+  <td><strong>c</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_x</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(N_Vector)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>sunvec_z</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

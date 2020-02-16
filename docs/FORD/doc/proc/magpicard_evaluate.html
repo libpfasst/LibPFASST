@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">12 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
      
      
@@ -357,7 +357,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E176"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E229"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -372,7 +372,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-pf%7E82"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td><span class="anchor" id="variable-pf%7E95"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
   <td>intent(inout),</td>
   <td></td>
   
@@ -387,7 +387,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-level_index%7E86"></span>integer,</td>
+  <td><span class="anchor" id="variable-level_index%7E109"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -402,7 +402,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E35"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E41"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -417,7 +417,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-m%7E10"></span>integer,</td>
+  <td><span class="anchor" id="variable-m%7E11"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -432,7 +432,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E89"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E126"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -447,7 +447,7 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
   
 <tr>
   
-  <td><span class="anchor" id="variable-step%7E22"></span>integer,</td>
+  <td><span class="anchor" id="variable-step%7E25"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -534,7 +534,10 @@ public subroutine magpicard_evaluate(this, pf, level_index, t, m, flags, step)
 
     <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">pointer</span>  <span class="kd">::</span> <span class="n">lev</span>    <span class="c">!!  Current level</span>
     <span class="n">lev</span> <span class="o">=&gt;</span> <span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>   <span class="c">!  Assign level pointer</span>
-    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="nb">index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">save_timings</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">T_FEVAL</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>          
+    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">f_eval</span><span class="p">(</span><span class="n">lev</span><span class="p">%</span><span class="n">Q</span><span class="p">(</span><span class="n">m</span><span class="p">),</span> <span class="n">t</span><span class="p">,</span> <span class="n">level_index</span><span class="p">,</span> <span class="n">lev</span><span class="p">%</span><span class="n">F</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">save_timings</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">call </span><span class="n">pf_stop_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">T_FEVAL</span><span class="p">,</span><span class="n">level_index</span><span class="p">)</span>          
   <span class="k">end subroutine </span><span class="n">magpicard_evaluate</span>
 </pre></div>
 

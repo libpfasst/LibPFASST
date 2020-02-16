@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.5% of total for procedures.">89 statements</a>
+    title=" 0.4% of total for procedures.">89 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine fft_setup(this, grid_shape, ndim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E13"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E35"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine fft_setup(this, grid_shape, ndim, grid_size)
   
 <tr>
   
-  <td><span class="anchor" id="variable-ndim%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-ndim%7E11"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -327,27 +327,27 @@ public subroutine fft_setup(this, grid_shape, ndim, grid_size)
 <path fill="none" stroke="#000000" d="M36.5415,-108.1183C47.9862,-121.9836 68.3536,-144.6225 90,-159 94.6248,-162.0718 99.7703,-164.8231 104.9691,-167.243"/>
 <polygon fill="#000000" stroke="#000000" points="103.7138,-170.5129 114.2837,-171.2383 106.4732,-164.0797 103.7138,-170.5129"/>
 </g>
-<!-- fftw_plan_dft_1d -->
+<!-- fftw_alloc_complex -->
 <g id="proc~~fft_setup~~CallsGraph_node3" class="node">
-<title>fftw_plan_dft_1d</title>
-<polygon fill="#777777" stroke="#777777" points="187,-150 96,-150 96,-126 187,-126 187,-150"/>
-<text text-anchor="middle" x="141.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_plan_dft_1d</text>
+<title>fftw_alloc_complex</title>
+<polygon fill="#777777" stroke="#777777" points="193,-150 90,-150 90,-126 193,-126 193,-150"/>
+<text text-anchor="middle" x="141.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_alloc_complex</text>
 </g>
-<!-- proc~fft_setup&#45;&gt;fftw_plan_dft_1d -->
+<!-- proc~fft_setup&#45;&gt;fftw_alloc_complex -->
 <g id="proc~~fft_setup~~CallsGraph_edge2" class="edge">
-<title>proc~fft_setup&#45;&gt;fftw_plan_dft_1d</title>
+<title>proc~fft_setup&#45;&gt;fftw_alloc_complex</title>
 <path fill="none" stroke="#000000" d="M54.1349,-105.9534C67.48,-110.8486 83.877,-116.8632 98.8472,-122.3544"/>
 <polygon fill="#000000" stroke="#000000" points="97.8386,-125.7125 108.4323,-125.8704 100.2493,-119.1406 97.8386,-125.7125"/>
 </g>
-<!-- fftw_plan_dft_3d -->
+<!-- fftw_plan_dft_1d -->
 <g id="proc~~fft_setup~~CallsGraph_node4" class="node">
-<title>fftw_plan_dft_3d</title>
+<title>fftw_plan_dft_1d</title>
 <polygon fill="#777777" stroke="#777777" points="187,-108 96,-108 96,-84 187,-84 187,-108"/>
-<text text-anchor="middle" x="141.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_plan_dft_3d</text>
+<text text-anchor="middle" x="141.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_plan_dft_1d</text>
 </g>
-<!-- proc~fft_setup&#45;&gt;fftw_plan_dft_3d -->
+<!-- proc~fft_setup&#45;&gt;fftw_plan_dft_1d -->
 <g id="proc~~fft_setup~~CallsGraph_edge3" class="edge">
-<title>proc~fft_setup&#45;&gt;fftw_plan_dft_3d</title>
+<title>proc~fft_setup&#45;&gt;fftw_plan_dft_1d</title>
 <path fill="none" stroke="#000000" d="M54.1349,-96C63.6537,-96 74.7252,-96 85.7241,-96"/>
 <polygon fill="#000000" stroke="#000000" points="85.7581,-99.5001 95.7581,-96 85.758,-92.5001 85.7581,-99.5001"/>
 </g>
@@ -363,15 +363,15 @@ public subroutine fft_setup(this, grid_shape, ndim, grid_size)
 <path fill="none" stroke="#000000" d="M54.1349,-86.0466C67.48,-81.1514 83.877,-75.1368 98.8472,-69.6456"/>
 <polygon fill="#000000" stroke="#000000" points="100.2493,-72.8594 108.4323,-66.1296 97.8386,-66.2875 100.2493,-72.8594"/>
 </g>
-<!-- fftw_alloc_complex -->
+<!-- fftw_plan_dft_3d -->
 <g id="proc~~fft_setup~~CallsGraph_node6" class="node">
-<title>fftw_alloc_complex</title>
-<polygon fill="#777777" stroke="#777777" points="193,-24 90,-24 90,0 193,0 193,-24"/>
-<text text-anchor="middle" x="141.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_alloc_complex</text>
+<title>fftw_plan_dft_3d</title>
+<polygon fill="#777777" stroke="#777777" points="187,-24 96,-24 96,0 187,0 187,-24"/>
+<text text-anchor="middle" x="141.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">fftw_plan_dft_3d</text>
 </g>
-<!-- proc~fft_setup&#45;&gt;fftw_alloc_complex -->
+<!-- proc~fft_setup&#45;&gt;fftw_plan_dft_3d -->
 <g id="proc~~fft_setup~~CallsGraph_edge5" class="edge">
-<title>proc~fft_setup&#45;&gt;fftw_alloc_complex</title>
+<title>proc~fft_setup&#45;&gt;fftw_plan_dft_3d</title>
 <path fill="none" stroke="#000000" d="M36.5415,-83.8817C47.9862,-70.0164 68.3536,-47.3775 90,-33 92.3753,-31.4224 94.8878,-29.9293 97.4744,-28.5222"/>
 <polygon fill="#000000" stroke="#000000" points="99.0536,-31.6458 106.462,-24.0717 95.9473,-25.3728 99.0536,-31.6458"/>
 </g>

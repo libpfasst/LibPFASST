@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">10 statements</a>
+    title=" 0.1% of total for procedures.">14 statements</a>
      </li> 
      
      
@@ -228,7 +228,7 @@ public subroutine zrestrict_1d(this, yhat_f, yhat_c)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E113"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E139"></span>class(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -341,8 +341,12 @@ public subroutine zrestrict_1d(this, yhat_f, yhat_c)
 
     <span class="n">nx_f</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yhat_f</span><span class="p">)</span>
     <span class="n">nx_c</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yhat_c</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">nx_f</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="n">nx_c</span><span class="p">)</span>  <span class="k">then</span>
+<span class="k">       </span><span class="n">yhat_c</span><span class="o">=</span><span class="n">yhat_f</span>
+       <span class="k">return</span>
+<span class="k">    end if</span>
 
-    <span class="n">yhat_c</span><span class="o">=</span><span class="mf">0.0_pfdp</span>
+<span class="k">    </span><span class="n">yhat_c</span><span class="o">=</span><span class="mf">0.0_pfdp</span>
     <span class="n">yhat_c</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_c</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">yhat_f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_c</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">yhat_c</span><span class="p">(</span><span class="n">nx_c</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_c</span><span class="p">)</span> <span class="o">=</span> <span class="n">yhat_f</span><span class="p">(</span><span class="n">nx_f</span><span class="o">-</span><span class="n">nx_c</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_f</span><span class="p">)</span>
     

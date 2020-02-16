@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 3.7% of total for derived types.</p>Including implementation: 258 statements,  3.9% of total for derived types.">23 statements</a>
+    title="<p> 3.1% of total for derived types.</p>Including implementation: 314 statements,  3.7% of total for derived types.">25 statements</a>
      </li> 
      
      
@@ -189,6 +189,8 @@
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-implicit%7E2">implicit</a>
       
+      <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-m_sub">m_sub</a>
+      
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-rhs%7E4">rhs</a>
       
     </div>
@@ -232,6 +234,8 @@
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-residual%7E6">residual</a>
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-spreadq0%7E6">spreadq0</a>
+      
+      <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-compute_dt%7E4">compute_dt</a>
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-evaluate_all%7E6">evaluate_all</a>
       
@@ -288,36 +292,36 @@
 <polygon fill="none" stroke="#000000" points="232,-45 126,-45 126,-21 232,-21 232,-45"/>
 <text text-anchor="middle" x="179" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_imex_sweeper_t</text>
 </g>
-<!-- type~pf_sweeper_t -->
-<g id="type~~pf_imex_sweeper_t~~InheritsGraph_node2" class="node">
-<title>type~pf_sweeper_t</title>
-<g id="a_type~~pf_imex_sweeper_t~~InheritsGraph_node2"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-66 0,-66 0,-42 77,-42 77,-66"/>
-<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sweeper_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_imex_sweeper_t&#45;&gt;type~pf_sweeper_t -->
-<g id="type~~pf_imex_sweeper_t~~InheritsGraph_edge2" class="edge">
-<title>type~pf_imex_sweeper_t&#45;&gt;type~pf_sweeper_t</title>
-<path fill="none" stroke="#000000" d="M125.883,-40.9392C113.2552,-42.8266 99.8409,-44.8316 87.4113,-46.6894"/>
-<polygon fill="#000000" stroke="#000000" points="86.6136,-43.2697 77.2409,-48.2095 87.6484,-50.1928 86.6136,-43.2697"/>
-</g>
 <!-- type~pf_encap_t -->
-<g id="type~~pf_imex_sweeper_t~~InheritsGraph_node3" class="node">
+<g id="type~~pf_imex_sweeper_t~~InheritsGraph_node2" class="node">
 <title>type~pf_encap_t</title>
-<g id="a_type~~pf_imex_sweeper_t~~InheritsGraph_node3"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="71.5,-24 5.5,-24 5.5,0 71.5,0 71.5,-24"/>
-<text text-anchor="middle" x="38.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_encap_t</text>
+<g id="a_type~~pf_imex_sweeper_t~~InheritsGraph_node2"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="71.5,-66 5.5,-66 5.5,-42 71.5,-42 71.5,-66"/>
+<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_encap_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_imex_sweeper_t&#45;&gt;type~pf_encap_t -->
 <g id="type~~pf_imex_sweeper_t~~InheritsGraph_edge1" class="edge">
 <title>type~pf_imex_sweeper_t&#45;&gt;type~pf_encap_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M125.883,-25.0608C111.3926,-22.895 95.8665,-20.5744 81.9811,-18.499"/>
-<polygon fill="#000000" stroke="#000000" points="82.1346,-14.9831 71.727,-16.9663 81.0997,-21.9062 82.1346,-14.9831"/>
-<text text-anchor="middle" x="101.5" y="-23.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">rhs</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M125.883,-40.9392C111.3926,-43.105 95.8665,-45.4256 81.9811,-47.501"/>
+<polygon fill="#000000" stroke="#000000" points="81.0997,-44.0938 71.727,-49.0337 82.1346,-51.0169 81.0997,-44.0938"/>
+<text text-anchor="middle" x="101.5" y="-47.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">rhs</text>
+</g>
+<!-- type~pf_sweeper_t -->
+<g id="type~~pf_imex_sweeper_t~~InheritsGraph_node3" class="node">
+<title>type~pf_sweeper_t</title>
+<g id="a_type~~pf_imex_sweeper_t~~InheritsGraph_node3"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-24 0,-24 0,0 77,0 77,-24"/>
+<text text-anchor="middle" x="38.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sweeper_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_imex_sweeper_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~pf_imex_sweeper_t~~InheritsGraph_edge2" class="edge">
+<title>type~pf_imex_sweeper_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" d="M125.883,-25.0608C113.2552,-23.1734 99.8409,-21.1684 87.4113,-19.3106"/>
+<polygon fill="#000000" stroke="#000000" points="87.6484,-15.8072 77.2409,-17.7905 86.6136,-22.7303 87.6484,-15.8072"/>
 </g>
 </g>
 </svg>
@@ -392,6 +396,8 @@
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-implicit%7E2">implicit</a>
       
+      <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-m_sub">m_sub</a>
+      
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#variable-rhs%7E4">rhs</a>
       
     </div>
@@ -435,6 +441,8 @@
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-residual%7E6">residual</a>
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-spreadq0%7E6">spreadq0</a>
+      
+      <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-compute_dt%7E4">compute_dt</a>
       
       <a class="list-group-item" href="../type/pf_imex_sweeper_t.html#boundprocedure-evaluate_all%7E6">evaluate_all</a>
       
@@ -599,6 +607,20 @@
   <td>public</td>
   <td></td><td>::</td>
   <td><strong>implicit</strong></td><td></td><td></td><td><p>True if there an implicit piece (must set in derived sweeper)</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-m_sub"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>m_sub</strong></td><td></td><td></td><td><p>Substep loop variable (useful in the function evaluation routines in derived sweepers)</p></td>
   
 </tr>
 
@@ -1605,7 +1627,8 @@ public subroutine <a href='../proc/imex_residual.html'>imex_residual</a>(this, p
 
 
 
-<p>Subroutine to compute  Residual</p>
+<p>Subroutine to compute  Residual
+ add tau if it exists</p>
     
     <h4>Arguments</h4>
     
@@ -1831,6 +1854,153 @@ public subroutine <a href='../proc/imex_spreadq0.html'>imex_spreadq0</a>(this, p
   
   <td></td><td>::</td>
   <td><strong>step</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-compute_dt%7E4"></span><h3>procedure, public :: <strong>compute_dt</strong>  => <a href='../proc/imex_compute_dt.html'>imex_compute_dt</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/imex_compute_dt.html'>imex_compute_dt</a>(this, pf, level_index, t0, dt, flags)
+    
+    
+   
+</h3>
+    
+
+
+
+
+
+
+
+<p>Assign level pointer</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/pf_imex_sweeper_t.html'>pf_imex_sweeper_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
+  <td>intent(inout),</td>
+  <td></td>
+  
+  <td>target</td><td>::</td>
+  <td><strong>pf</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=pfdp),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>flags</strong></td><td></td>
   
 </tr>
 
@@ -2318,7 +2488,7 @@ public subroutine <a href='../proc/imex_initialize.html'>imex_initialize</a>(thi
 
      <span class="kt">logical</span>    <span class="kd">::</span> <span class="n">explicit</span>  <span class="c">!!  True if there is an explicit piece (must set in derived sweeper)</span>
      <span class="kt">logical</span>    <span class="kd">::</span> <span class="k">implicit</span>  <span class="c">!!  True if there an implicit piece (must set in derived sweeper)</span>
-
+     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">m_sub</span>     <span class="c">!!  Substep loop variable (useful in the function evaluation routines in derived sweepers)</span>
      <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">rhs</span>   <span class="c">!! holds rhs for implicit solve</span>
 
    <span class="k">contains</span>
@@ -2331,6 +2501,7 @@ public subroutine <a href='../proc/imex_initialize.html'>imex_initialize</a>(thi
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">integrate</span>  <span class="o">=&gt;</span> <span class="n">imex_integrate</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">residual</span>   <span class="o">=&gt;</span> <span class="n">imex_residual</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">spreadq0</span>   <span class="o">=&gt;</span> <span class="n">imex_spreadq0</span>
+     <span class="k">procedure</span> <span class="kd">::</span> <span class="n">compute_dt</span> <span class="o">=&gt;</span> <span class="n">imex_compute_dt</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">evaluate_all</span> <span class="o">=&gt;</span> <span class="n">imex_evaluate_all</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy</span>   <span class="o">=&gt;</span> <span class="n">imex_destroy</span>
      <span class="k">procedure</span> <span class="kd">::</span> <span class="n">imex_destroy</span>

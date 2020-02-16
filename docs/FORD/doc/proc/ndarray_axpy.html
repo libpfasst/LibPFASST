@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">12 statements</a>
+    title=" 0.1% of total for procedures.">19 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E194"></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E249"></span>class(<a href='../type/pf_ndarray_t.html'>pf_ndarray_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -245,7 +245,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-a%7E7"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-a%7E12"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -260,7 +260,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-x%7E35"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-x%7E52"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -275,7 +275,7 @@ public subroutine ndarray_axpy(this, a, x, flags)
   
 <tr>
   
-  <td><span class="anchor" id="variable-flags%7E101"></span>integer,</td>
+  <td><span class="anchor" id="variable-flags%7E139"></span>integer,</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -315,15 +315,18 @@ public subroutine ndarray_axpy(this, a, x, flags)
 <polygon fill="none" stroke="#000000" points="78,-24 0,-24 0,0 78,0 78,-24"/>
 <text text-anchor="middle" x="39" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">ndarray_axpy</text>
 </g>
-<!-- pf_stop -->
+<!-- proc~pf_stop -->
 <g id="proc~~ndarray_axpy~~CallsGraph_node2" class="node">
-<title>pf_stop</title>
-<polygon fill="#777777" stroke="#777777" points="168,-24 114,-24 114,0 168,0 168,-24"/>
+<title>proc~pf_stop</title>
+<g id="a_proc~~ndarray_axpy~~CallsGraph_node2"><a xlink:href=".././proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="168,-24 114,-24 114,0 168,0 168,-24"/>
 <text text-anchor="middle" x="141" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
+</a>
 </g>
-<!-- proc~ndarray_axpy&#45;&gt;pf_stop -->
+</g>
+<!-- proc~ndarray_axpy&#45;&gt;proc~pf_stop -->
 <g id="proc~~ndarray_axpy~~CallsGraph_edge1" class="edge">
-<title>proc~ndarray_axpy&#45;&gt;pf_stop</title>
+<title>proc~ndarray_axpy&#45;&gt;proc~pf_stop</title>
 <path fill="none" stroke="#000000" d="M78.1441,-12C86.5186,-12 95.3445,-12 103.6493,-12"/>
 <polygon fill="#000000" stroke="#000000" points="103.8166,-15.5001 113.8166,-12 103.8166,-8.5001 103.8166,-15.5001"/>
 </g>
@@ -457,11 +460,18 @@ public subroutine ndarray_axpy(this, a, x, flags)
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">)</span>           <span class="kd">::</span> <span class="n">a</span>
     <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span>   <span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>
 
-
-    <span class="k">select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mf">0.0_pfdp</span><span class="p">)</span> <span class="k">return</span>
+<span class="k">    select type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">type is</span> <span class="p">(</span><span class="n">pf_ndarray_t</span><span class="p">)</span>
-       <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
-    <span class="k">class </span><span class="n">default</span>
+       <span class="k">if</span> <span class="p">(</span><span class="n">a</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="mf">1.0_pfdp</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">x</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
+       <span class="n">elseif</span> <span class="p">(</span><span class="n">a</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">)</span> <span class="k">then</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
+       <span class="k">else</span>
+<span class="k">          </span><span class="n">this</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="p">%</span><span class="n">flatarray</span> <span class="o">+</span> <span class="n">this</span><span class="p">%</span><span class="n">flatarray</span>
+       <span class="k">end if</span>
+<span class="k">          </span>
+<span class="k">    class </span><span class="n">default</span>
        <span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Type error&#39;</span><span class="p">)</span>
     <span class="k">end select</span>
 <span class="k">  end subroutine </span><span class="n">ndarray_axpy</span>

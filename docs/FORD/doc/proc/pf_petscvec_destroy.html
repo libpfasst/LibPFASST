@@ -126,7 +126,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">10 statements</a>
+    title=" 0.0% of total for procedures.">10 statements</a>
      </li> 
      
      
@@ -230,7 +230,7 @@ public subroutine pf_petscVec_destroy(encap)
   
 <tr>
   
-  <td><span class="anchor" id="variable-encap%7E6"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-encap%7E9"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -270,20 +270,17 @@ public subroutine pf_petscVec_destroy(encap)
 <polygon fill="none" stroke="#000000" points="112,-66 0,-66 0,-42 112,-42 112,-66"/>
 <text text-anchor="middle" x="56" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_petscVec_destroy</text>
 </g>
-<!-- proc~cast_as_pf_petscvec -->
+<!-- chkerrq -->
 <g id="proc~~pf_petscvec_destroy~~CallsGraph_node2" class="node">
-<title>proc~cast_as_pf_petscvec</title>
-<g id="a_proc~~pf_petscvec_destroy~~CallsGraph_node2"><a xlink:href=".././proc/cast_as_pf_petscvec.html" xlink:title="cast_as_pf_petscVec">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="262,-108 148,-108 148,-84 262,-84 262,-108"/>
-<text text-anchor="middle" x="205" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">cast_as_pf_petscVec</text>
-</a>
+<title>chkerrq</title>
+<polygon fill="#777777" stroke="#777777" points="232,-108 178,-108 178,-84 232,-84 232,-108"/>
+<text text-anchor="middle" x="205" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">chkerrq</text>
 </g>
-</g>
-<!-- proc~pf_petscvec_destroy&#45;&gt;proc~cast_as_pf_petscvec -->
+<!-- proc~pf_petscvec_destroy&#45;&gt;chkerrq -->
 <g id="proc~~pf_petscvec_destroy~~CallsGraph_edge1" class="edge">
-<title>proc~pf_petscvec_destroy&#45;&gt;proc~cast_as_pf_petscvec</title>
-<path fill="none" stroke="#000000" d="M98.6974,-66.0355C115.375,-70.7366 134.6702,-76.1755 152.2071,-81.1188"/>
-<polygon fill="#000000" stroke="#000000" points="151.7218,-84.6183 162.2963,-83.9627 153.621,-77.8809 151.7218,-84.6183"/>
+<title>proc~pf_petscvec_destroy&#45;&gt;chkerrq</title>
+<path fill="none" stroke="#000000" d="M98.6974,-66.0355C120.5723,-72.2016 146.9505,-79.637 167.9577,-85.5586"/>
+<polygon fill="#000000" stroke="#000000" points="167.2211,-88.9873 177.7957,-88.3317 169.1203,-82.2498 167.2211,-88.9873"/>
 </g>
 <!-- vecdestroy -->
 <g id="proc~~pf_petscvec_destroy~~CallsGraph_node3" class="node">
@@ -292,22 +289,25 @@ public subroutine pf_petscVec_destroy(encap)
 <text text-anchor="middle" x="205" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">vecdestroy</text>
 </g>
 <!-- proc~pf_petscvec_destroy&#45;&gt;vecdestroy -->
-<g id="proc~~pf_petscvec_destroy~~CallsGraph_edge3" class="edge">
+<g id="proc~~pf_petscvec_destroy~~CallsGraph_edge2" class="edge">
 <title>proc~pf_petscvec_destroy&#45;&gt;vecdestroy</title>
 <path fill="none" stroke="#000000" d="M112.3305,-54C128.9362,-54 146.8246,-54 162.414,-54"/>
 <polygon fill="#000000" stroke="#000000" points="162.7954,-57.5001 172.7954,-54 162.7953,-50.5001 162.7954,-57.5001"/>
 </g>
-<!-- chkerrq -->
+<!-- proc~cast_as_pf_petscvec -->
 <g id="proc~~pf_petscvec_destroy~~CallsGraph_node4" class="node">
-<title>chkerrq</title>
-<polygon fill="#777777" stroke="#777777" points="232,-24 178,-24 178,0 232,0 232,-24"/>
-<text text-anchor="middle" x="205" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">chkerrq</text>
+<title>proc~cast_as_pf_petscvec</title>
+<g id="a_proc~~pf_petscvec_destroy~~CallsGraph_node4"><a xlink:href=".././proc/cast_as_pf_petscvec.html" xlink:title="cast_as_pf_petscVec">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="262,-24 148,-24 148,0 262,0 262,-24"/>
+<text text-anchor="middle" x="205" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">cast_as_pf_petscVec</text>
+</a>
 </g>
-<!-- proc~pf_petscvec_destroy&#45;&gt;chkerrq -->
-<g id="proc~~pf_petscvec_destroy~~CallsGraph_edge2" class="edge">
-<title>proc~pf_petscvec_destroy&#45;&gt;chkerrq</title>
-<path fill="none" stroke="#000000" d="M98.6974,-41.9645C120.5723,-35.7984 146.9505,-28.363 167.9577,-22.4414"/>
-<polygon fill="#000000" stroke="#000000" points="169.1203,-25.7502 177.7957,-19.6683 167.2211,-19.0127 169.1203,-25.7502"/>
+</g>
+<!-- proc~pf_petscvec_destroy&#45;&gt;proc~cast_as_pf_petscvec -->
+<g id="proc~~pf_petscvec_destroy~~CallsGraph_edge3" class="edge">
+<title>proc~pf_petscvec_destroy&#45;&gt;proc~cast_as_pf_petscvec</title>
+<path fill="none" stroke="#000000" d="M98.6974,-41.9645C115.375,-37.2634 134.6702,-31.8245 152.2071,-26.8812"/>
+<polygon fill="#000000" stroke="#000000" points="153.621,-30.1191 162.2963,-24.0373 151.7218,-23.3817 153.621,-30.1191"/>
 </g>
 </g>
 </svg>

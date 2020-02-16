@@ -128,21 +128,21 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">29 statements</a>
+    title=" 0.2% of total for procedures.">39 statements</a>
      </li> 
      
      
      
-    <li><i class="fa fa-code"></i><a href="../src/pf_verlet_sweeper.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/pf_magpicard_sweeper.f90"> Source File</a></li>
      
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
     
-     <li><a href='../sourcefile/pf_verlet_sweeper.f90.html'>pf_verlet_sweeper.f90</a></li>
+     <li><a href='../sourcefile/pf_magpicard_sweeper.f90.html'>pf_magpicard_sweeper.f90</a></li>
     
-     <li><a href='../module/pf_mod_verlet.html'>pf_mod_verlet</a></li>
+     <li><a href='../module/pf_mod_magnus_picard.html'>pf_mod_magnus_picard</a></li>
     
   
      <li class="active">pf_f_eval_p</li>
@@ -228,7 +228,7 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-this%7E205"></span>class(<a href='../type/pf_verlet_t.html'>pf_verlet_t</a>),</td>
+  <td><span class="anchor" id="variable-this%7E235"></span>class(<a href='../type/pf_magpicard_t.html'>pf_magpicard_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -243,57 +243,57 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f)
   
 <tr>
   
-  <td><span class="anchor" id="variable-y%7E24"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>y</strong></td><td><p>Argument for evaluation</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-t%7E71"></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>t</strong></td><td><p>Time at evaluation</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-level_index%7E104"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index</strong></td><td><p>Level index</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-f%7E16"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td><span class="anchor" id="variable-y%7E25"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>f</strong></td><td><p>RHS function value</p></td>
+  <td><strong>y</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-t%7E43"></span>real(kind=pfdp),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>t</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-level_index%7E115"></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>level_index</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-f%7E15"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>f</strong></td><td></td>
   
 </tr>
 
@@ -302,11 +302,6 @@ public subroutine pf_f_eval_p(this, y, t, level_index, f)
 
     
     
-    
-    <h3>Description</h3>
-    <p>This is the interface for the routine to compute the RHS function values
-  Evaluate f_piece(y), where piece is one or two 
-  Evaluate f_piece(y), where piece is one or two </p>
     
     <br>
 

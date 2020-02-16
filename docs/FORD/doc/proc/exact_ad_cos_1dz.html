@@ -228,7 +228,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-t%7E44"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-t%7E53"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -243,7 +243,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-uex%7E2"></span>complex(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-uex%7E3"></span>complex(kind=pfdp),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -258,7 +258,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nu%7E5"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-nu%7E6"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -273,7 +273,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-v%7E6"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-v%7E7"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -288,12 +288,12 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-kfreq%7E3"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-kfreq%7E4"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>kfreq</strong></td><td></td>
+  <td><strong>kfreq</strong>(1)</td><td></td>
   
 </tr>
 
@@ -303,7 +303,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
   
 <tr>
   
-  <td><span class="anchor" id="variable-lx%7E8"></span>real(kind=pfdp),</td>
+  <td><span class="anchor" id="variable-lx%7E10"></span>real(kind=pfdp),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -586,7 +586,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
     <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">exact_ad_cos_1dz</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uex</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">kfreq</span><span class="p">,</span><span class="n">Lx</span><span class="p">)</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">t</span>
     <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">uex</span><span class="p">(:)</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">kfreq</span><span class="p">,</span><span class="n">Lx</span>
+    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">kfreq</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">Lx</span>
     
     <span class="kt">integer</span>    <span class="kd">::</span> <span class="n">nx</span><span class="p">,</span> <span class="n">i</span>
     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">x</span>
@@ -594,7 +594,7 @@ public subroutine exact_ad_cos_1dz(t, uex, nu, v, kfreq, Lx)
     <span class="n">nx</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">uex</span><span class="p">)</span>
     <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nx</span>
        <span class="n">x</span> <span class="o">=</span> <span class="n">Lx</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="o">/</span><span class="kt">REAL</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span> 
-       <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">ad_cos_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">kfreq</span><span class="p">,</span><span class="n">Lx</span><span class="p">)</span>       
+       <span class="n">uex</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">ad_cos_ex</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span><span class="n">nu</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">kfreq</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">Lx</span><span class="p">)</span>       
     <span class="k">end do</span>
 
 <span class="k">  end subroutine </span><span class="n">exact_ad_cos_1dz</span>

@@ -433,6 +433,7 @@ public subroutine pf_mpi_create(pf_comm, mpi_comm)
 
     <span class="n">pf_comm</span><span class="p">%</span><span class="n">comm</span> <span class="o">=</span> <span class="n">mpi_comm</span>       <span class="c">!! assign communicator</span>
     
+    
     <span class="c">!&gt; assign number of processors</span>
     <span class="k">call </span><span class="n">mpi_comm_size</span><span class="p">(</span><span class="n">mpi_comm</span><span class="p">,</span> <span class="n">pf_comm</span><span class="p">%</span><span class="n">nproc</span><span class="p">,</span> <span class="n">ierror</span><span class="p">)</span>
     
