@@ -855,4 +855,22 @@ contains
 
   end subroutine exact_kdv_3dz
 
+  !  Initial conditions for ML games
+  subroutine init_ML_1dz(u,Lx,ic_bar)
+    complex(pfdp), intent(inout) :: u(:)
+    real(pfdp), intent(in) :: Lx
+    real(pfdp), intent(in) :: ic_bar(:)
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(u)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       u(i) = ic_bar(1)*sin(x)       
+    end do
+
+  end subroutine init_ML_1dz
+  
+  
 end module pf_mod_solutions

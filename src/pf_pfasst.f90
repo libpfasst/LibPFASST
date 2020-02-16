@@ -28,7 +28,7 @@ contains
     integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
-    pf%outdir = "dat/"
+    pf%outdir = "outdir/"
 
     !> gather some input from a file and command line
     read_cmd = .true.
@@ -145,6 +145,7 @@ contains
           call pf_time_interpolation_matrix(c_lev%nodes, c_lev%nnodes, f_lev%nodes, f_lev%nnodes, f_lev%rmat)
        endif
     end do
+    
 
   end subroutine pf_pfasst_setup
 
@@ -192,14 +193,14 @@ contains
     allocate(lev%nflags(nnodes),stat=ierr)
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
     lev%nflags=0
-    !>  Allocate and compute all the matrices
-    allocate(lev%sdcmats,stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
-    call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
-    lev%nodes = lev%sdcmats%qnodes
-
     !>  initialize sweeper
     if (pf%use_sdc_sweeper) then
+       !>  Allocate and compute all the matrices
+       allocate(lev%sdcmats,stat=ierr)
+       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error sdcmats")
+       call pf_init_sdcmats(pf,lev%sdcmats, nnodes,lev%nflags)
+       lev%nodes = lev%sdcmats%qnodes
+       
        lev%ulevel%sweeper%use_LUq=pf%use_LUq
        call lev%ulevel%sweeper%initialize(pf,level_index)
     end if
@@ -210,7 +211,6 @@ contains
     !> allocate solution and function arrays for sdc sweepers
     if (pf%use_sdc_sweeper) then
        npieces = lev%ulevel%sweeper%npieces
-
        call lev%ulevel%factory%create_array(lev%I, nnodes-1, lev%index,  lev%lev_shape)
 
        !  Space for function values
@@ -243,6 +243,9 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf  !!  Main pfasst structure
 
     integer :: l
+
+    !>   deallocate results data
+    call destroy_results(pf%results)
 
     !>  destroy all levels
     do l = 1, pf%nlevels
@@ -278,16 +281,15 @@ contains
     !> deallocate nodes, flags, and integration matrices
     deallocate(lev%nodes)
     deallocate(lev%nflags)
-
-    call pf_destroy_sdcmats(lev%sdcmats)
-    deallocate(lev%sdcmats)
-
+    
     !> deallocate solution and function storage
     if ((lev%index < pf%nlevels) .and. allocated(lev%tauQ)) then
        call lev%ulevel%factory%destroy_array(lev%tauQ)
     end if
 
     if (pf%use_sdc_sweeper) then
+       call pf_destroy_sdcmats(lev%sdcmats)
+       deallocate(lev%sdcmats)
        call lev%ulevel%factory%destroy_array(lev%Fflt)
        call lev%ulevel%factory%destroy_array(lev%I)
        call lev%ulevel%factory%destroy_array(lev%pFflt)
@@ -337,7 +339,6 @@ contains
     integer :: nsweeps(PF_MAXLEVS)
     integer :: nsweeps_pred(PF_MAXLEVS) 
     integer :: nnodes(PF_MAXLEVS)
-    integer :: nsteps_rk(PF_MAXLEVS)
 
     real(pfdp) :: abs_res_tol, rel_res_tol
     logical    :: PFASST_pred, RK_pred, pipeline_pred
@@ -358,7 +359,7 @@ contains
 
     
     !> define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, nsteps_rk, abs_res_tol, rel_res_tol
+    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
     namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
@@ -389,7 +390,6 @@ contains
     save_timings = pf%save_timings
 
 
-    nsteps_rk    = pf%nsteps_rk
     rk_pred      = pf%rk_pred
     use_rk_stepper= pf%use_rk_stepper
     use_sdc_sweeper= pf%use_sdc_sweeper
@@ -449,7 +449,6 @@ contains
 
     pf%use_rk_stepper=use_rk_stepper
     pf%use_sdc_sweeper=use_sdc_sweeper
-    pf%nsteps_rk    = nsteps_rk    
     pf%rk_pred      = rk_pred
     pf%use_pysdc_V= use_pysdc_V
     pf%sweep_at_conv= sweep_at_conv
@@ -489,13 +488,17 @@ contains
     call date_and_time(date=date, time=time)
     write(un,*) 'date:        ', date
     write(un,*) 'time:        ', time
-
+    if(pf%use_sdc_sweeper) then
+       write(un,*) 'method:        ',' PFASST'
+    else
+       write(un,*) 'method:        ',' parareal'
+    end if
     write(un,*) 'double precision:   ', pfdp   ,'  bytes'
     write(un,*) 'quad precision:   ', pfqp   ,'  bytes'    
     write(un,*) 'Output directory: ', trim(pf%outdir)    
     write(un,*) 'Nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
+    write(un,*) 'Nlevels:     ', pf%nlevels, '! number of levels'
     if (pf%use_sdc_sweeper) then
-       write(un,*) 'Nlevels:     ', pf%nlevels, '! number of pfasst levels'
        if (pf%comm%nproc == 1) then
           write(un,*) '            ', '             ', ' ! since 1 time proc is being used, this is a serial sdc run'
        else
@@ -577,52 +580,64 @@ contains
 
     if (present(json_opt)) dump_json=json_opt
     if (dump_json) then
+    
        ! Create a json file of all the pfasst parameters
        istat= system('mkdir -p dat')
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")       
        istat= system('mkdir -p dat/' // trim(pf%outdir))       
        if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")
        datpath= 'dat/' // trim(pf%outdir) 
-
        fname=trim(datpath) // '/pfasst_params.json'
-
-       open(unit=321, file=trim(fname), form='formatted')
-       write(321,*) '{'
-       write(321,"(A24,I15,A1)")  '"nproc" :',       pf%comm%nproc, ','
-       write(321,"(A24,I15,A1)")  '"nlevels" :',     pf%nlevels, ','
-       write(321,"(A24,I15,A1)")  '"niters" :',      pf%niters, ','
-       write(321,"(A24,I15,A1)")  '"qtype" :',       pf%qtype, ','
-       write(321,"(A24,I15,A1)")  '"q0_style" :',    pf%q0_style, ','
-       write(321,"(A24,I15,A1)")  '"taui0" :',       pf%taui0, ','
-       write(321,"(A24,I15,A1)")  '"nsweeps_burn" :',pf%nsweeps_burn, ','
-       write(321,"(A24,A15,A1)")  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,A15,A1)")  '"nsteps_rk" :',   adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
-       write(321,"(A24,e15.6,A1)") '"abs_res_tol" :',pf%abs_res_tol, ','
-       write(321,"(A24,e15.6,A1)") '"rel_res_tol" :',pf%abs_res_tol, ','
+       un=321
+       open(unit=un, file=trim(fname), form='formatted')
+       write(un,*) '{'
+       if(pf%use_sdc_sweeper) then 
+          write(un,*) '      "method" :  "PFASST",'
+       else
+          write(un,*) '      "method" :  "parareal",'
+       end if
+       write(un,123)  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
+       write(un,123)  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
+       write(un,122)  '"nproc" :',       pf%comm%nproc, ','
+       write(un,122)  '"nlevels" :',     pf%nlevels, ','
+       write(un,122)  '"niters" :',      pf%niters, ','
+       write(un,123)  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
+       write(un,122)  '"q0_style" :',    pf%q0_style, ','
+       write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
+       if(pf%use_sdc_sweeper) then 
+          write(un,122)  '"qtype" :',       pf%qtype, ','
+          write(un,123)  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
+          write(un,122)  '"nsweeps_burn" :',pf%nsweeps_burn, ','
+          write(un,122)  '"taui0" :',       pf%taui0, ','
+       end if
        
-       write(321,"(A24,A15,A1)")  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
-       write(321,"(A24,A15,A1)")  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
-       write(321,"(A24,A15,A1)")  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
-       write(321,"(A24,A15,A1)")  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
-       write(321,"(A24,A15,A1)")  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
-       write(321,"(A24,A15,A1)")  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
-       write(321,"(A24,A15,A1)")  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
-       write(321,"(A24,A15,A1)")  '"Finterp" :',            convert_logical(pf%Finterp), ','
-       write(321,"(A24,A15,A1)")  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
-       write(321,"(A24,A15,A1)")  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
-       write(321,"(A24,A15,A1)")  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
-       write(321,"(A24,A15,A1)")  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','
-       write(321,"(A24,A15,A1)")  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
-       write(321,"(A24,A15,A1)")  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
-       write(321,"(A24,I15,A1)")  '"save_timings" :',       pf%save_timings, ','
-       write(321,"(A24,A15,A1)")  '"save_errors" :',        convert_logical(pf%save_errors), ','    
-       write(321,"(A24,A15)")  '"debug" :',                 convert_logical(pf%debug)
-       write(321,*) '}'    
+       write(un,124) '"abs_res_tol" :',pf%abs_res_tol, ','
+       write(un,124) '"rel_res_tol" :',pf%abs_res_tol, ','
+       if(pf%use_sdc_sweeper) then        
+          write(un,123)  '"use_proper_nodes" :',   convert_logical(pf%use_proper_nodes), ','
+          write(un,123)  '"use_composite_nodes" :',convert_logical(pf%use_composite_nodes), ','
+          write(un,123)  '"use_no_left_q" :',      convert_logical(pf%use_no_left_q), ','
+          write(un,123)  '"PFASST_pred" :',        convert_logical(pf%PFASST_pred), ','
+          write(un,123)  '"pipeline_pred" :',      convert_logical(pf%pipeline_pred), ','
+          write(un,123)  '"sweep_at_conv" :',      convert_logical(pf%sweep_at_conv), ','
+          write(un,123)  '"use_LUq" :',            convert_logical(pf%use_LUq), ','
+          write(un,123)  '"use_Sform" :',          convert_logical(pf%use_Sform), ','
+          write(un,123)  '"Finterp" :',            convert_logical(pf%Finterp), ','
+       end if
+       write(un,123)  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
+       write(un,123)  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
+       write(un,123)  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
+       write(un,122)  '"save_timings" :',       pf%save_timings, ','
+       write(un,123)  '"save_errors" :',        convert_logical(pf%save_errors), ','    
+       write(un,123)  '"debug" :',                 convert_logical(pf%debug),','    
+       write(un,"(A24,A64)")  '"outdir" : ',       adjustr('"'//trim(pf%outdir)//'"')
+       write(un,*) '}'
+122    FORMAT (A24,I15,A1)
+123    FORMAT (A24,A15,A1)
+124    FORMAT (A24,e15.6,A1)
+       close(unit=un)       
     end if
   end subroutine pf_print_options
-
   !> Subroutine to make the matrices for interpolation  between noodes
   subroutine pf_time_interpolation_matrix(f_nodes, f_nnodes, c_nodes, c_nnodes, tmat)
     integer,    intent(in)  :: f_nnodes  !!  number of nodes on fine level
@@ -651,61 +666,4 @@ contains
     end do
   end subroutine pf_time_interpolation_matrix
 
-
-  !>  Subroutine to write out run parameters
-  subroutine pf_initialize_results(pf)
-  
-  type(pf_pfasst_t), intent(inout)           :: pf
-
-  integer :: level_index
-  ALLOCATE(pf%results(pf%nlevels))
-  do level_index = 1,pf%nlevels
-     call  initialize_results(pf%results(level_index),pf%state%nsteps, pf%niters, pf%comm%nproc, pf%nsweeps(level_index),pf%rank,level_index,pf%outdir,pf%save_residuals)
-  end do
-  end subroutine pf_initialize_results
-
-
-  !>  Subroutine to write out run parameters
-  subroutine pf_dump_results(pf)
-    
-    type(pf_pfasst_t), intent(inout)           :: pf
-    
-    integer :: level_index
-    
-    if (pf%save_residuals) then
-       do level_index = 1,pf%nlevels
-          call  dump_resids(pf%results(level_index))
-          call  dump_delta_q0(pf%results(level_index))
-       end do
-    end if
-    
-    if (pf%save_errors) then
-       do level_index = 1,pf%nlevels
-          call  dump_errors(pf%results(level_index))
-       end do
-    end if
-    
-    if (pf%save_timings > 0) then
-       call  dump_timings(pf%results(pf%nlevels),pf)
-    end if
-
-end subroutine pf_dump_results
-
-!>  Subroutine to destroy the results
-  subroutine pf_destroy_results(pf)
-    
-    type(pf_pfasst_t), intent(inout)           :: pf
-    
-    integer :: level_index
-    
-       do level_index = 1,pf%nlevels
-          call  destroy_results(pf%results(level_index))
-       end do
-  
-
-end subroutine pf_destroy_results
-  
-  
-    
-  
 end module pf_mod_pfasst

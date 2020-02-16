@@ -65,6 +65,7 @@ contains
   !> Allocates complex ndarray
   subroutine zndarray_build(q, shape_in)
     class(pf_encap_t), intent(inout) :: q
+    !type(pf_zndarray_t), intent(inout) :: q    
     integer,           intent(in   ) :: shape_in(:)
     
     integer :: ierr
@@ -76,7 +77,7 @@ contains
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                         
        q%ndim   = SIZE(shape_in)
        q%arr_shape = shape_in
-       q%flatarray = cmplx(0.0, 0.0,pfdp)
+       q%flatarray = cmplx(66666666.0, -66666666.0,pfdp)
     end select
   end subroutine zndarray_build
   
@@ -107,6 +108,7 @@ contains
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
     
     do i = 1, n
+!       allocate(pf_zndarray_t::x(i),stat=ierr)
        call zndarray_build(x(i), lev_shape)
     end do
 
