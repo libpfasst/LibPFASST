@@ -78,5 +78,5 @@ jobs:
                   cd ../../..
             - run: # Run the python tests in test
                 name: do_pytests
-                command: >  # pytest
-                 ./test/run_encaps.sh
+                command: >  pytest
+
