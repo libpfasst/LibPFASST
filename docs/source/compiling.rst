@@ -15,14 +15,14 @@ You may also need to install open-blas
   `$ sudo apt-get install  libopenblas-dev`
 
 
-The user will probably have to adjust some flags in 'Makefile.defaults'.
+The user may have to change the compiler and compiler flags defined in Makefile.local and
+'Makefile.defaults'.
 
 The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.
 
-FC = mpif90
-
+FC = mpiffort 
 CC = mpicc
-
+LD= $(FC)
 AR = ar rcs
 
 Some optional flags are
@@ -37,7 +37,7 @@ which if made true will show more info in the build steps.  These can also both 
 
  make MKVERBOSE=TRUE DEBUG=TRUE
 
-There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
+There is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
 
 make depend
 

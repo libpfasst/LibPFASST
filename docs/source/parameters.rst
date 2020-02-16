@@ -184,9 +184,9 @@ Typically the main routine specifies this input file (the default
 being probin.nml), and this file can be changed by specifying the
 value of
 
-  pfasst_nml = 'probin.nml'
+  pfasst_nml = "my_file.nml"
 
-either in the local input file or the command line.
+either in the local input file or the command line  pfasst_nml=\\\\"my_file.nml\\\\"
 
 
 Command line input

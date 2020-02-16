@@ -7,7 +7,7 @@ The following material will walk the user through a couple of examples to demons
 LibPFASST.
 
 
-Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist
+Once libpfasst has been successfully built, move to the directory  LibPFASST/Tutorials/EX1_Dahlquist
 This example solves the  scalar model problem or Dahlquist equation
 
 .. math::
@@ -22,7 +22,7 @@ An implicit-explicit or IMEX  (also known as semi-implicit) splitting is used in
 
    y'  = \lambda_1 y + \lambda_2 y
 
-Typing 'make' in the directory should compile the example creating an exectuable called 'main.exe'.  In the same directory, there are a few parameter files with the extension '.nml'.  You can run the example using one of these files, as in
+Typing 'make' in the directory should compile the example creating an executable called 'main.exe'.  In the same directory, there are a few parameter files with the extension '.nml'.  You can run the example using one of these files, as in
 
   `$ ./main.exe sdc.nml`
 
@@ -49,7 +49,7 @@ The first thing done in ``run_pfasst`` is to read in local problem parameters by
 
 This routine also returns the location of the namelist for the PFASST parameters, which in this case will match the location of the local parameters (a different file can be specified if desired).  After
 the MPI based communicator is set up, the routine ``pf_pfasst_create`` is called to allocate the main PFASST structure called 'pf'.  Note that the filename for PFASST parameters is
-based to this routine so that it can be read.
+passed to this routine so that it can be read.
 
 .. code-block:: fortran
 		
@@ -200,7 +200,9 @@ This example solves a 1d linear advection diffusion equation
 
 .. math::
 
-  u_t  = - v u_x + \nu u_{xx}.
+  u_t  = - v u_x + \nu u_{xx},
+
+where $v$ and $\nu$ are scalars.  
 
 This right hand side of the equation will be split into stiff terms handled implicitly
 (:math:`\nu u_{xx}`) and non-stiff terms handled explicitly (:math:`-v u_x`),
@@ -226,14 +228,28 @@ In the local definition of the sweeper,  variables are added to facilitate opera
      complex(pfdp), allocatable :: opE(:) ! Explicit spectral operator
      complex(pfdp), allocatable :: opI(:) ! Implicit spectral operator
 
-The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  ``feval`` and ``f_comp`` the convolution subroutine `conv` is used for either implicit or explicit
+The first of these is a pointer to the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  ``feval`` and ``f_comp`` the convolution subroutine `conv` is used for either implicit or explicit
 function evaluations in spectral space, e.g.
 
 .. code-block:: fortran
 		
-       ! Apply the inverse opeator with the FFT convolution
+       ! Apply the inverse operator with the FFT convolution
        call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
 In a similar manner, in the local definition of the `level`, the interpolation is done in spectral space while the restriction is just pointwise coarsening.
 
-When creating and example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.
+When creating an example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.
+
+
+Example 4
+---------
+In the directory ``LibPFASST/Tutorials/EX4_Boussinesq`` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
+.. math::
+
+  \omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \bf{u} - g\rho_x
+  \rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho - g\rho_x.
+
+Here (:math: \omega) is the vorticity, (:math: \bf{u})  is the velocity, and
+(:math: \rho) a density or bouyancy term.  The constants (:math: \nu and \kappa) determine the diffusion terms, and (:math: g) if "gravity".
+
+The example code is similar to Example 3 except is based on the encapsulation for an complex N-dimensional system of equations called zndsysarray.

@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
-    <link rel="next" title="Data encapsulation" href="encap.html" />
+    <link rel="next" title="Steepers" href="steppers.html" />
     <link rel="prev" title="Parameters and variables" href="parameters.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="encap.html" title="Data encapsulation"
+          <a href="steppers.html" title="Steepers"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="parameters.html" title="Parameters and variables"
@@ -47,16 +47,16 @@
 <p>Under construction!</p>
 <p>LibPFASST contains several sweeper types for solving different types of equations.  These are contained in <code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that contain <code class="docutils literal notranslate"><span class="pre">sweeper</span></code> in the name.</p>
 <ul class="simple">
-<li><p>exp:  Exponential integrator</p></li>
 <li><p>imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</p></li>
 <li><p>misdc: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</p></li>
+<li><p>exp:  Exponential integrator</p></li>
 <li><p>imk:  Implicit Munthe-Kass Runge-Kutta integrators</p></li>
 <li><p>magpicard:   Magnus  integrator based on Picard iterations</p></li>
-<li><p>verlet:   Verlet type integrator for 2nd order equations</p></li>
+<li><p>verlet:   Verlet type integrator for 2nd-order Hamiltonian equations</p></li>
 <li><p>imex_oc:  Optimal control version of imex</p></li>
 <li><p>misdc_oc:  Optimal control version of misdc</p></li>
 </ul>
-<p>For historical reasons, there are two versions of some of these sweeper, with a <cite>Q</cite> denoting the more modern version that can utilize DIRK style sweepers.</p>
+<p>For historical reasons, there are two versions of some of these sweepers, with a <cite>Q</cite> denoting the more modern version that can utilize DIRK style sweepers.</p>
 </div>
 
 
@@ -69,8 +69,8 @@
   <p class="topless"><a href="parameters.html"
                         title="previous chapter">Parameters and variables</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="encap.html"
-                        title="next chapter">Data encapsulation</a></p>
+  <p class="topless"><a href="steppers.html"
+                        title="next chapter">Steepers</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -99,7 +99,7 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="encap.html" title="Data encapsulation"
+          <a href="steppers.html" title="Steepers"
              >next</a> |</li>
         <li class="right" >
           <a href="parameters.html" title="Parameters and variables"

@@ -48,14 +48,14 @@
 <h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
 <p>The following material will walk the user through a couple of examples to demonstrate how to set up an application using
 LibPFASST.</p>
-<p>Once libpfasst has been successfully built, move to the directory  libpfasst/Tutorials/EX1_Dahlquist
+<p>Once libpfasst has been successfully built, move to the directory  LibPFASST/Tutorials/EX1_Dahlquist
 This example solves the  scalar model problem or Dahlquist equation</p>
 <div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}y'  = \lambda y\\y(0) = 1\end{aligned}\end{align} \]</div>
 <p>An implicit-explicit or IMEX  (also known as semi-implicit) splitting is used in this example, so the equation can be written</p>
 <div class="math notranslate nohighlight">
 \[y'  = \lambda_1 y + \lambda_2 y\]</div>
-<p>Typing ‘make’ in the directory should compile the example creating an exectuable called ‘main.exe’.  In the same directory, there are a few parameter files with the extension ‘.nml’.  You can run the example using one of these files, as in</p>
+<p>Typing ‘make’ in the directory should compile the example creating an executable called ‘main.exe’.  In the same directory, there are a few parameter files with the extension ‘.nml’.  You can run the example using one of these files, as in</p>
 <blockquote>
 <div><p><cite>$ ./main.exe sdc.nml</cite></p>
 </div></blockquote>
@@ -74,7 +74,7 @@ only initializes MPI, calls a routine <code class="docutils literal notranslate"
 </div>
 <p>This routine also returns the location of the namelist for the PFASST parameters, which in this case will match the location of the local parameters (a different file can be specified if desired).  After
 the MPI based communicator is set up, the routine <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code> is called to allocate the main PFASST structure called ‘pf’.  Note that the filename for PFASST parameters is
-based to this routine so that it can be read.</p>
+passed to this routine so that it can be read.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Create the pfasst structure</span>
 <span class="k">call </span><span class="n">pf_pfasst_create</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">pf_fname</span><span class="p">)</span>
 </pre></div>
@@ -188,7 +188,8 @@ encapsulation called ‘scalar_encap’ is defined</p>
 for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
 <div class="math notranslate nohighlight">
-\[u_t  = - v u_x + \nu u_{xx}.\]</div>
+\[u_t  = - v u_x + \nu u_{xx},\]</div>
+<p>where $v$ and $nu$ are scalars.</p>
 <p>This right hand side of the equation will be split into stiff terms handled implicitly
 (<span class="math notranslate nohighlight">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math notranslate nohighlight">\(-v u_x\)</span>),
 hence an IMEX SDC substepper will be used to evolve the equation through time.
@@ -208,14 +209,26 @@ In the local definition of the sweeper,  variables are added to facilitate opera
 <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opI</span><span class="p">(:)</span> <span class="c">! Implicit spectral operator</span>
 </pre></div>
 </div>
-<p>The first of these is a pointer the the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal notranslate"><span class="pre">feval</span></code> and <code class="docutils literal notranslate"><span class="pre">f_comp</span></code> the convolution subroutine <cite>conv</cite> is used for either implicit or explicit
+<p>The first of these is a pointer to the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal notranslate"><span class="pre">feval</span></code> and <code class="docutils literal notranslate"><span class="pre">f_comp</span></code> the convolution subroutine <cite>conv</cite> is used for either implicit or explicit
 function evaluations in spectral space, e.g.</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse opeator with the FFT convolution</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse operator with the FFT convolution</span>
 <span class="k">call </span><span class="n">fft</span><span class="p">%</span><span class="n">conv</span><span class="p">(</span><span class="n">rhsvec</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0_pfdp</span> <span class="o">-</span> <span class="n">dtq</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">opI</span><span class="p">),</span><span class="n">yvec</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In a similar manner, in the local definition of the <cite>level</cite>, the interpolation is done in spectral space while the restriction is just pointwise coarsening.</p>
-<p>When creating and example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.</p>
+<p>When creating an example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.</p>
+</div>
+<div class="section" id="example-4">
+<h2>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h2>
+<p>In the directory <code class="docutils literal notranslate"><span class="pre">LibPFASST/Tutorials/EX4_Boussinesq</span></code> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
+.. math:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>\<span class="n">omega_t</span>  <span class="o">=</span> <span class="o">-</span> <span class="p">(</span>\<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> \<span class="n">cdot</span> \<span class="n">nabla</span><span class="p">)</span>\<span class="n">omega</span> <span class="o">+</span> \<span class="n">nu</span> \<span class="n">nabla</span><span class="o">^</span><span class="mi">2</span> \<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> <span class="o">-</span> <span class="n">g</span>\<span class="n">rho_x</span>
+\<span class="n">rho_t</span>  <span class="o">=</span> <span class="o">-</span> <span class="p">(</span>\<span class="n">bf</span><span class="p">{</span><span class="n">u</span><span class="p">}</span> \<span class="n">cdot</span> \<span class="n">nabla</span><span class="p">)</span>\<span class="n">rho</span> <span class="o">+</span> \<span class="n">kappa</span> \<span class="n">nabla</span><span class="o">^</span><span class="mi">2</span> \<span class="n">rho</span> <span class="o">-</span> <span class="n">g</span>\<span class="n">rho_x</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Here (:math: omega) is the vorticity, (:math: bf{u})  is the velocity, and
+(:math: rho) a density or bouyancy term.  The constants (:math: nu and kappa) determine the diffusion terms, and (:math: g) if “gravity”.</p>
+<p>The example code is similar to Example 3 except is based on the encapsulation for an complex N-dimensional system of equations called zndsysarray.</p>
 </div>
 </div>
 
@@ -231,6 +244,7 @@ function evaluations in spectral space, e.g.</p>
 <li><a class="reference internal" href="#example-1">Example 1</a></li>
 <li><a class="reference internal" href="#example-2">Example 2</a></li>
 <li><a class="reference internal" href="#example-3">Example 3</a></li>
+<li><a class="reference internal" href="#example-4">Example 4</a></li>
 </ul>
 </li>
 </ul>

@@ -55,11 +55,13 @@ or Ubuntu machines, we recommend MPICH2:</p>
 <blockquote>
 <div><p><cite>$ sudo apt-get install  libopenblas-dev</cite></p>
 </div></blockquote>
-<p>The user will probably have to adjust some flags in ‘Makefile.defaults’.</p>
+<p>The user may have to change the compiler and compiler flags defined in Makefile.local and
+‘Makefile.defaults’.</p>
 <p>The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.</p>
-<p>FC = mpif90</p>
-<p>CC = mpicc</p>
-<p>AR = ar rcs</p>
+<p>FC = mpiffort
+CC = mpicc
+LD= $(FC)
+AR = ar rcs</p>
 <p>Some optional flags are</p>
 <p>DEBUG = FALSE</p>
 <p>which if made true will add many diagnostic flags to the build, and</p>
@@ -68,7 +70,7 @@ or Ubuntu machines, we recommend MPICH2:</p>
 <blockquote>
 <div><p>make MKVERBOSE=TRUE DEBUG=TRUE</p>
 </div></blockquote>
-<p>There is is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing</p>
+<p>There is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing</p>
 <p>make depend</p>
 <p>Finally, one can type</p>
 <p>make clean</p>

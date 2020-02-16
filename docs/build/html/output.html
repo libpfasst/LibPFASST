@@ -43,7 +43,7 @@
 <p>There are two main ways to produce output automatically from LibPFASST, namely through the setting of hooks and the output of the results module.</p>
 <div class="section" id="hooks">
 <h2>hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
-<p>The first output possibility is through the use of the what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in “LibPFASST/Tutorials/EX1_Dahlquist/src/main.f90”  a hook is added by the statement.</p>
+<p>The first output possibility is through the use of what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in “LibPFASST/Tutorials/EX2_Dahlquist/src/main.f90”  a hook is added by the statement.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
 <span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
 </pre></div>
@@ -53,10 +53,40 @@
 </div>
 <div class="section" id="results">
 <h2>results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
-<p>LibPFASST contains the module “pf_mod_results” which is used to collect information about the run during a call to library.
-The destination of the output can be changed from default direct “dat/” to an arbitrary path by specifying the variable “outdir” in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=&quot;my_outdir&quot;.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
-then output to the directory “my_outdir/residuals” after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, echo_timings prints timings to  stdout while the code is running.</p>
-<p>Note that for the library supplied data encapsulations there is a subroutine called “eprint” which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine could be modified for an additional avenue for output from any place in the code.</p>
+<p>LibPFASST contains the module “pf_mod_results” which is used to collect information about the run during a call to LibPFASST.
+The destination of the output can be changed from default directory “dat/outdir” to an arbitrary path by specifying the variable “outdir” in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\”my_outdir\”.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
+then output to the directory “my_outdir/residuals” after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, save_timings is an integer which can be set to 0,1,2, or 3.</p>
+<p><a href="#id1"><span class="problematic" id="id2">*</span></a>0: no timings
+<a href="#id3"><span class="problematic" id="id4">*</span></a>1: just the total time
+<a href="#id5"><span class="problematic" id="id6">*</span></a>2: time all parts of the code
+<a href="#id7"><span class="problematic" id="id8">*</span></a>3: time all parts of the code and echo timers to the standard out</p>
+<p>Note that for the library supplied data encapsulations there is a subroutine called “eprint” which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine can be modified for an additional avenue for output from any place in the code.</p>
+<p>Depending on the above flag, several files will be created after the time integration and put in the directory /dat/outdir.</p>
+<ul class="simple">
+<li><p>pfasst_params.json :  A description of all the run parameters</p></li>
+<li><p>runtimes :  A directory containing timing files for each processor</p></li>
+<li><p>residuals :  A directory containing residual information for each   processor</p></li>
+<li><p>delta_q0 :  A directory containing information for each  processor  concerning the changes to the initial condition at each processor</p></li>
+<li><p>errors :  A directory containing solution error files for each processor</p></li>
+</ul>
+<p>The first 5 of these files are generated automatically  by the library unless the user turns of the option for each with flags in the input files.  The error statistics must be set by the user (typically with a “hook” since the library has no information on the error for a particular application.</p>
+<p>At the moment, the easiest way to understand the output file formats is probably to consult the code in src/pf_results.f90, e.g.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">do </span><span class="n">klevel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nlevs</span>
+   <span class="k">do </span><span class="n">kblock</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span>
+      <span class="n">nstep</span><span class="o">=</span><span class="p">(</span><span class="n">kblock</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nprocs</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
+      <span class="k">do </span><span class="n">kiter</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">niters</span>
+         <span class="k">do </span><span class="n">ksweep</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">max_nsweeps</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">rstream</span><span class="p">,</span><span class="mi">101</span> <span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span> <span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksweep</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_errors</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">estream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>  <span class="n">ksweep</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_delta_q0</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">qstream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">delta_q0</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span> <span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksweep</span><span class="p">)</span>
+         <span class="k">end do</span>
+<span class="k">      end do</span>
+<span class="k">   </span><span class="n">enddo</span>
+<span class="n">enddo</span>
+<span class="mi">101</span> <span class="k">format</span><span class="p">(</span><span class="n">I3</span><span class="p">,</span><span class="n">I10</span><span class="p">,</span> <span class="n">I10</span><span class="p">,</span><span class="n">I5</span><span class="p">,</span> <span class="n">I4</span><span class="p">,</span> <span class="n">e22</span><span class="p">.</span><span class="mi">14</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output files are set up to allow easy input into Python post-processing routines using  json.load or numpy.loadtxt routines (or equivalents).</p>
 </div>
 </div>
 

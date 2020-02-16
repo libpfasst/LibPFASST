@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Data encapsulation &#8212; LIBPFASST 1.1 documentation</title>
+    <title>Steepers &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -18,8 +18,8 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
-    <link rel="next" title="Output" href="output.html" />
-    <link rel="prev" title="Steepers" href="steppers.html" /> 
+    <link rel="next" title="Data encapsulation" href="encap.html" />
+    <link rel="prev" title="Sweepers" href="sweepers.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -28,10 +28,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="output.html" title="Output"
+          <a href="encap.html" title="Data encapsulation"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="steppers.html" title="Steepers"
+          <a href="sweepers.html" title="Sweepers"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>
@@ -42,25 +42,17 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="data-encapsulation">
-<h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Permalink to this headline">¶</a></h1>
-<p>!  Under construction</p>
-<p>The temporal integration routines in LibPFASST do not specify the form of the solution in terms of its data layout, but rather this must be described by an encapsulation module which tells LibPFASST how to operate on the data.  For convenience LibPFASST provides sample encapsulations corresponding to regular Fortran arrays. These are provided in
-<code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that include <code class="docutils literal notranslate"><span class="pre">encap</span></code></p>
-<p>Curently, the provided encaps include</p>
+  <div class="section" id="steepers">
+<h1>Steepers<a class="headerlink" href="#steepers" title="Permalink to this headline">¶</a></h1>
+<p>Under construction!</p>
+<p>LibPFASST contains two stepper types which execute Runge-Kutta time steps over an interval.
+These are usually applied during a Parareal implementation, but can also be called to initialize the coarsest level in PFASST
+These are contained in <code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that contain <code class="docutils literal notranslate"><span class="pre">sweeper</span></code> in the name.</p>
 <ul class="simple">
-<li><p>ndarray:  An N-dimensional array</p></li>
-<li><p>ndsysarray: System of ndarrays</p></li>
-<li><p>zndarray: An N-dimensional complex array</p></li>
-<li><p>zndsysarray: System of complex ndarrays</p></li>
-<li><p>ndarray_oc:  Optimal control version of ndarray</p></li>
+<li><p>rkstepper: IMEX Runge-Kutta integrator for equations with an implicit  and explicit splitting</p></li>
+<li><p>erkstepper: Exponential Runge-Kutta integrator for equations that can be split into
+linear and nonlinear terms</p></li>
 </ul>
-<p>A discussion of how to construct an encapsulation is included in the 2nd tutorial.
-The advanced user might also consider the encapsulations</p>
-<p><a href="#id1"><span class="problematic" id="id2">*</span></a>petscVec:  uses the standard Vec structure from PETSc
-<a href="#id3"><span class="problematic" id="id4">*</span></a>hamsys:    provides encapsulation of two Hamiltonian variables for
-Verlet sweepers
-<a href="#id5"><span class="problematic" id="id6">*</span></a>amrex:  based on the multifab structure from the AMReX code (under construction)</p>
 </div>
 
 
@@ -70,15 +62,15 @@ Verlet sweepers
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="steppers.html"
-                        title="previous chapter">Steepers</a></p>
+  <p class="topless"><a href="sweepers.html"
+                        title="previous chapter">Sweepers</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="output.html"
-                        title="next chapter">Output</a></p>
+  <p class="topless"><a href="encap.html"
+                        title="next chapter">Data encapsulation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/encap.rst.txt"
+      <li><a href="_sources/steppers.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -103,10 +95,10 @@ Verlet sweepers
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="output.html" title="Output"
+          <a href="encap.html" title="Data encapsulation"
              >next</a> |</li>
         <li class="right" >
-          <a href="steppers.html" title="Steepers"
+          <a href="sweepers.html" title="Sweepers"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>
