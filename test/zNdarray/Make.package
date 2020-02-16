@@ -1,0 +1,24 @@
+#  Include the standard 
+FSRC +=  src/probin.f90  src/utils_$(DIM)d.f90 src/dim_$(DIM)d.f90
+
+#  Choose the main and level to include
+ifeq ($(DO_RK),TRUE)
+FSRC += src/main_rk.f90 src/hooks_rk.f90 src/level_rk.f90
+else
+FSRC += src/main.f90 src/hooks.f90 src/level.f90
+endif
+ifeq ($(DO_EXP),TRUE)
+FSRC += src/phi_mod.f90
+endif
+
+build/main.o : ../src/main.f90 build/probin.o build/hooks.o build/level.o build/sweeper_$(DIM)d.o build/utils_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/main_rk.o : ../src/main_rk.f90 build/probin.o build/hooks_rk.o build/level_rk.o build/stepper_$(DIM)d.o build/utils_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/probin.o :../src/probin.f90 build/dim_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/hooks.o : ../src/hooks.f90 build/sweeper_$(DIM)d.o  build/probin.o build/utils_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/level.o : ../src/level.f90 build/sweeper_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/utils_$(DIM)d.o : ../src/utils_$(DIM)d.f90 build/probin.o 
+build/dim_$(DIM)d.o : ../src/dim_$(DIM)d.f90 
+build/phi_mod.o : ../src/phi_mod.f90
+build/level_rk.o : ../src/level_rk.f90 build/stepper_$(DIM)d.o $(LIBPFASST)/lib/libpfasst.a 
+build/hooks_rk.o : ../src/hooks_rk.f90 build/stepper_$(DIM)d.o build/utils_$(DIM)d.o
+

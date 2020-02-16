@@ -1,0 +1,3 @@
+./build/phi_mod.o : src/phi_mod.f90 
+./build/main.o : src/main.f90 ./build/sweeper.o 
+./build/sweeper.o : src/sweeper.f90 
