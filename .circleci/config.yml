@@ -33,12 +33,15 @@ jobs:
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Making Tutorial 2"	&&	  		
                   cd ../EX2_Dahlquist &&  make DEBUG=TRUE &&
-                  echo "Running Tutorial 2"	&&	  		
+                  echo "Running Tutorial 2" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
-                  echo "Making Tutorial 3"	&&	  		
+                  echo "Checking Tutorial 3" &&	  		
+                  cd ../EX3_adv_diff && 
+                  echo "Making Tutorial 3"   &&	  		
                   cd ../EX3_adv_diff &&  make &&
-                  echo "Running tutorial 3"	&&	  		
+                  echo "Running tutorial 3" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Done with Tutorials" &&	  		
                   cd ../..
             - run: # Modify the commands below to build and check the zNdarray examples
                 name: check_zNdarray
