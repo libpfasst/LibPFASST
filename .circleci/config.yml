@@ -72,7 +72,7 @@ jobs:
                   mpirun -n 4 ./main.2d.exe test_2d.nml &&
                   echo "Running EXP 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
-		  cd ../../..
+                  cd ../../..
             - run: # Run the python tests in test
                 name: do_pytests
                 command: >  # pytest
