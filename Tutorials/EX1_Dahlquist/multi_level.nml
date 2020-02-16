@@ -26,7 +26,7 @@
 &PARAMS
 
     Tfin = 1.0
-    nsteps = 32
+    nsteps = 8
 
     lam1=1.0
     lam2=-2.0
