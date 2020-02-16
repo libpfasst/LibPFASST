@@ -15,8 +15,8 @@ module pf_mod_hooks
        PF_POST_ITERATION    = 4, &
        PF_PRE_SWEEP         = 5, &
        PF_POST_SWEEP        = 6, &
-       PF_PRE_STEP          = 7, &
-       PF_POST_STEP         = 8, &
+       PF_PRE_BLOCK         = 7, &
+       PF_POST_BLOCK        = 8, &
        PF_PRE_INTERP_ALL    = 9, &
        PF_POST_INTERP_ALL   = 10, &
        PF_PRE_INTERP_Q0     = 11, &
@@ -25,7 +25,8 @@ module pf_mod_hooks
        PF_POST_RESTRICT_ALL = 14, &
        PF_PRE_CONVERGENCE   = 15, &
        PF_POST_CONVERGENCE  = 16, &
-       PF_MAX_HOOK          = 16
+       PF_POST_ALL          = 17, &
+       PF_MAX_HOOK          = 17
 
   integer, parameter :: &
        PF_HOOK_LOG_ONE  = 1, &
@@ -40,8 +41,8 @@ module pf_mod_hooks
        'post-iteration     ',  &
        'pre-sweep          ',  &
        'post-sweep         ',  &
-       'pre-step           ',  &
-       'post-step          ',  &
+       'pre-block          ',  &
+       'post-block         ',  &
        'pre-interp-all     ',  &
        'post-interp-all    ',  &
        'pre-interp-q0      ',  &
@@ -49,7 +50,8 @@ module pf_mod_hooks
        'pre-restrict-all   ',  &
        'post-restrict-all  ',  &
        'pre-convergence    ',  &
-       'post-convergence   ' /)
+       'post-convergence   ',  & 
+       'post-all           ' /)
 
 contains
 
@@ -84,22 +86,26 @@ contains
     integer :: i  !!  hook loop index
     integer :: l  !!  level loop index
 
-    call start_timer(pf, THOOKS)
 
     pf%state%hook = hook
     if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_HOOKS,l)
           do i = 1, pf%nhooks(l,hook)
              call pf%hooks(l,hook,i)%proc(pf,l)
           end do
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,l)
        end do
     else  ! Do to just level level_index
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_HOOKS,level_index)
        do i = 1, pf%nhooks(level_index,hook)
           call pf%hooks(level_index,hook,i)%proc(pf,level_index)
        end do
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,level_index)
     end if
 
-    call end_timer(pf, THOOKS)
+
+    
   end subroutine call_hooks
 
   !>  Subroutine defining log hook

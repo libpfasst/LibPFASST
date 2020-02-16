@@ -31,7 +31,7 @@ module pf_mod_petscVec
      procedure :: destroy_array => pf_petscVec_destroy_array
   end type pf_petscVec_factory_t
   
-  !>  N-dimensional array type,  extends the abstract encap type
+  !>  1-dimensional array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_petscVec_t
      integer             :: ndim
      integer,    allocatable :: arr_shape(:)

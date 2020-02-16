@@ -16,7 +16,7 @@ module pf_mod_fft_abs
      complex(pfdp), pointer :: wk_1d(:)            ! work space
      complex(pfdp), pointer :: wk_2d(:,:)          ! work space
      complex(pfdp), pointer :: wk_3d(:,:,:)        ! work space                    
-     real(pfdp), allocatable :: kx(:),ky(:),kz(:)              ! work space                    
+     real(pfdp), allocatable :: kx(:),ky(:),kz(:)              ! work space
    contains
      procedure(pf_fft_s_p),deferred :: fft_setup
      procedure(pf_fft_p),deferred :: fft_destroy
@@ -504,6 +504,10 @@ contains
 
     nx_f = SIZE(yhat_f)
     nx_c = SIZE(yhat_c)
+    if (nx_f .eq. nx_c)  then
+       yhat_c=yhat_f
+       return
+    end if
 
     yhat_c=0.0_pfdp
     yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
@@ -517,6 +521,10 @@ contains
     integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
     nx_f = SHAPE(yhat_f)
     nx_c = SHAPE(yhat_c)
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2))  then
+       yhat_c=yhat_f
+       return
+    end if
     
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
@@ -536,13 +544,14 @@ contains
 
     integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
     
-    
-    
     yhat_c = 0.0_pfdp
     
     nx_f = SHAPE(yhat_f)
     nx_c = SHAPE(yhat_c)
-    
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3))  then
+       yhat_c=yhat_f
+       return
+    end if
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nf3=nx_f(3)-nx_c(3)/2+2
@@ -561,6 +570,7 @@ contains
     yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3))
     
   end subroutine zrestrict_3d
+
 
   end module pf_mod_fft_abs
   

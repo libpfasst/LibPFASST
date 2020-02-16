@@ -22,9 +22,8 @@ module pf_mod_rkstepper
 
      !  Local storage (not optimal)
      class(pf_encap_t), allocatable           :: rhs          !!  Accumulated right hand side for implicit solves
-     class(pf_encap_t), allocatable           :: qtemp        !!  Temp for y
-     class(pf_encap_t), allocatable           :: q0           !!  Local q0
-     class(pf_encap_t), allocatable           :: qend         !!  Local qend
+     class(pf_encap_t), allocatable           :: ytemp        !!  Temp for y
+     class(pf_encap_t), allocatable           :: y0           !!  Local y0
      class(pf_encap_t), pointer               :: F(:,:)       !!  Pointer to F
 
    contains
@@ -65,16 +64,16 @@ module pf_mod_rkstepper
 
 contains
 
-  !> Perform N steps of ark on level level_index and set qend appropriately.
-  subroutine ark_do_n_steps(this, pf, level_index, t0, q0,qend,big_dt, nsteps_rk)
+  !> Perform N steps of ark on level level_index and set yend appropriately.  Note that input y0 is not disturbed
+  subroutine ark_do_n_steps(this, pf, level_index, t0, y0,yend,big_dt, nsteps_rk)
     use pf_mod_timer
     use pf_mod_hooks
 
     class(pf_ark_stepper_t),   intent(inout)         :: this
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in   )         :: t0           !!  Time at start of time interval
-    class(pf_encap_t), intent(in   )         :: q0           !!  Starting value
-    class(pf_encap_t), intent(inout)         :: qend         !!  Final value
+    class(pf_encap_t), intent(in   )         :: y0           !!  Starting value
+    class(pf_encap_t), intent(inout)         :: yend         !!  Final value
     real(pfdp),        intent(in   )         :: big_dt       !!  Size of time interval to integrato on
     integer,           intent(in)            :: level_index  !!  Level of the index to step on
     integer,           intent(in)            :: nsteps_rk    !!  Number of steps to use
@@ -90,20 +89,21 @@ contains
 
     dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
 
-    call this%q0%copy(q0)
-    
+    call this%y0%copy(y0)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)    
     do n = 1, nsteps_rk      ! Loop over time steps
        tn=t0+dt*real(n-1,pfdp)
        ! Reset initial condition
-       if (n > 1) call this%q0%copy(this%qend)
+       if (n > 1) call this%y0%copy(this%ytemp)
 
 
        ! this assumes that cvec(1) == 0
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
        if (this%explicit) &
-            call this%f_eval(this%q0, tn+dt*this%cvec(1), level_index, this%F(1,1),1)
+            call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,1),1)
        if (this%implicit) &
-            call this%f_eval(this%q0, tn+dt*this%cvec(1), level_index, this%F(1,2),2)
-     
+            call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,2),2)
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)            
        ! Loop over stage values
        do m = 1, this%nstages-1  
           
@@ -111,7 +111,7 @@ contains
           tc = tn + dt*this%cvec(m+1)
 
           ! Initialize the right-hand size for each stage
-          call this%rhs%copy(this%q0)
+          call this%rhs%copy(this%y0)
 
           do j = 1, m
 
@@ -127,35 +127,41 @@ contains
 
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
-             call this%f_comp(this%qtemp, tc, dt*this%AmatI(m+1,m+1), this%rhs, level_index,this%F(m+1,2), 2)
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
+             call this%f_comp(this%ytemp, tc, dt*this%AmatI(m+1,m+1), this%rhs, level_index,this%F(m+1,2), 2)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
           else
-             call this%qtemp%copy(this%rhs)
+             call this%ytemp%copy(this%rhs)
           end if
                     
           ! Reevaluate explicit rhs with the new solution
-          if (this%explicit) &
-               call this%f_eval(this%qtemp, tc, level_index, this%F(m+1,1), 1)
-          
+          if (this%explicit) then
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call this%f_eval(this%ytemp, tc, level_index, this%F(m+1,1), 1)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+          end if
        end do  ! End loop over stage values
        
        ! Compute final value using quadrature rule
-       call this%qend%copy(this%q0)
+       call this%ytemp%copy(this%y0)
 
        ! Loop over stage values one more time
        do j = 1, this%nstages
 
           ! Add explicit terms
           if (this%explicit) &
-               call this%qend%axpy(dt*this%bvecE(j), this%F(j,1))
+               call this%ytemp%axpy(dt*this%bvecE(j), this%F(j,1))
 
           ! Add implicit terms
           if (this%implicit) &
-               call this%qend%axpy(dt*this%bvecI(j), this%F(j,2))
+               call this%ytemp%axpy(dt*this%bvecI(j), this%F(j,2))
 
        end do ! End loop over stage values
 
     end do ! End Loop over time steps
-    call qend%copy(this%qend)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
+    
+    call yend%copy(this%ytemp)
   end subroutine ark_do_n_steps
   
 
@@ -303,9 +309,8 @@ contains
 
     ! Allocate space for local variables
     call lev%ulevel%factory%create_single(this%rhs, level_index,  lev%lev_shape)
-    call lev%ulevel%factory%create_single(this%q0, level_index,  lev%lev_shape)
-    call lev%ulevel%factory%create_single(this%qend, level_index,  lev%lev_shape)
-    call lev%ulevel%factory%create_single(this%qtemp, level_index,  lev%lev_shape)            
+    call lev%ulevel%factory%create_single(this%y0, level_index,  lev%lev_shape)
+    call lev%ulevel%factory%create_single(this%ytemp, level_index,  lev%lev_shape)            
     call lev%ulevel%factory%create_array(lev%Frkflt, nstages*npieces, level_index,  lev%lev_shape)
     do i = 1, nstages*npieces
        call lev%Frkflt(i)%setval(0.0_pfdp, 0)
@@ -329,10 +334,9 @@ contains
     deallocate(this%bvecE)
     deallocate(this%bvecI)
     deallocate(this%cvec)
-    call lev%ulevel%factory%destroy_single(this%qend)
-    call lev%ulevel%factory%destroy_single(this%q0)
+    call lev%ulevel%factory%destroy_single(this%y0)
     call lev%ulevel%factory%destroy_single(this%rhs)
-    call lev%ulevel%factory%destroy_single(this%qtemp)
+    call lev%ulevel%factory%destroy_single(this%ytemp)
     call lev%ulevel%factory%destroy_array(lev%Frkflt)
   end subroutine ark_destroy
 

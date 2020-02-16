@@ -30,6 +30,7 @@ module pf_mod_magnus_picard
      procedure :: destroy   => magpicard_destroy
      procedure :: magpicard_destroy     
      procedure :: magpicard_initialize
+     procedure :: compute_dt => magpicard_compute_dt
   end type pf_magpicard_t
 
   interface
@@ -62,6 +63,15 @@ module pf_mod_magnus_picard
        class(pf_encap_t), intent(inout) :: sol_tn
        integer, intent(in) :: level_index
      end subroutine pf_propagate_solution_p
+     subroutine pf_comp_dt_p(this,y, t, level_index, dt)
+       !>  Evaluate f_piece(y), where piece is one or two 
+       import pf_magpicard_t, pf_encap_t, pfdp
+       class(pf_magpicard_t),  intent(inout) :: this
+       class(pf_encap_t), intent(in   ) :: y        !!  Argument for evaluation
+       real(pfdp),        intent(in   ) :: t        !!  Time at evaluation
+       integer,    intent(in   ) :: level_index     !!  Level index
+       real(pfdp),        intent(inout) :: dt       !!  time step chosen
+     end subroutine pf_comp_dt_p
   end interface
 contains
 
@@ -85,11 +95,11 @@ contains
     lev => pf%levels(level_index)
     nnodes = lev%nnodes
 
-    call call_hooks(pf, level_index, PF_PRE_SWEEP)
     call lev%Q(1)%copy(lev%q0)
 
-    call start_timer(pf, TLEVEL+lev%index-1)
     do k = 1, nsweeps
+       call call_hooks(pf, level_index, PF_PRE_SWEEP)
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k       
 
        ! Copy values into residual
@@ -101,8 +111,10 @@ contains
        !$omp parallel do private(m, t)
        do m = 1, nnodes
 !          t = t + dt*this%dtsdc(m)
-           t=t0+dt*lev%nodes(m)
-          call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+          t=t0+dt*lev%nodes(m)
+          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+          call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
        end do
        !$omp end parallel do
 
@@ -111,32 +123,32 @@ contains
        call magpicard_integrate(this, pf,level_index, lev%Q, lev%F, dt, lev%I)
 
        if (this%magnus_order > 1 .and. nnodes > 2) then
-          call start_timer(pf, TAUX)
+          call pf_start_timer(pf, T_AUX)
           call this%compute_single_commutators(lev%F)
-          call end_timer(pf, TAUX)
+          call pf_stop_timer(pf, T_AUX)
        endif
 
        !! this loop not OMP'd because the deferred procs are OMP'd
        do m = 1, nnodes-1
-          call start_timer(pf, TAUX+1)
+          call pf_start_timer(pf, T_AUX)
           call this%compute_omega(this%omega(m), lev%I, lev%F, &
                lev%nodes, lev%sdcmats%qmat, dt, m, this%commutator_coefs(:,:,m))
-          call end_timer(pf, TAUX+1)
+          call pf_stop_timer(pf, T_AUX)
        end do
 
        !$omp parallel do private(m)
        do m = 1, nnodes-1
-          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%omega(m), lev%index)
+          call this%propagate_solution(lev%Q(1), lev%Q(m+1), this%omega(m), level_index)
        end do
        !$omp end parallel do
 
        call pf_residual(pf, level_index, dt)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
 
     call lev%qend%copy(lev%Q(nnodes))
-    call end_timer(pf, TLEVEL+lev%index-1)
 
   end subroutine magpicard_sweep
 
@@ -160,10 +172,10 @@ contains
     call get_commutator_coefs(this%qtype, nnodes, this%dt, this%commutator_coefs)
 
     call lev%ulevel%factory%create_array(this%omega, nnodes-1, &
-         lev%index,  lev%lev_shape)
+         level_index,  lev%lev_shape)
 
     call lev%ulevel%factory%create_array(this%time_ev_op, nnodes-1, &
-         lev%index,  lev%lev_shape)
+         level_index,  lev%lev_shape)
 
     do m = 1, nnodes-1
         call this%omega(m)%setval(0.0_pfdp)
@@ -207,7 +219,10 @@ contains
 
     type(pf_level_t), pointer  :: lev    !!  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
-    call this%f_eval(lev%Q(m), t, lev%index, lev%F(m,1))
+
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+    call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
   end subroutine magpicard_evaluate
 
   subroutine magpicard_evaluate_all(this, pf,level_index, t, flags, step)
@@ -313,4 +328,18 @@ contains
        call pf_stop(__FILE__,__LINE__,'unsupported qtype ',qtype)
     endif
   end subroutine get_commutator_coefs
+  subroutine magpicard_compute_dt(this,pf,level_index,  t0, dt,flags)
+    class(pf_magpicard_t),  intent(inout) :: this
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer,              intent(in)    :: level_index
+    real(pfdp),        intent(in   ) :: t0
+    real(pfdp),        intent(inout) :: dt
+    integer, optional,   intent(in)    :: flags
+
+    type(pf_level_t),    pointer :: lev
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    !  Do nothing now
+    return
+  end subroutine magpicard_compute_dt
+
 end module pf_mod_magnus_picard

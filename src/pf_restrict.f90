@@ -43,7 +43,7 @@ contains
     if(present(mystep)) step = mystep
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
-    call start_timer(pf, TRESTRICT + level_index - 1)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_RESTRICT, level_index)
     
 
     allocate(c_times(c_lev%nnodes),stat=ierr)
@@ -65,6 +65,7 @@ contains
        call c_lev%tauQ(m)%setval(0.0_pfdp, flags)
     end do
     if (pf%state%iter >= pf%taui0)  then
+
        ! compute '0 to node' integral on the coarse level
       call c_lev%ulevel%sweeper%integrate(pf,level_index-1,  c_lev%Q, &
            c_lev%F, dt, c_lev%I, flags)
@@ -98,7 +99,7 @@ contains
        
     end if
 
-    call end_timer(pf, TRESTRICT + level_index - 1)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESTRICT,level_index)
     call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
     deallocate(c_times)
@@ -128,7 +129,6 @@ contains
 
     !!  Create a temp array for the spatial restriction
     if (f_lev%restrict_workspace_allocated   .eqv. .false.) then      
-       print *,'create in restrict'
        call c_lev%ulevel%factory%create_array(f_lev%f_encap_array_c, f_nnodes, c_lev%index, c_lev%lev_shape)
        f_lev%restrict_workspace_allocated  = .true.
     end if
@@ -172,7 +172,6 @@ contains
 
     !!  Create a temp array for the spatial restriction
     if (f_lev%restrict_workspace_allocated   .eqv. .false.) then      
-       print *,'create in restrict'
        call c_lev%ulevel%factory%create_array(f_lev%f_encap_array_c, f_nnodes, c_lev%index, c_lev%lev_shape)
        f_lev%restrict_workspace_allocated  = .true.
     end if

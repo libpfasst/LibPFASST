@@ -282,10 +282,17 @@ contains
     real(pfdp), intent(inout), pointer :: yvec_f(:)
     real(pfdp), intent(in),    pointer :: yvec_c(:)
     type(pf_fft_t),intent(in), pointer :: fft_f
-    integer :: nx_f, nx_c
 
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
+    integer :: nx_f, nx_c
 
+    nx_f = SIZE(yvec_f)
+    nx_c = SIZE(yvec_c)
+    if (nx_f .eq. nx_c) then
+       yvec_f=yvec_c
+       return
+    end if
+    
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
@@ -305,6 +312,15 @@ contains
     type(pf_fft_t),intent(in), pointer:: fft_f
 
     complex(pfdp),         pointer :: wk_f(:,:), wk_c(:,:)
+    integer :: nx_f(2), nx_c(2)
+
+    nx_f = SHAPE(yvec_f)
+    nx_c = SHAPE(yvec_c)
+
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2)) then
+       yvec_f=yvec_c
+       return
+    end if
 
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
@@ -324,6 +340,15 @@ contains
     real(pfdp), intent(inout),  pointer :: yvec_c(:,:,:)
     type(pf_fft_t),intent(in),  pointer :: fft_f
     complex(pfdp),         pointer :: wk_f(:,:,:), wk_c(:,:,:)
+    integer :: nx_f(3), nx_c(3)
+
+    nx_f = SHAPE(yvec_f)
+    nx_c = SHAPE(yvec_c)
+
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3)) then
+       yvec_f=yvec_c
+       return
+    end if
 
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
@@ -347,7 +372,10 @@ contains
 
     nx_f = SIZE(yhat_f)
     nx_c = SIZE(yhat_c)
-
+    if (nx_f .eq. nx_c) then
+       yhat_f=yhat_c
+       return
+    end if
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
     yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
@@ -359,22 +387,26 @@ contains
     complex(pfdp),   pointer,intent(inout) :: yhat_f(:,:) 
     complex(pfdp),   pointer,intent(in) :: yhat_c(:,:)
 
-    integer :: nx_f(2), nx_c(2),nf1,nf2,nc1,nc2
+    integer :: nf1,nf2,nc1,nc2
+    integer :: nx_f(2), nx_c(2)
 
     nx_f = SHAPE(yhat_f)
     nx_c = SHAPE(yhat_c)
-    
+
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2)) then
+       yhat_f=yhat_c
+       return
+    end if
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nc1=nx_c(1)/2+2
     nc2=nx_c(2)/2+2
-
+    
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c(1)/2,1:nx_c(2)/2) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2)
     yhat_f(nf1:nx_f(1),1:nx_c(2)/2) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2)    
     yhat_f(1:nx_c(1)/2,nf2:nx_f(2)) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2)) 
     yhat_f(nf1:nx_f(1),nf2:nx_f(2)) = yhat_c(nc1:nx_c(1),nc2:nx_c(2)) 
-
     
   end subroutine zinterp_2d
 
@@ -384,30 +416,33 @@ contains
     complex(pfdp),   pointer,intent(inout) :: yhat_f(:,:,:) 
     complex(pfdp),   pointer,intent(in) :: yhat_c(:,:,:)
 
-    integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
-
+    integer :: nf1,nf2,nf3,nc1,nc2,nc3
+    integer :: nx_f(3), nx_c(3)
 
     nx_f = SHAPE(yhat_f)
     nx_c = SHAPE(yhat_c)
-    
+    if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3))  then
+       yhat_f=yhat_c
+       return
+    end if
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nf3=nx_f(3)-nx_c(3)/2+2
     nc1=nx_c(1)/2+2
     nc2=nx_c(2)/2+2
     nc3=nx_c(3)/2+2
-
+    
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2)
     yhat_f(nf1:nx_f(1),1:nx_c(2)/2,1:nx_c(3)/2) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2,1:nx_c(3)/2)    
     yhat_f(1:nx_c(1)/2,nf2:nx_f(2),1:nx_c(3)/2) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2),1:nx_c(3)/2) 
     yhat_f(nf1:nx_f(1),nf2:nx_f(2),1:nx_c(3)/2) = yhat_c(nc1:nx_c(1),nc2:nx_c(2),1:nx_c(3)/2) 
-
+    
     yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,nf3:nx_f(3)) = yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,nc3:nx_c(3))
     yhat_f(nf1:nx_f(1),1:nx_c(2)/2,nf3:nx_f(3)) = yhat_c(nc1:nx_c(1),1:nx_c(2)/2,nc3:nx_c(3))    
     yhat_f(1:nx_c(1)/2,nf2:nx_f(2),nf3:nx_f(3)) = yhat_c(1:nx_c(1)/2,nc2:nx_c(2),nc3:nx_c(3)) 
     yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3)) = yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) 
-    
+
   end subroutine zinterp_3d
   end module pf_mod_fftpackage
    

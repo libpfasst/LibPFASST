@@ -23,7 +23,7 @@ contains
     integer :: m
     type(pf_level_t), pointer   :: lev
     
-    call start_timer(pf, TRESIDUAL)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_RESIDUAL,level_index)
 
     lev => pf%levels(level_index)
     call lev%ulevel%sweeper%residual(pf,level_index, dt, flag)
@@ -37,12 +37,12 @@ contains
        !       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right?
 !       sol_norms(m+1) = sol_norms(1) ! only the value at lev%nnodes is needed for forward integration, right?        
 !    end do
-    call end_timer(pf, TRESIDUAL)
     
     !    lev%residual = res_norms(lev%nnodes-1)
     m = lev%nnodes  ! for usual forward integration
     if(present(flag)) then
       if(flag==2) m = 1
+
     end if
     lev%residual = maxval(res_norms)    
     if (sol_norms(m) > 0.0d0) then
@@ -52,11 +52,9 @@ contains
     end if
 
     call pf_set_resid(pf,lev%index,lev%residual)
-!    if (pf%save_residuals .and. pf%state%iter>0)  then
-!       pf%results(lev%index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = lev%residual
-!    end if
+    
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESIDUAL,level_index)
 
-!    call end_timer(pf, TRESIDUAL)
 
   end subroutine pf_residual
 
@@ -91,7 +89,8 @@ contains
       do m = 1, lev%nnodes-1      
         if( (flags .eq. 0) .or. (flags .eq. 1) ) then
           call lev%R(m)%copy(lev%I(m), 1)
-          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          !          call lev%R(m)%axpy(1.0_pfdp, lev%Q(1), 1)
+          call lev%R(m)%axpy(1.0_pfdp, lev%q0, 1)          
           call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1), 1)
         end if
         if( (flags .eq. 0) .or. (flags .eq. 2) ) then
@@ -103,7 +102,7 @@ contains
     else
       do m = 1, lev%nnodes-1      
         call lev%R(m)%copy(lev%I(m))
-        call lev%R(m)%axpy(1.0_pfdp, lev%Q(1))
+        call lev%R(m)%axpy(1.0_pfdp, lev%q0)
         call lev%R(m)%axpy(-1.0_pfdp, lev%Q(m+1))
       end do
     end if
@@ -115,7 +114,8 @@ contains
     type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
 
-    print '("resid: time: ", f10.4," step: ",i4.4," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
+
+    print '("resid: time: ", f10.4," step: ",i8.8," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," resid: ",es14.7)', &
          pf%state%t0+pf%state%dt,pf%state%step+1, pf%rank, pf%state%iter,level_index,pf%levels(level_index)%residual    
     
     call flush(6)
@@ -123,28 +123,50 @@ contains
 
   !>  Subroutine to store a residual value
   subroutine pf_set_resid(pf,level_index,resid)
-    type(pf_pfasst_t), intent(inout)           :: pf
+    type(pf_pfasst_t), intent(inout) :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: resid
-    
-    if (pf%save_residuals .and. pf%state%iter>0)  then
-       pf%results(level_index)%residuals(pf%state%iter, pf%state%pfblock, pf%state%sweep) = resid
+    !  Make sure indices are valid
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return
+    if (pf%results%save_residuals)  then
+       pf%results%residuals(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = resid
     end if
     
   end subroutine pf_set_resid
+  !>  Subroutine to store a delta_q0 value
+  subroutine pf_set_delta_q0(pf,level_index,delta)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: level_index
+    real(pfdp), intent(in) :: delta
 
-  !>  Subroutine to store a residual value
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return
+    if (pf%results%save_delta_q0)  then
+       pf%results%delta_q0(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = delta
+    end if
+    
+  end subroutine pf_set_delta_q0
+  
+  !>  Subroutine to store an error value
   subroutine pf_set_error(pf,level_index,error)
     type(pf_pfasst_t), intent(inout)           :: pf
     integer, intent(in) :: level_index
     real(pfdp), intent(in) :: error
-    
-    if (pf%save_residuals .and. pf%state%iter>0)  then
-       pf%results(level_index)%errors(pf%state%iter, pf%state%pfblock, pf%state%sweep) = error
+    if( min(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) < 1) return    
+    if (pf%results%save_errors)  then
+       pf%results%errors(level_index, pf%state%pfblock,pf%state%iter+1, pf%state%sweep) = error
     end if
     
   end subroutine pf_set_error
 
+  !>  Subroutine to set the final the iteration number for convergence
+  subroutine pf_set_iter(pf,iter)
+    type(pf_pfasst_t), intent(inout)           :: pf
+    integer, intent(in) :: iter
+    if(pf%state%pfblock < 1) return
+    pf%results%iters(pf%state%pfblock) = iter
+    
+  end subroutine pf_set_iter
+  
 
   !
   !> Generic evaluate all
@@ -170,6 +192,17 @@ contains
     end do
   end subroutine pf_generic_evaluate_all
 
+  subroutine pf_delta_q0(pf,level_index)
+    type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
+    integer,           intent(in)    :: level_index  !!  level on which to sweep
+
+    class(pf_level_t), pointer :: lev  !!  Level on which to spread
+    lev => pf%levels(level_index)   !!  Assign level pointer
+    call lev%delta_q0%axpy(-1.0_pfdp,lev%q0)
+    lev%max_delta_q0=lev%delta_q0%norm()
+    call pf_set_delta_q0(pf,level_index,lev%max_delta_q0)
+
+  end subroutine pf_delta_q0
   
   !> Generic routine to spread initial conditions
   !! Each sweeper can define its own spreadq0 or use this generic one
@@ -225,11 +258,14 @@ contains
         
     n = SIZE(mat, dim=1)
     m = SIZE(mat, dim=2)
-        
+    
     do i = 1, n
       if (lzero) call dst(i)%setval(0.0_pfdp, flags)
       do j = 1, m
-         if (abs(a*mat(i, j)) /= 0.0_pfdp)  call dst(i)%axpy(a * mat(i, j), src(j), flags)
+         if (abs(a*mat(i, j)) /= 0.0_pfdp) then
+            call dst(i)%axpy(a * mat(i, j), src(j), flags)
+         end if
+         
       end do
     end do
   end subroutine pf_apply_mat
@@ -267,5 +303,49 @@ contains
       end do
     end do
   end subroutine pf_apply_mat_backward
+  
+  function convert_logical(q) result(q_string)
+    logical,intent(in) :: q  ! true or false
+    character(len=5)::  q_string
+    if (q) then
+       q_string=' true'
+    else
+       q_string='false'
+    end if
+  end function convert_logical
+
+  function convert_int_array(q,n) result(q_string)
+    integer,intent(in) :: n     ! length of array
+    integer,intent(in) :: q(n)  ! integer array
+    character(len=15)::  q_string
+
+    character(len=15)::  f_string  !  format string
+    integer i
+    write(f_string,"(*(G0,:,','))") q
+    q_string=adjustr('['//trim(f_string)//']')
+  end function convert_int_array
+  function wrap_timer_name(tname) result(q_string)
+    character(len=10)::  tname
+    character(len=12)::  q_string
+
+    integer i
+
+    q_string=adjustr('"'//trim(tname)//'"')
+
+  end function wrap_timer_name
+  
+
+  function convert_real_array(q,n) result(q_string)
+    integer,intent(in) :: n     ! length of array
+    real(pfdp) , intent(in) :: q(n)  ! real array
+    character(len=128)::  q_string
+
+    character(len=128)::  f_string  !  format string
+    integer i
+    write(f_string,"(*(e15.6,:,','))") q
+    q_string=adjustl('['//trim(f_string)//']')
+
+  end function convert_real_array
+  
   
 end module pf_mod_utils

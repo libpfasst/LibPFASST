@@ -38,7 +38,7 @@ contains
        if(flags(1)==0) which = 0   ! sweep forward and backward simultaneously on two components, communication only forwards
     end if
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    call start_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
 
@@ -195,7 +195,7 @@ contains
 
   end if
 
-    call end_timer(pf, TPREDICTOR)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
@@ -330,8 +330,7 @@ contains
 
     logical :: converged, qbroadcast
     logical :: did_post_step_hook
-
-    call start_timer(pf, TTOTAL)
+    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
 
     which = 1
     if (present(flags)) which = flags
@@ -384,7 +383,7 @@ contains
     !pf%state%pfblock = k ! has to be set in pf_optimization_flex to current step
                           ! this is relevant for save_residuals
     do j = 1, pf%niters
-      call start_timer(pf, TITERATION)
+      if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
 
       pf%state%iter = j
@@ -396,19 +395,22 @@ contains
       !  Check for convergence
       call pf_check_convergence_oc(pf, pf%state%finest_level, send_tag=1111*k+j, flags=dir)
 
+      if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_POST_ITERATION)
-      call end_timer(pf, TITERATION)
 
       !  If we are converged, exit block
-      if (pf%state%status == PF_STATUS_CONVERGED)  exit
+      if (pf%state%status == PF_STATUS_CONVERGED) then
+         call call_hooks(pf, -1, PF_POST_CONVERGENCE)
+         exit
+      end if
+      
     end do  !  Loop over the iteration in this block
-    call call_hooks(pf, -1, PF_POST_CONVERGENCE)
     pf%state%itcnt = pf%state%itcnt + pf%state%iter
-    call call_hooks(pf, -1, PF_POST_STEP)
+    call call_hooks(pf, -1, PF_POST_BLOCK)
 
     
-!    call pf_dump_results(pf)
-    call end_timer(pf, TTOTAL)
+    !  call pf_dump_results(pf)
+    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
   end subroutine pf_pfasst_block_oc
 
   subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c,level_index_f, flags)
