@@ -183,11 +183,12 @@ contains
                 call pf_set_iter(pf,j)                 
                 exit
              end if
+
           end do  !  Loop over j, the iterations in this bloc
+
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
-    end if
-    
+
     end do !  Loop over the blocks
     call call_hooks(pf, -1, PF_POST_ALL)
 
@@ -314,6 +315,9 @@ contains
 
     !  Complete the jump at the end
     call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
+
+    ! Put the coarse sweeper answer in coarse q_end for diagnositics
+    call c_lev%qend%copy(c_lev%Q(1))
 
     !  Save jumps
     c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
