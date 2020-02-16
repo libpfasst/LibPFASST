@@ -360,33 +360,33 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
 <polygon fill="none" stroke="#000000" points="109,-66 0,-66 0,-42 109,-42 109,-66"/>
 <text text-anchor="middle" x="54.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_parareal_v_cycle</text>
 </g>
-<!-- proc~pf_send -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_node2" class="node">
-<title>proc~pf_send</title>
-<g id="a_proc~~pf_parareal_v_cycle~~CallsGraph_node2"><a xlink:href=".././proc/pf_send.html" xlink:title="pf_send">
-<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-66 153.5,-66 153.5,-42 207.5,-42 207.5,-66"/>
-<text text-anchor="middle" x="180.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge1" class="edge">
-<title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send</title>
-<path fill="none" stroke="#000000" d="M109.0326,-54C120.5055,-54 132.36,-54 143.0367,-54"/>
-<polygon fill="#000000" stroke="#000000" points="143.263,-57.5001 153.2629,-54 143.2629,-50.5001 143.263,-57.5001"/>
-</g>
 <!-- proc~pf_recv -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_node3" class="node">
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_node2" class="node">
 <title>proc~pf_recv</title>
-<g id="a_proc~~pf_parareal_v_cycle~~CallsGraph_node3"><a xlink:href=".././proc/pf_recv.html" xlink:title="pf_recv">
-<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-108 153.5,-108 153.5,-84 207.5,-84 207.5,-108"/>
-<text text-anchor="middle" x="180.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_recv</text>
+<g id="a_proc~~pf_parareal_v_cycle~~CallsGraph_node2"><a xlink:href=".././proc/pf_recv.html" xlink:title="pf_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-66 153.5,-66 153.5,-42 207.5,-42 207.5,-66"/>
+<text text-anchor="middle" x="180.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_recv</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_recv -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge2" class="edge">
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge1" class="edge">
 <title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_recv</title>
+<path fill="none" stroke="#000000" d="M109.0326,-54C120.5055,-54 132.36,-54 143.0367,-54"/>
+<polygon fill="#000000" stroke="#000000" points="143.263,-57.5001 153.2629,-54 143.2629,-50.5001 143.263,-57.5001"/>
+</g>
+<!-- proc~pf_send -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_node3" class="node">
+<title>proc~pf_send</title>
+<g id="a_proc~~pf_parareal_v_cycle~~CallsGraph_node3"><a xlink:href=".././proc/pf_send.html" xlink:title="pf_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="207.5,-108 153.5,-108 153.5,-84 207.5,-84 207.5,-108"/>
+<text text-anchor="middle" x="180.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge2" class="edge">
+<title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send</title>
 <path fill="none" stroke="#000000" d="M90.6065,-66.0355C107.1072,-71.5357 126.638,-78.046 143.2724,-83.5908"/>
 <polygon fill="#000000" stroke="#000000" points="142.6087,-87.0588 153.2023,-86.9008 144.8223,-80.418 142.6087,-87.0588"/>
 </g>
@@ -411,9 +411,9 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
 <polygon fill="#777777" stroke="#777777" points="316,-129 252,-129 252,-105 316,-105 316,-129"/>
 <text text-anchor="middle" x="284" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
 </g>
-<!-- proc~pf_send&#45;&gt;start_timer -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge6" class="edge">
-<title>proc~pf_send&#45;&gt;start_timer</title>
+<!-- proc~pf_recv&#45;&gt;start_timer -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge4" class="edge">
+<title>proc~pf_recv&#45;&gt;start_timer</title>
 <path fill="none" stroke="#000000" d="M201.1887,-66.1485C206.0573,-69.0322 211.2201,-72.1104 216,-75 229.1531,-82.9513 243.6544,-91.8848 255.8748,-99.4619"/>
 <polygon fill="#000000" stroke="#000000" points="254.3737,-102.6497 264.7151,-104.953 258.0672,-96.7034 254.3737,-102.6497"/>
 </g>
@@ -423,9 +423,9 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
 <polygon fill="#777777" stroke="#777777" points="311,-87 257,-87 257,-63 311,-63 311,-87"/>
 <text text-anchor="middle" x="284" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
 </g>
-<!-- proc~pf_send&#45;&gt;pf_stop -->
+<!-- proc~pf_recv&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge5" class="edge">
-<title>proc~pf_send&#45;&gt;pf_stop</title>
+<title>proc~pf_recv&#45;&gt;pf_stop</title>
 <path fill="none" stroke="#000000" d="M207.6934,-59.5175C219.6973,-61.9531 233.996,-64.8543 246.9535,-67.4833"/>
 <polygon fill="#000000" stroke="#000000" points="246.4919,-70.9609 256.9882,-69.5193 247.8839,-64.1007 246.4919,-70.9609"/>
 </g>
@@ -435,27 +435,27 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
 <polygon fill="#777777" stroke="#777777" points="314.5,-45 253.5,-45 253.5,-21 314.5,-21 314.5,-45"/>
 <text text-anchor="middle" x="284" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
 </g>
-<!-- proc~pf_send&#45;&gt;end_timer -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge4" class="edge">
-<title>proc~pf_send&#45;&gt;end_timer</title>
+<!-- proc~pf_recv&#45;&gt;end_timer -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge6" class="edge">
+<title>proc~pf_recv&#45;&gt;end_timer</title>
 <path fill="none" stroke="#000000" d="M207.6934,-48.4825C218.6426,-46.2609 231.5011,-43.652 243.5095,-41.2155"/>
 <polygon fill="#000000" stroke="#000000" points="244.2318,-44.6403 253.3361,-39.2217 242.8398,-37.7801 244.2318,-44.6403"/>
 </g>
-<!-- proc~pf_recv&#45;&gt;start_timer -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge9" class="edge">
-<title>proc~pf_recv&#45;&gt;start_timer</title>
+<!-- proc~pf_send&#45;&gt;start_timer -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge7" class="edge">
+<title>proc~pf_send&#45;&gt;start_timer</title>
 <path fill="none" stroke="#000000" d="M207.6934,-101.5175C218.1625,-103.6417 230.3772,-106.12 241.9253,-108.4631"/>
 <polygon fill="#000000" stroke="#000000" points="241.3451,-111.9166 251.8414,-110.4751 242.7371,-105.0564 241.3451,-111.9166"/>
 </g>
-<!-- proc~pf_recv&#45;&gt;pf_stop -->
+<!-- proc~pf_send&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge8" class="edge">
-<title>proc~pf_recv&#45;&gt;pf_stop</title>
+<title>proc~pf_send&#45;&gt;pf_stop</title>
 <path fill="none" stroke="#000000" d="M207.6934,-90.4825C219.6973,-88.0469 233.996,-85.1457 246.9535,-82.5167"/>
 <polygon fill="#000000" stroke="#000000" points="247.8839,-85.8993 256.9882,-80.4807 246.4919,-79.0391 247.8839,-85.8993"/>
 </g>
-<!-- proc~pf_recv&#45;&gt;end_timer -->
-<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge7" class="edge">
-<title>proc~pf_recv&#45;&gt;end_timer</title>
+<!-- proc~pf_send&#45;&gt;end_timer -->
+<g id="proc~~pf_parareal_v_cycle~~CallsGraph_edge9" class="edge">
+<title>proc~pf_send&#45;&gt;end_timer</title>
 <path fill="none" stroke="#000000" d="M201.1887,-83.8515C206.0573,-80.9678 211.2201,-77.8896 216,-75 229.1531,-67.0487 243.6544,-58.1152 255.8748,-50.5381"/>
 <polygon fill="#000000" stroke="#000000" points="258.0672,-53.2966 264.7151,-45.047 254.3737,-47.3503 258.0672,-53.2966"/>
 </g>
@@ -767,7 +767,7 @@ public subroutine pf_parareal_v_cycle(pf, iteration, t0, dt, level_index_c, leve
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
                                           </p></div>
         <div class="col-xs-6 col-md-4 col-md-push-4">
           <p class="text-right">

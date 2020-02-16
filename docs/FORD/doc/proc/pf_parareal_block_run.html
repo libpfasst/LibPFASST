@@ -344,327 +344,327 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
  -->
 <!-- Title: proc~~pf_parareal_block_run~~CallsGraph Pages: 1 -->
 <svg id="procpf_parareal_block_runCallsGraph" width="641pt" height="395pt"
- viewBox="0.00 0.00 641.00 394.59" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~pf_parareal_block_run~~CallsGraph" class="graph" transform="scale(.9816 .9816) rotate(0) translate(4 397.9724)">
+ viewBox="0.00 0.00 641.00 394.54" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_parareal_block_run~~CallsGraph" class="graph" transform="scale(.9816 .9816) rotate(0) translate(4 397.9225)">
 <title>proc~~pf_parareal_block_run~~CallsGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-397.9724 649,-397.9724 649,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-397.9225 649,-397.9225 649,4 -4,4"/>
 <!-- proc~pf_parareal_block_run -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_node1" class="node">
 <title>proc~pf_parareal_block_run</title>
-<polygon fill="none" stroke="#000000" points="120,-274 0,-274 0,-250 120,-250 120,-274"/>
-<text text-anchor="middle" x="60" y="-259.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_parareal_block_run</text>
+<polygon fill="none" stroke="#000000" points="120,-143.9225 0,-143.9225 0,-119.9225 120,-119.9225 120,-143.9225"/>
+<text text-anchor="middle" x="60" y="-129.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_parareal_block_run</text>
 </g>
-<!-- proc~pf_parareal_predictor -->
+<!-- proc~pf_parareal_v_cycle -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_node2" class="node">
-<title>proc~pf_parareal_predictor</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node2"><a xlink:href=".././proc/pf_parareal_predictor.html" xlink:title="pf_parareal_predictor">
-<polygon fill="#d9534f" stroke="#d9534f" points="290.5,-353 175.5,-353 175.5,-329 290.5,-329 290.5,-353"/>
-<text text-anchor="middle" x="233" y="-338.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_predictor</text>
+<title>proc~pf_parareal_v_cycle</title>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node2"><a xlink:href=".././proc/pf_parareal_v_cycle.html" xlink:title="pf_parareal_v_cycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="287.5,-288.9225 178.5,-288.9225 178.5,-264.9225 287.5,-264.9225 287.5,-288.9225"/>
+<text text-anchor="middle" x="233" y="-274.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_v_cycle</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_predictor -->
+<!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge1" class="edge">
-<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_predictor</title>
-<path fill="none" stroke="#000000" d="M79.3325,-274.0218C98.3569,-285.5249 128.4738,-302.8709 156,-315 164.7204,-318.8425 174.199,-322.4673 183.4287,-325.7216"/>
-<polygon fill="#000000" stroke="#000000" points="182.3201,-329.0415 192.9147,-328.9726 184.5895,-322.4196 182.3201,-329.0415"/>
+<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle</title>
+<path fill="none" stroke="#000000" d="M74.4523,-144.0357C104.5249,-169.241 174.0351,-227.501 210.2037,-257.8158"/>
+<polygon fill="#000000" stroke="#000000" points="208.3098,-260.7952 218.2221,-264.5364 212.8063,-255.4303 208.3098,-260.7952"/>
 </g>
 <!-- proc~end_timer -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_node3" class="node">
 <title>proc~end_timer</title>
 <g id="a_proc~~pf_parareal_block_run~~CallsGraph_node3"><a xlink:href=".././proc/end_timer.html" xlink:title="end_timer">
-<polygon fill="#d9534f" stroke="#d9534f" points="543.5,-332 482.5,-332 482.5,-308 543.5,-308 543.5,-332"/>
-<text text-anchor="middle" x="513" y="-317.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="543.5,-85.9225 482.5,-85.9225 482.5,-61.9225 543.5,-61.9225 543.5,-85.9225"/>
+<text text-anchor="middle" x="513" y="-71.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge2" class="edge">
-<title>proc~pf_parareal_block_run&#45;&gt;proc~end_timer</title>
-<path fill="none" stroke="#000000" d="M120.1317,-256.4309C197.1343,-251.2145 333.8964,-248.447 445,-281 460.4489,-285.5265 476.1394,-294.1966 488.5497,-302.2147"/>
-<polygon fill="#000000" stroke="#000000" points="486.7052,-305.1921 496.9563,-307.8693 490.6122,-299.3838 486.7052,-305.1921"/>
-</g>
-<!-- proc~call_hooks -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node4" class="node">
-<title>proc~call_hooks</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node4"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
-<polygon fill="#d9534f" stroke="#d9534f" points="427,-314 364,-314 364,-290 427,-290 427,-314"/>
-<text text-anchor="middle" x="395.5" y="-299.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">call_hooks</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_block_run&#45;&gt;proc~call_hooks -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge3" class="edge">
-<title>proc~pf_parareal_block_run&#45;&gt;proc~call_hooks</title>
-<path fill="none" stroke="#000000" d="M120.1259,-271.1137C132.0049,-272.8168 144.3876,-274.5235 156,-276 225.1904,-284.7978 305.8682,-293.1665 353.7063,-297.9319"/>
-<polygon fill="#000000" stroke="#000000" points="353.3923,-301.4178 363.6888,-298.9214 354.0829,-294.4519 353.3923,-301.4178"/>
+<title>proc~pf_parareal_block_run&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M120.1317,-137.4916C197.1343,-142.708 333.8964,-145.4755 445,-112.9225 460.4489,-108.396 476.1394,-99.7259 488.5497,-91.7078"/>
+<polygon fill="#000000" stroke="#000000" points="490.6122,-94.5387 496.9563,-86.0532 486.7052,-88.7304 490.6122,-94.5387"/>
 </g>
 <!-- proc~start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node5" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node4" class="node">
 <title>proc~start_timer</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node5"><a xlink:href=".././proc/start_timer.html" xlink:title="start_timer">
-<polygon fill="#d9534f" stroke="#d9534f" points="545,-383 481,-383 481,-359 545,-359 545,-383"/>
-<text text-anchor="middle" x="513" y="-368.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node4"><a xlink:href=".././proc/start_timer.html" xlink:title="start_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="545,-34.9225 481,-34.9225 481,-10.9225 545,-10.9225 545,-34.9225"/>
+<text text-anchor="middle" x="513" y="-20.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge4" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge2" class="edge">
 <title>proc~pf_parareal_block_run&#45;&gt;proc~start_timer</title>
-<path fill="none" stroke="#000000" d="M67.1219,-274.0196C80.9918,-296.1357 113.9837,-342.7714 156,-362 260.5648,-409.8535 401.0124,-393.0893 470.4569,-380.2216"/>
-<polygon fill="#000000" stroke="#000000" points="471.4146,-383.6018 480.5758,-378.28 470.0954,-376.7272 471.4146,-383.6018"/>
-</g>
-<!-- proc~pf_parareal_v_cycle -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node6" class="node">
-<title>proc~pf_parareal_v_cycle</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node6"><a xlink:href=".././proc/pf_parareal_v_cycle.html" xlink:title="pf_parareal_v_cycle">
-<polygon fill="#d9534f" stroke="#d9534f" points="287.5,-129 178.5,-129 178.5,-105 287.5,-105 287.5,-129"/>
-<text text-anchor="middle" x="233" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_v_cycle</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge5" class="edge">
-<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle</title>
-<path fill="none" stroke="#000000" d="M74.4523,-249.8868C104.5249,-224.6815 174.0351,-166.4215 210.2037,-136.1067"/>
-<polygon fill="#000000" stroke="#000000" points="212.8063,-138.4922 218.2221,-129.3861 208.3098,-133.1273 212.8063,-138.4922"/>
+<path fill="none" stroke="#000000" d="M67.0427,-119.6809C80.7805,-97.174 113.561,-49.8004 156,-30.9225 261.0615,15.8114 401.2861,-.975 470.57,-13.7699"/>
+<polygon fill="#000000" stroke="#000000" points="470.1855,-17.2597 480.6648,-15.6997 471.4999,-10.3842 470.1855,-17.2597"/>
 </g>
 <!-- proc~pf_check_convergence_block~2 -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node7" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node5" class="node">
 <title>proc~pf_check_convergence_block~2</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node7"><a xlink:href=".././proc/pf_check_convergence_block%7E2.html" xlink:title="pf_check_convergence_block">
-<polygon fill="#d9534f" stroke="#d9534f" points="310,-234 156,-234 156,-210 310,-210 310,-234"/>
-<text text-anchor="middle" x="233" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_check_convergence_block</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node5"><a xlink:href=".././proc/pf_check_convergence_block%7E2.html" xlink:title="pf_check_convergence_block">
+<polygon fill="#d9534f" stroke="#d9534f" points="310,-183.9225 156,-183.9225 156,-159.9225 310,-159.9225 310,-183.9225"/>
+<text text-anchor="middle" x="233" y="-169.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_check_convergence_block</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_check_convergence_block~2 -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge6" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge4" class="edge">
 <title>proc~pf_parareal_block_run&#45;&gt;proc~pf_check_convergence_block~2</title>
-<path fill="none" stroke="#000000" d="M111.9057,-249.9987C130.4669,-245.7071 151.5724,-240.8272 170.9062,-236.3569"/>
-<polygon fill="#000000" stroke="#000000" points="171.8777,-239.7247 180.8322,-234.0619 170.3007,-232.9047 171.8777,-239.7247"/>
+<path fill="none" stroke="#000000" d="M111.9057,-143.9238C130.4669,-148.2154 151.5724,-153.0953 170.9062,-157.5656"/>
+<polygon fill="#000000" stroke="#000000" points="170.3007,-161.0178 180.8322,-159.8606 171.8777,-154.1978 170.3007,-161.0178"/>
+</g>
+<!-- proc~call_hooks -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node6" class="node">
+<title>proc~call_hooks</title>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node6"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
+<polygon fill="#d9534f" stroke="#d9534f" points="427,-103.9225 364,-103.9225 364,-79.9225 427,-79.9225 427,-103.9225"/>
+<text text-anchor="middle" x="395.5" y="-89.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">call_hooks</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_parareal_block_run&#45;&gt;proc~call_hooks -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge5" class="edge">
+<title>proc~pf_parareal_block_run&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M120.1259,-122.8088C132.0049,-121.1057 144.3876,-119.3991 156,-117.9225 225.1904,-109.1247 305.8682,-100.756 353.7063,-95.9906"/>
+<polygon fill="#000000" stroke="#000000" points="354.0829,-99.4706 363.6888,-95.0011 353.3923,-92.5047 354.0829,-99.4706"/>
+</g>
+<!-- proc~pf_parareal_predictor -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node7" class="node">
+<title>proc~pf_parareal_predictor</title>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node7"><a xlink:href=".././proc/pf_parareal_predictor.html" xlink:title="pf_parareal_predictor">
+<polygon fill="#d9534f" stroke="#d9534f" points="290.5,-63.9225 175.5,-63.9225 175.5,-39.9225 290.5,-39.9225 290.5,-63.9225"/>
+<text text-anchor="middle" x="233" y="-49.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_predictor</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_predictor -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge6" class="edge">
+<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_predictor</title>
+<path fill="none" stroke="#000000" d="M79.7266,-119.7527C98.7925,-108.3009 128.7185,-91.1334 156,-78.9225 165.2126,-74.799 175.2617,-70.8794 184.968,-67.3695"/>
+<polygon fill="#000000" stroke="#000000" points="186.2487,-70.6292 194.5164,-64.0038 183.9216,-64.0273 186.2487,-70.6292"/>
 </g>
 <!-- proc~pf_broadcast -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_node8" class="node">
 <title>proc~pf_broadcast</title>
 <g id="a_proc~~pf_parareal_block_run~~CallsGraph_node8"><a xlink:href=".././proc/pf_broadcast.html" xlink:title="pf_broadcast">
-<polygon fill="#d9534f" stroke="#d9534f" points="433,-24 358,-24 358,0 433,0 433,-24"/>
-<text text-anchor="middle" x="395.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_broadcast</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="433,-393.9225 358,-393.9225 358,-369.9225 433,-369.9225 433,-393.9225"/>
+<text text-anchor="middle" x="395.5" y="-379.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_broadcast</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_broadcast -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge7" class="edge">
 <title>proc~pf_parareal_block_run&#45;&gt;proc~pf_broadcast</title>
-<path fill="none" stroke="#000000" d="M63.8004,-249.5984C73.7934,-219.0144 103.703,-139.33 156,-96 212.1438,-49.4828 295.7684,-28.0057 347.8928,-18.6328"/>
-<polygon fill="#000000" stroke="#000000" points="348.6178,-22.0596 357.8802,-16.9158 347.4317,-15.1608 348.6178,-22.0596"/>
-</g>
-<!-- proc~pf_parareal_predictor&#45;&gt;proc~end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge8" class="edge">
-<title>proc~pf_parareal_predictor&#45;&gt;proc~end_timer</title>
-<path fill="none" stroke="#000000" d="M290.6767,-336.6742C344.817,-332.6137 424.4322,-326.6426 472.2485,-323.0564"/>
-<polygon fill="#000000" stroke="#000000" points="472.5276,-326.5454 482.2378,-322.3072 472.004,-319.565 472.5276,-326.5454"/>
-</g>
-<!-- proc~pf_parareal_predictor&#45;&gt;proc~call_hooks -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge9" class="edge">
-<title>proc~pf_parareal_predictor&#45;&gt;proc~call_hooks</title>
-<path fill="none" stroke="#000000" d="M283.0813,-328.9805C305.7837,-323.5319 332.3127,-317.1649 353.8969,-311.9848"/>
-<polygon fill="#000000" stroke="#000000" points="354.8378,-315.3584 363.7448,-309.6212 353.2041,-308.5517 354.8378,-315.3584"/>
-</g>
-<!-- proc~pf_parareal_predictor&#45;&gt;proc~start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge10" class="edge">
-<title>proc~pf_parareal_predictor&#45;&gt;proc~start_timer</title>
-<path fill="none" stroke="#000000" d="M290.6767,-347.1796C344.2204,-352.9165 422.6807,-361.3229 470.6563,-366.4632"/>
-<polygon fill="#000000" stroke="#000000" points="470.3867,-369.9542 480.7026,-367.5396 471.1324,-362.9941 470.3867,-369.9542"/>
-</g>
-<!-- mpi_wtime -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node14" class="node">
-<title>mpi_wtime</title>
-<polygon fill="#777777" stroke="#777777" points="645,-357 581,-357 581,-333 645,-333 645,-357"/>
-<text text-anchor="middle" x="613" y="-342.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mpi_wtime</text>
-</g>
-<!-- proc~end_timer&#45;&gt;mpi_wtime -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge11" class="edge">
-<title>proc~end_timer&#45;&gt;mpi_wtime</title>
-<path fill="none" stroke="#000000" d="M543.5467,-327.6367C552.2359,-329.809 561.8538,-332.2135 571.093,-334.5233"/>
-<polygon fill="#000000" stroke="#000000" points="570.3577,-337.9471 580.908,-336.977 572.0555,-331.1561 570.3577,-337.9471"/>
-</g>
-<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge12" class="edge">
-<title>proc~call_hooks&#45;&gt;proc~end_timer</title>
-<path fill="none" stroke="#000000" d="M427.2972,-306.8711C441.213,-309.0028 457.7047,-311.5292 472.4865,-313.7937"/>
-<polygon fill="#000000" stroke="#000000" points="471.9796,-317.2568 482.3943,-315.3115 473.0396,-310.3375 471.9796,-317.2568"/>
-</g>
-<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge13" class="edge">
-<title>proc~call_hooks&#45;&gt;proc~start_timer</title>
-<path fill="none" stroke="#000000" d="M415.9669,-314.0189C434.6387,-324.9836 462.4482,-341.3143 483.5152,-353.6855"/>
-<polygon fill="#000000" stroke="#000000" points="481.9779,-356.8416 492.3734,-358.8873 485.5226,-350.8054 481.9779,-356.8416"/>
-</g>
-<!-- proc~start_timer&#45;&gt;mpi_wtime -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge14" class="edge">
-<title>proc~start_timer&#45;&gt;mpi_wtime</title>
-<path fill="none" stroke="#000000" d="M545.1911,-362.6303C553.3986,-360.4964 562.3426,-358.1709 570.9626,-355.9297"/>
-<polygon fill="#000000" stroke="#000000" points="572.0718,-359.2578 580.8692,-353.354 570.3103,-352.483 572.0718,-359.2578"/>
+<path fill="none" stroke="#000000" d="M63.8004,-144.3241C73.7934,-174.9081 103.703,-254.5925 156,-297.9225 212.1438,-344.4397 295.7684,-365.9168 347.8928,-375.2897"/>
+<polygon fill="#000000" stroke="#000000" points="347.4317,-378.7617 357.8802,-377.0067 348.6178,-371.8629 347.4317,-378.7617"/>
 </g>
 <!-- proc~pf_send -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node15" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node11" class="node">
 <title>proc~pf_send</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node15"><a xlink:href=".././proc/pf_send.html" xlink:title="pf_send">
-<polygon fill="#d9534f" stroke="#d9534f" points="422.5,-108 368.5,-108 368.5,-84 422.5,-84 422.5,-108"/>
-<text text-anchor="middle" x="395.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node11"><a xlink:href=".././proc/pf_send.html" xlink:title="pf_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="422.5,-267.9225 368.5,-267.9225 368.5,-243.9225 422.5,-243.9225 422.5,-267.9225"/>
+<text text-anchor="middle" x="395.5" y="-253.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge15" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge9" class="edge">
 <title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_send</title>
-<path fill="none" stroke="#000000" d="M287.5622,-109.9489C310.752,-106.9521 337.2046,-103.5336 358.1188,-100.8308"/>
-<polygon fill="#000000" stroke="#000000" points="358.7335,-104.2806 368.2024,-99.5277 357.8363,-97.3383 358.7335,-104.2806"/>
+<path fill="none" stroke="#000000" d="M287.5622,-269.8714C310.752,-266.8746 337.2046,-263.4561 358.1188,-260.7533"/>
+<polygon fill="#000000" stroke="#000000" points="358.7335,-264.2031 368.2024,-259.4502 357.8363,-257.2608 358.7335,-264.2031"/>
 </g>
 <!-- proc~pf_recv -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node16" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node14" class="node">
 <title>proc~pf_recv</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node16"><a xlink:href=".././proc/pf_recv.html" xlink:title="pf_recv">
-<polygon fill="#d9534f" stroke="#d9534f" points="422.5,-66 368.5,-66 368.5,-42 422.5,-42 422.5,-66"/>
-<text text-anchor="middle" x="395.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_recv</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node14"><a xlink:href=".././proc/pf_recv.html" xlink:title="pf_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="422.5,-351.9225 368.5,-351.9225 368.5,-327.9225 422.5,-327.9225 422.5,-351.9225"/>
+<text text-anchor="middle" x="395.5" y="-337.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_recv</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_recv -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge16" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge8" class="edge">
 <title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_recv</title>
-<path fill="none" stroke="#000000" d="M264.3316,-104.853C291.3093,-94.3939 330.2747,-79.2874 358.7248,-68.2574"/>
-<polygon fill="#000000" stroke="#000000" points="360.254,-71.4185 368.3126,-64.5403 357.7236,-64.8918 360.254,-71.4185"/>
+<path fill="none" stroke="#000000" d="M264.3316,-289.0695C291.3093,-299.5286 330.2747,-314.6351 358.7248,-325.6651"/>
+<polygon fill="#000000" stroke="#000000" points="357.7236,-329.0307 368.3126,-329.3822 360.254,-322.504 357.7236,-329.0307"/>
 </g>
 <!-- proc~pf_set_resid -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_node17" class="node">
 <title>proc~pf_set_resid</title>
 <g id="a_proc~~pf_parareal_block_run~~CallsGraph_node17"><a xlink:href=".././proc/pf_set_resid.html" xlink:title="pf_set_resid">
-<polygon fill="#d9534f" stroke="#d9534f" points="431,-150 360,-150 360,-126 431,-126 431,-150"/>
-<text text-anchor="middle" x="395.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_set_resid</text>
+<polygon fill="#d9534f" stroke="#d9534f" points="431,-309.9225 360,-309.9225 360,-285.9225 431,-285.9225 431,-309.9225"/>
+<text text-anchor="middle" x="395.5" y="-295.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_set_resid</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge17" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge10" class="edge">
 <title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid</title>
-<path fill="none" stroke="#000000" d="M287.5622,-124.0511C307.7266,-126.657 330.358,-129.5816 349.67,-132.0773"/>
-<polygon fill="#000000" stroke="#000000" points="349.361,-135.5664 359.7271,-133.377 350.2582,-128.6242 349.361,-135.5664"/>
+<path fill="none" stroke="#000000" d="M287.5622,-283.9736C307.7266,-286.5795 330.358,-289.5042 349.67,-291.9999"/>
+<polygon fill="#000000" stroke="#000000" points="349.361,-295.4889 359.7271,-293.2996 350.2582,-288.5467 349.361,-295.4889"/>
+</g>
+<!-- mpi_wtime -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node15" class="node">
+<title>mpi_wtime</title>
+<polygon fill="#777777" stroke="#777777" points="645,-55.9225 581,-55.9225 581,-31.9225 645,-31.9225 645,-55.9225"/>
+<text text-anchor="middle" x="613" y="-41.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mpi_wtime</text>
+</g>
+<!-- proc~end_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge11" class="edge">
+<title>proc~end_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M543.5467,-64.7585C552.2359,-62.1517 561.8538,-59.2664 571.093,-56.4946"/>
+<polygon fill="#000000" stroke="#000000" points="572.3355,-59.776 580.908,-53.5501 570.324,-53.0713 572.3355,-59.776"/>
+</g>
+<!-- proc~start_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge12" class="edge">
+<title>proc~start_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M545.1911,-29.6826C553.3986,-31.4062 562.3426,-33.2845 570.9626,-35.0946"/>
+<polygon fill="#000000" stroke="#000000" points="570.3634,-38.5451 580.8692,-37.175 571.802,-31.6945 570.3634,-38.5451"/>
 </g>
 <!-- proc~pf_check_convergence_block~2&#45;&gt;proc~call_hooks -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge19" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge15" class="edge">
 <title>proc~pf_check_convergence_block~2&#45;&gt;proc~call_hooks</title>
-<path fill="none" stroke="#000000" d="M257.6803,-234.1503C285.5205,-247.8562 330.9521,-270.2226 361.9863,-285.5009"/>
-<polygon fill="#000000" stroke="#000000" points="360.6023,-288.7207 371.1199,-289.9975 363.6941,-282.4405 360.6023,-288.7207"/>
+<path fill="none" stroke="#000000" d="M257.6803,-159.7722C285.5205,-146.0663 330.9521,-123.6999 361.9863,-108.4216"/>
+<polygon fill="#000000" stroke="#000000" points="363.6941,-111.482 371.1199,-103.925 360.6023,-105.2018 363.6941,-111.482"/>
 </g>
 <!-- proc~pf_check_residual~2 -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node10" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node9" class="node">
 <title>proc~pf_check_residual~2</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node10"><a xlink:href=".././proc/pf_check_residual%7E2.html" xlink:title="pf_check_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="445,-192 346,-192 346,-168 445,-168 445,-192"/>
-<text text-anchor="middle" x="395.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_check_residual</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node9"><a xlink:href=".././proc/pf_check_residual%7E2.html" xlink:title="pf_check_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="445,-225.9225 346,-225.9225 346,-201.9225 445,-201.9225 445,-225.9225"/>
+<text text-anchor="middle" x="395.5" y="-211.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_check_residual</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_check_convergence_block~2&#45;&gt;proc~pf_check_residual~2 -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge20" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge13" class="edge">
 <title>proc~pf_check_convergence_block~2&#45;&gt;proc~pf_check_residual~2</title>
-<path fill="none" stroke="#000000" d="M279.566,-209.9645C298.0946,-205.1756 319.5857,-199.6209 338.9943,-194.6045"/>
-<polygon fill="#000000" stroke="#000000" points="340.1212,-197.9284 348.9272,-192.0373 338.3695,-191.1511 340.1212,-197.9284"/>
+<path fill="none" stroke="#000000" d="M279.566,-183.958C298.0946,-188.7469 319.5857,-194.3016 338.9943,-199.318"/>
+<polygon fill="#000000" stroke="#000000" points="338.3695,-202.7714 348.9272,-201.8852 340.1212,-195.9941 338.3695,-202.7714"/>
 </g>
 <!-- proc~pf_send_status -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node11" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node10" class="node">
 <title>proc~pf_send_status</title>
-<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node11"><a xlink:href=".././proc/pf_send_status.html" xlink:title="pf_send_status">
-<polygon fill="#d9534f" stroke="#d9534f" points="438,-234 353,-234 353,-210 438,-210 438,-234"/>
-<text text-anchor="middle" x="395.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send_status</text>
+<g id="a_proc~~pf_parareal_block_run~~CallsGraph_node10"><a xlink:href=".././proc/pf_send_status.html" xlink:title="pf_send_status">
+<polygon fill="#d9534f" stroke="#d9534f" points="438,-183.9225 353,-183.9225 353,-159.9225 438,-159.9225 438,-183.9225"/>
+<text text-anchor="middle" x="395.5" y="-169.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_send_status</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_check_convergence_block~2&#45;&gt;proc~pf_send_status -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge18" class="edge">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge14" class="edge">
 <title>proc~pf_check_convergence_block~2&#45;&gt;proc~pf_send_status</title>
-<path fill="none" stroke="#000000" d="M310.4426,-222C321.3557,-222 332.3604,-222 342.6672,-222"/>
-<polygon fill="#000000" stroke="#000000" points="342.7121,-225.5001 352.7121,-222 342.712,-218.5001 342.7121,-225.5001"/>
+<path fill="none" stroke="#000000" d="M310.4426,-171.9225C321.3557,-171.9225 332.3604,-171.9225 342.6672,-171.9225"/>
+<polygon fill="#000000" stroke="#000000" points="342.7121,-175.4226 352.7121,-171.9225 342.712,-168.4226 342.7121,-175.4226"/>
 </g>
-<!-- start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node9" class="node">
-<title>start_timer</title>
-<polygon fill="#777777" stroke="#777777" points="545,-66 481,-66 481,-42 545,-42 545,-66"/>
-<text text-anchor="middle" x="513" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
+<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge16" class="edge">
+<title>proc~call_hooks&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M427.2972,-87.0514C441.213,-84.9197 457.7047,-82.3933 472.4865,-80.1288"/>
+<polygon fill="#000000" stroke="#000000" points="473.0396,-83.585 482.3943,-78.611 471.9796,-76.6657 473.0396,-83.585"/>
 </g>
-<!-- proc~pf_broadcast&#45;&gt;start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge23" class="edge">
-<title>proc~pf_broadcast&#45;&gt;start_timer</title>
-<path fill="none" stroke="#000000" d="M429.1708,-24.0355C442.2675,-28.7169 457.4111,-34.1299 471.1941,-39.0566"/>
-<polygon fill="#000000" stroke="#000000" points="470.3465,-42.4705 480.9411,-42.5407 472.7027,-35.8789 470.3465,-42.4705"/>
+<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge17" class="edge">
+<title>proc~call_hooks&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M415.9669,-79.9036C434.6387,-68.9389 462.4482,-52.6082 483.5152,-40.237"/>
+<polygon fill="#000000" stroke="#000000" points="485.5226,-43.1171 492.3734,-35.0352 481.9779,-37.0809 485.5226,-43.1171"/>
 </g>
-<!-- end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node12" class="node">
-<title>end_timer</title>
-<polygon fill="#777777" stroke="#777777" points="543.5,-24 482.5,-24 482.5,0 543.5,0 543.5,-24"/>
-<text text-anchor="middle" x="513" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
+<!-- proc~pf_parareal_predictor&#45;&gt;proc~end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge18" class="edge">
+<title>proc~pf_parareal_predictor&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M290.6767,-56.4542C344.817,-60.7081 424.4322,-66.9636 472.2485,-70.7206"/>
+<polygon fill="#000000" stroke="#000000" points="471.9944,-74.2113 482.2378,-71.5055 472.5427,-67.2328 471.9944,-74.2113"/>
 </g>
-<!-- proc~pf_broadcast&#45;&gt;end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge21" class="edge">
-<title>proc~pf_broadcast&#45;&gt;end_timer</title>
-<path fill="none" stroke="#000000" d="M433.0008,-12C445.3839,-12 459.2226,-12 471.8627,-12"/>
-<polygon fill="#000000" stroke="#000000" points="472.1403,-15.5001 482.1403,-12 472.1402,-8.5001 472.1403,-15.5001"/>
+<!-- proc~pf_parareal_predictor&#45;&gt;proc~start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge19" class="edge">
+<title>proc~pf_parareal_predictor&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M290.6767,-45.9488C344.2204,-40.4033 422.6807,-32.277 470.6563,-27.3081"/>
+<polygon fill="#000000" stroke="#000000" points="471.1165,-30.7793 480.7026,-26.2676 470.3952,-23.8165 471.1165,-30.7793"/>
+</g>
+<!-- proc~pf_parareal_predictor&#45;&gt;proc~call_hooks -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge20" class="edge">
+<title>proc~pf_parareal_predictor&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M281.7554,-63.9238C304.7795,-69.5913 331.9716,-76.2847 353.9947,-81.7058"/>
+<polygon fill="#000000" stroke="#000000" points="353.1694,-85.1071 363.7161,-84.0988 354.8426,-78.31 353.1694,-85.1071"/>
 </g>
 <!-- pf_stop -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_node13" class="node">
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node12" class="node">
 <title>pf_stop</title>
-<polygon fill="#777777" stroke="#777777" points="540,-108 486,-108 486,-84 540,-84 540,-108"/>
-<text text-anchor="middle" x="513" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
+<polygon fill="#777777" stroke="#777777" points="540,-288.9225 486,-288.9225 486,-264.9225 540,-264.9225 540,-288.9225"/>
+<text text-anchor="middle" x="513" y="-274.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stop</text>
 </g>
 <!-- proc~pf_broadcast&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge22" class="edge">
 <title>proc~pf_broadcast&#45;&gt;pf_stop</title>
-<path fill="none" stroke="#000000" d="M429.6489,-24.0131C435.0173,-26.5882 440.3291,-29.5822 445,-33 464.8411,-47.5181 462.5403,-58.7617 481,-75 482.1226,-75.9875 483.2951,-76.9637 484.5,-77.9228"/>
-<polygon fill="#000000" stroke="#000000" points="482.5993,-80.8689 492.7373,-83.9464 486.7312,-75.2184 482.5993,-80.8689"/>
+<path fill="none" stroke="#000000" d="M431.0204,-369.8356C435.9873,-367.3167 440.8162,-364.3593 445,-360.9225 467.0037,-342.8476 462.678,-329.7209 481,-307.9225 484.3967,-303.8813 488.2567,-299.7915 492.0916,-295.9663"/>
+<polygon fill="#000000" stroke="#000000" points="494.531,-298.4762 499.3067,-289.0187 489.6756,-293.4338 494.531,-298.4762"/>
+</g>
+<!-- end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node13" class="node">
+<title>end_timer</title>
+<polygon fill="#777777" stroke="#777777" points="543.5,-382.9225 482.5,-382.9225 482.5,-358.9225 543.5,-358.9225 543.5,-382.9225"/>
+<text text-anchor="middle" x="513" y="-368.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
+</g>
+<!-- proc~pf_broadcast&#45;&gt;end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge23" class="edge">
+<title>proc~pf_broadcast&#45;&gt;end_timer</title>
+<path fill="none" stroke="#000000" d="M433.0008,-378.4118C445.3839,-377.2525 459.2226,-375.957 471.8627,-374.7737"/>
+<polygon fill="#000000" stroke="#000000" points="472.5101,-378.2284 482.1403,-373.8115 471.8575,-371.2589 472.5101,-378.2284"/>
+</g>
+<!-- start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_node16" class="node">
+<title>start_timer</title>
+<polygon fill="#777777" stroke="#777777" points="545,-340.9225 481,-340.9225 481,-316.9225 545,-316.9225 545,-340.9225"/>
+<text text-anchor="middle" x="513" y="-326.5225" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
+</g>
+<!-- proc~pf_broadcast&#45;&gt;start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge21" class="edge">
+<title>proc~pf_broadcast&#45;&gt;start_timer</title>
+<path fill="none" stroke="#000000" d="M424.3737,-369.8945C431.1612,-367.0058 438.353,-363.8951 445,-360.9225 456.0545,-355.9787 468.0315,-350.4136 478.809,-345.3274"/>
+<polygon fill="#000000" stroke="#000000" points="480.3816,-348.4553 487.918,-341.0086 477.3827,-342.1302 480.3816,-348.4553"/>
 </g>
 <!-- proc~pf_send_status&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge24" class="edge">
 <title>proc~pf_send_status&#45;&gt;pf_stop</title>
-<path fill="none" stroke="#000000" d="M431.0886,-209.9951C436.0461,-207.4649 440.8542,-204.4825 445,-201 472.5232,-177.8803 492.8809,-140.767 503.834,-117.4179"/>
-<polygon fill="#000000" stroke="#000000" points="507.1405,-118.6002 508.0715,-108.0463 500.7623,-115.7161 507.1405,-118.6002"/>
-</g>
-<!-- proc~pf_send&#45;&gt;start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge27" class="edge">
-<title>proc~pf_send&#45;&gt;start_timer</title>
-<path fill="none" stroke="#000000" d="M422.7522,-86.2588C437.1246,-81.1214 455.0676,-74.7077 471.1603,-68.9555"/>
-<polygon fill="#000000" stroke="#000000" points="472.6542,-72.1384 480.8926,-65.4767 470.298,-65.5469 472.6542,-72.1384"/>
-</g>
-<!-- proc~pf_send&#45;&gt;end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge25" class="edge">
-<title>proc~pf_send&#45;&gt;end_timer</title>
-<path fill="none" stroke="#000000" d="M422.6515,-87.1132C430.2693,-83.9392 438.295,-79.9062 445,-75 464.8411,-60.4819 462.5403,-49.2383 481,-33 482.1226,-32.0125 483.2951,-31.0363 484.5,-30.0772"/>
-<polygon fill="#000000" stroke="#000000" points="486.7312,-32.7816 492.7373,-24.0536 482.5993,-27.1311 486.7312,-32.7816"/>
+<path fill="none" stroke="#000000" d="M429.9917,-183.9487C435.2611,-186.5095 440.4522,-189.4956 445,-192.9225 468.2026,-210.4062 488.2141,-237.4703 500.4065,-256.1293"/>
+<polygon fill="#000000" stroke="#000000" points="497.582,-258.2108 505.8942,-264.7802 503.493,-254.461 497.582,-258.2108"/>
 </g>
 <!-- proc~pf_send&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge26" class="edge">
 <title>proc~pf_send&#45;&gt;pf_stop</title>
-<path fill="none" stroke="#000000" d="M422.7522,-96C438.472,-96 458.4633,-96 475.6331,-96"/>
-<polygon fill="#000000" stroke="#000000" points="475.8956,-99.5001 485.8956,-96 475.8956,-92.5001 475.8956,-99.5001"/>
+<path fill="none" stroke="#000000" d="M422.7522,-260.7931C438.472,-263.6026 458.4633,-267.1755 475.6331,-270.2442"/>
+<polygon fill="#000000" stroke="#000000" points="475.4358,-273.7643 485.8956,-272.0783 476.6674,-266.8735 475.4358,-273.7643"/>
 </g>
-<!-- proc~pf_recv&#45;&gt;start_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge30" class="edge">
-<title>proc~pf_recv&#45;&gt;start_timer</title>
-<path fill="none" stroke="#000000" d="M422.7522,-54C436.989,-54 454.7294,-54 470.7043,-54"/>
-<polygon fill="#000000" stroke="#000000" points="470.8926,-57.5001 480.8926,-54 470.8926,-50.5001 470.8926,-57.5001"/>
+<!-- proc~pf_send&#45;&gt;end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge27" class="edge">
+<title>proc~pf_send&#45;&gt;end_timer</title>
+<path fill="none" stroke="#000000" d="M422.7294,-263.4743C430.6079,-266.6541 438.7568,-271.0249 445,-276.9225 471.2973,-301.7639 457.0354,-322.8238 481,-349.9225 481.7263,-350.7438 482.492,-351.5465 483.2888,-352.3296"/>
+<polygon fill="#000000" stroke="#000000" points="481.1604,-355.1117 491.0853,-358.8193 485.6387,-349.7317 481.1604,-355.1117"/>
 </g>
-<!-- proc~pf_recv&#45;&gt;end_timer -->
-<g id="proc~~pf_parareal_block_run~~CallsGraph_edge28" class="edge">
-<title>proc~pf_recv&#45;&gt;end_timer</title>
-<path fill="none" stroke="#000000" d="M422.7522,-44.2588C437.4614,-39.001 455.9107,-32.4064 472.2887,-26.5521"/>
-<polygon fill="#000000" stroke="#000000" points="473.9282,-29.683 482.1666,-23.0213 471.572,-23.0915 473.9282,-29.683"/>
+<!-- proc~pf_send&#45;&gt;start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge25" class="edge">
+<title>proc~pf_send&#45;&gt;start_timer</title>
+<path fill="none" stroke="#000000" d="M422.5575,-265.9542C430.0152,-269.1037 437.9805,-272.8376 445,-276.9225 461.543,-286.5496 478.6513,-299.651 491.5691,-310.2945"/>
+<polygon fill="#000000" stroke="#000000" points="489.4955,-313.1235 499.4049,-316.8726 493.9963,-307.7623 489.4955,-313.1235"/>
 </g>
 <!-- proc~pf_recv&#45;&gt;pf_stop -->
 <g id="proc~~pf_parareal_block_run~~CallsGraph_edge29" class="edge">
 <title>proc~pf_recv&#45;&gt;pf_stop</title>
-<path fill="none" stroke="#000000" d="M422.7522,-63.7412C438.6203,-69.4132 458.8409,-76.641 476.1182,-82.8167"/>
-<polygon fill="#000000" stroke="#000000" points="475.301,-86.2414 485.8956,-86.3116 477.6572,-79.6499 475.301,-86.2414"/>
+<path fill="none" stroke="#000000" d="M422.5605,-329.3187C429.9427,-326.1902 437.8689,-322.6103 445,-318.9225 459.0836,-311.6394 474.1423,-302.4903 486.4998,-294.592"/>
+<polygon fill="#000000" stroke="#000000" points="488.4779,-297.4808 494.968,-289.1065 484.6721,-291.6058 488.4779,-297.4808"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;end_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge30" class="edge">
+<title>proc~pf_recv&#45;&gt;end_timer</title>
+<path fill="none" stroke="#000000" d="M422.7522,-347.1124C437.4614,-350.9932 455.9107,-355.8606 472.2887,-360.1816"/>
+<polygon fill="#000000" stroke="#000000" points="471.6046,-363.6209 482.1666,-362.7877 473.3904,-356.8525 471.6046,-363.6209"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;start_timer -->
+<g id="proc~~pf_parareal_block_run~~CallsGraph_edge28" class="edge">
+<title>proc~pf_recv&#45;&gt;start_timer</title>
+<path fill="none" stroke="#000000" d="M422.7522,-337.3712C436.989,-336.0384 454.7294,-334.3776 470.7043,-332.8821"/>
+<polygon fill="#000000" stroke="#000000" points="471.2624,-336.3452 480.8926,-331.9283 470.6099,-329.3757 471.2624,-336.3452"/>
 </g>
 </g>
 </svg>
@@ -1016,7 +1016,7 @@ public subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend, flags)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
                                           </p></div>
         <div class="col-xs-6 col-md-4 col-md-push-4">
           <p class="text-right">

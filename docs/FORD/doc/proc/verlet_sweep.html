@@ -252,7 +252,7 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 </g>
 </g>
 <!-- proc~verlet_sweep&#45;&gt;module~pf_mod_timer -->
-<g id="proc~~verlet_sweep~~UsesGraph_edge2" class="edge">
+<g id="proc~~verlet_sweep~~UsesGraph_edge1" class="edge">
 <title>proc~verlet_sweep&#45;&gt;module~pf_mod_timer</title>
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M349.8609,-26.0656C340.9821,-24.4513 331.4015,-22.7094 322.1079,-21.0196"/>
 <polygon fill="#000000" stroke="#000000" points="322.6477,-17.5605 312.1829,-19.2151 321.3955,-24.4476 322.6477,-17.5605"/>
@@ -267,7 +267,7 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 </g>
 </g>
 <!-- proc~verlet_sweep&#45;&gt;module~pf_mod_hooks -->
-<g id="proc~~verlet_sweep~~UsesGraph_edge1" class="edge">
+<g id="proc~~verlet_sweep~~UsesGraph_edge2" class="edge">
 <title>proc~verlet_sweep&#45;&gt;module~pf_mod_hooks</title>
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M349.8609,-39.9344C341.6433,-41.4285 332.8245,-43.0319 324.1885,-44.6021"/>
 <polygon fill="#000000" stroke="#000000" points="323.3941,-41.1891 314.1816,-46.4215 324.6464,-48.0761 323.3941,-41.1891"/>
@@ -309,9 +309,9 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <polygon fill="#000000" stroke="#000000" points="205.3297,-50.5001 195.3297,-54 205.3296,-57.5001 205.3297,-50.5001"/>
 </g>
 <!-- iso_c_binding -->
-<g id="proc~~verlet_sweep~~UsesGraph_node7" class="node">
+<g id="proc~~verlet_sweep~~UsesGraph_node6" class="node">
 <title>iso_c_binding</title>
-<g id="a_proc~~verlet_sweep~~UsesGraph_node7"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
+<g id="a_proc~~verlet_sweep~~UsesGraph_node6"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
 <polygon fill="#337ab7" stroke="#337ab7" points="78,-66 0,-66 0,-42 78,-42 78,-66"/>
 <text text-anchor="middle" x="39" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_c_binding</text>
 </a>
@@ -324,9 +324,9 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <polygon fill="#000000" stroke="#000000" points="88.1899,-50.5001 78.1899,-54 88.1899,-57.5001 88.1899,-50.5001"/>
 </g>
 <!-- mpi -->
-<g id="proc~~verlet_sweep~~UsesGraph_node6" class="node">
+<g id="proc~~verlet_sweep~~UsesGraph_node7" class="node">
 <title>mpi</title>
-<g id="a_proc~~verlet_sweep~~UsesGraph_node6"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<g id="a_proc~~verlet_sweep~~UsesGraph_node7"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
 <polygon fill="#337ab7" stroke="#337ab7" points="66,-24 12,-24 12,0 66,0 66,-24"/>
 <text text-anchor="middle" x="39" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mpi</text>
 </a>
@@ -572,25 +572,25 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 </g>
 </g>
 <!-- proc~verlet_sweep&#45;&gt;proc~start_timer -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge4" class="edge">
+<g id="proc~~verlet_sweep~~CallsGraph_edge2" class="edge">
 <title>proc~verlet_sweep&#45;&gt;proc~start_timer</title>
 <path fill="none" stroke="#000000" d="M54.0141,-33.1151C68.3506,-23.1445 90.3858,-9.7381 112,-4.1505 143.1192,3.8942 179.1664,-1.7362 206.4003,-8.9047"/>
 <polygon fill="#000000" stroke="#000000" points="205.8041,-12.3725 216.3777,-11.7021 207.6939,-5.6324 205.8041,-12.3725"/>
 </g>
-<!-- proc~call_hooks -->
+<!-- proc~end_timer -->
 <g id="proc~~verlet_sweep~~CallsGraph_node3" class="node">
-<title>proc~call_hooks</title>
-<g id="a_proc~~verlet_sweep~~CallsGraph_node3"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
-<polygon fill="#d9534f" stroke="#d9534f" points="176,-37.1505 113,-37.1505 113,-13.1505 176,-13.1505 176,-37.1505"/>
-<text text-anchor="middle" x="144.5" y="-22.7505" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">call_hooks</text>
+<title>proc~end_timer</title>
+<g id="a_proc~~verlet_sweep~~CallsGraph_node3"><a xlink:href=".././proc/end_timer.html" xlink:title="end_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="279,-77.1505 218,-77.1505 218,-53.1505 279,-53.1505 279,-77.1505"/>
+<text text-anchor="middle" x="248.5" y="-62.7505" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
 </a>
 </g>
 </g>
-<!-- proc~verlet_sweep&#45;&gt;proc~call_hooks -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge2" class="edge">
-<title>proc~verlet_sweep&#45;&gt;proc~call_hooks</title>
-<path fill="none" stroke="#000000" d="M76.1481,-37.9866C84.8137,-36.3592 94.061,-34.6226 102.8633,-32.9696"/>
-<polygon fill="#000000" stroke="#000000" points="103.7482,-36.3647 112.9304,-31.0791 102.4562,-29.485 103.7482,-36.3647"/>
+<!-- proc~verlet_sweep&#45;&gt;proc~end_timer -->
+<g id="proc~~verlet_sweep~~CallsGraph_edge1" class="edge">
+<title>proc~verlet_sweep&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M76.12,-48.7724C113.2653,-52.3016 169.5566,-57.65 207.6173,-61.2662"/>
+<polygon fill="#000000" stroke="#000000" points="207.5516,-64.7756 217.8378,-62.2373 208.2137,-57.807 207.5516,-64.7756"/>
 </g>
 <!-- proc~pf_residual -->
 <g id="proc~~verlet_sweep~~CallsGraph_node4" class="node">
@@ -607,20 +607,20 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <path fill="none" stroke="#000000" d="M59.5519,-57.2924C75.1421,-66.0756 96.4317,-78.0698 113.7974,-87.8533"/>
 <polygon fill="#000000" stroke="#000000" points="112.5497,-91.1676 122.9802,-93.0267 115.9857,-85.0688 112.5497,-91.1676"/>
 </g>
-<!-- proc~end_timer -->
+<!-- proc~call_hooks -->
 <g id="proc~~verlet_sweep~~CallsGraph_node5" class="node">
-<title>proc~end_timer</title>
-<g id="a_proc~~verlet_sweep~~CallsGraph_node5"><a xlink:href=".././proc/end_timer.html" xlink:title="end_timer">
-<polygon fill="#d9534f" stroke="#d9534f" points="279,-77.1505 218,-77.1505 218,-53.1505 279,-53.1505 279,-77.1505"/>
-<text text-anchor="middle" x="248.5" y="-62.7505" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
+<title>proc~call_hooks</title>
+<g id="a_proc~~verlet_sweep~~CallsGraph_node5"><a xlink:href=".././proc/call_hooks.html" xlink:title="call_hooks">
+<polygon fill="#d9534f" stroke="#d9534f" points="176,-37.1505 113,-37.1505 113,-13.1505 176,-13.1505 176,-37.1505"/>
+<text text-anchor="middle" x="144.5" y="-22.7505" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">call_hooks</text>
 </a>
 </g>
 </g>
-<!-- proc~verlet_sweep&#45;&gt;proc~end_timer -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge1" class="edge">
-<title>proc~verlet_sweep&#45;&gt;proc~end_timer</title>
-<path fill="none" stroke="#000000" d="M76.12,-48.7724C113.2653,-52.3016 169.5566,-57.65 207.6173,-61.2662"/>
-<polygon fill="#000000" stroke="#000000" points="207.5516,-64.7756 217.8378,-62.2373 208.2137,-57.807 207.5516,-64.7756"/>
+<!-- proc~verlet_sweep&#45;&gt;proc~call_hooks -->
+<g id="proc~~verlet_sweep~~CallsGraph_edge4" class="edge">
+<title>proc~verlet_sweep&#45;&gt;proc~call_hooks</title>
+<path fill="none" stroke="#000000" d="M76.1481,-37.9866C84.8137,-36.3592 94.061,-34.6226 102.8633,-32.9696"/>
+<polygon fill="#000000" stroke="#000000" points="103.7482,-36.3647 112.9304,-31.0791 102.4562,-29.485 103.7482,-36.3647"/>
 </g>
 <!-- mpi_wtime -->
 <g id="proc~~verlet_sweep~~CallsGraph_node6" class="node">
@@ -634,26 +634,20 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <path fill="none" stroke="#000000" d="M280.6807,-29.68C289.9296,-31.5565 300.1565,-33.6316 309.9088,-35.6103"/>
 <polygon fill="#000000" stroke="#000000" points="309.3429,-39.0667 319.8392,-37.6252 310.7349,-32.2065 309.3429,-39.0667"/>
 </g>
-<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge7" class="edge">
-<title>proc~call_hooks&#45;&gt;proc~start_timer</title>
-<path fill="none" stroke="#000000" d="M176.2685,-24.5396C185.6675,-24.3589 196.1112,-24.158 206.07,-23.9665"/>
-<polygon fill="#000000" stroke="#000000" points="206.2774,-27.4633 216.2083,-23.7715 206.1428,-20.4646 206.2774,-27.4633"/>
-</g>
-<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
+<!-- proc~end_timer&#45;&gt;mpi_wtime -->
 <g id="proc~~verlet_sweep~~CallsGraph_edge6" class="edge">
-<title>proc~call_hooks&#45;&gt;proc~end_timer</title>
-<path fill="none" stroke="#000000" d="M175.7034,-37.1519C185.873,-41.0632 197.313,-45.4632 208.0593,-49.5964"/>
-<polygon fill="#000000" stroke="#000000" points="207.0871,-52.9724 217.677,-53.2955 209.6,-46.439 207.0871,-52.9724"/>
+<title>proc~end_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M279.2732,-58.9067C288.837,-56.9662 299.5515,-54.7923 309.7554,-52.7219"/>
+<polygon fill="#000000" stroke="#000000" points="310.6232,-56.1172 319.7275,-50.6986 309.2312,-49.257 310.6232,-56.1172"/>
 </g>
 <!-- proc~pf_residual&#45;&gt;proc~start_timer -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge10" class="edge">
+<g id="proc~~verlet_sweep~~CallsGraph_edge8" class="edge">
 <title>proc~pf_residual&#45;&gt;proc~start_timer</title>
 <path fill="none" stroke="#000000" d="M156.5108,-93.1468C169.7299,-80.2568 191.911,-59.5548 213,-44.1505 214.6046,-42.9784 216.2785,-41.8137 217.9878,-40.6685"/>
 <polygon fill="#000000" stroke="#000000" points="220.1014,-43.4727 226.6722,-35.1616 216.3527,-37.561 220.1014,-43.4727"/>
 </g>
 <!-- proc~pf_residual&#45;&gt;proc~end_timer -->
-<g id="proc~~verlet_sweep~~CallsGraph_edge8" class="edge">
+<g id="proc~~verlet_sweep~~CallsGraph_edge7" class="edge">
 <title>proc~pf_residual&#45;&gt;proc~end_timer</title>
 <path fill="none" stroke="#000000" d="M175.7034,-93.1492C185.873,-89.2379 197.313,-84.8378 208.0593,-80.7047"/>
 <polygon fill="#000000" stroke="#000000" points="209.6,-83.8621 217.677,-77.0055 207.0871,-77.3287 209.6,-83.8621"/>
@@ -673,11 +667,17 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
 <path fill="none" stroke="#000000" d="M177.1209,-105.7779C185.1675,-105.9326 193.9365,-106.1012 202.4868,-106.2657"/>
 <polygon fill="#000000" stroke="#000000" points="202.6789,-109.7699 212.7444,-106.4629 202.8135,-102.7712 202.6789,-109.7699"/>
 </g>
-<!-- proc~end_timer&#45;&gt;mpi_wtime -->
+<!-- proc~call_hooks&#45;&gt;proc~start_timer -->
 <g id="proc~~verlet_sweep~~CallsGraph_edge11" class="edge">
-<title>proc~end_timer&#45;&gt;mpi_wtime</title>
-<path fill="none" stroke="#000000" d="M279.2732,-58.9067C288.837,-56.9662 299.5515,-54.7923 309.7554,-52.7219"/>
-<polygon fill="#000000" stroke="#000000" points="310.6232,-56.1172 319.7275,-50.6986 309.2312,-49.257 310.6232,-56.1172"/>
+<title>proc~call_hooks&#45;&gt;proc~start_timer</title>
+<path fill="none" stroke="#000000" d="M176.2685,-24.5396C185.6675,-24.3589 196.1112,-24.158 206.07,-23.9665"/>
+<polygon fill="#000000" stroke="#000000" points="206.2774,-27.4633 216.2083,-23.7715 206.1428,-20.4646 206.2774,-27.4633"/>
+</g>
+<!-- proc~call_hooks&#45;&gt;proc~end_timer -->
+<g id="proc~~verlet_sweep~~CallsGraph_edge10" class="edge">
+<title>proc~call_hooks&#45;&gt;proc~end_timer</title>
+<path fill="none" stroke="#000000" d="M175.7034,-37.1519C185.873,-41.0632 197.313,-45.4632 208.0593,-49.5964"/>
+<polygon fill="#000000" stroke="#000000" points="207.0871,-52.9724 217.677,-53.2955 209.6,-46.439 207.0871,-52.9724"/>
 </g>
 </g>
 </svg>
@@ -963,7 +963,7 @@ public subroutine verlet_sweep(this, pf, level_index, t0, dt, nsweeps, flags)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
                                           </p></div>
         <div class="col-xs-6 col-md-4 col-md-push-4">
           <p class="text-right">

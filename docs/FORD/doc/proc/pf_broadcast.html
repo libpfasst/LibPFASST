@@ -322,7 +322,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
 <text text-anchor="middle" x="143" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">start_timer</text>
 </g>
 <!-- proc~pf_broadcast&#45;&gt;start_timer -->
-<g id="proc~~pf_broadcast~~CallsGraph_edge3" class="edge">
+<g id="proc~~pf_broadcast~~CallsGraph_edge1" class="edge">
 <title>proc~pf_broadcast&#45;&gt;start_timer</title>
 <path fill="none" stroke="#000000" d="M67.7321,-66.0355C78.7682,-70.429 91.4231,-75.467 103.1677,-80.1426"/>
 <polygon fill="#000000" stroke="#000000" points="102.1781,-83.5157 112.7635,-83.9627 104.7673,-77.0122 102.1781,-83.5157"/>
@@ -346,7 +346,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
 <text text-anchor="middle" x="143" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">end_timer</text>
 </g>
 <!-- proc~pf_broadcast&#45;&gt;end_timer -->
-<g id="proc~~pf_broadcast~~CallsGraph_edge1" class="edge">
+<g id="proc~~pf_broadcast~~CallsGraph_edge3" class="edge">
 <title>proc~pf_broadcast&#45;&gt;end_timer</title>
 <path fill="none" stroke="#000000" d="M67.7321,-41.9645C78.7682,-37.571 91.4231,-32.533 103.1677,-27.8574"/>
 <polygon fill="#000000" stroke="#000000" points="104.7673,-30.9878 112.7635,-24.0373 102.1781,-24.4843 104.7673,-30.9878"/>
@@ -468,25 +468,10 @@ public subroutine pf_broadcast(pf, y, nvar, root)
 <path fill="none" stroke="#000000" d="M222.1872,-17.8497C237.1232,-20.1992 254.534,-22.9379 270.4127,-25.4357"/>
 <polygon fill="#000000" stroke="#000000" points="270.1622,-28.9393 280.5846,-27.0358 271.25,-22.0243 270.1622,-28.9393"/>
 </g>
-<!-- proc~pf_parareal_run -->
-<g id="proc~~pf_broadcast~~CalledByGraph_node4" class="node">
-<title>proc~pf_parareal_run</title>
-<g id="a_proc~~pf_broadcast~~CalledByGraph_node4"><a xlink:href=".././proc/pf_parareal_run.html" xlink:title="pf_parareal_run">
-<polygon fill="#d9534f" stroke="#d9534f" points="89,-66 0,-66 0,-42 89,-42 89,-66"/>
-<text text-anchor="middle" x="44.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_run</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run -->
-<g id="proc~~pf_broadcast~~CalledByGraph_edge3" class="edge">
-<title>proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run</title>
-<path fill="none" stroke="#000000" d="M89.3414,-54C97.4802,-54 106.1449,-54 114.8084,-54"/>
-<polygon fill="#000000" stroke="#000000" points="114.9465,-57.5001 124.9465,-54 114.9465,-50.5001 114.9465,-57.5001"/>
-</g>
 <!-- proc~pf_pfasst_run -->
-<g id="proc~~pf_broadcast~~CalledByGraph_node5" class="node">
+<g id="proc~~pf_broadcast~~CalledByGraph_node4" class="node">
 <title>proc~pf_pfasst_run</title>
-<g id="a_proc~~pf_broadcast~~CalledByGraph_node5"><a xlink:href=".././proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
+<g id="a_proc~~pf_broadcast~~CalledByGraph_node4"><a xlink:href=".././proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
 <polygon fill="#d9534f" stroke="#d9534f" points="83.5,-24 5.5,-24 5.5,0 83.5,0 83.5,-24"/>
 <text text-anchor="middle" x="44.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_pfasst_run</text>
 </a>
@@ -497,6 +482,21 @@ public subroutine pf_broadcast(pf, y, nvar, root)
 <title>proc~pf_pfasst_run&#45;&gt;proc~pf_block_run</title>
 <path fill="none" stroke="#000000" d="M83.6371,-12C100.3345,-12 119.9706,-12 137.4913,-12"/>
 <polygon fill="#000000" stroke="#000000" points="137.5245,-15.5001 147.5245,-12 137.5245,-8.5001 137.5245,-15.5001"/>
+</g>
+<!-- proc~pf_parareal_run -->
+<g id="proc~~pf_broadcast~~CalledByGraph_node5" class="node">
+<title>proc~pf_parareal_run</title>
+<g id="a_proc~~pf_broadcast~~CalledByGraph_node5"><a xlink:href=".././proc/pf_parareal_run.html" xlink:title="pf_parareal_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="89,-66 0,-66 0,-42 89,-42 89,-66"/>
+<text text-anchor="middle" x="44.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run -->
+<g id="proc~~pf_broadcast~~CalledByGraph_edge3" class="edge">
+<title>proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run</title>
+<path fill="none" stroke="#000000" d="M89.3414,-54C97.4802,-54 106.1449,-54 114.8084,-54"/>
+<polygon fill="#000000" stroke="#000000" points="114.9465,-57.5001 124.9465,-54 114.9465,-50.5001 114.9465,-57.5001"/>
 </g>
 </g>
 </svg>
@@ -654,7 +654,7 @@ public subroutine pf_broadcast(pf, y, nvar, root)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2019 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
                                           </p></div>
         <div class="col-xs-6 col-md-4 col-md-push-4">
           <p class="text-right">
