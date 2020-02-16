@@ -60,7 +60,7 @@ jobs:
                   echo "Running RK 3-d"	&&	  		
                   mpirun -n 4 ./main.3d.exe test_3d.nml &&
                   echo "Making Running IMEX SDC "	&&	  		
-                  cd ../IMEX_seeper &&  make && make DIM=2 && make DIM=3  &&
+                  cd ../IMEX_sweeper &&  make && make DIM=2 && make DIM=3  &&
                   echo "Running IMEX SDC 1-d"	&&	  		
                   mpirun -n 4 ./main.1d.exe test_1d.nml &&
                   echo "Running IMEX SDC 2-d"	&&	  		
