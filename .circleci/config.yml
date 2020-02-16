@@ -78,5 +78,6 @@ jobs:
                   cd ../../..
             - run: # Run the python tests in test
                 name: do_pytests
-                command: >  pytest
+                command: > pytest
+
 
