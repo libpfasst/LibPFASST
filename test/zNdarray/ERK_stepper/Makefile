@@ -2,7 +2,7 @@
 # Makefile for Exponential RK examples
 #
 
-LIBPFASST ?= ../../../../LibPFASST
+LIBPFASST ?= ../../..
 DO_EXP=TRUE
 DO_RK=TRUE
 

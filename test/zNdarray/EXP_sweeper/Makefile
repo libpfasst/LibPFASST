@@ -2,7 +2,7 @@
 # Makefile for Exponential SDC examples
 #
 DIM=1
-LIBPFASST ?= ../../../../LibPFASST
+LIBPFASST ?= ../../..
 
 DO_EXP=TRUE
 DO_RK=FALSE
