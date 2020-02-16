@@ -28,7 +28,7 @@ contains
     integer :: l                     !!  Loop variable for levels
     if (present(nlevels)) pf%nlevels = nlevels
 
-    pf%outdir = "dat/"
+    pf%outdir = "outdir/"
 
     !> gather some input from a file and command line
     read_cmd = .true.
