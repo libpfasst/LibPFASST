@@ -21,8 +21,6 @@ jobs:
                   cd ../nagumo && make &&
                   echo "Compiling IMEX"	&&	  
                   cd ../EXP_adv_diff_fft/1d && make &&
-                  cd ../../adv_diff_fft/1d && make &&
-                  cd ../2d/ && make &&
                   cd ../../.. 
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
