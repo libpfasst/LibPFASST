@@ -13,7 +13,7 @@ their default value or PFASST will not execute.
 
 Following these lists is an explanation of how to set
 parameters through input files or the command line and
-how to choose certain parameters to acheive particular
+how to choose certain parameters to achieve particular
 variants of PFASST.
 
 Types of parameters
@@ -33,7 +33,7 @@ Types of parameters
   unrelated to the workings of LibPFASST
 
 
-passt static parameters
+pfasst static parameters
 ---------------------------
 
 The parameters at the top of the file ``src/pf_dtype.f90`` are all set
@@ -42,7 +42,7 @@ here of interest to the user is
 
 .. code-block:: fortran
 
-  integer, parameter :: pfdp = c_double
+  integer, parameter :: pfdp = selected_real_kind(15, 307)  
 
 which controls the precision of all floating point numbers (or at
 least all those using ``pfdp`` in the declaration).
@@ -54,6 +54,14 @@ The parameters defined in type ``pf_pfasst_t`` in ``src/pf_dtype.f90``
 are all given a default value.  Currently only the variable
 ``nlevels`` is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory
+
+.. code-block:: fortran
+
+  !>  The main PFASST data type which includes pretty much everything
+  type :: pf_pfasst_t
+     !> === Mandatory pfasst parameters (must be set on command line or input file)  ===
+     integer :: nlevels = -1             !! number of pfasst levels
+
 
 
 Optional pfasst parameters
@@ -91,14 +99,17 @@ default values as below:
 
 
      ! --  run options  (should be set before pfasst_run is called)
-     logical :: Vcycle = .true.      !!  decides if Vcycles are done
+     logical :: Vcycle = .true.         !!  decides if Vcycles are done
+     logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
+     logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
      logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
      logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
      logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
-     integer :: taui0 = -999999      !! iteration cutoff for tau inclusion
+     integer :: taui0 = -99          !! iteration cutoff for tau inclusion
 
 
      ! -- RK and Parareal options
+     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used (can be turned off for pure parareal)
      logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
      integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
@@ -107,10 +118,11 @@ default values as below:
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
-     logical :: save_residuals = .false.  !!  If true, residuals are saved and output
-     logical :: save_timings  = .false.    !!  If true, timings are saved and  output
-     logical :: echo_timings  = .false.    !!  If true, timings are  output to screen
-     logical :: save_errors  = .false.    !!  If true, errors  are saved and output
+     logical :: save_residuals = .true.  !!  Will save residuals every time they are set
+     logical :: save_delta_q0 = .true.   !!  Will save change in initial condition
+     logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
+     integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
+
 
 Mandatory level parameters
 --------------------------
@@ -164,7 +176,7 @@ Finally, ``qend`` is also optional and returns the final solution.
   File input for user variables
   -----------------------------
 
-  The usual default input file is "probin.nml" wherein the namelist
+  The  default input file is "probin.nml" wherein the namelist
   PARAMS (defined locally in probin.f90) can be specified.
   Alternatively, a different input file can be specified on the command
   line by adding the file name directly after the executable.  The
@@ -203,7 +215,7 @@ caveat to this in that any parameters must be specified after the
 
 would set the input file to "myinput.nml" and then over-ride any
 specified value of niters with the value 10. Command line options
-over-ride input files.
+over-ride input files values.
 
 
 Variables for the predictor
