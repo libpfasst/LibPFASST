@@ -39,26 +39,27 @@ contains
     pf%results%save_errors=pf%save_errors
     pf%results%save_delta_q0=pf%save_delta_q0
     istat=0
-    if(.not.allocated(pf%results%errors) .and. pf%results%save_errors) &
-         allocate(pf%results%errors(nlevs, nblocks,niters+1, max_nsweeps),stat=istat)
-    if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)
-
+    if(.not.allocated(pf%results%errors) .and. pf%results%save_errors) then
+       allocate(pf%results%errors(nlevs, nblocks,niters+1, max_nsweeps),stat=istat)
+       if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)
+       pf%results%errors = -1.0_pfdp
+    end if
     
-    if(.not.allocated(pf%results%residuals) .and. pf%results%save_residuals) &
-         allocate(pf%results%residuals(nlevs, nblocks,niters+1, max_nsweeps),stat=istat)
-    if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)                   
+    if(.not.allocated(pf%results%residuals) .and. pf%results%save_residuals) then
+       allocate(pf%results%residuals(nlevs, nblocks,niters+1, max_nsweeps),stat=istat)
+       if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)
+       pf%results%residuals = -1.0_pfdp
+    endif
+    
 
-    if(.not.allocated(pf%results%delta_q0) .and. pf%results%save_delta_q0) &
-         allocate(pf%results%delta_q0(nlevs,nblocks,niters+1, max_nsweeps),stat=istat)
-    if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)                   
-
+    if(.not.allocated(pf%results%delta_q0) .and. pf%results%save_delta_q0) then
+       allocate(pf%results%delta_q0(nlevs,nblocks,niters+1, max_nsweeps),stat=istat)
+       if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)
+       pf%results%delta_q0 = -1.0_pfdp
+    end if
+    
     if(.not.allocated(pf%results%iters)) allocate(pf%results%iters(nblocks),stat=istat)
     if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)                   
-
-    !  Put in some default values
-    pf%results%errors = -1.0_pfdp
-    pf%results%residuals = -1.0_pfdp
-    pf%results%delta_q0 = -1.0_pfdp
     pf%results%iters = niters  
 
     !  Set up the directory to dump results

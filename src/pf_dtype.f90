@@ -307,10 +307,10 @@ module pf_mod_dtype
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
-     logical :: save_residuals = .true.  !!  If true, residuals are saved and output
-     logical :: save_delta_q0 = .true.   !!  If true, delta_q0 is  saved and output
-     logical :: save_errors  = .true.    !!  If true, errors  are saved and output
-     integer :: save_timings  = 2         !!  0=none, 1=total only, 2=all, 3=all and echo
+     logical :: save_residuals = .true.  !!  Will save residuals every time they are set
+     logical :: save_delta_q0 = .true.   !!  Will save change in initial condition
+     logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
+     integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
 
      integer :: rank    = -1            !! rank of current processor
 
