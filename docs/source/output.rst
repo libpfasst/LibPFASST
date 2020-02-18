@@ -19,13 +19,14 @@ This will force a call to  the user-supplied subroutine "echo_error" (supplied l
 results
 -------
 LibPFASST contains the module "pf_mod_results" which is used to collect information about the run during a call to LibPFASST.
-The destination of the output can be changed from default directory "dat/outdir" to an arbitrary path by specifying the variable "outdir" in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\\\\"my_outdir\\\\".  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
-then output to the directory "my_outdir/residuals" after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, save_timings is an integer which can be set to 0,1,2, or 3.
+The destination of the output can be changed from the default directory "dat/outdir" to an arbitrary path by specifying the variable "outdir" in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\\\\"my_outdir\\\\".  The collection and output of the results can be controlled by the parameters save_residuals, save_delta_q0, save_errors, and save_timings.  The first will determine if the residuals are saved internally and
+then output to the directory "my_outdir/residuals" after the completion of the iterations.  The second does essentially the change in intial conditions at each processor.  The third controls the behavior for errors. The last is for the output of
+timings of various parts of the code and is an integer which can be set to 0,1,2, or 3.
 
-*0: no timings
-*1: just the total time
-*2: time all parts of the code
-*3: time all parts of the code and echo timers to the standard out
+* 0: no timings
+* 1: just the total time
+* 2: time all parts of the code
+* 3: time all parts of the code and echo timers to the standard out
 
 Note that for the library supplied data encapsulations there is a subroutine called "eprint" which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine can be modified for an additional avenue for output from any place in the code.
 
