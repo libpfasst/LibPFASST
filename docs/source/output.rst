@@ -23,7 +23,7 @@ The destination of the output can be changed from the default directory "dat/out
 then output to the directory "my_outdir/residuals" after the completion of the iterations.  The second does essentially the change in intial conditions at each processor.  The third controls the behavior for errors. The last is for the output of
 timings of various parts of the code and is an integer which can be set to 0,1,2, or 3.
 
-* 0: no timings
+* 0: no timings 
 * 1: just the total time
 * 2: time all parts of the code
 * 3: time all parts of the code and echo timers to the standard out
