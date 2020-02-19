@@ -54,12 +54,15 @@
 <div class="section" id="results">
 <h2>results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
 <p>LibPFASST contains the module “pf_mod_results” which is used to collect information about the run during a call to LibPFASST.
-The destination of the output can be changed from default directory “dat/outdir” to an arbitrary path by specifying the variable “outdir” in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\”my_outdir\”.  The collection and output of the results can be controlled by the parameters save_residuals, save_timings, and echo_timings.  The first will determine if the residuals are saved internally and
-then output to the directory “my_outdir/residuals” after the completion of the iterations.  The second does essentially the same for total timing of various parts of the code.  The last, save_timings is an integer which can be set to 0,1,2, or 3.</p>
-<p><a href="#id1"><span class="problematic" id="id2">*</span></a>0: no timings
-<a href="#id3"><span class="problematic" id="id4">*</span></a>1: just the total time
-<a href="#id5"><span class="problematic" id="id6">*</span></a>2: time all parts of the code
-<a href="#id7"><span class="problematic" id="id8">*</span></a>3: time all parts of the code and echo timers to the standard out</p>
+The destination of the output can be changed from the default directory “dat/outdir” to an arbitrary path by specifying the variable “outdir” in the PF namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\”my_outdir\”.  The collection and output of the results can be controlled by the parameters save_residuals, save_delta_q0, save_errors, and save_timings.  The first will determine if the residuals are saved internally and
+then output to the directory “my_outdir/residuals” after the completion of the iterations.  The second does essentially the change in intial conditions at each processor.  The third controls the behavior for errors. The last is for the output of
+timings of various parts of the code and is an integer which can be set to 0,1,2, or 3.</p>
+<ol class="arabic simple" start="0">
+<li><p>no timings</p></li>
+<li><p>just the total time</p></li>
+<li><p>time all parts of the code</p></li>
+<li><p>time all parts of the code and echo timers to the standard out</p></li>
+</ol>
 <p>Note that for the library supplied data encapsulations there is a subroutine called “eprint” which dumps (some of) the content in the data type to the screen (typically for debugging purposes).  This routine can be modified for an additional avenue for output from any place in the code.</p>
 <p>Depending on the above flag, several files will be created after the time integration and put in the directory /dat/outdir.</p>
 <ul class="simple">

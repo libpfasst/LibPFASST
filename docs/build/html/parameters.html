@@ -54,7 +54,7 @@ command line.  Some of the parameters must be changed from
 their default value or PFASST will not execute.</p>
 <p>Following these lists is an explanation of how to set
 parameters through input files or the command line and
-how to choose certain parameters to acheive particular
+how to choose certain parameters to achieve particular
 variants of PFASST.</p>
 <div class="section" id="types-of-parameters">
 <h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
@@ -73,12 +73,12 @@ the use of default values will result in default execution.</p></li>
 unrelated to the workings of LibPFASST</p></li>
 </ul>
 </div>
-<div class="section" id="passt-static-parameters">
-<h2>passt static parameters<a class="headerlink" href="#passt-static-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pfasst-static-parameters">
+<h2>pfasst static parameters<a class="headerlink" href="#pfasst-static-parameters" title="Permalink to this headline">¶</a></h2>
 <p>The parameters at the top of the file <code class="docutils literal notranslate"><span class="pre">src/pf_dtype.f90</span></code> are all set
 at compile time and can’t be changed at runtime.  The only parameter
 here of interest to the user is</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="kt">c_double</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">307</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>which controls the precision of all floating point numbers (or at
@@ -90,6 +90,12 @@ least all those using <code class="docutils literal notranslate"><span class="pr
 are all given a default value.  Currently only the variable
 <code class="docutils literal notranslate"><span class="pre">nlevels</span></code> is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  The main PFASST data type which includes pretty much everything</span>
+<span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
+   <span class="c">!&gt; === Mandatory pfasst parameters (must be set on command line or input file)  ===</span>
+   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nlevels</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c">!! number of pfasst levels</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="optional-pfasst-parameters">
 <h2>Optional pfasst parameters<a class="headerlink" href="#optional-pfasst-parameters" title="Permalink to this headline">¶</a></h2>
@@ -122,14 +128,17 @@ default values as below:</p>
 
 
 <span class="c">! --  run options  (should be set before pfasst_run is called)</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>      <span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_pysdc_V</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">sweep_at_conv</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  decides if one final sweep after convergence is done</span>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_Sform</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  True if Qmat type of stepping is used</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999999</span>      <span class="c">!! iteration cutoff for tau inclusion</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">99</span>          <span class="c">!! iteration cutoff for tau inclusion</span>
 
 
 <span class="c">! -- RK and Parareal options</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_sdc_sweeper</span> <span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!! decides if SDC sweeper is used (can be turned off for pure parareal)</span>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_rk_stepper</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!! decides if RK steps are used instead of the sweeps</span>
 <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>  <span class="c">!! number of runge-kutta steps per time step</span>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">RK_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>        <span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
@@ -138,10 +147,10 @@ default values as below:</p>
 <span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
 
 <span class="c">! -- controller for the results</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  If true, residuals are saved and output</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are saved and  output</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">echo_timings</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, timings are  output to screen</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  If true, errors  are saved and output</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!!  Will save residuals every time they are set</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_delta_q0</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>   <span class="c">!!  Will save change in initial condition</span>
+<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  Will save errors, but set_error must be called externally</span>
+<span class="kt">integer</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="mi">2</span>        <span class="c">!!  0=none, 1=total only, 2=all, 3=all and echo</span>
 </pre></div>
 </div>
 </div>
@@ -185,7 +194,7 @@ variable <code class="docutils literal notranslate"><span class="pre">nsteps</sp
 </div>
 <p>Finally, <code class="docutils literal notranslate"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
 <blockquote>
-<div><p>The usual default input file is “probin.nml” wherein the namelist
+<div><p>The  default input file is “probin.nml” wherein the namelist
 PARAMS (defined locally in probin.f90) can be specified.
 Alternatively, a different input file can be specified on the command
 line by adding the file name directly after the executable.  The
@@ -219,7 +228,7 @@ caveat to this in that any parameters must be specified after the
 </div>
 <p>would set the input file to “myinput.nml” and then over-ride any
 specified value of niters with the value 10. Command line options
-over-ride input files.</p>
+over-ride input files values.</p>
 </div>
 <div class="section" id="variables-for-the-predictor">
 <h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Permalink to this headline">¶</a></h2>
@@ -280,7 +289,7 @@ without communication in all cases.  Then,  additional sweeps are done if specif
   <ul>
 <li><a class="reference internal" href="#">Parameters and variables</a><ul>
 <li><a class="reference internal" href="#types-of-parameters">Types of parameters</a></li>
-<li><a class="reference internal" href="#passt-static-parameters">passt static parameters</a></li>
+<li><a class="reference internal" href="#pfasst-static-parameters">pfasst static parameters</a></li>
 <li><a class="reference internal" href="#mandatory-pfasst-parameters">Mandatory pfasst parameters</a></li>
 <li><a class="reference internal" href="#optional-pfasst-parameters">Optional pfasst parameters</a></li>
 <li><a class="reference internal" href="#mandatory-level-parameters">Mandatory level parameters</a></li>
