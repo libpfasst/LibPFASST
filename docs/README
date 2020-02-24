@@ -38,3 +38,11 @@ git add doc/index.html doc/*/*.html
 
 This should update the documentation page at
 https://libpfasst.github.io/LibPFASST/
+
+For the documentation, we use the following style guidlines
+
+variables:  double back quotes
+subroutines:  double back quotes
+directories:   single back quotes 
+file names:  single back quotes 
+command line  :  single back quotes with $ at the beginning

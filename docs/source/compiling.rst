@@ -20,9 +20,12 @@ The user may have to change the compiler and compiler flags defined in Makefile.
 
 The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.
 
-FC = mpiffort 
+FC = mpiffort
+
 CC = mpicc
+
 LD= $(FC)
+
 AR = ar rcs
 
 Some optional flags are
@@ -35,15 +38,15 @@ MKVERBOSE=FALSE
 
 which if made true will show more info in the build steps.  These can also both be changed on the command line as in
 
- make MKVERBOSE=TRUE DEBUG=TRUE
+ `$ make MKVERBOSE=TRUE DEBUG=TRUE`
 
 There is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing
 
-make depend
+ `$ make depend`
 
 Finally, one can type
 
-make clean
+  `$ make clean`
 
 to remove all intermediate files and start from scratch.
 

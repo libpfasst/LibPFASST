@@ -22,11 +22,15 @@ An implicit-explicit or IMEX  (also known as semi-implicit) splitting is used in
 
    y'  = \lambda_1 y + \lambda_2 y
 
-Typing 'make' in the directory should compile the example creating an executable called 'main.exe'.  In the same directory, there are a few parameter files with the extension '.nml'.  You can run the example using one of these files, as in
+Typing
+
+  `$ make`
+
+in the directory should compile the example creating an executable called `main.exe`.  In the same directory, there are a few parameter files with the extension `.nml`.  You can run the example using one of these files, as in
 
   `$ ./main.exe sdc.nml`
 
-Using your favorite editor, open the file sdc.nml.  There are two namelists here, 'PF_PARAMS' and 'PARAMS'.  The second of these is for local variables which in this simple example are just the values of lam1 and lam2, the simulation time and the number of steps.  The 'PF_PARAMS' variables are discussed below in the section `Parameters <parameters>`_. 
+Using your favorite editor, open the file sdc.nml.  There are two namelists here, ``PF_PARAMS`` and ``PARAMS``.  The second of these is for local variables which in this simple example are just the values of ``lam1`` and ``lam2``, the simulation time and the number of steps.  The ``PF_PARAMS`` variables are discussed below in the section `Parameters <parameters>`_. 
 Any parameter in either list can be overwritten by adding it to the command line, as in
 
 `$ ./main.exe sdc.nml lam1=3.0 niters=10`
@@ -37,10 +41,10 @@ To run an example that does the actual PFASST algorithm
 
 `$ mpirun -n 32 ./main.exe multi_level.nml`
 
-The main program is in ``src/main.f90`` and can be used as a template for building applications using LibPFASST.  The main routine here
+The main program is in `src/main.f90` and can be used as a template for building applications using LibPFASST.  The main routine here
 only initializes MPI, calls a routine ``run_pfasst`` to run the PFASST algorithm, then closes MPI.
 
-The first thing done in ``run_pfasst`` is to read in local problem parameters by calling  the subroutine ``probin_init`` located in ``src/probin.f90``.
+The first thing done in ``run_pfasst`` is to read in local problem parameters by calling  the subroutine ``probin_init`` located in `src/probin.f90`.
 
 .. code-block:: fortran
 		
@@ -48,7 +52,7 @@ The first thing done in ``run_pfasst`` is to read in local problem parameters by
     call probin_init(pf_fname)
 
 This routine also returns the location of the namelist for the PFASST parameters, which in this case will match the location of the local parameters (a different file can be specified if desired).  After
-the MPI based communicator is set up, the routine ``pf_pfasst_create`` is called to allocate the main PFASST structure called 'pf'.  Note that the filename for PFASST parameters is
+the MPI based communicator is set up, the routine ``pf_pfasst_create`` is called to allocate the main PFASST structure called ``pf``.  Note that the filename for PFASST parameters is
 passed to this routine so that it can be read.
 
 .. code-block:: fortran
@@ -77,15 +81,15 @@ The most important part of the initialization in ``run_pfasst`` is the loop over
     end do
 
 The abstract type defining a level must be extended with spatial restriction and
-interpolation operators (in this example, these are the identity operators).  This is done in the file ``src/level.f90``.
-Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, the data type 'ndarray' provided by LibPFASST and corresponding to an N-dimensional array is used.
-In the next Tutorial, a local encapsulation will be demonstrated.  Third, the abstract sweeper type must be extended and assigned to the level. This is done in the file ``src/sweeper.f90`` discussed below.  Finally, the level type carries a one-dimensional integer array to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.
+interpolation operators (in this example, these are the identity operators).  This is done in the file `src/level.f90`.
+Next, the encapsulation of the data type must be specified by assigning its factory.  In this example, the data type ``ndarray`` provided by LibPFASST and corresponding to an N-dimensional array is used.
+In the next Tutorial, a local encapsulation will be demonstrated.  Third, the abstract sweeper type must be extended and assigned to the level. This is done in the file `src/sweeper.f90` discussed below.  Finally, the level type carries a one-dimensional integer array to carry information about the size of the data.  This array must be set, and here the size is simply a one-dimensional array of length 1.
 
    
 The local sweeper type needs to define
 functions to evaluate each term in the IMEX splitting and
 a routine to solve an implicit equation equivalent to a
-backward-Euler step.  These routines are in ``src/sweeper.f90`` and are called
+backward-Euler step.  These routines are in `src/sweeper.f90` and are called
 ``f_eval`` and ``f_comp``.
 
 After the levels are assigned, the rest of the PFASST structure can is made by calling
@@ -116,15 +120,15 @@ The rest is just cleanup.
 Example 2
 ---------
 This example solves exactly the same equation as Example 1, but using more user generated code.
-The main difference is that instead of using the LibPFASST data encapsulation 'ndarray', a local data
-encapsulation called 'scalar_encap' is defined 
+The main difference is that instead of using the LibPFASST data encapsulation ``ndarray``, a local data
+encapsulation called ``scalar_encap`` is defined 
 
 .. code-block:: fortran
 		
        !>  Allocate the user specific data constructor
        allocate(scalar_factory::pf%levels(l)%ulevel%factory)
 
-The relevant code for the factory is in ``src/encap.f90``.       
+The relevant code for the factory is in `src/encap.f90`.       
 
 .. code-block:: fortran
 
@@ -141,7 +145,7 @@ The four required subroutines are in this case trivial since no data structures 
 
 To define a data encapsulation, the user must also provide
 7 subroutines that define actions on the data set corresponding to the procedures in
-``src/encap.f90``.       
+`src/encap.f90`.       
 
 .. code-block:: fortran
 
@@ -157,7 +161,7 @@ To define a data encapsulation, the user must also provide
 
 In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed  by LibPFASST but is included for convenience in debugging.
 
-The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in ``src/sweeper.f90``.
+The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in `src/sweeper.f90`.
 
 .. code-block:: fortran
 
@@ -172,7 +176,7 @@ These two routines will be called instead of the base sweeper initialize and des
     call this%imex_initialize(pf,level_index)
 
 
-Another difference in this example, is that a local hook is defined in the file ``src/hooks.f90`` to print the error to the screen.  It is assigned by
+Another difference in this example, is that a local hook is defined in the file `src/hooks.f90` to print the error to the screen.  It is assigned by
 
 
 .. code-block:: fortran
@@ -183,7 +187,7 @@ Another difference in this example, is that a local hook is defined in the file 
 
 The user can construct custom hooks following this template.
 
-Finally, note that in this example, an optional argument to return the solution at the final time, y_end is included in the call to ``pf_pfasst_run``
+Finally, note that in this example, an optional argument to return the solution at the final time, ``y_end`` is included in the call to ``pf_pfasst_run``
 
 .. code-block:: fortran
 		
@@ -193,7 +197,7 @@ Finally, note that in this example, an optional argument to return the solution 
 
 Example 3
 ---------
-Please see the ``LibPFASST/Tutorials/EX3_adv_diff`` directory included in LibPFASST
+Please see the `LibPFASST/Tutorials/EX3_adv_diff` directory included in LibPFASST
 for a simple PDE application of LibPFASST.
 
 This example solves a 1d linear advection diffusion equation
@@ -207,10 +211,10 @@ where $v$ and $\nu$ are scalars.
 This right hand side of the equation will be split into stiff terms handled implicitly
 (:math:`\nu u_{xx}`) and non-stiff terms handled explicitly (:math:`-v u_x`),
 hence an IMEX SDC substepper will be used to evolve the equation through time.
-As in Example 1, the ndarray encapsulation provided by LibPFASST is used here.
+As in Example 1, the ``ndarray`` encapsulation provided by LibPFASST is used here.
 
-The code in ``src/main.f90`` is almost identical to that of Example 1 except that the size of the ndarray is different and set per level
-from the variable 'nx' read from the local namelist.
+The code in `src/main.f90` is almost identical to that of Example 1 except that the size of the ``ndarray`` is different and set per level
+from the variable ``nx`` read from the local namelist.
 
 .. code-block:: fortran
 		
@@ -228,7 +232,7 @@ In the local definition of the sweeper,  variables are added to facilitate opera
      complex(pfdp), allocatable :: opE(:) ! Explicit spectral operator
      complex(pfdp), allocatable :: opI(:) ! Implicit spectral operator
 
-The first of these is a pointer to the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  ``feval`` and ``f_comp`` the convolution subroutine `conv` is used for either implicit or explicit
+The first of these is a pointer to the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  ``feval`` and ``f_comp`` the convolution subroutine ``conv`` is used for either implicit or explicit
 function evaluations in spectral space, e.g.
 
 .. code-block:: fortran
@@ -236,14 +240,17 @@ function evaluations in spectral space, e.g.
        ! Apply the inverse operator with the FFT convolution
        call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*this%opI),yvec)
 
-In a similar manner, in the local definition of the `level`, the interpolation is done in spectral space while the restriction is just pointwise coarsening.
+In a similar manner, in the local definition of the ``level``, the interpolation is done in spectral space while the restriction is just pointwise coarsening.
 
 When creating an example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.
 
 
 Example 4
 ---------
-In the directory ``LibPFASST/Tutorials/EX4_Boussinesq`` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
+
+.. _tut4:
+
+In the directory `LibPFASST/Tutorials/EX4_Boussinesq` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
 
 .. math::
 
@@ -253,4 +260,4 @@ In the directory ``LibPFASST/Tutorials/EX4_Boussinesq`` is a more complicated ex
 Here (:math:`\omega`) is the vorticity, (:math:`\bf{u}`)  is the velocity, and
 (:math:`\rho`) a density or bouyancy term.  The constants (:math:`\nu`) and (:math:`\kappa`) determine the diffusion terms, and (:math:`g`)  "gravity".
 
-The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called "zndsysarray".
+The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called ``zndsysarray``.  Using the input file `tg.nml`, will run a special case with an exact solution and report errors.

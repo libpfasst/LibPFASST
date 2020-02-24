@@ -31,7 +31,7 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.todo',
+              'sphinx.ext.todo','sphinx.ext.intersphinx',
               'sphinx.ext.mathjax']
 #              'sphinxfortran.fortran_domain','sphinxfortran.fortran_autodoc']
 

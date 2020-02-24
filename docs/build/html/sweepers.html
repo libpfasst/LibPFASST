@@ -45,18 +45,19 @@
   <div class="section" id="sweepers">
 <h1>Sweepers<a class="headerlink" href="#sweepers" title="Permalink to this headline">¶</a></h1>
 <p>Under construction!</p>
-<p>LibPFASST contains several sweeper types for solving different types of equations.  These are contained in <code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that contain <code class="docutils literal notranslate"><span class="pre">sweeper</span></code> in the name.</p>
+<p>LibPFASST contains several sweeper types for solving different types of equations.  These are contained in <cite>src/</cite> within module files that contain <cite>sweeper</cite> in the name.</p>
 <ul class="simple">
-<li><p>imex:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</p></li>
-<li><p>misdc: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</p></li>
-<li><p>exp:  Exponential integrator</p></li>
-<li><p>imk:  Implicit Munthe-Kass Runge-Kutta integrators</p></li>
-<li><p>magpicard:   Magnus  integrator based on Picard iterations</p></li>
-<li><p>verlet:   Verlet type integrator for 2nd-order Hamiltonian equations</p></li>
-<li><p>imex_oc:  Optimal control version of imex</p></li>
-<li><p>misdc_oc:  Optimal control version of misdc</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">imex</span></code>:  Semi-implicit or IMEX integrator for equations with an implicit  and explicit splitting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">misdc</span></code>: Multi-implicit integrator for equations with an two implicit  and 1 explicit splitting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exp</span></code>:  Exponential integrator</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fexp</span></code>:  Faster exponential integrator suitable for spectral space problems</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">imk</span></code>:  Implicit Munthe-Kass Runge-Kutta integrators</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">magpicard</span></code>:   Magnus  integrator based on Picard iterations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verlet</span></code>:   Verlet type integrator for 2nd-order Hamiltonian equations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">imex_oc</span></code>:  Optimal control version of imex</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">misdc_oc</span></code>:  Optimal control version of misdc</p></li>
 </ul>
-<p>For historical reasons, there are two versions of some of these sweepers, with a <cite>Q</cite> denoting the more modern version that can utilize DIRK style sweepers.</p>
+<p>For historical reasons, there are two versions of some of these sweepers, with a <code class="docutils literal notranslate"><span class="pre">Q</span></code> denoting the more modern version that can utilize DIRK style sweepers.</p>
 </div>
 
 

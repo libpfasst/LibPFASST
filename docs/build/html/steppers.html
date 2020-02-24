@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Steepers &#8212; LIBPFASST 1.1 documentation</title>
+    <title>Steppers &#8212; LIBPFASST 1.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -42,15 +42,15 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="steepers">
-<h1>Steepers<a class="headerlink" href="#steepers" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="steppers">
+<h1>Steppers<a class="headerlink" href="#steppers" title="Permalink to this headline">¶</a></h1>
 <p>Under construction!</p>
 <p>LibPFASST contains two stepper types which execute Runge-Kutta time steps over an interval.
 These are usually applied during a Parareal implementation, but can also be called to initialize the coarsest level in PFASST
-These are contained in <code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that contain <code class="docutils literal notranslate"><span class="pre">sweeper</span></code> in the name.</p>
+These are contained in <cite>src/</cite> within module files that contain <cite>sweeper</cite> in the name.</p>
 <ul class="simple">
-<li><p>rkstepper: IMEX Runge-Kutta integrator for equations with an implicit  and explicit splitting</p></li>
-<li><p>erkstepper: Exponential Runge-Kutta integrator for equations that can be split into
+<li><p><code class="docutils literal notranslate"><span class="pre">rkstepper</span></code>: IMEX Runge-Kutta integrator for equations with an implicit  and explicit splitting</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">erkstepper</span></code>: Exponential Runge-Kutta integrator for equations that can be split into
 linear and nonlinear terms</p></li>
 </ul>
 </div>

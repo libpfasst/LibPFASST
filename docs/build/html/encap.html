@@ -19,7 +19,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="next" title="Output" href="output.html" />
-    <link rel="prev" title="Steepers" href="steppers.html" /> 
+    <link rel="prev" title="Steppers" href="steppers.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -31,7 +31,7 @@
           <a href="output.html" title="Output"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="steppers.html" title="Steepers"
+          <a href="steppers.html" title="Steppers"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>
@@ -46,21 +46,22 @@
 <h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Permalink to this headline">¶</a></h1>
 <p>!  Under construction</p>
 <p>The temporal integration routines in LibPFASST do not specify the form of the solution in terms of its data layout, but rather this must be described by an encapsulation module which tells LibPFASST how to operate on the data.  For convenience LibPFASST provides sample encapsulations corresponding to regular Fortran arrays. These are provided in
-<code class="docutils literal notranslate"><span class="pre">src/</span></code> with names that include <code class="docutils literal notranslate"><span class="pre">encap</span></code></p>
+<cite>src/</cite> within module files whose names  include <cite>encap</cite>.</p>
 <p>Curently, the provided encaps include</p>
 <ul class="simple">
-<li><p>ndarray:  An N-dimensional array</p></li>
-<li><p>ndsysarray: System of ndarrays</p></li>
-<li><p>zndarray: An N-dimensional complex array</p></li>
-<li><p>zndsysarray: System of complex ndarrays</p></li>
-<li><p>ndarray_oc:  Optimal control version of ndarray</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ndarray</span></code>:  An N-dimensional array</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ndsysarray</span></code>: System of ndarrays</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">zndarray</span></code>: An N-dimensional complex array</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">zndsysarray</span></code>: System of complex ndarrays</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ndarray_oc</span></code>:  Optimal control version of ndarray</p></li>
 </ul>
 <p>A discussion of how to construct an encapsulation is included in the 2nd tutorial.
 The advanced user might also consider the encapsulations</p>
-<p><a href="#id1"><span class="problematic" id="id2">*</span></a>petscVec:  uses the standard Vec structure from PETSc
-<a href="#id3"><span class="problematic" id="id4">*</span></a>hamsys:    provides encapsulation of two Hamiltonian variables for
-Verlet sweepers
-<a href="#id5"><span class="problematic" id="id6">*</span></a>amrex:  based on the multifab structure from the AMReX code (under construction)</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">petscVec</span></code>:  uses the standard Vec structure from PETSc</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hamsys</span></code>:    provides encapsulation of two Hamiltonian variables for Verlet sweepers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amrex</span></code>:  based on the multifab structure from the AMReX code (under construction)</p></li>
+</ul>
 </div>
 
 
@@ -71,7 +72,7 @@ Verlet sweepers
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="steppers.html"
-                        title="previous chapter">Steepers</a></p>
+                        title="previous chapter">Steppers</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="output.html"
                         title="next chapter">Output</a></p>
@@ -106,7 +107,7 @@ Verlet sweepers
           <a href="output.html" title="Output"
              >next</a> |</li>
         <li class="right" >
-          <a href="steppers.html" title="Steepers"
+          <a href="steppers.html" title="Steppers"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
       </ul>

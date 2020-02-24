@@ -5,7 +5,9 @@ You can obtain a copy of LibPFASST through the
 
 `PFASST@lbl.gov project page`_
 
-or directly from `github`_.
+or directly from `github`_ as in
+
+`$ git clone https://github.com/libpfasst/LibPFASST.git`
 
 In either case, you will get the source code for the library, Makefiles, tutorials, and the files from which the documentation is made.
 

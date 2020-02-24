@@ -58,22 +58,26 @@ or Ubuntu machines, we recommend MPICH2:</p>
 <p>The user may have to change the compiler and compiler flags defined in Makefile.local and
 ‘Makefile.defaults’.</p>
 <p>The first three flags correspond to the compilers and linkers.  These can be changed to correspond to those used on your system.</p>
-<p>FC = mpiffort
-CC = mpicc
-LD= $(FC)
-AR = ar rcs</p>
+<p>FC = mpiffort</p>
+<p>CC = mpicc</p>
+<p>LD= $(FC)</p>
+<p>AR = ar rcs</p>
 <p>Some optional flags are</p>
 <p>DEBUG = FALSE</p>
 <p>which if made true will add many diagnostic flags to the build, and</p>
 <p>MKVERBOSE=FALSE</p>
 <p>which if made true will show more info in the build steps.  These can also both be changed on the command line as in</p>
 <blockquote>
-<div><p>make MKVERBOSE=TRUE DEBUG=TRUE</p>
+<div><p><cite>$ make MKVERBOSE=TRUE DEBUG=TRUE</cite></p>
 </div></blockquote>
 <p>There is a Fortran dependency file included called .depend.  If you want to remake this, it can be done using the makedpef90 package by uncommenting out the appropriate lines in Makefile.rules and typing</p>
-<p>make depend</p>
+<blockquote>
+<div><p><cite>$ make depend</cite></p>
+</div></blockquote>
 <p>Finally, one can type</p>
-<p>make clean</p>
+<blockquote>
+<div><p><cite>$ make clean</cite></p>
+</div></blockquote>
 <p>to remove all intermediate files and start from scratch.</p>
 </div>
 

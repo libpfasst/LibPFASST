@@ -36,7 +36,7 @@ Types of parameters
 pfasst static parameters
 ---------------------------
 
-The parameters at the top of the file ``src/pf_dtype.f90`` are all set
+The parameters at the top of the file `src/pf_dtype.f90` are all set
 at compile time and can't be changed at runtime.  The only parameter
 here of interest to the user is
 
@@ -50,7 +50,7 @@ least all those using ``pfdp`` in the declaration).
 Mandatory pfasst parameters
 ---------------------------
 
-The parameters defined in type ``pf_pfasst_t`` in ``src/pf_dtype.f90``
+The parameters defined in type ``pf_pfasst_t`` in `src/pf_dtype.f90`
 are all given a default value.  Currently only the variable
 ``nlevels`` is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory
@@ -176,8 +176,8 @@ Finally, ``qend`` is also optional and returns the final solution.
   File input for user variables
   -----------------------------
 
-  The  default input file is "probin.nml" wherein the namelist
-  PARAMS (defined locally in probin.f90) can be specified.
+  The  default input file is `probin.nml` wherein the namelist
+  PARAMS (defined locally in `probin.f90`) can be specified.
   Alternatively, a different input file can be specified on the command
   line by adding the file name directly after the executable.  The
   alternative input file must be specified first before any command line
@@ -188,12 +188,12 @@ File input for pfasst  variables
 --------------------------------
 
 The pfasst parameters are specified in a namelist ``PF_PARAMS``
-defined in routine ``pf_read_opts`` in ``src/pf_options.f90``.  This
-routine is called from ``pf_pfasst_create`` in ``pf_pfasst.f90``
+defined in routine ``pf_read_opts`` in `src/pf_options.f90`.  This
+routine is called from ``pf_pfasst_create`` in `src/pf_pfasst.f90`
 (which is typically called when initializing PFASST).  If no file is
 specified in the call to ``pf_pfasst_create``, then no file is read.
 Typically the main routine specifies this input file (the default
-being probin.nml), and this file can be changed by specifying the
+being `probin.nml`), and this file can be changed by specifying the
 value of
 
   pfasst_nml = "my_file.nml"
@@ -213,7 +213,7 @@ caveat to this in that any parameters must be specified after the
 
   mpirun -n 20 main.exe  myinput.nml niters=10
 
-would set the input file to "myinput.nml" and then over-ride any
+would set the input file to `myinput.nml` and then over-ride any
 specified value of niters with the value 10. Command line options
 over-ride input files values.
 
@@ -228,41 +228,41 @@ differences in how the predictor performs.
 
 Some cases:
 
-#. If PFASST_pred is false and pipeline_pred is false, then the predictor
-   is a serial application of SDC with nsweeps_pred sweeps.  This can be done
+#. If ``PFASST_pred`` is false and ``pipeline_pred`` is false, then the predictor
+   is a serial application of SDC with ``nsweeps_pred`` sweeps.  This can be done
    without communication wherein every processor mimics the behavior
    of the processors previous to it in time.
 
-#. If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is one,
+#. If ``PFASST_pred`` is false and ``pipeline_pred`` is true and ``nsweeps_pred`` is one,
    then the predictor is a serial application of SDC with 1 sweep.  As
    above, there is no communication necessary.
 
-#. If PFASST_pred is false and pipeline_pred is true and nsweeps_pred is
+#. If ``PFASST_pred`` is false and ``pipeline_pred`` is true and ``nsweeps_pred`` is
    greater than one, then the predictor is a version of pipelined
    SDC. There is no communication necessary until the second sweep on
    each processor is done.  After that, each processor must
    recieve a new initial value before each new sweep.
 
-#. If PFASST_pred is true, and nsweeps_pred equals one, then it doesn't
-   matter what pipeline_pred is.  No communication is necessary, and we
+#. If ``PFASST_pred`` is true, and ``nsweeps_pred`` equals one, then it doesn't
+   matter what ``pipeline_pred`` is.  No communication is necessary, and we
    simply reuse the function values from the previous iteration in
    each SDC sweep.  Some care must be taken here as to how to
-   interpret the variable t0 especially in light of time dependent
+   interpret the variable ``t0`` especially in light of time dependent
    boundary conditions.  Currently t0 does not change in these
-   iterations, hence one should use caution using PFASST_pred = true
+   iterations, hence one should use caution using ``PFASST_pred`` equal true
    with time dependent boundary conditions.
 
-#. If PFASST_pred is true, and nsweeps_pred is greater than one and
-   pipeline_pred is true, then the predictor will act like the normal
-   PFASST_pred with nsweeps equals one, but more iterations will be
+#. If ``PFASST_pred`` is true, and ``nsweeps_pred`` is greater than one and
+   ``pipeline_pred`` is true, then the predictor will act like the normal
+   ``PFASST_pred`` with ``nsweeps`` equals one, but more iterations will be
    taken.  This choice is a bit strange.  No communication is needed
    until each processor is doing the P+1st iteration, then new initial
    data must be used and in all cases, previous f values are used in
-   the SDCsweeps.  The caveat about t0 is still valid.
+   the SDC sweeps.  The caveat about ``t0`` is still valid.
 
-#. Finally, if PFASST_pred is true, and nsweeps_pred is greater than one
-   and pipeline_pred is false, then the predictor will act like the
-   normal PFASST_pred with nsweeps equals one, but additional
+#. Finally, if ``PFASST_pred`` is true, and ``nsweeps_pred`` is greater than one
+   and ``pipeline_pred`` is false, then the predictor will act like the
+   normal ``PFASST_pred`` with nsweeps equals one, but additional
    iterations are taken before the initial conditions at each
    processor are reset.  This can be done without communication.  The
    caveat about t0 is still valid.
