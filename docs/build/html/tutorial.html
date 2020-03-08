@@ -224,12 +224,12 @@ function evaluations in spectral space, e.g.</p>
 </div>
 <div class="section" id="example-4">
 <h2>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h2>
-<p id="tut4">In the directory <cite>LibPFASST/Tutorials/EX4_Boussinesq</cite> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form</p>
+<p id="tut4">In the directory <cite>LibPFASST/Tutorials/EX4_Boussinesq</cite> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity stream-function formulation</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \omega - g\rho_x \\
 \rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho\end{split}\]</div>
 <p>Here (<span class="math notranslate nohighlight">\(\omega\)</span>) is the vorticity, (<span class="math notranslate nohighlight">\(\bf{u}\)</span>)  is the velocity, and
-(<span class="math notranslate nohighlight">\(\rho\)</span>) a density or bouyancy term.  The constants (<span class="math notranslate nohighlight">\(\nu\)</span>) and (<span class="math notranslate nohighlight">\(\kappa\)</span>) determine the diffusion terms, and (<span class="math notranslate nohighlight">\(g\)</span>)  “gravity”.</p>
+(<span class="math notranslate nohighlight">\(\rho\)</span>) a density or bouyancy term.  The constants (<span class="math notranslate nohighlight">\(\nu\)</span>) and (<span class="math notranslate nohighlight">\(\kappa\)</span>) determine the diffusion terms, and (<span class="math notranslate nohighlight">\(g\)</span>) is  “gravity”.</p>
 <p>The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called <code class="docutils literal notranslate"><span class="pre">zndsysarray</span></code>.  Using the input file <cite>tg.nml</cite>, will run a special case with an exact solution and report errors.</p>
 </div>
 </div>

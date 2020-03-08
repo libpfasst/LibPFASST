@@ -250,7 +250,7 @@ Example 4
 
 .. _tut4:
 
-In the directory `LibPFASST/Tutorials/EX4_Boussinesq` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity-function form
+In the directory `LibPFASST/Tutorials/EX4_Boussinesq` is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity stream-function formulation
 
 .. math::
 
@@ -258,6 +258,6 @@ In the directory `LibPFASST/Tutorials/EX4_Boussinesq` is a more complicated exam
   \rho_t  = - (\bf{u} \cdot \nabla)\rho + \kappa \nabla^2 \rho
 
 Here (:math:`\omega`) is the vorticity, (:math:`\bf{u}`)  is the velocity, and
-(:math:`\rho`) a density or bouyancy term.  The constants (:math:`\nu`) and (:math:`\kappa`) determine the diffusion terms, and (:math:`g`)  "gravity".
+(:math:`\rho`) a density or bouyancy term.  The constants (:math:`\nu`) and (:math:`\kappa`) determine the diffusion terms, and (:math:`g`) is  "gravity".
 
 The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called ``zndsysarray``.  Using the input file `tg.nml`, will run a special case with an exact solution and report errors.
