@@ -206,7 +206,7 @@ This example solves a 1d linear advection diffusion equation
 
   u_t  = - v u_x + \nu u_{xx},
 
-where (:math:`v') and (:math:`\nu') are scalars.  
+where (:math:`v`) and (:math:`\nu`) are scalars.  
 
 This right hand side of the equation will be split into stiff terms handled implicitly
 (:math:`\nu u_{xx}`) and non-stiff terms handled explicitly (:math:`-v u_x`),
