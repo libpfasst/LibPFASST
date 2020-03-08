@@ -193,7 +193,7 @@ for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
 <div class="math notranslate nohighlight">
 \[u_t  = - v u_x + \nu u_{xx},\]</div>
-<p>where $v$ and $nu$ are scalars.</p>
+<p>where (<span class="math notranslate nohighlight">\(v') and (:math:\)</span>nu’) are scalars.</p>
 <p>This right hand side of the equation will be split into stiff terms handled implicitly
 (<span class="math notranslate nohighlight">\(\nu u_{xx}\)</span>) and non-stiff terms handled explicitly (<span class="math notranslate nohighlight">\(-v u_x\)</span>),
 hence an IMEX SDC substepper will be used to evolve the equation through time.
