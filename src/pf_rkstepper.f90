@@ -83,6 +83,9 @@ contains
     real(pfdp)                               :: t!, tend      !!  Time
     real(pfdp)                               :: dt           !!  Size of each ark step
 
+   class(pf_encap_t), allocatable           :: val0, val1 !! for interpolation
+
+    
     integer :: which, adjStepExpl, mystep, myidx, idxj, inc
     which = 1
     if(present(flags)) which = flags
@@ -94,6 +97,10 @@ contains
 
     ! Allocate space for the right-hand side
     call lev%ulevel%factory%create_single(rhs, lev%index,  lev%shape)
+    
+    call lev%ulevel%factory%create_single(val0, lev%index,  lev%shape)
+    call lev%ulevel%factory%create_single(val1, lev%index,  lev%shape)
+
 
 !     if (which == 2) then
 !       inc = -1
@@ -125,6 +132,12 @@ contains
           if(n==1) then
              call lev%Q(1)%unpack(state(adjStepExpl,:),1)  ! load state solution
              call lev%Q(1)%pack(adjoint(adjStepExpl,:),2)  ! save adjoint sol for later
+             
+!              call val0%unpack(state(adjStepExpl,:),1)
+!              call val1%unpack(state(adjStepExpl-1,:),1)
+!              call val1%axpy(-1.0_pfdp, val0, 1)
+!              call val0%axpy(this%cvec(1), val1)
+!              call lev%Q(1)%copy(val0, 1)
           end if
        else
           mystep = n
@@ -183,6 +196,11 @@ contains
 !              print *, "stage", m, "load substep", lev%nnodes-m-1
 !              call lev%Q(m+1)%unpack(state(adjStepExpl,lev%nnodes-m,:), 1) ! (required for feval later)
              call lev%Q(m+1)%unpack(state(adjStepExpl,:), 1) ! (required for feval later)
+!              call val0%unpack(state(adjStepExpl,:),1)
+! !              call val1%unpack(state(adjStepExpl-1,:),1)
+! !              call val1%axpy(-1.0, val0, 1)
+!              call val0%axpy(this%cvec(m+1), val1)
+!              call lev%Q(m+1)%copy(val0, 1)
           end if
           
           ! Solve the implicit system
@@ -233,8 +251,15 @@ contains
  !        print *, 'assigning value', adjStepExpl-1
          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl-1,:),2) ! store solution value
          call lev%Q(1)%unpack(state(adjStepExpl-1,:), 1)
-!          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl,1,:),2) ! store solution value
-!          call lev%Q(1)%unpack(state(adjStepExpl-1,,lev%nnodes:), 1)
+! !          call lev%Q(lev%nnodes)%pack(adjoint(adjStepExpl,1,:),2) ! store solution value
+! !          call lev%Q(1)%unpack(state(adjStepExpl-1,,lev%nnodes:), 1)
+!         if(adjStepExpl-1 > 0) then
+!           call val0%unpack(state(adjStepExpl-1,:),1)
+!           call val1%unpack(state(adjStepExpl-2,:),1)
+!           call val1%axpy(-1.0_pfdp, val0, 1)
+!           call val0%axpy(this%cvec(1), val1)
+!           call lev%Q(1)%copy(val0, 1)
+!         end if
        else
          call lev%Q(lev%nnodes)%pack(state(n+1,:), 1)
 !          call lev%Q(lev%nnodes)%pack(state(n,lev%nnodes,:), 1)

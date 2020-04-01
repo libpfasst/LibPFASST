@@ -124,12 +124,12 @@ contains
        endif  !  RK_pred
     end if  ! (q0_style .eq. 0)
 
-    if (pf%q0_style > 0) then
-      my_coarse_sweeps = pf%rank+1 ! for warm start do pipelining
-      if(which == 2) my_coarse_sweeps = pf%comm%nproc-pf%rank
-    else
+!     if (pf%q0_style > 0) then
+!       my_coarse_sweeps = pf%rank+1 ! for warm start do pipelining
+!       if(which == 2) my_coarse_sweeps = pf%comm%nproc-pf%rank
+!     else
       my_coarse_sweeps = c_lev_p%nsweeps_pred
-    end if
+!     end if
 
     ! Step 4: Now we have everyone burned in, so do some coarse sweeps
     ! Modification: each processor does sweeps according to its rank

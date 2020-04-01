@@ -67,6 +67,7 @@ contains
 
     !> interpolate corrections in time
     call pf_apply_mat(f_lev_p%Q, 1.0_pfdp, f_lev_p%tmat, cf_delta, .false., flags)
+    ! Q: do we have to use apply_mat_backward for adjoint?
 
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
