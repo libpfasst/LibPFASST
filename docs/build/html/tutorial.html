@@ -67,8 +67,8 @@ This example solves the  scalar model problem or Dahlquist equation</p>
 Any parameter in either list can be overwritten by adding it to the command line, as in</p>
 <p><cite>$ ./main.exe sdc.nml lam1=3.0 niters=10</cite></p>
 <p>The order of the command line parameters is not important except that they must come after the input file is specified.</p>
-<p>To run an example that does the actual PFASST algorithm</p>
-<p><cite>$ mpirun -n 32 ./main.exe multi_level.nml</cite></p>
+<p>To run an example that does the actual PFASST algorithm using 8 processors</p>
+<p><cite>$ mpirun -n 8  ./main.exe multi_level.nml</cite></p>
 <p>The main program is in <cite>src/main.f90</cite> and can be used as a template for building applications using LibPFASST.  The main routine here
 only initializes MPI, calls a routine <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> to run the PFASST algorithm, then closes MPI.</p>
 <p>The first thing done in <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> is to read in local problem parameters by calling  the subroutine <code class="docutils literal notranslate"><span class="pre">probin_init</span></code> located in <cite>src/probin.f90</cite>.</p>

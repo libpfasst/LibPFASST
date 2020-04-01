@@ -37,9 +37,9 @@ Any parameter in either list can be overwritten by adding it to the command line
 
 The order of the command line parameters is not important except that they must come after the input file is specified.
 
-To run an example that does the actual PFASST algorithm
+To run an example that does the actual PFASST algorithm using 8 processors
 
-`$ mpirun -n 32 ./main.exe multi_level.nml`
+`$ mpirun -n 8  ./main.exe multi_level.nml`
 
 The main program is in `src/main.f90` and can be used as a template for building applications using LibPFASST.  The main routine here
 only initializes MPI, calls a routine ``run_pfasst`` to run the PFASST algorithm, then closes MPI.
