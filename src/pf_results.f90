@@ -62,12 +62,6 @@ contains
     if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)                   
     pf%results%iters = niters  
 
-    !  Set up the directory to dump results
-    istat= system('mkdir -p dat')  !  May be there already
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make dat directory dat in initialize_results")       
-    istat= system('mkdir -p dat/' // trim(pf%outdir))       
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make base directory in initialize_results")
-
     datpath= 'dat/' // trim(pf%outdir) // '/'
 
     ! Create directory for this processor

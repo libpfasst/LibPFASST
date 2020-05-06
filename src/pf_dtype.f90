@@ -310,6 +310,7 @@ module pf_mod_dtype
      logical :: save_residuals = .true.  !!  Will save residuals every time they are set
      logical :: save_delta_q0 = .true.   !!  Will save change in initial condition
      logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
+     logical :: save_json = .true.       !!  Will save a jason file of run parameters
      integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
 
      integer :: rank    = -1            !! rank of current processor
