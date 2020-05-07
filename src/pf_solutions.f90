@@ -625,7 +625,7 @@ contains
 
     real(pfdp) :: sigma,xx
     complex(pfdp) :: ae,dn
-    sigma=0.2_pfdp
+    sigma=0.02_pfdp
     xx=(x-Lx*0.5_pfdp)/(sigma*Lx)   
     u=exp(-(xx*xx*xx*xx))
 

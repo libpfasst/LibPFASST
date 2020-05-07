@@ -105,7 +105,7 @@ contains
     iname = trim(this%datpath) // '/iter.dat'
     istream=8000+this%rank
     open(istream, file=trim(iname), form='formatted',err=999)
-
+    write(rstream,*)'#level   step     block  iter  sweep   residual'
     do klevel=1,this%nlevs
        do kblock = 1, this%nblocks
           nstep=(kblock-1)*this%nprocs+this%rank+1
@@ -118,7 +118,7 @@ contains
           end do
        enddo
     enddo
-    101 format(I3,I10, I10,I5, I4, e22.14)
+    101 format(I3,I10, I10,I6, I6, e22.14)
     if (this%save_residuals) close(rstream)
     if (this%save_errors) close(estream)
     if (this%save_delta_q0) close(qstream)

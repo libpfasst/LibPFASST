@@ -360,7 +360,7 @@ contains
     integer    ::  nsweeps_burn, q0_style, taui0
     logical    ::  Vcycle,use_pysdc_V,Finterp, use_LUq, use_Sform
     logical    :: debug, use_rk_stepper, use_sdc_sweeper, sweep_at_conv
-    logical    :: save_residuals, save_errors
+    logical    :: save_residuals,save_delta_q0, save_errors
     integer    :: save_timings
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
@@ -377,7 +377,7 @@ contains
     !> define the namelist for reading
     namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
+    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals,save_delta_q0, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
     namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
 
     !> set local variables to pf_pfasst defaults
@@ -402,6 +402,7 @@ contains
     outdir       = 'outdir'
     debug        = pf%debug
     save_residuals = pf%save_residuals
+    save_delta_q0 = pf%save_delta_q0
     save_errors = pf%save_errors
     save_timings = pf%save_timings
 
@@ -460,6 +461,7 @@ contains
     pf%outdir       = outdir
     pf%debug        = debug
     pf%save_residuals = save_residuals
+    pf%save_delta_q0 = save_delta_q0
     pf%save_timings = save_timings
     pf%save_errors = save_errors
 
@@ -676,6 +678,7 @@ contains
     write(un,123)  '"Vcycle" :',             convert_logical(pf%Vcycle), ','
     write(un,123)  '"RK_pred" :',            convert_logical(pf%RK_pred), ','
     write(un,123)  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
+    write(un,123)  '"save_delta_q0" :',      convert_logical(pf%save_delta_q0), ','
     write(un,122)  '"save_timings" :',       pf%save_timings, ','
     write(un,123)  '"save_errors" :',        convert_logical(pf%save_errors), ','    
     write(un,123)  '"debug" :',                 convert_logical(pf%debug),','    

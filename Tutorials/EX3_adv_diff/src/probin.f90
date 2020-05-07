@@ -18,6 +18,7 @@ module probin
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: nsteps          ! number of time steps
   integer, save :: imex_stat       ! type of imex splitting
+  integer, save :: ic_type         ! specifies the initial condition
 
   character(len=128), save :: pfasst_nml
 
@@ -27,7 +28,7 @@ module probin
 
   integer :: ios,iostat
   namelist /params/  nx, nsteps, dt, Tfin
-  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat
+  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ic_type
 
 contains
 
@@ -52,6 +53,7 @@ contains
     Tfin    = 0.0_pfdp
     Lx      = 1.0_pfdp
     imex_stat=2    !  Default is full IMEX
+    ic_type=1      !  Default is a sine wave    
     pfasst_nml=probin_fname
 
     !>  Read in stuff from input file
@@ -110,6 +112,7 @@ contains
     case DEFAULT
        print *,'Bad case for imex_stat in probin ', imex_stat
        call exit(0)
+    write(un,*) 'ic_type:    ', ic_type, '! which initial condition'
     end select
 
     
