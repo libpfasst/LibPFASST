@@ -314,6 +314,11 @@ contains
           do i = 2, nx
              ilap(i) = dx*dx/(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))
           end do
+       case (4)
+          dx=this%Lx/real(nx,pfdp)
+          do i = 2, nx
+             ilap(i) = (12.0_pfdp*dx*dx)/(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))
+          end do
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
@@ -326,7 +331,7 @@ contains
     complex(pfdp), intent(inout) :: ilap(:,:)
     integer, intent(in),optional :: order
     integer     :: i,j,nx,ny,local_order
-    real(pfdp) :: dx,dy
+    real(pfdp) :: dx,dy,kk
     local_order=0
     if (present(order)) local_order = order
 
@@ -355,6 +360,20 @@ contains
                 ilap(i,j) = dx*dx/(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx)) + dy*dy/(-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))
              end do
           end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do j = 1, ny
+             do i = 1, nx
+                kk=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                     + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy)
+                if (abs(kk) .gt. 0.0) then
+                   ilap(i,j) = 1.0_pfdp/kk
+                else
+                   ilap(i,j) = 0.0_pfdp
+                end if
+             end do
+          end do
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
@@ -380,7 +399,7 @@ contains
              do j = 1, ny
                 do i = 1, nx
                    kk=-this%kx(i)**2-this%ky(j)**2-this%kz(k)**2                     
-                   if (kk .gt. 0.0) then
+                   if (abs(kk) .gt. 0.0) then
                       ilap(i,j,k) = 1.0_pfdp/kk
                    else
                       ilap(i,j,k) = 0.0_pfdp !    This sets DC component
@@ -396,7 +415,25 @@ contains
              do j = 1, ny
                 do i = 1, nx
                    kk=(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)+ (-2.0_pfdp+2.0_pfdp*cos(this%kz(k)*dz))/(dz*dz)
-                   if (kk .gt. 0.0) then
+                   if (abs(kk) .gt. 0.0) then
+                      ilap(i,j,k) = 1.0_pfdp/kk
+                   else
+                      ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+                   end if
+                end do
+             end do
+          end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   kk=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%kz(k)*dz)-2.0_pfdp*cos(2.0_pfdp*this%kz(k)*dz))/(12.0_pfdp*dz*dz)
+                   if (abs(kk) .gt. 0.0) then
                       ilap(i,j,k) = 1.0_pfdp/kk
                    else
                       ilap(i,j,k) = 0.0_pfdp !    This sets DC component
@@ -431,6 +468,11 @@ contains
           do i = 2, nx
              lap(i) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx)
           end do
+       case (4)
+          dx=this%Lx/real(nx,pfdp)
+          do i = 2, nx
+             lap(i) = (-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx)
+          end do
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
@@ -464,6 +506,15 @@ contains
              do i = 1, nx
                 lap(i,j) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)
              end do
+          end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do j = 1, ny
+             do i = 1, nx
+                   lap(i,j)=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) 
+               end do
           end do
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
@@ -504,6 +555,19 @@ contains
                 end do
              end do
           end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   lap(i,j,k)=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%kz(k)*dz)-2.0_pfdp*cos(2.0_pfdp*this%kz(k)*dz))/(12.0_pfdp*dz*dz)
+                end do
+             end do
+          end do
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
@@ -531,6 +595,10 @@ contains
       case (2)
          do i = 1, nx
             ddx(i) = (0.0_pfdp, 1.0_pfdp) * sin(dx*this%kx(i))/dx
+         end do
+      case (4)
+         do i = 1, nx
+            ddx(i) = (0.0_pfdp, 1.0_pfdp) * (-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
          end do
       case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
@@ -572,6 +640,18 @@ contains
             dy=this%Ly/real(ny,pfdp)            
             do j = 1, ny
                deriv(:,j) = (0.0_pfdp,1.0_pfdp)*sin(this%ky(j)*dx)/dy
+            end do
+         endif
+      case(4)
+         if (dir .eq. 1) then
+            dx=this%Lx/real(nx,pfdp)            
+            do i = 1, nx
+               deriv(i,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
+            end do
+         else
+            dy=this%Ly/real(ny,pfdp)            
+            do j = 1, ny
+               deriv(:,j) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dy*this%ky(j))+16.0_pfdp*sin(dy*this%ky(j)))/(12.0_pfdp*dy)
             end do
          endif
       case DEFAULT
@@ -628,6 +708,26 @@ contains
                dz=this%Lz/real(nz,pfdp)
                do k = 1, nz
                   deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*sin(this%kz(k)*dz)/dz
+               end do
+            case DEFAULT
+               call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
+            end select
+         case(4)
+            select case (dir)
+            case (1)  
+               dx=this%Lx/real(nx,pfdp)
+               do i = 1, nx
+                  deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
+               end do
+            case (2)
+               dy=this%Ly/real(ny,pfdp)
+               do j = 1, ny
+                  deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dy*this%ky(j))+16.0_pfdp*sin(dy*this%ky(j)))/(12.0_pfdp*dy)
+               end do
+            case (3)
+               dz=this%Lz/real(nz,pfdp)
+               do k = 1, nz
+                  deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dz*this%kz(k))+16.0_pfdp*sin(dz*this%kz(k)))/(12.0_pfdp*dz)
                end do
             case DEFAULT
                call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
