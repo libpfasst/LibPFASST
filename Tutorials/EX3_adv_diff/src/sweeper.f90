@@ -47,7 +47,7 @@ contains
 
   !>  Routine to initialize sweeper (bypasses imex sweeper initialize)
   subroutine initialize(this, pf,level_index)
-    use probin, only:  imex_stat, v ,nu
+    use probin, only:  imex_stat, v ,nu,fd_ord
     class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t),   intent(inout),target :: pf
     integer,             intent(in)    :: level_index
@@ -81,8 +81,8 @@ contains
     !>  Define spectral derivatitive operators
     allocate(lap(nx))
     allocate(ddx(nx))
-    call this%fft_tool%make_lap(lap)
-    call this%fft_tool%make_deriv(ddx)
+    call this%fft_tool%make_lap(lap,fd_ord)
+    call this%fft_tool%make_deriv(ddx,fd_ord)
     
     !> Allocate operators for implicit and explicit parts
     allocate(this%opE(nx))
