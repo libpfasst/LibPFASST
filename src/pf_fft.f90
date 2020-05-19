@@ -459,23 +459,23 @@ contains
     nx=this%nx
 
     select case (local_order)
-       case (0)
-          do i = 2, nx
-             lap(i) = -(this%kx(i)**2)
-          end do
-       case (2)
-          dx=this%Lx/real(nx,pfdp)
-          do i = 2, nx
-             lap(i) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx)
-          end do
-       case (4)
-          dx=this%Lx/real(nx,pfdp)
-          do i = 2, nx
-             lap(i) = (-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx)
-          end do
-       case DEFAULT
-          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
-       end select
+    case (0)
+       do i = 2, nx
+          lap(i) = -(this%kx(i)**2)
+       end do
+    case (2)
+       dx=this%Lx/real(nx,pfdp)
+       do i = 2, nx
+          lap(i) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx)
+       end do
+    case (4)
+       dx=this%Lx/real(nx,pfdp)
+       do i = 2, nx
+          lap(i) = (-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx)
+       end do
+    case DEFAULT
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+    end select
  
     
   end subroutine make_lap_1d

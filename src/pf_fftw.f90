@@ -207,13 +207,19 @@ contains
     end select
   end subroutine fftb
   
-  subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
+  subroutine interp_1d(this, yvec_c, fft_f,yvec_f,order)
     class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:)
     real(pfdp), intent(in),     pointer :: yvec_c(:)
     type(pf_fft_t),intent(in),  pointer :: fft_f
+    integer, intent(in),optional :: order
+    
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
-    integer :: nx_f, nx_c
+    integer :: nx_f, nx_c,local_order
+
+    local_order=0
+    if (present(order)) local_order = order
+
 
     nx_f = SIZE(yvec_f)
     nx_c = SIZE(yvec_c)
@@ -222,16 +228,33 @@ contains
        return
     end if
 
-    call this%get_wk_ptr(wk_c)
-    call fft_f%get_wk_ptr(wk_f)
-    
-    wk_c=yvec_c
-
-    call this%fftf()       !  internal forward fft call    
-    call this%zinterp_1d(wk_c, wk_f)
-    call fft_f%fftb()     !  internal inverse fft call
-
-    yvec_f=REAL(wk_f,pfdp)     !  grab the real part
+   select case (local_order)
+   case (0)
+      call this%get_wk_ptr(wk_c)
+      call fft_f%get_wk_ptr(wk_f)
+      
+      wk_c=yvec_c
+      
+      call this%fftf()       !  internal forward fft call    
+      call this%zinterp_1d(wk_c, wk_f)
+      call fft_f%fftb()     !  internal inverse fft call
+      
+      yvec_f=REAL(wk_f,pfdp)     !  grab the real part
+   case (2)  !  This is for 2nd order Finite Difference in periodic domains
+      yvec_f(1:nx_f-1:2)=yvec_c
+      yvec_f(2:nx_f-2:2)=(yvec_c(1:nx_c-1)+yvec_c(2:nx_c))*0.5_pfdp
+      yvec_f(nx_f)=(yvec_f(1) + yvec_f(nx_f-1))*0.5_pfdp
+   case (4)
+      if (nx_c .lt. 4) call pf_stop(__FILE__,__LINE__,'Coarse grid too small in interp_2d ',nx_c)
+      yvec_f(1:nx_f-1:2)=yvec_c
+      yvec_f(4:nx_f-4:2)=(-yvec_c(1:nx_c-3)+9.0_pfdp*(yvec_c(2:nx_c-2)+yvec_c(3:nx_c-1)) -yvec_c(4:nx_c) )*0.0625_pfdp
+      yvec_f(2)=         (-yvec_f(nx_f-1)  +9.0_pfdp*(yvec_f(1)      + yvec_f(3)     )-yvec_f(5))*0.0625_pfdp         
+      yvec_f(nx_f)=      (-yvec_f(3)       +9.0_pfdp*(yvec_f(1)      + yvec_f(nx_f-1))-yvec_f(nx_f-3))*0.0625_pfdp
+      yvec_f(nx_f-2)=    (-yvec_f(1)       +9.0_pfdp*(yvec_f(nx_f-1) + yvec_f(nx_f-3))-yvec_f(nx_f-5))*0.0625_pfdp
+   case DEFAULT
+      call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+   end select
+     
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
