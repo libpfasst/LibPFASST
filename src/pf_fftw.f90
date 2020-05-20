@@ -335,6 +335,8 @@ contains
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
     yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
+    yhat_f(nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
+    yhat_f(nx_f-nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
     
   end subroutine zinterp_1d
   subroutine zinterp_2d(this, yhat_c, yhat_f)
