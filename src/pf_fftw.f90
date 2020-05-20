@@ -246,23 +246,17 @@ contains
       yvec_f(nx_f)=(yvec_f(1) + yvec_f(nx_f-1))*0.5_pfdp
    case (4)
       if (nx_c .lt. 4) call pf_stop(__FILE__,__LINE__,'Coarse grid too small in interp_1d ',nx_c)
+      c2=-1.0_pfdp/16.0_pfdp
+      c1= 9.0_pfdp/16.0_pfdp
       yvec_f(1:nx_f-1:2)=yvec_c
-      yvec_f(4:nx_f-4:2)=(-yvec_c(1:nx_c-3)+9.0_pfdp*(yvec_c(2:nx_c-2)+yvec_c(3:nx_c-1)) -yvec_c(4:nx_c) )*0.0625_pfdp
-      yvec_f(2)=         (-yvec_f(nx_f-1)  +9.0_pfdp*(yvec_f(1)      + yvec_f(3)     )-yvec_f(5))*0.0625_pfdp         
-      yvec_f(nx_f)=      (-yvec_f(3)       +9.0_pfdp*(yvec_f(1)      + yvec_f(nx_f-1))-yvec_f(nx_f-3))*0.0625_pfdp
-      yvec_f(nx_f-2)=    (-yvec_f(1)       +9.0_pfdp*(yvec_f(nx_f-1) + yvec_f(nx_f-3))-yvec_f(nx_f-5))*0.0625_pfdp
+      yvec_f(2:nx_f:2)=c2*(cshift(yvec_c,-1)+cshift(yvec_c,2))+c1*(yvec_c+cshift(yvec_c,1))      
    case (6)
       if (nx_c .lt. 6) call pf_stop(__FILE__,__LINE__,'Coarse grid too small in interp_1d ',nx_c)
-      c1=  3.0_pfdp/256.0_pfdp
+      c3=  3.0_pfdp/256.0_pfdp
       c2=-25.0_pfdp/256.0_pfdp
-      c3= 75.0_pfdp/128.0_pfdp
+      c1= 75.0_pfdp/128.0_pfdp
       yvec_f(1:nx_f-1:2)=yvec_c
-      yvec_f(6:nx_f-6:2)=c1*(yvec_c(1:nx_c-5)+yvec_c(6:nx_c)) +c2*(yvec_c(2:nx_c-4)+yvec_c(5:nx_c-1)) +c3*(yvec_c(3:nx_c-3)+yvec_c(4:nx_c-2))
-      yvec_f(2)=c1*(yvec_f(nx_f-3)+yvec_f(7)) +c2*(yvec_f(nx_f-1)+yvec_f(5)) +c3*(yvec_f(1)+yvec_f(3))         
-      yvec_f(4)=c1*(yvec_f(nx_f-1)+yvec_f(9)) +c2*(yvec_f(1)+yvec_f(7)) +c3*(yvec_f(3)+yvec_f(5))         
-      yvec_f(nx_f)=c1*(yvec_f(5)+yvec_f(nx_f-5)) +c2*(yvec_f(3)+yvec_f(nx_f-3)) +c3*(yvec_f(1)+yvec_f(nx_f-1))         
-      yvec_f(nx_f-2)=c1*(yvec_f(3)+yvec_f(nx_f-7)) +c2*(yvec_f(1)+yvec_f(nx_f-5)) +c3*(yvec_f(nx_f-1)+yvec_f(nx_f-3))         
-      yvec_f(nx_f-4)=c1*(yvec_f(1)+yvec_f(nx_f-9)) +c2*(yvec_f(nx_f-1)+yvec_f(nx_f-7)) +c3*(yvec_f(nx_f-3)+yvec_f(nx_f-5))         
+      yvec_f(2:nx_f:2)=c3*(cshift(yvec_c,-2)+cshift(yvec_c,3))+c2*(cshift(yvec_c,-1)+cshift(yvec_c,2))+c1*(yvec_c+cshift(yvec_c,1))
    case DEFAULT
       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
    end select
