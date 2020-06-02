@@ -9,5 +9,10 @@ FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none
 else
-FFLAGS += -O3 
+FFLAGS += -O3
+endif
+
+ifeq ($(GCC10),TRUE)
+FFLAGS += -fallow-argument-mismatch
+F77FLAGS += -fallow-argument-mismatch
 endif
