@@ -12,6 +12,7 @@ else
 FFLAGS += -O3
 endif
 
+F77FLAGS =
 ifeq ($(GCC10),TRUE)
 FFLAGS += -fallow-argument-mismatch
 F77FLAGS += -fallow-argument-mismatch
