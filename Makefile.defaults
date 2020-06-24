@@ -7,7 +7,7 @@ DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
-USE_FFTW=FALSE
+USE_FFTW=TRUE
 
 #  File for compiler options
 include $(LIBPFASST)/Makefile.local
@@ -15,6 +15,7 @@ include $(LIBPFASST)/Makefile.local
 
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
+LDFLAGS +=  -L$(LIBPFASST)/libnpy/ -lnpy
 
 #  Source files
 FSRC = src/pfasst.f90 \
