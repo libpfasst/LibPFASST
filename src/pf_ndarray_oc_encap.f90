@@ -420,11 +420,12 @@ contains
 
 !    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
 !         qend%ndim, qend%arr_shape, SIZE(qend%yflatarray), qend%yflatarray)
-    !call save_double (trim(pf%outdir)//c_null_char, trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, shape(qend), real(qend%yflatarray,pfdp))
 
-!    write(fnamep, "('p_s',i0.2,'i',i0.3,'l',i0.2,'.npy')") &
-!         pf%state%step, pf%state%iter, level_index
-!
+
+    write(fnamep, "('p_s',i0.2,'i',i0.3,'l',i0.2,'.npy')") &
+         pf%state%step, pf%state%iter, level_index
+
+
 !    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char, trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
 !         qend%ndim, qend%arr_shape, SIZE(qend%pflatarray), qend%pflatarray)
   end subroutine ndarray_oc_dump_hook
@@ -445,15 +446,12 @@ contains
       write(fnamey, "('y_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
            pf%state%step, level_index, m
 
- !     call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamey)//c_null_char, '<f8'//c_null_char//c_null_char, &
- !          qend%ndim, qend%arr_shape, SIZE(qend%yflatarray), qend%yflatarray)
+
 
       write(fnamep, "('p_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
            pf%state%step, level_index, m
 
-  !    call ndarray_dump_numpy(trim(pf%outdir)//c_null_char,trim(fnamep)//c_null_char, '<f8'//c_null_char//c_null_char, &
-  !         qend%ndim, qend%arr_shape, SIZE(qend%pflatarray), qend%pflatarray)
-   end do
+
 
   end subroutine ndarray_oc_dump_all_hook
 

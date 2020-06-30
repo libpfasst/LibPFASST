@@ -62,7 +62,7 @@ contains
     call initialize_results(pf)
 
     !  do sanity checks on Nproc
-    if (mod(nsteps,nproc) > 0) call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps)
+    if (mod(nsteps_loc,nproc) > 0) call pf_stop(__FILE__,__LINE__,'nsteps must be multiple of nproc ,nsteps=',nsteps_loc)
 
     !>  Try to sync everyone
     call mpi_barrier(pf%comm%comm, ierr)
@@ -74,11 +74,10 @@ contains
     else
        call pf_block_run(pf, q0, dt,  nsteps_loc,q0,flags=flags)
     end if
+
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
-
-    call dump_results(pf%results)
-    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
-
+    !  Output stats
+    call pf_dump_stats(pf)
 
     !  What we would like to do is check for
     !  1.  nlevels==1  and nprocs ==1 -> Serial SDC

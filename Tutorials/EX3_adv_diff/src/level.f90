@@ -24,6 +24,7 @@ module my_level
   !>  Interpolate from coarse  level to fine using FFT
   subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     use my_sweeper, only: my_sweeper_t, as_my_sweeper
+    use probin, only: interp_ord
     
     class(my_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
@@ -52,12 +53,12 @@ module my_level
     nx_c = size(yvec_c)
     irat  = nx_f / nx_c
 
-    !>  If 
+
     if (irat == 1) then !  Identity map
        yvec_f = yvec_c   
        return
     elseif (irat == 2) then  !  Use spectral space
-       call fft_c%interp(yvec_c,fft_f,yvec_f)
+       call fft_c%interp(yvec_c,fft_f,yvec_f,interp_ord)
     end if
 
   end subroutine interpolate

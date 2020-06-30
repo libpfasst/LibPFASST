@@ -388,13 +388,13 @@ contains
 
     nterms = 100
     u=0.0_pfdp
-    xs=x*two_pi/Lx       
-    ts=t*two_pi/Lx       
+    xs=x
+    ts=t
 
     if (t .gt. 0.0_pfdp) then
        do n =  nterms,1,-1
           rn = REAL(n,pfdp)
-          u=u - 2.0_pfdp*bessel_jn(n,rn*ts)/(rn*ts)*sin(rn*xs)
+          u=u - 2.0_pfdp*bessel_jn(n,nu*rn*ts)/(rn*ts)*sin(rn*xs)
        end do
     else
        u=-sin(xs)    
@@ -625,7 +625,7 @@ contains
 
     real(pfdp) :: sigma,xx
     complex(pfdp) :: ae,dn
-    sigma=0.2_pfdp
+    sigma=0.02_pfdp
     xx=(x-Lx*0.5_pfdp)/(sigma*Lx)   
     u=exp(-(xx*xx*xx*xx))
 

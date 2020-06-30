@@ -7,7 +7,7 @@ DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
-USE_FFTW=FALSE
+USE_FFTW=TRUE
 
 #  File for compiler options
 include $(LIBPFASST)/Makefile.local
@@ -15,6 +15,7 @@ include $(LIBPFASST)/Makefile.local
 
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
+LDFLAGS +=  -L$(LIBPFASST)/libnpy/ -lnpy
 
 #  Source files
 FSRC = src/pfasst.f90 \
@@ -91,7 +92,7 @@ endif
 #  These are displayed at the end of the petsc configuration step
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
-FSRC+= pf_petscVec_encap.f90
+FSRC+= src/pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
 

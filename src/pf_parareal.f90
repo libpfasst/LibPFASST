@@ -65,16 +65,20 @@ contains
     !>  Try to sync everyone
     call mpi_barrier(pf%comm%comm, ierr)
 
+    !> Start timer
     if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
        call pf_parareal_block_run(pf, q0, dt, nsteps_loc,qend=qend)
     else
        call pf_parareal_block_run(pf, q0, dt,  nsteps_loc)
     end if
+
+    !> End timer    
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
-    call dump_results(pf%results)
-    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
+    !>  Output stats
+    call pf_dump_stats(pf)
+
 
   end subroutine pf_parareal_run
 
@@ -303,8 +307,8 @@ contains
     !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
-
-    !  Finish the parareal update (store in coarse qend) F_old-G_old+G_new
+    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+    !  Finish the parareal update (store in fine qend) F_old-G_old+G_new
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
     !  Send new solution  forward  (nonblocking)

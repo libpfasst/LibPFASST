@@ -409,8 +409,9 @@ contains
     call call_hooks(pf, -1, PF_POST_BLOCK)
 
     
-    !  call pf_dump_results(pf)
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    ! call dump_results(pf%results)
+    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
   end subroutine pf_pfasst_block_oc
 
   subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c,level_index_f, flags)

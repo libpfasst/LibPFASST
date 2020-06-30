@@ -62,12 +62,6 @@ contains
     if (istat /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',istat)                   
     pf%results%iters = niters  
 
-    !  Set up the directory to dump results
-    istat= system('mkdir -p dat')  !  May be there already
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make dat directory dat in initialize_results")       
-    istat= system('mkdir -p dat/' // trim(pf%outdir))       
-    if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make base directory in initialize_results")
-
     datpath= 'dat/' // trim(pf%outdir) // '/'
 
     ! Create directory for this processor
@@ -111,7 +105,7 @@ contains
     iname = trim(this%datpath) // '/iter.dat'
     istream=8000+this%rank
     open(istream, file=trim(iname), form='formatted',err=999)
-
+    write(rstream,*)'#level   step     block  iter  sweep   residual'
     do klevel=1,this%nlevs
        do kblock = 1, this%nblocks
           nstep=(kblock-1)*this%nprocs+this%rank+1
@@ -124,7 +118,7 @@ contains
           end do
        enddo
     enddo
-    101 format(I3,I10, I10,I5, I4, e22.14)
+    101 format(I3,I10, I10,I6, I6, e22.14)
     if (this%save_residuals) close(rstream)
     if (this%save_errors) close(estream)
     if (this%save_delta_q0) close(qstream)

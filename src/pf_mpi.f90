@@ -153,11 +153,11 @@ contains
 
     
     if (blocking) then
-       call mpi_send(level%send, level%mpibuflen, myMPI_Datatype, &
+       call mpi_ssend(level%send, level%mpibuflen, myMPI_Datatype, &
                      dest, tag, pf%comm%comm, stat, ierror)
     else
 
-       call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
+       call mpi_issend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send

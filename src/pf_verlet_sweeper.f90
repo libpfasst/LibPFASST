@@ -57,6 +57,8 @@ module pf_mod_verlet
      procedure :: compute_dt => verlet_compute_dt
      procedure :: evaluate_all => verlet_evaluate_all
      procedure :: destroy   => verlet_destroy
+     procedure :: verlet_destroy
+     procedure :: verlet_initialize
   end type pf_verlet_t
 
   interface

@@ -47,7 +47,7 @@ contains
 
   !>  Routine to initialize sweeper (bypasses imex sweeper initialize)
   subroutine initialize(this, pf,level_index)
-    use probin, only:  imex_stat, v ,nu
+    use probin, only:  imex_stat, v ,nu,fd_ord
     class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t),   intent(inout),target :: pf
     integer,             intent(in)    :: level_index
@@ -81,8 +81,8 @@ contains
     !>  Define spectral derivatitive operators
     allocate(lap(nx))
     allocate(ddx(nx))
-    call this%fft_tool%make_lap(lap)
-    call this%fft_tool%make_deriv(ddx)
+    call this%fft_tool%make_lap(lap,fd_ord)
+    call this%fft_tool%make_deriv(ddx,fd_ord)
     
     !> Allocate operators for implicit and explicit parts
     allocate(this%opE(nx))
@@ -220,14 +220,17 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nu, v,kfreq,Lx
+    use probin, only: nu, v,kfreq,Lx,ic_type
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
 
     !  Call exact solution from Libpfasst for ad problem
-    !    call exact_ad_cos_1d(t,yex,nu,v,[kfreq],Lx)
-    call exact_ad_cos(t,yex,nu,v,kfreq,Lx)    
+    if (ic_type .eq. 1) then
+       call exact_ad_cos(t,yex,nu,v,kfreq,Lx)  ! Cosine wave
+    else
+       call exact_ad_exp(t,yex,nu,v,Lx)   !  Exponential
+    endif
   end subroutine exact
 
 

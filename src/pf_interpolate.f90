@@ -73,7 +73,6 @@ contains
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
        do p = 1,SIZE(c_lev%F(1,:))
-          print *,'p in interp',p
           do m = 1, c_lev%nnodes
              call f_lev%c_delta(m)%setval(0.0_pfdp, flags)
              call f_lev%cf_delta(m)%setval(0.0_pfdp, flags)
