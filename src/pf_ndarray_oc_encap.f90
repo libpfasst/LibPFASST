@@ -451,7 +451,7 @@ contains
       write(fnamep, "('p_s',i0.2,'l',i0.2,'m',i0.2,'.npy')") &
            pf%state%step, level_index, m
 
-
+   end do
 
   end subroutine ndarray_oc_dump_all_hook
 
