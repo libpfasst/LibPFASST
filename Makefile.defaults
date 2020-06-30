@@ -7,7 +7,7 @@ DEBUG = FALSE
 MKVERBOSE = FALSE
 USE_PETSC=FALSE
 USE_SUNDIALS=FALSE
-USE_FFTW=TRUE
+USE_FFTW=FALSE
 
 #  File for compiler options
 include $(LIBPFASST)/Makefile.local

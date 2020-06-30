@@ -12,31 +12,31 @@ jobs:
                 name: make_tests
                 command: >
                   echo "Compiling Libfasst"  &&
-                  make  DEBUG=TRUE &&
+                  make  DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling magpicard" &&		  
-                  cd test/magpicard &&  make &&
+                  cd test/magpicard &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling imk"	&&	  
-                  cd ../imk &&  make &&
+                  cd ../imk &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling nagumo"		  
-                  cd ../nagumo && make &&
+                  cd ../nagumo && make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling IMEX"	&&	  
-                  cd ../EXP_adv_diff_fft/1d && make &&
+                  cd ../EXP_adv_diff_fft/1d && make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   cd ../../.. 
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
                   echo "Making Tutorial 1"	&&	  		
-                  cd Tutorials/EX1_Dahlquist &&  make &&
+                  cd Tutorials/EX1_Dahlquist &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Running Tutorial 1"	&&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Making Tutorial 2"	&&	  		
-                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE &&
+                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Running Tutorial 2" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Checking Tutorial 3" &&	  		
                   cd ../EX3_adv_diff && 
                   echo "Making Tutorial 3"   &&	  		
-                  cd ../EX3_adv_diff &&  make &&
+                  cd ../EX3_adv_diff &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Running tutorial 3" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Done with Tutorials" &&	  		
