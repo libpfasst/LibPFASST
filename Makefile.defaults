@@ -91,7 +91,7 @@ endif
 #  These are displayed at the end of the petsc configuration step
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
-FSRC+= pf_petscVec_encap.f90
+FSRC+= src/pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
 
