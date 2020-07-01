@@ -15,7 +15,7 @@ include $(LIBPFASST)/Makefile.local
 
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
-LDFLAGS +=  -L$(LIBPFASST)/libnpy/ -lnpy
+#LDFLAGS +=  -L$(LIBPFASST)/libnpy/ -lnpy
 
 #  Source files
 FSRC = src/pfasst.f90 \
