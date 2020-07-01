@@ -5,14 +5,17 @@ jobs:
             - image: libpfasst/libpfasst
         steps:
             - checkout
+            - run: # Modify the commands below to build all the tests
+                name: make_LibPFASST
+                command: >
+                  echo "Compiling Libfasst"  &&
+                  make  DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE 
             - run:
-                name: env_links
+                name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
             - run: # Modify the commands below to build all the tests
                 name: make_tests
                 command: >
-                  echo "Compiling Libfasst"  &&
-                  make  DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling magpicard" &&		  
                   cd test/magpicard &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Compiling imk"	&&	  
