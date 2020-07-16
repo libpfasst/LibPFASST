@@ -83,7 +83,7 @@ else
 FSRC+=src/pf_fftw.f90
 FFTW=$(LIBPFASST)/fftw3
 FFLAGS  +=  -I$(FFTW)/include
-LDFLAGS += -L$(FFTW)/lib -lfftw3
+LDFLAGS += -L$(FFTW)/lib -L$(FFTW)/lib64 -lfftw3
 endif
 
 
