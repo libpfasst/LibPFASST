@@ -207,13 +207,17 @@ contains
     end select
   end subroutine fftb
   
-  subroutine interp_1d(this, yvec_c, fft_f,yvec_f)
+  subroutine interp_1d(this, yvec_c, fft_f,yvec_f,order)
     class(pf_fft_t), intent(inout) :: this
     real(pfdp), intent(inout),  pointer :: yvec_f(:)
     real(pfdp), intent(in),     pointer :: yvec_c(:)
     type(pf_fft_t),intent(in),  pointer :: fft_f
+    integer, intent(in),optional :: order
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
-    integer :: nx_f, nx_c
+    integer :: nx_f, nx_c,local_order
+    real :: c1,c2,c3
+    local_order=0
+    if (present(order)) local_order = order
 
     nx_f = SIZE(yvec_f)
     nx_c = SIZE(yvec_c)
@@ -222,6 +226,8 @@ contains
        return
     end if
 
+   select case (local_order)
+   case (0)
     call this%get_wk_ptr(wk_c)
     call fft_f%get_wk_ptr(wk_f)
     
@@ -232,6 +238,26 @@ contains
     call fft_f%fftb()     !  internal inverse fft call
 
     yvec_f=REAL(wk_f,pfdp)     !  grab the real part
+   case (2)  !  This is for 2nd order Finite Difference in periodic domains
+      yvec_f(1:nx_f-1:2)=yvec_c
+      yvec_f(2:nx_f-2:2)=(yvec_c(1:nx_c-1)+yvec_c(2:nx_c))*0.5_pfdp
+      yvec_f(nx_f)=(yvec_f(1) + yvec_f(nx_f-1))*0.5_pfdp
+   case (4)
+      if (nx_c .lt. 4) call pf_stop(__FILE__,__LINE__,'Coarse grid too small in interp_1d ',nx_c)
+      c2=-1.0_pfdp/16.0_pfdp
+      c1= 9.0_pfdp/16.0_pfdp
+      yvec_f(1:nx_f-1:2)=yvec_c
+      yvec_f(2:nx_f:2)=c2*(cshift(yvec_c,-1)+cshift(yvec_c,2))+c1*(yvec_c+cshift(yvec_c,1))      
+   case (6)
+      if (nx_c .lt. 6) call pf_stop(__FILE__,__LINE__,'Coarse grid too small in interp_1d ',nx_c)
+      c3=  3.0_pfdp/256.0_pfdp
+      c2=-25.0_pfdp/256.0_pfdp
+      c1= 75.0_pfdp/128.0_pfdp
+      yvec_f(1:nx_f-1:2)=yvec_c
+      yvec_f(2:nx_f:2)=c3*(cshift(yvec_c,-2)+cshift(yvec_c,3))+c2*(cshift(yvec_c,-1)+cshift(yvec_c,2))+c1*(yvec_c+cshift(yvec_c,1))
+   case DEFAULT
+      call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+   end select
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)
@@ -306,6 +332,8 @@ contains
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
     yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
+    yhat_f(nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
+    yhat_f(nx_f-nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
     
   end subroutine zinterp_1d
   subroutine zinterp_2d(this, yhat_c, yhat_f)

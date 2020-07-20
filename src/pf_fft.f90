@@ -293,30 +293,55 @@ contains
   end subroutine zconv_3d
 
   !  Make the inverse of the Laplacian in spectral space
-  subroutine make_ilap_1d(this, ilap)
+  subroutine make_ilap_1d(this, ilap,order)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: ilap(:)
+    integer, intent(in),optional :: order
     
-    integer     :: i,nx
+    integer     :: i,nx,local_order
+    real(pfdp) :: dx
+    local_order=0
+    if (present(order)) local_order = order
     
     nx=this%nx
-    ilap(1) = 0.0_pfdp !    This sets DC component    
+    ilap(1) = 0.0_pfdp !    This sets DC component    '
+    select case (local_order)
+       case (0)
     do i = 2, nx
        ilap(i) = -1.0_pfdp/(this%kx(i)**2)
     end do
+       case (2)
+          dx=this%Lx/real(nx,pfdp)
+          do i = 2, nx
+             ilap(i) = dx*dx/(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))
+          end do
+       case (4)
+          dx=this%Lx/real(nx,pfdp)
+          do i = 2, nx
+             ilap(i) = (12.0_pfdp*dx*dx)/(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))
+          end do
+       case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
     
   end subroutine make_ilap_1d
   
-  subroutine make_ilap_2d(this, ilap)
+  subroutine make_ilap_2d(this, ilap,order)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: ilap(:,:)
     
-    integer     :: i,j,nx,ny
+    integer, intent(in),optional :: order
+    integer     :: i,j,nx,ny,local_order
+    real(pfdp) :: dx,dy,kk
+    local_order=0
+    if (present(order)) local_order = order
     
     nx=this%nx
     ny=this%ny
     
     ilap(1,1) = 0.0_pfdp !    This sets DC component
+    select case (local_order)
+       case (0)
     do i = 2, nx
        ilap(i,1) = -1.0_pfdp/(this%kx(i)**2)       
     end do
@@ -325,97 +350,295 @@ contains
           ilap(i,j) = -1.0_pfdp/(this%kx(i)**2+this%ky(j)**2)
        end do
     end do
+       case(2)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do i = 2, nx
+             ilap(i,1) = dx*dx/(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))
+          end do
+          do j = 2, ny
+             do i = 1, nx
+                ilap(i,j) = dx*dx/(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx)) + dy*dy/(-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))
+             end do
+          end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do j = 1, ny
+             do i = 1, nx
+                kk=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                     + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy)
+                if (abs(kk) .gt. 0.0) then
+                   ilap(i,j) = 1.0_pfdp/kk
+                else
+                   ilap(i,j) = 0.0_pfdp
+                end if
+             end do
+          end do
+       case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
   end subroutine make_ilap_2d
   
-  subroutine make_ilap_3d(this, ilap)
+  subroutine make_ilap_3d(this, ilap,order)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: ilap(:,:,:)
+    integer, intent(in),optional :: order
     
-    integer     :: i,j,k,nx,ny,nz
+    integer     :: i,j,k,nx,ny,nz,kk,local_order
+    real(pfdp) :: dx,dy,dz
+    local_order=0
+    if (present(order)) local_order = order
       
     nx=this%nx
     ny=this%ny
     nz=this%nz
+    select case (local_order)
+       case (0)
     do k = 1,nz
        do j = 1, ny
           do i = 1, nx
-             if (i .eq. 0  .and. j .eq. 0 ) then
+                   kk=-this%kx(i)**2-this%ky(j)**2-this%kz(k)**2                     
+                   if (abs(kk) .gt. 0.0) then
+                      ilap(i,j,k) = 1.0_pfdp/kk
+                   else
                 ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+                   end if
+                end do
+             end do
+          end do
+       case(2)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   kk=(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)+ (-2.0_pfdp+2.0_pfdp*cos(this%kz(k)*dz))/(dz*dz)
+                   if (abs(kk) .gt. 0.0) then
+                      ilap(i,j,k) = 1.0_pfdp/kk
              else
-                ilap(i,j,k) = -1.0_pfdp/(this%kx(i)**2+this%ky(j)**2+this%kz(k)**2)
+                      ilap(i,j,k) = 0.0_pfdp !    This sets DC component
              end if
           end do
        end do
     end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   kk=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%kz(k)*dz)-2.0_pfdp*cos(2.0_pfdp*this%kz(k)*dz))/(12.0_pfdp*dz*dz)
+                   if (abs(kk) .gt. 0.0) then
+                      ilap(i,j,k) = 1.0_pfdp/kk
+                   else
+                      ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+                   end if
+                end do
+             end do
+          end do
+       case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
     
   end subroutine make_ilap_3d
   
-    subroutine make_lap_1d(this, lap)
+  subroutine make_lap_1d(this, lap,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: lap(:)
+    integer, intent(in),optional :: order
       
-      integer     :: i,nx
+    integer     :: i,nx,local_order
+    real(pfdp) :: dx
+    local_order=0
+    if (present(order)) local_order = order
 
       nx=this%nx
-      do i = 1, nx
+    select case (local_order)
+    case (0)
+       do i = 2, nx
          lap(i) = -(this%kx(i)**2)
       end do
+    case (2)
+       dx=this%Lx/real(nx,pfdp)
+       do i = 2, nx
+          lap(i) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx)
+       end do
+    case (4)
+       dx=this%Lx/real(nx,pfdp)
+       do i = 2, nx
+          lap(i) = (-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx)
+       end do
+    case DEFAULT
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+    end select
     end subroutine make_lap_1d
     
-    subroutine make_lap_2d(this, lap)
+  subroutine make_lap_2d(this, lap,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: lap(:,:)
       
-      integer     :: i,j,nx,ny
+    integer, intent(in),optional :: order
+    integer     :: i,j,nx,ny,local_order
+    real(pfdp) :: dx,dy
+    local_order=0
+    if (present(order)) local_order = order
       
       nx=this%nx
       ny=this%ny
+    select case (local_order)
+       case (0)
       do j = 1, ny
          do i = 1, nx
             lap(i,j) = -(this%kx(i)**2+this%ky(j)**2)
          end do
       end do
+       case(2)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do j = 1, ny
+             do i = 1, nx
+                lap(i,j) = (-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)
+             end do
+          end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          do j = 1, ny
+             do i = 1, nx
+                   lap(i,j)=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) 
+               end do
+          end do
+       case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
     end subroutine make_lap_2d
-    subroutine make_lap_3d(this, lap)
+  subroutine make_lap_3d(this, lap,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: lap(:,:,:)
+    integer, intent(in),optional :: order
       
-      integer     :: i,j,k,nx,ny,nz
+    integer     :: i,j,k,nx,ny,nz,local_order
+    real(pfdp) :: dx,dy,dz
+    local_order=0
+    if (present(order)) local_order = order
       
       nx=this%nx
       ny=this%ny
       nz=this%nz
+    select case (local_order)
+       case (0)
       do k = 1,nz
          do j = 1, ny
             do i = 1, nx
-               lap(i,j,k) = -(this%kx(i)**2+this%ky(j)**2+this%kz(k)**2)
+                   lap(i,j,k)=-this%kx(i)**2-this%ky(j)**2-this%kz(k)**2                     
             end do
          end do
       end do
+       case(2)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   lap(i,j,k)=(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)+ (-2.0_pfdp+2.0_pfdp*cos(this%kz(k)*dz))/(dz*dz)
+                end do
+             end do
+          end do
+       case(4)
+          dx=this%Lx/real(nx,pfdp)          
+          dy=this%Ly/real(ny,pfdp)          
+          dz=this%Lz/real(nz,pfdp)          
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
+                   lap(i,j,k)=(-30.0_pfdp+32.0_pfdp*cos(this%kx(i)*dx)-2.0_pfdp*cos(2.0_pfdp*this%kx(i)*dx))/(12.0_pfdp*dx*dx) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%ky(j)*dy)-2.0_pfdp*cos(2.0_pfdp*this%ky(j)*dy))/(12.0_pfdp*dy*dy) &
+                        + (-30.0_pfdp+32.0_pfdp*cos(this%kz(k)*dz)-2.0_pfdp*cos(2.0_pfdp*this%kz(k)*dz))/(12.0_pfdp*dz*dz)
+                end do
+             end do
+          end do
+       case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
       
     end subroutine make_lap_3d
 
-    subroutine make_deriv_1d(this, ddx)
+  !subroutine make_ilap_3d(this, ilap)
+  !  class(pf_fft_abs_t), intent(inout) :: this
+  !  complex(pfdp), intent(inout) :: ilap(:,:,:)
+
+  !  integer     :: i,j,k,nx,ny,nz
+!
+!    nx=this%nx
+!    ny=this%ny
+!    nz=this%nz
+!    do k = 1,nz
+!       do j = 1, ny
+!          do i = 1, nx
+!             if (i .eq. 1  .and. j .eq. 1 ) then !CHECK!
+!                ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+!             else
+!                ilap(i,j,k) = -1.0_pfdp/(this%kx(i)**2+this%ky(j)**2+this%kz(k)**2)
+!             end if
+!          end do
+!       end do
+!    end do
+!
+!  end subroutine make_ilap_3d
+
+
+    subroutine make_deriv_1d(this, ddx,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: ddx(:)
+      integer, intent(in),optional :: order
       
-      integer     :: i,nx
+      integer     :: i,nx,local_order
+      real(pfdp) :: dx
+      local_order=0
+      if (present(order)) local_order = order
       
       nx=this%nx
+      dx=this%Lx/real(nx,pfdp)
+      select case(local_order)
+      case(0)
       do i = 1, nx
          ddx(i) = (0.0_pfdp, 1.0_pfdp) * this%kx(i)
       end do
+      case (2)
+         do i = 1, nx
+            ddx(i) = (0.0_pfdp, 1.0_pfdp) * sin(dx*this%kx(i))/dx
+         end do
+      case (4)
+         do i = 1, nx
+            ddx(i) = (0.0_pfdp, 1.0_pfdp) * (-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
+         end do
+      case DEFAULT
+          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+       end select
     end subroutine make_deriv_1d
-    subroutine make_deriv_2d(this, deriv,dir)
+    subroutine make_deriv_2d(this, deriv,dir,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: deriv(:,:)
       integer, intent(in) :: dir
+      integer, intent(in),optional :: order
       
-      integer     :: i,j,nx,ny
+      integer     :: i,j,nx,ny,local_order
+      real(pfdp) :: dx,dy
+      local_order=0
+      if (present(order)) local_order = order
       
       nx=this%nx
       ny=this%ny
       
+      select case(local_order)
+      case(0)
       if (dir .eq. 1) then
          do i = 1, nx
             deriv(i,:) = (0.0_pfdp,1.0_pfdp)*this%kx(i)
@@ -425,19 +648,52 @@ contains
             deriv(:,j) = (0.0_pfdp,1.0_pfdp)*this%ky(j)
          end do
       endif
+      case(2)
+         if (dir .eq. 1) then
+            dx=this%Lx/real(nx,pfdp)            
+            do i = 1, nx
+               deriv(i,:) = (0.0_pfdp,1.0_pfdp)*sin(this%kx(i)*dx)/dx
+            end do
+         else
+            dy=this%Ly/real(ny,pfdp)            
+            do j = 1, ny
+               deriv(:,j) = (0.0_pfdp,1.0_pfdp)*sin(this%ky(j)*dx)/dy
+            end do
+         endif
+      case(4)
+         if (dir .eq. 1) then
+            dx=this%Lx/real(nx,pfdp)            
+            do i = 1, nx
+               deriv(i,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
+            end do
+         else
+            dy=this%Ly/real(ny,pfdp)            
+            do j = 1, ny
+               deriv(:,j) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dy*this%ky(j))+16.0_pfdp*sin(dy*this%ky(j)))/(12.0_pfdp*dy)
+            end do
+         endif
+      case DEFAULT
+         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
+      end select
     end subroutine make_deriv_2d
 
-    subroutine make_deriv_3d(this, deriv,dir)
+    subroutine make_deriv_3d(this, deriv,dir,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: deriv(:,:,:)
       integer, intent(in) :: dir
+      integer, intent(in),optional :: order
       
-      integer     :: i,j,k,nx,ny,nz
+      integer     :: i,j,k,nx,ny,nz,local_order
+      real(pfdp) :: dx,dy,dz
+      local_order=0
+      if (present(order)) local_order = order
       
       nx=this%nx
       ny=this%ny
       nz=this%nz       
       
+      select case(local_order)
+         case (0)
       select case (dir)
       case (1)  
          do i = 1, nx
@@ -453,6 +709,49 @@ contains
          end do
       case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
+            end select
+         case(2)
+            select case (dir)
+            case (1)  
+               dx=this%Lx/real(nx,pfdp)
+               do i = 1, nx
+                  deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*sin(this%kx(i)*dx)/dx
+               end do
+            case (2)
+               dy=this%Ly/real(ny,pfdp)
+               do j = 1, ny
+                  deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*sin(this%ky(j)*dy)/dy
+               end do
+            case (3)
+               dz=this%Lz/real(nz,pfdp)
+               do k = 1, nz
+                  deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*sin(this%kz(k)*dz)/dz
+               end do
+            case DEFAULT
+               call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
+            end select
+         case(4)
+            select case (dir)
+            case (1)  
+               dx=this%Lx/real(nx,pfdp)
+               do i = 1, nx
+                  deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dx*this%kx(i))+16.0_pfdp*sin(dx*this%kx(i)))/(12.0_pfdp*dx)
+               end do
+            case (2)
+               dy=this%Ly/real(ny,pfdp)
+               do j = 1, ny
+                  deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dy*this%ky(j))+16.0_pfdp*sin(dy*this%ky(j)))/(12.0_pfdp*dy)
+               end do
+            case (3)
+               dz=this%Lz/real(nz,pfdp)
+               do k = 1, nz
+                  deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*(-2.0_pfdp*sin(2.0_pfdp*dz*this%kz(k))+16.0_pfdp*sin(dz*this%kz(k)))/(12.0_pfdp*dz)
+               end do
+            case DEFAULT
+               call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
+            end select
+         case DEFAULT
+            call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
       end select
 
     end subroutine make_deriv_3d
