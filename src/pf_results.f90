@@ -65,8 +65,9 @@ contains
     datpath= 'dat/' // trim(pf%outdir) // '/'
 
     ! Create directory for this processor
-    write (dirname, "(A5,I0.3)") 'Proc_',pf%results%rank
-    datpath=trim(datpath) // trim(dirname) 
+    write (dirname, "(A5,I0.4)") 'Proc_',pf%results%rank
+    datpath=trim(datpath) // trim(dirname)
+
     istat= system('mkdir -p ' // trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make Proc directory")
     !  Final path for all the stat files

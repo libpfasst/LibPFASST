@@ -263,6 +263,7 @@ module pf_mod_dtype
 
      !>  ===  Optional pfasst parameters ====
      integer :: niters  = 5             !! number of PFASST iterations to do
+     integer :: MINiters  = 0           !! MIN number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
      logical :: use_proper_nodes =  .false.
      logical :: use_composite_nodes = .false.
@@ -312,6 +313,7 @@ module pf_mod_dtype
      logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
      logical :: save_json = .true.       !!  Will save a jason file of run parameters
      integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
+     integer :: save_solutions  = 0      !!  0=none, 1=end, 2=all time steps, 3=all iterations
 
      integer :: rank    = -1            !! rank of current processor
 

@@ -350,7 +350,7 @@ contains
     character(len=*),  intent(in   ), optional :: fname
     
     ! local versions of pfasst parameters
-    integer :: niters, nlevels, qtype
+    integer :: niters, MINiters,nlevels, qtype
     integer :: nsweeps(PF_MAXLEVS)
     integer :: nsweeps_pred(PF_MAXLEVS) 
     integer :: nnodes(PF_MAXLEVS)
@@ -361,7 +361,7 @@ contains
     logical    ::  Vcycle,use_pysdc_V,Finterp, use_LUq, use_Sform
     logical    :: debug, use_rk_stepper, use_sdc_sweeper, sweep_at_conv
     logical    :: save_residuals,save_delta_q0, save_errors
-    integer    :: save_timings
+    integer    :: save_timings, save_solutions
     logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
     
     ! stuff for reading the command line
@@ -375,14 +375,16 @@ contains
 
     
     !> define the namelist for reading
-    namelist /pf_params/ niters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, abs_res_tol, rel_res_tol
+    namelist /pf_params/ niters,MINiters, nlevels, qtype, nsweeps, nsweeps_pred, nnodes, abs_res_tol, rel_res_tol
     namelist /pf_params/ PFASST_pred, RK_pred, pipeline_pred, nsweeps_burn, q0_style, taui0
-    namelist /pf_params/ Vcycle,Finterp, use_LUq, use_Sform, debug, save_timings,save_residuals,save_delta_q0, save_errors, use_rk_stepper, use_sdc_sweeper,sweep_at_conv,use_pysdc_V
-    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, outdir
+    namelist /pf_params/ Vcycle,Finterp,  debug, save_timings,save_residuals,save_delta_q0, save_errors, save_solutions
+    namelist /pf_params/ use_sdc_sweeper,sweep_at_conv,use_pysdc_V,use_LUq, use_Sform
+    namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, use_rk_stepper, outdir
 
     !> set local variables to pf_pfasst defaults
     nlevels      = pf%nlevels
     niters       = pf%niters
+    MINiters     = pf%MINiters
     qtype        = pf%qtype
     nsweeps      = pf%nsweeps
     nsweeps_pred = pf%nsweeps_pred
@@ -404,6 +406,7 @@ contains
     save_residuals = pf%save_residuals
     save_delta_q0 = pf%save_delta_q0
     save_errors = pf%save_errors
+    save_solutions = pf%save_solutions
     save_timings = pf%save_timings
 
 
@@ -441,6 +444,7 @@ contains
     !> re-assign the pfasst internals
     pf%nlevels      = nlevels
     pf%niters       = niters
+    pf%MINiters     = MINiters
     pf%qtype        = qtype
     pf%nsweeps      = nsweeps
     pf%nsweeps_pred = nsweeps_pred
@@ -464,6 +468,7 @@ contains
     pf%save_delta_q0 = save_delta_q0
     pf%save_timings = save_timings
     pf%save_errors = save_errors
+    pf%save_solutions = save_solutions
 
     pf%use_rk_stepper=use_rk_stepper
     pf%use_sdc_sweeper=use_sdc_sweeper
@@ -514,13 +519,19 @@ contains
     write(un,*) 'Output directory: ', trim(pf%outdir)    
     write(un,*) 'Nprocs:      ', pf%comm%nproc, '! number of pfasst "time" processors'
     write(un,*) 'Nlevels:     ', pf%nlevels, '! number of levels'
+    if(pf%use_sdc_sweeper) then
+       write(un,*) 'Niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
+       write(un,*) 'MINiters:    ', pf%MINiters, '! Minimum number of sdc/pfasst iterations'
+    else
+       write(un,*) 'Niters:      ', pf%niters, '! maximum number of parareal iterations'
+       write(un,*) 'MINiters:    ', pf%MINiters, '! Minimum number of parareal iterations'
+    end if
     if (pf%use_sdc_sweeper) then
        if (pf%comm%nproc == 1) then
           write(un,*) '            ', '             ', ' ! since 1 time proc is being used, this is a serial sdc run'
        else
           write(un,*) '            ', '             ', ' ! since >1 time procs are being used, this is a parallel pfasst run'
        end if
-       write(un,*) 'Niters:      ', pf%niters, '! maximum number of sdc/pfasst iterations'
        write(un,*) 'Nnodes:      ', pf%levels(1:pf%nlevels)%nnodes, '! number of sdc nodes per level'
        write(un,*) 'Nsweeps:     ', pf%levels(1:pf%nlevels)%nsweeps, '! number of sdc sweeps performed per visit to each level'
        write(un,*) 'Nsweeps_pred:     ', pf%levels(1:pf%nlevels)%nsweeps_pred, '! number of sdc sweeps in predictor'
@@ -652,6 +663,7 @@ contains
     write(un,122)  '"nsteps" :',      pf%state%nsteps, ','
     write(un,122)  '"nlevels" :',     pf%nlevels, ','
     write(un,122)  '"niters" :',      pf%niters, ','
+    write(un,122)  '"miniters" :',    pf%miniters, ','
     write(un,123)  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
     write(un,122)  '"q0_style" :',    pf%q0_style, ','
     write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
@@ -680,6 +692,7 @@ contains
     write(un,123)  '"save_residuals" :',     convert_logical(pf%save_residuals), ','
     write(un,123)  '"save_delta_q0" :',      convert_logical(pf%save_delta_q0), ','
     write(un,122)  '"save_timings" :',       pf%save_timings, ','
+    write(un,122)  '"save_solutions" :',     pf%save_solutions, ','
     write(un,123)  '"save_errors" :',        convert_logical(pf%save_errors), ','    
     write(un,123)  '"debug" :',                 convert_logical(pf%debug),','    
     write(un,"(A24,A64)")  '"outdir" : ',       adjustr('"'//trim(pf%outdir)//'"')
