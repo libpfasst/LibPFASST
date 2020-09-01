@@ -17,7 +17,7 @@ subroutine echo_error_hook(pf, level_index)
 !     type(pf_state_t),    intent(in)    :: state
 
 !     real(c_double) :: yexact(product(level%shape)), pexact(product(level%shape))
-    real(pfdp), pointer :: qend(:,:,:), q0(:,:,:)
+    real(pfdp), pointer :: qend(:), q0(:)
     real(pfdp) :: res,max_y,max_p, err_y, err_p, t
     integer :: un, Nx, Nxy, m
     character(len=64) :: fout 
@@ -27,8 +27,8 @@ subroutine echo_error_hook(pf, level_index)
     real(pfdp) :: pnorms(pf%levels(level_index)%nnodes-1), ynorms(pf%levels(level_index)%nnodes-1)
 
 
-    qend => get_array3d_oc(pf%levels(level_index)%Q(pf%levels(level_index)%nnodes),1) 
-    q0   => get_array3d_oc(pf%levels(level_index)%Q(1),2) 
+    qend => get_array1d_oc(pf%levels(level_index)%Q(pf%levels(level_index)%nnodes),1) 
+    q0   => get_array1d_oc(pf%levels(level_index)%Q(1),2) 
     t = pf%state%t0+pf%state%dt   
 !     call exact_y(t, level%nvars, yexact)
     max_y=maxval(abs(qend))
@@ -71,10 +71,10 @@ subroutine echo_error_hook(pf, level_index)
 !     class(pf_level_t),  intent(inout) :: level
 !     type(pf_state_t),  intent(in)    :: state
 
-    real(pfdp), pointer :: ry(:,:,:), rp(:,:,:)
+    real(pfdp), pointer :: ry(:), rp(:)
 
-    ry => get_array3d_oc(pf%levels(level_index)%R(pf%levels(level_index)%nnodes-1),1)
-    rp => get_array3d_oc(pf%levels(level_index)%R(2),2)
+    ry => get_array1d_oc(pf%levels(level_index)%R(pf%levels(level_index)%nnodes-1),1)
+    rp => get_array1d_oc(pf%levels(level_index)%R(2),2)
 
     print '("resid: step: ",i3.3," iter: ",i4.3," level: ",i2.2," res_y: ",es14.7," res_p: ",es14.7)', &
          pf%state%step+1, pf%state%iter, level_index, maxval(abs(ry)), maxval(abs(rp))

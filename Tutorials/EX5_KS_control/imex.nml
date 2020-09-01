@@ -1,0 +1,56 @@
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 2
+
+    !  These are internal pfasst variables that can be reset
+    niters = 150   !  default is 5
+
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1
+
+
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1e-10
+     rel_res_tol = 1e-10
+
+     !  Variable which determine how the predictor runs  (default is .false. and .true.)
+     PFASST_pred = .true.
+     pipeline_pred = .false.
+
+
+/
+
+&PARAMS
+  poutmod  = 1
+
+  ndim          = 1
+
+  nsteps       = 250
+
+  nvars =   64 64
+  nnodes =  5 5
+
+  Finterp = F
+
+
+  Lx = 100.5309649  ! 32pi
+  Tfin = 2.50
+  nu = 0
+
+  alpha = 1e-4
+  max_opt_iter = 20000
+  tol_grad = 1e-2
+  tol_obj  = 1e-6
+  max_step_size = 1.0
+
+
+  do_imex = 1
+  warmstart = 0
+  do_mixed = 0
+  logfile = "dbg"
+
+  pfasst_nml = "imex.nml"
+  fbase = "pfasst_V"
+
+  output = " "
+/

@@ -209,8 +209,7 @@ contains
   
    subroutine armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, skippedState, predict, searchDir, gradient, &
                         savedStatesFlat, savedAdjointsFlat, alpha, globObj, &
-                        globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, &
-                                L2errorState, LinfErrorState, L2exactState, LinfExactState, ctrl)
+                        globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, ctrl)
     type(pf_pfasst_t),         intent(inout) :: pf
     type(pf_ndarray_oc_t), target,  intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
@@ -222,7 +221,6 @@ contains
     real(pfdp),                intent(inout) :: stepSize, LinftyNormGrad, L2NormGradSq, gradient(:), &
                                                 savedStatesFlat(:,:,:), savedAdjointsFlat(:,:,:)
     logical,                   intent(inout) :: stepTooSmall
-    real(pfdp),                intent(inout) :: L2errorState, LinfErrorState, L2exactState, LinfExactState
     real(pfdp),                intent(inout) :: ctrl(:)
 
 

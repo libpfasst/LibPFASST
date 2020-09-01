@@ -164,7 +164,7 @@ contains
         call fft%conv(tmp, this%ddx, fvec)
         
         ! source term from distributed tracking objective
-        !fvec = fvec + (yvec-this%ydesired(mystep, idx, :)
+        fvec = fvec + (yvec-this%ydesired(mystep, idx, :))
        
        case DEFAULT
         print *, "ERROR in f_eval: only 1, 2 allowed as flags", flags
@@ -176,11 +176,11 @@ contains
        case (1)
           yvec => get_array1d_oc(y,1)
           fvec => get_array1d_oc(f,1)
-          call fft%conv(yvec,-this%lap*this%lap-this%lap,fvec)
+          call fft%conv(yvec,-this%lap-this%lap*this%lap,fvec)
        case (2)
           pvec => get_array1d_oc(y,2)
           fvec => get_array1d_oc(f,2)
-          call fft%conv(pvec,-this%lap*this%lap-this%lap,fvec)
+          call fft%conv(pvec,-this%lap-this%lap*this%lap,fvec)
        case default
           print *, "ERROR in f_eval: only 1, 2 allowed as flags", flags
           call exit(1)
@@ -221,7 +221,7 @@ contains
 
     if (piece == 2) then
        ! Apply the inverse operator with the FFT convolution
-       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*(-this%lap*this%lap-this%lap)),yvec)
+       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*(-this%lap-this%lap*this%lap)),yvec)
 
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq
@@ -313,6 +313,8 @@ contains
      
      this%ydesired = targetState
   end subroutine set_ydesired
+  
+  
   
   !> Restrict desired state from fine to coarse level
   subroutine restrict_ydesired(sweeperC, sweeperF)

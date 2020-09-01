@@ -5,7 +5,7 @@
 !>     u_t + v*u_x = nu*u_xx
 module my_level
   use pf_mod_dtype
-  use pf_mod_ndarray
+  use pf_mod_ndarray_oc
   use pf_mod_fftpackage
   implicit none
 
@@ -38,15 +38,18 @@ module my_level
     real(pfdp),          pointer :: yvec_f(:), yvec_c(:)  !  fine and coarse solutions
     complex(pfdp),       pointer :: wk_f(:),wk_c(:)       !  fine and coarse FFT workspaces
     type(pf_fft_t),      pointer :: fft_f,fft_c           !  fine and coarse FFT packages
+    integer :: which
 
-
+    which = 1
+    if(present(flags)) which = flags
+    
     sweeper_c => as_my_sweeper(c_lev%ulevel%sweeper)
     sweeper_f => as_my_sweeper(f_lev%ulevel%sweeper)
     fft_c => sweeper_c%fft_tool
     fft_f => sweeper_f%fft_tool    
 
-    yvec_f => get_array1d(f_vec) 
-    yvec_c => get_array1d(c_vec)
+    yvec_f => get_array1d_oc(f_vec,which) 
+    yvec_c => get_array1d_oc(c_vec,which)
 
     nx_f = size(yvec_f)
     nx_c = size(yvec_c)
@@ -73,12 +76,15 @@ module my_level
 
     real(pfdp), pointer :: yvec_f(:), yvec_c(:)  
 
-    integer :: irat
+    integer :: irat, which
+    
+    which = 1
+    if(present(flags)) which = flags
 
     !>  Grab the vectors from the encap
-    yvec_f => get_array1d(f_vec)
-    yvec_c => get_array1d(c_vec)
-
+    yvec_f => get_array1d_oc(f_vec,which)
+    yvec_c => get_array1d_oc(c_vec,which)
+    
     irat  = size(yvec_f)/size(yvec_c)
 
     !>  Pointwise coarsening

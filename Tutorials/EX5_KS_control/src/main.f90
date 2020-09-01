@@ -46,7 +46,7 @@ implicit none
   integer        :: time_start(8), time_end(8)
   real(pfdp)     :: time_start_sec, time_end_sec
 
-  real(pfdp), allocatable :: targetState(:,:,:), npyOutput(:,:,:)
+  real(pfdp), allocatable :: targetState(:,:,:), npyOutput(:)
 
   !
   ! read options
@@ -111,7 +111,7 @@ implicit none
 !   pf%save_results = .false.
 
 
-!   call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
+  call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
 
 
   if(pf%rank == 0) print *, "computing ", nsteps_per_rank, "steps per CPU"
@@ -194,6 +194,11 @@ implicit none
 
   allocate(ctrl(nvars(pf%nlevels)))
   call initial_sol(ctrl)  ! get exact control
+  
+  allocate(npyOutput(nvars(pf%nlevels)))
+  
+  write(npyfname, "(A,'.npy')") "npy/uexact"
+  call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
 
   ! solve equation with correct initial condition to generate tracking data
   allocate(targetState(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes,nvars(pf%nlevels)))
@@ -202,23 +207,31 @@ implicit none
   pf%q0_style = 0
 
   if (pf%rank .eq. 0) then
-    q1%yflatarray = ctrl
+    q1%yflatarray = ctrl    
   else
     q1%yflatarray = 0.0_pfdp
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
-  if (pf%rank .eq. 0)  print *, ' **** solve state with exact initial condition ***'
-
-
+  if (pf%rank .eq. 0)  then
+    print *, ' **** solve state with exact initial condition ***'
+    write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", 0
+    call pf%levels(pf%nlevels)%q0%pack(npyOutput,1)
+    call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
+  end if
+  
   do step=1, nsteps_per_rank ! nstepsTo25
       pf%state%pfblock = step
       call pf_pfasst_block_oc(pf, dt, step*pf%comm%nproc, .true., 1, step=(step-1)*pf%comm%nproc + pf%rank)
       
       do m=1, pf%levels(pf%nlevels)%nnodes
          call pf%levels(pf%nlevels)%Q(m)%pack(targetState(step,m,:),1)
-         write(npyfname, "(A,'s',i0.2,'m',i0.2,'.npy')") "y", step, m
-         call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
+!          write(npyfname, "(A,'s',i0.4,'m',i0.2,'.npy')") "npy/y", step, m
+!          call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
       end do
+      ! output state at time step end 
+      write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", step
+      call pf%levels(pf%nlevels)%qend%pack(npyOutput,1)
+      call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
       
       if( step < nsteps_per_rank) then
         call pf%levels(pf%nlevels)%qend%pack(pf%levels(pf%nlevels)%send, 1)    !<  Pack away your last solution
@@ -267,8 +280,9 @@ implicit none
 
   do k = 1, max_opt_iter
 
-     call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'uk', .false., .true.)
-
+     write(npyfname, "(A,'k',i0.4,'.npy')") "npy/uk", k
+     call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
+     
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
 
 !      call mpi_barrier(pf%comm%comm, ierror)
@@ -353,14 +367,13 @@ implicit none
      ctrl = ctrl + stepsize*searchDir
      !call update_control(pf%levels(pf%state%finest_level)%ulevel%sweeper, searchDir, stepSize)
 
-    !  call armijo_step(pf, q1, dt, nsteps_per_rank, itersState, itersAdjoint, skippedState, predict, searchDir, gradient, &
-!                       savedStatesFlat, savedAdjointsFlat, alpha, &
-!                       globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, &
-!                       L2errorState, LinfErrorState, L2exactState, LinfExactState, targetState)
+     call armijo_step(pf, q1, dt, nsteps_per_rank, itersState, itersAdjoint, skippedState, predict, searchDir, gradient, &
+                      savedStatesFlat, savedAdjointsFlat, alpha, &
+                      globObj, globDirXGrad, objectiveNew, L2NormCtrlSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, &
+                      ctrl)
 !      call strong_wolfe_step(pf, q1, dt, nsteps_per_rank, itersState, itersAdjoint, predict, searchDir, gradient, &
-!                       savedStatesFlat, savedAdjointsFlat, alpha, &
-!                       globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, &
-!                       L2errorState, LinfErrorState, L2exactState, LinfExactState, targetState)
+!                       savedStatesFlat, savedAdjointsFlat, ctrl, alpha, &
+!                       globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
 
      if (stepTooSmall) exit
 
@@ -403,13 +416,9 @@ implicit none
 !       print *, '                                   Linf = ', globLinfExactCtrl
    end if
 
-  call dump_control(pf%levels(pf%nlevels)%ulevel%sweeper, pf, 'ufinal', .true., .true.)
-  if(pf%rank == pf%comm%nproc-1) then ! get final state
-      npyOutput = get_array3d_oc(pf%levels(pf%nlevels)%qend, 1)
-      call save_double('yfinal.npy', shape(npyOutput), real(npyOutput,8))
-      npyOutput = npyOutput - targetState
-      call save_double('yfinaldiff.npy', shape(npyOutput), real(npyOutput,8))
- end if
+  write(npyfname, "(A,'.npy')") "npy/ufinal"
+  call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
+
   !
   ! cleanup
   !

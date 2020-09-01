@@ -21,8 +21,7 @@ FSRC   = src/probin.f90  src/sweeper.f90 src/hooks.f90  src/pf_optimization_1d.f
 
 OBJ = $(subst src, build, $(FSRC:.f90=.o))
 
-FFLAGS  += -I$(LIBPFASST)/include -I$(LIBNPY)/include
-# -g -fcheck=all,bounds -fbacktrace
+FFLAGS  += -I$(LIBPFASST)/include -I$(LIBNPY)/include  -g -fcheck=all,bounds -fbacktrace
 #-I$(FFTW3)/include
 LDFLAGS += -L$(LIBPFASST)/lib -lpfasst -L$(LIBPFASST)/libnpy/libnpy_fortran_mod -lnpy
 #-lblas -llapack
