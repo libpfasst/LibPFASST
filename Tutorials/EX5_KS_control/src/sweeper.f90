@@ -9,6 +9,7 @@ module my_sweeper
   use pf_mod_ndarray_oc
   use pf_mod_imexQ_oc
   use pf_mod_fftpackage
+  use pf_mod_restrict
     
   use probin
   
@@ -273,6 +274,34 @@ contains
     this%ydesired = 0.0_pfdp
     
   end subroutine initialize_ocp
+  
+  
+  subroutine objective_function(s, sol, shape, m, objective, step)
+  ! actually just the tracking part of the objective
+    class(pf_sweeper_t), intent(inout) :: s
+    class(pf_encap_t), intent(in   )   :: sol
+    integer,             intent(in)    :: shape(1), m, step
+    real(pfdp),          intent(out)   :: objective
+
+    real(pfdp),  pointer   :: y(:), f(:) !, obj(:)
+    integer                :: nx,ny,nz,i,j,k !, nnodes
+    
+
+    class(my_sweeper_t), pointer :: sweeper
+    sweeper => as_my_sweeper(s)
+
+    nx = shape(1)
+    allocate(f(nx))
+
+       y => get_array1d_oc(sol, 1)
+!        f = (y -sweeper%ydesiredT(:,:,:))
+       f = (y -sweeper%ydesired(step,m,:))
+       objective = 0.0_pfdp
+       objective = sum(f**2)
+       objective = objective * Lx / dble(nx)
+
+    deallocate(f)
+  end subroutine objective_function
   
   !> Set ydesired in sweeper to some space-time target state
   subroutine set_ydesired(sweeper, targetState)

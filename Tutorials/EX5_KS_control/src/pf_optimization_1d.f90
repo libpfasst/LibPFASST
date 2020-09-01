@@ -78,7 +78,7 @@ contains
       ! evaluate objective on current step    
       do m = 1, nnodes
         call objective_function(pf%levels(pf%nlevels)%ulevel%sweeper, pf%levels(pf%nlevels)%Q(m), &
-                                    product(pf%levels(pf%nlevels)%lev_shape), m, obj(m), step)
+                                    pf%levels(pf%nlevels)%lev_shape , m, obj(m), step)
 
         ! record state solution
         call pf%levels(pf%nlevels)%Q(m)%pack(savedStates(step,m,:), 1)
@@ -205,205 +205,79 @@ contains
     pf%q0_style = 0     
 !     deallocate(savedAdjointCompressed)
   end subroutine evaluate_gradient
+  
+  
+   subroutine armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, skippedState, predict, searchDir, gradient, &
+                        savedStatesFlat, savedAdjointsFlat, alpha, globObj, &
+                        globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall, &
+                                L2errorState, LinfErrorState, L2exactState, LinfExactState, ctrl)
+    type(pf_pfasst_t),         intent(inout) :: pf
+    type(pf_ndarray_oc_t), target,  intent(inout) :: q1
+    real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
+    integer,                   intent(in   ) :: nsteps
+    integer,                   intent(inout) :: itersState, itersAdjoint, skippedState
+    logical,                   intent(in   ) :: predict
+    real(pfdp),                intent(in   ) :: searchDir(:)
+    real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq
+    real(pfdp),                intent(inout) :: stepSize, LinftyNormGrad, L2NormGradSq, gradient(:), &
+                                                savedStatesFlat(:,:,:), savedAdjointsFlat(:,:,:)
+    logical,                   intent(inout) :: stepTooSmall
+    real(pfdp),                intent(inout) :: L2errorState, LinfErrorState, L2exactState, LinfExactState
+    real(pfdp),                intent(inout) :: ctrl(:)
 
-!  subroutine armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
-!                          globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
-!     type(pf_pfasst_t),         intent(inout) :: pf
-!     type(ndarray_oc), target,  intent(inout) :: q1
-!     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
-!     integer,                   intent(in   ) :: nsteps
-!     integer,                   intent(inout) :: itersState, itersAdjoint
-!     logical,                   intent(in   ) :: predict
-!     real(pfdp),                intent(in   ) :: searchDir(:,:)  
-!     real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq
-!     real(pfdp),                intent(inout) :: stepSize, LinftyNormGrad, L2NormGradSq, gradient(:,:), savedAdjoint(:,:)
-!     logical,                   intent(inout) :: stepTooSmall
-!        
-!     real(pfdp) :: globObjNew, directionTimesGradient, globDirXGradNew
-!     integer    :: l, ierror
-!     !real(pfdp) :: armijoDecrease ! this should be in a structure global to the module, and set in
-!     !                             ! something like init_optimization, along with other parameters 
-!     !real(pfdp) :: minStepSize
-!     !armijoDecrease = 1e-4
-!     !minStepSize    = 1e-6
-! 
-!     do
-!       call update_control(pf%levels(pf%nlevels)%ctx, searchDir, stepSize)
+
+    real(pfdp) :: globObjNew, directionTimesGradient, globDirXGradNew
+    integer    :: l, ierror
+    !real(pfdp) :: armijoDecrease ! this should be in a structure global to the module, and set in
+    !                             ! something like init_optimization, along with other parameters
+    !real(pfdp) :: minStepSize
+    !armijoDecrease = 1e-4
+    !minStepSize    = 1e-6
+
+    do
+      ctrl = ctrl + stepsize*searchDir
+!       call update_control(pf%levels(pf%state%finest_level)%ulevel%sweeper, searchDir, stepSize)
 !       !restrict control
-!       do l = pf%nlevels-1,1,-1
-! 	call restrict_control(pf%levels(l)%ctx, pf%levels(l+1)%ctx)
+!       do l = pf%state%finest_level-1,1,-1
+! 	      call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
 !       end do
-! 
-!       call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedAdjoint)
+
+      call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedStatesFlat, &
+                              ctrl)
+
 !       itersState = itersState + pf%state%itcnt
-!            
+      if(pf%state%finest_level == pf%nlevels) & !count only finest level sweeps
+        itersState = itersState + pf%state%itcnt - pf%state%skippedy
+      skippedState = skippedState + pf%state%skippedy
+
 !       call mpi_allreduce(objectiveNew, globObjNew, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-!       if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', globObjNew
-! 
-!       if (globObjNew < globObj + armijoDecrease*stepSize*globDirXGrad) then
-!         ! evaluate gradient to be consistent with wolfe_powell_step
-!         call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedAdjoint)
-!         itersAdjoint = itersAdjoint + pf%state%itcnt
-!         return 
-!       end if
-! 
-!        call update_control(pf%levels(pf%nlevels)%ctx, searchDir, -stepSize)
-!        ! no need to restrict here, coarse levels get overwritten above
-!        stepSize = 0.5 * stepSize
-!        if (stepSize < minStepSize) then
-!          stepTooSmall = .true.
-!          if (pf%rank .eq. 0) print *, 'no step found, stopping'
-!          !call write_control(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
-!          return
-!        end if
-!      end do
-!    end subroutine armijo_step
-! 
-! 
-! 
-!    subroutine zoom(stepLowIn, stepHighIn, stepSizeIn, stepSizeOut, &
-!                    pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedStates, alpha, &
-!                    globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepTooSmall, globObjLowIn)
-!      type(pf_pfasst_t),         intent(inout) :: pf
-!      type(ndarray_oc), target,  intent(inout) :: q1
-!      real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
-!      integer,                   intent(in   ) :: nsteps
-!      integer,                   intent(inout) :: itersState, itersAdjoint
-!      logical,                   intent(in   ) :: predict
-!      real(pfdp),                intent(in   ) :: searchDir(:,:,:) 
-!      real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSizeOut
-!      real(pfdp),                intent(in   ) :: stepSizeIn, stepLowIn, stepHighIn, globObjLowIn
-!      real(pfdp),                intent(inout) :: gradient(:,:,:), savedStates(:,:,:)
-!      logical,                   intent(inout) :: stepTooSmall
-! 
-!      real(pfdp) :: directionTimesGradient, directionTimesGradientNew
-!      real(pfdp) :: stepSize, stepLow, stepHigh, objectiveLow
-!      integer    :: l, ierror, iter
-!  
-!      stepSize = stepSizeIn
-!      stepLow = stepLowIn
-!      stepHigh = stepHighIn
-!      objectiveLow = globObjLowIn
-!  
-!      iter = 0
-!      if (pf%rank .eq. 0) print *, 'in zoom'
-! 
-!      do
-!        call update_control(pf%levels(pf%nlevels)%ctx, searchDir, -stepSize)
-!        stepSize = 0.5_pfdp*(stepLow+stepHigh)
-!        iter = iter + 1
-!        if (stepSize < minStepSize .or. iter > maxIterZoom) then
-!          stepTooSmall = .true.
-!          if (pf%rank .eq. 0) print *, 'no step found (< min or > maxIter), stopping'
-!          !call write_control(pf%levels(pf%nlevels)%ctx, k, "u_sdc_split_final")
-!          stepSizeOut = stepSize
-!          return
-!        end if
-! 
-!        call update_control(pf%levels(pf%nlevels)%ctx, searchDir, stepSize)
-!         !restrict control
-!         do l = pf%nlevels-1,1,-1
-!    	  call restrict_control(pf%levels(l)%ctx, pf%levels(l+1)%ctx)
-!         end do
-! 
-!         call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedStates)
-!         itersState = itersState + pf%state%itcnt
-!         if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', objectiveNew
-!       
-!         if ( (objectiveNew > globObj + armijoDecrease*stepSize*globDirXGrad) .or. &
-!              (objectiveNew >= objectiveLow) )                                     then
-!           stepHigh = stepSize
-!           if (pf%rank .eq. 0) print *, 'set new stepHigh to stepSize; stepHigh = ', stepHigh, 'stepLow = ', stepLow
-!         else          
-!           call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStates)
-!           itersAdjoint = itersAdjoint + pf%state%itcnt
-!           directionTimesGradientNew = compute_scalar_prod(searchDir, gradient, pf%levels(pf%nlevels)%nodes, dt)
-!           
-!           if (abs(directionTimesGradientNew) <= -c2*globDirXGrad) then
-!             stepSizeOut = stepSize
-!             return
-!           end if
-!    
-!           if (directionTimesGradientNew*(stepHigh-stepLow) >= 0) then
-!             if(pf%rank == 0) print *, stepSize, stepHigh, stepLow
-!             stepHigh = stepLow
-!             if (pf%rank .eq. 0) print *, 'set new stepHigh to stepLow; stepHigh = ', stepHigh, 'stepLow = ', stepLow, 'stepSize = ', stepSize 
-!           end if
-!           stepLow = stepSize
-!           if (pf%rank .eq. 0) print *, 'set new stepLow; stepHigh = ', stepHigh, 'stepLow = ', stepLow, 'stepSize = ', stepSize 
-!           objectiveLow = objectiveNew
-!         end if
-!       end do
-!    end subroutine zoom
-!     
-!  
-!    subroutine wolfe_powell_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedStates, alpha, &
-!                                 objective, directionTimesGradient, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
-!     type(pf_pfasst_t),         intent(inout) :: pf
-!     type(ndarray_oc), target,  intent(inout) :: q1
-!     real(pfdp),                intent(in   ) :: dt, alpha, objective, directionTimesGradient
-!     integer,                   intent(in   ) :: nsteps
-!     integer,                   intent(inout) :: itersState, itersAdjoint
-!     logical,                   intent(in   ) :: predict
-!     real(pfdp),                intent(in   ) :: searchDir(:,:,:) 
-!     real(pfdp),                intent(  out) :: objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq
-!     real(pfdp),                intent(inout) :: stepSize, gradient(:,:,:), savedStates(:,:,:)
-!     logical,                   intent(inout) :: stepTooSmall
-! 
-!     integer    :: l, ierror, iter
-!     real(pfdp) :: prevStepSize, directionTimesGradientNew, prevObjective
-!     prevStepSize   = 0.0_pfdp
-!     prevObjective = objective
-!     iter = 1
-! !     
-!     do
-!       call update_control(pf%levels(pf%nlevels)%ctx, searchDir, stepSize)
-!       !restrict control
-!       do l = pf%nlevels-1,1,-1
-! 	call restrict_control(pf%levels(l)%ctx, pf%levels(l+1)%ctx)
-!       end do
-!  
-!       call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedStates)
-!       itersState = itersState + pf%state%itcnt
-!       if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', objectiveNew
-!        
-!       if ( (objectiveNew > objective + armijoDecrease*stepSize*directionTimesGradient) .or. &
-!            ( objectiveNew >= prevObjective .and. iter > 1) )                   then
-!         call zoom(prevStepSize, stepSize, stepSize, stepSize, &
-!                   pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedStates, alpha, objective, directionTimesGradient, &
-!                   objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepTooSmall, prevObjective)
-!         return
-!       end if                    
-! !       
-!       if (pf%rank .eq. 0) print *, 'evaluate new gradient'
-!       call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStates)
-!       itersAdjoint = itersAdjoint + pf%state%itcnt
-!       directionTimesGradientNew = compute_scalar_prod(searchDir, gradient, pf%levels(pf%nlevels)%nodes, dt)
-!       if (pf%rank .eq. 0) print *, 'globDirXGradNew = ', directionTimesGradientNew
-!       if (abs(directionTimesGradientNew) <= -c2*directionTimesGradient) then
-!         return
-!       end if
-! ! 
-!       if (directionTimesGradientNew >= 0) then
-!         call zoom(stepSize, prevStepSize, stepSize, stepSize, &
-!                   pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedStates, alpha, objective, directionTimesGradient, &
-!                   objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepTooSmall, objectiveNew)
-!         return
-!       end if
-! 
-!       prevObjective  = objectiveNew
-!       prevStepSize = stepSize
-!       stepSize     = stepIncFactor*stepSize
-!       iter = iter + 1
-!       if (stepSize > maxStepSize) then
-!          stepTooSmall = .true.
-!          if (pf%rank .eq. 0) print *, 'no step found (> max), stopping'         
-!          return
-!        end if
-!        call update_control(pf%levels(pf%nlevels)%ctx, searchDir, -prevStepSize)
-!     end do
-! 
-!    end subroutine wolfe_powell_step
+      globObjNew = objectiveNew
+      if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', globObjNew
+
+      if (globObjNew < globObj + armijoDecrease*stepSize*globDirXGrad) then
+        ! evaluate gradient to be consistent with wolfe_powell_step
+        call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStatesFlat, &
+                               savedAdjointsFlat)
+
+        if(pf%state%finest_level == pf%nlevels) & !count only finest level sweeps
+          itersAdjoint = itersAdjoint + pf%state%itcnt
+        return
+      end if
+
+      ctrl = ctrl - stepsize*searchDir
+
+!        call update_control(pf%levels(pf%state%finest_level)%ulevel%sweeper, searchDir, -stepSize)
+       ! no need to restrict here, coarse levels get overwritten above
+       stepSize = 0.5 * stepSize
+       if (stepSize < minStepSize) then
+         stepTooSmall = .true.
+         if (pf%rank .eq. 0) print *, 'no step found, stopping'
+         !call write_control(pf%levels(pf%state%finest_level)%ctx, k, "u_sdc_split_final")
+         return
+       end if
+     end do
+   end subroutine armijo_step
+
    
     subroutine strong_wolfe_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, &
         savedStates, savedAdjoint, ctrl, &
@@ -432,12 +306,12 @@ contains
      !if (stepSize > high) high = stepSize
      
      do
-       call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, high) !stepSize)
+       ctrl = ctrl + high*searchDir
+!       call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, high) !stepSize)
        !restrict control
-       do l = pf%nlevels-1,1,-1
-       call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
-       end do
- !       call dump_control(pf%levels(pf%nlevels)%ctx, pf, 'u1')
+!        do l = pf%nlevels-1,1,-1
+!        call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
+!        end do
  
        !call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedAdjoint, first)
        call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedStates, ctrl)
@@ -447,7 +321,8 @@ contains
        call mpi_allreduce(objectiveNew, globObjNew, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
        if(pf%rank == 0) print *, high, 'objectiveNew (L2) = ', globObjNew ! *, stepSize,
  
-       call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, -high) !-stepSize)
+       ctrl = ctrl - high*searchDir
+!        call update_control(pf%levesl(pf%nlevels)%ulevel%sweeper, searchDir, -high) !-stepSize)
        
        if (globObjNew < globObj + armijoDecrease*stepSize*globDirXGrad) then
          high = 2.0*high
@@ -471,11 +346,11 @@ contains
          return
        end if
        
-       
-       call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, stepSize)
-       do l = pf%nlevels-1,1,-1
-        call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
-       end do
+       ctrl = ctrl + stepSize*searchDir    
+!        call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, stepSize)
+!        do l = pf%nlevels-1,1,-1
+!         call restrict_control(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
+!        end do
  
        call evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedStates, ctrl)
        !(pf, q1, dt, nsteps, predict, alpha, objectiveNew, L2NormUSq, savedAdjoint, first)
@@ -484,7 +359,8 @@ contains
        if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', globObjNew
        
        if (globObjNew >= globObj + armijoDecrease*stepSize*globDirXGrad) then
-         call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, -stepSize)
+         ctrl = ctrl - stepSize*searchDir
+         !call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, -stepSize)
          high = stepSize
          cycle
        end if
@@ -518,7 +394,8 @@ contains
          exit
        end if
        
-       call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, -stepSize)
+       ctrl = ctrl - stepSize*searchDir     
+!        call update_control(pf%levels(pf%nlevels)%ulevel%sweeper, searchDir, -stepSize)
      end do
      
    end subroutine strong_wolfe_step
