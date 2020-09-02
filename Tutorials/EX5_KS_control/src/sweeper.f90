@@ -69,7 +69,7 @@ contains
 
     !>  Set up the FFT 
     allocate(this%fft_tool)
-    call this%fft_tool%fft_setup([nx],1)
+    call this%fft_tool%fft_setup([nx],1, [Lx])
 
     !>  Define spectral derivative operators
     allocate(this%lap(nx))
