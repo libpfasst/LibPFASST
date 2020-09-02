@@ -1,6 +1,6 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 2
+    nlevels  = 1
 
     !  These are internal pfasst variables that can be reset
     niters = 150   !  default is 5
@@ -25,16 +25,16 @@
 
   ndim          = 1
 
-  nsteps       = 250
+  nsteps       = 500
 
-  nvars =   64 64
+  nvars =   1024 1024
   nnodes =  5 5
 
   Finterp = F
 
 
   Lx = 100.5309649  ! 32pi
-  Tfin = 2.50
+  Tfin = 60.0
   nu = 0
 
   alpha = 1e-4

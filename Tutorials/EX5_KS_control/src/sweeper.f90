@@ -21,15 +21,15 @@ module my_sweeper
 
      !>  FFT and Spectral derivatives
      type(pf_fft_t), pointer :: fft_tool
-     complex(pfdp), allocatable :: lap(:) ! Explicit spectral operator
-     complex(pfdp), allocatable :: ddx(:) ! Implicit spectral operator
+     complex(pfdp), allocatable :: lap(:) ! Laplace spectral operator
+     complex(pfdp), allocatable :: ddx(:) ! Derivative spectral operator
      
      real(pfdp), allocatable :: ydesired(:,:,:) !(time step, quadrature node, nx)
      integer                 :: nsteps_per_rank, nproc, myrank
 
    contains
 
-     procedure :: f_eval    !  Computes the advection and diffusion terms
+     procedure :: f_eval    !  Computes the PDEs rhs terms
      procedure :: f_comp    !  Does implicit solves
      procedure :: initialize  !  Bypasses base sweeper initialize
      procedure :: destroy     !  Bypasses base sweeper destroy
@@ -71,7 +71,7 @@ contains
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx],1)
 
-    !>  Define spectral derivatitive operators
+    !>  Define spectral derivative operators
     allocate(this%lap(nx))
     allocate(this%ddx(nx))
     call this%fft_tool%make_lap(this%lap)
@@ -151,7 +151,9 @@ contains
         
           ! explicit piece: -y y_x
           tmp = -0.5_pfdp*yvec*yvec
+          !tmp = yvec
           call fft%conv(tmp, this%ddx, fvec)
+          !fvec = fvec*(-yvec)
        
        case(2) ! Adjoint
           !  Grab the arrays from the encap
@@ -221,7 +223,7 @@ contains
 
     if (piece == 2) then
        ! Apply the inverse operator with the FFT convolution
-       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*(-this%lap-this%lap*this%lap)),yvec)
+       call fft%conv(rhsvec,1.0_pfdp/(1.0_pfdp - dtq*(-this%lap*this%lap-this%lap)),yvec)
 
        !  The function is easy to derive
        fvec = (yvec - rhsvec) / dtq

@@ -40,7 +40,7 @@ implicit none
                          abs_res_tol_save, rel_res_tol_save
   logical             :: stepTooSmall, predict
   integer             :: itersState, itersAdjoint, skippedState, sumSkippedState, sumItersState, sumItersAdjoint, &
-                         step, nsteps_per_rank, root
+                         step, nsteps_per_rank, root, thisstep
   character(8)   :: date
   character(10)  :: time
   integer        :: time_start(8), time_end(8)
@@ -220,8 +220,9 @@ implicit none
   end if
   
   do step=1, nsteps_per_rank ! nstepsTo25
+      thisstep = (step-1)*pf%comm%nproc + pf%rank
       pf%state%pfblock = step
-      call pf_pfasst_block_oc(pf, dt, step*pf%comm%nproc, .true., 1, step=(step-1)*pf%comm%nproc + pf%rank)
+      call pf_pfasst_block_oc(pf, dt, step*pf%comm%nproc, .true., 1, step=thisstep+1)
       
       do m=1, pf%levels(pf%nlevels)%nnodes
          call pf%levels(pf%nlevels)%Q(m)%pack(targetState(step,m,:),1)
@@ -229,8 +230,8 @@ implicit none
 !          call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
       end do
       ! output state at time step end 
-      write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", step
-      call pf%levels(pf%nlevels)%qend%pack(npyOutput,1)
+      write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", thisstep+1
+      call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%pack(npyOutput,1)
       call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
       
       if( step < nsteps_per_rank) then
@@ -245,6 +246,7 @@ implicit none
     call restrict_ydesired(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
   end do
   
+  call mpi_barrier(pf%comm%comm, ierror)
   call exit(0)
 
   if(pf%rank == 0) &
