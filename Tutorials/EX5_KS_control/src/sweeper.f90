@@ -162,7 +162,7 @@ contains
           pvec => get_array1d_oc(y,2)
         
         ! explicit piece: +y y_x
-        tmp = 0.5_pfdp*yvec*yvec
+        tmp = 0.5_pfdp*pvec*pvec
         call fft%conv(tmp, this%ddx, fvec)
         
         ! source term from distributed tracking objective
@@ -359,8 +359,9 @@ contains
   function compute_scalar_prod(f, g) result(r)
     real(pfdp), intent(in)  :: f(:), g(:)
     real(pfdp)              :: r
-    integer                 :: m, i,j,k,nx,ny,nz, nsteps, n
+    integer                 :: nx
 
+    nx = size(f)
     r = dot_product(f,g)
     r = r*Lx/dble(nx)
   end function compute_scalar_prod

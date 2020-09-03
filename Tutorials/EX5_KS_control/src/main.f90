@@ -47,6 +47,7 @@ implicit none
   real(pfdp)     :: time_start_sec, time_end_sec
 
   real(pfdp), allocatable :: targetState(:,:,:), npyOutput(:)
+  real, allocatable :: rndArr(:)
 
   !
   ! read options
@@ -109,9 +110,14 @@ implicit none
 
   pf%outdir = output
 !   pf%save_results = .false.
+  pf%save_timings = 0
+  pf%save_residuals = .false.
+  pf%save_errors=.false.
+  pf%save_delta_q0=.false.
+  pf%save_solutions=0
+  call initialize_results(pf)
 
-
-  call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
+!   call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
 
 
   if(pf%rank == 0) print *, "computing ", nsteps_per_rank, "steps per CPU"
@@ -226,8 +232,8 @@ implicit none
       
       do m=1, pf%levels(pf%nlevels)%nnodes
          call pf%levels(pf%nlevels)%Q(m)%pack(targetState(step,m,:),1)
-!          write(npyfname, "(A,'s',i0.4,'m',i0.2,'.npy')") "npy/y", step, m
-!          call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
+         write(npyfname, "(A,'s',i0.4,'m',i0.2,'.npy')") "npy/ytarget", step, m
+         call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
       end do
       ! output state at time step end 
       write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", thisstep+1
@@ -247,13 +253,13 @@ implicit none
   end do
   
   call mpi_barrier(pf%comm%comm, ierror)
-  call exit(0)
+!   call exit(0)
 
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , &
          status = 'unknown',  action = 'write')
 
-  if(pf%rank == 0) write(105,*) "iter   L2_grad   objective   stepsize"
+  if(pf%rank == 0) write(105,*) "#iter   L2_grad   objective   stepsize"
 
   allocate(gradient(nvars(pf%nlevels)))
   allocate(prevGrad(nvars(pf%nlevels)))
@@ -262,12 +268,18 @@ implicit none
   allocate(savedStatesFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
   allocate(savedAdjointsFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
   
-  ctrl = 0.0_pfdp
+  allocate(rndArr(nvars(pf%nlevels)))
+  
+  call initial_sol(ctrl)
+  !call random_number(rndArr)
+  ctrl = 0.75 * ctrl !+ 0.1*rndArr
+  !call pf_broadcast(pf, ctrl, pf%levels(pf%nlevels)%mpibuflen, 0)
+  
   gradient = 0
   prevGrad = 0
   prevGlobDirXGrad = 0.0_pfdp
   globDirXGrad = 0.0_pfdp
-  prevStepSize = 0.05_pfdp
+  prevStepSize = 1.0_pfdp
   prevSearchDir = 0
   savedStatesFlat = 0.0_pfdp
   savedAdjointsFlat = 0.0_pfdp
@@ -282,7 +294,7 @@ implicit none
 
   do k = 1, max_opt_iter
 
-     write(npyfname, "(A,'k',i0.4,'.npy')") "npy/uk", k
+     write(npyfname, "(A,'k',i0.4,'.npy')") "npy/u", k
      call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
      
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
@@ -295,19 +307,31 @@ implicit none
 
      call mpi_allreduce(objective, globObj, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'objective (L2) = ', globObj
-     exit
+     !exit
 
 !      call mpi_barrier(pf%comm%comm, ierror)
-!      if ( k .eq. 1 ) then   ! in later iterations, this is done in linesearch
-       call evaluate_gradient(pf, q1, dt, nsteps_per_rank, .true., gradient, LinftyNormGrad, L2NormGradSq, savedStatesFlat, &
+     if ( k .eq. 1 ) then   ! in later iterations, this is done in linesearch
+       call evaluate_gradient(pf, q1, dt, nsteps_per_rank, .true., alpha, gradient, LinftyNormGrad, L2NormGradSq, savedStatesFlat, &
                               savedAdjointsFlat)
        itersAdjoint = itersAdjoint + pf%state%itcnt
+     end if
+     
+     gradient = gradient + alpha*ctrl
+     
+     if(pf%rank == 0) then
+        write(npyfname, "(A,'k',i0.4,'.npy')") "npy/gradient", k
+        call save_double(npyfname, shape(gradient), real(gradient(:),8))
+     end if
+     
+     
+!      exit
+     ! add regularization term derivative to gradient
+     
+     globL2NormGradSq = sum(gradient**2)*Lx/dble(nvars(pf%nlevels))
+     globLinftyNormGrad = maxval(abs(gradient))
 
      ! done optimizing?
-!      call mpi_allreduce(L2NormGradSq, globL2NormGradSq, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-      ! here gradient is not time dependent, every rank has correct norm already
-     globL2NormGradSq = L2NormGradSq
-     globLinftyNormGrad = LinftyNormGrad
+    
 !      call mpi_allreduce(LinftyNormGrad, globLinftyNormGrad, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'gradient (L2, Linf) = ', sqrt(globL2NormGradSq), globLinftyNormGrad
      if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
@@ -351,11 +375,11 @@ implicit none
      if(pf%rank == 0) print *, k, 'gradient times searchDir = ', globDirXGrad
 
 
-!       stepSize = max_step_size !1.0_pfdp
+!     stepSize = max_step_size !1.0_pfdp
 !       stepSize = 0.0_pfdp
 
 !      stepSize = max(prevStepSize * prevGlobDirXGrad / globDirXGrad, 1.0)
-!      stepSize = min(2.0_pfdp*prevStepSize, 1.0_pfdp)
+     stepSize = min(2.0_pfdp*prevStepSize, 1.0_pfdp)
 
      ! update for next iteration, as these get re-assigned during linesearch
      prevGlobDirXGrad = globDirXGrad
@@ -364,7 +388,6 @@ implicit none
 
      stepTooSmall = .false.
 
-     stepSize = prevStepSize
      if(pf%rank == 0) print *, k, 'step size = ', stepSize
      ctrl = ctrl + stepsize*searchDir
      !call update_control(pf%levels(pf%state%finest_level)%ulevel%sweeper, searchDir, stepSize)
@@ -420,7 +443,20 @@ implicit none
 
   write(npyfname, "(A,'.npy')") "npy/ufinal"
   call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
-
+  
+  do step=1, nsteps_per_rank 
+     thisstep = (step-1)*pf%comm%nproc + pf%rank
+      
+     write(npyfname, "(A,'s',i0.4'.npy')") "npy/yfinal", thisstep+1
+     call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%pack(npyOutput,1)
+     call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
+     
+     if(pf%rank == 0) then 
+        write(npyfname, "(A,'s',i0.4'.npy')") "npy/yfinal", 0
+        call initial_sol(npyOutput)  ! get exact initial condition
+        call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
+     end if
+  end do
   !
   ! cleanup
   !

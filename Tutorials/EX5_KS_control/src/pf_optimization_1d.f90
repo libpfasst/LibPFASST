@@ -6,6 +6,7 @@ module pf_mod_optimization
   use pf_mod_ndarray_oc
   use pf_mod_parallel_oc
   use my_sweeper
+  
   implicit none
 
   real(pfdp), parameter, private :: armijoDecrease = 1e-4
@@ -111,10 +112,10 @@ contains
   end subroutine evaluate_objective
 
 
-  subroutine evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStates, savedAdjoint)
+  subroutine evaluate_gradient(pf, q1, dt, nsteps, predict, alpha, gradient, LinftyNormGrad, L2NormGradSq, savedStates, savedAdjoint)
     type(pf_pfasst_t),        intent(inout) :: pf
     type(pf_ndarray_oc_t), target, intent(inout) :: q1
-    real(pfdp),               intent(in   ) :: dt
+    real(pfdp),               intent(in   ) :: dt, alpha
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
     real(pfdp),               intent(  out) :: gradient(:), LinftyNormGrad, L2NormGradSq
@@ -200,8 +201,17 @@ contains
 !    call construct_gradient(pf%levels(pf%nlevels)%ulevel%sweeper, gradient, pf%levels(pf%nlevels)%nodes, &
 !                                      LinftyNormGrad, L2NormGradSq)
     !TODO gradient is not time dependent, compute on first rank only (as requires p(0)) and broadcast.
-
-
+    if(pf%rank == 0) then
+        ! gradient is adjoint at t0 (plus regularization term derivative = alpha*ctrl)
+        ! pack away on rank 0
+        call pf%levels(pf%nlevels)%q0%pack(pf%levels(pf%nlevels)%send, 2)
+    end if
+    ! broadcast
+    call pf_broadcast(pf, pf%levels(pf%nlevels)%send, pf%levels(pf%nlevels)%mpibuflen, 0)
+    ! everybody sets gradient (actually this could be skipped, only rank 0 needs initial condition)
+    ! need to check implementation
+    gradient = pf%levels(pf%nlevels)%send
+    
     pf%q0_style = 0     
 !     deallocate(savedAdjointCompressed)
   end subroutine evaluate_gradient
@@ -248,13 +258,13 @@ contains
         itersState = itersState + pf%state%itcnt - pf%state%skippedy
       skippedState = skippedState + pf%state%skippedy
 
-!       call mpi_allreduce(objectiveNew, globObjNew, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
-      globObjNew = objectiveNew
+      call mpi_allreduce(objectiveNew, globObjNew, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
+!      globObjNew = objectiveNew
       if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', globObjNew
 
       if (globObjNew < globObj + armijoDecrease*stepSize*globDirXGrad) then
         ! evaluate gradient to be consistent with wolfe_powell_step
-        call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStatesFlat, &
+        call evaluate_gradient(pf, q1, dt, nsteps, predict, alpha, gradient, LinftyNormGrad, L2NormGradSq, savedStatesFlat, &
                                savedAdjointsFlat)
 
         if(pf%state%finest_level == pf%nlevels) & !count only finest level sweeps
@@ -365,7 +375,7 @@ contains
  
        ! now Armijo is satisfied again
        !call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedAdjoint)
-       call evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedStates, savedAdjoint)
+       call evaluate_gradient(pf, q1, dt, nsteps, predict, alpha, gradient, LinftyNormGrad, L2NormGradSq, savedStates, savedAdjoint)
        itersAdjoint = itersAdjoint + pf%state%itcnt
        directionTimesGradient = compute_scalar_prod(searchDir, gradient)
        
