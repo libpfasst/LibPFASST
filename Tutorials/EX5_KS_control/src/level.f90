@@ -1,8 +1,7 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Level specification  for 1-D advection/diffusion example.
-!>     u_t + v*u_x = nu*u_xx
+!> Level specification  for the K-S example.
 module my_level
   use pf_mod_dtype
   use pf_mod_ndarray_oc

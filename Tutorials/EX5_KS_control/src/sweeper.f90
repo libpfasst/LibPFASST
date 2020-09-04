@@ -2,8 +2,8 @@
 ! This file is part of LIBPFASST.
 !
 !
-!> Sweeper and RHS routines for 1-D K-S equation.
-!>     u_t + v*u_x = nu*u_xx
+!> Sweeper and RHS routines for optimization with the 1-D K-S equation.
+
 module my_sweeper
   use pf_mod_dtype
   use pf_mod_ndarray_oc
@@ -17,18 +17,16 @@ module my_sweeper
 
   !>  extend the imex_oc sweeper type with stuff we need to compute rhs
   type, extends(pf_imexQ_oc_t) :: my_sweeper_t
-     integer ::     nx   !  Grid size
-
      !>  FFT and Spectral derivatives
-     type(pf_fft_t), pointer :: fft_tool
+     type(pf_fft_t), pointer :: fft_tool  ! FFT
      complex(pfdp), allocatable :: lap(:) ! Laplace spectral operator
      complex(pfdp), allocatable :: ddx(:) ! Derivative spectral operator
      
-     real(pfdp), allocatable :: ydesired(:,:,:) !(time step, quadrature node, nx)
+     real(pfdp), allocatable :: ydesired(:,:,:) ! desired state in tracking type functional
+                                                ! (time step, quadrature node, nx)
      integer                 :: nsteps_per_rank, nproc, myrank
 
    contains
-
      procedure :: f_eval    !  Computes the PDEs rhs terms
      procedure :: f_comp    !  Does implicit solves
      procedure :: initialize  !  Bypasses base sweeper initialize
@@ -62,6 +60,7 @@ contains
     !  Call the imex sweeper initialize
     call this%imexQ_oc_initialize(pf,level_index)    
 
+    ! Contains implicit and explicit part
     this%implicit=.TRUE.
     this%explicit=.TRUE.
   
@@ -76,8 +75,6 @@ contains
     allocate(this%ddx(nx))
     call this%fft_tool%make_lap(this%lap)
     call this%fft_tool%make_deriv(this%ddx)
-    
-        
   end subroutine initialize
   
 
@@ -277,30 +274,25 @@ contains
     
   end subroutine initialize_ocp
   
-  
-  subroutine objective_function(s, sol, shape, m, objective, step)
-  ! actually just the tracking part of the objective
+  !> To evaluate the tracking part of the objective
+  subroutine objective_function(s, sol, nx, m, objective, step)
     class(pf_sweeper_t), intent(inout) :: s
     class(pf_encap_t), intent(in   )   :: sol
-    integer,             intent(in)    :: shape(1), m, step
+    integer,             intent(in)    :: nx, m, step
     real(pfdp),          intent(out)   :: objective
 
-    real(pfdp),  pointer   :: y(:), f(:) !, obj(:)
-    integer                :: nx,ny,nz,i,j,k !, nnodes
+    real(pfdp),  pointer   :: y(:), f(:) 
     
-
     class(my_sweeper_t), pointer :: sweeper
     sweeper => as_my_sweeper(s)
 
-    nx = shape(1)
     allocate(f(nx))
 
-       y => get_array1d_oc(sol, 1)
-!        f = (y -sweeper%ydesiredT(:,:,:))
-       f = (y -sweeper%ydesired(step,m,:))
-       objective = 0.0_pfdp
-       objective = sum(f**2)
-       objective = objective * Lx / dble(nx)
+    y => get_array1d_oc(sol, 1)
+    f = (y -sweeper%ydesired(step,m,:))
+    objective = 0.0_pfdp
+    objective = sum(f**2)
+    objective = objective * Lx / dble(nx)
 
     deallocate(f)
   end subroutine objective_function
@@ -343,12 +335,13 @@ contains
     ydesiredC(:,:,:) = ydesiredF(:,::trat,::xrat)
   end subroutine restrict_ydesired
   
-  subroutine restrict_for_adjoint(pf, t0, dt, which, step)
+  !> Restrict fine level state solution to the coarser leves for use in the adjoint
+  !  equation 
+  subroutine restrict_for_adjoint(pf, t0, dt, which)
     type(pf_pfasst_t), intent(inout) :: pf
-    real(pfdp),        intent(in)    :: t0, dt
-    integer, intent(in) :: which, step
-    real(pfdp), pointer :: tF(:), tG(:) !zF(:), zG(:)
-    integer :: l, m !, nnodesF, nnodesG, nvarsF, nvarsG
+    real(pfdp), intent(in) :: t0, dt
+    integer, intent(in) :: which
+    integer :: l
 
     do l = pf%state%finest_level, 2, -1
       call restrict_ts(pf%levels(l), pf%levels(l-1), pf%levels(l)%Q, pf%levels(l-1)%Q, t0+dt*pf%levels(l)%nodes, which)

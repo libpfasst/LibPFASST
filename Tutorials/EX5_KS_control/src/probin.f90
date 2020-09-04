@@ -2,7 +2,6 @@ module probin
   use pf_mod_dtype
 
   double precision, parameter :: pi     = 3.141592653589793d0
-!   double precision, parameter :: two_pi = 6.2831853071795862d0
 
   integer, parameter :: maxlevs = 3
 
@@ -10,14 +9,7 @@ module probin
 
   character(len=64), save :: problem_type, window_type
 
-  double precision, save :: v      ! advection velocity
   double precision, save :: Lx     ! domain size x
-  double precision, save :: Ly     ! domain size y
-  double precision, save :: Lz     ! domain size z
-  double precision, save :: nu     ! viscosity
-  double precision, save :: t0     ! initial time for exact solution
-  double precision, save :: sigma  ! initial condition parameter
-  integer,          save :: kfreq  ! initial condition parameter
   double precision, save :: dt     ! time step
   double precision, save :: Tfin   ! Final time
 
@@ -35,42 +27,37 @@ module probin
   integer, save :: ndim            ! number of dimensions
   integer, save :: nnodes(maxlevs) ! number of nodes
   integer, save :: nvars(maxlevs)  ! number of grid points
-  integer, save :: nprob           ! which problem
   integer, save :: nsteps          ! number of time steps
   logical, save :: Finterp
-  integer, save :: spatial_order   ! spatial order for operators
-  integer, save :: interp_order
-  integer, save :: mg_interp_order
-  integer, save :: do_spec
-  integer, save :: N_Vcycles
-  integer, save :: Nrelax
   integer, save :: do_imex          ! set to 1 to use imex sweeper, otherwise misdc
   integer, save :: warmstart        ! set to 1 to use previous solution as initialization in state solve
-  integer, save :: do_mixed         ! set to 1 to sweep on state and adjoint simultaneously (but without communication in adjoint)
   integer, save :: nsweeps(maxlevs) ! Sweeps at each levels
   integer, save :: nsweeps_pred(maxlevs)   ! Sweeps during predictor
-  integer, save :: test_no
-  logical, save :: solve_y
+  integer, save :: test_no          ! to distinguish individual test runs
+  integer, save :: opt_method       ! 0: steepest descent, 1: Polak-Ribiere nonlinear conjugate gradient
+                                    ! 2: Dai-Yuan ncg      3: Fletcher-Reeves ncg
+  logical, save :: use_wolfe        ! whether to use strong Wolfe stepsize (if false, use Armijo)
+  logical, save :: write_numpy      ! whether to output numpy arrays of control, state, gradient
+                                    ! turn off for timing experiments
   
-  character(len=32), save :: pfasst_nml
+  character(len=32), save :: pfasst_nml !  file for setting PFASST options
   character(len=20), save :: fbase      !  base name for run
   character(len=64), save :: foutbase   !  base name for output file
   character(len=44) :: foutfoo          !  temp used to create foutbase
   character(len=128), save :: logfile   !  file to use for output of optimization progress
   integer, save    :: poutmod
-
+  
   character(len=64), save :: output ! directory name for output
   CHARACTER(LEN=255) :: istring     ! stores command line argument
   CHARACTER(LEN=255) :: message     ! use for I/O error messages
 
   integer :: ios,iostat
-  namelist /params/ Finterp, ndim, nnodes, nvars,nprob, nsteps
-  namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
+  namelist /params/ Finterp, ndim, nnodes, nvars, nsteps
   namelist /params/ pfasst_nml,fbase ,poutmod, output
   namelist /params/ abs_res_tol, rel_res_tol, tol_grad, tol_obj
-  namelist /params/ v, nu, t0, dt, Tfin,sigma, kfreq, Lx, Ly, Lz, alpha, max_opt_iter
-  namelist /params/ do_imex, warmstart, do_mixed, logfile, nsweeps, nsweeps_pred
-  namelist /params/ max_step_size, test_no
+  namelist /params/ dt, Tfin, Lx, alpha, max_opt_iter
+  namelist /params/ do_imex, warmstart, logfile, nsweeps, nsweeps_pred
+  namelist /params/ max_step_size, test_no, opt_method, use_wolfe, write_numpy
 
 contains
 
@@ -86,42 +73,29 @@ contains
     !
 
     Finterp = .FALSE.
-    ndim     = 2
+    ndim     = 1
     nnodes  = [ 2, 3, 3 ]
 
     nsteps  = -1
 
-    v       = 0.0_pfdp
     Lx      = 1._pfdp
-    Ly      = 1._pfdp
-    Lz      = 1._pfdp
-    nu      = 1._pfdp
-    sigma   = 0.004_pfdp
-    kfreq   = 1
-    t0      = 0.0_pfdp
     dt      = 0.01_pfdp
     Tfin    = 1.0_pfdp
 
     abs_res_tol = 0.0
     rel_res_tol = 0.0
 
-    spatial_order=2
-    interp_order = 2
-
-    do_spec = 1
-    N_Vcycles = 1
-    Nrelax = 1
-    mg_interp_order = 2
-    
     do_imex = 1
     warmstart = 0
-    do_mixed = 0   
     
     max_opt_iter = 100
     alpha = 0.05
     tol_grad = 1e-6
     tol_obj  = 1e-6
     max_step_size = 1.0
+    opt_method = 0
+    use_wolfe = .false.
+    write_numpy = .true.
  
     poutmod = 1
 
@@ -153,17 +127,6 @@ contains
 
     !  Reset dt if Tfin is set
     if (Tfin .gt. 0.0) dt = Tfin/nsteps
-
-    !
-    ! init
-    !
-
-!     select case (window_type)
-!     case ("block")
-!        wtype = PF_WINDOW_BLOCK
-!     case ("ring")
-!        wtype = PF_WINDOW_RING
-!     end select
 
     output = "Dat/pfasst_V/numpy"
 

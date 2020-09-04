@@ -35,7 +35,6 @@
 
   Lx = 100.5309649  ! 32pi
   Tfin = 1.0
-  nu = 0
 
   alpha = 1e-6
   max_opt_iter = 10
@@ -46,8 +45,7 @@
 
   do_imex = 1
   warmstart = 0
-  do_mixed = 0
-  logfile = "dbg"
+  logfile = "check"
 
   pfasst_nml = "imex.nml"
   fbase = "pfasst_V"
