@@ -775,7 +775,9 @@ contains
     real(pfdp) :: eps
     eps=0.01_pfdp
 
-    u=1.0_pfdp+eps*exp(zi*x*0.25_pfdp)
+    !    u=1.0_pfdp+eps*exp(zi*x*0.25_pfdp-2.0_pfdp*two_pi)
+    !    u=1.0_pfdp+eps*exp(zi*(x-2.0_pfdp*two_pi)*0.25_pfdp)
+    u=1.0_pfdp+eps*exp(zi*(x)*0.25_pfdp)        
 
   end function nls_pert_ex
   subroutine exact_nls_pert_1dz(t, uex,Lx)
