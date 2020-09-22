@@ -164,7 +164,7 @@ contains
     end if
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PACK, level%index)
     ierror = 0
-    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send, level=",I4, " tag=", I8," blocking=", L3," state%status=")',pf%rank,level%index,tag,blocking,pf%state%status
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send, level=",I4, " tag=", I8," blocking=", L3," state%status=",I3)',pf%rank,level%index,tag,blocking,pf%state%status
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SEND, level%index)
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
@@ -173,7 +173,7 @@ contains
        call pf_stop(__FILE__,__LINE__,'error during send',ierror)
     endif
 
-    if (pf%debug) print  '("DEBUG-rank=", I5, " end send, level=",I4, " tag=", I8," blocking=", L3," state%status=")',pf%rank,level%index,tag,blocking,pf%state%status
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end send, level=",I4, " tag=", I8," blocking=", L3," state%status=",I3)',pf%rank,level%index,tag,blocking,pf%state%status
   end subroutine pf_send
 
   !>  Subroutine to recieve the solution from the previous processor
