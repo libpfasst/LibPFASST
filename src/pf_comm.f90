@@ -191,7 +191,7 @@ contains
     if(present(direction)) dir = direction
 
     ierror = 0
-    if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,blocking,pf%state%pstatus
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
        source=pf%rank-1
@@ -245,7 +245,7 @@ contains
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_UNPACK, level%index)
     end if
 
-    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,blocking,pf%state%pstatus
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
   end subroutine pf_recv
 
 
