@@ -305,7 +305,7 @@ module pf_mod_dtype
      logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
-     logical :: debug = .false.         !!  If true, debug diagnostics are printed
+     logical :: debug = .true.         !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
      logical :: save_residuals = .true.  !!  Will save residuals every time they are set

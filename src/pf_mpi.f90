@@ -113,7 +113,7 @@ contains
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'done waiting in send_status'
     end if
 
-    call mpi_issend(message, 1, MPI_INTEGER, &
+    call mpi_isend(message, 1, MPI_INTEGER, &
                     dest, tag, pf%comm%comm, pf%comm%statreq, ierror)
 
   end subroutine pf_mpi_send_status
@@ -157,7 +157,7 @@ contains
                      dest, tag, pf%comm%comm, stat, ierror)
     else
 
-       call mpi_issend(level%send, level%mpibuflen, myMPI_Datatype, &
+       call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send
@@ -201,6 +201,7 @@ contains
     real(pfdp),        intent(in)    :: y(nvar) !!  data to broadcast
     integer,           intent(in)    :: root    !!  rank of broadcaster
     integer,           intent(inout) :: ierror  !!  error flag
+    print *,pf%rank,'rank broadcasting from rank=',root
     call mpi_bcast(y, nvar, myMPI_Datatype, root, pf%comm%comm, ierror)
   end subroutine pf_mpi_broadcast
 

@@ -120,7 +120,7 @@ contains
     endif
 
    if (pf%debug) print *, pf%rank, 'status recvd = ', istatus
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_status with pstatus=',pf%state%pstatus,'tag=',tag
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
@@ -166,7 +166,7 @@ contains
     end if
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PACK, level%index)
      ierror = 0
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status, SIZE(level%send), 'send buffer=',level%send
+    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status, SIZE(level%send)
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SEND, level%index)
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
@@ -194,6 +194,7 @@ contains
 
     ierror = 0
     if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin recv, tag=',tag,blocking, "pf%state%pstatus=",pf%state%pstatus
+    if (pf%debug) print  '("DEBUG -- rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,blocking,pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
        source=pf%rank-1
@@ -217,7 +218,7 @@ contains
        end if
 
        
-       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+!       if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv', SIZE(level%recv)
 
 
        if (pf%save_timings > 1) call pf_start_timer(pf, T_UNPACK, level%index)
@@ -236,7 +237,7 @@ contains
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
        if (ierror .ne. 0) call pf_stop(__FILE__,__LINE__,'error during receive, rank=',pf%rank)       
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
-       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv)
        !  Unpack solution
        if (pf%save_timings > 1) call pf_start_timer(pf, T_UNPACK, level%index)
        if (present(direction)) then
@@ -261,14 +262,14 @@ contains
     if (pf%comm%nproc .eq. 1) return
 
     if (pf%save_timings > 1) call pf_start_timer(pf, T_BROADCAST)
-    if(pf%debug) print *,'beginning broadcast'
+    if(pf%debug) print *,'DEBUG --',pf%rank,'beginning broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during broadcast',ierror)
     endif
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_BROADCAST)
-    if(pf%debug)print *,'ending broadcast'
+    if(pf%debug)print *,'DEBUG --',pf%rank,'  ending broadcast'
   end subroutine pf_broadcast
 
   !> Save current solution and function value so that future corrections can be computed

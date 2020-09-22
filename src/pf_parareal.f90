@@ -92,7 +92,7 @@ contains
     integer,           intent(in   ), optional :: flags(:)
 
     class(pf_level_t), pointer :: lev  !!  pointer to the one level we are operating on
-    integer                   :: j, k
+    integer                   :: j, k, ierr
     integer                   :: nblocks !!  The number of blocks of steps to do
     integer                   :: nproc   !!  The number of processors being used
     integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
@@ -144,6 +144,8 @@ contains
 
        if (k > 1) then
           !>  When starting a new block, broadcast new initial conditions to all procs
+          print *,'barrier at k=',k, 'rank=',pf%rank
+          call mpi_barrier(pf%comm%comm, ierr)
           if (nproc > 1)  then
              call lev%qend%pack(lev%send)    !!  Pack away your last solution
              call pf_broadcast(pf, lev%send, lev%mpibuflen, pf%comm%nproc-1)
