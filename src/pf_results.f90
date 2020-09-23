@@ -105,25 +105,26 @@ contains
     !  output file for iters
     iname = trim(this%datpath) // '/iter.dat'
     istream=8000+this%rank
-    open(istream, file=trim(iname), form='formatted',err=999)
-    write(rstream,*)'#level   step     block  iter  sweep   residual'
-    do klevel=1,this%nlevs
-       do kblock = 1, this%nblocks
-          nstep=(kblock-1)*this%nprocs+this%rank+1
-          do kiter = 0 , this%niters
-             do ksweep = 1, this%max_nsweeps
-                if (this%save_residuals) write(rstream,101 ) klevel,nstep,kblock,kiter,ksweep,this%residuals(klevel, kblock,kiter+1, ksweep)
-                if (this%save_errors) write(estream,101) klevel,nstep,kblock,kiter,ksweep,this%errors(klevel,kblock,kiter+1,  ksweep)
-                if (this%save_delta_q0) write(qstream,101) klevel,nstep,kblock,kiter,ksweep,this%delta_q0(klevel, kblock,kiter+1, ksweep)
+    if (this%save_residuals .or. this%save_errors .or. this%save_delta_q0) then
+       open(istream, file=trim(iname), form='formatted',err=999)
+       write(rstream,*)'#level   step     block  iter  sweep   residual'
+       do klevel=1,this%nlevs
+          do kblock = 1, this%nblocks
+             nstep=(kblock-1)*this%nprocs+this%rank+1
+             do kiter = 0 , this%niters
+                do ksweep = 1, this%max_nsweeps
+                   if (this%save_residuals) write(rstream,101 ) klevel,nstep,kblock,kiter,ksweep,this%residuals(klevel, kblock,kiter+1, ksweep)
+                   if (this%save_errors) write(estream,101) klevel,nstep,kblock,kiter,ksweep,this%errors(klevel,kblock,kiter+1,  ksweep)
+                   if (this%save_delta_q0) write(qstream,101) klevel,nstep,kblock,kiter,ksweep,this%delta_q0(klevel, kblock,kiter+1, ksweep)
+                end do
              end do
-          end do
+          enddo
        enddo
-    enddo
-    101 format(I3,I10, I10,I6, I6, e22.14)
-    if (this%save_residuals) close(rstream)
-    if (this%save_errors) close(estream)
-    if (this%save_delta_q0) close(qstream)
-
+101    format(I3,I10, I10,I6, I6, e22.14)
+       if (this%save_residuals) close(rstream)
+       if (this%save_errors) close(estream)
+       if (this%save_delta_q0) close(qstream)
+    end if
 
     do kblock = 1, this%nblocks
        nstep=(kblock-1)*this%nprocs+this%rank+1
