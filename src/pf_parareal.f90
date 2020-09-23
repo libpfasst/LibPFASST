@@ -84,6 +84,7 @@ contains
 
   !>  parareal controller for block mode
   subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend,flags)
+    use pf_mod_mpi, only: MPI_REQUEST_NULL
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(in   )           :: dt
@@ -137,15 +138,16 @@ contains
        pf%state%mysteps = 0
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
-       pf%comm%statreq  = -66
+       pf%comm%statreq  = MPI_REQUEST_NULL
        pf%state%pfblock = k
        pf%state%sweep = 1   !  Needed for compatibility of residual storage       
 
 
        if (k > 1) then
           !>  When starting a new block, broadcast new initial conditions to all procs
-          print *,'barrier at k=',k, 'rank=',pf%rank
+          if (pf%debug) print *,'DEBUG-rank=',pf%rank, ' at barrier at k=',k
           call mpi_barrier(pf%comm%comm, ierr)
+          if (pf%debug) print *,'DEBUG-rank=',pf%rank, ' past barrier at k=',k
           if (nproc > 1)  then
              call lev%qend%pack(lev%send)    !!  Pack away your last solution
              call pf_broadcast(pf, lev%send, lev%mpibuflen, pf%comm%nproc-1)
