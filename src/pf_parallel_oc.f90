@@ -316,6 +316,7 @@ contains
   !>  On calling, it is assumed that the levels are already loaded with the initial guesses
   !>
   subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
+    use pf_mod_mpi, only: MPI_REQUEST_NULL
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
@@ -355,7 +356,7 @@ contains
     pf%state%mysteps = 0
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
-    pf%comm%statreq  = -66
+    pf%comm%statreq  = MPI_REQUEST_NULL
     pf%state%nsteps  = nsteps
 !     pf%state%component = which
 
