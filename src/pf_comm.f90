@@ -119,7 +119,7 @@ contains
       print *, 'Rank=',pf%rank
       call pf_stop(__FILE__,__LINE__,'error during recv_status',ierror)      
     endif
-    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv_status, tag=",I8, " pf%state%pstatus=", I2,I2)',pf%rank,tag,pf%state%pstatus,istatus           
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
