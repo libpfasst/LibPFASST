@@ -359,6 +359,7 @@ contains
 
   !>  PFASST controller for block mode
   subroutine pf_block_run(pf, q0, dt, nsteps, qend,flags)
+    use pf_mod_mpi, only: MPI_REQUEST_NULL
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(inout)           :: dt
@@ -417,7 +418,7 @@ contains
        pf%state%mysteps = 0
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
-       pf%comm%statreq  = -66
+       pf%comm%statreq  = MPI_REQUEST_NULL
        pf%state%pfblock = k
        pf%state%sweep = 1
 

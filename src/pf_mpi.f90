@@ -64,7 +64,8 @@ contains
     if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)    
 
     pf_comm%sendreq = MPI_REQUEST_NULL
-    pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive
+!    pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive
+    pf_comm%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
   end subroutine pf_mpi_setup
 
 
@@ -94,7 +95,7 @@ contains
 
   !> Subroutine to send convergence status information
   subroutine pf_mpi_send_status(pf, tag,istatus,ierror, dest)
-    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE, MPI_REQUEST_NULL
+    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE, MPI_REQUEST_NULL,MPI_SIZEOF
 
     type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
     integer,           intent(in)    :: tag       !!  message tag
@@ -103,24 +104,27 @@ contains
     integer,            intent(in)    :: dest
     integer    ::  stat(MPI_STATUS_SIZE)
 
-    integer :: message
+    integer :: message(1),isize
     message = istatus
     
 
-    if (pf%comm%statreq /= -66) then
+    if (pf%comm%statreq /= MPI_REQUEST_NULL) then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'waiting in send_status with statreq',pf%comm%statreq
        call mpi_wait(pf%comm%statreq, stat, ierror)
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'done waiting in send_status'
     end if
 
-    call mpi_isend(message, 1, MPI_INTEGER, &
+    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begin issend_status', istatus, message,pf%comm%statreq
+    call mpi_issend(message, 1, MPI_INTEGER4, &
                     dest, tag, pf%comm%comm, pf%comm%statreq, ierror)
+    if (pf%debug) print*, 'DEBUG --',pf%rank, 'end issend  status', istatus, message,pf%comm%statreq
+
 
   end subroutine pf_mpi_send_status
 
   !> Subroutine to receive convergence status information
   subroutine pf_mpi_recv_status(pf, tag,istatus,ierror, source)
-    use pf_mod_mpi, only: MPI_INTEGER, MPI_STATUS_SIZE
+    use pf_mod_mpi, only: MPI_INTEGER4, MPI_STATUS_SIZE
 
     type(pf_pfasst_t), intent(inout) :: pf        !!  main pfasst structure
     integer,           intent(in)    :: tag       !!  message tag
@@ -129,12 +133,12 @@ contains
     integer,           intent(in)    :: source
     integer    ::  stat(MPI_STATUS_SIZE)
 
-    integer :: message
+    integer :: message(1)
 
     ! Get the message
-    call mpi_recv(message, 1, MPI_INTEGER,source, tag, pf%comm%comm, stat, ierror)
-    istatus=message
-
+    call mpi_recv(message, 1, MPI_INTEGER4,source, tag, pf%comm%comm, stat, ierror)
+    istatus=message(1)
+    if (pf%debug) print *,'DEBUG- rank=',pf%rank,'in recv_status, istatus,message', istatus, message
   end subroutine pf_mpi_recv_status
 
 
@@ -157,7 +161,7 @@ contains
                      dest, tag, pf%comm%comm, stat, ierror)
     else
 
-       call mpi_isend(level%send, level%mpibuflen, myMPI_Datatype, &
+       call mpi_issend(level%send, level%mpibuflen, myMPI_Datatype, &
                       dest, tag, pf%comm%comm, pf%comm%sendreq(level%index), ierror)
     end if
   end subroutine pf_mpi_send
@@ -201,7 +205,7 @@ contains
     real(pfdp),        intent(in)    :: y(nvar) !!  data to broadcast
     integer,           intent(in)    :: root    !!  rank of broadcaster
     integer,           intent(inout) :: ierror  !!  error flag
-    print *,pf%rank,'rank broadcasting from rank=',root
+    if(pf%debug)  print *,pf%rank,'rank broadcasting from rank=',root
     call mpi_bcast(y, nvar, myMPI_Datatype, root, pf%comm%comm, ierror)
   end subroutine pf_mpi_broadcast
 
