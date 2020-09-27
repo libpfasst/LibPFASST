@@ -64,7 +64,6 @@ contains
        pf%levels(l)%nsweeps_pred = pf%nsweeps_pred(l)
        pf%levels(l)%nnodes = pf%nnodes(l)
        pf%levels(l)%Finterp = pf%Finterp
-       pf%levels(l)%nsteps_rk = pf%nsteps_rk(l)
     end do
     
     !>  allocate hooks
@@ -656,6 +655,9 @@ contains
        write(un,*) '      "method" :  "PFASST",'
     else
        write(un,*) '      "method" :  "parareal",'
+       write(un,123)  '"nsteps_rk" :',adjustr(convert_int_array(pf%nsteps_rk(1:pf%nlevels),pf%nlevels)), ','
+       write(un,123)  '"rk_order" :',adjustr(convert_int_array(pf%rk_order(1:pf%nlevels),pf%nlevels)), ','
+       write(un,123)  '"rk_nstages" :',adjustr(convert_int_array(pf%rk_nstages(1:pf%nlevels),pf%nlevels)), ','
     end if
     write(un,123)  '"use_rk_stepper" :',     convert_logical(pf%use_rk_stepper), ','
     write(un,123)  '"use_sdc_sweeper" :',     convert_logical(pf%use_sdc_sweeper), ','

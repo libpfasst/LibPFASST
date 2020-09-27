@@ -24,26 +24,23 @@ contains
 
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
-
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus    
     ierror = 0
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
-       if (pf%debug) print  '("DEBUG-rank=", I5, " begin post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
        source=pf%rank-1
        call pf%comm%post(pf, level, tag, ierror, source)
-       if (pf%debug) print  '("DEBUG-rank=", I5, " end post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus       
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
          .and. dir == 2) then
-       if (pf%debug) print  '("DEBUG-rank=", I5, " begin post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus    
        source=pf%rank+1
        call pf%comm%post(pf, level, tag, ierror, source)
-       if (pf%debug) print  '("DEBUG-rank=", I5, " end post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus       
     end if
 
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during post',ierror)
    endif
+   if (pf%debug) print  '("DEBUG-rank=", I5, " end post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus       
   end subroutine pf_post
 
   !>  Subroutine to send this processor's convergence status to the next processor
@@ -73,14 +70,14 @@ contains
       call pf_stop(__FILE__,__LINE__,'invalid dir during send_status',dir)
     end if
 
-    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send_status, tag=",I8, " pf%state%status=", I2)',pf%rank,tag,pf%state%status           
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
     call pf%comm%send_status(pf, tag, istatus, ierror, dest)
 
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during send_status',ierror)
     endif
-    if (pf%debug) print  '("DEBUG-rank=", I5, " end send_status, tag=",I8, " pf%state%status=", I2)',pf%rank,tag,pf%state%status           
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end send_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
   end subroutine pf_send_status
 
   !>  Subroutine to receive the convergence status from the previous processor
@@ -110,7 +107,7 @@ contains
       print *, 'Rank',pf%rank
       call pf_stop(__FILE__,__LINE__,'invalid bad dir in recv_status',dir)
    end if
-   if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus   
+   if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
    call pf%comm%recv_status(pf, tag, istatus, ierror, source)
 
    if (ierror .eq. 0) then
@@ -119,7 +116,7 @@ contains
       print *, 'Rank=',pf%rank
       call pf_stop(__FILE__,__LINE__,'error during recv_status',ierror)      
     endif
-    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv_status, tag=",I8, " pf%state%pstatus=", I2,I2)',pf%rank,tag,pf%state%pstatus,istatus           
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
@@ -141,7 +138,7 @@ contains
     ierror = 0
     ! need to wait here to make sure last non-blocking send is done
     if(blocking .eqv. .false.) then
-       if (pf%debug) print  '("DEBUG-rank=", I5, " begin wait in send, level=",I4)',pf%rank,level%index
+       if (pf%debug) print  '("DEBUG-rank=", I5, " begin wait, level=",I4)',pf%rank,level%index
        if (pf%save_timings > 1) call pf_start_timer(pf, T_WAIT, level%index)
        !       call pf_mpi_wait(pf, level%index, ierror)
        call pf%comm%wait(pf, level%index, ierror)       
@@ -150,7 +147,7 @@ contains
           print *, 'Rank=',pf%rank
           call pf_stop(__FILE__,__LINE__,'error during send (wait)',ierror)
        end if
-       if (pf%debug) print  '("DEBUG-rank=", I5, " end wait in send, level=",I4)',pf%rank,level%index
+       if (pf%debug) print  '("DEBUG-rank=", I5, " end wait, level=",I4)',pf%rank,level%index
     end if
     
     if (pf%save_timings > 1) call pf_start_timer(pf, T_PACK, level%index)
@@ -194,10 +191,9 @@ contains
     if(present(direction)) dir = direction
 
     ierror = 0
-
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
-       if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus       
        source=pf%rank-1
        if (pf%save_timings > 1) then
           if (blocking)  then
@@ -229,11 +225,9 @@ contains
           call level%q0%unpack(level%recv)
        end if
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_UNPACK, level%index)
-       if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
 
     elseif (pf%rank /= pf%comm%nproc-1 .and. pf%state%pstatus == PF_STATUS_ITERATING &
          .and. dir == 2) then
-       if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus       
        source=pf%rank+1
        
        if (pf%save_timings > 1) call pf_start_timer(pf, T_RECEIVE, level%index)
@@ -249,9 +243,9 @@ contains
           call level%qend%unpack(level%recv)
        end if
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_UNPACK, level%index)
-       if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
     end if
 
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
   end subroutine pf_recv
 
 

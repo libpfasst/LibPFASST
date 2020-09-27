@@ -48,7 +48,7 @@ contains
       !  Do  sanity check on steps
       if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/1d-7) then
         print *,'dt=',dt
-       print *,'nsteps=',nsteps_loc
+        print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
        call pf_stop(__FILE__,__LINE__,'Invalid nsteps ,nsteps=',nsteps)
       end if
@@ -98,7 +98,7 @@ contains
     integer                   :: nproc   !!  The number of processors being used
     integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
     integer                   :: level_max_depth !!  Finest level in V-cycle
-    integer::  nsteps_c,nsteps_f  
+!    integer::  nsteps_c,nsteps_f  
 
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
@@ -254,7 +254,7 @@ contains
     ! Save the coarse level value to be used in parareal iteration
     call c_lev%Q(1)%copy(f_lev%qend, flags=0)     
     ! Save the fine level value
-    call f_lev%qend%copy(f_lev%qend, flags=0)     
+    call c_lev%qend%copy(f_lev%qend, flags=0)     
     call c_lev%q0%copy(f_lev%q0, flags=0)     
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)

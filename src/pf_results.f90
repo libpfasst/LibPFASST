@@ -102,12 +102,10 @@ contains
        qstream=7000+this%rank
        open(qstream, file=trim(q0name), form='formatted',err=999)
     end if
-    !  output file for iters
-    iname = trim(this%datpath) // '/iter.dat'
-    istream=8000+this%rank
     if (this%save_residuals .or. this%save_errors .or. this%save_delta_q0) then
-       open(istream, file=trim(iname), form='formatted',err=999)
-       write(rstream,*)'#level   step     block  iter  sweep   residual'
+       if (this%save_residuals) write(rstream,*)'#level   step     block  iter  sweep   residual'
+       if (this%save_errors) write(estream,*)'#level   step     block  iter  sweep   error'
+       if (this%save_delta_q0) write(qstream,*)'#level   step     block  iter  sweep   delta q0'
        do klevel=1,this%nlevs
           do kblock = 1, this%nblocks
              nstep=(kblock-1)*this%nprocs+this%rank+1
@@ -126,6 +124,10 @@ contains
        if (this%save_delta_q0) close(qstream)
     end if
 
+    !  output file for iters
+    iname = trim(this%datpath) // '/iter.dat'
+    istream=8000+this%rank
+    open(istream, file=trim(iname), form='formatted',err=999)
     do kblock = 1, this%nblocks
        nstep=(kblock-1)*this%nprocs+this%rank+1
        write(istream, '(I10,I10, e22.14)') nstep,kblock,this%iters(kblock)

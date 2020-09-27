@@ -59,6 +59,7 @@ module pf_mod_dtype
     integer :: sweep    !! sweep number
     integer :: status   !! status (iterating, converged etc)
     integer :: pstatus  !! previous rank's status
+    logical :: pconverged  !! is previous rank converged
     integer :: itcnt    !! total iterations by this processor
     integer :: skippedy !! skipped sweeps for state (for mixed integration)
     integer :: mysteps  !! steps I did
@@ -155,7 +156,6 @@ module pf_mod_dtype
      !  level parameters set by the pfasst_t values
      integer  :: index        = -1   !! level number (1 is the coarsest)
      integer  :: nnodes       = -1   !! number of sdc nodes
-     integer  :: nsteps_rk    = -1   !! number of rk steps to perform
      integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
@@ -299,10 +299,12 @@ module pf_mod_dtype
 
 
      ! -- RK and Parareal options
-     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
-     logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=-1 !! number of runge-kutta steps per time step
-     logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+     logical :: use_sdc_sweeper =.true.   !! decides if SDC sweeper is used 
+     logical :: use_rk_stepper = .false.  !! decides if RK steps are used instead of the sweeps
+     integer :: nsteps_rk(PF_MAXLEVS)=-1  !! number of runge-kutta steps per time step
+     integer :: rk_order(PF_MAXLEVS)=-1   !! order of runge-kutta method per level
+     integer :: rk_nstages(PF_MAXLEVS)=-1 !! number of runge-kutta stages per level
+     logical :: RK_pred = .false.         !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed

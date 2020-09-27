@@ -307,6 +307,10 @@ contains
         this%nstages = nstages
         this%npieces = npieces
 
+        !  Store the info in the pf structure
+        pf%rk_order(level_index)=this%order
+        pf%rk_nstages(level_index)=this%nstages
+
         ! Allocate space for local variables
         call lev%ulevel%factory%create_single(this%y_n,    level_index,  lev%lev_shape)
         call lev%ulevel%factory%create_single(this%y_np1,  level_index,  lev%lev_shape)
