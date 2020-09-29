@@ -91,21 +91,21 @@ contains
        resname = trim(this%datpath) // '/residual.dat'
        rstream=5000+this%rank
        open(rstream, file=trim(resname), form='formatted',err=999)
+       write(rstream,*)'#level   step     block  iter  sweep   residual'       
     end if
     if (this%save_errors) then
        errname = trim(this%datpath) // '/error.dat'
        estream=6000+this%rank
        open(estream, file=trim(errname), form='formatted',err=999)
+       write(estream,*)'#level   step     block  iter  sweep   error'
     end if
     if (this%save_delta_q0) then
        q0name = trim(this%datpath) // '/delta_q0.dat'
        qstream=7000+this%rank
        open(qstream, file=trim(q0name), form='formatted',err=999)
+       write(qstream,*)'#level   step     block  iter  sweep   delta q0'       
     end if
     if (this%save_residuals .or. this%save_errors .or. this%save_delta_q0) then
-       if (this%save_residuals) write(rstream,*)'#level   step     block  iter  sweep   residual'
-       if (this%save_errors) write(estream,*)'#level   step     block  iter  sweep   error'
-       if (this%save_delta_q0) write(qstream,*)'#level   step     block  iter  sweep   delta q0'
        do klevel=1,this%nlevs
           do kblock = 1, this%nblocks
              nstep=(kblock-1)*this%nprocs+this%rank+1
