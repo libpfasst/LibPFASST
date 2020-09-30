@@ -15,7 +15,6 @@ include $(LIBPFASST)/Makefile.local
 
 VPATHS = $(LIBPFASST)/src
 LDFLAGS +=  -L$(LIBPFASST)/lib -lpfasst 
-#LDFLAGS +=  -L$(LIBPFASST)/libnpy/ -lnpy
 
 #  Source files
 FSRC = src/pfasst.f90 \
@@ -59,10 +58,10 @@ FSRC = src/pfasst.f90 \
 #       pf_amisdcQ.f90 \
 
 #  Before using AMReX, one must compile amrexlib
-USE_AMREX=FALSE
+USE_AMREX=TRUE
 ifeq ($(USE_AMREX),TRUE)
-AMREX_HOME=../amrex
-AMREX_LIBRARY_HOME= $(AMREX_HOME)/amrexlib
+AMREX_HOME=$(LIBPFASST)/../amrex
+AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
 
 LIBDIR := $(AMREX_LIBRARY_HOME)/lib
 INCDIR := $(AMREX_LIBRARY_HOME)/include
@@ -72,7 +71,7 @@ COMPILE_LIB_FLAGS ?= $(shell awk '/Libs:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkg
 FSRC += src/pf_amrex_encap.f90
 
 FFLAGS += -I$(INCDIR) $(COMPILE_CPP_FLAGS)
-LDFLAGS += -L$(LIBDIR) $(COMPILE_LIB_FLAGS) -lamrex
+LDFLAGS += -L$(LIBDIR) $(COMPILE_LIB_FLAGS) -lamrex -lpthread -lstdc++
 endif
 
 #  FFT options
@@ -83,7 +82,7 @@ else
 FSRC+=src/pf_fftw.f90
 FFTW=$(LIBPFASST)/fftw3
 FFLAGS  +=  -I$(FFTW)/include
-LDFLAGS += -L$(FFTW)/lib -L$(FFTW)/lib64 -lfftw3
+LDFLAGS += -L$(FFTW)/lib -lfftw3
 endif
 
 
@@ -92,7 +91,7 @@ endif
 #  These are displayed at the end of the petsc configuration step
 ifeq ($(USE_PETSC),TRUE)
 FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
-FSRC+= src/pf_petscVec_encap.f90
+FSRC+= pf_petscVec_encap.f90
 LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
 endif
 
