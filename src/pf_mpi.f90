@@ -64,7 +64,6 @@ contains
     if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)    
 
     pf_comm%sendreq = MPI_REQUEST_NULL
-!    pf_comm%statreq = -66   !Tells the first send_status not to wait for previous one to arrive
     pf_comm%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
   end subroutine pf_mpi_setup
 
