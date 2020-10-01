@@ -72,13 +72,21 @@ contains
     integer nn,psize,rank,ierr,k
     type(amrex_boxarray)  :: ba
     type(amrex_distromap) :: dm
+    type(amrex_parmparse) :: pp
+    integer :: n_cell, max_grid_size
+
     
     select type (this)
     class is (pf_AMReX_mfab_t)
+       this%ndim   = SIZE(shape_in)-1
+       this%ncomp=shape_in(1)
+       this%nghost=0
+       this%arr_shape = shape_in(2:this%ndim+1)
+       print *,'ndim=',this%ndim,' ncomp=',this%ncomp,' nghost=',this%nghost, ' array_shape=',this%arr_shape(1:this%ndim)
        
        ! Define a single box covering the domain
        this%domain = amrex_box((/0,0,0/), (/shape_in(2),shape_in(3),shape_in(4)/))
-       
+
        ! Initialize the boxarray "ba" from the single box "bx"
        call amrex_boxarray_build(ba, this%domain)
 
@@ -87,24 +95,25 @@ contains
        call ba%maxSize(this%max_grid_size)
        
        ! Build a DistributionMapping for the boxarray
+
        call amrex_distromap_build(dm, ba)
-       
+
        ! This defines a amrex_geometry object.
+!       print *,'set geometry coord'
+       call amrex_geometry_set_coord_sys(0)
+       call amrex_geometry_set_prob_domain((/0.0d0,0.0d0,0.0d0/), (/1.0d0,1.0d0,1.0d0/))
+       call amrex_geometry_set_periodic ((/ .true.,.true.,.true./))
        call amrex_geometry_build(this%geom, this%domain)
        
        ! Build data multifabs
-       this%ncomp=shape_in(1)
        call amrex_multifab_build(this%mfab, ba, dm, this%ncomp, this%nghost)
        
        call amrex_distromap_destroy(dm)
        call amrex_boxarray_destroy(ba)
        
-       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)                                
-       this%ndim   = SIZE(shape_in)
-       this%arr_shape = shape_in
        !  Make a shape the size of the grid with ghost cells
        this%pack_size(1:size(shape_in)) = shape_in
-       do k=2,4
+       do k=2,this%ndim+1
           if (this%pack_size(k)>1) this%pack_size(k)=this%pack_size(k)+2*this%nghost
        end do
        
@@ -147,10 +156,9 @@ contains
     pf_AMReX_mfab_obj => cast_as_AMReX_mfab(encap)
 !    print *,'destroying AMReX_mfab'
 
-    
-    nullify(pf_AMReX_mfab_obj)
     call amrex_multifab_destroy(pf_AMReX_mfab_obj%mfab)
     call amrex_geometry_destroy(pf_AMReX_mfab_obj%geom) 
+    nullify(pf_AMReX_mfab_obj)
 
 
   end subroutine AMReX_mfab_destroy
@@ -194,6 +202,7 @@ contains
     class(pf_AMReX_mfab_t), intent(inout)           :: this
     real(pfdp),     intent(in   )           :: val
     integer,        intent(in   ), optional :: flags
+
     call this%mfab%setval(val,1,this%ncomp,this%nghost)       
   end subroutine AMReX_mfab_setval
 
@@ -258,11 +267,11 @@ contains
     integer,     intent(in   ), optional :: flags
     real(pfdp) :: norm
     norm=1.0
-    if (present(flags)) then
-       norm = this%mfab%norm2(flags)
-    else
-       norm = this%mfab%norm2(0)
-    end if
+!    if (present(flags)) then
+       norm = this%mfab%norm2()
+!    else
+!       norm = this%mfab%norm2(0)
+!    end if
     
 !    call VecNorm(this%AMReX_mfab,NORM_INFINITY,norm,this%ierr);CHKERRQ(this%ierr)
   end function AMReX_mfab_norm
