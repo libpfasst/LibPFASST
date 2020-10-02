@@ -219,13 +219,9 @@ contains
     type is (pf_AMReX_mfab_t)
        ng=this%nghost
        nc=this%ncomp
-       !       call this%mfab%amrex_multifab_copy(src%mfab,1,1,nc,ng)
-       call this%mfab%copy(src%mfab,1,1,nc,ng)       
-!        call VecGetSize(src%AMReX_mfab,m, this%ierr);CHKERRQ(this%ierr)
-!        call VecGetSize(this%AMReX_mfab,n, this%ierr);CHKERRQ(this%ierr)
-
-!        call VecCopy(src%AMReX_mfab,this%AMReX_mfab,this%ierr);CHKERRQ(this%ierr)
-
+       !call this%mfab%amrex_multifab_copy(src%mfab,1,1,nc,ng)
+       !       call this%mfab%copy(src%mfab,1,1,nc,ng)
+       call this%mfab%parallel_copy(src%mfab,src%geom)              
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
