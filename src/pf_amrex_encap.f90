@@ -26,16 +26,14 @@ module pf_mod_AMReX_mfab
      procedure :: destroy_array => AMReX_mfab_destroy_array
   end type pf_AMReX_mfab_factory_t
   
-  !>  1-dimensional array type,  extends the abstract encap type
+  !>  AMReX array type,  extends the abstract encap type
   type, extends(pf_encap_t) :: pf_amrex_mfab_t
-     integer             :: ndim
-     integer   :: arr_shape(4)
-     integer   :: pack_size(4)
-     integer :: n_cell, max_grid_size, nsteps, plot_int
-     integer :: ncomp     ! Number of componentns
+     integer   :: ndim    !  Number of spatial dimensions
+     integer   :: ncomp     ! Number of solution components
+     integer   :: arr_shape(4)  !  (ncomp,nx,ny,nz)
+     integer   :: pack_size(4)  !  arr_shape plus ghost cells
+     integer ::  max_grid_size  !  maximum block size in AMReX
      integer ::  nghost   ! number of  ghost cells
-     integer :: istep
-     type(amrex_parmparse) :: pp
      type(amrex_box) :: domain
      type(amrex_geometry)  :: geom
      type(amrex_multifab)  :: mfab
@@ -68,13 +66,9 @@ contains
     use pf_mod_comm_mpi
     class(pf_encap_t), intent(inout) :: this
     integer,           intent(in   ) :: shape_in(:)
-
-    integer nn,psize,rank,ierr,k
+    integer ::  k
     type(amrex_boxarray)  :: ba
     type(amrex_distromap) :: dm
-    type(amrex_parmparse) :: pp
-    integer :: n_cell, max_grid_size
-
     
     select type (this)
     class is (pf_AMReX_mfab_t)
@@ -95,7 +89,6 @@ contains
        call ba%maxSize(this%max_grid_size)
        
        ! Build a DistributionMapping for the boxarray
-
        call amrex_distromap_build(dm, ba)
 
        ! This defines a amrex_geometry object.
@@ -104,6 +97,8 @@ contains
        call amrex_geometry_set_prob_domain((/0.0d0,0.0d0,0.0d0/), (/1.0d0,1.0d0,1.0d0/))
        call amrex_geometry_set_periodic ((/ .true.,.true.,.true./))
        call amrex_geometry_build(this%geom, this%domain)
+
+!       call amrex_geometry_init_data (this%geom)  ! geom%p must be valid!       
        
        ! Build data multifabs
        call amrex_multifab_build(this%mfab, ba, dm, this%ncomp, this%nghost)
@@ -232,7 +227,6 @@ contains
     class(pf_AMReX_mfab_t), intent(in   ) :: this
     real(pfdp),     intent(  out) :: z(:)
     integer,     intent(in   ), optional :: flags
-    integer :: psize
     real(pfdp),  pointer :: mfab_data(:,:,:,:)
 
     mfab_data=>this%mfab%dataPtr(0)
@@ -264,12 +258,10 @@ contains
     real(pfdp) :: norm
     norm=1.0
 !    if (present(flags)) then
-       norm = this%mfab%norm2()
+       norm = this%mfab%norm0()
 !    else
 !       norm = this%mfab%norm2(0)
 !    end if
-    
-!    call VecNorm(this%AMReX_mfab,NORM_INFINITY,norm,this%ierr);CHKERRQ(this%ierr)
   end function AMReX_mfab_norm
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
