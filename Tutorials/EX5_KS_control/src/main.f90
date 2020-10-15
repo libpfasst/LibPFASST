@@ -30,26 +30,26 @@ implicit none
   integer        :: iout,nout
 
   real(pfdp), pointer :: gradient(:), prevGrad(:), &    !< gradient of current and previous optimization iter
-                         searchDir(:), prevSearchDir(:),& !< current and previous search direction 
+                         searchDir(:), prevSearchDir(:),& !< current and previous search direction
                          ctrl(:), & !< control (to be determined by the optimization), here: initial condition
                          savedStatesFlat(:,:,:), savedAdjointsFlat(:,:,:) !< to store solutions, e.g., for warm starting
   real(pfdp)          :: LinftyNormGrad, LinftyNormCtrl, L2NormCtrlSq, L2NormGradSq, & !< norms of gradient and control
                          objective, objectiveNew, & !< objective function values (current and after update for step size selection)
                          stepSize, prevStepSize, & !< current initial step size and previously chosen step size for updating the control
-                         directionTimesGradient, & !< scalar product of search direction and gradient, used in step size selection                         
+                         directionTimesGradient, & !< scalar product of search direction and gradient, used in step size selection
                          globObj, globObjNew, globDirXGrad, prevGlobDirXGrad, globL2NormGradSq, globLinftyNormGrad, & !< accumulated quantities (summed over all ranks)
                          beta, & !< determines the type of optimization method
                          num, denom, & !< helper variables to determine beta
-                         L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfEXactCtrl, & !< to determine error in computed control                                                 
+                         L2errorCtrl, LinfErrorCtrl, L2exactCtrl, LinfEXactCtrl, & !< to determine error in computed control
                          abs_res_tol_save, rel_res_tol_save !< to solve state for data generation with potentially stricter residual tolerance than given in the nml file for the optimization run
-                         
+
   logical             :: stepTooSmall, & !< whether step size determined by alg is too small
                          predict !< use predictor?
   integer             :: itersState, itersAdjoint, skippedState, sumSkippedState, sumItersState, sumItersAdjoint, &  !< counting PFASST iterations on different equations for statistics
                          step, & ! loop counter for time steps
                          nsteps_per_rank, & !< how many timesteps for each CPU?
                          thisstep !< what is the true time step corresponding the the CPUs local step number
-                        
+
   character(8)   :: date  !< wall clock times for timing the optimization run
   character(10)  :: time  !< wall clock times for timing the optimization run
   integer        :: time_start(8), time_end(8)   !< wall clock times for timing the optimization run
@@ -111,13 +111,13 @@ implicit none
 
   ! do we want to save timings?
   pf%save_timings = 0
-  
+
   ! saving other stuff is not yet tested for optimal control problems
   pf%save_residuals = .false.
   pf%save_errors=.false.
   pf%save_delta_q0=.false.
   pf%save_solutions=0
-  
+
   call initialize_results(pf)
 
   ! output some information each after time step
@@ -130,6 +130,10 @@ implicit none
   call system('if [ ! -e ./Dat ]; then mkdir Dat; fi')
   shell_cmd = 'if [ ! -e ./Dat/'//trim(fbase)//' ]; then mkdir Dat/'//trim(fbase)//'; fi'
   call system(shell_cmd)
+
+  if(write_numpy) then
+     call system('if [ ! -e ./npy ]; then mkdir npy; fi')
+  end if
 
   ! open output files
   write (fname, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'Niter',pf%niters,'_Nx',nvars(pf%nlevels),'_Nstep',nsteps,'_Nproc',comm%nproc
@@ -186,18 +190,18 @@ implicit none
 
   ! create array for initial condition
   call ndarray_oc_build(q1, pf%levels(pf%nlevels)%lev_shape)
-  
-  ! set up and initialize optimization specific elements of the sweeper 
+
+  ! set up and initialize optimization specific elements of the sweeper
   do l = 1, pf%nlevels
      call initialize_ocp(pf%levels(l)%ulevel%sweeper, pf, l, nsteps_per_rank)
   end do
 
   ! get exact control = true initial condition
   allocate(ctrl(nvars(pf%nlevels)))
-  call initial_sol(ctrl)  
-  
+  call initial_sol(ctrl)
+
   allocate(npyOutput(nvars(pf%nlevels)))
-  
+
   ! numpy output
   if (write_numpy) then
      write(npyfname, "(A,'.npy')") "npy/uexact"
@@ -212,13 +216,13 @@ implicit none
 
   ! set initial condition
   if (pf%rank .eq. 0) then
-    q1%yflatarray = ctrl    
+    q1%yflatarray = ctrl
   else
     q1%yflatarray = 0.0_pfdp
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
-  
-  
+
+
   if (pf%rank .eq. 0)  then
     print *, ' **** solve state with exact initial condition ***'
     if (write_numpy) then
@@ -227,34 +231,34 @@ implicit none
        call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
     end if
   end if
-  
+
   ! PFASST loop to solve state equation
   ! done manually, as we need to keep track of some quantities (e.g., save state solution values),
   ! so we cannot use the standard PFASST controller magic to do it for us
-  do step=1, nsteps_per_rank 
+  do step=1, nsteps_per_rank
       thisstep = (step-1)*pf%comm%nproc + pf%rank
       pf%state%pfblock = step
       call pf_pfasst_block_oc(pf, dt, step*pf%comm%nproc, .true., 1, step=thisstep+1)
-      
+
       ! pack true solution to targetState for setting up the tracking type objective function
       do m=1, pf%levels(pf%nlevels)%nnodes
          call pf%levels(pf%nlevels)%Q(m)%pack(targetState(step,m,:),1)
- 
+
          if (write_numpy) then
             write(npyfname, "(A,'s',i0.4,'m',i0.2,'.npy')") "npy/ytarget", step, m
             call save_double(npyfname, shape(targetState(step,m,:)), real(targetState(step,m,:),8))
          end if
-         
+
          ! TODO: add some observation noise here
       end do
-      
-      ! output state at time step end 
+
+      ! output state at time step end
       if (write_numpy) then
          write(npyfname, "(A,'s',i0.4'.npy')") "npy/y", thisstep+1
          call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%pack(npyOutput,1)
          call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
       end if
-      
+
       ! if not done pass on initial condition
       if( step < nsteps_per_rank) then
         call pf%levels(pf%nlevels)%qend%pack(pf%levels(pf%nlevels)%send, 1)    !<  Pack away your last solution
@@ -268,11 +272,11 @@ implicit none
   do l = pf%nlevels-1,1,-1
     call restrict_ydesired(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
   end do
-  
+
   ! wait for everybody to finish their setup/data generation phase
   call mpi_barrier(pf%comm%comm, ierror)
 
-  
+
   ! set up remaining data structures for the optimization loop
   if(pf%rank == 0) &
      open(unit=105, file = logfilename , &
@@ -286,7 +290,7 @@ implicit none
   allocate(prevSearchDir(nvars(pf%nlevels)))
   allocate(savedStatesFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
   allocate(savedAdjointsFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
-      
+
   gradient = 0
   prevGrad = 0
   prevGlobDirXGrad = 0.0_pfdp
@@ -299,11 +303,11 @@ implicit none
   itersState = 0
   itersAdjoint = 0
   skippedState = 0
-  
-  
+
+
   ! initial guess for control: some fraction or perturbation of true control
   call initial_sol(ctrl)
-  
+
   ctrl = 0.75 * ctrl
   ! allocate(rndArr(nvars(pf%nlevels)))
   ! call random_number(rndArr)
@@ -311,12 +315,12 @@ implicit none
   ! call pf_broadcast(pf, ctrl, pf%levels(pf%nlevels)%mpibuflen, 0)
   ! deallocate(rndArr)
 
-  
+
   call date_and_time(date=date, time=time, values=time_start)
   if (pf%rank .eq. 0) &
     print *, 'start optimization on ', date, ', ',  time
 
-  ! optimization loop  
+  ! optimization loop
   do k = 1, max_opt_iter
 
      ! output current control
@@ -324,7 +328,7 @@ implicit none
         write(npyfname, "(A,'k',i0.4,'.npy')") "npy/u", k
         call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
      end if
-     
+
      if(pf%rank == 0) print *, '===============Optimization ITERATION================', k
 
 !      call mpi_barrier(pf%comm%comm, ierror)
@@ -343,15 +347,15 @@ implicit none
                               savedAdjointsFlat)
        itersAdjoint = itersAdjoint + pf%state%itcnt
      end if
-     
-     
+
+
      if(pf%rank == 0 .and. write_numpy) then
         write(npyfname, "(A,'k',i0.4,'.npy')") "npy/gradient", k
         call save_double(npyfname, shape(gradient), real(gradient(:),8))
      end if
-     
-     
-     ! add regularization term derivative to gradient    
+
+
+     ! add regularization term derivative to gradient
      globL2NormGradSq = sum(gradient**2)*Lx/dble(nvars(pf%nlevels))
      globLinftyNormGrad = maxval(abs(gradient))
 
@@ -369,7 +373,7 @@ implicit none
        exit
      end if
 
-     ! determine search direction depending on the optimization method 
+     ! determine search direction depending on the optimization method
      if ( k .eq. 1 ) then
         beta = 0.0
      else
@@ -388,10 +392,10 @@ implicit none
           num   = compute_scalar_prod(gradient, gradient)
           denom = compute_scalar_prod(prevGrad, prevGrad)
           beta = num/denom
-        else 
+        else
           ! none of the above, use steepest descent, i.e., beta = 0
           beta = 0
-        end if        
+        end if
      end if
      searchDir = -gradient + beta*prevSearchDir
 
@@ -410,7 +414,7 @@ implicit none
 
      if(pf%rank == 0) print *, k, 'step size = ', stepSize
      ctrl = ctrl + stepsize*searchDir
-     
+
      if(use_wolfe) then
         call strong_wolfe_step(pf, q1, dt, nsteps_per_rank, itersState, itersAdjoint, predict, searchDir, gradient, &
         savedStatesFlat, savedAdjointsFlat, ctrl, alpha, &
@@ -464,22 +468,22 @@ implicit none
   if (write_numpy) then
      write(npyfname, "(A,'.npy')") "npy/ufinal"
      call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
-  
-     do step=1, nsteps_per_rank 
+
+     do step=1, nsteps_per_rank
         thisstep = (step-1)*pf%comm%nproc + pf%rank
-      
+
         write(npyfname, "(A,'s',i0.4'.npy')") "npy/yfinal", thisstep+1
         call pf%levels(pf%nlevels)%Q(pf%levels(pf%nlevels)%nnodes)%pack(npyOutput,1)
         call save_double(npyfname, shape(npyOutput), real(npyOutput,8))
-     
-        if(pf%rank == 0) then 
+
+        if(pf%rank == 0) then
            ! for completeness write y at t=0, i.e., the initial condition, as well
            write(npyfname, "(A,'s',i0.4'.npy')") "npy/yfinal", 0
            call save_double(npyfname, shape(ctrl), real(ctrl,8))
         end if
      end do
   end if
-  
+
   !
   ! cleanup
   !
