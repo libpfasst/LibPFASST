@@ -9,6 +9,65 @@
 !! uses the levels 'shape_lev' attribute to create a new array with that
 !! shape.  Thus, the 'shape'_lev attributes of the PFASST levels should be
 !! set appropriately.
+!!$
+module pf_mod_AMReX_geom
+  use amrex_base_module
+  type(amrex_geometry)  :: geom
+  logical  :: geom_is_set
+  integer   :: ndim    !  Number of spatial dimensions
+  integer   :: ncomp     ! Number of solution components
+  integer   :: arr_shape(4)  !  (ncomp,nx,ny,nz)
+  integer ::  max_grid_size  !  maximum block size in AMReX
+  integer ::  nghost   ! number of  ghost cells
+  type(amrex_box) :: domain
+  
+contains
+  !>  Subroutine to allocate the array and set the size parameters
+  subroutine AMReX_geom_build(shape_in)
+    use amrex_base_module
+    use iso_c_binding
+    use pf_mod_dtype
+    use pf_mod_utils
+    use pf_mod_comm_mpi
+    integer,           intent(in   ) :: shape_in(:)
+    integer ::  k,max_grid_size
+    type(amrex_boxarray)  :: ba
+    type(amrex_distromap) :: dm
+    
+    ndim   = SIZE(shape_in)-1
+    ncomp=shape_in(1)
+    nghost=0
+    arr_shape = shape_in(2:ndim+1)
+    print *,'ndim=',ndim,' ncomp=',ncomp,' nghost=',nghost, ' array_shape=',arr_shape(1:ndim)
+       
+    ! Define a single box covering the domain
+    domain = amrex_box((/0,0,0/), (/shape_in(2),shape_in(3),shape_in(4)/))
+    
+    ! Initialize the boxarray "ba" from the single box "bx"
+    call amrex_boxarray_build(ba, domain)
+    
+    max_grid_size=64
+    ! Break up boxarray "ba" into chunks no larger than "max_grid_size" along a direction
+    call ba%maxSize(max_grid_size)
+    
+    ! Build a DistributionMapping for the boxarray
+    call amrex_distromap_build(dm, ba)
+    
+    ! This defines a amrex_geometry object.
+    print *,'setting geometry for AMReX'
+    call amrex_geometry_set_coord_sys(0)
+    call amrex_geometry_set_prob_domain((/0.0d0,0.0d0,0.0d0/), (/1.0d0,1.0d0,1.0d0/))
+    call amrex_geometry_set_periodic ((/ .true.,.true.,.true./))
+    call amrex_geometry_build(geom, domain)
+    
+    ! Build data multifabs
+    call amrex_distromap_destroy(dm)
+    call amrex_boxarray_destroy(ba)
+    
+
+end subroutine AMReX_geom_build
+
+end module pf_mod_AMReX_geom
 
 module pf_mod_AMReX_mfab
   use amrex_base_module
@@ -47,8 +106,6 @@ module pf_mod_AMReX_mfab
      procedure :: axpy => AMReX_mfab_axpy
      procedure :: eprint => AMReX_mfab_eprint
   end type pf_amrex_mfab_t
-  
-  
 
 contains
   function cast_as_AMReX_mfab(encap_polymorph) result(pf_AMReX_mfab_obj)
