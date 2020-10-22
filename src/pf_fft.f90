@@ -28,10 +28,13 @@ module pf_mod_fft_abs
      !  Inverse FFT
      procedure, private  :: ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d
      generic :: ifft => ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d
-     !  Convolution in spectral space
+     !  Convolution in spectral space for real data
      procedure, private  :: conv_1d, conv_2d, conv_3d
      generic :: conv => conv_1d, conv_2d, conv_3d
-     !  Complex convolution in real space
+     !  Dealiasing
+     procedure, private  :: dealias_1d, dealias_2d, dealias_3d
+     generic :: dealias => dealias_1d, dealias_2d, dealias_3d
+     !  Complex convolution in real space for spectral data
      procedure, private :: zconv_1d, zconv_2d, zconv_3d
      generic :: zconv => zconv_1d, zconv_2d, zconv_3d
      !  Convenience function to grab pointer to workspace
@@ -208,44 +211,92 @@ contains
     call this%fftb()
     g=this%wk_3d
   end subroutine izfft_3d
+  ! Routines to do 2/(p+1) rule dealiasing
+  subroutine dealias_1d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:)
+    integer, intent(in) :: p
+    integer :: nmax
+    nmax = FLOOR(real(this%nx,pfdp)/(2.0_pfdp+real(p,pfdp)))+1
+    yhat(nmax+1:this%nx-nmax)=0.0_pfdp
+  end subroutine dealias_1d
+
+  subroutine dealias_2d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:,:)
+    integer, intent(in) :: p    
+    integer :: nxmax,nymax
+    nxmax = FLOOR(real(this%nx)/(2.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(2.0_pfdp+real(p,pfdp)))+1
+    yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax)=0.0_pfdp
+  end subroutine dealias_2d
+  
+  subroutine dealias_3d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:,:,:)
+    integer, intent(in) :: p
+    integer :: nxmax,nymax,nzmax
+    nxmax = FLOOR(real(this%nx)/(2.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(2.0_pfdp+real(p,pfdp)))+1
+    nzmax = FLOOR(real(this%nz)/(2.0_pfdp+real(p,pfdp)))+1
+    yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax,nzmax+1:this%nz-nzmax)=0.0_pfdp
+  end subroutine dealias_3d
 
   ! Convolve g with spectral op and return in c
-  subroutine conv_1d(this, g,op,c)
+  subroutine conv_1d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:)
     complex(pfdp), intent(in) :: op(:)
     real(pfdp), intent(inout) :: c(:)
+    logical, optional, intent(in) :: dealias
 
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
+    
     this%wk_1d=g
     call this%fftf()
+    if (do_dealias) call this%dealias_1d(this%wk_1d,2)
     this%wk_1d = this%wk_1d * op
     call this%fftb()
     c=REAL(this%wk_1d,pfdp)
   end subroutine conv_1d
 
+
   ! Convolve g with spectral op and return in c
-  subroutine conv_2d(this, g,op,c)
+  subroutine conv_2d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:,:)
     complex(pfdp), intent(in) :: op(:,:)
     real(pfdp), intent(inout) :: c(:,:)
+    logical, optional, intent(in) :: dealias
+
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
 
     this%wk_2d=g
     call this%fftf()
+    if (do_dealias) call this%dealias_2d(this%wk_2d,2)
     this%wk_2d = this%wk_2d * op
     call this%fftb()
     c=REAL(this%wk_2d,pfdp)
   end subroutine conv_2d
 
-  subroutine conv_3d(this, g,op,c)
+  subroutine conv_3d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:,:,:)
     complex(pfdp), intent(in) :: op(:,:,:)
     real(pfdp), intent(inout) :: c(:,:,:)
+    logical, optional, intent(in) :: dealias
+
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
 
     this%wk_3d=g
     call this%fftf()
-    this%wk_3d = this%wk_3d * op
+    if (do_dealias) call this%dealias_3d(this%wk_3d,3)
     call this%fftb()
     c=REAL(this%wk_3d,pfdp)
   end subroutine conv_3d
