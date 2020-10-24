@@ -18,6 +18,11 @@ module pf_mod_MGRIT
   implicit none
   
 contains
+
+  subroutine pf_MGRIT_setup(pf, q0, dt, tend, nsteps, qend)
+
+  end subroutine pf_MGRIT_setup
+
   !>  Do the MGRIT algorithm
   subroutine pf_MGRIT_run(pf, q0, dt, tend, nsteps, qend)
     type(pf_pfasst_t), intent(inout), target   :: pf   !!  The complete PFASST structure
@@ -162,7 +167,7 @@ contains
        end if
 
        !> Call the predictor to get an initial guess on all levels and all processors
-       call pf_MGRIT_predictor(pf, pf%state%t0, dt, flags)
+       call pf_MGRIT_predictor(pf, q0, flags)
        ! After the predictor, the residual and delta_q0 are just zero
        call pf_set_delta_q0(pf,1,0.0_pfdp)       
        call pf_set_resid(pf,pf%nlevels,0.0_pfdp)       
@@ -211,9 +216,23 @@ contains
   !!  When this is called the previous coarse integrator result should be stored in Q(1)
   !!  and the MGRIT iteration in qend (both on coarse level).  If this is called
   !!  directly after the predictor, these will be the same thing
-  subroutine pf_MGRIT_v_cycle(pf, iteration, t0, dt, level_index_c, level_index_f, flags)
+  subroutine pf_MGRIT_v_cycle(pf, Q0, iteration, t0, dt)
+    type(pf_pfasst_t), intent(inout) :: pf
+    class(pf_encap_t), intent(in) :: Q0
+    real(pfdp), intent(in) :: t0, dt
+    integer, intent(in) :: iteration
+
+    type(pf_level_t), pointer :: f_lev, c_lev, lev
+    integer :: zero_rhs_flag, zero_c_pts_flag, interp_flag
+    integer :: qc_len
+    integer :: i, j, k, n
+    integer :: nlevels, level_index
+
+    nlevels = pf%nlevels;
 
     !> FCF-relaxation on finest grid
+    level_index = nlevels
+    lev => pf%levels(level_index)
     zero_rhs_flag = 1
     interp_flag = 0
     zero_c_pts_flag = 0
@@ -262,18 +281,31 @@ contains
   end subroutine pf_MGRIT_v_cycle
 
   subroutine F_Relax(pf, level_index, interp_flag, zero_rhs_flag, zero_init_c_pts_flag, Q0)
+     type(pf_pfasst_t), intent(inout) :: pf
+     integer, intent(in) :: level_index
+     integer, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag
+     class(pf_encap_t), intent(in) :: Q0
+
+     type(pf_level_t), pointer :: finest_lev, lev
+     integer :: f_blocks(:,:)
+     integer :: i, j, k, n, ii
+     integer :: nlevels
+     integer :: q_zero_flag
+     real(pfdp) :: t0, dt
 
      nlevels = pf%nlevels
      dt = lev%ulevel%dt
      t0 = pf%state%t0 
      finest_lev => pf%levels(nlevels)
+     lev => pf%levels(level_index)
+     f_blocks = lev%f_blocks
 
-     q_zero_flag = 0;
+     q_zero_flag = .false.
      do i = 1, size(f_blocks)
         !> Check if inital values of C-points are zero
         if (zero_c_pts_flag .eq. .true.) then
            call lev%q0%setval(0.0_pfdp)
-           q_zero_flag = 1;
+           q_zero_flag = .true.
         else
            if (i .eq. 1) then
                !> If we are at the first F-point on the fine level, use ODE initial value.
@@ -282,7 +314,7 @@ contains
                    call lev%q0%copy(Q0);
                else
                    call lev%q0%setval(0.0_pfdp)
-                   q_zero_flag = 1;
+                   q_zero_flag = .true.
                end if
            else
                call lev%q0%copy(lev%qc_prev(i-1))
@@ -295,7 +327,7 @@ contains
               if (zero_rhs_flag .eq. .false.)
                  call lev%qend%axpy(1.0_pfdp, lev%g(j))
               end if
-              q_zero_flag = 0;
+              q_zero_flag = .false.;
            else 
               !> Do a single step
               call Point_Relax(pf, lev, level_index, j, lev%q0, lev%qend)
@@ -318,6 +350,25 @@ contains
   end subroutine F_Relax
 
   subroutine C_Relax(pf, level_index)
+     type(pf_pfasst_t), intent(inout) :: pf
+     integer, intent(in) :: level_index
+     integer, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag
+     class(pf_encap_t), intent(in) :: Q0
+
+     type(pf_level_t), pointer :: finest_lev, lev
+     integer :: f_blocks(:,:)
+     integer :: i, j, k, n, ii
+     integer :: nlevels
+     integer :: q_zero_flag
+     real(pfdp) :: t0, dt
+
+     nlevels = pf%nlevels
+     dt = lev%ulevel%dt
+     t0 = pf%state%t0
+     finest_lev => pf%levels(nlevels)
+     lev => pf%levels(level_index)
+     f_blocks = lev%f_blocks
+
      do i = 1,size(c_pts)
         j = c_pts(i)
         call lev%q0%copy(lev%qc(i))
@@ -334,51 +385,48 @@ contains
   end subroutine C_Relax
 
   subroutine ExactSolve(pf, level_index)
-     do i = 1,Nt(k)
+     level_index_f = level_index + 1
+
+     do i = 1,Nt(level_index)
          ii = restrict_map(i)
-         if (k+1 .eq. nlevels)
+         if (level_index_f .eq. nlevels)
              zero_rhs_flag = 1;
-             call InjectRestrictPoint(c_lev%g(i), f_lev%qc(i), f_lev%qc_prev(i), A, null, ht(k+1), zero_rhs_flag);
          else
              zero_rhs_flag = 0;
-             call InjectRestrictPoint(c_lev%g(i), f_lev%qc(i), f_lev%qc_prev(i), A, f_lev%g(ii), ht(k+1), zero_rhs_flag);
          end if
-         call c_lev%qc(i)%copy(c_lev%qc_prev(i));
+         gi = InjectRestrictPoint(pf, level_index, level_index_f, i, ii, zero_rhs_flag);
+         call f_lev%qc(i)%copy(f_lev%qc_prev(i));
          if (i == 1)
-            call lev%qend%copy(lev%g(i))   
+            call lev%qend%copy(gi)   
          else
             call Point_Relax(pf, lev, level_index, i, lev%q0, lev%qend)
-            call lev%qend%axpy(1.0_pfdp, lev%g(i))
+            call lev%qend%axpy(1.0_pfdp, gi)
          end if
          ii = lev%interp_map(i)
          call finest_lev%qc(ii)%axpy(1.0_pfdp, lev%qend)
      end do
   end subroutine ExactSolve
 
-
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !> MATLAB TRANSLATION STOPPED HERE
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine Restrict(pf, level_index_c, level_index_f)
-     do i = 1:,Nt(level_index_c)
-         i_f = restrict_map(i)
+     do i = 1,Nt(level_index_c)
+         ii = restrict_map(i)
          if (level_index_f == nlevels)
             zero_rhs_flag = 1;
          else
             zero_rhs_flag = 0;
          end if
-         call InjectRestrictPoint(pf, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag);
+         c_lev%g(i) = InjectRestrictPoint(pf, level_index_c, level_index_f, i, ii, zero_rhs_flag);
      end
   end subroutine Restrict
 
-  subroutine InjectRestrictPoint(pf, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag)
-     call c_lev%g(i_c)%copy(f_lev%qc_prev(i_c))
-     call c_lev%g(i_c)%scale(-1.0_pfdp)
-     call f_lev%q0%copy(q_f)
-     call Point_Relax(pf, lev, level_index, i, f_lev%q0, f_lev%qend) 
+  function InjectRestrictPoint(pf, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag) result(g_c)
+     call g_c%copy(f_lev%qc_prev(i_c))
+     call g_c%scale(-1.0_pfdp)
+     call f_lev%q0%copy(f_lev%qc(i_c))
+     call Point_Relax(pf, f_lev, level_index_f, i_f, f_lev%q0, f_lev%qend) 
      call g_c%axpy(1.0_pfdp, f_lev%qend)
      if (zero_rhs_flag == 0)
-         call g_c%axpy(1.0_pfdp, g_f);
+         call g_c%axpy(1.0_pfdp, f_lev%g(i_f));
      end if
   end function InjectRestrictPoint
 
