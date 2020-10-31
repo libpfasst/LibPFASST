@@ -38,7 +38,7 @@ contains
 
   subroutine mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
      type(pf_pfasst_t), intent(inout) :: pf
-     type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
+     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
      integer, intent(in) :: n_coarse, refine_factor
      real(pfdp) :: T0, Tfin
      integer :: level_index, nlevels, N, i, kk
@@ -133,7 +133,7 @@ contains
 
   !>  Do the MGRIT algorithm
   subroutine pf_MGRIT_run(pf, mg_ld, q0, qend)
-    type(pf_pfasst_t), intent(inout), pointer   :: pf   !!  The complete PFASST structure
+    type(pf_pfasst_t), target, intent(inout)   :: pf   !!  The complete PFASST structure
     type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
     class(pf_encap_t), intent(in   )           :: q0   !!  The initial condition
     class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
@@ -196,7 +196,7 @@ contains
   !!  and the MGRIT iteration in qend (both on coarse level).  If this is called
   !!  directly after the predictor, these will be the same thing
   subroutine pf_MGRIT_v_cycle(pf, mg_ld, Q0, iteration)
-    type(pf_pfasst_t), pointer, intent(inout) :: pf
+    type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
     class(pf_encap_t), intent(in) :: Q0
     integer, intent(in) :: iteration
@@ -262,7 +262,7 @@ contains
   end subroutine pf_MGRIT_v_cycle
 
   subroutine F_Relax(pf, mg_ld, level_index, interp_flag, zero_rhs_flag, zero_c_pts_flag, Q0)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index
      logical, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag
@@ -331,7 +331,7 @@ contains
   end subroutine F_Relax
 
   subroutine C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index
      logical, intent(in) :: zero_rhs_flag, interp_flag
@@ -365,7 +365,7 @@ contains
   end subroutine C_Relax
 
   subroutine ExactSolve(pf, mg_ld, level_index)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index
      integer :: level_index_f
@@ -415,7 +415,7 @@ contains
   end subroutine ExactSolve
 
   subroutine Restrict(pf, mg_ld, level_index_c, level_index_f)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index_c, level_index_f
      class(pf_encap_t), pointer :: gi
@@ -439,7 +439,7 @@ contains
   end subroutine Restrict
 
   subroutine InjectRestrictPoint(pf, mg_ld, g_c, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      class(pf_encap_t), intent(inout) :: g_c
      integer, intent(in) :: level_index_c, level_index_f, i_c, i_f
@@ -463,7 +463,7 @@ contains
   end subroutine InjectRestrictPoint
 
   subroutine Point_Relax(pf, mg_ld, level_index, n, q0, qend)
-     type(pf_pfasst_t), pointer, intent(inout) :: pf
+     type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), pointer, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index, n
      class(pf_encap_t), intent(inout) :: q0, qend
