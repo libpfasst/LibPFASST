@@ -217,7 +217,7 @@ contains
     complex(pfdp), intent(inout) :: yhat(:)
     integer, intent(in) :: p
     integer :: nmax
-    nmax = FLOOR(real(this%nx,pfdp)/(2.0_pfdp+real(p,pfdp)))+1
+    nmax = FLOOR(real(this%nx,pfdp)/(1.0_pfdp+real(p,pfdp)))+1
     yhat(nmax+1:this%nx-nmax)=0.0_pfdp
   end subroutine dealias_1d
 
@@ -226,8 +226,8 @@ contains
     complex(pfdp), intent(inout) :: yhat(:,:)
     integer, intent(in) :: p    
     integer :: nxmax,nymax
-    nxmax = FLOOR(real(this%nx)/(2.0_pfdp+real(p,pfdp)))+1
-    nymax = FLOOR(real(this%ny)/(2.0_pfdp+real(p,pfdp)))+1
+    nxmax = FLOOR(real(this%nx)/(1.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(1.0_pfdp+real(p,pfdp)))+1
     yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax)=0.0_pfdp
   end subroutine dealias_2d
   
@@ -236,9 +236,9 @@ contains
     complex(pfdp), intent(inout) :: yhat(:,:,:)
     integer, intent(in) :: p
     integer :: nxmax,nymax,nzmax
-    nxmax = FLOOR(real(this%nx)/(2.0_pfdp+real(p,pfdp)))+1
-    nymax = FLOOR(real(this%ny)/(2.0_pfdp+real(p,pfdp)))+1
-    nzmax = FLOOR(real(this%nz)/(2.0_pfdp+real(p,pfdp)))+1
+    nxmax = FLOOR(real(this%nx)/(1.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(1.0_pfdp+real(p,pfdp)))+1
+    nzmax = FLOOR(real(this%nz)/(1.0_pfdp+real(p,pfdp)))+1
     yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax,nzmax+1:this%nz-nzmax)=0.0_pfdp
   end subroutine dealias_3d
 
