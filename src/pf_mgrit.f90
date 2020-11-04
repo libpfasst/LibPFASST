@@ -24,8 +24,10 @@ module pf_mod_MGRIT
   type :: mgrit_level_data
      integer :: Nt
      real(pfdp) :: dt
-     real(pfdp) :: T0
-     real(pfdp) :: Tfin
+     real(pfdp) :: glob_t0
+     real(pfdp) :: glob_tfin
+     real(pfdp) :: t0
+     real(pfdp) :: tfin
      type(int_vector), allocatable :: f_blocks(:)
      integer, allocatable :: c_pts(:)
      class(pf_encap_t), allocatable :: g(:)
@@ -36,11 +38,11 @@ module pf_mod_MGRIT
   
 contains
 
-  subroutine mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
+  subroutine mgrit_initialize(pf, mg_ld, glob_t0, glob_tfin, n_coarse, refine_factor)
      type(pf_pfasst_t), intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
      integer, intent(in) :: n_coarse, refine_factor
-     real(pfdp) :: T0, Tfin
+     real(pfdp) :: glob_t0, glob_tfin
      integer :: level_index, nlevels, N, i, kk
      type(pf_level_t) :: pf_lev, pf_f_lev, pf_c_lev
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
@@ -55,10 +57,12 @@ contains
      do level_index = 1,nlevels
         mg_lev => mg_ld(level_index)
 
-        mg_lev%T0 = T0
-        mg_lev%Tfin = Tfin
+        mg_lev%glob_t0 = glob_t0
+        mg_lev%glob_tfin = glob_tfin
         mg_lev%Nt = N
-        mg_lev%dt = (Tfin-T0)/(mg_lev%Nt)
+        mg_lev%dt = (glob_tfin - glob_t0)/(N * pf%comm%nproc)
+        mg_lev%t0 = glob_t0 + N * mg_lev%dt * pf%rank
+        mg_lev%tfin = mg_lev%t0 + N * mg_lev%dt
         N = N * refine_factor
      end do
 
@@ -159,48 +163,30 @@ contains
     call mpi_barrier(pf%comm%comm, ierr)
 
     !> Start timer
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
 
     do iter = 1, pf%niters
-       call call_hooks(pf, -1, PF_PRE_ITERATION)
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
-
        pf%state%iter = iter
+       pf%state%pstatus = PF_STATUS_ITERATING
 
        !  Do a v_cycle
        call pf_MGRIT_v_cycle(pf, mg_ld, q0, iter)
-
-       !  Check for convergence
-       call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+iter)
-
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
-       call call_hooks(pf, -1, PF_POST_ITERATION)
-
-       !  If we are converged, exit block
-       if (pf%state%status == PF_STATUS_CONVERGED)  then
-          call call_hooks(pf, -1, PF_POST_CONVERGENCE)
-          call pf_set_iter(pf,iter)
-          exit
-       end if
     end do  !  Loop over j, the iterations in this block
 
     qc => mg_ld(pf%nlevels)%qc
     call qend%copy(qc(size(qc)))
-    call qend%eprint()
 
-    t0 = mg_ld(pf%nlevels)%T0
-    Nt = mg_ld(pf%nlevels)%Nt
-    dt = mg_ld(pf%nlevels)%dt
-    big_dt = dt * real(Nt, pfdp)
-    call pf%levels(pf%nlevels)%q0%copy(q0)
-    call pf%levels(pf%nlevels)%ulevel%stepper%do_n_steps(pf, pf%nlevels, t0, pf%levels(pf%nlevels)%q0, &
-                               pf%levels(pf%nlevels)%qend, big_dt, Nt)
-    call qend%copy(pf%levels(pf%nlevels)%qend)
-    !> End timer    
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
-
-    !>  Output stats
-    call pf_dump_stats(pf)
+   ! if (pf%rank .eq. pf%comm%nproc-1) then
+   !    call qend%eprint()
+   !
+   !    t0 = mg_ld(pf%nlevels)%glob_t0
+   !    Nt = mg_ld(pf%nlevels)%Nt * pf%comm%nproc
+   !    dt = mg_ld(pf%nlevels)%dt
+   !    big_dt = dt * real(Nt, pfdp)
+   !    call pf%levels(pf%nlevels)%q0%copy(q0)
+   !    call pf%levels(pf%nlevels)%ulevel%stepper%do_n_steps(pf, pf%nlevels, t0, pf%levels(pf%nlevels)%q0, &
+   !                               pf%levels(pf%nlevels)%qend, big_dt, Nt)
+   !    call qend%copy(pf%levels(pf%nlevels)%qend)
+   ! end if
   end subroutine pf_MGRIT_run
 
   !> Execute a MGRIT V-cycle (iteration)
@@ -225,25 +211,28 @@ contains
     !> FCF-relaxation on finest grid
     level_index = nlevels
     mg_lev => mg_ld(level_index)
+    
+    call FCF_Relax(pf, mg_ld, level_index, iteration, Q0)
 
-    zero_rhs_flag = .true.
-    interp_flag = .false.
-    if (iteration .eq. 1) then
-       zero_c_pts_flag = .true.
-    else
-       zero_c_pts_flag = .false.
-       qc_len = size(mg_lev%qc)
-       do i = 1,qc_len
-          call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
-       end do
-    end if
-    call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
-    call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
-    do i = 1,qc_len
-       call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
-    end do
-    call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
-    zero_rhs_flag = .false.
+   ! zero_rhs_flag = .true.
+   ! interp_flag = .false.
+   ! qc_len = size(mg_lev%qc)
+   ! if (iteration .eq. 1) then
+   !    zero_c_pts_flag = .true.
+   ! else
+   !    zero_c_pts_flag = .false.
+   !    do i = 1,qc_len
+   !       call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+   !    end do
+   ! end if
+   ! call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
+   ! call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
+   ! !> Send and receive boundary C-points
+   ! call send_recv_C_points(pf, level_index)
+   ! do i = 1,qc_len
+   !    call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+   ! end do
+   ! call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
     do level_index = nlevels-1,2,-1
         level_index_f = level_index+1
         mg_lev => mg_ld(level_index)
@@ -251,32 +240,109 @@ contains
 
         !> Restrict residual
         call Restrict(pf, mg_ld, level_index, level_index_f)
-        qc_len = size(mg_f_lev%qc)
-        do i = 1,qc_len
+        do i = 1,size(mg_f_lev%qc)
            call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
         end do
 
         !> FCF-relaxation on intermediate grids
-        interp_flag = .false.
-        zero_c_pts_flag = .true.
-        qc_len = size(mg_lev%qc)
-        do i = 1,qc_len
-           call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
-        end do
-        call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
-        interp_flag = .true.
-        zero_c_pts_flag = .false.
-        call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
-        do i = 1,qc_len
-           call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
-        end do
-        call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
+        call FCF_Relax(pf, mg_ld, level_index, iteration, Q0)
+
+       ! zero_rhs_flag = .false.
+       ! interp_flag = .false.
+       ! zero_c_pts_flag = .true.
+       ! qc_len = size(mg_lev%qc)
+       ! do i = 1,qc_len
+       !    call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+       ! end do
+       ! call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
+       ! interp_flag = .true.
+       ! zero_c_pts_flag = .false.
+       ! call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
+       ! !> Send and receive boundary C-points
+       ! call send_recv_C_points(pf, level_index)
+       ! do i = 1,qc_len
+       !    call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+       ! end do
+       ! call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
     end do
     !> Coarsest grid solve
     level_index = 1
     call ExactSolve(pf, mg_ld, level_index)
 
   end subroutine pf_MGRIT_v_cycle
+
+  subroutine FCF_Relax(pf, mg_ld, level_index, iteration, Q0)
+     type(pf_pfasst_t), target, intent(inout) :: pf
+     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+     class(pf_encap_t), intent(in) :: Q0
+     integer, intent(in) :: iteration
+     integer, intent(in) :: level_index
+     type(pf_level_t) :: pf_lev
+     type(mgrit_level_data), pointer :: mg_lev
+     logical :: zero_rhs_flag, zero_c_pts_flag, interp_flag
+     integer :: qc_len, i, nlevels
+
+     nlevels = pf%nlevels
+     mg_lev => mg_ld(level_index)
+
+     if ((iteration .eq. 1) .or. (level_index .lt. nlevels)) then
+        zero_c_pts_flag = .true.
+     else
+        zero_c_pts_flag = .false. 
+     end if
+
+     if (level_index .lt. nlevels) then
+        zero_rhs_flag = .false.
+     else
+        zero_rhs_flag = .true.
+     end if
+     
+     interp_flag = .false.
+
+     qc_len = size(mg_lev%qc)
+     if ((iteration .gt. 1) .or. (level_index .lt. nlevels)) then
+        do i = 1,qc_len
+           call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+        end do
+     end if
+
+     call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
+     if (level_index .lt. nlevels) then
+        interp_flag = .true.
+        zero_c_pts_flag = .false.
+     end if   
+     call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
+     !> Send and receive boundary C-points
+     call send_recv_C_points(pf, level_index)
+     do i = 1,qc_len
+        call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+     end do
+     call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
+  end subroutine FCF_Relax
+   
+  subroutine send_recv_C_points(pf, level_index)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    integer, intent(in) :: level_index
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror
+
+    pf_lev => pf%levels(level_index)
+    if (mod(pf%rank, 2) .eq. 0) then
+       if (pf%rank .gt. 0) then
+          call pf_recv(pf, pf_lev, 1, .true.)
+       end if
+       if (pf%rank .lt. pf%comm%nproc-1) then
+          call pf_send(pf, pf_lev, 1, .true.)
+       end if
+    else
+       if (pf%rank .lt. pf%comm%nproc-1) then
+          call pf_send(pf, pf_lev, 1, .true.)
+       end if
+       if (pf%rank .gt. 0) then
+          call pf_recv(pf, pf_lev, 1, .true.)
+       end if
+    end if
+  end subroutine send_recv_C_points
 
   subroutine F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag, Q0)
      type(pf_pfasst_t), target, intent(inout) :: pf
@@ -300,20 +366,24 @@ contains
 
      do i = 1, size(mg_lev%f_blocks)
         q_zero_flag = .false.
-        !> Check if inital values of C-points are zero
+        !> Check if inital values of C-points should be zero (first F-relaxation in FCF)
         if (zero_c_pts_flag .eqv. .true.) then
            call pf_lev%q0%setval(0.0_pfdp)
            q_zero_flag = .true.
         else
            if (i .eq. 1) then
-              !> If we are at the first F-point on the fine level, use ODE initial value.
+              !> If we are at the first F-point on the finest level on the first MPI process, use ODE initial value.
               !> Otherwise, set initial value to zero.
-              if (level_index .eq. nlevels) then
-                 call pf_lev%q0%copy(Q0);
-              else
-                 call pf_lev%q0%setval(0.0_pfdp)
-                 q_zero_flag = .true.
+              if (pf%rank .eq. 0) then
+                 if (level_index .eq. nlevels) then
+                    call pf_lev%q0%copy(Q0);
+                 else
+                    call pf_lev%q0%setval(0.0_pfdp)
+                    q_zero_flag = .true.
+                 end if
               end if
+              !> We don't need to handle the case where rank > 0 since data received
+              !> from the west direction will already be stored in q0
            else
               call pf_lev%q0%copy(mg_lev%qc_prev(i-1))
            end if
@@ -403,9 +473,10 @@ contains
 
      pf_lev => pf%levels(level_index)
 
-    ! if (pf%rank .gt. 0) then
-    !    call pf_recv(pf, lev, 10000+iteration, .true.)        
-    ! end if
+     if (pf%rank .gt. 0) then
+        call pf_recv(pf, pf_lev, 2, .true.)        
+     end if
+
      call pf_lev%ulevel%factory%create_single(gi, level_index, pf_lev%lev_shape)
      do i = 1,mg_lev%Nt
         ii = mg_f_lev%c_pts(i)
@@ -416,7 +487,7 @@ contains
         end if
         call InjectRestrictPoint(pf, mg_ld, gi, level_index, level_index_f, i, ii, zero_rhs_flag)
         call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
-        if (i .eq. 1) then
+        if ((i .eq. 1) .and. (pf%rank .eq. 0)) then
            call pf_lev%qend%copy(gi)   
         else
            call Point_Relax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
@@ -427,9 +498,10 @@ contains
         call pf_lev%q0%copy(pf_lev%qend)
      end do
      call pf_lev%ulevel%factory%destroy_single(gi)
-    ! if (pf%rank .lt. pf%nprocs-1) then
-    !    call pf_send(pf, lev, 10000+iteration, .false.)
-    ! end if
+
+     if (pf%rank .lt. pf%comm%nproc-1) then
+        call pf_send(pf, pf_lev, 2, .true.)
+     end if
   end subroutine ExactSolve
 
   subroutine Restrict(pf, mg_ld, level_index_c, level_index_f)

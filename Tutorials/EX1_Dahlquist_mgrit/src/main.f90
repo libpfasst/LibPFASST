@@ -83,8 +83,8 @@ contains
     call pf_pfasst_setup(pf)
 
     T0 = 0.0_pfdp
-    n_coarse = 10
-    refine_factor = 5
+    n_coarse = 5
+    refine_factor = 2
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
 
     !> add some hooks for output  (using a LibPFASST hook here)
@@ -95,19 +95,21 @@ contains
     
     !>  Allocate initial consdition
     call ndarray_build(y_0, [ 1 ])
+    call ndarray_build(y_end, [ 1 ])
 
     !> Set the initial condition 
     call y_0%setval(1.0_pfdp)
-    
+   
     call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
     !call pf_parareal_run(pf, y_0, dt, 0.0_pfdp, nsteps)
-    call y_end%eprint()
+    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
 
     !>  Deallocate initial condition and final solution
     call ndarray_destroy(y_0)
+    call ndarray_destroy(y_end)
     
     !>  Deallocate pfasst structure
     call pf_pfasst_destroy(pf)
