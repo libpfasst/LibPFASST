@@ -40,14 +40,13 @@ contains
     !>  Local variables
     type(pf_pfasst_t) :: pf       !<  the main pfasst structure
     type(pf_comm_t)   :: comm     !<  the communicator (here it is mpi)
-    type(pf_ndarray_t):: y_0      !<  the initial condition
-    type(pf_ndarray_t):: y_end
+    type(pf_ndarray_t):: y_0 , y_end   !<  the initial condition and solution
     character(256)    :: pf_fname   !<  file name for input of PFASST parameters
 
     integer           ::  l   !  loop variable over levels
-    integer :: n_coarse, refine_factor 
     real(pfdp) :: T0
     type(mgrit_level_data), allocatable :: mg_ld(:)
+    integer :: n_coarse, refine_factor
 
     !> Read problem parameters
     call probin_init(pf_fname)
@@ -83,8 +82,9 @@ contains
     call pf_pfasst_setup(pf)
 
     T0 = 0.0_pfdp
-    n_coarse = 5
-    refine_factor = 2
+    n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
+    print *,n_coarse
+    refine_factor = mgrit_refine_factor
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
 
     !> add some hooks for output  (using a LibPFASST hook here)
@@ -112,7 +112,7 @@ contains
     call ndarray_destroy(y_end)
     
     !>  Deallocate pfasst structure
-    call pf_pfasst_destroy(pf)
+    !call pf_pfasst_destroy(pf)
 
   end subroutine run_pfasst
 
