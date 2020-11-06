@@ -512,32 +512,6 @@ contains
 
   end subroutine send_recv_C_points
 
-!  subroutine Residual(pf, mg_ld, level_index, Q0, i, j)
-!     type(pf_pfasst_t), target, intent(inout) :: pf
-!     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-!     class(pf_encap_t), intent(in) :: Q0
-!     integer, intent(in) :: level_index, i, j
-!     integer :: nlevels
-!     type(mgrit_level_data), pointer :: mg_lev
-!     type(pf_level_t), pointer :: pf_lev
-!
-!     nlevels = pf%nlevels
-!
-!     if (level_index .eq. nlevels) then
-!        mg_lev => mg_ld(level_index)
-!        pf_lev => pf%levels(level_index)
-!
-!        if (i .eq. 1) then
-!           call pf_lev%q0%copy(Q0);
-!        else 
-!           call pf_lev%q0%copy(mg_lev%qc_prev(i-1));
-!        end if 
-!        call Point_Relax(pf, mg_ld, level_index, j, pf_lev%q0, mg_lev%r)
-!        call mg_lev%r%axpy(-1.0_pfdp, mg_lev%qc_prev(i))
-!        mg_lev%res_norm_loc(1) = max(mg_lev%res_norm_loc(1), mg_lev%r%norm())
-!     end if
-!  end subroutine Residual
-
   subroutine ExactSolve(pf, mg_ld, level_index)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
