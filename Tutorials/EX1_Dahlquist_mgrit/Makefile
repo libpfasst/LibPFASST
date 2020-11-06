@@ -9,7 +9,7 @@ EXE = main.exe
 
 include $(LIBPFASST)/Makefile.defaults
 
-FSRC = src/main.f90 src/level.f90 src/sweeper.f90  src/probin.f90 
+FSRC = src/stepper.f90 src/main.f90 src/level.f90 src/sweeper.f90  src/probin.f90 
 
 OBJ  = $(subst src, build,$(FSRC:.f90=.o))
 

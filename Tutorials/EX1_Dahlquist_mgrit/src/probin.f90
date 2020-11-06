@@ -11,9 +11,11 @@ module probin
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
   integer, save :: nsteps    ! number of time steps
+  integer, save :: mgrit_n_coarse
+  integer, save :: mgrit_refine_factor
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml
+  namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml, mgrit_n_coarse, mgrit_refine_factor
 
 contains
   
@@ -39,6 +41,9 @@ contains
 
     lam1       = 1.0_pfdp
     lam2       = -2.0_pfdp
+
+    mgrit_n_coarse = 10
+    mgrit_refine_factor = 2
 
     dt      = 0.01_pfdp
     Tfin    = 1.0_pfdp
