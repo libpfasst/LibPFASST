@@ -28,7 +28,6 @@ contains
   !>  This subroutine setups and calls libpfasst 
   subroutine run_pfasst()  
     use pfasst        !<  This module has include statements for the main pfasst routines
-    use pf_my_sweeper !<  Local module for sweeper
     use pf_my_stepper !<  Local module stepper
     use pf_my_level   !<  Local module for level
     use probin       !<  Local module reading/parsing problem parameters
@@ -74,7 +73,7 @@ contains
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
 
-       pf%rk_order(l) = 1
+       !pf%rk_order(l) = 1
        pf%levels(l)%ulevel%stepper%order = 1
     end do
 
@@ -83,7 +82,6 @@ contains
 
     T0 = 0.0_pfdp
     n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
-    print *,n_coarse
     refine_factor = mgrit_refine_factor
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
 
@@ -101,7 +99,7 @@ contains
     call y_0%setval(1.0_pfdp)
    
     call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-    !call pf_parareal_run(pf, y_0, dt, 0.0_pfdp, nsteps)
+    !call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
     if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     
     !>  Wait for everyone to be done

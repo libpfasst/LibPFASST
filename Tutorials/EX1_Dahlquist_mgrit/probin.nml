@@ -4,9 +4,9 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 4  !  must be set
+    nlevels  = 2  !  must be set
 
-    niters = 50 !  default is 5
+    niters = 10 !  default is 5
     nnodes =    2  3  5
 
     nsweeps_pred= 1 1 
@@ -24,12 +24,12 @@
 !  Now define the local variables you need
 &PARAMS
 
-    Tfin = .1
+    Tfin = 1
 
     lam1=1.0
     lam2=-2.0
 
 
-    mgrit_n_coarse = 5
-    mgrit_refine_factor = 2
+    mgrit_n_coarse = 100
+    mgrit_refine_factor = 3
 /
