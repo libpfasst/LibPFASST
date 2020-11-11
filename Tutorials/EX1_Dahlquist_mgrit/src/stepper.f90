@@ -84,14 +84,5 @@ contains
     end if
   end subroutine f_comp
 
-!  subroutine exact(t, yex)
-!    use probin, only: lam1,lam2
-!    real(pfdp), intent(in)  :: t
-!    real(pfdp), intent(out) :: yex
-!
-!    yex=exp((lam1+lam2)*t)
-!
-!  end subroutine exact
-
 end module pf_my_stepper
 

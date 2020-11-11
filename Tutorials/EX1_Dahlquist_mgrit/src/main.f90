@@ -33,6 +33,7 @@ contains
     use probin       !<  Local module reading/parsing problem parameters
     use pf_mod_MGRIT
     use pf_mod_parareal
+    use hooks
 
     implicit none
 
@@ -84,9 +85,13 @@ contains
     n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
     refine_factor = mgrit_refine_factor
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
+    do l = 1, pf%nlevels
+       mg_ld(l)%FCF_flag = .false.
+    end do
 
     !> add some hooks for output  (using a LibPFASST hook here)
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
+    !call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !>  Output run parameters to screen
     call print_loc_options(pf,un_opt=6)

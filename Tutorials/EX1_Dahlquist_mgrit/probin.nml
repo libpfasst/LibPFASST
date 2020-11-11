@@ -7,23 +7,30 @@
     nlevels  = 2  !  must be set
 
     niters = 10 !  default is 5
-    nnodes =    2  3  5
+
+    qtype   = 1
+    nnodes =    2  2
 
     nsweeps_pred= 1 1 
     nsweeps= 1 1 1
     
-     !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-14
-     rel_res_tol = 1.d-14
+    !  optional variables to control termination  (defaults are 0.0)
+    abs_res_tol = 1.d-14
+    rel_res_tol = 1.d-14
 
-     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
-     Vcycle=.TRUE.
+    !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
+    Vcycle=.TRUE.
+
+    save_residuals=.true.
+    use_rk_stepper=.true.
+    use_sdc_sweeper=.false.
 
 /
 
 !  Now define the local variables you need
 &PARAMS
 
+    nsteps = 6
     Tfin = 1
 
     lam1=1.0
@@ -31,5 +38,5 @@
 
 
     mgrit_n_coarse = 100
-    mgrit_refine_factor = 3
+    mgrit_refine_factor = 2
 /
