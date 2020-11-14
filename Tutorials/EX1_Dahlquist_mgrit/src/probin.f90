@@ -13,9 +13,11 @@ module probin
   integer, save :: nsteps    ! number of time steps
   integer, save :: mgrit_n_coarse
   integer, save :: mgrit_refine_factor
+  integer, save :: nsteps_rk(PF_MAXLEVS)
+  logical, save :: mgrit_flag
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml, mgrit_n_coarse, mgrit_refine_factor
+  namelist /params/  lam1,lam2, dt, Tfin, nsteps, nsteps_rk, pfasst_nml, mgrit_n_coarse, mgrit_refine_factor, mgrit_flag
 
 contains
   
@@ -38,6 +40,7 @@ contains
 
     !> set defaults
     nsteps  = -1
+    nsteps_rk  = -1
 
     lam1       = 1.0_pfdp
     lam2       = -2.0_pfdp
@@ -48,6 +51,8 @@ contains
     dt      = 0.01_pfdp
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
+
+    mgrit_flag = .true.
     
     !>  Read in stuff from input file
     un = 9

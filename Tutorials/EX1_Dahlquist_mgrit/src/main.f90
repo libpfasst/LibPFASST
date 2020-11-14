@@ -74,8 +74,9 @@ contains
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
 
-       !pf%rk_order(l) = 1
        pf%levels(l)%ulevel%stepper%order = 1
+       pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+       !pf%rk_order(l) = 1
     end do
 
     !>  Set up some pfasst stuff
@@ -85,8 +86,10 @@ contains
     n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
     refine_factor = mgrit_refine_factor
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
+
     do l = 1, pf%nlevels
        mg_ld(l)%FCF_flag = .false.
+       !pf%levels(l)%ulevel%stepper%nsteps = mg_ld(l)%Nt
     end do
 
     !> add some hooks for output  (using a LibPFASST hook here)
@@ -102,10 +105,14 @@ contains
 
     !> Set the initial condition 
     call y_0%setval(1.0_pfdp)
-   
-    call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-    !call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
-    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+  
+    if (mgrit_flag .eqv. .true.) then 
+       call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
+       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    else
+       call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
+       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    end if
     
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
