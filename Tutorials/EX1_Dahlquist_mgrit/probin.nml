@@ -4,9 +4,9 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 2  !  must be set
+    nlevels  = 4  !  must be set
 
-    niters = 1 !  default is 5
+    niters = 20 !  default is 5
 
     qtype   = 1
     nnodes =    1 1
@@ -41,5 +41,5 @@
 
     mgrit_n_coarse = 6
     mgrit_refine_factor = 2
-    mgrit_flag=.false.
+    mgrit_flag=.true.
 /

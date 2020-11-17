@@ -88,7 +88,7 @@ contains
     call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
 
     do l = 1, pf%nlevels
-       mg_ld(l)%FCF_flag = .false.
+       !mg_ld(l)%FCF_flag = .false.
        !pf%levels(l)%ulevel%stepper%nsteps = mg_ld(l)%Nt
     end do
 

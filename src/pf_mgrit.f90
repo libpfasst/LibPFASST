@@ -166,6 +166,7 @@ contains
     class(pf_encap_t), pointer :: qc(:)
     type(mgrit_level_data), pointer :: mg_lev
     type(pf_level_t), pointer :: pf_lev
+    logical :: zero_rhs_flag
 
     !  Local variables
     integer :: nproc  !!  Total number of processors
@@ -187,6 +188,8 @@ contains
 
     level_index = 1
     call InitExactSolve(pf, mg_ld, level_index, q0)
+    zero_rhs_flag = .true.
+    call IdealInterp(pf, mg_ld, Q0, 0, zero_rhs_flag)
 
     do level_index = 1,pf%nlevels
        pf_lev => pf%levels(level_index)
@@ -343,30 +346,8 @@ contains
     !      return
     !   end if
     !end if
-
-    mg_ld(1)%cycle_phase = 3
-    zero_c_pts_flag = .false.;
-    zero_rhs_flag = .false.;
-    interp_flag = .true.; 
-    do level_index = 2,(nlevels-1)
-       mg_lev => mg_ld(level_index)
-       mg_f_lev => mg_ld(level_index+1)
-       pf_lev => pf%levels(level_index)
-       qc_len = size(mg_lev%qc)
-       do i = 1,qc_len
-          call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
-       end do
-       if (pf%comm%nproc .gt. 1) then
-          if (pf%rank .lt. pf%comm%nproc-1) then
-             call pf_lev%qend%copy(mg_lev%qc(qc_len))
-          end if
-          call send_recv_C_points(pf, level_index)
-       end if
-       call F_Relax(pf, mg_ld, level_index, Q0, zero_rhs_flag, interp_flag, zero_c_pts_flag, res_norm_flag)
-       do i = 1,qc_len
-          call mg_lev%qc(i)%copy(mg_lev%qc_prev(i))
-       end do
-    end do
+    zero_rhs_flag = .false.
+    call IdealInterp(pf, mg_ld, Q0, iteration, zero_rhs_flag)
 
     ! if (pf%state%iter .eq. pf%niters) then
     !    qc => mg_ld(nlevels)%qc
@@ -450,6 +431,45 @@ contains
      end if
 
   end subroutine FCF_Relax
+
+  subroutine IdealInterp(pf, mg_ld, Q0, iteration, zero_rhs_flag)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    class(pf_encap_t), intent(in) :: Q0
+    integer, intent(in) :: iteration
+    logical, intent(in) :: zero_rhs_flag
+    type(pf_level_t), pointer :: pf_lev, pf_f_lev, pf_c_lev
+    type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
+    logical :: zero_c_pts_flag, interp_flag, res_norm_flag
+    integer :: qc_len
+    integer :: i, j, k, n, ierr
+    integer :: nlevels, level_index
+    class(pf_encap_t), pointer :: qc(:)
+
+    nlevels = pf%nlevels;
+    mg_ld(1)%cycle_phase = 3
+    zero_c_pts_flag = .false.
+    interp_flag = .true.
+
+    do level_index = 2,(nlevels-1)
+       mg_lev => mg_ld(level_index)
+       pf_lev => pf%levels(level_index)
+       qc_len = size(mg_lev%qc)
+       do i = 1,qc_len
+          call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+       end do
+       if (pf%comm%nproc .gt. 1) then
+          if (pf%rank .lt. pf%comm%nproc-1) then
+             call pf_lev%qend%copy(mg_lev%qc(qc_len))
+          end if
+          call send_recv_C_points(pf, level_index)
+       end if
+       call F_Relax(pf, mg_ld, level_index, Q0, zero_rhs_flag, interp_flag, zero_c_pts_flag, res_norm_flag)
+       do i = 1,qc_len
+          call mg_lev%qc(i)%copy(mg_lev%qc_prev(i))
+       end do
+    end do
+  end subroutine IdealInterp
 
   subroutine F_Relax(pf, mg_ld, level_index, Q0, zero_rhs_flag, interp_flag, zero_c_pts_flag, res_norm_flag)
      type(pf_pfasst_t), target, intent(inout) :: pf
@@ -661,8 +681,7 @@ contains
         call Point_Relax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
         call pf_lev%q0%copy(pf_lev%qend)
 
-        ii = mg_lev%interp_map(i)
-        call mg_finest_lev%qc(ii)%copy(pf_lev%qend)
+        call mg_finest_lev%qc(i)%copy(pf_lev%qend)
      end do
 
      if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
