@@ -14,10 +14,13 @@ module probin
   integer, save :: mgrit_n_coarse
   integer, save :: mgrit_refine_factor
   integer, save :: nsteps_rk(PF_MAXLEVS)
-  logical, save :: mgrit_flag
+  logical, save :: use_mgrit
+  integer, save :: imex_stat       ! type of imex splitting
+  integer, save :: ark_stat
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/  lam1,lam2, dt, Tfin, nsteps, nsteps_rk, pfasst_nml, mgrit_n_coarse, mgrit_refine_factor, mgrit_flag
+  namelist /params/  lam1,lam2, dt, Tfin, nsteps, nsteps_rk, pfasst_nml, mgrit_n_coarse, mgrit_refine_factor, use_mgrit
+  namelist /params/ imex_stat,ark_stat
 
 contains
   
@@ -52,7 +55,10 @@ contains
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
 
-    mgrit_flag = .true.
+    imex_stat=2    !  Default is full IMEX
+    ark_stat=2
+
+    use_mgrit = .true.
     
     !>  Read in stuff from input file
     un = 9

@@ -322,13 +322,13 @@ contains
         do i = 1,size(mg_f_lev%qc)
            call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
         end do
-        !if (level_index_f .eq. nlevels) then
-        !   call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
-        !   if (res_norm_glob(1) .lt. pf%abs_res_tol) then
-        !      pf%state%pstatus = PF_STATUS_CONVERGED
-        !      return
-        !   end if
-        !end if
+        if ((level_index_f .eq. nlevels) .and. (iteration .gt. 1)) then
+           call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
+           if (res_norm_glob(1) .lt. pf%abs_res_tol) then
+              pf%state%pstatus = PF_STATUS_CONVERGED
+              return
+           end if
+        end if
 
         !> FCF-relaxation on intermediate grids
         call FCF_Relax(pf, mg_ld, level_index, Q0, iteration)
@@ -338,33 +338,16 @@ contains
     mg_ld(1)%cycle_phase = 2
     level_index = 1
     call ExactSolve(pf, mg_ld, level_index)
-    !if (level_index+1 .eq. nlevels) then
-    !   mg_f_lev => mg_ld(nlevels)
-    !   call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
-    !   if (res_norm_glob(1) .lt. pf%abs_res_tol) then
-    !      pf%state%pstatus = PF_STATUS_CONVERGED
-    !      return
-    !   end if
-    !end if
+    if ((level_index+1 .eq. nlevels) .and. (iteration .gt. 1)) then
+       mg_f_lev => mg_ld(nlevels)
+       call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
+       if (res_norm_glob(1) .lt. pf%abs_res_tol) then
+          pf%state%pstatus = PF_STATUS_CONVERGED
+          return
+       end if
+    end if
     zero_rhs_flag = .false.
     call IdealInterp(pf, mg_ld, Q0, iteration, zero_rhs_flag)
-
-    ! if (pf%state%iter .eq. pf%niters) then
-    !    qc => mg_ld(nlevels)%qc
-    !    if (pf%rank .eq. 0) then
-    !       do i = 1,size(qc)
-    !          print *,i,qc(i)%norm()
-    !       end do
-    !    end if
-    !    call mpi_barrier(pf%comm%comm, ierror)
-    !    call mpi_barrier(pf%comm%comm, ierror)
-    !    call mpi_barrier(pf%comm%comm, ierror)
-    !    if (pf%rank .eq. 1) then
-    !       do i = 1,size(qc)
-    !          print *,i,qc(i)%norm()
-    !       end do
-    !    end if
-    ! end if
 
   end subroutine pf_MGRIT_v_cycle
 

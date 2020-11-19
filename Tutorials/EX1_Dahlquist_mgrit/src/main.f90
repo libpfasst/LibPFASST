@@ -28,6 +28,7 @@ contains
   !>  This subroutine setups and calls libpfasst 
   subroutine run_pfasst()  
     use pfasst        !<  This module has include statements for the main pfasst routines
+    use pf_my_sweeper
     use pf_my_stepper !<  Local module stepper
     use pf_my_level   !<  Local module for level
     use probin       !<  Local module reading/parsing problem parameters
@@ -54,8 +55,13 @@ contains
     !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
-    pf%use_rk_stepper = .true.
-    pf%use_sdc_sweeper = .false.
+    if (use_mgrit .eqv. .true.) then
+       pf%use_rk_stepper = .true.
+       pf%use_sdc_sweeper = .false.
+    else
+       pf%use_rk_stepper = .false.
+       pf%use_sdc_sweeper = .true.
+    end if
 
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
@@ -68,33 +74,41 @@ contains
        !>  Allocate the user specific data constructor
        allocate(pf_ndarray_factory_t::pf%levels(l)%ulevel%factory)
 
-       !>  Allocate the stepper at this level
-       allocate(my_stepper_t::pf%levels(l)%ulevel%stepper)
+       if (use_mgrit .eqv. .true.) then
+          allocate(my_stepper_t::pf%levels(l)%ulevel%stepper)
+       else
+          allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
+       end if
 
        !>  Set the size of the data on this level (here just one)
        call pf_level_set_size(pf,l,[1])
 
-       pf%levels(l)%ulevel%stepper%order = 1
-       pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
-       !pf%rk_order(l) = 1
+       if (use_mgrit .eqv. .true.) then
+          pf%levels(l)%ulevel%stepper%order = 1
+          pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+       end if
     end do
 
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    T0 = 0.0_pfdp
-    n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
-    refine_factor = mgrit_refine_factor
-    call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
-
-    do l = 1, pf%nlevels
-       !mg_ld(l)%FCF_flag = .false.
-       !pf%levels(l)%ulevel%stepper%nsteps = mg_ld(l)%Nt
-    end do
+    if (use_mgrit .eqv. .true.) then
+       T0 = 0.0_pfdp
+       n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
+       refine_factor = mgrit_refine_factor
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor)
+       do l = 1, pf%nlevels
+          mg_ld(l)%FCF_flag = .true.
+       end do
+    end if
 
     !> add some hooks for output  (using a LibPFASST hook here)
-    !call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    if (use_mgrit .eqv. .true.) then
+       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    else
+       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+    end if
+
 
     !>  Output run parameters to screen
     call print_loc_options(pf,un_opt=6)
@@ -106,11 +120,11 @@ contains
     !> Set the initial condition 
     call y_0%setval(1.0_pfdp)
   
-    if (mgrit_flag .eqv. .true.) then 
+    if (use_mgrit .eqv. .true.) then 
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
        if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     else
-       call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
+       call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
        if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     end if
     
