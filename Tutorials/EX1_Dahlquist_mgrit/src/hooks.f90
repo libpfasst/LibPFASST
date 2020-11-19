@@ -3,7 +3,8 @@
 !
 !>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
-  use pf_my_stepper
+  use pfasst
+  use pf_mod_ndarray
   implicit none
 contains
 

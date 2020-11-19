@@ -60,7 +60,6 @@ FSRC = src/pfasst.f90 \
 #       pf_amisdcQ.f90 \
 
 #  Before using AMReX, one must compile amrexlib
-USE_AMREX=TRUE
 ifeq ($(USE_AMREX),TRUE)
 AMREX_HOME=$(LIBPFASST)/../amrex
 AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
