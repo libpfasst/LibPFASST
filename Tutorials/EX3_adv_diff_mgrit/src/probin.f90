@@ -36,7 +36,7 @@ module probin
   integer :: ios,iostat
   namelist /params/  nx, nsteps, dt, Tfin
   namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ark_stat, ic_type
-  namelist /params/  nsteps_rk, use_mgrit, mgrit_n_coarse, mgrit_refine_factor
+  namelist /params/  nsteps_rk, use_mgrit, mgrit_n_coarse, mgrit_refine_factor, rk_order
 
 contains
 

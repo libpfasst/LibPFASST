@@ -52,4 +52,6 @@
     imex_stat=2
     ark_stat=2
 
+    rk_order=2
+
 /

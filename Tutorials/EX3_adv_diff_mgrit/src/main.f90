@@ -85,7 +85,7 @@ contains
        call pf_level_set_size(pf,l,[nx(l)])
 
        if (use_mgrit .eqv. .true.) then 
-          pf%levels(l)%ulevel%stepper%order = 1
+          pf%levels(l)%ulevel%stepper%order = rk_order
           pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
        end if
     end do
