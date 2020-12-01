@@ -4,9 +4,9 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 3  !  must be set
+    nlevels  = 2  !  must be set
 
-    niters = 20 !  default is 5
+    niters = 10 !  default is 5
 
     qtype   = 1
     nnodes =    2 3 5
@@ -15,8 +15,8 @@
     nsweeps= 1 1 1
     
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 1.d-14
-    rel_res_tol = 1.d-14
+    abs_res_tol = 0
+    rel_res_tol = 0
 
     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
     Vcycle=.TRUE.
@@ -37,7 +37,7 @@
     lam2=-2.0
 
 
-    mgrit_n_coarse = 12
+    mgrit_n_coarse = 10
     mgrit_refine_factor = 2
 
     use_mgrit = .true.
