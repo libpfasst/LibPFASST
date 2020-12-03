@@ -48,7 +48,7 @@ contains
     real(pfdp) :: T0
     type(mgrit_level_data), allocatable :: mg_ld(:)
     integer :: n_coarse, refine_factor
-    logical :: FAS_flag
+    logical :: FAS_flag, FCF_flag
 
     !> Read problem parameters
     call probin_init(pf_fname)
@@ -94,14 +94,12 @@ contains
     call pf_pfasst_setup(pf)
 
     if (use_mgrit .eqv. .true.) then
-       FAS_flag = .true.
+       FAS_flag = .false.
+       FCF_flag = .true.
        T0 = 0.0_pfdp
        n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
        refine_factor = mgrit_refine_factor
-       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag)
-       do l = 1, pf%nlevels
-          mg_ld(l)%FCF_flag = .true.
-       end do
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag, FCF_flag)
     end if
 
     !> add some hooks for output  (using a LibPFASST hook here)
