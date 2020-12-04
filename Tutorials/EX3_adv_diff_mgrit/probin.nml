@@ -4,7 +4,7 @@
 
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 2
+    nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
     niters = 50  !  default is 5
@@ -36,7 +36,7 @@
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  64 64
+    nx =  128 128 128
     nu = 0.1
     v=.9
     Lx=1.0

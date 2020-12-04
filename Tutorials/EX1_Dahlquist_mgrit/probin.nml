@@ -6,7 +6,7 @@
 &PF_PARAMS
     nlevels  = 3  !  must be set
 
-    niters = 100 !  default is 5
+    niters = 11 !  default is 5
 
     qtype   = 1
     nnodes =    2 3 5
