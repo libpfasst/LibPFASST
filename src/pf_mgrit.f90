@@ -106,7 +106,6 @@ contains
      end do
      do level_index = nlevels,1,-1
         mg_lev => mg_ld(level_index)
-
         pf_lev = pf%levels(level_index)
         if (level_index .lt. nlevels .and. level_index .gt. 1) then
            call pf_lev%ulevel%factory%create_array(mg_lev%g, mg_lev%Nt, level_index, pf_lev%lev_shape)
@@ -204,6 +203,7 @@ contains
 
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
+
 
     mg_ld(nlevels)%cycle_phase = 0
     level_index = 1
@@ -485,16 +485,19 @@ contains
      logical, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag
      class(pf_encap_t), intent(in) :: Q0
      type(mgrit_level_data), pointer :: mg_f_lev, mg_lev
-     type(pf_level_t), pointer :: pf_lev
+     type(pf_level_t), pointer :: pf_lev, pf_f_lev
      integer :: i, j, n, ii
      integer :: nlevels
      logical :: q_zero_flag
+     integer :: level_index_f
 
      nlevels = pf%nlevels
+     level_index_f = level_index + 1;
      mg_lev => mg_ld(level_index)
      pf_lev => pf%levels(level_index)
      if (interp_flag .eqv. .true.) then
-        mg_f_lev => mg_ld(level_index+1)
+        mg_f_lev => mg_ld(level_index_f)
+        pf_f_lev => pf%levels(level_index_f)
      end if
 
      do i = 1, size(mg_lev%f_blocks)
@@ -521,7 +524,7 @@ contains
         do n = 1,size(mg_lev%f_blocks(i)%val)
            j = mg_lev%f_blocks(i)%val(n)
            !> Do a single step
-           call Point_Relax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
+           call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
            !> Add g to the result
            if (zero_rhs_flag .eqv. .false.) then
               call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g(j))
@@ -529,19 +532,31 @@ contains
 
            !> Interpolate to fine level
            if (interp_flag .eqv. .true.) then
-              call mg_f_lev%qc(j)%axpy(1.0_pfdp, pf_lev%qend)
+              !call mg_f_lev%qc(j)%axpy(1.0_pfdp, pf_lev%qend)
+              !if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
+              !   call mg_f_lev%qc(j)%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
+              !end if
+              call mg_lev%q_temp%copy(pf_lev%qend)
               if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
-                 call mg_f_lev%qc(j)%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
+                 call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
               end if
+              call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
+              call mg_f_lev%qc(j)%axpy(1.0_pfdp, mg_f_lev%q_temp)
            end if
            call pf_lev%q0%copy(pf_lev%qend)
         end do
         call mg_lev%qc(i)%copy(pf_lev%qend)
         if (interp_flag .eqv. .true.) then
-           call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_lev%qc_prev(i))
+           !call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_lev%qc_prev(i))
+           !if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
+           !   call mg_f_lev%qc(j+1)%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
+           !end if
+           call mg_lev%q_temp%copy(mg_lev%qc_prev(i))
            if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
-              call mg_f_lev%qc(j+1)%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
+              call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
            end if
+           call pf_f_lev%ulevel%restrict(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_lev%t0)
+           call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_f_lev%q_temp)
         end if
      end do
   end subroutine F_Relax
@@ -567,7 +582,7 @@ contains
      do i = 1,size(mg_lev%c_pts)
         j = mg_lev%c_pts(i)
         call pf_lev%q0%copy(mg_lev%qc(i))
-        call Point_Relax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
+        call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
         call mg_lev%qc(i)%copy(pf_lev%qend)
         if (zero_rhs_flag .eqv. .false.) then
            call mg_lev%qc(i)%axpy(1.0_pfdp, mg_lev%g(j))
@@ -646,18 +661,22 @@ contains
             zero_rhs_flag = .false.
         end if
         call InjectRestrictPoint(pf, mg_ld, gi, Q0, level_index, level_index_f, i, ii, zero_rhs_flag)
-        if (i .eq. mg_lev%Nt) call ResNorm(pf, mg_ld, level_index_f, gi, i)
         call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
 
-        call Point_Relax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+        call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
         call pf_lev%qend%axpy(1.0_pfdp, gi)
         call pf_lev%q0%copy(pf_lev%qend)
 
-        call mg_f_lev%qc(i)%axpy(1.0_pfdp, pf_lev%qend)
-        if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-           call mg_f_lev%qc(i)%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
+        !call mg_f_lev%qc(i)%axpy(1.0_pfdp, pf_lev%qend)
+        !if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
+        !   call mg_f_lev%qc(i)%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
+        !end if
+        call mg_lev%q_temp%copy(pf_lev%qend)
+        if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
+           call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
         end if
-
+        call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
+        call mg_f_lev%qc(i)%axpy(1.0_pfdp, mg_f_lev%q_temp)
      end do
      call pf_lev%ulevel%factory%destroy_single(gi)
 
@@ -676,7 +695,7 @@ contains
      integer, intent(in) :: level_index
      integer :: level_index_f
      type(pf_level_t), pointer :: lev
-     integer :: i, j, k, n, ii
+     integer :: i, j, k, n, ii, l
      integer :: nlevels
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_finest_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
@@ -694,14 +713,17 @@ contains
      if ((pf%rank .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
         call pf_recv(pf, pf_lev, 3, .true.)
      else
-        call pf_lev%q0%copy(Q0)
+        call mg_finest_lev%q_temp%copy(Q0)
+        do l = nlevels,2,-1
+           call pf%levels(l)%ulevel%restrict(pf%levels(l), pf%levels(l-1), mg_ld(l)%q_temp, mg_ld(l-1)%q_temp, mg_ld(l)%t0)
+        end do
+        call pf_lev%q0%copy(mg_lev%q_temp)
      end if
 
      do i = 1,mg_lev%Nt
-        call Point_Relax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+        call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+        call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%qc(i), pf_lev%qend, mg_f_lev%t0)
         call pf_lev%q0%copy(pf_lev%qend)
-
-        call mg_f_lev%qc(i)%copy(pf_lev%qend)
      end do
 
      if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
@@ -731,14 +753,15 @@ contains
 
      mg_f_lev%res_norm_loc(1) = 0.0_pfdp
      mg_f_lev%res_norm_index = 0
+
      do i = 1,mg_c_lev%Nt
-         ii = mg_f_lev%c_pts(i)
-         if (level_index_f .eq. nlevels) then
-            zero_rhs_flag = .true.;
-         else
-            zero_rhs_flag = .false.;
-         end if
-         call InjectRestrictPoint(pf, mg_ld, mg_c_lev%g(i), Q0, level_index_c, level_index_f, i, ii, zero_rhs_flag);
+        ii = mg_f_lev%c_pts(i)
+        if (level_index_f .eq. nlevels) then
+           zero_rhs_flag = .true.;
+        else
+           zero_rhs_flag = .false.;
+        end if
+        call InjectRestrictPoint(pf, mg_ld, mg_c_lev%g(i), Q0, level_index_c, level_index_f, i, ii, zero_rhs_flag);
      end do
 
      pf_f_lev%residual = mg_f_lev%res_norm_loc(1)
@@ -763,20 +786,18 @@ contains
      nlevels = pf%nlevels
 
      call mg_f_lev%q_temp%copy(mg_f_lev%qc(i_c))
-     call Point_Relax(pf, mg_ld, level_index_f, i_f, mg_f_lev%q_temp, pf_f_lev%qend)
-     call gci%copy(pf_f_lev%qend)
-     !call gci%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
+     call PointRelax(pf, mg_ld, level_index_f, i_f, mg_f_lev%q_temp, mg_f_lev%r)
+     call mg_f_lev%r%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
      if (zero_rhs_flag .eqv. .false.) then
-         call gci%axpy(1.0_pfdp, mg_f_lev%g(i_f));
+         call mg_f_lev%r%axpy(1.0_pfdp, mg_f_lev%g(i_f));
      end if
+     if (i_c .eq. mg_c_lev%Nt) then
+        call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
+     end if
+     call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%r, mg_c_lev%r, mg_f_lev%t0)
      if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-        if (i_c .eq. mg_c_lev%Nt) then
-           call mg_f_lev%r%copy(gci)
-           call mg_f_lev%r%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
-           call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
-        end if
-        call mg_c_lev%qc_fas(i_c)%copy(mg_f_lev%qc_prev(i_c))
-        !call gci%axpy(1.0_pfdp, mg_c_lev%qc_fas(i_c))
+        call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%qc_prev(i_c), mg_c_lev%qc_fas(i_c), mg_f_lev%t0)
+        call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%qc_fas(i_c))
         if (i_c .eq. 1) then
            if (pf%rank .eq. 0) then
               call mg_c_lev%q_temp%copy(Q0)
@@ -786,18 +807,13 @@ contains
         else
            call mg_c_lev%q_temp%copy(mg_c_lev%qc_fas(i_c-1))
         end if
-        call Point_Relax(pf, mg_ld, level_index_c, i_c, mg_c_lev%q_temp, pf_c_lev%qend)
-        call gci%axpy(-1.0_pfdp, pf_c_lev%qend)
-     else
-        call gci%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
-        if (i_c .eq. mg_c_lev%Nt) then
-           call mg_f_lev%r%copy(gci)
-           call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
-        end if
+        call PointRelax(pf, mg_ld, level_index_c, i_c, mg_c_lev%q_temp, pf_c_lev%qend)
+        call mg_c_lev%r%axpy(-1.0_pfdp, pf_c_lev%qend)
      end if
+     call gci%copy(mg_c_lev%r)
   end subroutine InjectRestrictPoint
 
-  subroutine Point_Relax(pf, mg_ld, level_index, n, q0, qend)
+  subroutine PointRelax(pf, mg_ld, level_index, n, q0, qend)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index, n
@@ -811,7 +827,7 @@ contains
 
      t0n = mg_lev%t0 + mg_lev%dt * real(n-1,pfdp)
      call pf_lev%ulevel%stepper%do_n_steps(pf, level_index, t0n, q0, qend, mg_lev%dt, 1)
-  end subroutine Point_Relax
+  end subroutine PointRelax
 
   subroutine ResNorm(pf, mg_ld, level_index, r, i)
      type(pf_pfasst_t), target, intent(inout) :: pf
