@@ -1,12 +1,12 @@
-./build/pfasst.o : src/pfasst.f90 ./build/pf_mpi.o ./build/pf_stop.o ./build/pf_utils.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_results.o ./build/pf_hooks.o ./build/pf_dtype.o 
+./build/pfasst.o : src/pfasst.f90 ./build/pf_mpi.o ./build/pf_stop.o ./build/pf_utils.o ./build/pf_pfasst.o ./build/pf_parallel.o ./build/pf_hooks.o ./build/pf_dtype.o 
 ./build/pf_comm.o : src/pf_comm.f90 ./build/pf_pfasst.o 
 ./build/pf_dtype.o : src/pf_dtype.f90 
 ./build/pf_fft.o : src/pf_fft.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_hooks.o : src/pf_hooks.f90 ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_interpolate.o : src/pf_interpolate.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
 ./build/pf_parallel.o : src/pf_parallel.f90 ./build/pf_results.o ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
-./build/pf_parareal.o : src/pf_parareal.f90 ./build/pf_comm.o ./build/pf_pfasst.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o 
-./build/pf_parallel_oc.o : src/pf_parallel_oc.f90 ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
+./build/pf_parareal.o : src/pf_parareal.f90 ./build/pf_mpi.o ./build/pf_results.o ./build/pf_comm.o ./build/pf_pfasst.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o 
+./build/pf_parallel_oc.o : src/pf_parallel_oc.f90 ./build/pf_mpi.o ./build/pf_comm.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_pfasst.o 
 ./build/pf_pfasst.o : src/pf_pfasst.f90 ./build/pf_quadrature.o ./build/pf_hooks.o ./build/pf_results.o ./build/pf_utils.o ./build/pf_mpi.o ./build/pf_dtype.o 
 ./build/pf_quadrature.o : src/pf_quadrature.f90 ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_restrict.o : src/pf_restrict.f90 ./build/pf_utils.o ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_dtype.o 
@@ -33,4 +33,6 @@
 ./build/pf_misdcQ_sweeper.o : src/pf_misdcQ_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_misdcQ_oc_sweeper.o : src/pf_misdcQ_oc_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_verlet_sweeper.o : src/pf_verlet_sweeper.f90 ./build/pf_hooks.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_dtype.o 
+./build/pf_fftpack.o : src/pf_fftpack.f90 ./build/pf_fft.o ./build/pf_utils.o ./build/pf_dtype.o 
 ./build/pf_mpi.o : src/pf_mpi.f90 ./build/pf_stop.o ./build/pf_dtype.o 
+./build/pf_mgrit.o : src/pf_mgrit.f90 ./build/pf_mpi.o ./build/pf_results.o ./build/pf_comm.o ./build/pf_pfasst.o ./build/pf_hooks.o ./build/pf_dtype.o ./build/pf_timer.o ./build/pf_utils.o ./build/pf_restrict.o ./build/pf_interpolate.o ./build/pf_rkstepper.o
