@@ -213,13 +213,12 @@ contains
     real(pfdp), intent(in),     pointer :: yvec_c(:)
     type(pf_fft_t),intent(in),  pointer :: fft_f
     integer, intent(in),optional :: order
-    
+
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
     integer :: nx_f, nx_c,local_order
     real :: c1,c2,c3
     local_order=0
     if (present(order)) local_order = order
-
 
     nx_f = SIZE(yvec_f)
     nx_c = SIZE(yvec_c)
@@ -260,7 +259,6 @@ contains
    case DEFAULT
       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
    end select
-     
     
   end subroutine interp_1d
   subroutine interp_2d(this, yvec_c, fft_f,yvec_f)

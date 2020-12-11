@@ -20,6 +20,7 @@ x = np.linspace(0,32*np.pi,nvars)
 #plt.plot(x,dat)
 
 plt.figure()
+
 dat = np.zeros([nsteps+1,nvars]);
 counter = 0
 for step in range(0,nsteps+1):
@@ -28,6 +29,7 @@ for step in range(0,nsteps+1):
    fn=path+'ys'+str(step).zfill(4) + '.npy'
    dat[counter,:] = np.load(fn);
    counter = counter + 1
+
 plt.imshow(dat,extent=[0,101,0,60],aspect='auto',origin='lower',interpolation='none')
 plt.colorbar()
 plt.xlabel('x')
@@ -109,5 +111,6 @@ plt.title('gradients')
 
 
 plt.title('gradients')
+
 
 plt.show()

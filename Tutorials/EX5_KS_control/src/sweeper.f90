@@ -27,6 +27,7 @@ module my_sweeper
      integer                 :: nsteps_per_rank, nproc, myrank
 
    contains
+
      procedure :: f_eval    !  Computes the PDEs rhs terms
      procedure :: f_comp    !  Does implicit solves
      procedure :: initialize  !  Bypasses base sweeper initialize
@@ -69,6 +70,7 @@ contains
     !>  Set up the FFT 
     allocate(this%fft_tool)
     call this%fft_tool%fft_setup([nx],1, [Lx])
+
 
     !>  Define spectral derivative operators
     allocate(this%lap(nx))
@@ -355,6 +357,7 @@ contains
     integer                 :: nx
 
     nx = size(f)
+
     r = dot_product(f,g)
     r = r*Lx/dble(nx)
   end function compute_scalar_prod

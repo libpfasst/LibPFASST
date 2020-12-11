@@ -1,11 +1,11 @@
 !
 ! This file is part of LIBPFASST.
 !
-!> Level specification  for the K-S example.
-
+!> Level specification  for 1-D advection/diffusion example.
+!>     u_t + v*u_x = nu*u_xx
 module my_level
   use pf_mod_dtype
-  use pf_mod_ndarray_oc
+  use pf_mod_ndarray
   use pf_mod_fftpackage
   implicit none
 
@@ -24,6 +24,8 @@ module my_level
   !>  Interpolate from coarse  level to fine using FFT
   subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
     use my_sweeper, only: my_sweeper_t, as_my_sweeper
+    use my_stepper, only: my_stepper_t, as_my_stepper
+    use probin
     
     class(my_level_t), intent(inout) :: this
     class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
@@ -35,21 +37,26 @@ module my_level
     integer :: nx_f, nx_c
     integer :: irat       !  Coarsening ratio
     class(my_sweeper_t), pointer :: sweeper_f, sweeper_c  !  fine and coarse sweepers
+    class(my_stepper_t), pointer :: stepper_f, stepper_c
     real(pfdp),          pointer :: yvec_f(:), yvec_c(:)  !  fine and coarse solutions
     complex(pfdp),       pointer :: wk_f(:),wk_c(:)       !  fine and coarse FFT workspaces
     type(pf_fft_t),      pointer :: fft_f,fft_c           !  fine and coarse FFT packages
-    integer :: which
 
-    which = 1
-    if(present(flags)) which = flags
-    
-    sweeper_c => as_my_sweeper(c_lev%ulevel%sweeper)
-    sweeper_f => as_my_sweeper(f_lev%ulevel%sweeper)
-    fft_c => sweeper_c%fft_tool
-    fft_f => sweeper_f%fft_tool    
 
-    yvec_f => get_array1d_oc(f_vec,which) 
-    yvec_c => get_array1d_oc(c_vec,which)
+    if (use_mgrit .eqv. .true.) then
+       stepper_c => as_my_stepper(c_lev%ulevel%stepper)
+       stepper_f => as_my_stepper(f_lev%ulevel%stepper)
+       fft_c => stepper_c%fft_tool
+       fft_f => stepper_f%fft_tool
+    else
+       sweeper_c => as_my_sweeper(c_lev%ulevel%sweeper)
+       sweeper_f => as_my_sweeper(f_lev%ulevel%sweeper)
+       fft_c => sweeper_c%fft_tool
+       fft_f => sweeper_f%fft_tool
+    end if
+
+    yvec_f => get_array1d(f_vec) 
+    yvec_c => get_array1d(c_vec)
 
     nx_f = size(yvec_f)
     nx_c = size(yvec_c)
@@ -76,15 +83,12 @@ module my_level
 
     real(pfdp), pointer :: yvec_f(:), yvec_c(:)  
 
-    integer :: irat, which
-    
-    which = 1
-    if(present(flags)) which = flags
+    integer :: irat
 
     !>  Grab the vectors from the encap
-    yvec_f => get_array1d_oc(f_vec,which)
-    yvec_c => get_array1d_oc(c_vec,which)
-    
+    yvec_f => get_array1d(f_vec)
+    yvec_c => get_array1d(c_vec)
+
     irat  = size(yvec_f)/size(yvec_c)
 
     !>  Pointwise coarsening

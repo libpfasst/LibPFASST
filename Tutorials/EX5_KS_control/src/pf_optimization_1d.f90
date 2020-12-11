@@ -6,7 +6,7 @@ module pf_mod_optimization
   use pf_mod_ndarray_oc
   use pf_mod_parallel_oc
   use my_sweeper
-  
+
   implicit none
 
   real(pfdp), parameter, private :: armijoDecrease = 1e-4
@@ -81,6 +81,7 @@ contains
         call objective_function(pf%levels(pf%nlevels)%ulevel%sweeper, pf%levels(pf%nlevels)%Q(m), &
                                     pf%levels(pf%nlevels)%lev_shape(1), m, obj(m), step)
 
+
         ! record state solution
         call pf%levels(pf%nlevels)%Q(m)%pack(savedStates(step,m,:), 1)
       end do
@@ -110,20 +111,18 @@ contains
     deallocate(obj)
     
   end subroutine evaluate_objective
-
-
   
   !> Compute the gradient. For this, use the previously computed state solution to solve the adjoint equation.
   subroutine evaluate_gradient(pf, q1, dt, nsteps, predict, ctrl, alpha, gradient, LinftyNormGrad, L2NormGradSq, savedStates, savedAdjoint)
     type(pf_pfasst_t),        intent(inout) :: pf
     type(pf_ndarray_oc_t), target, intent(inout) :: q1
     real(pfdp),               intent(in   ) :: dt, alpha
+
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
     real(pfdp),               intent(  out) :: gradient(:), LinftyNormGrad, L2NormGradSq
     real(pfdp),               intent(inout) :: savedStates(:,:,:), savedAdjoint(:,:,:)
     real(pfdp),               intent(inout) :: ctrl(:)
-
 
     integer :: m, step, nnodes, thisstep, ierror
     real(pfdp), pointer :: obj(:) 
@@ -155,6 +154,7 @@ contains
         call restrict_for_adjoint(pf, thisstep*dt, dt, 1) 
         
         ! when using warm starts, load stored adjoint solution from previous optimization iteration
+
         if(.not. predict) then
           do m = 1, nnodes
             call pf%levels(pf%nlevels)%Q(m)%unpack(savedAdjoint(step,m,:), 2)
@@ -249,6 +249,7 @@ contains
 
       call mpi_allreduce(objectiveNew, globObjNew, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
 !      globObjNew = objectiveNew
+
       if(pf%rank == 0) print *, stepSize, 'objectiveNew (L2) = ', globObjNew
 
       if (globObjNew < globObj + armijoDecrease*stepSize*globDirXGrad) then

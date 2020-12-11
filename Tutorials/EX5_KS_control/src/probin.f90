@@ -46,7 +46,7 @@ module probin
   character(len=44) :: foutfoo          !  temp used to create foutbase
   character(len=128), save :: logfile   !  file to use for output of optimization progress
   integer, save    :: poutmod
-  
+
   character(len=64), save :: output ! directory name for output
   CHARACTER(LEN=255) :: istring     ! stores command line argument
   CHARACTER(LEN=255) :: message     ! use for I/O error messages
@@ -58,6 +58,7 @@ module probin
   namelist /params/ dt, Tfin, Lx, alpha, max_opt_iter
   namelist /params/ do_imex, warmstart, logfile, nsweeps, nsweeps_pred
   namelist /params/ max_step_size, test_no, opt_method, use_wolfe, write_numpy
+
 
 contains
 
@@ -75,7 +76,6 @@ contains
     Finterp = .FALSE.
     ndim     = 1
     nnodes  = [ 2, 3, 3 ]
-
     nsteps  = -1
 
     Lx      = 1._pfdp
@@ -87,15 +87,16 @@ contains
 
     do_imex = 1
     warmstart = 0
-    
     max_opt_iter = 100
     alpha = 0.05
     tol_grad = 1e-6
     tol_obj  = 1e-6
     max_step_size = 1.0
+
     opt_method = 0
     use_wolfe = .false.
     write_numpy = .true.
+
  
     poutmod = 1
 

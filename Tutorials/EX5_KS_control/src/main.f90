@@ -21,6 +21,7 @@ implicit none
 
   type(pf_ndarray_oc_t) :: q1    !< for setting initial conditions
   integer        :: ierror, l, m, k, i, p
+
   character(len = 64) :: fout
   character(len =128) :: logfilename
   character(len = 64) :: fname
@@ -59,6 +60,7 @@ implicit none
                              npyOutput(:) !< helper arry for numpy output
   real, allocatable :: rndArr(:)  !< for generating random numbers for perturbations
 
+
   !
   ! read options
   !
@@ -88,6 +90,7 @@ implicit none
   if(nsteps_per_rank*comm%nproc /= nsteps) stop "ERROR: nsteps not an integer multiple of nproc"
 
   ! set up levels
+
   do l = 1, pf%nlevels
 
        pf%levels(l)%nnodes = nnodes(l)
@@ -124,6 +127,7 @@ implicit none
 !   call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
 
 
+
   if(pf%rank == 0) print *, "computing ", nsteps_per_rank, "steps per CPU"
 
   !  Make directory for Data if it does not exist
@@ -138,7 +142,7 @@ implicit none
   ! open output files
   write (fname, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'Niter',pf%niters,'_Nx',nvars(pf%nlevels),'_Nstep',nsteps,'_Nproc',comm%nproc
   foutbase = 'Dat/'//trim(fbase)//'/'//trim(fname)
-
+  
   if (warmstart .eq. 1) then
     predict = .false.
     logfile = trim(logfile)//'_warm'
@@ -148,6 +152,7 @@ implicit none
   endif
 
   write(logfilename, "(A,'_tol',i0.3,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), test_no, max_opt_iter, nsteps, comm%nproc
+
 
   !  Output the run parameters
   if (pf%rank == 0) then
@@ -208,6 +213,7 @@ implicit none
      call save_double(npyfname, shape(ctrl), real(ctrl(:),8))
   end if
 
+
   ! solve equation with correct initial condition to generate tracking data
   allocate(targetState(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes,nvars(pf%nlevels)))
   targetState = 0.0_pfdp
@@ -217,6 +223,7 @@ implicit none
   ! set initial condition
   if (pf%rank .eq. 0) then
     q1%yflatarray = ctrl
+
   else
     q1%yflatarray = 0.0_pfdp
   end if
@@ -260,6 +267,7 @@ implicit none
       end if
 
       ! if not done pass on initial condition
+
       if( step < nsteps_per_rank) then
         call pf%levels(pf%nlevels)%qend%pack(pf%levels(pf%nlevels)%send, 1)    !<  Pack away your last solution
         call pf_broadcast(pf, pf%levels(pf%nlevels)%send, pf%levels(pf%nlevels)%mpibuflen, pf%comm%nproc-1)
@@ -268,6 +276,7 @@ implicit none
   end do
 
   ! set up tracking objective
+
   call set_ydesired(pf%levels(pf%nlevels)%ulevel%sweeper, targetState)
   do l = pf%nlevels-1,1,-1
     call restrict_ydesired(pf%levels(l)%ulevel%sweeper, pf%levels(l+1)%ulevel%sweeper)
@@ -284,6 +293,7 @@ implicit none
 
   if(pf%rank == 0) write(105,*) "# iter   L2_grad   objective   stepsize"
 
+
   allocate(gradient(nvars(pf%nlevels)))
   allocate(prevGrad(nvars(pf%nlevels)))
   allocate(searchDir(nvars(pf%nlevels)))
@@ -291,11 +301,13 @@ implicit none
   allocate(savedStatesFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
   allocate(savedAdjointsFlat(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, product(pf%levels(pf%nlevels)%lev_shape)))
 
+  
   gradient = 0
   prevGrad = 0
   prevGlobDirXGrad = 0.0_pfdp
   globDirXGrad = 0.0_pfdp
   prevStepSize = 1.0_pfdp
+
   prevSearchDir = 0
   savedStatesFlat = 0.0_pfdp
   savedAdjointsFlat = 0.0_pfdp
@@ -303,7 +315,6 @@ implicit none
   itersState = 0
   itersAdjoint = 0
   skippedState = 0
-
 
   ! initial guess for control: some fraction or perturbation of true control
   call initial_sol(ctrl)
@@ -314,7 +325,6 @@ implicit none
   ! ctrl = ctrl + 0.1*rndArr
   ! call pf_broadcast(pf, ctrl, pf%levels(pf%nlevels)%mpibuflen, 0)
   ! deallocate(rndArr)
-
 
   call date_and_time(date=date, time=time, values=time_start)
   if (pf%rank .eq. 0) &
@@ -364,6 +374,7 @@ implicit none
      if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
 
      ! are we done optimizing?
+
      if (sqrt(globL2NormGradSq) < tol_grad) then
        if(pf%rank == 0) print *, 'optimality condition satisfied (gradient norm small enough), stopping'
        exit
@@ -483,6 +494,7 @@ implicit none
         end if
      end do
   end if
+
 
   !
   ! cleanup

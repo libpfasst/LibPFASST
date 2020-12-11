@@ -283,7 +283,7 @@ contains
     real(pfdp), intent(in),    pointer :: yvec_c(:)
     type(pf_fft_t),intent(in), pointer :: fft_f
     integer, intent(in),optional :: order
-    
+
     complex(pfdp),         pointer :: wk_f(:), wk_c(:)
     integer :: nx_f, nx_c,local_order
     real(pfdp) :: c1,c2,c3

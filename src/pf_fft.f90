@@ -373,7 +373,6 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
- 
     
   end subroutine make_ilap_1d
   
@@ -385,6 +384,7 @@ contains
     real(pfdp) :: dx,dy,kk
     local_order=0
     if (present(order)) local_order = order
+
 
     nx=this%nx
     ny=this%ny
@@ -428,7 +428,7 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
-          
+
   end subroutine make_ilap_2d
   
   subroutine make_ilap_3d(this, ilap,order)
@@ -502,7 +502,7 @@ contains
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: lap(:)
     integer, intent(in),optional :: order
-    
+
     integer     :: i,nx,local_order
     real(pfdp) :: dx
     local_order=0
@@ -527,19 +527,18 @@ contains
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
     end select
- 
     
   end subroutine make_lap_1d
   
   subroutine make_lap_2d(this, lap,order)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: lap(:,:)
+
     integer, intent(in),optional :: order
     integer     :: i,j,nx,ny,local_order
     real(pfdp) :: dx,dy
     local_order=0
     if (present(order)) local_order = order
-
     nx=this%nx
     ny=this%ny
     
@@ -577,7 +576,7 @@ contains
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: lap(:,:,:)
     integer, intent(in),optional :: order
-    
+
     integer     :: i,j,k,nx,ny,nz,local_order
     real(pfdp) :: dx,dy,dz
     local_order=0
@@ -653,7 +652,6 @@ contains
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: ddx(:)
       integer, intent(in),optional :: order
-
       integer     :: i,nx,local_order
       real(pfdp) :: dx
       local_order=0
@@ -679,6 +677,7 @@ contains
        end select
        
      end subroutine make_deriv_1d
+
     subroutine make_deriv_2d(this, deriv,dir,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: deriv(:,:)
@@ -731,7 +730,7 @@ contains
       case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
       end select
-   
+
     end subroutine make_deriv_2d
 
     subroutine make_deriv_3d(this, deriv,dir,order)
