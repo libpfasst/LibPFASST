@@ -5,7 +5,8 @@
 module hooks
   use pf_mod_dtype
   use pf_mod_ndarray_oc
-  use probin, only: nprob,poutmod, fbase, foutbase, N_Vcycles,kfreq
+  use probin
+
   implicit none
 contains
 

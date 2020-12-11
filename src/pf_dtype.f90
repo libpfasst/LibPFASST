@@ -59,6 +59,7 @@ module pf_mod_dtype
     integer :: sweep    !! sweep number
     integer :: status   !! status (iterating, converged etc)
     integer :: pstatus  !! previous rank's status
+    logical :: pconverged  !! is previous rank converged
     integer :: itcnt    !! total iterations by this processor
     integer :: skippedy !! skipped sweeps for state (for mixed integration)
     integer :: mysteps  !! steps I did
@@ -155,7 +156,6 @@ module pf_mod_dtype
      !  level parameters set by the pfasst_t values
      integer  :: index        = -1   !! level number (1 is the coarsest)
      integer  :: nnodes       = -1   !! number of sdc nodes
-     integer  :: nsteps_rk    = -1   !! number of rk steps to perform
      integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
@@ -263,6 +263,7 @@ module pf_mod_dtype
 
      !>  ===  Optional pfasst parameters ====
      integer :: niters  = 5             !! number of PFASST iterations to do
+     integer :: MINiters  = 0           !! MIN number of PFASST iterations to do
      integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
      logical :: use_proper_nodes =  .false.
      logical :: use_composite_nodes = .false.
@@ -298,10 +299,12 @@ module pf_mod_dtype
 
 
      ! -- RK and Parareal options
-     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used 
-     logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=-1 !! number of runge-kutta steps per time step
-     logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+     logical :: use_sdc_sweeper =.true.   !! decides if SDC sweeper is used 
+     logical :: use_rk_stepper = .false.  !! decides if RK steps are used instead of the sweeps
+     integer :: nsteps_rk(PF_MAXLEVS)=-1  !! number of runge-kutta steps per time step
+     integer :: rk_order(PF_MAXLEVS)=-1   !! order of runge-kutta method per level
+     integer :: rk_nstages(PF_MAXLEVS)=-1 !! number of runge-kutta stages per level
+     logical :: RK_pred = .false.         !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
      logical :: debug = .false.         !!  If true, debug diagnostics are printed
@@ -312,6 +315,7 @@ module pf_mod_dtype
      logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
      logical :: save_json = .true.       !!  Will save a jason file of run parameters
      integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
+     integer :: save_solutions  = 0      !!  0=none, 1=end, 2=all time steps, 3=all iterations
 
      integer :: rank    = -1            !! rank of current processor
 

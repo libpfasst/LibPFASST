@@ -195,6 +195,11 @@ contains
     this%nstages = nstages
     this%npieces = npieces
 
+    !  Store the info in the pf structure
+    pf%rk_order(level_index)=this%order
+    pf%rk_nstages(level_index)=this%nstages-1
+
+    !  Allocate Butcher tableaus
     allocate(this%AmatE(nstages,nstages),stat=ierr)  !  Explicit Butcher matrix
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)               
     allocate(this%AmatI(nstages,nstages),stat=ierr)  !  Implicit Butcher matrix

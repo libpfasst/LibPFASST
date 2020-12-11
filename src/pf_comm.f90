@@ -9,6 +9,7 @@ module pf_mod_comm
   implicit none
 contains
 
+
   !>  Subroutine to post a receive request for a new initial condition to be received after doing some work
   subroutine pf_post(pf, level, tag, direction)
     type(pf_pfasst_t), intent(in)    :: pf
@@ -23,7 +24,7 @@ contains
 
     dir = 1 ! default 1: send forward; set to 2 for send backwards
     if(present(direction)) dir = direction
-    if (pf%debug) print*,'DEBUG --', pf%rank, 'is beginning pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus    
     ierror = 0
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
@@ -39,7 +40,7 @@ contains
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during post',ierror)
    endif
-   if (pf%debug) print*,'DEBUG --', pf%rank, 'is leaving pf_post, state%pstatus=', pf%state%pstatus, 'with tag =', tag
+   if (pf%debug) print  '("DEBUG-rank=", I5, " end post, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus       
   end subroutine pf_post
 
   !>  Subroutine to send this processor's convergence status to the next processor
@@ -69,15 +70,14 @@ contains
       call pf_stop(__FILE__,__LINE__,'invalid dir during send_status',dir)
     end if
 
-    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begins send_status with status', istatus, 'with tag =', tag
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
     call pf%comm%send_status(pf, tag, istatus, ierror, dest)
-    if (pf%debug) print*, 'DEBUG --',pf%rank, 'ends send_status'
 
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during send_status',ierror)
     endif
-
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end send_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
   end subroutine pf_send_status
 
   !>  Subroutine to receive the convergence status from the previous processor
@@ -97,7 +97,7 @@ contains
     if (pf%rank == 0 .and. dir == 1) return
     if (pf%rank == pf%comm%nproc-1 .and. dir == 2) return
 
-    if (pf%debug) print*, 'DEBUG --',pf%rank, 'begin recv_status with pstatus=',pf%state%pstatus, ' tag=',tag
+
     ierror = 0
     if (dir == 1) then
        source=pf%rank-1
@@ -107,9 +107,7 @@ contains
       print *, 'Rank',pf%rank
       call pf_stop(__FILE__,__LINE__,'invalid bad dir in recv_status',dir)
    end if
-
-   if (pf%debug) print*, pf%rank,  'is receiving status with tag ', tag
-
+   if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus           
    call pf%comm%recv_status(pf, tag, istatus, ierror, source)
 
    if (ierror .eq. 0) then
@@ -118,9 +116,7 @@ contains
       print *, 'Rank=',pf%rank
       call pf_stop(__FILE__,__LINE__,'error during recv_status',ierror)      
     endif
-
-   if (pf%debug) print *, pf%rank, 'status recvd = ', istatus
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv_statuswith pstatus=',pf%state%pstatus,'tag=',tag
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv_status, tag=",I8, " pf%state%pstatus=", I2)',pf%rank,tag,pf%state%pstatus
   end subroutine pf_recv_status
   !>  Subroutine to send the solution to the next processor
   subroutine pf_send(pf, level, tag, blocking, direction)
@@ -142,6 +138,7 @@ contains
     ierror = 0
     ! need to wait here to make sure last non-blocking send is done
     if(blocking .eqv. .false.) then
+       if (pf%debug) print  '("DEBUG-rank=", I5, " begin wait, level=",I4)',pf%rank,level%index
        if (pf%save_timings > 1) call pf_start_timer(pf, T_WAIT, level%index)
        !       call pf_mpi_wait(pf, level%index, ierror)
        call pf%comm%wait(pf, level%index, ierror)       
@@ -150,6 +147,7 @@ contains
           print *, 'Rank=',pf%rank
           call pf_stop(__FILE__,__LINE__,'error during send (wait)',ierror)
        end if
+       if (pf%debug) print  '("DEBUG-rank=", I5, " end wait, level=",I4)',pf%rank,level%index
     end if
     
     if (pf%save_timings > 1) call pf_start_timer(pf, T_PACK, level%index)
@@ -165,17 +163,17 @@ contains
        end if
     end if
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PACK, level%index)
-     ierror = 0
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin send, tag=',tag,blocking,' pf%state%status =',pf%state%status, SIZE(level%send), 'send buffer=',level%send
+    ierror = 0
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin send, level=",I4, " tag=", I8," blocking=", L3," state%status=",I3)',pf%rank,level%index,tag,blocking,pf%state%status
     if (pf%save_timings > 1) call pf_start_timer(pf, T_SEND, level%index)
     call pf%comm%send(pf, level, tag, blocking, ierror, dest)
-   if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SEND,level%index)
     if (ierror /= 0) then
        print *, 'Rank=',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during send',ierror)
-   endif
+    endif
 
-   if (pf%debug) print*,  'DEBUG --',pf%rank, 'end send, tag=',tag,blocking
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end send, level=",I4, " tag=", I8," blocking=", L3," state%status=",I3)',pf%rank,level%index,tag,blocking,pf%state%status
   end subroutine pf_send
 
   !>  Subroutine to recieve the solution from the previous processor
@@ -193,7 +191,7 @@ contains
     if(present(direction)) dir = direction
 
     ierror = 0
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'begin recv, tag=',tag,blocking, "pf%state%pstatus=",pf%state%pstatus
+    if (pf%debug) print  '("DEBUG-rank=", I5, " begin recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
     if (pf%rank /= 0 .and. pf%state%pstatus == PF_STATUS_ITERATING &
                                   .and. dir == 1) then
        source=pf%rank-1
@@ -217,7 +215,7 @@ contains
        end if
 
        
-       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+!       if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv', SIZE(level%recv)
 
 
        if (pf%save_timings > 1) call pf_start_timer(pf, T_UNPACK, level%index)
@@ -236,7 +234,7 @@ contains
        call pf%comm%recv(pf, level,tag, blocking, ierror, source)
        if (ierror .ne. 0) call pf_stop(__FILE__,__LINE__,'error during receive, rank=',pf%rank)       
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_RECEIVE,level%index)
-       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv), 'recv buffer=',level%recv
+       if (pf%debug) print*,  'DEBUG --',pf%rank, SIZE(level%recv)
        !  Unpack solution
        if (pf%save_timings > 1) call pf_start_timer(pf, T_UNPACK, level%index)
        if (present(direction)) then
@@ -247,7 +245,7 @@ contains
        if (pf%save_timings > 1) call pf_stop_timer(pf, T_UNPACK, level%index)
     end if
 
-    if (pf%debug) print*,  'DEBUG --',pf%rank, 'end recv, tag=',tag,blocking
+    if (pf%debug) print  '("DEBUG-rank=", I5, " end recv, blocking=" ,L4, " tag=",I8, " pf%state%pstatus=", I2)',pf%rank,blocking,tag,pf%state%pstatus
   end subroutine pf_recv
 
 
@@ -261,14 +259,14 @@ contains
     if (pf%comm%nproc .eq. 1) return
 
     if (pf%save_timings > 1) call pf_start_timer(pf, T_BROADCAST)
-    if(pf%debug) print *,'beginning broadcast'
+    if(pf%debug) print *,'DEBUG-rank=',pf%rank,' begin broadcast'
     call pf%comm%broadcast(pf, y, nvar, root, ierror)
     if (ierror /= 0) then
        print *, 'Rank',pf%rank
        call pf_stop(__FILE__,__LINE__,'error during broadcast',ierror)
     endif
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_BROADCAST)
-    if(pf%debug)print *,'ending broadcast'
+    if(pf%debug)print *,'DEBUG-rank=',pf%rank,' end broadcast'
   end subroutine pf_broadcast
 
   !> Save current solution and function value so that future corrections can be computed

@@ -15,7 +15,7 @@ module pf_mod_fft_abs
      real(pfdp) :: Lx, Ly, Lz                      !! domain size
      complex(pfdp), pointer :: wk_1d(:)            ! work space
      complex(pfdp), pointer :: wk_2d(:,:)          ! work space
-     complex(pfdp), pointer :: wk_3d(:,:,:)        ! work space                    
+     complex(pfdp), pointer :: wk_3d(:,:,:)        ! work space
      real(pfdp), allocatable :: kx(:),ky(:),kz(:)              ! work space
    contains
      procedure(pf_fft_s_p),deferred :: fft_setup
@@ -23,19 +23,22 @@ module pf_mod_fft_abs
      procedure(pf_fft_p),deferred :: fftf   !  Forward FFT
      procedure(pf_fft_p),deferred :: fftb   !  Inverse (backward)  FFT
      !  FFT
-     procedure, private  :: fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d  
-     generic :: fft => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d  
+     procedure, private  :: fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d
+     generic :: fft => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d
      !  Inverse FFT
-     procedure, private  :: ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d  
-     generic :: ifft => ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d    
-     !  Convolution in spectral space     
-     procedure, private  :: conv_1d, conv_2d, conv_3d  
-     generic :: conv => conv_1d, conv_2d, conv_3d  
-     !  Complex convolution in real space     
-     procedure, private :: zconv_1d, zconv_2d, zconv_3d  
-     generic :: zconv => zconv_1d, zconv_2d, zconv_3d  
+     procedure, private  :: ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d
+     generic :: ifft => ifft_1d, ifft_2d, ifft_3d,izfft_1d, izfft_2d, izfft_3d
+     !  Convolution in spectral space for real data
+     procedure, private  :: conv_1d, conv_2d, conv_3d
+     generic :: conv => conv_1d, conv_2d, conv_3d
+     !  Dealiasing
+     procedure, private  :: dealias_1d, dealias_2d, dealias_3d
+     generic :: dealias => dealias_1d, dealias_2d, dealias_3d
+     !  Complex convolution in real space for spectral data
+     procedure, private :: zconv_1d, zconv_2d, zconv_3d
+     generic :: zconv => zconv_1d, zconv_2d, zconv_3d
      !  Convenience function to grab pointer to workspace
-     procedure , private :: get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d  
+     procedure , private :: get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d
      generic   :: get_wk_ptr =>get_wk_ptr_1d,get_wk_ptr_2d,get_wk_ptr_3d
      !  Construct spectral Laplacian
      procedure , private :: make_lap_1d,make_lap_2d, make_lap_3d
@@ -49,7 +52,7 @@ module pf_mod_fft_abs
      !  Restrict in spectral space
      procedure , private :: restrict_1d,restrict_2d, restrict_3d,zrestrict_1d,zrestrict_2d,zrestrict_3d
      generic   :: restrict =>restrict_1d,restrict_2d,restrict_3d,zrestrict_1d,zrestrict_2d,zrestrict_3d
-     
+
   end type pf_fft_abs_t
 
   interface
@@ -65,25 +68,25 @@ module pf_mod_fft_abs
        class(pf_fft_abs_t), intent(inout) :: this
      end subroutine pf_fft_p
   end interface
-  
+
 contains
 
- subroutine get_wk_ptr_1d(this,wk) 
+ subroutine get_wk_ptr_1d(this,wk)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), pointer,intent(inout) :: wk(:)              ! work space
     wk=>this%wk_1d
   end subroutine get_wk_ptr_1d
-  subroutine get_wk_ptr_2d(this,wk) 
+  subroutine get_wk_ptr_2d(this,wk)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), pointer,intent(inout) :: wk(:,:)              ! work space
     wk=>this%wk_2d
   end subroutine get_wk_ptr_2d
-  subroutine get_wk_ptr_3d(this,wk) 
+  subroutine get_wk_ptr_3d(this,wk)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), pointer,intent(inout) :: wk(:,:,:)              ! work space
     wk=>this%wk_3d
   end subroutine get_wk_ptr_3d
-  
+
   !++++++++++ Forward FFT real to complex  ++++++++++++++++
   subroutine fft_1d(this, g,ghat)
     class(pf_fft_abs_t), intent(inout) :: this
@@ -182,7 +185,7 @@ contains
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(in) :: ghat(:)
     complex(pfdp), intent(inout) :: g(:)
-    
+
     this%wk_1d=ghat
     call this%fftb()
     g=this%wk_1d
@@ -208,49 +211,97 @@ contains
     call this%fftb()
     g=this%wk_3d
   end subroutine izfft_3d
+  ! Routines to do 2/(p+1) rule dealiasing
+  subroutine dealias_1d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:)
+    integer, intent(in) :: p
+    integer :: nmax
+    nmax = FLOOR(real(this%nx,pfdp)/(1.0_pfdp+real(p,pfdp)))+1
+    yhat(nmax+1:this%nx-nmax)=0.0_pfdp
+  end subroutine dealias_1d
+
+  subroutine dealias_2d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:,:)
+    integer, intent(in) :: p    
+    integer :: nxmax,nymax
+    nxmax = FLOOR(real(this%nx)/(1.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(1.0_pfdp+real(p,pfdp)))+1
+    yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax)=0.0_pfdp
+  end subroutine dealias_2d
+  
+  subroutine dealias_3d(this,yhat,p)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: yhat(:,:,:)
+    integer, intent(in) :: p
+    integer :: nxmax,nymax,nzmax
+    nxmax = FLOOR(real(this%nx)/(1.0_pfdp+real(p,pfdp)))+1
+    nymax = FLOOR(real(this%ny)/(1.0_pfdp+real(p,pfdp)))+1
+    nzmax = FLOOR(real(this%nz)/(1.0_pfdp+real(p,pfdp)))+1
+    yhat(nxmax+1:this%nx-nxmax,nymax+1:this%ny-nymax,nzmax+1:this%nz-nzmax)=0.0_pfdp
+  end subroutine dealias_3d
 
   ! Convolve g with spectral op and return in c
-  subroutine conv_1d(this, g,op,c)
+  subroutine conv_1d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:)
     complex(pfdp), intent(in) :: op(:)
     real(pfdp), intent(inout) :: c(:)
+    logical, optional, intent(in) :: dealias
 
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
+    
     this%wk_1d=g
     call this%fftf()
+    if (do_dealias) call this%dealias_1d(this%wk_1d,2)
     this%wk_1d = this%wk_1d * op
     call this%fftb()
     c=REAL(this%wk_1d,pfdp)
   end subroutine conv_1d
 
+
   ! Convolve g with spectral op and return in c
-  subroutine conv_2d(this, g,op,c)
+  subroutine conv_2d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:,:)
     complex(pfdp), intent(in) :: op(:,:)
     real(pfdp), intent(inout) :: c(:,:)
+    logical, optional, intent(in) :: dealias
+
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
 
     this%wk_2d=g
     call this%fftf()
+    if (do_dealias) call this%dealias_2d(this%wk_2d,2)
     this%wk_2d = this%wk_2d * op
     call this%fftb()
-    c=REAL(this%wk_2d,pfdp)        
+    c=REAL(this%wk_2d,pfdp)
   end subroutine conv_2d
-  
-  subroutine conv_3d(this, g,op,c)
+
+  subroutine conv_3d(this, g,op,c,dealias)
     class(pf_fft_abs_t), intent(inout) :: this
     real(pfdp), intent(in) :: g(:,:,:)
     complex(pfdp), intent(in) :: op(:,:,:)
     real(pfdp), intent(inout) :: c(:,:,:)
+    logical, optional, intent(in) :: dealias
+
+    logical  :: do_dealias
+    do_dealias=.FALSE.
+    if(present(dealias)) do_dealias=dealias
 
     this%wk_3d=g
     call this%fftf()
-    this%wk_3d = this%wk_3d * op
+    if (do_dealias) call this%dealias_3d(this%wk_3d,3)
     call this%fftb()
-    c=REAL(this%wk_3d,pfdp)            
+    c=REAL(this%wk_3d,pfdp)
   end subroutine conv_3d
 
-  ! Convolution in real space 
+  ! Convolution in real space
   subroutine zconv_1d(this, ghat,op,chat)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(in) :: ghat(:),op(:)
@@ -268,28 +319,28 @@ contains
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(in) :: ghat(:,:),op(:,:)
     complex(pfdp), intent(inout) ::chat(:,:)
-    
-      
+
+
     this%wk_2d=ghat
     call this%fftb()
     this%wk_2d = this%wk_2d * op
     call this%fftf()
     chat=this%wk_2d
-    
-    
+
+
   end subroutine zconv_2d
 
   subroutine zconv_3d(this, ghat,op,chat)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(in) :: ghat(:,:,:),op(:,:,:)
     complex(pfdp), intent(inout) ::chat(:,:,:)
-    
+
     this%wk_3d=ghat
     call this%fftb()
     this%wk_3d = this%wk_3d * op
     call this%fftf()
     chat=this%wk_3d
-    
+
   end subroutine zconv_3d
 
   !  Make the inverse of the Laplacian in spectral space
@@ -302,14 +353,13 @@ contains
     real(pfdp) :: dx
     local_order=0
     if (present(order)) local_order = order
-    
     nx=this%nx
     ilap(1) = 0.0_pfdp !    This sets DC component    '
     select case (local_order)
        case (0)
-    do i = 2, nx
-       ilap(i) = -1.0_pfdp/(this%kx(i)**2)
-    end do
+          do i = 2, nx
+             ilap(i) = -1.0_pfdp/(this%kx(i)**2)
+          end do
        case (2)
           dx=this%Lx/real(nx,pfdp)
           do i = 2, nx
@@ -329,27 +379,27 @@ contains
   subroutine make_ilap_2d(this, ilap,order)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp), intent(inout) :: ilap(:,:)
-    
     integer, intent(in),optional :: order
     integer     :: i,j,nx,ny,local_order
     real(pfdp) :: dx,dy,kk
     local_order=0
     if (present(order)) local_order = order
-    
+
+
     nx=this%nx
     ny=this%ny
-    
+
     ilap(1,1) = 0.0_pfdp !    This sets DC component
     select case (local_order)
        case (0)
-    do i = 2, nx
-       ilap(i,1) = -1.0_pfdp/(this%kx(i)**2)       
-    end do
-    do j = 2, ny
-       do i = 1, nx
-          ilap(i,j) = -1.0_pfdp/(this%kx(i)**2+this%ky(j)**2)
-       end do
-    end do
+          do i = 2, nx
+             ilap(i,1) = -1.0_pfdp/(this%kx(i)**2)       
+          end do
+          do j = 2, ny
+             do i = 1, nx
+                ilap(i,j) = -1.0_pfdp/(this%kx(i)**2+this%ky(j)**2)
+             end do
+          end do
        case(2)
           dx=this%Lx/real(nx,pfdp)          
           dy=this%Ly/real(ny,pfdp)          
@@ -378,6 +428,7 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
+
   end subroutine make_ilap_2d
   
   subroutine make_ilap_3d(this, ilap,order)
@@ -395,14 +446,14 @@ contains
     nz=this%nz
     select case (local_order)
        case (0)
-    do k = 1,nz
-       do j = 1, ny
-          do i = 1, nx
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
                    kk=-this%kx(i)**2-this%ky(j)**2-this%kz(k)**2                     
                    if (abs(kk) .gt. 0.0) then
                       ilap(i,j,k) = 1.0_pfdp/kk
                    else
-                ilap(i,j,k) = 0.0_pfdp !    This sets DC component
+                      ilap(i,j,k) = 0.0_pfdp !    This sets DC component
                    end if
                 end do
              end do
@@ -417,12 +468,12 @@ contains
                    kk=(-2.0_pfdp+2.0_pfdp*cos(this%kx(i)*dx))/(dx*dx) + (-2.0_pfdp+2.0_pfdp*cos(this%ky(j)*dy))/(dy*dy)+ (-2.0_pfdp+2.0_pfdp*cos(this%kz(k)*dz))/(dz*dz)
                    if (abs(kk) .gt. 0.0) then
                       ilap(i,j,k) = 1.0_pfdp/kk
-             else
+                   else
                       ilap(i,j,k) = 0.0_pfdp !    This sets DC component
-             end if
+                   end if
+                end do
+             end do
           end do
-       end do
-    end do
        case(4)
           dx=this%Lx/real(nx,pfdp)          
           dy=this%Ly/real(ny,pfdp)          
@@ -448,21 +499,21 @@ contains
   end subroutine make_ilap_3d
   
   subroutine make_lap_1d(this, lap,order)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: lap(:)
     integer, intent(in),optional :: order
-      
+
     integer     :: i,nx,local_order
     real(pfdp) :: dx
     local_order=0
     if (present(order)) local_order = order
+    nx=this%nx
 
-      nx=this%nx
     select case (local_order)
     case (0)
        do i = 2, nx
-         lap(i) = -(this%kx(i)**2)
-      end do
+          lap(i) = -(this%kx(i)**2)
+       end do
     case (2)
        dx=this%Lx/real(nx,pfdp)
        do i = 2, nx
@@ -476,27 +527,28 @@ contains
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
     end select
-    end subroutine make_lap_1d
     
+  end subroutine make_lap_1d
+  
   subroutine make_lap_2d(this, lap,order)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:,:)
-      
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: lap(:,:)
+
     integer, intent(in),optional :: order
     integer     :: i,j,nx,ny,local_order
     real(pfdp) :: dx,dy
     local_order=0
     if (present(order)) local_order = order
-      
-      nx=this%nx
-      ny=this%ny
+    nx=this%nx
+    ny=this%ny
+    
     select case (local_order)
        case (0)
-      do j = 1, ny
-         do i = 1, nx
-            lap(i,j) = -(this%kx(i)**2+this%ky(j)**2)
-         end do
-      end do
+          do j = 1, ny
+             do i = 1, nx
+                lap(i,j) = -(this%kx(i)**2+this%ky(j)**2)
+             end do
+          end do
        case(2)
           dx=this%Lx/real(nx,pfdp)          
           dy=this%Ly/real(ny,pfdp)          
@@ -517,29 +569,31 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
-    end subroutine make_lap_2d
+          
+  end subroutine make_lap_2d
+  
   subroutine make_lap_3d(this, lap,order)
-      class(pf_fft_abs_t), intent(inout) :: this
-      complex(pfdp), intent(inout) :: lap(:,:,:)
+    class(pf_fft_abs_t), intent(inout) :: this
+    complex(pfdp), intent(inout) :: lap(:,:,:)
     integer, intent(in),optional :: order
-      
+
     integer     :: i,j,k,nx,ny,nz,local_order
     real(pfdp) :: dx,dy,dz
     local_order=0
     if (present(order)) local_order = order
       
-      nx=this%nx
-      ny=this%ny
-      nz=this%nz
+    nx=this%nx
+    ny=this%ny
+    nz=this%nz
     select case (local_order)
        case (0)
-      do k = 1,nz
-         do j = 1, ny
-            do i = 1, nx
+          do k = 1,nz
+             do j = 1, ny
+                do i = 1, nx
                    lap(i,j,k)=-this%kx(i)**2-this%ky(j)**2-this%kz(k)**2                     
-            end do
-         end do
-      end do
+                end do
+             end do
+          end do
        case(2)
           dx=this%Lx/real(nx,pfdp)          
           dy=this%Ly/real(ny,pfdp)          
@@ -567,9 +621,9 @@ contains
        case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
-      
-    end subroutine make_lap_3d
-
+    
+  end subroutine make_lap_3d
+  
   !subroutine make_ilap_3d(this, ilap)
   !  class(pf_fft_abs_t), intent(inout) :: this
   !  complex(pfdp), intent(inout) :: ilap(:,:,:)
@@ -598,7 +652,6 @@ contains
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: ddx(:)
       integer, intent(in),optional :: order
-      
       integer     :: i,nx,local_order
       real(pfdp) :: dx
       local_order=0
@@ -608,9 +661,9 @@ contains
       dx=this%Lx/real(nx,pfdp)
       select case(local_order)
       case(0)
-      do i = 1, nx
-         ddx(i) = (0.0_pfdp, 1.0_pfdp) * this%kx(i)
-      end do
+         do i = 1, nx
+            ddx(i) = (0.0_pfdp, 1.0_pfdp) * this%kx(i)
+         end do
       case (2)
          do i = 1, nx
             ddx(i) = (0.0_pfdp, 1.0_pfdp) * sin(dx*this%kx(i))/dx
@@ -622,7 +675,9 @@ contains
       case DEFAULT
           call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
        end select
-    end subroutine make_deriv_1d
+       
+     end subroutine make_deriv_1d
+
     subroutine make_deriv_2d(this, deriv,dir,order)
       class(pf_fft_abs_t), intent(inout) :: this
       complex(pfdp), intent(inout) :: deriv(:,:)
@@ -675,6 +730,7 @@ contains
       case DEFAULT
          call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
       end select
+
     end subroutine make_deriv_2d
 
     subroutine make_deriv_3d(this, deriv,dir,order)
@@ -691,24 +747,23 @@ contains
       nx=this%nx
       ny=this%ny
       nz=this%nz       
-      
       select case(local_order)
          case (0)
-      select case (dir)
-      case (1)  
-         do i = 1, nx
-            deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(i)
-         end do
-      case (2)
-         do j = 1, ny
-            deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*this%ky(j)
-         end do
-      case (3)
-         do k = 1, nz
-            deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*this%kz(k)
-         end do
-      case DEFAULT
-         call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
+            select case (dir)
+            case (1)  
+               do i = 1, nx
+                  deriv(i,:,:) = (0.0_pfdp,1.0_pfdp)*this%kx(i)
+               end do
+            case (2)
+               do j = 1, ny
+                  deriv(:,j,:) = (0.0_pfdp,1.0_pfdp)*this%ky(j)
+               end do
+            case (3)
+               do k = 1, nz
+                  deriv(:,:,k) = (0.0_pfdp,1.0_pfdp)*this%kz(k)
+               end do
+            case DEFAULT
+               call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',dir)
             end select
          case(2)
             select case (dir)
@@ -752,7 +807,7 @@ contains
             end select
          case DEFAULT
             call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',local_order)
-      end select
+         end select
 
     end subroutine make_deriv_3d
 
@@ -777,8 +832,8 @@ contains
 
     irat  = nx_f(1)/nx_c(1)
     jrat  = nx_f(2)/nx_c(2)
-    
-    yvec_c = yvec_f(::irat,::jrat)           
+
+    yvec_c = yvec_f(::irat,::jrat)
   end subroutine restrict_2d
   subroutine restrict_3d(this, yvec_f, yvec_c)
     class(pf_fft_abs_t), intent(inout) :: this
@@ -792,10 +847,10 @@ contains
     irat  = nx_f(1)/nx_c(1)
     jrat  = nx_f(2)/nx_c(2)
     krat  = nx_f(3)/nx_c(3)
-    
-    yvec_c = yvec_f(::irat,::jrat,::krat)           
+
+    yvec_c = yvec_f(::irat,::jrat,::krat)
   end subroutine restrict_3d
-  
+
   subroutine zrestrict_1d(this, yhat_f, yhat_c)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp),  pointer :: yhat_f(:), yhat_c(:)
@@ -811,7 +866,7 @@ contains
     yhat_c=0.0_pfdp
     yhat_c(1:nx_c/2) = yhat_f(1:nx_c/2)
     yhat_c(nx_c/2+2:nx_c) = yhat_f(nx_f-nx_c/2+2:nx_f)
-    
+
   end subroutine zrestrict_1d
   subroutine zrestrict_2d(this, yhat_f, yhat_c)
     class(pf_fft_abs_t), intent(inout) :: this
@@ -824,7 +879,7 @@ contains
        yhat_c=yhat_f
        return
     end if
-    
+
     nf1=nx_f(1)-nx_c(1)/2+2
     nf2=nx_f(2)-nx_c(2)/2+2
     nc1=nx_c(1)/2+2
@@ -834,17 +889,17 @@ contains
     yhat_c(1:nx_c(1)/2,1:nx_c(2)/2) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2)
     yhat_c(nc1:nx_c(1),1:nx_c(2)/2) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2)
     yhat_c(1:nx_c(1)/2,nc2:nx_c(2)) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2))
-    yhat_c(nc1:nx_c(1),nc2:nx_c(2)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2)) 
-    
+    yhat_c(nc1:nx_c(1),nc2:nx_c(2)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2))
+
   end subroutine zrestrict_2d
   subroutine zrestrict_3d(this, yhat_f, yhat_c)
     class(pf_fft_abs_t), intent(inout) :: this
     complex(pfdp),         pointer :: yhat_f(:,:,:), yhat_c(:,:,:)
 
     integer :: nx_f(3), nx_c(3),nf1,nf2,nf3,nc1,nc2,nc3
-    
+
     yhat_c = 0.0_pfdp
-    
+
     nx_f = SHAPE(yhat_f)
     nx_c = SHAPE(yhat_c)
     if (nx_f(1) .eq. nx_c(1) .and. nx_f(2) .eq. nx_c(2) .and. nx_f(3) .eq. nx_c(3))  then
@@ -857,23 +912,23 @@ contains
     nc1=nx_c(1)/2+2
     nc2=nx_c(2)/2+2
     nc3=nx_c(3)/2+2
-    
+
     yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,1:nx_c(3)/2)
     yhat_c(nc1:nx_c(1),1:nx_c(2)/2,1:nx_c(3)/2) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2,1:nx_c(3)/2)
     yhat_c(1:nx_c(1)/2,nc2:nx_c(2),1:nx_c(3)/2) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2),1:nx_c(3)/2)
-    yhat_c(nc1:nx_c(1),nc2:nx_c(2),1:nx_c(3)/2) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),1:nx_c(3)/2) 
-    
-    yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,nf3:nx_f(3)) 
+    yhat_c(nc1:nx_c(1),nc2:nx_c(2),1:nx_c(3)/2) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),1:nx_c(3)/2)
+
+    yhat_c(1:nx_c(1)/2,1:nx_c(2)/2,nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,1:nx_c(2)/2,nf3:nx_f(3))
     yhat_c(nc1:nx_c(1),1:nx_c(2)/2,nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),1:nx_c(2)/2,nf3:nx_f(3))
-    yhat_c(1:nx_c(1)/2,nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2),nf3:nx_f(3)) 
+    yhat_c(1:nx_c(1)/2,nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(1:nx_c(1)/2,nf2:nx_f(2),nf3:nx_f(3))
     yhat_c(nc1:nx_c(1),nc2:nx_c(2),nc3:nx_c(3)) = yhat_f(nf1:nx_f(1),nf2:nx_f(2),nf3:nx_f(3))
-    
+
   end subroutine zrestrict_3d
 
 
   end module pf_mod_fft_abs
-  
-   
+
+
 
 
 

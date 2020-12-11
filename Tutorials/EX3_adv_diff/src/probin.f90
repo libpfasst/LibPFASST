@@ -19,6 +19,8 @@ module probin
   integer, save :: nsteps          ! number of time steps
   integer, save :: imex_stat       ! type of imex splitting
   integer, save :: ic_type         ! specifies the initial condition
+  integer, save :: fd_ord          ! specifies the spatial order (0 for spectral, 2, or 4)
+  integer, save :: interp_ord      ! specifies the spatial order of interpolation
 
   character(len=128), save :: pfasst_nml
 
@@ -28,7 +30,7 @@ module probin
 
   integer :: ios,iostat
   namelist /params/  nx, nsteps, dt, Tfin
-  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ic_type
+  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ic_type,fd_ord,interp_ord
 
 contains
 
@@ -54,6 +56,8 @@ contains
     Lx      = 1.0_pfdp
     imex_stat=2    !  Default is full IMEX
     ic_type=1      !  Default is a sine wave    
+    fd_ord=0       !  Default is spectral accuracy
+    interp_ord=0       !  Default is spectral accuracy
     pfasst_nml=probin_fname
 
     !>  Read in stuff from input file
@@ -102,6 +106,8 @@ contains
     write(un,*) 'nx:     ',  nx(1:pf%nlevels), '! grid size per level'
     write(un,*) 'v:      ',  v, '! advection constant'
     write(un,*) 'nu:     ', nu, '! diffusion constant'
+    write(un,*) 'fd_ord: ', fd_ord, '! spatial order of accuracy'
+    write(un,*) 'interp_ord: ', interp_ord, '! spatial order of interpolation'
     select case (imex_stat)
     case (0)  
        write(un,*) 'imex_stat:', imex_stat, '! Fully explicit'

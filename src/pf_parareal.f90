@@ -48,7 +48,7 @@ contains
       !  Do  sanity check on steps
       if (abs(real(nsteps_loc,pfdp)-tend/dt) > dt/1d-7) then
         print *,'dt=',dt
-       print *,'nsteps=',nsteps_loc
+        print *,'nsteps=',nsteps_loc
         print *,'tend=',tend
        call pf_stop(__FILE__,__LINE__,'Invalid nsteps ,nsteps=',nsteps)
       end if
@@ -84,6 +84,7 @@ contains
 
   !>  parareal controller for block mode
   subroutine pf_parareal_block_run(pf, q0, dt, nsteps, qend,flags)
+    use pf_mod_mpi, only: MPI_REQUEST_NULL
     type(pf_pfasst_t), intent(inout), target   :: pf
     class(pf_encap_t), intent(in   )           :: q0
     real(pfdp),        intent(in   )           :: dt
@@ -92,12 +93,12 @@ contains
     integer,           intent(in   ), optional :: flags(:)
 
     class(pf_level_t), pointer :: lev  !!  pointer to the one level we are operating on
-    integer                   :: j, k
+    integer                   :: j, k, ierr
     integer                   :: nblocks !!  The number of blocks of steps to do
     integer                   :: nproc   !!  The number of processors being used
     integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
     integer                   :: level_max_depth !!  Finest level in V-cycle
-    integer::  nsteps_c,nsteps_f  
+!    integer::  nsteps_c,nsteps_f  
 
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
@@ -137,13 +138,16 @@ contains
        pf%state%mysteps = 0
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
-       pf%comm%statreq  = -66
+       pf%comm%statreq  = MPI_REQUEST_NULL
        pf%state%pfblock = k
        pf%state%sweep = 1   !  Needed for compatibility of residual storage       
 
 
        if (k > 1) then
           !>  When starting a new block, broadcast new initial conditions to all procs
+          if (pf%debug) print *,'DEBUG-rank=',pf%rank, ' at barrier at k=',k
+          call mpi_barrier(pf%comm%comm, ierr)
+          if (pf%debug) print *,'DEBUG-rank=',pf%rank, ' past barrier at k=',k
           if (nproc > 1)  then
              call lev%qend%pack(lev%send)    !!  Pack away your last solution
              call pf_broadcast(pf, lev%send, lev%mpibuflen, pf%comm%nproc-1)
@@ -250,7 +254,7 @@ contains
     ! Save the coarse level value to be used in parareal iteration
     call c_lev%Q(1)%copy(f_lev%qend, flags=0)     
     ! Save the fine level value
-    call f_lev%qend%copy(f_lev%qend, flags=0)     
+    call c_lev%qend%copy(f_lev%qend, flags=0)     
     call c_lev%q0%copy(f_lev%q0, flags=0)     
 
     if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)

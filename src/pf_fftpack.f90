@@ -299,16 +299,16 @@ contains
     
    select case (local_order)
    case (0)
-    call this%get_wk_ptr(wk_c)
-    call fft_f%get_wk_ptr(wk_f)
-    
-    wk_c=yvec_c
-
-    call this%fftf()      !  internal forward fft call    
-    call this%zinterp_1d(wk_c, wk_f)
-    call fft_f%fftb()     !  internal inverse fft call
-
-    yvec_f=REAL(wk_f,pfdp) !  grab the real part
+      call this%get_wk_ptr(wk_c)
+      call fft_f%get_wk_ptr(wk_f)
+      
+      wk_c=yvec_c
+      
+      call this%fftf()      !  internal forward fft call    
+      call this%zinterp_1d(wk_c, wk_f)
+      call fft_f%fftb()     !  internal inverse fft call
+      
+      yvec_f=REAL(wk_f,pfdp) !  grab the real part
    case (2)  !  This is for 2nd order Finite Difference in periodic domains
       yvec_f(1:nx_f-1:2)=yvec_c
       yvec_f(2:nx_f-2:2)=(yvec_c(1:nx_c-1)+yvec_c(2:nx_c))*0.5_pfdp
@@ -405,10 +405,9 @@ contains
     yhat_f = 0.0_pfdp
     yhat_f(1:nx_c/2) = yhat_c(1:nx_c/2)
     yhat_f(nx_f-nx_c/2+2:nx_f) = yhat_c(nx_c/2+2:nx_c)
-
     yhat_f(nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
     yhat_f(nx_f-nx_c/2+1) = yhat_c(nx_c/2+1)*0.5_pfdp
-    
+
   end subroutine zinterp_1d
 
   subroutine zinterp_2d(this, yhat_c, yhat_f)
