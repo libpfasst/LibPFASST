@@ -297,6 +297,7 @@ contains
     this%wk_3d=g
     call this%fftf()
     if (do_dealias) call this%dealias_3d(this%wk_3d,3)
+    this%wk_3d = this%wk_3d * op
     call this%fftb()
     c=REAL(this%wk_3d,pfdp)
   end subroutine conv_3d
