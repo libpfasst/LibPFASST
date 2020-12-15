@@ -34,6 +34,7 @@ module pf_mod_MGRIT
      integer :: cycle_phase
      logical :: FCF_flag = .true.
      logical :: FAS_flag = .false.
+     logical :: setup_start_coarse = .true.
      type(int_vector), allocatable :: f_blocks(:)
      integer, allocatable :: c_pts(:)
      class(pf_encap_t), allocatable :: g(:)
@@ -44,71 +45,155 @@ module pf_mod_MGRIT
      class(pf_encap_t), allocatable :: qc_boundary
      class(pf_encap_t), allocatable :: q_temp
      class(pf_encap_t), allocatable :: Q0
-     integer, allocatable :: interp_map(:)
+     integer, allocatable :: send_procs(:)
+     integer, allocatable :: recv_procs(:)
+     integer, allocatable :: level_ranks_shifted(:)
+     integer, allocatable :: level_ranks(:)
+     integer :: nprocs_level
   end type 
   
 contains
 
-  subroutine mgrit_initialize(pf, mg_ld, glob_t0, glob_tfin, n_coarse, refine_factor, FAS_flag, FCF_flag)
+  subroutine mgrit_initialize(pf, mg_ld, glob_t0, glob_tfin, Nt_start, coarsen_factor, FAS_flag, FCF_flag)
      type(pf_pfasst_t), intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-     integer, intent(in) :: n_coarse, refine_factor
+     integer, intent(in) :: Nt_start, coarsen_factor
      logical, intent(in) :: FAS_flag
      logical, intent(in) :: FCF_flag
      real(pfdp) :: glob_t0, glob_tfin
-     integer :: level_index, nlevels, N, i, kk
+     integer :: level_index, nlevels, N, i, kk, p, Nt, p_rank, k
      type(pf_level_t) :: pf_lev, pf_f_lev, pf_c_lev
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
      class(pf_encap_t), allocatable :: qtemp
+     integer :: count_levels
+     logical :: start_dropping_procs
+     integer :: my_rank, rank_send, rank_recv, Nt_temp
+     integer :: Nt_coarsest
+
+     Nt_coarsest = 2
 
      nlevels = pf%nlevels
-     n = refine_factor
+     n = coarsen_factor
 
      allocate(mg_ld(nlevels))
-
-     N = n_coarse;
      do level_index = 1,nlevels
-        mg_lev => mg_ld(level_index)
-        mg_lev%res_norm_loc(1) = 0.0_pfdp
-
-        mg_lev%glob_t0 = glob_t0
-        mg_lev%glob_tfin = glob_tfin
-        mg_lev%Nt = N
-        mg_lev%dt = (glob_tfin - glob_t0)/(N * pf%comm%nproc)
-        mg_lev%t0 = glob_t0 + N * mg_lev%dt * pf%rank + mg_lev%dt
-        pf%state%t0 = mg_lev%t0
-        mg_lev%tfin = mg_lev%t0 + N * mg_lev%dt - mg_lev%dt
-        !print *,'tinterval',pf%rank,mg_lev%t0,mg_lev%tfin,mg_lev%tfin-mg_lev%t0
-        N = N * refine_factor
-
-        if (level_index .eq. nlevels) then
-           pf%state%t0 = mg_lev%tfin - mg_lev%dt
-           pf%state%dt = mg_lev%dt
-           pf%state%step = (pf%rank+1) * mg_lev%Nt - 1
-        end if
+        allocate(mg_ld(level_index)%send_procs(pf%comm%nproc))
+        allocate(mg_ld(level_index)%recv_procs(pf%comm%nproc))
      end do
+     if (mg_ld(nlevels)%setup_start_coarse .eqv. .true.) then
+        N = Nt_start;
+        do level_index = 1,nlevels
+           mg_lev => mg_ld(level_index)
+           mg_lev%res_norm_loc(1) = 0.0_pfdp
+
+           mg_lev%glob_t0 = glob_t0
+           mg_lev%glob_tfin = glob_tfin
+           mg_lev%Nt = N
+           mg_lev%dt = (glob_tfin - glob_t0)/(N * pf%comm%nproc)
+           mg_lev%t0 = glob_t0 + N * mg_lev%dt * pf%rank + mg_lev%dt
+           pf%state%t0 = mg_lev%t0
+           mg_lev%tfin = mg_lev%t0 + N * mg_lev%dt - mg_lev%dt
+           N = N * coarsen_factor
+
+           if (level_index .eq. nlevels) then
+              pf%state%t0 = mg_lev%tfin - mg_lev%dt
+              pf%state%dt = mg_lev%dt
+              pf%state%step = (pf%rank+1) * mg_lev%Nt - 1
+           end if
+           do p = 1,pf%comm%nproc
+              if (p .lt. pf%comm%nproc) then
+                 mg_lev%send_procs(p) = p
+              end if
+              if (p .gt. 1) then
+                 mg_lev%recv_procs(p) = p-2
+              end if
+           end do
+        end do
+     else
+        Nt_temp = Nt_start * pf%comm%nproc
+        count_levels = 1
+        do while (count_levels < pf%nlevels)
+           Nt_temp = Nt_temp / coarsen_factor;
+           if (Nt_temp < Nt_coarsest) then
+              exit
+           end if
+           count_levels = count_levels + 1;
+        end do
+        pf%nlevels = count_levels
+        nlevels = pf%nlevels
+        mg_ld(nlevels)%Nt = Nt_start
+        start_dropping_procs = .false.
+        i = 1
+        do level_index = (nlevels-1),1,-1
+           mg_lev => mg_ld(level_index)
+           mg_f_lev => mg_ld(level_index+1)
+           mg_lev%nprocs_level = 0
+           do p = 1,pf%comm%nproc
+              p_rank = p-1
+              if (mg_f_lev%Nt .eq. 1) then
+                 if (start_dropping_procs .eqv. .false.) then
+                    start_dropping_procs = .true.
+                 end if
+                 if (mod(p, coarsen_factor**(i+1)) .eq. 0) then 
+                    mg_lev%Nt = mg_f_lev%Nt
+                    mg_lev%nprocs_level = mg_lev%nprocs_level + 1
+                 else
+                    mg_lev%Nt = 0
+                 end if
+              else if (mg_f_lev%Nt .gt. 1) then
+                 mg_lev%Nt = mg_f_lev%Nt / coarsen_factor
+                 mg_lev%nprocs_level = mg_lev%nprocs_level + 1
+              else
+                 mg_lev%Nt = 0
+              end if
+           end do
+           if (start_dropping_procs .eqv. .true.) then
+              i = i + 1;
+           end if
+        end do
+
+
+        do level_index = nlevels,1,-1
+           mg_lev => mg_ld(level_index)
+           allocate(mg_lev%level_ranks_shifted(pf%comm%nproc))
+           allocate(mg_lev%level_ranks(mg_lev%nprocs_level))
+           k = 1
+           do p = 1,pf%comm%nproc
+              p_rank = p-1
+              mg_lev%level_ranks_shifted(p) = -1
+              if (mg_lev%Nt .gt. 0) then
+                 mg_lev%level_ranks_shifted(p) = k-1
+                 mg_lev%level_ranks(k) = p_rank
+                 k = k + 1
+              end if 
+           end do
+           my_rank = mg_lev%level_ranks(1);
+           rank_recv = mg_lev%level_ranks(2);
+           mg_lev%send_procs(my_rank+1) = rank_recv;
+           do i = 2,(mg_lev%nprocs_level-1)
+               my_rank = mg_lev%level_ranks(i);
+               rank_send = mg_lev%level_ranks(i+1);
+               rank_recv = mg_lev%level_ranks(i-1);
+               mg_lev%send_procs(my_rank+1) = rank_send;
+               mg_lev%recv_procs(my_rank+1) = rank_recv;
+           end do
+           rank_send = mg_lev%level_ranks(mg_lev%nprocs_level-1);
+           my_rank = mg_lev%level_ranks(mg_lev%nprocs_level);
+           mg_lev%recv_procs(my_rank+1) = rank_send;
+        end do
+     end if
 
      do level_index = nlevels,2,-1
         mg_lev => mg_ld(level_index)
         mg_c_lev => mg_ld(level_index-1)
 
-        call FC_Setup(mg_c_lev%Nt, refine_factor, mg_lev%f_blocks, mg_lev%c_pts)
+        call FC_Setup(mg_c_lev%Nt, coarsen_factor, mg_lev%f_blocks, mg_lev%c_pts)
      end do
 
-     kk = 0;
-     do level_index = (nlevels-1),1,-1
-        mg_lev => mg_ld(level_index)
-
-        allocate(mg_lev%interp_map(mg_lev%Nt))
-        do i = 1,mg_lev%Nt
-            mg_lev%interp_map(i) = i*refine_factor**kk
-        end do
-        kk = kk + 1;
-     end do
      do level_index = nlevels,1,-1
         mg_lev => mg_ld(level_index)
         pf_lev = pf%levels(level_index)
-        if (level_index .lt. nlevels .and. level_index .gt. 1) then
+        if ((level_index .lt. nlevels) .and. (level_index .gt. 1) .and. (mg_lev%Nt .gt. 0)) then
            call pf_lev%ulevel%factory%create_array(mg_lev%g, mg_lev%Nt, level_index, pf_lev%lev_shape)
            do i = 1,mg_lev%Nt
               call mg_lev%g(i)%setval(0.0_pfdp)
@@ -116,7 +201,7 @@ contains
         end if
         if (FAS_flag .eqv. .true.) then
            mg_ld(level_index)%FAS_flag = .true.
-           if (level_index .lt. nlevels) then
+           if ((level_index .lt. nlevels) .and. (mg_lev%Nt .gt. 0)) then
               call pf_lev%ulevel%factory%create_array(mg_lev%qc_fas, mg_lev%Nt, level_index, pf_lev%lev_shape)
               do i = 1,mg_lev%Nt
                  call mg_lev%qc_fas(i)%setval(0.0_pfdp)
@@ -128,12 +213,14 @@ contains
         end if
         if (level_index .gt. 1) then
            mg_c_lev => mg_ld(level_index-1)
-           call pf_lev%ulevel%factory%create_array(mg_lev%qc, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
-           call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
-           do i = 1,mg_c_lev%Nt
-              call mg_lev%qc(i)%setval(0.0_pfdp)
-              call mg_lev%qc_prev(i)%setval(0.0_pfdp)
-           end do
+           if (mg_c_lev%Nt .gt. 0) then
+              call pf_lev%ulevel%factory%create_array(mg_lev%qc, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
+              call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
+              do i = 1,mg_c_lev%Nt
+                 call mg_lev%qc(i)%setval(0.0_pfdp)
+                 call mg_lev%qc_prev(i)%setval(0.0_pfdp)
+              end do
+           end if
         end if
         call pf_lev%ulevel%factory%create_single(mg_lev%qc_boundary, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%q_temp, level_index, pf_lev%lev_shape)
@@ -142,16 +229,16 @@ contains
      end do
   end subroutine mgrit_initialize
 
-  subroutine FC_Setup(Nc, refine_factor, f_blocks, c_pts)
+  subroutine FC_Setup(Nc, coarsen_factor, f_blocks, c_pts)
      type(int_vector), allocatable, intent(inout) :: f_blocks(:)
      integer, allocatable, intent(inout) :: c_pts(:)
-     integer, intent(in) :: Nc, refine_factor
+     integer, intent(in) :: Nc, coarsen_factor
      integer, allocatable :: f_pts(:)
      integer :: i, j, n
      integer :: j_start, j_end, jj
      integer :: f_size
 
-     n = refine_factor
+     n = coarsen_factor
 
      allocate(f_blocks(Nc))
      allocate(c_pts(Nc))
@@ -415,7 +502,7 @@ contains
         if (pf%rank .lt. pf%comm%nproc-1) then
            call pf_lev%qend%copy(mg_lev%qc(qc_len))
         end if
-        call send_recv_C_points(pf, level_index)
+        call send_recv_C_points(pf, mg_ld, level_index)
      else
         call pf_lev%q0%setval(0.0_pfdp)
      end if
@@ -428,7 +515,7 @@ contains
         if (pf%rank .lt. pf%comm%nproc-1) then
            call pf_lev%qend%copy(mg_lev%qc(qc_len))
         end if
-        call send_recv_C_points(pf, level_index)
+        call send_recv_C_points(pf, mg_ld, level_index)
         if (pf%rank .gt. 0) then
            call mg_lev%qc_boundary%copy(pf_lev%q0)
         end if
@@ -468,7 +555,7 @@ contains
           if (pf%rank .lt. pf%comm%nproc-1) then
              call pf_lev%qend%copy(mg_lev%qc(qc_len))
           end if
-          call send_recv_C_points(pf, level_index)
+          call send_recv_C_points(pf, mg_ld, level_index)
        end if
        call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)
        do i = 1,qc_len
@@ -579,8 +666,9 @@ contains
     end do
   end subroutine C_Relax
 
-  subroutine send_recv_C_points(pf, level_index)
+  subroutine send_recv_C_points(pf, mg_ld, level_index)
     type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
     integer, intent(in) :: level_index
     type(pf_level_t), pointer :: pf_lev
     integer :: ierror
@@ -589,21 +677,51 @@ contains
        pf_lev => pf%levels(level_index)
        if (mod(pf%rank, 2) .eq. 0) then
           if (pf%rank .gt. 0) then
-             call pf_recv(pf, pf_lev, 1, .true.)
+             !call pf_recv(pf, pf_lev, 1, .true.)
+             call mgrit_recv(pf, mg_ld, level_index, 1, .true.)
           end if
           if (pf%rank .lt. pf%comm%nproc-1) then
-             call pf_send(pf, pf_lev, 1, .true.)
+             !call pf_send(pf, pf_lev, 1, .true.)
+             call mgrit_send(pf, mg_ld, level_index, 1, .true.)
           end if
        else
           if (pf%rank .lt. pf%comm%nproc-1) then
-             call pf_send(pf, pf_lev, 1, .true.)
+             !call pf_send(pf, pf_lev, 1, .true.)
+             call mgrit_send(pf, mg_ld, level_index, 1, .true.)
           end if
           if (pf%rank .gt. 0) then
-             call pf_recv(pf, pf_lev, 1, .true.)
+             !call pf_recv(pf, pf_lev, 1, .true.)
+             call mgrit_recv(pf, mg_ld, level_index, 1, .true.)
           end if
        end if
     end if
   end subroutine send_recv_C_points
+
+  subroutine mgrit_send(pf, mg_ld, level_index, tag, blocking)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    logical, intent(in) :: blocking
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror
+
+    pf_lev => pf%levels(level_index)
+    call pf_lev%qend%pack(pf_lev%send)
+    call pf%comm%send(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%send_procs(pf%rank+1))
+  end subroutine mgrit_send
+
+  subroutine mgrit_recv(pf, mg_ld, level_index, tag, blocking)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    logical, intent(in) :: blocking
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror
+
+    pf_lev => pf%levels(level_index)
+    call pf%comm%recv(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%recv_procs(pf%rank+1))
+    call pf_lev%q0%unpack(pf_lev%recv)
+  end subroutine mgrit_recv
 
   subroutine ExactSolve(pf, mg_ld, level_index)
      type(pf_pfasst_t), target, intent(inout) :: pf

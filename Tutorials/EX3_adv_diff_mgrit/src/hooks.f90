@@ -29,8 +29,11 @@ contains
 
     !print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es14.7)', &
     !     pf%state%step+1, pf%state%iter,level_index, maxerr,residual
+
+    if (level_index .eq. pf%nlevels) then
     print '("error: time: ", f8.4," step: ",i8.1," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," resid: ",es14.7," deltaq0: ",es14.7)', &
          t,pf%state%step+1, pf%rank, pf%state%iter,level_index,maxerr,pf%levels(level_index)%residual,pf%levels(level_index)%max_delta_q0    
+    end if
 
     call pf_set_error(pf,level_index,maxerr)
     

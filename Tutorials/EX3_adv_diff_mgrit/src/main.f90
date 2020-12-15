@@ -94,7 +94,7 @@ contains
     call pf_pfasst_setup(pf)
 
     if (use_mgrit .eqv. .true.) then
-       FAS_flag = .true.
+       FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
        n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
