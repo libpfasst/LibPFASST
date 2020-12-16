@@ -147,32 +147,32 @@ contains
     call call_hooks(pf, 1, PF_PRE_SWEEP)
 
     call lev%Q(1)%copy(lev%q0, flags=1)
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(1), t, level_index, this%A(1))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     ! commutator_p flags=1 hack copies Q(1)%y -> Q(1)%array
     ! all subsequent RK stages are done on Q(m)%array
     call this%commutator_p(this%A(1), lev%Q(1), lev%F(1,1), flags=1)
 
     call lev%Q(2)%axpy(1.0_pfdp, lev%Q(1))
     call lev%Q(2)%axpy(0.5_pfdp*dt, lev%F(1,1))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(2), t, level_index, this%A(2))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%commutator_p(this%A(2), lev%Q(2), lev%F(2,1))
 
     call lev%Q(3)%axpy(1.0_pfdp, lev%Q(1))
     call lev%Q(3)%axpy(0.5_pfdp*dt, lev%F(2,1))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(3), t, level_index, this%A(3))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%commutator_p(this%A(3), lev%Q(3), lev%F(3,1))
 
     call lev%Q(4)%axpy(1.0_pfdp, lev%Q(1))
     call lev%Q(4)%axpy(dt, lev%F(3,1))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(4), t, level_index, this%A(4))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%commutator_p(this%A(4), lev%Q(4), lev%F(4,1))
 
     call lev%Q(5)%axpy(1.0_pfdp, lev%Q(1))
@@ -224,30 +224,30 @@ contains
     call call_hooks(pf, 1, PF_PRE_SWEEP)
 
     call lev%Q(1)%copy(lev%q0, flags=1)
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(1), t, level_index, this%A(1))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%dexpinv(this%A(1), lev%Q(1), lev%F(1,1))
 
     call lev%Q(2)%axpy(0.5_pfdp*dt, lev%F(1,1))
     call this%propagate(lev%q0, lev%Q(2))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(2), t, level_index, this%A(2))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%dexpinv(this%A(2), lev%Q(2), lev%F(2,1))
 
     call lev%Q(3)%axpy(0.5_pfdp*dt, lev%F(2,1))
     call this%propagate(lev%q0, lev%Q(3))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(3), t, level_index, this%A(3))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%dexpinv(this%A(3), lev%Q(3), lev%F(3,1))
 
     call lev%Q(4)%axpy(dt, lev%F(3,1))
     call this%propagate(lev%q0, lev%Q(4))
-    if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+    call pf_start_timer(pf,T_FEVAL,level_index)       
     call this%f_eval(lev%Q(4), t, level_index, this%A(4))
-    if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+    call pf_stop_timer(pf,T_FEVAL,level_index)       
     call this%dexpinv(this%A(4), lev%Q(4), lev%F(4,1))
 
     call lev%Q(5)%axpy(dt/6.0_pfdp, lev%F(1,1))
@@ -285,7 +285,7 @@ contains
 
     do k = 1,nsweeps   !!  Loop over sweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -323,7 +323,7 @@ contains
 
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes), flags=1)
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
+       call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
 
@@ -427,32 +427,32 @@ contains
        end do
 
        call lev%Q(1)%copy(lev%q0, flags=1)
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(1), t, level_index, this%A(1))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        ! commutator_p flags=1 hack copies Q(1)%y -> Q(1)%array
        ! all subsequent RK stages are done on Q(m)%array
        call this%commutator_p(this%A(1), lev%Q(1), lev%F(1,1), flags=1)
 
        call lev%Q(2)%axpy(1.0_pfdp, lev%Q(1))
        call lev%Q(2)%axpy(0.5_pfdp*dt, lev%F(1,1))
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(2), t, level_index, this%A(2))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        call this%commutator_p(this%A(2), lev%Q(2), lev%F(2,1))
 
        call lev%Q(3)%axpy(1.0_pfdp, lev%Q(1))
        call lev%Q(3)%axpy(0.5_pfdp*dt, lev%F(2,1))
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(3), t, level_index, this%A(3))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        call this%commutator_p(this%A(3), lev%Q(3), lev%F(3,1))
 
        call lev%Q(4)%axpy(1.0_pfdp, lev%Q(1))
        call lev%Q(4)%axpy(dt, lev%F(3,1))
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(4), t, level_index, this%A(4))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        call this%commutator_p(this%A(4), lev%Q(4), lev%F(4,1))
 
        call lev%Q(5)%axpy(1.0_pfdp, lev%Q(1))
@@ -484,9 +484,9 @@ contains
        if (this%debug) call lev%Q(m)%eprint()
 
        !  Compute A(y,t)
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(m), t, level_index, this%A(m))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        if (this%debug) print*, 'A'
        if (this%debug) call this%A(m)%eprint()
 

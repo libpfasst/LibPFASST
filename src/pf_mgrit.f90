@@ -223,7 +223,7 @@ contains
     call mpi_barrier(pf%comm%comm, ierror)
 
     !> Start timer
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
     do iter = 1, pf%niters
        pf%state%iter = iter
 
@@ -239,10 +239,10 @@ contains
        end do       
 
        !  Do a v_cycle
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+       call pf_start_timer(pf, T_ITERATION)
        call pf_MGRIT_v_cycle(pf, mg_ld, iter)
        call pf_set_iter(pf, iter)
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+       call pf_stop_timer(pf, T_ITERATION)
 
        do level_index = 1,nlevels
           mg_lev => mg_ld(level_index)
@@ -263,7 +263,7 @@ contains
           exit
        end if
     end do
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_stats(pf)
 

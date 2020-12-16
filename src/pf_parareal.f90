@@ -66,7 +66,7 @@ contains
     call mpi_barrier(pf%comm%comm, ierr)
 
     !> Start timer
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
        call pf_parareal_block_run(pf, q0, dt, nsteps_loc,qend=qend)
     else
@@ -74,7 +74,7 @@ contains
     end if
 
     !> End timer    
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
 
     !>  Output stats
     call pf_dump_stats(pf)
@@ -123,7 +123,7 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_BLOCK)
+       call pf_start_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_PRE_BLOCK)
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
@@ -172,7 +172,7 @@ contains
           !>  Start the parareal iterations
           do j = 1, pf%niters
              call call_hooks(pf, -1, PF_PRE_ITERATION)
-             if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+             call pf_start_timer(pf, T_ITERATION)
              
              pf%state%iter = j
              
@@ -182,7 +182,7 @@ contains
              !  Check for convergence
              call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
              
-             if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+             call pf_stop_timer(pf, T_ITERATION)
              call call_hooks(pf, -1, PF_POST_ITERATION)
              
              !  If we are converged, exit block
@@ -192,7 +192,7 @@ contains
                 exit
              end if
           end do  !  Loop over j, the iterations in this block
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
+       call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
     end if
     
@@ -224,7 +224,7 @@ contains
     pf%state%iter = 0          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
+    call pf_start_timer(pf, T_PREDICTOR)
 
     !  This is for one two levels only or one if only RK is done
     c_lev => pf%levels(1)
@@ -257,7 +257,7 @@ contains
     call c_lev%qend%copy(f_lev%qend, flags=0)     
     call c_lev%q0%copy(f_lev%q0, flags=0)     
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
+    call pf_stop_timer(pf, T_PREDICTOR)
 
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 

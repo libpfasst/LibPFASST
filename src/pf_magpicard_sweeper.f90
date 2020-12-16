@@ -99,7 +99,7 @@ contains
 
     do k = 1, nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k       
 
        ! Copy values into residual
@@ -112,9 +112,9 @@ contains
        do m = 1, nnodes
 !          t = t + dt*this%dtsdc(m)
           t=t0+dt*lev%nodes(m)
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+          call pf_start_timer(pf, T_FEVAL,level_index)          
           call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
+          call pf_stop_timer(pf, T_FEVAL,level_index)          
        end do
        !$omp end parallel do
 
@@ -143,7 +143,7 @@ contains
        !$omp end parallel do
 
        call pf_residual(pf, level_index, dt)
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
+       call pf_stop_timer(pf, T_SWEEP,level_index)
        call call_hooks(pf, level_index, PF_POST_SWEEP)
 
     end do  ! Loop over sweeps
@@ -220,9 +220,9 @@ contains
     type(pf_level_t), pointer  :: lev    !!  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+    call pf_start_timer(pf, T_FEVAL,level_index)          
     call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
+    call pf_stop_timer(pf, T_FEVAL,level_index)          
   end subroutine magpicard_evaluate
 
   subroutine magpicard_evaluate_all(this, pf,level_index, t, flags, step)
