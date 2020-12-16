@@ -30,8 +30,8 @@
   nvars =   512 1024
   nnodes =  3 5
 
-  Finterp = F
 
+  Finterp = F
 
   Lx = 100.5309649  ! 32pi
   Tfin = 1.0
@@ -39,9 +39,9 @@
   alpha = 1e-6
   max_opt_iter = 10
   tol_grad = 1e-4
+
   tol_obj  = 1e-6
   max_step_size = 1.0
-
 
   do_imex = 1
   warmstart = 0

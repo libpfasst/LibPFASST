@@ -5,6 +5,7 @@
 !> Module defining exact solutions for various PDEs
 module pf_mod_solutions
   use pf_mod_dtype
+  use pf_mod_stop
   implicit none
 
   interface exact_ad_cos
@@ -1005,19 +1006,38 @@ contains
   end subroutine exact_kdv_3dz
 
   !  Initial conditions for ML games
-  subroutine init_ML_1dz(u,Lx,ic_bar)
+  subroutine init_ML_1dz(u,Lx,ic_bar,ic_type)
     complex(pfdp), intent(inout) :: u(:)
     real(pfdp), intent(in) :: Lx
+    integer, intent(in) :: ic_type
     real(pfdp), intent(in) :: ic_bar(:)
     
-    integer    :: nx, i
-    real(pfdp) :: x
-    
+    integer    :: nx, i,j
+    real(pfdp) :: x, xrand(8,2),ixrand(2)
+
     nx = SIZE(u)
-    do i = 1, nx
-       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
-       u(i) = ic_bar(1)*sin(x)       
-    end do
+    select case (ic_type)
+    case (0)
+       !  eight random fourier modes
+       call random_number(xrand)
+       do i = 1, nx
+          x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)
+          u(i)=0.0_pfdp
+          do j = 1,8
+             u(i) = u(i)+ xrand(j,1)*sin(real(j,pfdp)*x)+xrand(j,2)*cos(real(j,pfdp)*x)       
+          end do
+       end do
+    case (1)
+       ! weird exponential thing
+       call random_number(ixrand)
+       ixrand=real(ceiling(ixrand*7))
+       do i = 1, nx
+          x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)
+          u(i)=sin(ixrand(1)*x)*exp(cos(ixrand(2)*x))
+       end do
+    case DEFAULT
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',ic_type)
+    end select
 
   end subroutine init_ML_1dz
   
