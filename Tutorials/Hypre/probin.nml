@@ -1,0 +1,54 @@
+!
+!  Test parameters for multi-level imex
+!
+
+!  These are internal pfasst variables that must be set
+&PF_PARAMS
+    nlevels = 3 !  must be set
+
+    niters = 50  !  default is 5
+    nnodes =    2  3  5
+
+    use_proper_nodes=.false.
+    nsweeps_pred= 1 1 
+    nsweeps= 1 1 1
+    
+    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+    qtype  = 1   
+
+    abs_res_tol = 1.d-9
+    rel_res_tol = 1.d-12
+
+    Vcycle=.TRUE.
+
+    save_residuals=.true.
+    save_delta_q0=.true.
+
+    pipeline_pred =  .true.
+    PFASST_pred = .true.
+   
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+    Tfin = .1
+    nsteps = 16
+    num_grid_points = 3
+    nspace = 1
+    ntime = 1
+    init_cond = 50.0
+    space_dim = 2
+    max_space_v_cycles = 50
+
+    mgrit_n_coarse = 100
+    mgrit_refine_factor = 2
+
+    use_mgrit = .false.
+
+    imex_stat = 1
+    ark_stat = 1
+
+    rk_order=1
+
+/

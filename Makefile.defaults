@@ -110,8 +110,7 @@ FSRC+= src/pf_sundials_vec.f90
 endif
 
 ifeq ($(USE_HYPRE),TRUE)
-FFLAGS  += -I$(HYPRE_DIR)/include
-LDFLAGS += -lstdc++ $(HYPRE_DIR)/lib/libHYPRE.a
+include $(LIBPFASST)/Makefile.hypre
 endif
 
 ifdef NOMPI

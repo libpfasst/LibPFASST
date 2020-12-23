@@ -988,9 +988,6 @@ contains
         call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
      end if
      call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%r, mg_c_lev%r, mg_f_lev%t0)
-     !if (level_index_c .eq. 1) then
-     !   print *,pf%rank,mg_f_lev%qc(i_c)%norm(),mg_f_lev%qc_prev(i_c)%norm(),mg_c_lev%r%norm()
-     !end if
      if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
         call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%qc_prev(i_c), mg_c_lev%qc_fas(i_c), mg_f_lev%t0)
         call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%qc_fas(i_c))

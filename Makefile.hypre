@@ -1,0 +1,6 @@
+#  Flags for linking hypre (HYPRE_DIR must be set)
+
+
+HYPRE_DIR = $(LIBPFASST)/Tutorials/Hypre/hypre/src/hypre
+FFLAGS  += -I$(HYPRE_DIR)/include
+LDFLAGS += -lstdc++ $(HYPRE_DIR)/lib/libHYPRE.a
