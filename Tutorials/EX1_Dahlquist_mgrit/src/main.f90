@@ -48,7 +48,7 @@ contains
     real(pfdp) :: T0
     type(mgrit_level_data), allocatable :: mg_ld(:)
     integer :: n_coarse, refine_factor
-    logical :: FAS_flag, FCF_flag
+    logical :: FAS_flag, FCF_flag, setup_start_coarse_flag
 
     !> Read problem parameters
     call probin_init(pf_fname)
@@ -97,9 +97,14 @@ contains
        FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
-       n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
+       setup_start_coarse_flag = .false.
+       if (setup_start_coarse_flag .eqv. .true.) then
+          n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
+       else
+          n_coarse = mgrit_n_coarse
+       end if
        refine_factor = mgrit_refine_factor
-       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag, FCF_flag)
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
     end if
 
     !> add some hooks for output  (using a LibPFASST hook here)
@@ -111,7 +116,7 @@ contains
 
 
     !>  Output run parameters to screen
-    call print_loc_options(pf,un_opt=6)
+    !call print_loc_options(pf,un_opt=6)
     
     !>  Allocate initial consdition
     call ndarray_build(y_0, [ 1 ])

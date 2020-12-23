@@ -6,7 +6,7 @@
 &PF_PARAMS
     nlevels  = 3  !  must be set
 
-    niters = 11 !  default is 5
+    niters = 1 !  default is 5
 
     qtype   = 1
     nnodes =    2 3 5
@@ -37,7 +37,7 @@
     lam2=-2.0
 
 
-    mgrit_n_coarse = 10
+    mgrit_n_coarse = 256
     mgrit_refine_factor = 2
 
     use_mgrit = .true.
