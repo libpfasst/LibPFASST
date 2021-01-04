@@ -44,6 +44,7 @@ module pf_mod_MGRIT
      class(pf_encap_t), allocatable :: qc_fas(:)
      class(pf_encap_t), allocatable :: r
      class(pf_encap_t), allocatable :: qc_boundary
+     class(pf_encap_t), allocatable :: qc_fas_boundary
      class(pf_encap_t), allocatable :: q_temp
      class(pf_encap_t), allocatable :: Q0
      integer :: send_to_rank
@@ -142,7 +143,6 @@ contains
         mg_ld(nlevels)%rank_shifted = pf%rank
         mg_ld(nlevels)%send_to_rank = pf%rank+1
         mg_ld(nlevels)%recv_from_rank = pf%rank-1
-
         start_dropping_procs = .false.
         i = 0
         do level_index = (nlevels-1),coarsest_level,-1
@@ -244,6 +244,9 @@ contains
         call pf_lev%ulevel%factory%create_single(mg_lev%q_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%r, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%Q0, level_index, pf_lev%lev_shape)
+        if (FAS_flag .eqv. .true.) then
+           call pf_lev%ulevel%factory%create_single(mg_lev%qc_fas_boundary, level_index, pf_lev%lev_shape)
+        end if
      end do
   end subroutine mgrit_initialize
 
@@ -571,6 +574,9 @@ contains
         send_flag = mg_lev%c_pts_flag
         recv_flag = mg_lev%f_pts_flag
         call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
+        if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
+           call mg_lev%qc_fas_boundary%copy(mg_lev%qc_boundary)
+        end if
         do i = 1,qc_len
            call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
         end do
@@ -818,7 +824,7 @@ contains
      class(pf_encap_t), allocatable :: gi
      integer :: i, j, k, n, ii
      integer :: nlevels
-     logical :: zero_rhs_flag
+     logical :: zero_rhs_flag, send_flag, recv_flag
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_finest_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
 
@@ -831,8 +837,20 @@ contains
 
      pf_lev => pf%levels(level_index)
      pf_f_lev => pf%levels(level_index_f)
+
+     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
+        call pf_f_lev%qend%copy(mg_f_lev%qc_boundary)
+        send_flag = mg_f_lev%f_pts_flag
+        recv_flag = mg_f_lev%c_pts_flag
+        call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
+        if (recv_flag .eqv. .true.) then
+           call mg_f_lev%qc_fas_boundary%copy(mg_f_lev%qc_boundary)
+        end if
+     end if
+
      if (mg_lev%Nt .gt. 0) then
         mg_f_lev%res_norm_loc(1) = 0.0_pfdp
+
 
         if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
            call mgrit_recv(pf, mg_ld, level_index, 3, .true.)
@@ -929,7 +947,7 @@ contains
      class(pf_encap_t), pointer :: gi
      integer :: i_c, i_f, k, n
      integer :: nlevels
-     logical :: zero_rhs_flag
+     logical :: zero_rhs_flag, send_flag, recv_flag
      real(pfdp) :: r_norm
      type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
@@ -943,6 +961,16 @@ contains
 
      mg_f_lev%res_norm_loc(1) = 0.0_pfdp
      mg_f_lev%res_norm_index = 0
+
+     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
+        call pf_f_lev%qend%copy(mg_f_lev%qc_boundary)
+        send_flag = mg_f_lev%f_pts_flag
+        recv_flag = mg_f_lev%c_pts_flag
+        call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
+        if (recv_flag .eqv. .true.) then
+           call mg_f_lev%qc_fas_boundary%copy(mg_f_lev%qc_boundary)
+        end if
+     end if
 
      do i_c = 1,mg_c_lev%Nt
         i_f = mg_f_lev%c_pts(i_c)
@@ -982,7 +1010,7 @@ contains
      call PointRelax(pf, mg_ld, level_index_f, i_f, mg_f_lev%q_temp, mg_f_lev%r)
      call mg_f_lev%r%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
      if (zero_rhs_flag .eqv. .false.) then
-         call mg_f_lev%r%axpy(1.0_pfdp, mg_f_lev%g(i_f));
+        call mg_f_lev%r%axpy(1.0_pfdp, mg_f_lev%g(i_f));
      end if
      if (i_c .eq. mg_c_lev%Nt) then
         call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
@@ -995,7 +1023,7 @@ contains
            if (mg_c_lev%rank_shifted .eq. 0) then
               call mg_c_lev%q_temp%copy(mg_c_lev%Q0)
            else
-              call mg_c_lev%q_temp%copy(mg_f_lev%qc_boundary)
+              call mg_c_lev%q_temp%copy(mg_f_lev%qc_fas_boundary)
            end if
         else
            call mg_c_lev%q_temp%copy(mg_c_lev%qc_fas(i_c-1))

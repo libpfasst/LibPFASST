@@ -37,7 +37,7 @@
     lam2=-2.0
 
 
-    mgrit_n_coarse = 256
+    mgrit_n_coarse = 1
     mgrit_refine_factor = 2
 
     use_mgrit = .true.
