@@ -2,6 +2,7 @@
 # User-set variables
 ####################
 # Hypre include directory
+export HYPRE_DIR=./hypre/src/hypre
 # C++ compiler (user must set this)
 CPP_COMPILE = g++ -O3 -g
 # LibPFASST directory
@@ -9,8 +10,6 @@ LIBPFASST ?= ../..
 
 CPP_SRC_DIR=src/
 export USE_HYPRE=TRUE
-# Must use Makefile.defaults included in this repo
-include $(LIBPFASST)/Makefile.defaults
 
 CPP_FILES = \
         $(CPP_SRC_DIR)hypre_struct.cpp \
@@ -26,6 +25,8 @@ BUILDDIR = build
 
 EXE = main.exe
 
+# Must use Makefile.defaults included in this repo
+include $(LIBPFASST)/Makefile.defaults
 
 FSRC = src/comm.f90 src/level.f90 src/sweeper.f90 src/stepper.f90 src/hooks.f90 src/probin.f90 src/encap.f90 src/pfasst_hypre.f90 src/main.f90
 CSRC = src/hypre_struct.cpp src/hypre_vector.cpp src/hypre_solver.cpp src/hypre_fortran.cpp

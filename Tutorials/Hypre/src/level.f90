@@ -51,7 +51,6 @@ contains
     c_level_index = c_lev%index
 
     !> Here we use the identity map    
-    !call y_f%copy(y_c)
     call HypreProlong(y_f%c_hypre_vector_ptr, &
                       y_c%c_hypre_vector_ptr, &
                       f_level_index, c_level_index) 
@@ -80,7 +79,6 @@ contains
     c_level_index = c_lev%index
 
     !> Here we use the identity map    
-    !call y_c%copy(y_f)
     call HypreRestrict(y_f%c_hypre_vector_ptr, &
                        y_c%c_hypre_vector_ptr, &
                        f_level_index, c_level_index)

@@ -103,6 +103,7 @@ contains
         mg_lev%Tfin_glob = Tfin_glob
      end do
      if (mg_ld(nlevels)%setup_start_coarse_flag .eqv. .true.) then
+        coarsest_level = 1
         mg_ld(nlevels)%coarsest_level = 1
         N = Nt_start;
         do level_index = 1,nlevels

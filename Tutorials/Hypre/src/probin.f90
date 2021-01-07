@@ -1,29 +1,26 @@
 !
 ! This file is part of LIBPFASST.
 !
+!>  Module for reading parameters for the problem  y'=lam1*y+lam2*y
 module probin
   use pfasst
   use pf_mod_mpi
 
   !  The namlist for local variables
   integer, save :: num_grid_points, nspace, ntime, space_dim, max_space_v_cycles
+  integer, save :: solver_type, mgrit_n_init, mgrit_refine_factor, nsteps_rk(PF_MAXLEVS)
+  logical, save :: FAS_flag
   real(pfdp), save :: init_cond
   real(pfdp), save :: dt     ! time step
-  real(pfdp), save :: Tfin   ! Final time
+  real(pfdp), save :: T0, Tfin   ! Final time
   integer, save :: nsteps    ! number of time steps
-  character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
-
-  integer, save :: nsteps_rk(PF_MAXLEVS)
-  integer, save :: rk_order
-  logical, save :: use_mgrit
-  integer, save :: mgrit_n_coarse
-  integer, save :: mgrit_refine_factor
-
   integer, save :: imex_stat
   integer, save :: ark_stat
+  integer, save :: rk_order
+  character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/  space_dim, num_grid_points, init_cond, nspace, ntime, dt, Tfin, nsteps, pfasst_nml, max_space_v_cycles
-  namelist /params/  nsteps_rk, use_mgrit, mgrit_n_coarse, mgrit_refine_factor, rk_order, imex_stat, ark_stat
+  namelist /params/ space_dim, num_grid_points, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
+  namelist /params/ mgrit_n_init, mgrit_refine_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order
 
 contains
   
@@ -50,6 +47,7 @@ contains
 
     !> set defaults
     nsteps  = -1
+    nsteps_rk = -1
 
     nspace = 1
     ntime = nproc
@@ -59,15 +57,18 @@ contains
     max_space_v_cycles = 100
 
     dt      = 0.01_pfdp
+    T0      = 0.0_pfdp
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
 
-    mgrit_n_coarse = 10
+    mgrit_n_init = 10
     mgrit_refine_factor = 2
-    nsteps_rk = -1
-    use_mgrit = .true.
+    imex_stat = 2
+    ark_stat = 2
     rk_order = 1
-    nsteps_rk = -1
+
+    FAS_flag = .false.
+    solver_type = 0
     
     !>  Read in stuff from input file
     un = 9

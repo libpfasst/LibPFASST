@@ -61,7 +61,7 @@ class HypreSolver: public HypreStruct {
       int GetNumRowsLevel(int level_index);
       int GetNumLevels(void);
       void SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver);
-      void SetupMatrix(int num_grid_points, int level_index);
+      void SetupMatrix(int num_grid_points, int level_index, int spacial_coarsen_flag);
       void FEval(double *y, double t, int level_index, double **f);
       void FComp(double **y, double t, double dtq, double *rhs, int level_index, double **f);
       void Restrict(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_level, int c_level);

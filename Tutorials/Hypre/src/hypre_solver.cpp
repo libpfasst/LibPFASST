@@ -37,9 +37,9 @@ int HypreSolver::GetNumLevels(void)
    return num_levels;
 }
 
-void HypreSolver::SetupMatrix(int num_grid_points, int level_index)
+void HypreSolver::SetupMatrix(int num_grid_points, int level_index, int spacial_coarsen_flag)
 {
-   if (level_index > 0 && A == NULL) return;
+   if ((level_index > 0) && (A == NULL) && (spacial_coarsen_flag == 1)) return;
 
    double *values;
 
@@ -212,34 +212,48 @@ void HypreSolver::SetupMatrix(int num_grid_points, int level_index)
    HYPRE_StructVectorAssemble(b);
    HYPRE_StructVectorAssemble(x);
 
-   SetupStructPFMGSolver(&pfmg_level_data); 
-   HYPRE_StructPFMGSetMaxLevels(pfmg_level_data, max_levels);
-   HYPRE_StructPFMGSetup(pfmg_level_data, A, b, x);
-   pfmg_data = (hypre_PFMGData *)pfmg_level_data;
-   A_l = pfmg_data->A_l;   
-   RT_l = pfmg_data->RT_l;
-   P_l = pfmg_data->P_l;
-   x_l = pfmg_data->x_l;
-   b_l = pfmg_data->b_l;
-   restrict_data_l = pfmg_data->restrict_data_l;
-   interp_data_l = pfmg_data->interp_data_l;
-   num_levels = pfmg_data->num_levels;
-   nrows_l = (int *)malloc(num_levels * sizeof(int));
-   ilower_l = (int **)malloc(num_levels * sizeof(int *));
-   iupper_l = (int **)malloc(num_levels * sizeof(int *));
-   for (int level = 0; level < num_levels; level++){
-      ilower_l[level] = (int *)malloc(2 * sizeof(int));
-      iupper_l[level] = (int *)malloc(2 * sizeof(int)); 
-      nrows_l[level] = A_l[level]->grid->local_size;
-      if (nrows_l[level] > 0){
-         ilower_l[level] = A_l[level]->grid->boxes->boxes[0].imin; 
-         iupper_l[level] = A_l[level]->grid->boxes->boxes[0].imax;
+   if (level_index == 0){
+      if (spacial_coarsen_flag == 1){
+         SetupStructPFMGSolver(&pfmg_level_data); 
+         HYPRE_StructPFMGSetMaxLevels(pfmg_level_data, max_levels);
+         HYPRE_StructPFMGSetup(pfmg_level_data, A, b, x);
+         pfmg_data = (hypre_PFMGData *)pfmg_level_data;
+         A_l = pfmg_data->A_l;   
+         RT_l = pfmg_data->RT_l;
+         P_l = pfmg_data->P_l;
+         x_l = pfmg_data->x_l;
+         b_l = pfmg_data->b_l;
+         restrict_data_l = pfmg_data->restrict_data_l;
+         interp_data_l = pfmg_data->interp_data_l;
+         num_levels = pfmg_data->num_levels;
       }
       else {
-         ilower_l[level][0] = 0; 
-         ilower_l[level][1] = 0;
-         iupper_l[level][0] = -1;
-         iupper_l[level][1] = -1;
+         num_levels = max_levels;      
+      }
+      nrows_l = (int *)malloc(num_levels * sizeof(int));
+      ilower_l = (int **)malloc(num_levels * sizeof(int *));
+      iupper_l = (int **)malloc(num_levels * sizeof(int *));
+      for (int level = 0; level < num_levels; level++){
+         ilower_l[level] = (int *)malloc(2 * sizeof(int));
+         iupper_l[level] = (int *)malloc(2 * sizeof(int)); 
+         HYPRE_StructMatrix AA;
+         if (spacial_coarsen_flag == 1){
+            AA = A_l[level];
+         }
+         else {
+            AA = A;
+         }
+         nrows_l[level] = AA->grid->local_size;
+         if (nrows_l[level] > 0){
+            ilower_l[level] = AA->grid->boxes->boxes[0].imin; 
+            iupper_l[level] = AA->grid->boxes->boxes[0].imax;
+         }
+         else {
+            ilower_l[level][0] = 0; 
+            ilower_l[level][1] = 0;
+            iupper_l[level][0] = -1;
+            iupper_l[level][1] = -1;
+         }
       }
    }
 }

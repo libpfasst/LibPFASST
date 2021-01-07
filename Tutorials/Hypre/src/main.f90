@@ -29,14 +29,12 @@ contains
   subroutine run_pfasst()  
     use pfasst            !< This module has include statements for the main pfasst routines
     use pf_my_sweeper     !< Local module for sweeper
-    use pf_my_stepper
     use pf_my_level       !< Local module for level
     use hooks             !< Local module for diagnostics and i/o
     use probin            !< Local module reading/parsing problem parameters
     use encap             !< Local module defining the encapsulation
     use pf_space_comm
     use pfasst_hypre
-    use pf_mod_mgrit
 
     implicit none
 
@@ -61,7 +59,7 @@ contains
     integer :: nproc, rank, error
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
-
+    integer :: spacial_coarsen_flag
     type(mgrit_level_data), allocatable :: mg_ld(:)
 
     ! check size
@@ -77,7 +75,7 @@ contains
     !>  Set up communicator
     call pf_mpi_create(comm, time_comm)
 
-    if (use_mgrit .eqv. .true.) then
+    if (solver_type .eq. 1) then
        pf%use_rk_stepper = .true.
        pf%use_sdc_sweeper = .false.
     else
@@ -88,10 +86,15 @@ contains
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
 
-    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color)
+    spacial_coarsen_flag = 0
+    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spacial_coarsen_flag)
     
     !>  Add some hooks for output
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    if (solver_type .eq. 1) then
+       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    else
+       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+    end if
 
     !>  Output run parameters
     call print_loc_options(pf,un_opt=6)
@@ -106,21 +109,18 @@ contains
     ! call y_end%setval(init_cond)
     call initial(y_0)
 
-    if (use_mgrit .eqv. .true.) then
+    !> Do the PFASST time stepping
+    if (solver_type .eq. 1) then
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
+       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     else
-       call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps, y_end)
+       call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
+       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     end if
- 
-   ! do p = 0, nproc-1
-   !    if (p == rank) then
-          call y_end%eprint()
-   !    end if
-   !    call mpi_barrier(MPI_COMM_WORLD, ierror)
-   ! end do 
-   ! if (rank == 2 .or. rank == 3) then 
-   !    call y_end%eprint()
-   ! end if
+
+
+    call mpi_comm_size(pf%comm%comm, nproc, error)
+    call mpi_comm_rank(pf%comm%comm, rank, error)
 
     !>  Wait for everyone to be done
     call mpi_barrier(MPI_COMM_WORLD, ierror)
