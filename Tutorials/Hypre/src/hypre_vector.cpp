@@ -92,7 +92,7 @@ void HypreVector::Print(void)
    for (int p = 0; p < num_procs; p++){
       if (p == myid){  
          for (int i = 0; i < nrows; i++){
-            printf("%f\n", values[i]);
+            printf("%.16f\n", values[i]);
          }
       }
       MPI_Barrier(comm);

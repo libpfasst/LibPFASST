@@ -112,11 +112,10 @@ contains
     !> Do the PFASST time stepping
     if (solver_type .eq. 1) then
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
-       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     end if
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
 
 
     call mpi_comm_size(pf%comm%comm, nproc, error)

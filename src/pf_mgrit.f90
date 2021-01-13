@@ -330,12 +330,12 @@ contains
     mg_ld(nlevels)%cycle_phase = 0
     level_index = coarsest_level
     call InitExactSolve(pf, mg_ld, Q0, level_index)
-    zero_rhs_flag = .true.
-    call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
-    !qc => mg_ld(nlevels)%qc
-    !call qend%copy(qc(size(qc)))
-    !print *,pf%rank,qend%norm()
-    !return
+    !zero_rhs_flag = .true.
+    !call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
+    !!qc => mg_ld(nlevels)%qc
+    !!call qend%copy(qc(size(qc)))
+    !!print *,pf%rank,qend%norm()
+    !!return
 
     do level_index = coarsest_level,nlevels
        pf_lev => pf%levels(level_index)
@@ -382,7 +382,7 @@ contains
           call pf_set_resid(pf, level_index, mg_lev%res_norm_loc(1))
        end do
 
-       !call call_hooks(pf, -1, PF_POST_ITERATION)
+       call call_hooks(pf, -1, PF_POST_ITERATION)
        if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
           exit
        end if
