@@ -22,7 +22,7 @@ module pf_mod_AMReX_geom
   type(amrex_box) :: domain
   
 contains
-  !>  Subroutine to allocate the array and set the size parameters
+  !>  Subroutine to allocate a geometry used by the AMReX encapsulation
   subroutine AMReX_geom_build(shape_in)
     use amrex_base_module
     use iso_c_binding
@@ -63,7 +63,6 @@ contains
     ! Build data multifabs
     call amrex_distromap_destroy(dm)
     call amrex_boxarray_destroy(ba)
-    
 
 end subroutine AMReX_geom_build
 
@@ -131,12 +130,13 @@ contains
     class is (pf_AMReX_mfab_t)
        this%ndim   = SIZE(shape_in)-1
        this%ncomp=shape_in(1)
-       this%nghost=0
-       this%arr_shape = shape_in(2:this%ndim+1)
-       print *,'ndim=',this%ndim,' ncomp=',this%ncomp,' nghost=',this%nghost, ' array_shape=',this%arr_shape(1:this%ndim)
+       this%nghost=1
+
+       this%arr_shape(1:this%ndim) = shape_in(2:this%ndim+1)
+       print *,'ndim=',this%ndim,' ncomp=',this%ncomp,' nghost=',this%nghost, ' shape_in=',shape_in,' array_shape=',this%arr_shape(1:this%ndim)              
        
        ! Define a single box covering the domain
-       this%domain = amrex_box((/0,0,0/), (/shape_in(2),shape_in(3),shape_in(4)/))
+       this%domain = amrex_box((/0,0,0/), (/shape_in(2)-1,shape_in(3)-1,shape_in(4)-1/))
 
        ! Initialize the boxarray "ba" from the single box "bx"
        call amrex_boxarray_build(ba, this%domain)
