@@ -621,9 +621,9 @@ contains
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")
     datpath= 'dat/' // trim(pf%outdir)     
     !  Save the statistics before returning
-    if (pf%save_timings > 0) then
-       call dump_timingsl(pf%results,pf)
-    end if
+
+    call dump_timingsl(pf%results,pf)
+
     
     if (pf%save_json) call pf_dump_json(pf)
     

@@ -38,7 +38,7 @@ contains
        if(flags(1)==0) which = 0   ! sweep forward and backward simultaneously on two components, communication only forwards
     end if
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
+    call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
 
@@ -195,7 +195,7 @@ contains
 
   end if
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
+    call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
@@ -331,7 +331,7 @@ contains
 
     logical :: converged, qbroadcast
     logical :: did_post_step_hook
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
 
     which = 1
     if (present(flags)) which = flags
@@ -384,7 +384,7 @@ contains
     !pf%state%pfblock = k ! has to be set in pf_optimization_flex to current step
                           ! this is relevant for save_residuals
     do j = 1, pf%niters
-      if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+      call pf_start_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
 
       pf%state%iter = j
@@ -396,7 +396,7 @@ contains
       !  Check for convergence
       call pf_check_convergence_oc(pf, pf%state%finest_level, send_tag=1111*k+j, flags=dir)
 
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+      call pf_stop_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_POST_ITERATION)
 
       !  If we are converged, exit block
@@ -410,9 +410,9 @@ contains
     call call_hooks(pf, -1, PF_POST_BLOCK)
 
     
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
     ! call dump_results(pf%results)
-    if (pf%save_timings > 0) call dump_timingsl(pf%results,pf)
+    call dump_timingsl(pf%results,pf)
   end subroutine pf_pfasst_block_oc
 
   subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c,level_index_f, flags)

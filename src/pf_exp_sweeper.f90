@@ -280,7 +280,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
         ! error sweeps
         do k = 1, nsweeps
            call call_hooks(pf, level_index, PF_PRE_SWEEP)   
-           if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)        
+           call pf_start_timer(pf, T_SWEEP,level_index)        
            
            pf%state%sweep=k                  
            ! NOTE: ensure that lev%F has been properly initialized here
@@ -289,9 +289,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            end do
            if (k .eq. 1) then
               call lev%Q(1)%copy(lev%q0)
-              if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+              call pf_start_timer(pf, T_FEVAL,level_index)
               call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1))      ! compute F_j^{[k+1]}
-              if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+              call pf_stop_timer(pf, T_FEVAL,level_index)
            end if
            t = t0 
            do j = 1, nnodes - 1
@@ -301,9 +301,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               call this%b(1)%copy(lev%Q(j))  ! add term \phi_0(tL) y_n
 
               call this%b(2)%axpy(REAL(-1.0, pfdp), this%f_old(j))         ! add -\phi_1(tL) F_j^{[k]}
-              if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+              call pf_start_timer(pf, T_FEVAL,level_index)
               call this%f_eval(lev%Q(j), t, level_index, lev%F(j,1))      ! compute F_j^{[k+1]}
-              if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+              call pf_stop_timer(pf, T_FEVAL,level_index)
               call this%b(2)%axpy(REAL(1.0, pfdp), lev%F(j,1))          ! add \phi_1(tL) F_j^{[k+1]}
 
 
@@ -324,14 +324,14 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
               end if
 
            end do  !  Substepping over nodes
-           if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+           call pf_start_timer(pf, T_FEVAL,level_index)
            call this%f_eval(lev%Q(nnodes), t0 + dt, level_index, lev%F(nnodes,1))   ! eval last nonlinear term
-           if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+           call pf_stop_timer(pf, T_FEVAL,level_index)
            
 
            call pf_residual(pf, level_index, dt)
            call lev%qend%copy(lev%Q(lev%nnodes))
-           if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)                
+           call pf_stop_timer(pf, T_SWEEP,level_index)                
            call call_hooks(pf, level_index, PF_POST_SWEEP)
            
         end do  !  Sweeps
@@ -458,9 +458,9 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
 
       type(pf_level_t), pointer :: lev
       lev => pf%levels(level_index)   !  Assign level pointer
-      if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)      
+      call pf_start_timer(pf, T_FEVAL,level_index)      
       call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+      call pf_stop_timer(pf, T_FEVAL,level_index)
     end subroutine exp_evaluate
 
     ! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================

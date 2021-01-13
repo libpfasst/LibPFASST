@@ -142,15 +142,15 @@ contains
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
           if (this%explicit) then
-             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call pf_start_timer(pf,T_FEVAL,level_index)
              call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1),1)
-             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+             call pf_stop_timer(pf,T_FEVAL,level_index)
           end if
           
           if (this%implicit) then
-             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call pf_start_timer(pf,T_FEVAL,level_index)
               call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,2),2)
-             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+             call pf_stop_timer(pf,T_FEVAL,level_index)
           end if
        end if
 
@@ -181,17 +181,17 @@ contains
 
           !>  Solve for the implicit piece
           if (this%implicit) then
-             if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
+             call pf_start_timer(pf,T_FCOMP,level_index)
              call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index,lev%F(m+1,2),2)
-             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
+             call pf_stop_timer(pf,T_FCOMP,level_index)
           else
              call lev%Q(m+1)%copy(this%rhs)
           end if
           !>  Compute explicit function on new value
           if (this%explicit) then
-             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+             call pf_start_timer(pf,T_FEVAL,level_index)
              call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,1),1)
-             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+             call pf_stop_timer(pf,T_FEVAL,level_index)
           end if
             
 
@@ -389,15 +389,15 @@ contains
     lev => pf%levels(level_index)   !  Assign level pointer
 
     if (this%explicit) then
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
+       call pf_start_timer(pf,T_FEVAL,level_index)
        call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1),1)
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+       call pf_stop_timer(pf,T_FEVAL,level_index)
     end if
     
     if (this%implicit) then
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2),2)
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
+       call pf_stop_timer(pf,T_FEVAL,level_index)
     end if
     
   end subroutine imex_evaluate

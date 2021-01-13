@@ -67,7 +67,7 @@ contains
     !>  Try to sync everyone
     call mpi_barrier(pf%comm%comm, ierr)
 
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
 
     if (present(qend)) then
        call pf_block_run(pf, q0, dt, nsteps_loc,qend=qend,flags=flags)
@@ -75,7 +75,7 @@ contains
        call pf_block_run(pf, q0, dt,  nsteps_loc,q0,flags=flags)
     end if
 
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
     !  Output stats
     call pf_dump_stats(pf)
 
@@ -143,7 +143,7 @@ contains
     pf%state%iter = -1          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
+    call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
     f_lev => pf%levels(pf%state%finest_level)
@@ -268,7 +268,7 @@ contains
     end do 
     pf%state%iter   = 0
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
+    call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_ITERATION)
 
     pf%state%status = PF_STATUS_ITERATING
@@ -399,7 +399,7 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_BLOCK)
+       call pf_start_timer(pf, T_BLOCK)
 
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
@@ -447,7 +447,7 @@ contains
 
        do j = 1, pf%niters
 
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+          call pf_start_timer(pf, T_ITERATION)
           call call_hooks(pf, -1, PF_PRE_ITERATION)
 
           pf%state%iter = j
@@ -463,7 +463,7 @@ contains
           !  Check for convergence
           call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
           call call_hooks(pf, -1, PF_POST_ITERATION)
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+          call pf_stop_timer(pf, T_ITERATION)
           
           !  If we are converged, exit block (can do one last sweep if desired)
           if (pf%state%status == PF_STATUS_CONVERGED)  then
@@ -483,7 +483,7 @@ contains
           call pf%levels(pf%nlevels)%ulevel%sweeper%sweep(pf, pf%nlevels, pf%state%t0, dt, 1)
        end if
 
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
+       call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
        
     end do !  Loop over the blocks

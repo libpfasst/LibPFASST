@@ -147,6 +147,9 @@ contains
     integer :: j, iout,system,nlev,k,kmax
     real(pfdp) :: qarr(pf%nlevels)
 
+    !  Return if timers are off
+    if (pf%save_timings .eq. 0) return
+    
     !  Write a json file with timer numbers and times
     fullname = trim(this%datpath) // '/runtime.json'
     iout = 4000+pf%rank !  Use processor dependent file number
@@ -171,7 +174,7 @@ contains
           end if
        end do
     end if
-    write(iout,*) '"foo":"0"'
+!    write(iout,*) '"foo":"0"'
     write(iout,*) '}'
     
     close(iout)
