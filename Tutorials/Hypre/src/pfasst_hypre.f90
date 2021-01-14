@@ -135,7 +135,7 @@ contains
        FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
-       setup_start_coarse_flag = .true.
+       setup_start_coarse_flag = .false.
        if (setup_start_coarse_flag .eqv. .true.) then
           n_init = max(1, mgrit_n_init/pf%comm%nproc)
        else

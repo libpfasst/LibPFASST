@@ -115,7 +115,7 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
-    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
 
 
     call mpi_comm_size(pf%comm%comm, nproc, error)

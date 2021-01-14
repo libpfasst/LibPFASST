@@ -47,6 +47,7 @@ module pf_mod_MGRIT
      class(pf_encap_t), allocatable :: qc_fas_boundary
      class(pf_encap_t), allocatable :: q_temp
      class(pf_encap_t), allocatable :: Q0
+     class(pf_encap_t), allocatable :: g_temp
      integer :: send_to_rank
      integer :: recv_from_rank
      integer :: rank_shifted
@@ -243,6 +244,7 @@ contains
         end if
         call pf_lev%ulevel%factory%create_single(mg_lev%qc_boundary, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%q_temp, level_index, pf_lev%lev_shape)
+        call pf_lev%ulevel%factory%create_single(mg_lev%g_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%r, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%Q0, level_index, pf_lev%lev_shape)
         if (FAS_flag .eqv. .true.) then
@@ -330,12 +332,12 @@ contains
     mg_ld(nlevels)%cycle_phase = 0
     level_index = coarsest_level
     call InitExactSolve(pf, mg_ld, Q0, level_index)
-    !zero_rhs_flag = .true.
-    !call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
-    !!qc => mg_ld(nlevels)%qc
-    !!call qend%copy(qc(size(qc)))
-    !!print *,pf%rank,qend%norm()
-    !!return
+    zero_rhs_flag = .true.
+    call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
+    !qc => mg_ld(nlevels)%qc
+    !call qend%copy(qc(size(qc)))
+    !print *,pf%rank,qend%norm()
+    !return
 
     do level_index = coarsest_level,nlevels
        pf_lev => pf%levels(level_index)
@@ -852,7 +854,6 @@ contains
      if (mg_lev%Nt .gt. 0) then
         mg_f_lev%res_norm_loc(1) = 0.0_pfdp
 
-
         if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
            call mgrit_recv(pf, mg_ld, level_index, 3, .true.)
         else
@@ -863,7 +864,7 @@ contains
            end if
         end if
 
-        call pf_lev%ulevel%factory%create_single(gi, level_index, pf_lev%lev_shape)
+        !call pf_lev%ulevel%factory%create_single(gi, level_index, pf_lev%lev_shape)
         do i = 1,mg_lev%Nt
            ii = mg_f_lev%c_pts(i)
            if (level_index_f .eq. nlevels) then
@@ -871,11 +872,11 @@ contains
            else
                zero_rhs_flag = .false.
            end if
-           call InjectRestrictPoint(pf, mg_ld, gi, level_index, level_index_f, i, ii, zero_rhs_flag)
+           call InjectRestrictPoint(pf, mg_ld, mg_lev%g_temp, level_index, level_index_f, i, ii, zero_rhs_flag)
            call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
 
            call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
-           call pf_lev%qend%axpy(1.0_pfdp, gi)
+           call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g_temp)
            call pf_lev%q0%copy(pf_lev%qend)
 
            call mg_lev%q_temp%copy(pf_lev%qend)
@@ -885,7 +886,7 @@ contains
            call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
            call mg_f_lev%qc(i)%axpy(1.0_pfdp, mg_f_lev%q_temp)
         end do
-        call pf_lev%ulevel%factory%destroy_single(gi)
+        !call pf_lev%ulevel%factory%destroy_single(gi)
 
         pf_f_lev%residual = mg_f_lev%res_norm_loc(1)
         pf_lev%residual = 0.0_pfdp
