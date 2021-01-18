@@ -11,7 +11,7 @@ HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_m
    tol = 0.0;
    max_iter = in_max_iter;
    jacobi_weight = 1.0;
-   relax_type = RELAX_RBGS;
+   relax_type = RELAX_RBGS_NONSYMMETRIC;
    solver_type = SOLVER_PFMG;
    max_levels = in_max_levels;
    setup_done = 1;
@@ -459,7 +459,7 @@ void HypreSolver::SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver)
    HYPRE_StructPFMGSetMaxIter(*pfmg_solver, max_iter);
    HYPRE_StructPFMGSetTol(*pfmg_solver, tol);
    HYPRE_StructPFMGSetRelChange(*pfmg_solver, 0);
-   HYPRE_StructPFMGSetRAPType(*pfmg_solver, 0);
+   HYPRE_StructPFMGSetRAPType(*pfmg_solver, 1);
    HYPRE_StructPFMGSetRelaxType(*pfmg_solver, relax_type);
    HYPRE_StructPFMGSetJacobiWeight(*pfmg_solver, jacobi_weight);
    HYPRE_StructPFMGSetNumPreRelax(*pfmg_solver, n_pre);

@@ -6,7 +6,7 @@
 &PF_PARAMS
     nlevels = 3 !  must be set
 
-    niters = 20  !  default is 5
+    niters = 5  !  default is 5
     nnodes =    2  3  5
 
     nsweeps_pred= 1 1 
@@ -35,7 +35,7 @@
     nsteps = 6
     num_grid_points = 3
     nspace = 1
-    ntime = 4
+    ntime = 1
     init_cond = 50.0
     space_dim = 2
     max_space_v_cycles = 50

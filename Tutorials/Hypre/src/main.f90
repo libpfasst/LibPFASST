@@ -74,6 +74,7 @@ contains
 
     !>  Set up communicator
     call pf_mpi_create(comm, time_comm)
+    
 
     if (solver_type .eq. 1) then
        pf%use_rk_stepper = .true.
@@ -88,6 +89,7 @@ contains
 
     spacial_coarsen_flag = 0
     call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spacial_coarsen_flag)
+    !print *,time_color,space_color,pf%rank
     
     !>  Add some hooks for output
     if (solver_type .eq. 1) then
@@ -115,7 +117,8 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
-    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    call y_end%eprint()
 
 
     call mpi_comm_size(pf%comm%comm, nproc, error)

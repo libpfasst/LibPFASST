@@ -192,6 +192,11 @@ contains
            mg_lev%tfin = mg_lev%t0 + mg_lev%Nt * mg_lev%dt
            pf%state%t0 = mg_lev%t0
         end do
+
+        !do level_index = nlevels,coarsest_level,-1
+        !   mg_lev => mg_ld(level_index)
+        !   print *,level_index,pf%rank,mg_lev%send_to_rank,mg_lev%recv_from_rank
+        !end do
      end if
 
      do level_index = nlevels,coarsest_level+1,-1
@@ -208,16 +213,18 @@ contains
      do level_index = nlevels,coarsest_level,-1
         mg_lev => mg_ld(level_index)
         pf_lev = pf%levels(level_index)
-        if ((level_index .lt. nlevels) .and. (level_index .gt. 1) .and. (mg_lev%Nt .gt. 0)) then
-           call pf_lev%ulevel%factory%create_array(mg_lev%g, mg_lev%Nt, level_index, pf_lev%lev_shape)
+        !if ((level_index .lt. nlevels) .and. (level_index .gt. 1) .and. (mg_lev%Nt .gt. 0)) then
+        if ((level_index .lt. nlevels) .and. (level_index .gt. 1)) then
+           call pf_lev%ulevel%factory%create_array(mg_lev%g, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
            do i = 1,mg_lev%Nt
               call mg_lev%g(i)%setval(0.0_pfdp)
            end do
         end if
         if (FAS_flag .eqv. .true.) then
            mg_ld(level_index)%FAS_flag = .true.
-           if ((level_index .lt. nlevels) .and. (mg_lev%Nt .gt. 0)) then
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc_fas, mg_lev%Nt, level_index, pf_lev%lev_shape)
+           !if ((level_index .lt. nlevels) .and. (mg_lev%Nt .gt. 0)) then
+           if (level_index .lt. nlevels) then
+              call pf_lev%ulevel%factory%create_array(mg_lev%qc_fas, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
               do i = 1,mg_lev%Nt
                  call mg_lev%qc_fas(i)%setval(0.0_pfdp)
               end do
@@ -228,19 +235,19 @@ contains
         end if
         if (level_index .gt. coarsest_level) then
            mg_c_lev => mg_ld(level_index-1)
-           if ((mg_c_lev%Nt .eq. 0) .and. (mg_lev%Nt .eq. 1)) then
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc, 1, level_index, pf_lev%lev_shape)
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, 1, level_index, pf_lev%lev_shape)
-              call mg_lev%qc(1)%setval(0.0_pfdp)
-              call mg_lev%qc_prev(1)%setval(0.0_pfdp)
-           else if (mg_c_lev%Nt .gt. 0) then
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, mg_c_lev%Nt, level_index, pf_lev%lev_shape)
+           !if ((mg_c_lev%Nt .eq. 0) .and. (mg_lev%Nt .eq. 1)) then
+           !   call pf_lev%ulevel%factory%create_array(mg_lev%qc, 1, level_index, pf_lev%lev_shape)
+           !   call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, 1, level_index, pf_lev%lev_shape)
+           !   call mg_lev%qc(1)%setval(0.0_pfdp)
+           !   call mg_lev%qc_prev(1)%setval(0.0_pfdp)
+           !else if (mg_c_lev%Nt .gt. 0) then
+              call pf_lev%ulevel%factory%create_array(mg_lev%qc, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
+              call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
               do i = 1,mg_c_lev%Nt
                  call mg_lev%qc(i)%setval(0.0_pfdp)
                  call mg_lev%qc_prev(i)%setval(0.0_pfdp)
               end do
-           end if
+           !end if
         end if
         call pf_lev%ulevel%factory%create_single(mg_lev%qc_boundary, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%q_temp, level_index, pf_lev%lev_shape)
@@ -328,7 +335,6 @@ contains
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
 
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
 
     mg_ld(nlevels)%cycle_phase = 0
     level_index = coarsest_level
@@ -350,6 +356,7 @@ contains
     call mpi_barrier(pf%comm%comm, ierror)
 
     !> Start timer
+    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     do iter = 1, pf%niters
        pf%state%iter = iter
 
@@ -389,7 +396,6 @@ contains
           exit
        end if
     end do
-
     if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_stats(pf)
@@ -457,10 +463,7 @@ contains
     mg_ld(nlevels)%cycle_phase = 1
     level_index = nlevels
     mg_lev => mg_ld(level_index)
-    
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call FCF_Relax(pf, mg_ld, level_index, iteration)
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     
     if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
         return
@@ -486,19 +489,15 @@ contains
               return
            end if
         end if
-        if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
         !> FCF-relaxation on intermediate grids
         call FCF_Relax(pf, mg_ld, level_index, iteration)
-        if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     end do
 
     !> Coarsest grid solve
     mg_ld(nlevels)%cycle_phase = 2
     level_index = coarsest_level
     if (mg_lev%Nt .gt. 0) then
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
        call ExactSolve(pf, mg_ld, level_index)
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
        if ((level_index+1 .eq. nlevels) .and. (iteration .gt. 1)) then
           mg_f_lev => mg_ld(nlevels)
           call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
@@ -711,27 +710,23 @@ contains
 
            !> Interpolate to fine level
            if (interp_flag .eqv. .true.) then
-              if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
               call mg_lev%q_temp%copy(pf_lev%qend)
               if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
                  call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
               end if
               call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
               call mg_f_lev%qc(j)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-              if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            end if
            call pf_lev%q0%copy(pf_lev%qend)
         end do
         call mg_lev%qc(i)%copy(pf_lev%qend)
         if ((interp_flag .eqv. .true.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
-           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call mg_lev%q_temp%copy(mg_lev%qc_prev(i))
            if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
               call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
            end if
            call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_lev%t0)
            call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
         end if
      end do
   end subroutine F_Relax
@@ -814,6 +809,7 @@ contains
 
     pf_lev => pf%levels(level_index)
     call pf_lev%qend%pack(pf_lev%send)
+    !print *,pf%rank,mg_ld(level_index)%send_to_rank
     call pf%comm%send(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%send_to_rank)
   end subroutine mgrit_send
 
@@ -826,6 +822,7 @@ contains
     integer :: ierror
 
     pf_lev => pf%levels(level_index)
+    !print *,pf%rank,mg_ld(level_index)%recv_from_rank
     call pf%comm%recv(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%recv_from_rank)
     call pf_lev%q0%unpack(pf_lev%recv)
   end subroutine mgrit_recv
@@ -895,9 +892,7 @@ contains
            if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
               call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
            end if
-           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
-           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            call mg_f_lev%qc(i)%axpy(1.0_pfdp, mg_f_lev%q_temp)
         end do
         !call pf_lev%ulevel%factory%destroy_single(gi)
@@ -946,9 +941,7 @@ contains
      if (mg_lev%Nt .gt. 0) then
         do i = 1,mg_lev%Nt
            call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
-           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%qc(i), pf_lev%qend, mg_f_lev%t0)
-           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_lev%q0%copy(pf_lev%qend)
         end do
 
@@ -1020,8 +1013,6 @@ contains
      pf_c_lev => pf%levels(level_index_c)
      nlevels = pf%nlevels
 
-     if (pf%save_timings > 1) call pf_start_timer(pf, T_RESTRICT, level_index_f)
-
      !if (mg_f_lev%Nt .eq. 1) then
      !   call mg_f_lev%q_temp%copy(mg_f_lev%qc_boundary)
      !else
@@ -1052,8 +1043,6 @@ contains
         call mg_c_lev%r%axpy(-1.0_pfdp, pf_c_lev%qend)
      end if
      call gci%copy(mg_c_lev%r)
-
-     if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESTRICT, level_index_f)
   end subroutine InjectRestrictPoint
 
   subroutine PointRelax(pf, mg_ld, level_index, n, q0, qend)

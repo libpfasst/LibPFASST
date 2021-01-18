@@ -24,7 +24,7 @@ int main(void)
    }
    hypre_solver->FComp(&y, t, dtq, rhs, level_index, &f, piece);
 
-   hypre_solver->FEval(rhs, t, level_index, &f, piece);
+   //hypre_solver->FEval(rhs, t, level_index, &f, piece);
 
    hypre_solver->Cleanup();
 

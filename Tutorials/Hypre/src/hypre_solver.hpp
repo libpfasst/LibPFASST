@@ -13,6 +13,7 @@
 #define RELAX_JACOBI 0
 #define RELAX_WEIGHTED_JACOBI 1
 #define RELAX_RBGS 2
+#define RELAX_RBGS_NONSYMMETRIC 3
 
 using namespace std;
 
