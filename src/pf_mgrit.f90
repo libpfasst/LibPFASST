@@ -335,12 +335,14 @@ contains
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
 
-
+    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     mg_ld(nlevels)%cycle_phase = 0
     level_index = coarsest_level
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call InitExactSolve(pf, mg_ld, Q0, level_index)
     zero_rhs_flag = .true.
     call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     !qc => mg_ld(nlevels)%qc
     !call qend%copy(qc(size(qc)))
     !print *,pf%rank,qend%norm()
@@ -356,7 +358,6 @@ contains
     call mpi_barrier(pf%comm%comm, ierror)
 
     !> Start timer
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
     do iter = 1, pf%niters
        pf%state%iter = iter
 
@@ -463,7 +464,9 @@ contains
     mg_ld(nlevels)%cycle_phase = 1
     level_index = nlevels
     mg_lev => mg_ld(level_index)
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call FCF_Relax(pf, mg_ld, level_index, iteration)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     
     if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
         return
@@ -490,14 +493,18 @@ contains
            end if
         end if
         !> FCF-relaxation on intermediate grids
+        if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
         call FCF_Relax(pf, mg_ld, level_index, iteration)
+        if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     end do
 
     !> Coarsest grid solve
     mg_ld(nlevels)%cycle_phase = 2
     level_index = coarsest_level
     if (mg_lev%Nt .gt. 0) then
+       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
        call ExactSolve(pf, mg_ld, level_index)
+       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
        if ((level_index+1 .eq. nlevels) .and. (iteration .gt. 1)) then
           mg_f_lev => mg_ld(nlevels)
           call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
@@ -509,7 +516,9 @@ contains
     end if
     zero_rhs_flag = .false.
     mg_ld(nlevels)%cycle_phase = 3
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
     call IdealInterp(pf, mg_ld, iteration, zero_rhs_flag)
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
   end subroutine pf_MGRIT_v_cycle
 
   subroutine FCF_Relax(pf, mg_ld, level_index, iteration)
@@ -710,23 +719,27 @@ contains
 
            !> Interpolate to fine level
            if (interp_flag .eqv. .true.) then
+              if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
               call mg_lev%q_temp%copy(pf_lev%qend)
               if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
                  call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
               end if
               call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
               call mg_f_lev%qc(j)%axpy(1.0_pfdp, mg_f_lev%q_temp)
+              if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            end if
            call pf_lev%q0%copy(pf_lev%qend)
         end do
         call mg_lev%qc(i)%copy(pf_lev%qend)
         if ((interp_flag .eqv. .true.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
+           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call mg_lev%q_temp%copy(mg_lev%qc_prev(i))
            if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
               call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
            end if
            call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_lev%t0)
            call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_f_lev%q_temp)
+           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
         end if
      end do
   end subroutine F_Relax
@@ -892,7 +905,9 @@ contains
            if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
               call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
            end if
+           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
+           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            call mg_f_lev%qc(i)%axpy(1.0_pfdp, mg_f_lev%q_temp)
         end do
         !call pf_lev%ulevel%factory%destroy_single(gi)
@@ -941,7 +956,9 @@ contains
      if (mg_lev%Nt .gt. 0) then
         do i = 1,mg_lev%Nt
            call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+           if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%qc(i), pf_lev%qend, mg_f_lev%t0)
+           if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_lev%q0%copy(pf_lev%qend)
         end do
 
@@ -1026,6 +1043,7 @@ contains
      if (i_c .eq. mg_c_lev%Nt) then
         call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c)
      end if
+     if (pf%save_timings > 1) call pf_start_timer(pf, T_RESTRICT, level_index_f)
      call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%r, mg_c_lev%r, mg_f_lev%t0)
      if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
         call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%qc_prev(i_c), mg_c_lev%qc_fas(i_c), mg_f_lev%t0)
@@ -1042,6 +1060,7 @@ contains
         call PointRelax(pf, mg_ld, level_index_c, i_c, mg_c_lev%q_temp, pf_c_lev%qend)
         call mg_c_lev%r%axpy(-1.0_pfdp, pf_c_lev%qend)
      end if
+     if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESTRICT, level_index_f)
      call gci%copy(mg_c_lev%r)
   end subroutine InjectRestrictPoint
 
