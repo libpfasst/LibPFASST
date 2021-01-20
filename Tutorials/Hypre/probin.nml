@@ -33,7 +33,7 @@
     T0 = 0.0
     Tfin = .1
     nsteps = 6
-    num_grid_points = 3
+    num_grid_points = 4
     nspace = 1
     ntime = 1
     init_cond = 50.0
@@ -41,7 +41,7 @@
     max_space_v_cycles = 50
 
     nsteps = 8
-    nsteps_rk = 1 2
+    nsteps_rk = 1 1
 
     mgrit_n_init = 2
     mgrit_refine_factor = 2

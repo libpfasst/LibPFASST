@@ -56,22 +56,18 @@ void HypreVector::SetSinInitCond(void)
 
 
 
-   if (dim == 1){
-      int k = 0;
-      for (int i = ilower[0]; i <= iupper[0]; i++){
-         values[k] = sin(omega_x * coords_x[k]);
-         k++;
-      }
+   //int k = 0;
+   //for (int i = ilower[0]; i <= iupper[0]; i++){
+   //   for (int j = ilower[1]; j <= iupper[1]; j++){
+   //      values[k] = sin(omega_x * coords_x[k]) * sin(omega_y * coords_y[k]);
+   //      k++;
+   //   }
+   //}
+   
+   for (int k = 0; k < nrows; k++){
+      values[k] = sin(omega_x * coords_x[k]) * sin(omega_y * coords_y[k]);
    }
-   else {
-      int k = 0;
-      for (int i = ilower[0]; i <= iupper[0]; i++){
-         for (int j = ilower[1]; j <= iupper[1]; j++){
-            values[k] = sin(omega_x * coords_x[k]) * sin(omega_y * coords_y[k]);
-            k++;
-         }
-      }
-   }
+
    HYPRE_StructVectorSetBoxValues(v, ilower, iupper, values);
 }
 
@@ -92,6 +88,7 @@ void HypreVector::Print(void)
    for (int p = 0; p < num_procs; p++){
       if (p == myid){  
          for (int i = 0; i < nrows; i++){
+            //printf("%d %e %e %.16f\n", myid, coords_x[i], coords_y[i], values[i]);
             printf("%.16f\n", values[i]);
          }
       }

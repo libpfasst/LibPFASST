@@ -136,6 +136,4 @@ contains
     end if
   end subroutine print_loc_options
   
-  
-  
 end module probin

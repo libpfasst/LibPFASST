@@ -342,10 +342,9 @@ contains
     call InitExactSolve(pf, mg_ld, Q0, level_index)
     zero_rhs_flag = .true.
     call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
+    !if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
     !qc => mg_ld(nlevels)%qc
     !call qend%copy(qc(size(qc)))
-    !print *,pf%rank,qend%norm()
     !return
 
     do level_index = coarsest_level,nlevels

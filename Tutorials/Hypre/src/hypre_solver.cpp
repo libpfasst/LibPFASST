@@ -63,20 +63,10 @@ void HypreSolver::SetupMatrix(int num_grid_points, int level_index, int spacial_
 
       /* Set the standard stencil at each grid point,
          we will fix the boundaries later */
-      if (dim == 1){
-          for (int i = 0; i < nvalues; i += nentries){
-            values[i] = -2.0 / h;
-            for (int j = 1; j < nentries; j++){
-               values[i+j] = 1.0 / h;
-            }
-         }
-      }
-      else {
-         for (int i = 0; i < nvalues; i += nentries){
-            values[i] = -4.0 / h2;
-            for (int j = 1; j < nentries; j++){
-               values[i+j] = 1.0 / h2;
-            }
+      for (int i = 0; i < nvalues; i += nentries){
+         values[i] = -4.0 / h2;
+         for (int j = 1; j < nentries; j++){
+            values[i+j] = 1.0 / h2;
          }
       }
 
@@ -96,90 +86,61 @@ void HypreSolver::SetupMatrix(int num_grid_points, int level_index, int spacial_
       for (int j = 0; j < bc_nvalues; j++){
          values[j] = 0.0;
       }
-      if (dim == 1){
-         if (pi == 0){
-            /* Left grid point */
-            bc_ilower[0] = 0;
-            bc_iupper[0] = 0;
-            bc_ilower[1] = 0;
-            bc_iupper[1] = 0;
+      /* Recall: pi and pj describe position in the processor grid */
+      if (pj == 0){
+         /* Bottom row of grid points */
+         bc_ilower[0] = pi*n;
+         bc_ilower[1] = pj*n;
 
-            bc_stencil_indices[0] = 1;
+         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[1] = bc_ilower[1];
 
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         bc_stencil_indices[0] = 3;
 
-         if (pi == N-1){
-            /* Right grid point */
-            bc_ilower[0] = pi*n + n-1;
-            bc_iupper[0] = bc_ilower[0];
-            bc_ilower[1] = 0;
-            bc_iupper[1] = 0;
-
-            bc_stencil_indices[0] = 2;
-
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
+                                        bc_stencil_indices, values);
       }
-      else {
-         /* Recall: pi and pj describe position in the processor grid */
-         if (pj == 0){
-            /* Bottom row of grid points */
-            bc_ilower[0] = pi*n;
-            bc_ilower[1] = pj*n;
 
-            bc_iupper[0] = bc_ilower[0] + n-1;
-            bc_iupper[1] = bc_ilower[1];
+      if (pj == N-1){
+         /* upper row of grid points */
+         bc_ilower[0] = pi*n;
+         bc_ilower[1] = pj*n + n-1;
 
-            bc_stencil_indices[0] = 3;
+         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[1] = bc_ilower[1];
 
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         bc_stencil_indices[0] = 4;
 
-         if (pj == N-1){
-            /* upper row of grid points */
-            bc_ilower[0] = pi*n;
-            bc_ilower[1] = pj*n + n-1;
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
+                                        bc_stencil_indices, values);
+      }
 
-            bc_iupper[0] = bc_ilower[0] + n-1;
-            bc_iupper[1] = bc_ilower[1];
+      if (pi == 0){
+         /* Left row of grid points */
+         bc_ilower[0] = pi*n;
+         bc_ilower[1] = pj*n;
 
-            bc_stencil_indices[0] = 4;
+         bc_iupper[0] = bc_ilower[0];
+         bc_iupper[1] = bc_ilower[1] + n-1;
 
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         bc_stencil_indices[0] = 1;
 
-         if (pi == 0){
-            /* Left row of grid points */
-            bc_ilower[0] = pi*n;
-            bc_ilower[1] = pj*n;
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
+                                        bc_stencil_indices, values);
+      }
 
-            bc_iupper[0] = bc_ilower[0];
-            bc_iupper[1] = bc_ilower[1] + n-1;
+      if (pi == N-1){
+         /* Right row of grid points */
+         bc_ilower[0] = pi*n + n-1;
+         bc_ilower[1] = pj*n;
 
-            bc_stencil_indices[0] = 1;
+         bc_iupper[0] = bc_ilower[0];
+         bc_iupper[1] = bc_ilower[1] + n-1;
 
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         bc_stencil_indices[0] = 2;
 
-         if (pi == N-1){
-            /* Right row of grid points */
-            bc_ilower[0] = pi*n + n-1;
-            bc_ilower[1] = pj*n;
-
-            bc_iupper[0] = bc_ilower[0];
-            bc_iupper[1] = bc_ilower[1] + n-1;
-
-            bc_stencil_indices[0] = 2;
-
-            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
-                                           bc_stencil_indices, values);
-         }
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, bc_nentries,
+                                        bc_stencil_indices, values);
       }
       free(values);
    }
@@ -280,6 +241,7 @@ void HypreSolver::FEval(double *y, double t, int level_index, double **f)
 
    double alpha = 1.0, beta = 0.0;
    hypre_StructMatvec(alpha, A, x, beta, b);
+   
 
    HYPRE_StructVectorGetBoxValues(b, ilower, iupper, values);
    for (int i = 0; i < nrows; i++){
@@ -313,24 +275,6 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    HYPRE_StructMatrixGetBoxValues(A, ilower, iupper, nentries,
                                   stencil_indices, space_values);
 
-   /* Update the matrix entries using temporal information */
-  // for (int i = 0; i < nnz; i += nentries){
-  //    for (int j = 0; j < nentries; j++){
-  //       if (abs(space_values[i+j]) > 1e-14){
-  //          if (space_values[i+j] < 0){
-  //             values[i+j] = 1 - dtq * space_values[i+j];
-  //          }
-  //          else {
-  //             values[i+j] = -dtq * space_values[i+j];
-  //          }
-  //       }
-  //       else {
-  //          values[i+j] = 0.0;
-  //       }
-  //    }
-  // }
-
-
    hypre_Index *stencil_shape = hypre_StructStencilShape(stencil); 
    int diag_index = 0;
    for (int i = 0; i < hypre_StructStencilSize(stencil); i++){
@@ -347,10 +291,9 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
          else {
             values[i+j] = -dtq * space_values[i+j];
          }
+         //printf("%e %d %e\n", dtq, j, values[i+j]);
       }
    }
-
-   //hypre_StructMatrixPrint("struct_matrix.txt", A, 1);
 
    HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                   stencil_indices, values);
@@ -443,6 +386,7 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    for (int i = 0; i < nrows; i++){
       (*y)[i] = values[i];
       (*f)[i] = ((*y)[i] - rhs[i]) / dtq;
+      //printf("%d %e %e\n", myid, (*y)[i], (*f)[i]);
    }
    
    HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
