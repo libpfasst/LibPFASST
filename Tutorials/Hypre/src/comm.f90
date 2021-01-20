@@ -46,10 +46,16 @@ contains
        time_comm  = MPI_COMM_WORLD
     else
        ! split by color
-       space_color = mod(rank, nspace)
+       !space_color = mod(rank, nspace)
+       !call mpi_comm_split(MPI_COMM_WORLD, space_color, rank, space_comm, error)
+
+       !time_color = rank / nspace
+       !call mpi_comm_split(MPI_COMM_WORLD, time_color, rank, time_comm, error)
+
+       space_color = rank / nspace
        call mpi_comm_split(MPI_COMM_WORLD, space_color, rank, space_comm, error)
 
-       time_color = rank / nspace
+       time_color = mod(rank, nspace)
        call mpi_comm_split(MPI_COMM_WORLD, time_color, rank, time_comm, error)
     end if
 
