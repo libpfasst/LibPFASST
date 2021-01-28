@@ -238,7 +238,7 @@ module mod_zmkpair
        write(*, 100) real(this%y(i,i))
     end do
     100 format (*(F18.14))
-    call flush
+    call flush(6)
   end subroutine zmkpair_eprint
 
   subroutine write_to_disk(this, filename)

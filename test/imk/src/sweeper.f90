@@ -168,20 +168,20 @@ contains
 
   end subroutine commutator_p
 
-  subroutine compute_commutator(a, b, dim, output)
-    complex(pfdp), intent(in) :: a(dim,dim), b(dim,dim)
-    integer, intent(in) :: dim
-    complex(pfdp), intent(inout) :: output(dim,dim)
+  subroutine compute_commutator(a, b, Nmat, output)
+    complex(pfdp), intent(in) :: a(Nmat,Nmat), b(Nmat,Nmat)
+    integer, intent(in) :: Nmat
+    complex(pfdp), intent(inout) :: output(Nmat,Nmat)
 
-    call zgemm('n', 'n', dim, dim, dim, &
-         z1, b, dim, &
-         a, dim, &
-         z0, output, dim) ! output is zeroed here
+    call zgemm('n', 'n', Nmat, Nmat, Nmat, &
+         z1, b, Nmat, &
+         a, Nmat, &
+         z0, output, Nmat) ! output is zeroed here
 
-    call zgemm('n', 'n', dim, dim, dim, &
-         z1, a, dim, &
-         b, dim, &
-         zm1, output, dim)
+    call zgemm('n', 'n', Nmat, Nmat, Nmat, &
+         z1, a, Nmat, &
+         b, Nmat, &
+         zm1, output, Nmat)
   end subroutine compute_commutator
 
   subroutine propagate_solution(this, q0, q)
