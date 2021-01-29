@@ -17,8 +17,8 @@ contains
     integer, intent(in) :: spacial_coarsen_flag
     
     type(pf_comm_t) :: comm
-    type(my_sweeper_t) :: sw_finest
-    type(my_stepper_t) :: st_finest
+    type(my_sweeper_t) :: sw_finest, sw_lev
+    type(my_stepper_t) :: st_finest, st_lev
     type(my_level_t) :: my_lev
 
     integer :: l, l_finest   !  loop variable over levels
@@ -28,8 +28,10 @@ contains
     integer :: nproc, rank, error
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
-    integer :: n_init, refine_factor
+    integer :: n_init, refine_factor, FComp_setup_flag
     logical :: FCF_flag, setup_start_coarse_flag
+
+    FComp_setup_flag = 0
     
 
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
@@ -67,23 +69,37 @@ contains
 
     l_finest = pf%nlevels
     if (solver_type .eq. 1) then
-       st_finest = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
-
-       call HypreSolverInit(st_finest%c_hypre_solver_ptr, &
-                            l_finest, &
-                            num_grid_points, &
-                            space_color, &
-                            space_dim, &
-                            max_space_v_cycles, &
-                            pf%nlevels, &
-                            spacial_coarsen_flag)
-   
-       do l = 1,pf%nlevels
-          n = st_finest%get_nrows(l)
-          ilower0 = st_finest%get_extent(l, 0)
-          ilower1 = st_finest%get_extent(l, 1)
-          iupper0 = st_finest%get_extent(l, 2)
-          iupper1 = st_finest%get_extent(l, 3)
+       if (spacial_coarsen_flag .eq. 1) then
+          st_finest = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
+          call HypreSolverInit(st_finest%c_hypre_solver_ptr, &
+                               l_finest, &
+                               num_grid_points, &
+                               space_color, &
+                               space_dim, &
+                               max_space_v_cycles, &
+                               pf%nlevels, &
+                               spacial_coarsen_flag)
+       end if
+       do l = pf%nlevels,1,-1 
+          if (spacial_coarsen_flag .eq. 1) then
+             st_lev = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
+          else
+             st_lev = cast_as_my_stepper_t(pf%levels(l)%ulevel%stepper)
+             call HypreSolverInit(st_lev%c_hypre_solver_ptr, &
+                                  l, &
+                                  num_grid_points, &
+                                  space_color, &
+                                  space_dim, &
+                                  max_space_v_cycles, &
+                                  pf%nlevels, &
+                                  spacial_coarsen_flag)
+          end if
+ 
+          n = st_lev%get_nrows(l)
+          ilower0 = st_lev%get_extent(l, 0)
+          ilower1 = st_lev%get_extent(l, 1)
+          iupper0 = st_lev%get_extent(l, 2)
+          iupper1 = st_lev%get_extent(l, 3)
    
           lev_shape(l,5) = n
           lev_shape(l,6) = ilower0
@@ -94,23 +110,38 @@ contains
           call pf_level_set_size(pf, l, lev_shape(l,:), n)
        end do
     else
-       sw_finest = cast_as_my_sweeper_t(pf%levels(l_finest)%ulevel%sweeper)
+       if (spacial_coarsen_flag .eq. 1) then
+          sw_finest = cast_as_my_sweeper_t(pf%levels(l_finest)%ulevel%sweeper)
+          call HypreSolverInit(sw_finest%c_hypre_solver_ptr, &
+                               l_finest, &
+                               num_grid_points, &
+                               space_color, &
+                               space_dim, &
+                               max_space_v_cycles, &
+                               pf%nlevels, &
+                               spacial_coarsen_flag)
+       end if
 
-       call HypreSolverInit(sw_finest%c_hypre_solver_ptr, &
-                            l_finest, &
-                            num_grid_points, &
-                            space_color, &
-                            space_dim, &
-                            max_space_v_cycles, &
-                            pf%nlevels, &
-                            spacial_coarsen_flag)
+       do l = pf%nlevels,1,-1
+          if (spacial_coarsen_flag .eq. 1) then
+             sw_lev = cast_as_my_sweeper_t(pf%levels(l_finest)%ulevel%sweeper)
+          else
+             sw_lev = cast_as_my_sweeper_t(pf%levels(l)%ulevel%sweeper)
+             call HypreSolverInit(sw_lev%c_hypre_solver_ptr, &
+                                  l, &
+                                  num_grid_points, &
+                                  space_color, &
+                                  space_dim, &
+                                  max_space_v_cycles, &
+                                  pf%nlevels, &
+                                  spacial_coarsen_flag)
+          end if
 
-       do l = 1,pf%nlevels
-          n = sw_finest%get_nrows(l)
-          ilower0 = sw_finest%get_extent(l, 0)
-          ilower1 = sw_finest%get_extent(l, 1)
-          iupper0 = sw_finest%get_extent(l, 2)
-          iupper1 = sw_finest%get_extent(l, 3)
+          n = sw_lev%get_nrows(l)
+          ilower0 = sw_lev%get_extent(l, 0)
+          ilower1 = sw_lev%get_extent(l, 1)
+          iupper0 = sw_lev%get_extent(l, 2)
+          iupper1 = sw_lev%get_extent(l, 3)
 
           lev_shape(l,5) = n
           lev_shape(l,6) = ilower0
@@ -135,7 +166,7 @@ contains
        FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
-       setup_start_coarse_flag = .true.
+       setup_start_coarse_flag = .false.
        if (setup_start_coarse_flag .eqv. .true.) then
           n_init = max(1, mgrit_n_init/pf%comm%nproc)
        else
@@ -143,6 +174,34 @@ contains
        end if
        refine_factor = mgrit_refine_factor
        call mgrit_initialize(pf, mg_ld, T0, Tfin, n_init, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
+    end if
+
+    if (FComp_setup_flag .eq. 0) then
+       if (solver_type .eq. 1) then
+          do l = pf%nlevels,1,-1
+             st_lev = cast_as_my_stepper_t(pf%levels(l)%ulevel%stepper)
+             call HypreImplicitSolverInit(st_lev%c_hypre_solver_ptr, &
+                                          l, &
+                                          num_grid_points, &
+                                          space_color, &
+                                          space_dim, &
+                                          max_space_v_cycles, &
+                                          pf%nlevels, &
+                                          mg_ld(l)%dt)
+          end do
+       else
+          do l = pf%nlevels,1,-1
+             sw_lev = cast_as_my_sweeper_t(pf%levels(l)%ulevel%sweeper)
+             call HypreImplicitSolverInit(sw_lev%c_hypre_solver_ptr, &
+                                          l, &
+                                          num_grid_points, &
+                                          space_color, &
+                                          space_dim, &
+                                          max_space_v_cycles, &
+                                          pf%nlevels, &
+                                          mg_ld(l)%dt)
+          end do
+       end if
     end if
   end subroutine PfasstHypreInit
 

@@ -39,6 +39,14 @@ extern "C"
                         int max_iter,
                         int max_levels,
                         int spacial_coarsen_flag);
+   void HypreImplicitSolverInit(HypreSolver **hypre_solver,
+                                int pfasst_level_index,
+                                int num_grid_points,
+                                int comm_color,
+                                int space_dim,
+                                int max_iter,
+                                int max_levels,
+                                double dtq);
    void HypreSolverDestroy(HypreSolver *hypre_solver, int pfasst_level_index);
    void HypreSolverFEval(HypreSolver *hypre_solver, HypreVector *y, double t, int pfasst_level_index, HypreVector *f, int piece);
    void HypreSolverFComp(HypreSolver *hypre_solver, HypreVector *y, double t, double dtq, HypreVector *rhs, int pfasst_level_index, HypreVector *f, int piece);

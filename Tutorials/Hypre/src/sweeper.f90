@@ -29,6 +29,13 @@ module pf_my_sweeper
         type(c_ptr) :: hypre_solver_ptr
         integer, value :: nx, level_index, comm_color, space_dim, max_iter, num_levels, spacial_coarsen_flag
      end subroutine HypreSolverInit
+
+     subroutine HypreImplicitSolverInit(hypre_solver_ptr, level_index, nx, comm_color, space_dim, max_iter, num_levels, dtq) bind(c, name="HypreImplicitSolverInit")
+        use iso_c_binding
+        type(c_ptr) :: hypre_solver_ptr
+        integer, value :: nx, level_index, comm_color, space_dim, max_iter, num_levels
+        real(c_double), value :: dtq
+     end subroutine HypreImplicitSolverInit
    
      subroutine HypreSolverDestroy(hypre_solver, level_index) bind(c, name="HypreSolverDestroy")
         use iso_c_binding
@@ -105,8 +112,8 @@ contains
     !>  Call the imex sweeper initialization
     call this%imex_initialize(pf,level_index)
 
-    this%implicit=.TRUE.
-    this%explicit=.FALSE.
+    this%implicit=.true.
+    this%explicit=.false.
 
     ! Space variables
     nx = pf%levels(level_index)%lev_shape(1)

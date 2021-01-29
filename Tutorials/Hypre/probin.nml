@@ -4,9 +4,9 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels = 3 !  must be set
+    nlevels = 4 !  must be set
 
-    niters = 5  !  default is 5
+    niters = 10  !  default is 5
     nnodes =    2  3  5
 
     nsweeps_pred= 1 1 
@@ -25,6 +25,8 @@
 
     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
     Vcycle=.TRUE.
+
+    save_timings = 2
 /
 
 !  Now define the local variables you need
@@ -33,23 +35,23 @@
     T0 = 0.0
     Tfin = .1
     nsteps = 6
-    num_grid_points = 4
+    num_grid_points = 64
     nspace = 1
     ntime = 1
     init_cond = 50.0
     space_dim = 2
-    max_space_v_cycles = 50
+    max_space_v_cycles = 5
 
     nsteps = 8
     nsteps_rk = 1 1
 
-    mgrit_n_init = 2
+    mgrit_n_init = 32
     mgrit_refine_factor = 2
 
     solver_type = 1
 
     imex_stat=2
-    ark_stat=2
+    ark_stat=1
 
     rk_order=1
 

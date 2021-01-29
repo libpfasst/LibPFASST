@@ -336,16 +336,17 @@ contains
     call initialize_results(pf)
 
     if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
-    mg_ld(nlevels)%cycle_phase = 0
-    level_index = coarsest_level
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
-    call InitExactSolve(pf, mg_ld, Q0, level_index)
-    zero_rhs_flag = .true.
-    call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
+
+    !mg_ld(nlevels)%cycle_phase = 0
+    !level_index = coarsest_level
+    !if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)
+    !call InitExactSolve(pf, mg_ld, Q0, level_index)
+    !zero_rhs_flag = .true.
+    !call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
     !if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP, level_index)
-    !qc => mg_ld(nlevels)%qc
-    !call qend%copy(qc(size(qc)))
-    !return
+    !!qc => mg_ld(nlevels)%qc
+    !!call qend%copy(qc(size(qc)))
+    !!return
 
     do level_index = coarsest_level,nlevels
        pf_lev => pf%levels(level_index)

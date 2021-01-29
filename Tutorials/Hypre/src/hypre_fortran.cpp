@@ -1,4 +1,5 @@
 #include "hypre_fortran.hpp"
+#include "hypre_solver.hpp"
 
 /*
  *  C++ functions called from Fortran to manipulate Hypre vector and solver objects
@@ -18,39 +19,56 @@ extern "C"
    int HypreSolverGetNumRowsLevel(HypreSolver *hypre_solver, int pfasst_level_index)
    {
       int level_index;
-      //if (glob_spacial_coarsen_flag == 1){
+      int num_rows;
+      if (glob_spacial_coarsen_flag == 1){
+         level_index = 0;
+         num_rows = hypre_solver->GetNumRowsLevel(level_index);
+      }
+      else {
          level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-      //}
-      //else {
-      //   level_index = 0;
-      //}
-      return hypre_solver->GetNumRowsLevel(level_index);
+         num_rows = hypre_solver->nrows;
+      }
+      return num_rows;
    }
 
    int HypreSolverGetExtentLevel(HypreSolver *hypre_solver, int pfasst_level_index, int i)
    {
-      int level_index;
-      //if (glob_spacial_coarsen_flag == 1){
-         level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-      //}
-      //else {
-      //   level_index = 0;
-      //}
-      int extent;
-      switch(i){
-         case 0:
-            extent = hypre_solver->ilower_l[level_index][0];
-            break;
-         case 1:
-            extent = hypre_solver->ilower_l[level_index][1];
-            break;
-         case 2:
-            extent = hypre_solver->iupper_l[level_index][0];
-            break;
-         case 3:
-            extent = hypre_solver->iupper_l[level_index][1];
-            break;
+      int level_index, extent;
+      level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
+      if (glob_spacial_coarsen_flag == 1){
+         level_index = 0;
+         switch(i){
+            case 0:
+               extent = hypre_solver->ilower_lev[level_index][0];
+               break;
+            case 1:
+               extent = hypre_solver->ilower_lev[level_index][1];
+               break;
+            case 2:
+               extent = hypre_solver->iupper_lev[level_index][0];
+               break;
+            case 3:
+               extent = hypre_solver->iupper_lev[level_index][1];
+               break;
+         }
       }
+      else {
+         switch(i){
+            case 0:
+               extent = hypre_solver->ilower[0];
+               break;
+            case 1:
+               extent = hypre_solver->ilower[1];
+               break;
+            case 2:
+               extent = hypre_solver->iupper[0];
+               break;
+            case 3:
+               extent = hypre_solver->iupper[1];
+               break;
+         }
+      }
+
       return extent;
    }
 
@@ -121,12 +139,46 @@ extern "C"
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
       MPI_Comm newcomm;
-      MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
-      *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels);
-      (*hypre_solver)->SetupMatrix(num_grid_points, level_index, spacial_coarsen_flag);
+      if (spacial_coarsen_flag == 1){
+         if (level_index == 0){
+            //MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
+            //*hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, num_grid_points);
+            //(*hypre_solver)->A_imp = (*hypre_solver)->SetupMatrix(num_grid_points, level_index, spacial_coarsen_flag, 0);
+            //(*hypre_solver)->A_exp = (*hypre_solver)->SetupMatrix(num_grid_points, level_index, spacial_coarsen_flag, 1);
+            //(*hypre_solver)->x = (*hypre_solver)->SetupVector();
+            //(*hypre_solver)->b = (*hypre_solver)->SetupVector();
+            //(*hypre_solver)->SetupSpacialCoarsen((*hypre_solver)->A_imp);
+            //(*hypre_solver)->SetupSpacialCoarsen((*hypre_solver)->A_imp);
+
+         }
+      }
+      else {
+         if (*hypre_solver == NULL){
+            MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
+            *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, num_grid_points);
+            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
+            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
+            (*hypre_solver)->x = (*hypre_solver)->SetupVector();
+            (*hypre_solver)->b = (*hypre_solver)->SetupVector();
+         }
+      }
+
       if (level_index == 0){
          glob_hypre_solver = *hypre_solver;
          glob_spacial_coarsen_flag = spacial_coarsen_flag;
+      }
+   }
+
+   void HypreImplicitSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int num_grid_points, int comm_color, int space_dim, int max_iter, int max_levels, double dtq)
+   {
+      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
+      if (glob_spacial_coarsen_flag == 1){
+         if (level_index == 0){
+         }
+      }
+      else {
+         (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), num_grid_points, level_index, glob_spacial_coarsen_flag, 1, dtq);
+         (*hypre_solver)->SetupStructSolver(&((*hypre_solver)->A_imp), &((*hypre_solver)->solver_imp), &((*hypre_solver)->precond_imp));
       }
    }
 
@@ -223,18 +275,18 @@ extern "C"
    {
       int level_index;
       if (glob_spacial_coarsen_flag == 1){
-         level_index = PfasstToHypreLevelIndex(pfasst_level_index, x->GetNumLevels());
-         (*y)->A = x->A_l[level_index];
-         (*y)->x = x->x_l[level_index];
-         (*y)->b = x->b_l[level_index];
-         (*y)->nrows = x->nrows_l[level_index];
-         (*y)->ilower = x->ilower_l[level_index];
-         (*y)->iupper = x->iupper_l[level_index];
-         (*y)->nentries = x->nentries;
-         (*y)->stencil_indices = x->stencil_indices;
-         (*y)->stencil = hypre_StructMatrixStencil((*y)->A);
-         (*y)->nnz = (*y)->nrows * (*y)->nentries;
-         (*y)->num_levels = x->num_levels;
+         //level_index = PfasstToHypreLevelIndex(pfasst_level_index, x->GetNumLevels());
+         //(*y)->A = x->A_l[level_index];
+         //(*y)->x = x->x_l[level_index];
+         //(*y)->b = x->b_l[level_index];
+         //(*y)->nrows = x->nrows_l[level_index];
+         //(*y)->ilower = x->ilower_l[level_index];
+         //(*y)->iupper = x->iupper_l[level_index];
+         //(*y)->nentries = x->nentries;
+         //(*y)->stencil_indices = x->stencil_indices;
+         //(*y)->stencil = hypre_StructMatrixStencil((*y)->A);
+         //(*y)->nnz = (*y)->nrows * (*y)->nentries;
+         //(*y)->num_levels = x->num_levels;
       }
    }
 
