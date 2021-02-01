@@ -4,7 +4,7 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels = 4 !  must be set
+    nlevels = 3 !  must be set
 
     niters = 10  !  default is 5
     nnodes =    2  3  5
@@ -34,21 +34,21 @@
 
     T0 = 0.0
     Tfin = .1
-    nsteps = 6
-    num_grid_points = 64
+    nsteps = 50
+    num_grid_points = 32
     nspace = 1
     ntime = 1
     init_cond = 50.0
     space_dim = 2
-    max_space_v_cycles = 5
+    max_space_v_cycles = 50
 
-    nsteps = 8
+    nsteps = 2
     nsteps_rk = 1 1
 
-    mgrit_n_init = 32
+    mgrit_n_init = 128
     mgrit_refine_factor = 2
 
-    solver_type = 1
+    solver_type = 0
 
     imex_stat=2
     ark_stat=1

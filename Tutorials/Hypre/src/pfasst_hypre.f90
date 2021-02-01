@@ -31,7 +31,11 @@ contains
     integer :: n_init, refine_factor, FComp_setup_flag
     logical :: FCF_flag, setup_start_coarse_flag
 
-    FComp_setup_flag = 0
+    if ((solver_type .eq. 1) .and. (rk_order .eq. 1)) then
+       FComp_setup_flag = 0
+    else
+       FComp_setup_flag = 1
+    end if
     
 
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)

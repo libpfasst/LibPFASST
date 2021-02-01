@@ -110,7 +110,6 @@ contains
     ! call y_0%setval(init_cond)
     ! call y_end%setval(init_cond)
     call initial(y_0)
-    !call y_0%eprint()
 
     !> Do the PFASST time stepping
     if (solver_type .eq. 1) then
@@ -118,7 +117,6 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
-    return
     !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     !call y_end%eprint()
 

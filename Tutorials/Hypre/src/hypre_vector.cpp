@@ -55,15 +55,6 @@ void HypreVector::SetSinInitCond(void)
    double omega_y = kfreq * M_PI / Ly;
 
 
-
-   //int k = 0;
-   //for (int i = ilower[0]; i <= iupper[0]; i++){
-   //   for (int j = ilower[1]; j <= iupper[1]; j++){
-   //      values[k] = sin(omega_x * coords_x[k]) * sin(omega_y * coords_y[k]);
-   //      k++;
-   //   }
-   //}
-   
    for (int k = 0; k < nrows; k++){
       values[k] = sin(omega_x * coords_x[k]) * sin(omega_y * coords_y[k]);
    }

@@ -102,8 +102,8 @@ void HypreStruct::InitGrid(int num_grid_points, int in_nrows, int *extents)
    int k = 0;
    for(int j = 0; j < n; j++){
       for (int i = 0; i < n; i++){
-         coords_x[k] = (ilower[0]+i) * h;
-         coords_y[k] = (ilower[1]+j) * h;
+         coords_x[k] = (ilower[0]+i) * h + h;
+         coords_y[k] = (ilower[1]+j) * h + h;
          k++;
       }
    }

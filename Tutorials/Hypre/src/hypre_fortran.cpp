@@ -7,6 +7,7 @@
 
 HypreSolver *glob_hypre_solver;
 int glob_spacial_coarsen_flag;
+//int FComp_count = 0;
 
 /* TODO: handle case when number of pfasst levels > number of hypre levels */
 extern "C"
@@ -90,6 +91,7 @@ extern "C"
 
    void HypreVectorDestroy(HypreVector *hypre_vector)
    {
+      //printf("%d\n", FComp_count);
       if (hypre_vector != nullptr){
          delete hypre_vector;
       }
@@ -194,17 +196,13 @@ extern "C"
 
       int nrows = hypre_solver->GetNumRows();
       double *f_values = (double *)malloc(nrows * sizeof(double));
-      if (piece == 1){
-         for (int i = 0; i < nrows; i++){
-            f_values[i] = 0.0;
-         }
-      }
-      else if (piece == 2){
+      if (piece == 2){
          hypre_solver->FEval(y->GetBoxValues(), t, level_index, &f_values);
       }
       else {
-         cout << "ERROR in \"HypreSolverFEval()\": Bad value for variable 'piece'\n";
-         exit(1);
+         for (int i = 0; i < nrows; i++){
+            f_values[i] = 0.0;
+         }
       }
       f->SetBoxValues(f_values);
    }
@@ -224,27 +222,36 @@ extern "C"
       hypre_solver->FComp(&y_values, t, dtq, rhs->GetBoxValues(), level_index, &f_values);
       y->SetBoxValues(y_values);
       f->SetBoxValues(f_values);
+
+      //FComp_count++;
    }
 
    double HypreMaxErr(HypreVector *hypre_vector, double t, double init_cond)
    {
       int Q = 100, P = 100;
-      
+
       double *u = hypre_vector->HeatEquTrueSol(t, P, Q, init_cond);
       double *x = hypre_vector->GetBoxValues();
-      
-      double max_err = 0.0;
+
+      double error;
+      double max_error = 0.0;
+      double error_inner_prod = 0.0, error_L2norm;
       for (int i = 0; i < hypre_vector->GetNumRows(); i++){
          double abs_diff = abs(x[i] - u[i]);
-         //printf("%f %f\n", x[i], u[i]);
-         if (abs_diff > max_err){
-            max_err = abs_diff;
-         }
+         //if (abs_diff > max_error){
+         //   max_error = abs_diff;
+         //}
+         error_inner_prod += pow(abs_diff, 2.0);
       }
 
       free(u);
- 
-      return max_err;
+
+      //err = max_err;
+
+      MPI_Allreduce(&error_inner_prod, &error_L2norm, 1, MPI_DOUBLE, MPI_SUM, hypre_vector->comm);
+      error = sqrt(error_L2norm);
+
+      return error;
    }
 
    void HypreRestrict(HypreVector *y_f, HypreVector *y_c, int pfasst_f_level, int pfasst_c_level)
