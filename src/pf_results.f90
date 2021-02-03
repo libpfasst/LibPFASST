@@ -174,7 +174,7 @@ contains
           end if
        end do
     end if
-!    write(iout,*) '"foo":"0"'
+    write(iout,*) '"foo":"0"'
     write(iout,*) '}'
     
     close(iout)
