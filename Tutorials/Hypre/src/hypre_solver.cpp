@@ -9,12 +9,13 @@ HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_m
 
    n_pre  = 1;
    n_post = 1;
-   tol = 0.0;
+   tol = 1e-9;
    max_iter = in_max_iter;
    jacobi_weight = 1.0;
-   relax_type = RELAX_RBGS_NONSYMMETRIC;
+   relax_type = RELAX_RBGS;
    solver_type = SOLVER_PFMG;
    max_levels = in_max_levels;
+   num_levels = in_max_levels;
    setup_done = 1;
 }
 
@@ -292,7 +293,7 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    else {
       HYPRE_StructPFMGSolve(solver_imp, A_imp, b, x);
 
-      //HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
+      //HYPRE_StructPFMGGetNumIterations(solver_imp, &num_iterations);
       //HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
 
       //printf("%d %e\n", num_iterations, final_res_norm);
@@ -451,8 +452,11 @@ void HypreSolver::Prolong(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_
 
 void HypreSolver::Cleanup(void)
 {
-   //HYPRE_StructPFMGDestroy(pfmg_level_data);
-   //HYPRE_StructGridDestroy(grid);
-   //HYPRE_StructStencilDestroy(stencil);
-   //HYPRE_StructMatrixDestroy(A);
+   if (grid != NULL) HYPRE_StructGridDestroy(grid);
+   if (stencil != NULL) HYPRE_StructStencilDestroy(stencil);
+   if (A_imp != NULL) HYPRE_StructMatrixDestroy(A_imp);
+   if (A_exp != NULL) HYPRE_StructMatrixDestroy(A_exp);
+   if (solver_imp != NULL) CleanupStructSolver(&solver_imp, &precond_imp);
+   if (b != NULL) HYPRE_StructVectorDestroy(b);
+   if (x != NULL) HYPRE_StructVectorDestroy(x);
 }

@@ -9,7 +9,7 @@ module probin
   !  The namlist for local variables
   integer, save :: num_grid_points, nspace, ntime, space_dim, max_space_v_cycles
   integer, save :: solver_type, mgrit_n_init, mgrit_refine_factor, nsteps_rk(PF_MAXLEVS)
-  logical, save :: FAS_flag
+  logical, save :: FAS_flag, FCF_flag
   real(pfdp), save :: init_cond
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: T0, Tfin   ! Final time
@@ -20,7 +20,7 @@ module probin
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
   namelist /params/ space_dim, num_grid_points, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
-  namelist /params/ mgrit_n_init, mgrit_refine_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order
+  namelist /params/ mgrit_n_init, mgrit_refine_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order, FCF_flag
 
 contains
   
@@ -68,6 +68,7 @@ contains
     rk_order = 1
 
     FAS_flag = .false.
+    FCF_flag = .true.
     solver_type = 0
     
     !>  Read in stuff from input file

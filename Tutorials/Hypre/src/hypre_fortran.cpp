@@ -5,8 +5,9 @@
  *  C++ functions called from Fortran to manipulate Hypre vector and solver objects
  */
 
-HypreSolver *glob_hypre_solver;
-int glob_spacial_coarsen_flag;
+HypreSolver *glob_hypre_solver = nullptr;
+int glob_spacial_coarsen_flag = 0;
+MPI_Comm glob_space_comm = MPI_COMM_NULL;
 //int FComp_count = 0;
 
 /* TODO: handle case when number of pfasst levels > number of hypre levels */
@@ -83,10 +84,18 @@ extern "C"
                           int iupper0,
                           int iupper1)
    {
-      int extents[4] = {ilower0, ilower1, iupper0, iupper1};
-      MPI_Comm newcomm;
-      MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
-      *hypre_vector = new HypreVector(num_grid_points, 0.0, newcomm, space_dim, nrows, extents);
+      if (*hypre_vector == nullptr){
+         int extents[4] = {ilower0, ilower1, iupper0, iupper1};
+         MPI_Comm newcomm;
+         if (glob_space_comm == MPI_COMM_NULL){
+            MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
+         }
+         else {
+            newcomm = glob_space_comm;
+         }
+         newcomm = glob_space_comm;
+         *hypre_vector = new HypreVector(num_grid_points, 0.0, newcomm, space_dim, nrows, extents);
+      }
    }
 
    void HypreVectorDestroy(HypreVector *hypre_vector)
@@ -155,8 +164,14 @@ extern "C"
          }
       }
       else {
-         if (*hypre_solver == NULL){
-            MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
+         if (*hypre_solver == nullptr){
+            if (glob_space_comm == MPI_COMM_NULL){
+               MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
+            }
+            else {
+               newcomm = glob_space_comm;
+            }
+            newcomm = glob_space_comm;
             *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, num_grid_points);
             (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
             (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
@@ -187,7 +202,9 @@ extern "C"
    void HypreSolverDestroy(HypreSolver *hypre_solver, int pfasst_level_index)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-      delete hypre_solver;
+      if (hypre_solver != nullptr){
+         delete hypre_solver;
+      }
    }
 
    void HypreSolverFEval(HypreSolver *hypre_solver, HypreVector *y, double t, int pfasst_level_index, HypreVector *f, int piece)
@@ -238,18 +255,18 @@ extern "C"
       double error_inner_prod = 0.0, error_L2norm;
       for (int i = 0; i < hypre_vector->GetNumRows(); i++){
          double abs_diff = abs(x[i] - u[i]);
-         //if (abs_diff > max_error){
-         //   max_error = abs_diff;
-         //}
-         error_inner_prod += pow(abs_diff, 2.0);
+         if (abs_diff > max_error){
+            max_error = abs_diff;
+         }
+         //error_inner_prod += pow(abs_diff, 2.0);
       }
 
       free(u);
 
-      //err = max_err;
+      error = max_error;
 
-      MPI_Allreduce(&error_inner_prod, &error_L2norm, 1, MPI_DOUBLE, MPI_SUM, hypre_vector->comm);
-      error = sqrt(error_L2norm);
+      //MPI_Allreduce(&error_inner_prod, &error_L2norm, 1, MPI_DOUBLE, MPI_SUM, hypre_vector->comm);
+      //error = sqrt(error_L2norm);
 
       return error;
    }

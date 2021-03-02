@@ -29,7 +29,7 @@ contains
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
     integer :: n_init, refine_factor, FComp_setup_flag
-    logical :: FCF_flag, setup_start_coarse_flag
+    logical :: setup_start_coarse_flag
 
     if ((solver_type .eq. 1) .and. (rk_order .eq. 1)) then
        FComp_setup_flag = 0
@@ -57,7 +57,7 @@ contains
        allocate(hypre_vector_factory::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
-       if (solver_type .eq. 1) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
           allocate(my_stepper_t::pf%levels(l)%ulevel%stepper)
        else
           allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
@@ -65,14 +65,16 @@ contains
 
        call pf_level_set_size(pf, l, lev_shape(l,:), 0)
 
-       if (solver_type .eq. 1) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
           pf%levels(l)%ulevel%stepper%order = rk_order
-          pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+          if (solver_type .eq. 2) then
+             pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+          end if
        end if
     end do
 
     l_finest = pf%nlevels
-    if (solver_type .eq. 1) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
        if (spacial_coarsen_flag .eq. 1) then
           st_finest = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
           call HypreSolverInit(st_finest%c_hypre_solver_ptr, &
@@ -160,21 +162,20 @@ contains
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    if (solver_type .eq. 1) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
        call stepper_hypre_set_level_data(pf)
     else
        call sweeper_hypre_set_level_data(pf)
     end if
 
     if (solver_type .eq. 1) then
-       FAS_flag = .false.
-       FCF_flag = .true.
        T0 = 0.0_pfdp
        setup_start_coarse_flag = .false.
        if (setup_start_coarse_flag .eqv. .true.) then
           n_init = max(1, mgrit_n_init/pf%comm%nproc)
        else
-          n_init = mgrit_n_init
+          n_init = mgrit_n_init / pf%comm%nproc
+          !n_init = pf%state%nsteps / pf%comm%nproc
        end if
        refine_factor = mgrit_refine_factor
        call mgrit_initialize(pf, mg_ld, T0, Tfin, n_init, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)

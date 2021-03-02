@@ -35,6 +35,7 @@ contains
     use encap             !< Local module defining the encapsulation
     use pf_space_comm
     use pfasst_hypre
+    use pf_mod_parareal
 
     implicit none
 
@@ -76,7 +77,7 @@ contains
     call pf_mpi_create(comm, time_comm)
     
 
-    if (solver_type .eq. 1) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
        pf%use_rk_stepper = .true.
        pf%use_sdc_sweeper = .false.
     else
@@ -86,6 +87,10 @@ contains
 
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
+    if ((solver_type .eq. 2) .and. (pf%nlevels .ne. 2)) then
+       print *, 'ERROR: nlevels must be 2 for Parareal.'
+       return
+    end if
 
     spacial_coarsen_flag = 0
     call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spacial_coarsen_flag)
@@ -95,8 +100,10 @@ contains
     if (solver_type .eq. 1) then
        call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     else
-       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+       !call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     end if
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !>  Output run parameters
     call print_loc_options(pf,un_opt=6)
@@ -114,6 +121,14 @@ contains
     !> Do the PFASST time stepping
     if (solver_type .eq. 1) then
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
+    else if (solver_type .eq. 2) then
+       call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
+    else if (solver_type .eq. 3) then
+       call initialize_results(pf)
+       if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+       call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
+       if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+       call pf_dump_stats(pf)
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if

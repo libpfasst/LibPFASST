@@ -24,8 +24,8 @@ class HypreSolver: public HypreStruct {
    public:
       HYPRE_StructMatrix A_exp = NULL;
       HYPRE_StructMatrix A_imp = NULL;
-      HYPRE_StructVector b;
-      HYPRE_StructVector x;
+      HYPRE_StructVector b = NULL;
+      HYPRE_StructVector x = NULL;
       HYPRE_StructSolver solver_imp = NULL;
       HYPRE_StructSolver precond_imp = NULL;
 

@@ -9,7 +9,7 @@ module pf_my_stepper
 
   !>  extend the stepper type with stuff we need to compute rhs
   type, extends(pf_ark_stepper_t) :: my_stepper_t
-   type(c_ptr) :: c_hypre_solver_ptr
+   type(c_ptr) :: c_hypre_solver_ptr = c_null_ptr
    contains
 
      procedure :: f_eval => f_eval_stepper    !  Computes the explicit rhs terms
@@ -32,18 +32,22 @@ contains
     integer, intent(in) :: level_index
     integer :: nx, comm_color, space_dim, max_space_v_cycles, spacial_coarsen_flag
 
+    if (solver_type .eq. 2) then
+       this%nsteps=nsteps_rk(level_index)
+    end if
+
     call this%ark_initialize(pf,level_index)
 
-    if (ark_stat .eq. 0 ) then
+    if (ark_stat .eq. 0) then
        this%explicit=.TRUE.
        this%implicit=.FALSE.
-    elseif (ark_stat .eq. 1 ) then
+    elseif (ark_stat .eq. 1) then
        this%implicit=.TRUE.
        this%explicit=.FALSE.
     else
        this%implicit=.TRUE.
        this%explicit=.TRUE.
-    end if 
+    end if
 
     ! Space variables
     nx = pf%levels(level_index)%lev_shape(1)

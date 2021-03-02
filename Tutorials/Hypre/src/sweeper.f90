@@ -8,7 +8,7 @@ module pf_my_sweeper
 
   !>  extend the imex sweeper type with stuff we need to compute rhs
   type, extends(pf_imex_sweeper_t) :: my_sweeper_t
-   type(c_ptr) :: c_hypre_solver_ptr
+   type(c_ptr) :: c_hypre_solver_ptr = c_null_ptr
    contains
 
      procedure :: f_eval    !  Computes the explicit rhs terms
@@ -112,8 +112,16 @@ contains
     !>  Call the imex sweeper initialization
     call this%imex_initialize(pf,level_index)
 
-    this%implicit=.true.
-    this%explicit=.false.
+    if (imex_stat .eq. 0 ) then
+       this%explicit=.TRUE.
+       this%implicit=.FALSE.
+    elseif (imex_stat .eq. 1 ) then
+       this%implicit=.TRUE.
+       this%explicit=.FALSE.
+    else
+       this%implicit=.TRUE.
+       this%explicit=.TRUE.
+    end if    
 
     ! Space variables
     nx = pf%levels(level_index)%lev_shape(1)
