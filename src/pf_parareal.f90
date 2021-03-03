@@ -352,7 +352,7 @@ contains
 
 
     ! Shortcut for fixed iteration mode
-    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+    if (pf%abs_res_tol == 0.0 .and. pf%rel_res_tol == 0.0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return
