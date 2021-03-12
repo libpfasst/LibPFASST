@@ -59,6 +59,9 @@ contains
 
     double precision ::  t_wall
     integer :: l   !  Either the first index or level_index
+    if (pf%save_timings .eq. 0) return
+    if ((pf%save_timings .eq. 1) .and. (timer_index .ne. T_TOTAL)) return    
+    
     l=1
     if (present(level_index)) l=level_index
 
