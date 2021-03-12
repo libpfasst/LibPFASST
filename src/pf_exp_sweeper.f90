@@ -329,7 +329,7 @@ type, extends(pf_sweeper_t), abstract :: pf_exp_t
            call pf_stop_timer(pf, T_FEVAL,level_index)
            
 
-           call pf_residual(pf, level_index, dt)
+           if(pf%save_residuals) call pf_residual(pf, level_index, dt)
            call lev%qend%copy(lev%Q(lev%nnodes))
            call pf_stop_timer(pf, T_SWEEP,level_index)                
            call call_hooks(pf, level_index, PF_POST_SWEEP)

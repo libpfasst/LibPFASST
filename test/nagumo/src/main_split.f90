@@ -96,7 +96,7 @@ program main
 !   call pf_add_hook(pf, 3, PF_PRE_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf, 3, PF_POST_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,3,PF_POST_ITERATION,echo_error_hook)
-  call pf_add_hook(pf,pf%nlevels,PF_POST_STEP,echo_error_hook)
+  call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
 

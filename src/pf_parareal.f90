@@ -79,7 +79,6 @@ contains
     !>  Output stats
     call pf_dump_stats(pf)
 
-
   end subroutine pf_parareal_run
 
   !>  parareal controller for block mode
@@ -164,7 +163,7 @@ contains
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
        ! After the predictor, the residual and delta_q0 are just zero
-       call pf_set_delta_q0(pf,1,0.0_pfdp)       
+       if (pf%save_delta_q0) call pf_set_delta_q0(pf,1,0.0_pfdp)       
        call pf_set_resid(pf,pf%nlevels,0.0_pfdp)       
        call call_hooks(pf, -1, PF_POST_ITERATION)       !  This is the zero iteration
        
@@ -294,7 +293,7 @@ contains
 
     !  Save the old value of q0 and qend so that we can compute difference
 
-    call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+    if (pf%save_delta_q0) call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
 
     call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
 
@@ -311,7 +310,7 @@ contains
     !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
-    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  save in Q(1) for next iteration
     !  Finish the parareal update (store in fine qend) F_old-G_old+G_new
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
@@ -322,15 +321,20 @@ contains
     call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
 
     !  Complete the jump at the end
-    call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
+    if (pf%save_delta_q0) call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
 
+    !  Save residual
+    if (pf%save_residuals) then    
+       f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
+       call pf_set_resid(pf,1,f_lev%residual)
+       call pf_set_resid(pf,2,f_lev%residual)
+    end if
     !  Save jumps
-    c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
-    f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
-    call pf_set_resid(pf,1,f_lev%residual)
-    call pf_set_resid(pf,2,f_lev%residual)
-    call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
-    call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
+    if (pf%save_delta_q0) then
+       c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
+       call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
+       call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
+    end if
 
   end subroutine pf_parareal_v_cycle
   
@@ -348,7 +352,7 @@ contains
 
 
     ! Shortcut for fixed iteration mode
-    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+    if (pf%abs_res_tol == 0.0 .and. pf%rel_res_tol == 0.0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return

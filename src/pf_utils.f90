@@ -22,7 +22,7 @@ contains
     real(pfdp) :: sol_norms(pf%levels(level_index)%nnodes)      !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
     integer :: m
     type(pf_level_t), pointer   :: lev
-    
+
     call pf_start_timer(pf, T_RESIDUAL,level_index)
 
     lev => pf%levels(level_index)

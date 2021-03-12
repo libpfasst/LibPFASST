@@ -153,6 +153,7 @@ contains
 
     ! need to wait here to make sure last non-blocking send is done
     if(blocking .eqv. .false.) then
+
        if (pf%debug) print  '("DEBUG-rank=", I5, " begin wait, level=",I4)',rank,level%index
 
        call pf_start_timer(pf, T_WAIT, level%index)
@@ -176,6 +177,7 @@ contains
     end if
     call pf_stop_timer(pf, T_PACK, level%index)
 
+
     !  Do the send 
     if (pf%debug) print  '("DEBUG-rank=", I5, " begin send, level=",I4, " tag=", I8," blocking=", L3," status=",I3)',rank,level%index,tag,blocking,istatus
 
@@ -186,6 +188,7 @@ contains
     !  Check for an error
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,'error during send, ierr',val=ierr,rank=rank)
     if (pf%debug) print  '("DEBUG-rank=", I5, " end send, level=",I4, " tag=", I8," blocking=", L3," status=",I3)',rank,level%index,tag,blocking,istatus
+
   end subroutine pf_send
 
   !>  Subroutine to recieve the solution from the previous processor
@@ -194,6 +197,7 @@ contains
     type(pf_level_t),  intent(inout) :: level
     integer,           intent(in)    :: tag
     logical,           intent(in)    :: blocking
+
     integer, optional, intent(in)    :: dir
     integer, optional, intent(in)    :: which
     integer, optional, intent(in)    :: stride
@@ -215,8 +219,8 @@ contains
     if(present(which)) which_ = which
     if(present(stride)) stride_ = stride
     if(abs(dir_) .gt. 1) call pf_stop(__FILE__,__LINE__,'bad value for dir',val=dir_,rank=rank)
+    if( pf%debug) print '("DEBUG-rank=",I5," begin recv, blocking=",L4," tag=",I8," pstatus=", I2)',rank,blocking,tag,pstatus
 
-    if (pf%debug) print '("DEBUG-rank=",I5," begin recv, blocking=",L4," tag=",I8," pstatus=", I2)',rank,blocking,tag,pstatus
 
     source=pf%rank-(dir_)*(stride_)
     if (source < 0  .or. source > pf%comm%nproc-1) return 
@@ -225,6 +229,7 @@ contains
        ntimer=T_RECEIVE
     else
        ntimer=T_WAIT
+
     end if
     
     call pf_start_timer(pf, ntimer, level%index)
@@ -263,6 +268,7 @@ contains
     call pf_stop_timer(pf, T_BROADCAST)
 
     if (ierr /= 0) call pf_stop(__FILE__,__LINE__,'error during broadcast, ierr',val=ierr,rank=pf%rank)
+
     if(pf%debug)print *,'DEBUG-rank=',pf%rank,' end broadcast'
   end subroutine pf_broadcast
 

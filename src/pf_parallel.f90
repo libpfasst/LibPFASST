@@ -173,7 +173,7 @@ contains
     else
       level_index = 1
       c_lev => pf%levels(1)
-      call pf_residual(pf, f_lev%index, dt,0)
+      if(pf%save_residuals)  call pf_residual(pf, f_lev%index, dt,0)
     end if
 
     !!
