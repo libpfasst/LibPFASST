@@ -64,7 +64,7 @@ contains
     r => cast_as_zmkpair(pf%levels(level_index)%R(pf%levels(level_index)%nnodes-1))
     q => cast_as_zmkpair(pf%levels(level_index)%Q(pf%levels(level_index)%nnodes-1))
 
-    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es18.10e4)', &
+    print '("resid: time: ", f10.5," rank: ",i3.3," step: ",i5.5," iter: ",i4.3," level: ",i1.1," resid: ",es19.8e4)', &
          pf%state%t0+pf%state%dt, pf%rank, pf%state%step+1, pf%state%iter, level_index, maxval(abs(r%array))
 
     if (any(isnan(real(q%array)))) then

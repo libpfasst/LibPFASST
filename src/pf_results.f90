@@ -65,8 +65,9 @@ contains
     datpath= 'dat/' // trim(pf%outdir) // '/'
 
     ! Create directory for this processor
-    write (dirname, "(A5,I0.3)") 'Proc_',pf%results%rank
-    datpath=trim(datpath) // trim(dirname) 
+    write (dirname, "(A5,I0.4)") 'Proc_',pf%results%rank
+    datpath=trim(datpath) // trim(dirname)
+
     istat= system('mkdir -p ' // trim(datpath))
     if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make Proc directory")
     !  Final path for all the stat files
@@ -90,40 +91,43 @@ contains
        resname = trim(this%datpath) // '/residual.dat'
        rstream=5000+this%rank
        open(rstream, file=trim(resname), form='formatted',err=999)
+       write(rstream,*)'#level   step     block  iter  sweep   residual'       
     end if
     if (this%save_errors) then
        errname = trim(this%datpath) // '/error.dat'
        estream=6000+this%rank
        open(estream, file=trim(errname), form='formatted',err=999)
+       write(estream,*)'#level   step     block  iter  sweep   error'
     end if
     if (this%save_delta_q0) then
        q0name = trim(this%datpath) // '/delta_q0.dat'
        qstream=7000+this%rank
        open(qstream, file=trim(q0name), form='formatted',err=999)
+       write(qstream,*)'#level   step     block  iter  sweep   delta q0'       
     end if
+    if (this%save_residuals .or. this%save_errors .or. this%save_delta_q0) then
+       do klevel=1,this%nlevs
+          do kblock = 1, this%nblocks
+             nstep=(kblock-1)*this%nprocs+this%rank+1
+             do kiter = 0 , this%niters
+                do ksweep = 1, this%max_nsweeps
+                   if (this%save_residuals) write(rstream,101 ) klevel,nstep,kblock,kiter,ksweep,this%residuals(klevel, kblock,kiter+1, ksweep)
+                   if (this%save_errors) write(estream,101) klevel,nstep,kblock,kiter,ksweep,this%errors(klevel,kblock,kiter+1,  ksweep)
+                   if (this%save_delta_q0) write(qstream,101) klevel,nstep,kblock,kiter,ksweep,this%delta_q0(klevel, kblock,kiter+1, ksweep)
+                end do
+             end do
+          enddo
+       enddo
+101    format(I3,I10, I10,I6, I6, e22.14)
+       if (this%save_residuals) close(rstream)
+       if (this%save_errors) close(estream)
+       if (this%save_delta_q0) close(qstream)
+    end if
+
     !  output file for iters
     iname = trim(this%datpath) // '/iter.dat'
     istream=8000+this%rank
     open(istream, file=trim(iname), form='formatted',err=999)
-    write(rstream,*)'#level   step     block  iter  sweep   residual'
-    do klevel=1,this%nlevs
-       do kblock = 1, this%nblocks
-          nstep=(kblock-1)*this%nprocs+this%rank+1
-          do kiter = 0 , this%niters
-             do ksweep = 1, this%max_nsweeps
-                if (this%save_residuals) write(rstream,101 ) klevel,nstep,kblock,kiter,ksweep,this%residuals(klevel, kblock,kiter+1, ksweep)
-                if (this%save_errors) write(estream,101) klevel,nstep,kblock,kiter,ksweep,this%errors(klevel,kblock,kiter+1,  ksweep)
-                if (this%save_delta_q0) write(qstream,101) klevel,nstep,kblock,kiter,ksweep,this%delta_q0(klevel, kblock,kiter+1, ksweep)
-             end do
-          end do
-       enddo
-    enddo
-    101 format(I3,I10, I10,I6, I6, e22.14)
-    if (this%save_residuals) close(rstream)
-    if (this%save_errors) close(estream)
-    if (this%save_delta_q0) close(qstream)
-
-
     do kblock = 1, this%nblocks
        nstep=(kblock-1)*this%nprocs+this%rank+1
        write(istream, '(I10,I10, e22.14)') nstep,kblock,this%iters(kblock)
@@ -143,6 +147,9 @@ contains
     integer :: j, iout,system,nlev,k,kmax
     real(pfdp) :: qarr(pf%nlevels)
 
+    !  Return if timers are off
+    if (pf%save_timings .eq. 0) return
+    
     !  Write a json file with timer numbers and times
     fullname = trim(this%datpath) // '/runtime.json'
     iout = 4000+pf%rank !  Use processor dependent file number

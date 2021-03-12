@@ -365,6 +365,9 @@ contains
     call mpi_barrier(pf%comm%comm, ierror)
 
     !> Start timer
+
+    call pf_start_timer(pf, T_TOTAL)
+
     do iter = 1, pf%niters
        pf%state%iter = iter
 
@@ -406,7 +409,7 @@ contains
           exit
        end if
     end do
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_stats(pf)
 

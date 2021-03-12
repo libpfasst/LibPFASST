@@ -307,6 +307,10 @@ contains
         this%nstages = nstages
         this%npieces = npieces
 
+        !  Store the info in the pf structure
+        pf%rk_order(level_index)=this%order
+        pf%rk_nstages(level_index)=this%nstages
+
         ! Allocate space for local variables
         call lev%ulevel%factory%create_single(this%y_n,    level_index,  lev%lev_shape)
         call lev%ulevel%factory%create_single(this%y_np1,  level_index,  lev%lev_shape)
@@ -369,9 +373,9 @@ contains
           call this%y_n%copy(this%y_np1)
        endif
        ! Loop over stage values
-       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+       call pf_start_timer(pf,T_FEVAL,level_index)       
        call this%f_eval(this%y_n, tn, level_index, this%F(1,1))
-       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+       call pf_stop_timer(pf,T_FEVAL,level_index)       
        do i = 1, this%nstages - 1
           call this%compD(dt, i, this%y_n, this%y_stage)
           do j = 1, i
@@ -380,9 +384,9 @@ contains
                 call this%y_stage%axpy(1.0_pfdp, this%PFY)
              endif
           enddo
-          if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
+          call pf_start_timer(pf,T_FEVAL,level_index)       
           call this%f_eval(this%y_stage, tn + dt * this%c(i), level_index, this%F(i+1,1))
-          if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)       
+          call pf_stop_timer(pf,T_FEVAL,level_index)       
        enddo
        call this%compD(dt, this%nstages, this%y_n, this%y_np1)
        do i = 1, this%nstages

@@ -5,6 +5,7 @@
 !> Module defining exact solutions for various PDEs
 module pf_mod_solutions
   use pf_mod_dtype
+  use pf_mod_stop
   implicit none
 
   interface exact_ad_cos
@@ -45,6 +46,14 @@ module pf_mod_solutions
      module procedure exact_nls_sg_2d
      module procedure exact_nls_sg_3d
   end interface exact_nls_sg
+  interface exact_nls_pert
+     module procedure exact_nls_pert_1dz
+     module procedure exact_nls_pert_2dz
+     module procedure exact_nls_pert_3dz
+     module procedure exact_nls_pert_1d
+     module procedure exact_nls_pert_2d
+     module procedure exact_nls_pert_3d
+  end interface exact_nls_pert
   interface exact_kdv
      module procedure exact_kdv_1d
      module procedure exact_kdv_1dz
@@ -53,6 +62,7 @@ module pf_mod_solutions
 !!$     module procedure exact_kdv_2dz
 !!$     module procedure exact_kdv_3dz
   end interface exact_kdv
+
   
 contains
   !> Routine to return the exact solution for advection diffusion
@@ -757,17 +767,157 @@ contains
     end do
 
   end subroutine exact_nls_sg_3d
+  function nls_pert_ex(t, x,Lx) result(u)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(in)  :: x
+    real(pfdp), intent(in)  :: Lx        
+    complex(pfdp)  :: u
 
-    !  Soliton exact solution to kdv  moving at speed one (must scale equation properly)
-    function kdv_ex(t, x,beta,Lx) result(u)
+    real(pfdp) :: eps
+    eps=0.01_pfdp
+
+    !    u=1.0_pfdp+eps*exp(zi*x*0.25_pfdp-2.0_pfdp*two_pi)
+    !    u=1.0_pfdp+eps*exp(zi*(x-2.0_pfdp*two_pi)*0.25_pfdp)
+    u=1.0_pfdp+eps*exp(zi*(x)*0.25_pfdp)        
+
+  end function nls_pert_ex
+  subroutine exact_nls_pert_1dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)-0.5_pfdp*Lx 
+       uex(i) = nls_pert_ex(t, x,Lx)
+    end do
+
+  end subroutine exact_nls_pert_1dz
+  
+  subroutine exact_nls_pert_2dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
+    do j = 1, ny
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+       sy=nls_pert_ex(t, y,Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+          uex(i,j) = nls_pert_ex(t, x,Lx(1))*sy
+       end do
+    end do
+       
+  end subroutine exact_nls_pert_2dz
+  
+  subroutine exact_nls_pert_3dz(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    complex(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,L
+    real(pfdp) :: sz, sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
+       sz = nls_pert_ex(t, z,Lx(3))
+       do j = 1, ny
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+          sy = nls_pert_ex(t, y,Lx(2))
+          do i = 1, nx
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+             uex(i,j,k) = nls_pert_ex(t, x,Lx(1))*sy*sz
+          end do
+       end do
+    end do
+
+  end subroutine exact_nls_pert_3dz
+  subroutine exact_nls_pert_1d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:)
+    real(pfdp), intent(in) :: Lx
+    
+    integer    :: nx, i
+    real(pfdp) :: x
+    
+    nx = SIZE(uex)
+    do i = 1, nx
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       uex(i) = nls_pert_ex(t, x,Lx)       
+    end do
+
+  end subroutine exact_nls_pert_1d
+  
+  subroutine exact_nls_pert_2d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:)
+    real(pfdp), intent(in) :: Lx(2)
+    
+    integer    :: nx,ny, i,j
+    real(pfdp) :: x, y,sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)
+    do j = 1, ny
+       y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+       sy=nls_pert_ex(t, y,Lx(2))              
+       do i = 1, nx
+          x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+          uex(i,j) = nls_pert_ex(t, x,Lx(1))*sy
+       end do
+    end do
+       
+  end subroutine exact_nls_pert_2d
+  
+  subroutine exact_nls_pert_3d(t, uex,Lx)
+    real(pfdp), intent(in)  :: t
+    real(pfdp), intent(inout) :: uex(:,:,:)
+    real(pfdp), intent(in) :: Lx(3)
+    
+    integer    :: nx,ny,nz, i,j,k
+    real(pfdp) :: x, y,z,L
+    real(pfdp) :: sz, sy
+    
+    nx = SIZE(uex,1)
+    ny = SIZE(uex,2)    
+    nz = SIZE(uex,3)    
+    do k = 1, nz
+       z = Lx(3)*real(k-1,pfdp)/REAL(nz,pfdp) 
+       sz = nls_pert_ex(t, z,Lx(3))
+       do j = 1, ny
+          y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
+          sy = nls_pert_ex(t, y,Lx(2))
+          do i = 1, nx
+             x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+             uex(i,j,k) = nls_pert_ex(t, x,Lx(1))*sy*sz
+          end do
+       end do
+    end do
+
+  end subroutine exact_nls_pert_3d
+
+  !  Soliton exact solution to kdv  moving at speed one (must scale equation properly)
+  function kdv_ex(t, x,beta,Lx) result(u)
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(in)  :: x
     real(pfdp), intent(in)  :: beta
     real(pfdp), intent(in)  :: Lx        
     real(pfdp)  :: u
-
+    
     real(pfdp) :: a,s
-
+    
     a=beta*(x-0.375_pfdp*Lx-t)
     s = 2.0_pfdp/(exp(a)+exp(-a))
     u=s*s
@@ -856,19 +1006,38 @@ contains
   end subroutine exact_kdv_3dz
 
   !  Initial conditions for ML games
-  subroutine init_ML_1dz(u,Lx,ic_bar)
+  subroutine init_ML_1dz(u,Lx,ic_bar,ic_type)
     complex(pfdp), intent(inout) :: u(:)
     real(pfdp), intent(in) :: Lx
+    integer, intent(in) :: ic_type
     real(pfdp), intent(in) :: ic_bar(:)
     
-    integer    :: nx, i
-    real(pfdp) :: x
-    
+    integer    :: nx, i,j
+    real(pfdp) :: x, xrand(8,2),ixrand(2)
+
     nx = SIZE(u)
-    do i = 1, nx
-       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
-       u(i) = ic_bar(1)*sin(x)       
-    end do
+    select case (ic_type)
+    case (0)
+       !  eight random fourier modes
+       call random_number(xrand)
+       do i = 1, nx
+          x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)
+          u(i)=0.0_pfdp
+          do j = 1,8
+             u(i) = u(i)+ xrand(j,1)*sin(real(j,pfdp)*x)+xrand(j,2)*cos(real(j,pfdp)*x)       
+          end do
+       end do
+    case (1)
+       ! weird exponential thing
+       call random_number(ixrand)
+       ixrand=real(ceiling(ixrand*7))
+       do i = 1, nx
+          x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)
+          u(i)=sin(ixrand(1)*x)*exp(cos(ixrand(2)*x))
+       end do
+    case DEFAULT
+       call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',ic_type)
+    end select
 
   end subroutine init_ML_1dz
   

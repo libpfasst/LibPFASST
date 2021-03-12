@@ -117,7 +117,7 @@ module mod_zmkpair
   !> Wrapper routine for looped allocation of many zmkpair type arrays
   subroutine zmkpair_destroy_array(this, x)
     class(zmkpair_factory), intent(inout):: this
-    class(pf_encap_t), intent(inout), pointer :: x(:)
+    class(pf_encap_t), intent(inout), allocatable :: x(:)
     class(zmkpair), pointer :: zmkpair_obj
     integer :: i
 
@@ -238,7 +238,7 @@ module mod_zmkpair
        write(*, 100) real(this%y(i,i))
     end do
     100 format (*(F18.14))
-    call flush
+    call flush(6)
   end subroutine zmkpair_eprint
 
   subroutine write_to_disk(this, filename)
