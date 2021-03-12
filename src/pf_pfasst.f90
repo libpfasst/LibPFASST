@@ -622,8 +622,7 @@ contains
     datpath= 'dat/' // trim(pf%outdir)     
     !  Save the statistics before returning
 
-    call dump_timingsl(pf%results,pf)
-
+    if (pf%save_timings > 0)  call dump_timingsl(pf%results,pf)
     
     if (pf%save_json) call pf_dump_json(pf)
     

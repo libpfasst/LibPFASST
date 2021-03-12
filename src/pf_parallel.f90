@@ -660,15 +660,12 @@ contains
        if (level_index <= level_index_f) then
           if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at pred 3,lev=',level_index                       
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
-          call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
-          call pf_post(pf, f_lev, f_lev%index*10000+iteration)
-          call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
        else  !  compute residual for diagnostics since we didn't sweep
           pf%state%sweep=1
-          call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
-          call pf_post(pf, f_lev, f_lev%index*10000+iteration)
-          call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
        end if
+       call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
+       call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+       call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
        call pf_delta_q0(pf,level_index)                    
        call pf_residual(pf, f_lev%index, dt,0)
 
