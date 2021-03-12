@@ -177,7 +177,6 @@ contains
     end if
     call pf_stop_timer(pf, T_PACK, level%index)
 
-
     !  Do the send 
     if (pf%debug) print  '("DEBUG-rank=", I5, " begin send, level=",I4, " tag=", I8," blocking=", L3," status=",I3)',rank,level%index,tag,blocking,istatus
 
@@ -219,8 +218,9 @@ contains
     if(present(which)) which_ = which
     if(present(stride)) stride_ = stride
     if(abs(dir_) .gt. 1) call pf_stop(__FILE__,__LINE__,'bad value for dir',val=dir_,rank=rank)
-    if( pf%debug) print '("DEBUG-rank=",I5," begin recv, blocking=",L4," tag=",I8," pstatus=", I2)',rank,blocking,tag,pstatus
 
+
+    if (pf%debug) print '("DEBUG-rank=",I5," begin recv, blocking=",L4," tag=",I8," pstatus=", I2)',rank,blocking,tag,pstatus
 
     source=pf%rank-(dir_)*(stride_)
     if (source < 0  .or. source > pf%comm%nproc-1) return 

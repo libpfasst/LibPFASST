@@ -62,7 +62,7 @@ contains
     
     !>  Read in stuff from input file
     un = 9
-    write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
+    !write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
     open(unit=un, file = probin_fname, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)

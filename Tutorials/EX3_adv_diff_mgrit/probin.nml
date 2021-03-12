@@ -4,7 +4,7 @@
 
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 3
+    nlevels  = 4
 
     !  These are internal pfasst variables that can be reset
     niters = 50  !  default is 5
@@ -12,14 +12,14 @@
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
     qtype   = 1   
 
-    nnodes = 3 5
+    nnodes = 2 3 5
 
     use_proper_nodes=.false.
     nsweeps_pred = 1 1 1
     nsweeps = 1 1 1
    
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 1.d-12
+    abs_res_tol = 1.d-9
     rel_res_tol = 1.d-12
 
     Vcycle=.TRUE.
@@ -36,16 +36,16 @@
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  128 128 128
-    nu = 0.1
-    v=.9
-    Lx=1.0
+    nx =  128 256 512 1024
+    nu = 1.0
+    v=0.0
+    Lx=1
     kfreq = 4
 
     Tfin = .1
     nsteps = 6
 
-    mgrit_n_coarse = 100
+    mgrit_n_coarse = 1
     mgrit_refine_factor = 2
 
     use_mgrit = .true.
@@ -53,6 +53,6 @@
     imex_stat=2
     ark_stat=2
 
-    rk_order=1
+    rk_order=2
 
 /
