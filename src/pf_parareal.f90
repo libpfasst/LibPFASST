@@ -66,7 +66,7 @@ contains
     call mpi_barrier(pf%comm%comm, ierr)
 
     !> Start timer
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
     if (present(qend)) then
        call pf_parareal_block_run(pf, q0, dt, nsteps_loc,qend=qend)
     else
@@ -74,11 +74,10 @@ contains
     end if
 
     !> End timer    
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
 
     !>  Output stats
     call pf_dump_stats(pf)
-
 
   end subroutine pf_parareal_run
 
@@ -123,7 +122,7 @@ contains
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
 
     do k = 1, nblocks   !  Loop over blocks of time steps
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_BLOCK)
+       call pf_start_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_PRE_BLOCK)
        ! print *,'Starting  step=',pf%state%step,'  block k=',k
        ! Each block will consist of
@@ -164,7 +163,7 @@ contains
        !> Call the predictor to get an initial guess on all levels and all processors
        call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
        ! After the predictor, the residual and delta_q0 are just zero
-       call pf_set_delta_q0(pf,1,0.0_pfdp)       
+       if (pf%save_delta_q0) call pf_set_delta_q0(pf,1,0.0_pfdp)       
        call pf_set_resid(pf,pf%nlevels,0.0_pfdp)       
        call call_hooks(pf, -1, PF_POST_ITERATION)       !  This is the zero iteration
        
@@ -172,7 +171,7 @@ contains
           !>  Start the parareal iterations
           do j = 1, pf%niters
              call call_hooks(pf, -1, PF_PRE_ITERATION)
-             if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+             call pf_start_timer(pf, T_ITERATION)
              
              pf%state%iter = j
              
@@ -182,7 +181,7 @@ contains
              !  Check for convergence
              call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
              
-             if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+             call pf_stop_timer(pf, T_ITERATION)
              call call_hooks(pf, -1, PF_POST_ITERATION)
              
              !  If we are converged, exit block
@@ -192,7 +191,7 @@ contains
                 exit
              end if
           end do  !  Loop over j, the iterations in this block
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_BLOCK)
+       call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
     end if
     
@@ -224,7 +223,7 @@ contains
     pf%state%iter = 0          
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
+    call pf_start_timer(pf, T_PREDICTOR)
 
     !  This is for one two levels only or one if only RK is done
     c_lev => pf%levels(1)
@@ -257,7 +256,7 @@ contains
     call c_lev%qend%copy(f_lev%qend, flags=0)     
     call c_lev%q0%copy(f_lev%q0, flags=0)     
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
+    call pf_stop_timer(pf, T_PREDICTOR)
 
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
@@ -294,7 +293,7 @@ contains
 
     !  Save the old value of q0 and qend so that we can compute difference
 
-    call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+    if (pf%save_delta_q0) call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
 
     call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
 
@@ -311,7 +310,7 @@ contains
     !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
-    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  save in Q(1) for next iteration
     !  Finish the parareal update (store in fine qend) F_old-G_old+G_new
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
@@ -322,15 +321,20 @@ contains
     call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
 
     !  Complete the jump at the end
-    call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
+    if (pf%save_delta_q0) call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
 
+    !  Save residual
+    if (pf%save_residuals) then    
+       f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
+       call pf_set_resid(pf,1,f_lev%residual)
+       call pf_set_resid(pf,2,f_lev%residual)
+    end if
     !  Save jumps
-    c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
-    f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
-    call pf_set_resid(pf,1,f_lev%residual)
-    call pf_set_resid(pf,2,f_lev%residual)
-    call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
-    call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
+    if (pf%save_delta_q0) then
+       c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
+       call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
+       call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
+    end if
 
   end subroutine pf_parareal_v_cycle
   
@@ -348,7 +352,7 @@ contains
 
 
     ! Shortcut for fixed iteration mode
-    if (pf%abs_res_tol == 0 .and. pf%rel_res_tol == 0) then
+    if (pf%abs_res_tol == 0.0 .and. pf%rel_res_tol == 0.0) then
        pf%state%pstatus = PF_STATUS_ITERATING
        pf%state%status  = PF_STATUS_ITERATING
        return

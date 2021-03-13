@@ -109,6 +109,10 @@ FFLAGS  += -I/usr/local/fortran/
 FSRC+= src/pf_sundials_vec.f90
 endif
 
+ifeq ($(USE_HYPRE),TRUE)
+include $(LIBPFASST)/Makefile.hypre
+endif
+
 ifdef NOMPI
   FFLAGS += -DNOMPI
 else

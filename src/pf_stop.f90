@@ -5,17 +5,19 @@
 !> Module to exit gracefully and informatively
 module pf_mod_stop
 contains  
-  subroutine pf_stop(pf_file,Nline,msg, N)
+  subroutine pf_stop(pf_file,Nline,msg, val, rank)
     character(len=*), intent(in) :: pf_file
     integer, intent(in):: Nline
     character(len=*), intent(in) :: msg
-    integer, intent(in), optional :: N
+    integer, intent(in), optional :: val
+    integer, intent(in), optional :: rank    
 
     print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    if (present(rank))   print *,'Rank = ',rank
     print *,'Stopping in File: ', pf_file    
     print *,'Line number: ', Nline
     print *,msg
-    if (present(N))   print *,'value=',N
+    if (present(val))   print *,' = ',val
     print *,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     call EXIT(-1)
   end subroutine pf_stop
