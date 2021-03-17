@@ -1,0 +1,25 @@
+# LibPFASST has a convenient set of FFT wrappers
+#  To use FFTW, it must be installed.  This can be done with
+#  "make fftw3" from the LibPFASST base directory and it will
+#  installed in the directory fftw3/   Or one can point FFTW below
+#  to the proper local installation
+#
+#  The second option is to use the F77 implementation in src/pf_fftpack.f90
+#  This might cause compiler errors and/or warnings with some compilers
+#  due to it's "classic"  style
+
+#  Add the interface to the FFT
+FSRC += src/pf_fft.f90 
+
+#  Decide if FFTW will be used (can be over ridden by defining beforehand)
+USE_FFTW?=FALSE
+
+ifeq ($(USE_FFTW),FALSE)
+FSRC += src/pf_fftpack.f90 
+F77SRC = src/dfftpack.o
+else
+FSRC += src/pf_fftw.f90
+FFTWLIB=$(LIBPFASST)/fftw3
+FFLAGS  +=  -I$(FFTWLIB)/include 
+LDFLAGS += -L$(FFTWLIB)/lib -lfftw3
+endif

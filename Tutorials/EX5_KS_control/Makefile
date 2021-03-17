@@ -1,18 +1,20 @@
-##
-# Makefile for mpi-advection example.
+#
+# Makefile for optimal control with K-S equation
 #
 
 LIBPFASST ?= ../../../LibPFASST
-FFTW3     ?= $(LIBPFASST)/fftw3
+#FFTW3     ?= $(LIBPFASST)/fftw3
 LIBNPY ?= $(LIBPFASST)/libnpy
 
+EXE = main.exe
+
+USE_FFT=TRUE
 include $(LIBPFASST)/Makefile.defaults
 
 BUILDDIR = build
 
-USEFFTW=TRUE
-NOFFTW=FALSE
-EXE = main.exe
+#USEFFTW=TRUE
+#NOFFTW=FALSE
 
 DEBUG=FALSE
 
@@ -24,9 +26,9 @@ OBJ = $(subst src, build, $(FSRC:.f90=.o))
 FFLAGS  += -I$(LIBPFASST)/include -I$(LIBNPY)/include 
 # -g -fcheck=all,bounds -fbacktrace
 #-I$(FFTW3)/include
-LDFLAGS += -L$(LIBPFASST)/lib -lpfasst -L$(LIBPFASST)/libnpy/libnpy_fortran_mod -lnpy
+LDFLAGS += -L$(LIBPFASST)/lib -lpfasst -L$(LIBNPY)/libnpy_fortran_mod -lnpy
 #-lblas -llapack
-LDFLAGS += -L$(FFTW3)/lib -L$(FFTW3)/lib64 -lfftw3
+#LDFLAGS += -L$(FFTW3)/lib -L$(FFTW3)/lib64 -lfftw3
 
 
 all: $(EXE)

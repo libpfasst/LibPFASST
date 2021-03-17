@@ -3,12 +3,17 @@
 #
 
 
-DEBUG = FALSE
-MKVERBOSE = FALSE
-USE_PETSC=FALSE
-USE_SUNDIALS=FALSE
-USE_FFTW=FALSE
-USE_AMREX=FALSE
+#  Set some variables to determine what is included in the build
+#  The "?=" checks to see  if they have  been defined so that applications
+#  that need the FFT can specify it automatically in the local Makefile
+DEBUG ?= FALSE
+MKVERBOSE ?= FALSE
+USE_PETSC ?= FALSE
+USE_HYPRE ?= FALSE
+USE_SUNDIALS ?= FALSE
+USE_AMREX ?= FALSE
+USE_FFT ?= FALSE
+
 
 #  File for compiler options
 include $(LIBPFASST)/Makefile.local
@@ -24,6 +29,7 @@ FSRC = src/pfasst.f90 \
        src/pf_fft.f90 \
        src/pf_hooks.f90 \
        src/pf_interpolate.f90 \
+       src/pf_mgrit.f90 \
        src/pf_parallel.f90 \
        src/pf_parareal.f90 \
        src/pf_parallel_oc.f90 \
@@ -54,59 +60,26 @@ FSRC = src/pfasst.f90 \
        src/pf_misdcQ_oc_sweeper.f90 \
        src/pf_verlet_sweeper.f90 \
        src/pf_fexp_sweeper.f90 \
-       src/pf_mgrit.f90 \
-#       src/pf_amisdc.f90 \
-#       src/pf_erkstepper.f90 \
-#       pf_amisdcQ.f90 \
+#       src/pf_amisdc.f90  pf_amisdcQ.f90 \
 
-#  Before using AMReX, one must compile amrexlib
+#   AMReX options
 ifeq ($(USE_AMREX),TRUE)
-AMREX_HOME=$(LIBPFASST)/../amrex
-AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
-
-LIBDIR := $(AMREX_LIBRARY_HOME)/lib
-INCDIR := $(AMREX_LIBRARY_HOME)/include
-
-COMPILE_CPP_FLAGS ?= $(shell awk '/Cflags:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
-COMPILE_LIB_FLAGS ?= $(shell awk '/Libs:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
-FSRC += src/pf_amrex_encap.f90
-
-FFLAGS += -I$(INCDIR) $(COMPILE_CPP_FLAGS)
-LDFLAGS += -L$(LIBDIR) $(COMPILE_LIB_FLAGS) -lamrex -lpthread -lstdc++
+include $(LIBPFASST)/Makefile.AMReX
 endif
 
 #  FFT options
-ifeq ($(USE_FFTW),FALSE)
-F77SRC = src/dfftpack.o
-FSRC+=src/pf_fftpack.f90
-else
-FSRC+=src/pf_fftw.f90
-FFTW=$(LIBPFASST)/fftw3
-FFLAGS  +=  -I$(FFTW)/include
-LDFLAGS += -L$(FFTW)/lib -lfftw3
+ifeq ($(USE_FFT),TRUE)
+include $(LIBPFASST)/Makefile.FFT
 endif
 
-
-#  Before using petsc, one must set the environment variables
-#  PETSC_DIR and PETSC_ARCH
-#  These are displayed at the end of the petsc configuration step
+#   PETSc options
 ifeq ($(USE_PETSC),TRUE)
-FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
-FSRC+= pf_petscVec_encap.f90
-LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
+include $(LIBPFASST)/Makefile.PETSc
 endif
 
-
-#  Before using one must compile SUNDIALS
+#  SUNDIALS options
 ifeq ($(USE_SUNDIALS),TRUE)
-SUNDIALS_DIR=../sundials.5.0.0
-LDFLAGS += -L/usr/local/lib/
-LDFLAGS += -lsundials_farkode_mod
-LDFLAGS += -lsundials_farkode
-LDFLAGS += -lsundials_fnvecserial_mod
-LDFLAGS += -lsundials_nvecserial
-FFLAGS  += -I/usr/local/fortran/
-FSRC+= src/pf_sundials_vec.f90
+include $(LIBPFASST)/Makefile.SUNDIALS
 endif
 
 ifeq ($(USE_HYPRE),TRUE)
@@ -124,8 +97,7 @@ ifdef OMP
 endif
 
 OBJ  = $(subst src, build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-#OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
-ifeq ($(USE_FFTW),FALSE)
+ifeq ($(USE_FFT),TRUE)
 OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif
 

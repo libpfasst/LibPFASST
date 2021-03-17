@@ -6,6 +6,7 @@ LIBPFASST ?= ../..
 BUILDDIR = build
 
 EXE = main.exe
+USE_FFT=TRUE
 include $(LIBPFASST)/Makefile.defaults
 
 FSRC = src/main.f90 src/level.f90 src/sweeper.f90 src/hooks.f90 src/probin.f90 
@@ -17,7 +18,6 @@ FFLAGS  += -I$(LIBPFASST)/include
 all: $(EXE)
 
 VPATHS = src 
-
 
 include $(LIBPFASST)/Makefile.rules
 
