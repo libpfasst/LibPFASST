@@ -12,7 +12,7 @@ jobs:
                   cp Makefile.examples/Makefile.FFT ./  &&
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
-		  make libnpy
+                  make libnpy
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
