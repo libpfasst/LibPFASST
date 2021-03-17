@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
     build:
         docker:
@@ -42,37 +42,3 @@ jobs:
                   cd ../EX4_Boussinesq &&  make   &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
-    test:
-        docker:
-            - image: libpfasst/libpfasst
-        steps:
-            - run: # Modify the commands below to build and check all the tutorials
-                name: run_tutorials
-                command: >
-                  echo "Running Tutorial 1"	&&	  		
-                  cd Tutorials/EX1_Dahlquist &&  make  &&
-                  mpirun -n 8 ./main.exe multi_level.nml &&
-                  echo "Running Tutorial 2" &&	  		
-                  cd ../EX2_Dahlquist &&  
-                  mpirun -n 8 ./main.exe multi_level.nml &&
-                  echo "Running tutorial 3" &&	  		
-                  cd ../EX3_adv_diff && 
-                  mpirun -n 8 ./main.exe multi_level.nml &&
-                  echo "Done with Tutorials" &&	  		
-                  cd ../..
-            - run: # Modify the commands below to build and check the zNdarray examples
-                name: check_zNdarray
-                command: >
-                  cd test
-                  ./test_encaps.sh 
-                  cd ../../..
-
-
-# Orchestrate our job run sequence
-workflows:
-  build_and_test:
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
