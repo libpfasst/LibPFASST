@@ -9,8 +9,8 @@ jobs:
                 name: make_LibPFASST
                 command: >
                   echo "Compiling Libfasst"  &&
-		  cp Makefile.examples/Makefile.FFT ./
-		  cp Makefile.examples/Makefile.local.gnu ./Makefile.local
+                  cp Makefile.examples/Makefile.FFT ./  &&
+                  cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE
             - run:
                 name: test env_links
