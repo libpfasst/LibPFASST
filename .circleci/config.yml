@@ -27,7 +27,7 @@ jobs:
                   echo "Compiling IMEX"	&&	  
                   cd ../EXP_adv_diff_fft/1d && make  &&
                   cd ../../..
-            - run: # Modify the commands below to build and check all the tutorials		  
+            - run: # Modify the commands below to build  all the tutorials		  
                 name: check_tutorials
                 command: >
                   echo "Making Tutorial 1"	&&	  		
@@ -38,3 +38,25 @@ jobs:
                   cd ../EX3_adv_diff &&  make   &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
+            - run: # Modify the commands below to run  all the tutorials
+                name: check_tutorials
+                command: >
+                  cd Tutorials/EX1_Dahlquist &&  
+                  echo "Running Tutorial 1"	&&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  cd ../EX2_Dahlquist &&  
+                  echo "Running Tutorial 2" &&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  cd ../EX3_adv_diff && 
+                  echo "Running tutorial 3" &&	  		
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Done with Tutorials" &&	  		
+                  cd ../..
+            - run: # Modify the commands below to build and check the zNdarray examples
+                name: check_zNdarray
+                command: >
+                  cd test
+                  ./test_encaps.sh 
+                  cd ../../..
+
+
