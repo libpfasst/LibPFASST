@@ -13,6 +13,8 @@ FROM ubuntu:18.04
 RUN set -ex \
   && apt-get -y update \
   && apt-get -y install \
+         git \
+         ssh \
          gfortran \
          mpich \
          libmpich-dev \
@@ -20,7 +22,6 @@ RUN set -ex \
          liblapack-dev \
          python-nose \
          wget \
-         git \
          make \
          python-tk \
          python-pip \
