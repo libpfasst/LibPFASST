@@ -42,7 +42,6 @@ jobs:
                   cd ../EX4_Boussinesq &&  make   &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
-        		  
     test:
         docker:
             - image: libpfasst/libpfasst
