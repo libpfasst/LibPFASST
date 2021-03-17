@@ -27,6 +27,8 @@ RUN set -ex \
          python-pip \
          python-dev \
 	 libfftw3-dev
+RUN  git clone https://github.com/kovalp/libnpy.git  &&
+RUN  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod
 RUN set -ex \
   && pip install  \
         pytest 
