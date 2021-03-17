@@ -23,10 +23,8 @@ libnpy:
 
 
 #  Quick and dirty way to install hypre
-git clone https://github.com/hypre-space/hypre.git
-cd hypre/src
-make distclean
-./configure --disable-fortran
-make -j
+hypre:
+	git clone https://github.com/hypre-space/hypre.git
+	cd hypre/src && make distclean && ./configure --disable-fortran && make -j
 
 
