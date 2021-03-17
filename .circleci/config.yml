@@ -9,7 +9,7 @@ jobs:
                 name: make_LibPFASST
                 command: >
                   echo "Compiling Libfasst"  &&
-                  make  DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE 
+                  make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
@@ -17,29 +17,29 @@ jobs:
                 name: make_tests
                 command: >
                   echo "Compiling magpicard" &&		  
-                  cd test/magpicard &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd test/magpicard &&  make  &&
                   echo "Compiling imk"	&&	  
-                  cd ../imk &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../imk &&  make  &&
                   echo "Compiling nagumo"		  
-                  cd ../nagumo && make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../nagumo && make  &&
                   echo "Compiling IMEX"	&&	  
-                  cd ../EXP_adv_diff_fft/1d && make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../EXP_adv_diff_fft/1d && make  &&
                   cd ../../.. 
             - run: # Modify the commands below to build and check all the tutorials
                 name: check_tutorials
                 command: >
                   echo "Making Tutorial 1"	&&	  		
-                  cd Tutorials/EX1_Dahlquist &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd Tutorials/EX1_Dahlquist &&  make  &&
                   echo "Running Tutorial 1"	&&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Making Tutorial 2"	&&	  		
-                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE   &&
                   echo "Running Tutorial 2" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Checking Tutorial 3" &&	  		
                   cd ../EX3_adv_diff && 
                   echo "Making Tutorial 3"   &&	  		
-                  cd ../EX3_adv_diff &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../EX3_adv_diff &&  make   &&
                   echo "Running tutorial 3" &&	  		
                   mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Done with Tutorials" &&	  		
