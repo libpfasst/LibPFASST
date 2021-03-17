@@ -9,7 +9,7 @@
 #    this will put the image in the docker hub account so it can be pulled
 # Finally, go and update the docker image used in the .circleci/config.yml file
 
-FROM ubuntu:xenial
+FROM ubuntu:18.04
 RUN set -ex \
   && apt-get -y update \
   && apt-get -y install \
@@ -20,10 +20,12 @@ RUN set -ex \
          liblapack-dev \
          python-nose \
          wget \
+         git \
          make \
          python-tk \
          python-pip \
-         python-dev 
+         python-dev \
+	 libfftw3-dev
 RUN set -ex \
   && pip install  \
         pytest 
