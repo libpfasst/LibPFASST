@@ -71,8 +71,7 @@ contains
     call pf_pfasst_setup(pf)
 
     !> add some hooks for output  (using a LibPFASST hook here)
-!    call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
-    call pf%pf_add_hook(-1, PF_POST_ITERATION, pf_echo_residual)
+    call pf_add_hook(pf, -1, PF_POST_ITERATION, pf_echo_residual)
 
     !>  Output run parameters to screen
     call print_loc_options(pf,un_opt=6)
