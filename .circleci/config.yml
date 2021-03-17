@@ -12,7 +12,7 @@ jobs:
                   cp Makefile.examples/Makefile.FFT ./  &&
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
-		  ls
+                  ls
                   git clone https://github.com/kovalp/libnpy.git  &&
                   cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod
             - run:
