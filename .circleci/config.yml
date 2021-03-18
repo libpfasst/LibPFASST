@@ -18,8 +18,7 @@ jobs:
                   ls &&
                   wget https://github.com/kovalp/libnpy/archive/master.zip  &&
                   unzip master.zip  &&  mv libnpy-master libnpy &&
-                  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod &&
-		  ls
+                  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod && ls
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
