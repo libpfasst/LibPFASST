@@ -14,19 +14,5 @@ ENV TZ=US/Pacific
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN  apt-get -y update && \
      apt-get -y install \
-         git \
-         gfortran \
-         mpich \
-         libmpich-dev \
-         libopenblas-dev \
-         liblapack-dev \
-         python-nose \
-         unzip \
-         wget \
-         make \
-         python-tk \
-         python-pip \
-         python-dev \
-	 libfftw3-dev \
-         ssh 
+         git 
 
