@@ -16,5 +16,12 @@ RUN  apt-get -y update && \
      apt-get -y install \
          make \
 	 wget \
-	 unzip
+	 unzip \
+         gfortran \
+         mpich \
+         libmpich-dev \
+         libopenblas-dev \
+         liblapack-dev
+	 
+
 
