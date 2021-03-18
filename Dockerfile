@@ -10,11 +10,11 @@
 # Finally, go and update the docker image used in the .circleci/config.yml file
 
 FROM ubuntu:18.04
-RUN set -ex \
-  && apt-get -y update \
-  && apt-get -y install \
+ENV TZ=US/Pacific
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN  apt-get -y update && \
+     apt-get -y install \
          git \
-         ssh \
          gfortran \
          mpich \
          libmpich-dev \
@@ -22,19 +22,11 @@ RUN set -ex \
          liblapack-dev \
          python-nose \
          unzip \
+         wget \
          make \
          python-tk \
          python-pip \
          python-dev \
-	 libfftw3-dev
-RUN  git clone https://github.com/kovalp/libnpy.git  &&
-RUN  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod
-RUN set -ex \
-  && pip install  \
-        pytest 
-#        tqdm \
-#        numpy \
-#        pandas \
-#        attrs \
-#        scipy \
-#        'matplotlib<1.6.0'
+	 libfftw3-dev \
+         ssh 
+
