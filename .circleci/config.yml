@@ -18,7 +18,8 @@ jobs:
                   ls &&
                   wget https://github.com/kovalp/libnpy/archive/master.zip  &&
                   unzip master.zip  &&  mv libnpy-master libnpy &&
-                  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod
+                  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod &&
+		  ls
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
@@ -62,8 +63,6 @@ jobs:
             - run: # Modify the commands below to build and check the zNdarray examples
                 name: check_zNdarray
                 command: >
-                  cd test
-                  ./test_encaps.sh 
-                  cd ../../..
+                  cd test &&  ./test_encaps.sh &&   cd ../../..
 
 
