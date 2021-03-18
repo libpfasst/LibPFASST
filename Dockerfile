@@ -21,7 +21,7 @@ RUN set -ex \
          libopenblas-dev \
          liblapack-dev \
          python-nose \
-         wget \
+         unzip \
          make \
          python-tk \
          python-pip \
