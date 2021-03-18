@@ -12,9 +12,12 @@ jobs:
                   cp Makefile.examples/Makefile.FFT ./  &&
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
+            - run:
+                name: test libnpy
+                command: >
                   ls &&
                   wget https://github.com/kovalp/libnpy/archive/master.zip  &&
-                  unzip master.zip  &&  mv libnpy-master libnpy &
+                  unzip master.zip  &&  mv libnpy-master libnpy &&
                   cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod
             - run:
                 name: test env_links
