@@ -12,11 +12,13 @@ jobs:
                   cp Makefile.examples/Makefile.FFT ./  &&
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
-                  echo "Compiling Libnpy"  &&
+                  echo "fetching Libnpy"  &&
                   ls &&
                   wget https://github.com/kovalp/libnpy/archive/master.zip  &&
-                  unzip master.zip  &&  mv libnpy-master libnpy &&
-                  cd libnpy && cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod && ls && cd .. & ls
+                  echo "unzipping Libnpy"  &&
+                  unzip master.zip  &&  mv libnpy-master libnpy && cd libnpy && 
+                  echo "making Libnpy"  &&
+                  cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod && ls && cd .. && ls
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
