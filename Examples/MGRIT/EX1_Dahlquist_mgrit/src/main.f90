@@ -94,7 +94,7 @@ contains
     call pf_pfasst_setup(pf)
 
     if (use_mgrit .eqv. .true.) then
-       FAS_flag = .true.
+       FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
        setup_start_coarse_flag = .true.

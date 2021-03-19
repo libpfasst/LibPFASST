@@ -40,7 +40,7 @@ contains
     maxerr_om = maxval(abs(omega_end-omega_ex))
     maxerr_rho = maxval(abs(rho_end-rho_ex))
     
-    print '("error: time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7,es14.7," resid: ",es14.7)', &
+    print '("time: ", f8.4," step: ",i3.3," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," error_om: ",es14.7," error_rho: ",es14.7," resid: ",es14.7)', &
          t,pf%state%step+1, pf%rank, pf%state%iter,level_index,maxerr_om,maxerr_rho,pf%levels(level_index)%residual    
 
 

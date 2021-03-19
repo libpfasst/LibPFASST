@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
     build:
         docker:
@@ -9,7 +9,17 @@ jobs:
                 name: make_LibPFASST
                 command: >
                   echo "Compiling Libfasst"  &&
-                  make  DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE 
+                  cp Makefile.examples/Makefile.FFT ./  &&
+                  cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
+                  make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
+                  echo "making Libnpy"  &&
+                  make libnpy 
+#                  echo "fetching Libnpy"  &&
+#                  ls &&
+#                  wget https://github.com/kovalp/libnpy/archive/master.zip  &&
+#                  echo "unzipping Libnpy"  &&
+#                  unzip master.zip  &&  mv libnpy-master libnpy && cd libnpy && 
+#                  cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod && ls && cd .. && ls
             - run:
                 name: test env_links
                 command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
@@ -17,38 +27,47 @@ jobs:
                 name: make_tests
                 command: >
                   echo "Compiling magpicard" &&		  
-                  cd test/magpicard &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd test/magpicard &&  make  &&
                   echo "Compiling imk"	&&	  
-                  cd ../imk &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../imk &&  make  &&
                   echo "Compiling nagumo"		  
-                  cd ../nagumo && make USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../nagumo && make  &&
                   echo "Compiling IMEX"	&&	  
-                  cd ../EXP_adv_diff_fft/1d && make USE_FFTW=FALSE USE_PETSC=FALSE &&
-                  cd ../../.. 
-            - run: # Modify the commands below to build and check all the tutorials
+                  cd ../EXP_adv_diff_fft/1d && make  &&
+                  cd ../../..
+            - run: # Modify the commands below to build  all the tutorials		  
                 name: check_tutorials
                 command: >
                   echo "Making Tutorial 1"	&&	  		
-                  cd Tutorials/EX1_Dahlquist &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
-                  echo "Running Tutorial 1"	&&	  		
-                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  cd Tutorials/EX1_Dahlquist &&  make  &&
                   echo "Making Tutorial 2"	&&	  		
-                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE USE_FFTW=FALSE USE_PETSC=FALSE &&
+                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE   &&
+                  echo "Making Tutorial 3" &&	  		
+                  cd ../EX3_adv_diff &&  make   &&
+                  echo "Making Tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq &&  make   &&
+                  echo "Done with Tutorials" &&	  		
+                  cd ../..
+            - run: # Modify the commands below to run  all the tutorials
+                name: check_tutorials
+                command: >
+                  echo "Running Tutorial 1"	&&	  		
+                  cd Tutorials/EX1_Dahlquist &&  
+                  mpirun -n 8 ./main.exe multi_level.nml &&
                   echo "Running Tutorial 2" &&	  		
+                  cd ../EX2_Dahlquist &&  
                   mpirun -n 8 ./main.exe multi_level.nml &&
-                  echo "Checking Tutorial 3" &&	  		
-                  cd ../EX3_adv_diff && 
-                  echo "Making Tutorial 3"   &&	  		
-                  cd ../EX3_adv_diff &&  make USE_FFTW=FALSE USE_PETSC=FALSE &&
                   echo "Running tutorial 3" &&	  		
+                  cd ../EX3_adv_diff && 
                   mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Running tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq && 
+                  mpirun -n 8 ./main.exe tg.nml &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
             - run: # Modify the commands below to build and check the zNdarray examples
                 name: check_zNdarray
                 command: >
-                  cd test
-                  ./test_encaps.sh 
-                  cd ../../..
+                  cd test &&  ./test_encaps.sh &&   cd ../../..
 
 

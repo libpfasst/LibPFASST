@@ -50,6 +50,7 @@ contains
 
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
+!    call pf%pf_pfasst_create(comm, fname=pf_fname)
 
     !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels

@@ -1,0 +1,8 @@
+#  Flags for linking to hypre 
+#  In this example hypre is installed in the same directory as LibPFASST
+
+HYPRE_DIR = $(LIBPFASST)/../hypre/src
+
+#  The location of include and libHYPRE.a can vary
+FFLAGS  += -I$(HYPRE_DIR)/hypre/include
+LDFLAGS += -lstdc++ $(HYPRE_DIR)/hypre/lib/libHYPRE.a
