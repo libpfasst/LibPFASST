@@ -11,10 +11,8 @@ jobs:
                   echo "Compiling Libfasst"  &&
                   cp Makefile.examples/Makefile.FFT ./  &&
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
-                  make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE 
-            - run:
-                name: test libnpy
-                command: >
+                  make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
+                  echo "Compiling Libnpy"  &&
                   ls &&
                   wget https://github.com/kovalp/libnpy/archive/master.zip  &&
                   unzip master.zip  &&  mv libnpy-master libnpy &&

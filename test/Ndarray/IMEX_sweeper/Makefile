@@ -2,7 +2,7 @@
 # Makefile for mpi-advection example.
 #
 DIM=1
-LIBPFASST = ../../../../LibPFASST
+LIBPFASST = ../../..
 
 EXE = main.$(DIM)d.exe
 all: $(EXE)
