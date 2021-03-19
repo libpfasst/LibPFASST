@@ -13,7 +13,7 @@ jobs:
                   cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
                   make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
                   echo "making Libnpy"  &&
-		  make libnpy 
+                  make libnpy 
 #                  echo "fetching Libnpy"  &&
 #                  ls &&
 #                  wget https://github.com/kovalp/libnpy/archive/master.zip  &&
