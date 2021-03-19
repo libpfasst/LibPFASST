@@ -1,5 +1,5 @@
 !
-!  Test parameters to run advection diffusion example with just SDC
+!  Test parameters to run Dahlquist example with just SDC
 !
 !  If run in serial, this will be SDC
 !  If run in parallel, this will be pipelined SDC
@@ -7,7 +7,6 @@
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
     nlevels  = 1
-
 
     nnodes =  5  !  Number of quadrature nodes (default is 3)
 

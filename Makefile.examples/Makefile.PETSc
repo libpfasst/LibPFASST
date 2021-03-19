@@ -1,0 +1,10 @@
+#  Before using PETSc, one must set the environment variables
+#  PETSC_DIR and PETSC_ARCH
+#  These are displayed at the end of the petsc configuration step
+
+#  Include the petscVec encapsulation
+FSRC+= src/pf_petscVec_encap.f90
+
+FFLAGS  +=  -I$(PETSC_DIR)/include -I$(PETSC_DIR)/$(PETSC_ARCH)/include -I$(PETSC_DIR)/include/petsc/finclude
+LDFLAGS += -L$(PETSC_DIR)/$(PETSC_ARCH)/lib -lpetsc
+

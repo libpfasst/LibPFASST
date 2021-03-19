@@ -9,27 +9,19 @@
 #    this will put the image in the docker hub account so it can be pulled
 # Finally, go and update the docker image used in the .circleci/config.yml file
 
-FROM ubuntu:xenial
-RUN set -ex \
-  && apt-get -y update \
-  && apt-get -y install \
+FROM ubuntu:18.04
+ENV TZ=US/Pacific
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN  apt-get -y update && \
+     apt-get -y install \
+         make \
+	 wget \
+	 unzip \
          gfortran \
          mpich \
          libmpich-dev \
          libopenblas-dev \
-         liblapack-dev \
-         python-nose \
-         wget \
-         make \
-         python-tk \
-         python-pip \
-         python-dev 
-RUN set -ex \
-  && pip install  \
-        pytest 
-#        tqdm \
-#        numpy \
-#        pandas \
-#        attrs \
-#        scipy \
-#        'matplotlib<1.6.0'
+         liblapack-dev
+	 
+
+
