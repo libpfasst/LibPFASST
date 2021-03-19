@@ -18,7 +18,7 @@ $(FFTW3).tar.gz:
 # Libnpy, a library for writing numpy arrays from f90
 #
 libnpy:
-	wget https://github.com/kovalp/libnpy/archive/master.zip
+	wget https://github.com/libpfasst/libnpy/archive/refs/heads/master.zip
 	unzip master.zip
 	\rm -rf libnpy
 	mv libnpy-master libnpy
