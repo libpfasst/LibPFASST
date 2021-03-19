@@ -43,20 +43,25 @@ jobs:
                   cd ../EX2_Dahlquist &&  make DEBUG=TRUE   &&
                   echo "Making Tutorial 3" &&	  		
                   cd ../EX3_adv_diff &&  make   &&
+                  echo "Making Tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq &&  make   &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
             - run: # Modify the commands below to run  all the tutorials
                 name: check_tutorials
                 command: >
-                  cd Tutorials/EX1_Dahlquist &&  
                   echo "Running Tutorial 1"	&&	  		
+                  cd Tutorials/EX1_Dahlquist &&  
                   mpirun -n 8 ./main.exe multi_level.nml &&
-                  cd ../EX2_Dahlquist &&  
                   echo "Running Tutorial 2" &&	  		
+                  cd ../EX2_Dahlquist &&  
                   mpirun -n 8 ./main.exe multi_level.nml &&
-                  cd ../EX3_adv_diff && 
                   echo "Running tutorial 3" &&	  		
+                  cd ../EX3_adv_diff && 
                   mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Running tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq && 
+                  mpirun -n 8 ./main.exe tg.nml &&
                   echo "Done with Tutorials" &&	  		
                   cd ../..
             - run: # Modify the commands below to build and check the zNdarray examples

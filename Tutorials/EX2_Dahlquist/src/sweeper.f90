@@ -106,8 +106,8 @@ contains
        !  Do the solve
        y_encap%y =  rhs_encap%y/(1.0_pfdp - dtq*lam2)
 
-       !  The function is easy to derive  (equivalent to lam2*y)
-       f_encap%y = (y_encap%y - rhs_encap%y) / dtq
+       !  Recompute the function f2
+       call f_eval(this, y, t, level_index, f, piece)       
     else
        print *,'Bad piece in f_comp ',piece
        call exit(0)
