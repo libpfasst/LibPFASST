@@ -45,7 +45,7 @@ contains
 
     integer           ::  l   !  loop variable over levels
     type(mgrit_level_data), allocatable :: mg_ld(:)
-    integer :: n_coarse, refine_factor
+    integer :: mgrit_nsteps, coarsen_factor
     real(pfdp) :: T0
     logical :: FAS_flag, FCF_flag, setup_start_coarse_flag
 
@@ -94,17 +94,12 @@ contains
     call pf_pfasst_setup(pf)
 
     if (use_mgrit .eqv. .true.) then
-       FAS_flag = .true.
+       FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
-       setup_start_coarse_flag = .true.
-       if (setup_start_coarse_flag .eqv. .true.) then
-          n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
-       else
-          n_coarse = mgrit_n_coarse
-       end if
-       refine_factor = mgrit_refine_factor
-       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
+       setup_start_coarse_flag = .false.
+       mgrit_nsteps = max(1, nsteps/pf%comm%nproc)
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, mgrit_nsteps, mgrit_coarsen_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
     end if
 
     !> Add some hooks for output
@@ -133,10 +128,10 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps, y_end)
     end if
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
 
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)
-!    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     
     !>  Deallocate initial condition and final solution
     call ndarray_destroy(y_0)

@@ -30,13 +30,12 @@ module probin
   integer, save :: nsteps_rk(PF_MAXLEVS)
   integer, save :: rk_order
   logical, save :: use_mgrit
-  integer, save :: mgrit_n_coarse
-  integer, save :: mgrit_refine_factor
+  integer, save :: mgrit_coarsen_factor
 
   integer :: ios,iostat
   namelist /params/  nx, nsteps, dt, Tfin
   namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ark_stat, ic_type
-  namelist /params/  nsteps_rk, use_mgrit, mgrit_n_coarse, mgrit_refine_factor, rk_order
+  namelist /params/  nsteps_rk, use_mgrit, mgrit_coarsen_factor, rk_order
 
 contains
 
@@ -65,8 +64,7 @@ contains
     ic_type=1      !  Default is a sine wave    
     pfasst_nml=probin_fname
 
-    mgrit_n_coarse = 10
-    mgrit_refine_factor = 2
+    mgrit_coarsen_factor = 2
     nsteps_rk = -1
     use_mgrit = .true.
     rk_order = 1

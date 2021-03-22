@@ -342,7 +342,7 @@ contains
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
 
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
 
     mg_ld(nlevels)%cycle_phase = 0
     level_index = coarsest_level
@@ -365,9 +365,6 @@ contains
     call mpi_barrier(pf%comm%comm, ierror)
 
     !> Start timer
-
-    call pf_start_timer(pf, T_TOTAL)
-
     do iter = 1, pf%niters
        pf%state%iter = iter
 
@@ -409,6 +406,7 @@ contains
           exit
        end if
     end do
+
     call pf_stop_timer(pf, T_TOTAL)
 
     call pf_dump_stats(pf)

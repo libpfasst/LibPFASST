@@ -35,3 +35,14 @@ hypre:
 	cd hypre/src && make distclean && ./configure --disable-fortran && make -j
 
 
+#
+# sundials
+#
+
+sundials:
+	git clone https://github.com/LLNL/sundials.git
+	cd sundials && mkdir instdir
+	cd sundials && mkdir builddir
+	cd sundials/builddir && cmake -DCMAKE_INSTALL_PREFIX=../instdir -DEXAMPLES_INSTALL_PATH=../instdir/examples -DENABLE_MPI=ON ..
+	cd sundials/builddir && make
+	cd sundials/builddir && make install

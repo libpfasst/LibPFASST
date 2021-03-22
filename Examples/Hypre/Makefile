@@ -1,8 +1,6 @@
 ####################
 # User-set variables
 ####################
-# Hypre include directory
-export HYPRE_DIR=./hypre/src/hypre
 # C++ compiler (user must set this)
 CPP_COMPILE = g++ -O3 -g
 # LibPFASST directory
@@ -18,8 +16,8 @@ CPP_FILES = \
         $(CPP_SRC_DIR)hypre_fortran.cpp
 
 CPP_INCLUDE = \
-        -I$(HYPRE_DIR)/include \
-        -I./hypre/src/struct_ls
+        -I$(HYPRE_DIR)/src/hypre/include \
+        -I$(HYPRE_DIR)/src/struct_ls
 
 BUILDDIR = build
 

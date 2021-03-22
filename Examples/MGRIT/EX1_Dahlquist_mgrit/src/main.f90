@@ -47,7 +47,7 @@ contains
     integer           ::  l   !  loop variable over levels
     real(pfdp) :: T0
     type(mgrit_level_data), allocatable :: mg_ld(:)
-    integer :: n_coarse, refine_factor
+    integer :: mgrit_nsteps
     logical :: FAS_flag, FCF_flag, setup_start_coarse_flag
 
     !> Read problem parameters
@@ -85,7 +85,7 @@ contains
        call pf_level_set_size(pf,l,[1])
 
        if (use_mgrit .eqv. .true.) then
-          pf%levels(l)%ulevel%stepper%order = 1
+          pf%levels(l)%ulevel%stepper%order = rk_order
           pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
        end if
     end do
@@ -97,14 +97,9 @@ contains
        FAS_flag = .false.
        FCF_flag = .true.
        T0 = 0.0_pfdp
-       setup_start_coarse_flag = .true.
-       if (setup_start_coarse_flag .eqv. .true.) then
-          n_coarse = max(1, mgrit_n_coarse/pf%comm%nproc)
-       else
-          n_coarse = mgrit_n_coarse
-       end if
-       refine_factor = mgrit_refine_factor
-       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_coarse, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
+       setup_start_coarse_flag = .false.
+       mgrit_nsteps = max(1, nsteps/pf%comm%nproc)
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, mgrit_nsteps, mgrit_coarsen_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
     end if
 
     !> add some hooks for output  (using a LibPFASST hook here)
@@ -127,11 +122,10 @@ contains
   
     if (use_mgrit .eqv. .true.) then 
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
-       if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     end if
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
     
     !>  Wait for everyone to be done
     call mpi_barrier(pf%comm%comm, ierror)

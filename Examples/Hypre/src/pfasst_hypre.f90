@@ -28,7 +28,7 @@ contains
     integer :: nproc, rank, error
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
-    integer :: n_init, refine_factor, FComp_setup_flag
+    integer :: mgrit_nsteps, coarsen_factor, FComp_setup_flag
     logical :: setup_start_coarse_flag
 
     if ((solver_type .eq. 1) .and. (rk_order .eq. 1)) then
@@ -171,14 +171,9 @@ contains
     if (solver_type .eq. 1) then
        T0 = 0.0_pfdp
        setup_start_coarse_flag = .false.
-       if (setup_start_coarse_flag .eqv. .true.) then
-          n_init = max(1, mgrit_n_init/pf%comm%nproc)
-       else
-          n_init = mgrit_n_init / pf%comm%nproc
-          !n_init = pf%state%nsteps / pf%comm%nproc
-       end if
-       refine_factor = mgrit_refine_factor
-       call mgrit_initialize(pf, mg_ld, T0, Tfin, n_init, refine_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
+       mgrit_nsteps = max(1, nsteps/pf%comm%nproc)
+       coarsen_factor = mgrit_coarsen_factor
+       call mgrit_initialize(pf, mg_ld, T0, Tfin, mgrit_nsteps, mgrit_coarsen_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
     end if
 
     if (FComp_setup_flag .eq. 0) then
