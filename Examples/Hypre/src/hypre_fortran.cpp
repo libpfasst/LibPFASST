@@ -8,7 +8,9 @@
 HypreSolver *glob_hypre_solver = nullptr;
 int glob_spacial_coarsen_flag = 0;
 MPI_Comm glob_space_comm = MPI_COMM_NULL;
-//int FComp_count = 0;
+
+int FComp_count = 0;
+double FComp_wtime = 0;
 
 /* TODO: handle case when number of pfasst levels > number of hypre levels */
 extern "C"
@@ -100,7 +102,6 @@ extern "C"
 
    void HypreVectorDestroy(HypreVector *hypre_vector)
    {
-      //printf("%d\n", FComp_count);
       if (hypre_vector != nullptr){
          delete hypre_vector;
       }
@@ -230,6 +231,8 @@ extern "C"
          cout << "ERROR in \"HypreSolverFComp()\": Bad value for variable 'piece'\n";
          exit(1);
       }
+      
+      double wtime_start = MPI_Wtime();
 
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
 
@@ -240,7 +243,8 @@ extern "C"
       y->SetBoxValues(y_values);
       f->SetBoxValues(f_values);
 
-      //FComp_count++;
+      //FComp_wtime += MPI_Wtime() - wtime_start;
+      FComp_count++;
    }
 
    double HypreMaxErr(HypreVector *hypre_vector, double t, double init_cond)
@@ -317,5 +321,10 @@ extern "C"
    int HypreSolverGetNumLevels(HypreSolver *hypre_solver)
    {
       return hypre_solver->GetNumLevels();
+   }
+
+   void GetHypreStats(void)
+   {
+      printf("FComp count %d, wtime %e\n", FComp_count, FComp_wtime);
    }
 }

@@ -47,7 +47,6 @@ contains
    
     !call mpi_comm_rank(pf%comm%comm, rank, ierr)
     !call mpi_comm_size(pf%comm%comm, nproc, ierr)
-    
 
     if ((pf%rank == pf%comm%nproc-1) .and. (level_index == pf%nlevels) .and. (pf%state%iter .gt. 0) &
         .and. ((pf%state%step .eq. pf%state%nsteps-1) .or. (solver_type .eq. 1) .or. (solver_type .eq. 2))) then

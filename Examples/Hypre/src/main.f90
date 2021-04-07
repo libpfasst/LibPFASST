@@ -63,6 +63,8 @@ contains
     integer :: spacial_coarsen_flag
     type(mgrit_level_data), allocatable :: mg_ld(:)
 
+    double precision :: wtime_start
+
     ! check size
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
     call mpi_comm_rank(MPI_COMM_WORLD, rank,  error)
@@ -119,11 +121,12 @@ contains
     call initial(y_0)
 
     !> Do the PFASST time stepping
-    if (solver_type .eq. 1) then
+    wtime_start = MPI_Wtime()
+    if (solver_type .eq. 1) then !> MGRIT
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-    else if (solver_type .eq. 2) then
+    else if (solver_type .eq. 2) then !> Parareal
        call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
-    else if (solver_type .eq. 3) then
+    else if (solver_type .eq. 3) then !> Sequential solver
        call initialize_results(pf)
        if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
        call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
@@ -132,8 +135,9 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
+    !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
+    !call GetHypreStats()
     !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
-    !call y_end%eprint()
 
     call mpi_comm_size(pf%comm%comm, nproc, error)
     call mpi_comm_rank(pf%comm%comm, rank, error)

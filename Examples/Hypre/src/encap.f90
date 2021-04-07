@@ -99,6 +99,10 @@ module encap
          type(c_ptr), value :: x
          real(c_double), value :: val
       end subroutine HypreVectorSetInitCond
+      
+      subroutine GetHypreStats() bind(c, name="GetHypreStats")
+        use iso_c_binding
+      end subroutine GetHypreStats
    end interface
 
 contains

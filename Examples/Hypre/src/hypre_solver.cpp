@@ -1,5 +1,8 @@
 #include "hypre_solver.hpp"
 
+extern int FComp_count;
+extern double FComp_wtime;
+
 HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_max_levels, int num_grid_points)
 {
    //if (setup_done == 1) return;
@@ -9,10 +12,10 @@ HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_m
 
    n_pre  = 1;
    n_post = 1;
-   tol = 1e-9;
+   tol = 0.0;//1e-9;
    max_iter = in_max_iter;
    jacobi_weight = 1.0;
-   relax_type = RELAX_RBGS;
+   relax_type = RELAX_RBGS_NONSYMMETRIC;
    solver_type = SOLVER_PFMG;
    max_levels = in_max_levels;
    num_levels = in_max_levels;
@@ -291,13 +294,14 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
       //HYPRE_StructPFMGDestroy(precond);
    }
    else {
+      double wtime_start = MPI_Wtime();
       HYPRE_StructPFMGSolve(solver_imp, A_imp, b, x);
+      FComp_wtime += MPI_Wtime() - wtime_start;
 
       //HYPRE_StructPFMGGetNumIterations(solver_imp, &num_iterations);
-      //HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      //HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver_imp, &final_res_norm);
 
       //printf("%d %e\n", num_iterations, final_res_norm);
-      //HYPRE_StructPFMGDestroy(solver);
    }
 
    HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
@@ -436,8 +440,9 @@ void HypreSolver::SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver)
    HYPRE_StructPFMGSetJacobiWeight(*pfmg_solver, jacobi_weight);
    HYPRE_StructPFMGSetNumPreRelax(*pfmg_solver, n_pre);
    HYPRE_StructPFMGSetNumPostRelax(*pfmg_solver, n_post);
-   HYPRE_StructPFMGSetSkipRelax(*pfmg_solver, 0);
+   HYPRE_StructPFMGSetSkipRelax(*pfmg_solver, 1);
    HYPRE_StructPFMGSetLogging(*pfmg_solver, 1);
+   HYPRE_StructPFMGSetPrintLevel(*pfmg_solver, 3);
 }
 
 void HypreSolver::Restrict(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_level, int c_level)

@@ -56,6 +56,7 @@ extern "C"
    int HypreSolverGetExtentLevel(HypreSolver *hypre_solver, int pfasst_level_index, int i);
    void HypreSolverSetLevelData(HypreSolver **y, HypreSolver *x, int pfasst_level_index);
    int HypreSolverGetNumLevels(HypreSolver *hypre_solver);
+   void GetHypreStats(void);
 }
 
 #endif

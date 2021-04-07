@@ -89,7 +89,7 @@ contains
         end if
      end if
 
-     Nt_coarsest = max(4, coarsen_factor)
+     Nt_coarsest = coarsen_factor
 
      nlevels = pf%nlevels
      n = coarsen_factor
@@ -993,6 +993,9 @@ contains
            call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%qc(i), pf_lev%qend, mg_f_lev%t0)
            call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
            call pf_lev%q0%copy(pf_lev%qend)
+
+           !call pf_lev%q0%setval(0.0_pfdp)
+           !call pf_lev%qend%setval(0.0_pfdp)
         end do
 
         if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
