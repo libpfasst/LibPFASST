@@ -1,0 +1,29 @@
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 2
+
+    !  These are internal pfasst variables that can be reset
+    niters = 8   !  default is 5 - 0 leaves predictor on coarse level
+    
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1.d-11
+     rel_res_tol = 1.d-11
+
+     nnodes =  2 2
+
+     !  Choices to run parareal instead of PFASST
+     use_rk_stepper=.true.
+     use_sdc_sweeper=.false.
+
+     !  These flags control the output.  For fastest timings, turn them off
+     save_residuals=.true.
+     save_delta_q0=.true.
+     save_errors=.true.
+
+     ! Flag for timings.  For fastest timing of only full algorithm, set to 1
+     save_timings = 2
+     
+     !  Directory name for output
+     outdir="parareal"
+/
+

@@ -1,0 +1,19 @@
+!
+!  Test parameters for a K-S
+!
+&PARAMS
+
+   Tfin = 40.0
+    nx =   512 512
+    
+    nsteps = 32
+    nsteps_rk =  16  16
+    rk_order = 4 4
+
+    Lx=1.00530964914873d2
+    eq_type = 5	
+    ic_type = 1
+    
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+
+/
