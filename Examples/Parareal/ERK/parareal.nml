@@ -22,6 +22,9 @@
 
      ! Flag for timings.  For fastest timing of only full algorithm, set to 1
      save_timings = 2
+
+    ! Flag for saving solutions, needed for problems with no exact solution
+     save_solutions = 1
      
      !  Directory name for output
      outdir="parareal"
