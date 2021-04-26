@@ -203,7 +203,7 @@ contains
      
      pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
      pf%state%dt = mg_ld(nlevels)%dt
-     pf%state%step = (pf%rank+1) * mg_ld(nlevels)%Nt
+     pf%state%step = (pf%rank+1) * mg_ld(nlevels)%Nt - 1
      pf%state%nsteps = pf%comm%nproc * mg_ld(nlevels)%Nt
 
      !> Set up the F and C points
@@ -394,11 +394,7 @@ contains
           mg_lev => mg_ld(level_index)
           pf_lev => pf%levels(level_index)
           uc_len = size(mg_lev%uc)
-          if (level_index .gt. coarsest_level) then
-             call pf_lev%delta_q0%copy(mg_lev%uc(uc_len))
-          else
-             call pf_lev%delta_q0%copy(pf_lev%qend) 
-          end if
+          call pf_lev%delta_q0%copy(mg_lev%uc(uc_len))
        end do       
 
        !> Do a V-cycle
@@ -411,14 +407,11 @@ contains
           mg_lev => mg_ld(level_index)
           pf_lev => pf%levels(level_index)
           uc_len = size(mg_lev%uc)
-          if (level_index .gt. coarsest_level) then
-             call pf_lev%delta_q0%axpy(-1.0_pfdp, mg_lev%uc(uc_len))
-          else
-             call pf_lev%delta_q0%axpy(-1.0_pfdp, pf_lev%qend)
-          end if
+          call pf_lev%delta_q0%axpy(-1.0_pfdp, mg_lev%uc(uc_len))
           pf_lev%max_delta_q0 = pf_lev%delta_q0%norm()
           call pf_set_delta_q0(pf, level_index, pf_lev%delta_q0%norm())
           call pf_set_resid(pf, level_index, mg_lev%res_norm_loc)
+          call pf_lev%qend%copy(mg_lev%uc(uc_len))
        end do
 
        call call_hooks(pf, nlevels, PF_POST_ITERATION)

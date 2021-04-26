@@ -37,10 +37,8 @@ contains
        FComp_setup_flag = 1
     end if
     
-
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
     call mpi_comm_rank(MPI_COMM_WORLD, rank,  error)
-
 
     allocate(lev_shape(pf%nlevels,10))
     !> Loop over levels and set some level specific parameters

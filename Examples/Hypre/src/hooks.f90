@@ -28,7 +28,7 @@ contains
     real(pfdp) :: maxerr, error 
     real(pfdp) :: residual
     class(hypre_vector_encap), pointer :: y_end
-    integer :: nproc, rank, ierr
+    integer :: nproc, rank, ierr, step
 
     !> Get the solution at the end of this step
     y_end => cast_as_hypre_vector(pf%levels(level_index)%qend)
@@ -48,7 +48,7 @@ contains
     !call mpi_comm_rank(pf%comm%comm, rank, ierr)
     !call mpi_comm_size(pf%comm%comm, nproc, ierr)
 
-    if ((pf%state%step .eq. pf%state%nsteps) .and. (level_index == pf%nlevels) .and. (pf%state%iter .gt. 0)) then
+    if ((pf%state%step .eq. pf%state%nsteps-1) .and. (level_index == pf%nlevels) .and. (pf%state%iter .gt. 0)) then
        print '("error: rank: ", i4.4," step: ",i4.4," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
             pf%rank,pf%state%step+1, pf%state%iter,level_index, error, residual
        call flush(6)
