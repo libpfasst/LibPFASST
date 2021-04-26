@@ -22,42 +22,45 @@ module pf_mod_MGRIT
      integer, allocatable :: val(:)
   end type int_vector
 
+  !> This data structure holds important information for each MGRIT level for this proc
   type :: mgrit_level_data
-     integer :: Nt
-     integer :: Nt_glob
-     real(pfdp) :: dt
-     real(pfdp) :: T0_glob
-     real(pfdp) :: Tfin_glob
-     real(pfdp) :: t0
-     real(pfdp) :: tfin
-     real(pfdp) :: res_norm_loc(1)
-     integer :: res_norm_index
-     integer :: cycle_phase
-     logical :: FCF_flag = .true.
-     logical :: FAS_flag = .false.
-     logical :: setup_start_coarse_flag = .true.
-     type(int_vector), allocatable :: f_blocks(:)
-     integer, allocatable :: c_pts(:)
-     class(pf_encap_t), allocatable :: g(:)
-     class(pf_encap_t), allocatable :: qc(:)
-     class(pf_encap_t), allocatable :: qc_prev(:)
-     class(pf_encap_t), allocatable :: qc_fas(:)
-     class(pf_encap_t), allocatable :: r
-     class(pf_encap_t), allocatable :: qc_boundary
-     class(pf_encap_t), allocatable :: qc_fas_boundary
-     class(pf_encap_t), allocatable :: q_temp
-     class(pf_encap_t), allocatable :: Q0
-     class(pf_encap_t), allocatable :: g_temp
-     integer :: send_to_rank
-     integer :: recv_from_rank
-     integer :: rank_shifted
-     integer :: coarsest_level
-     logical :: f_pts_flag = .true.
-     logical :: c_pts_flag = .true.
+     integer :: Nt !> Number of time points local to this proc
+     integer :: Nt_glob !> global number of time points
+     real(pfdp) :: dt !> Time step size
+     real(pfdp) :: T0_glob !> Global starting time step
+     real(pfdp) :: Tfin_glob !> Global ending time step
+     real(pfdp) :: t0 !> Starting time step local to this proc
+     real(pfdp) :: tfin !> Ending time step local to this proc
+     real(pfdp) :: res_norm_loc !> Residual norm local to this proc
+     integer :: res_norm_index 
+     integer :: cycle_phase !> current phase of the V-cycle (down-cycle, exact solve, up-cycle)
+     logical :: FCF_flag = .true. !> If false, use only F-relaxation (set to false for Parareal)
+     logical :: FAS_flag = .false. !> If .true., use the Full Approximation Scheme (FAS)
+     logical :: setup_start_coarse_flag = .false. !> If true, set up the hierarchy of time grids starting from the coarsest
+     type(int_vector), allocatable :: f_blocks(:) !> Blocks of F-points. Each block contains the indices of the F-points
+     integer, allocatable :: c_pts(:) !> Array of C-point indices
+     class(pf_encap_t), allocatable :: g(:) !> Right-hand side
+     class(pf_encap_t), allocatable :: uc(:) !> Values at C-points
+     class(pf_encap_t), allocatable :: uc_prev(:) !> Temp variable for values at C-points
+     class(pf_encap_t), allocatable :: uc_fas(:) !> FAS approximation at C-points
+     class(pf_encap_t), allocatable :: r !> Residual
+     class(pf_encap_t), allocatable :: uc_ghost !> Ghost points (data received by neighboring procs)
+     class(pf_encap_t), allocatable :: uc_fas_ghost !> FAS ghost points
+     class(pf_encap_t), allocatable :: u_temp !> Temp encap
+     class(pf_encap_t), allocatable :: Q0 !> Global initial condition
+     class(pf_encap_t), allocatable :: g_temp !> Temp encap
+     class(pf_encap_t), allocatable :: e(:) !> Correction to be interpolated 
+     integer :: send_to_rank !> Send neighbor
+     integer :: recv_from_rank !> Receive neighbor
+     integer :: rank_shifted !> Shifted rank.  Needed for coarser grids when the global number of time points < num procs
+     integer :: coarsest_level !> Index of coarsest level
+     logical :: f_pts_flag = .true. !> True if this proc has F-points
+     logical :: c_pts_flag = .true. !> True if this proc has C-points
   end type 
   
 contains
 
+  !> Set up MGRIT data
   subroutine mgrit_initialize(pf, mg_ld, T0_glob, Tfin_glob, Nt_start, coarsen_factor, FAS_flag, FCF_flag, start_coarse_flag)
      type(pf_pfasst_t), intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -67,13 +70,12 @@ contains
      integer :: level_index, nlevels, N, i, kk, p, Nt, p_rank, k
      type(pf_level_t) :: pf_lev, pf_f_lev, pf_c_lev
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
-     class(pf_encap_t), allocatable :: qtemp
      integer :: count_levels
      logical :: start_dropping_procs
      integer :: my_rank, rank_send, rank_recv, Nt_temp
      integer :: Nt_coarsest, coarsest_level
 
-     if (start_coarse_flag .eqv. .false.) then
+     if (start_coarse_flag .eqv. .false.) then !> Generate starting from coarsest grid
         x = real(pf%comm%nproc, pfdp)
         y = log(x) / log(real(coarsen_factor, pfdp))
         if (ceiling(y) .ne. floor(y)) then
@@ -82,7 +84,6 @@ contains
         end if
         x = real(Nt_start * pf%comm%nproc, pfdp)
         y = log(x) / log(real(coarsen_factor, pfdp))
-        !print *,y,ceiling(y),floor(y) 
         if (ceiling(y) .ne. floor(y)) then
            print *,'Error in MGRIT setup: number of finest-grid points must be a power of the coarsening factor'
            stop
@@ -99,14 +100,14 @@ contains
 
      do level_index = 1,nlevels
         mg_lev => mg_ld(level_index)
-        mg_lev%res_norm_loc(1) = 0.0_pfdp
         mg_lev%T0_glob = T0_glob
         mg_lev%Tfin_glob = Tfin_glob
      end do
-     if (mg_ld(nlevels)%setup_start_coarse_flag .eqv. .true.) then
+     !> Generate the hierarchy of grids
+     if (mg_ld(nlevels)%setup_start_coarse_flag .eqv. .true.) then !> Generate starting from the coarsest grid
         coarsest_level = 1
         mg_ld(nlevels)%coarsest_level = 1
-        N = Nt_start;
+        N = Nt_start
         do level_index = 1,nlevels
            mg_lev => mg_ld(level_index)
            mg_lev%Nt = N
@@ -116,23 +117,19 @@ contains
            mg_lev%tfin = mg_lev%t0 + N * mg_lev%dt - mg_lev%dt
            pf%state%t0 = mg_lev%t0
            N = N * coarsen_factor
-
-           if (level_index .eq. nlevels) then
-              pf%state%t0 = mg_lev%tfin - mg_lev%dt
-              pf%state%dt = mg_lev%dt
-              pf%state%step = (pf%rank+1) * mg_lev%Nt - 1
-           end if
            
            mg_lev%rank_shifted = pf%rank
            mg_lev%send_to_rank = pf%rank+1
            mg_lev%recv_from_rank = pf%rank-1
         end do
-     else
+     else !> Generate starting from finest grid
         Nt_temp = Nt_start * pf%comm%nproc
         level_index = nlevels
         mg_ld(level_index)%Nt_glob = Nt_temp
+        !> Loop until coarsest grid or maximum number of levels is reached
         do while (level_index .gt. 1)
            Nt_temp = Nt_temp / coarsen_factor
+           !> If the grid cannot be coarser, stop
            if (Nt_temp < Nt_coarsest) then
               exit
            end if
@@ -147,6 +144,7 @@ contains
         mg_ld(nlevels)%recv_from_rank = pf%rank-1
         start_dropping_procs = .false.
         i = 0
+        !> Loop over levels to determine number of time points, C-points, and F-points
         do level_index = (nlevels-1),coarsest_level,-1
            mg_lev => mg_ld(level_index)
            mg_f_lev => mg_ld(level_index+1)
@@ -154,18 +152,19 @@ contains
            mg_lev%recv_from_rank = -1
            mg_lev%rank_shifted = -1
            p = pf%rank+1
+           !> Several cases need to be handled if the fine grid has only one point
            if (mg_f_lev%Nt .eq. 1) then
-              if (start_dropping_procs .eqv. .false.) then
+              if (start_dropping_procs .eqv. .false.) then !> If there is one point per proc, we need to start "dropping" procs
                  start_dropping_procs = .true.
               end if
-              if (mod(p, coarsen_factor**(i+1)) .eq. 0) then 
+              if (mod(p, coarsen_factor**(i+1)) .eq. 0) then !> If my rank divides coarsen_factor^(i+1), the fine grid has a C-point
                  mg_lev%Nt = 1
                  mg_lev%rank_shifted = (mg_f_lev%rank_shifted+1)/ coarsen_factor - 1
                  mg_lev%send_to_rank = (mg_lev%rank_shifted+2) * coarsen_factor**(i+1) - 1
                  mg_lev%recv_from_rank = mg_lev%rank_shifted * coarsen_factor**(i+1) - 1
                  mg_f_lev%f_pts_flag = .false.
                  mg_f_lev%c_pts_flag = .true.
-              else
+              else !> Otherwise, the fine grid has an F-point
                  mg_f_lev%f_pts_flag = .true.
                  mg_f_lev%c_pts_flag = .false.
                  mg_lev%c_pts_flag = .false.
@@ -186,6 +185,7 @@ contains
               i = i + 1;
            end if
         end do
+        
 
         do level_index = coarsest_level,nlevels
            mg_lev => mg_ld(level_index)
@@ -200,7 +200,13 @@ contains
         !   print *,level_index,pf%rank,mg_lev%send_to_rank,mg_lev%recv_from_rank
         !end do
      end if
+     
+     pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
+     pf%state%dt = mg_ld(nlevels)%dt
+     pf%state%step = (pf%rank+1) * mg_ld(nlevels)%Nt
+     pf%state%nsteps = pf%comm%nproc * mg_ld(nlevels)%Nt
 
+     !> Set up the F and C points
      do level_index = nlevels,coarsest_level+1,-1
         mg_lev => mg_ld(level_index)
         mg_c_lev => mg_ld(level_index-1)
@@ -212,11 +218,12 @@ contains
         end if
      end do
 
+     !> Allocate memory for all levels
      do level_index = nlevels,coarsest_level,-1
         mg_lev => mg_ld(level_index)
         pf_lev = pf%levels(level_index)
         !if ((level_index .lt. nlevels) .and. (level_index .gt. 1) .and. (mg_lev%Nt .gt. 0)) then
-        if ((level_index .lt. nlevels) .and. (level_index .gt. 1)) then
+        if (level_index .lt. nlevels) then
            call pf_lev%ulevel%factory%create_array(mg_lev%g, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
            do i = 1,mg_lev%Nt
               call mg_lev%g(i)%setval(0.0_pfdp)
@@ -226,9 +233,9 @@ contains
            mg_ld(level_index)%FAS_flag = .true.
            !if ((level_index .lt. nlevels) .and. (mg_lev%Nt .gt. 0)) then
            if (level_index .lt. nlevels) then
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc_fas, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
+              call pf_lev%ulevel%factory%create_array(mg_lev%uc_fas, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
               do i = 1,mg_lev%Nt
-                 call mg_lev%qc_fas(i)%setval(0.0_pfdp)
+                 call mg_lev%uc_fas(i)%setval(0.0_pfdp)
               end do
            end if
         end if
@@ -238,28 +245,40 @@ contains
         if (level_index .gt. coarsest_level) then
            mg_c_lev => mg_ld(level_index-1)
            !if ((mg_c_lev%Nt .eq. 0) .and. (mg_lev%Nt .eq. 1)) then
-           !   call pf_lev%ulevel%factory%create_array(mg_lev%qc, 1, level_index, pf_lev%lev_shape)
-           !   call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, 1, level_index, pf_lev%lev_shape)
-           !   call mg_lev%qc(1)%setval(0.0_pfdp)
-           !   call mg_lev%qc_prev(1)%setval(0.0_pfdp)
+           !   call pf_lev%ulevel%factory%create_array(mg_lev%uc, 1, level_index, pf_lev%lev_shape)
+           !   call pf_lev%ulevel%factory%create_array(mg_lev%uc_prev, 1, level_index, pf_lev%lev_shape)
+           !   call mg_lev%uc(1)%setval(0.0_pfdp)
+           !   call mg_lev%uc_prev(1)%setval(0.0_pfdp)
            !else if (mg_c_lev%Nt .gt. 0) then
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
-              call pf_lev%ulevel%factory%create_array(mg_lev%qc_prev, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
+              call pf_lev%ulevel%factory%create_array(mg_lev%uc, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
+              call pf_lev%ulevel%factory%create_array(mg_lev%uc_prev, max(1, mg_c_lev%Nt), level_index, pf_lev%lev_shape)
               do i = 1,mg_c_lev%Nt
-                 call mg_lev%qc(i)%setval(0.0_pfdp)
-                 call mg_lev%qc_prev(i)%setval(0.0_pfdp)
+                 call mg_lev%uc(i)%setval(0.0_pfdp)
+                 call mg_lev%uc_prev(i)%setval(0.0_pfdp)
               end do
            !end if
+        else
+           call pf_lev%ulevel%factory%create_array(mg_lev%uc, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
+           call pf_lev%ulevel%factory%create_array(mg_lev%uc_prev, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
+           do i = 1,mg_lev%Nt
+              call mg_lev%uc(i)%setval(0.0_pfdp)
+              call mg_lev%uc_prev(i)%setval(0.0_pfdp)
+           end do
         end if
-        call pf_lev%ulevel%factory%create_single(mg_lev%qc_boundary, level_index, pf_lev%lev_shape)
-        call pf_lev%ulevel%factory%create_single(mg_lev%q_temp, level_index, pf_lev%lev_shape)
+        call pf_lev%ulevel%factory%create_single(mg_lev%uc_ghost, level_index, pf_lev%lev_shape)
+        call pf_lev%ulevel%factory%create_single(mg_lev%u_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%g_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%r, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%Q0, level_index, pf_lev%lev_shape)
         if (FAS_flag .eqv. .true.) then
-           call pf_lev%ulevel%factory%create_single(mg_lev%qc_fas_boundary, level_index, pf_lev%lev_shape)
+           call pf_lev%ulevel%factory%create_single(mg_lev%uc_fas_ghost, level_index, pf_lev%lev_shape)
         end if
      end do
+
+     level_index = nlevels
+     mg_lev => mg_ld(level_index)
+     pf_lev = pf%levels(level_index)
+     call pf_lev%ulevel%factory%create_array(mg_lev%e, max(1, mg_lev%Nt), level_index, pf_lev%lev_shape)
 
      if (mg_ld(nlevels)%coarsest_level .eq. nlevels) then
         print *,'Error in MGRIT setup: number of levels must be greater than 1'
@@ -267,6 +286,7 @@ contains
      end if
   end subroutine mgrit_initialize
 
+  !> Set up F and C points 
   subroutine FC_Setup(Nc, Nf, coarsen_factor, f_blocks, c_pts)
      type(int_vector), allocatable, intent(inout) :: f_blocks(:)
      integer, allocatable, intent(inout) :: c_pts(:)
@@ -278,6 +298,7 @@ contains
 
      n = coarsen_factor
 
+     !> Find indices of C-points if this proc has any C-points
      if (Nc .gt. 0) then
         allocate(c_pts(Nc))
         j = min(Nf, n)
@@ -287,6 +308,7 @@ contains
         end do
      end if
 
+     !> Find indices of F-points if this proc has any F-points
      if (Nf .gt. 0) then
         if (Nc .gt. 0) then
            allocate(f_blocks(Nc))
@@ -310,76 +332,76 @@ contains
      end if
   end subroutine FC_Setup
 
-  !>  Do the MGRIT algorithm
+  !>  Run the MGRIT solver
   subroutine pf_MGRIT_run(pf, mg_ld, Q0, qend)
     type(pf_pfasst_t), target, intent(inout)   :: pf   !!  The complete PFASST structure
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
     class(pf_encap_t), intent(in   )           :: Q0   !!  The initial condition
     class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
-    class(pf_encap_t), pointer :: qc(:)
+    class(pf_encap_t), pointer :: uc(:)
     type(mgrit_level_data), pointer :: mg_lev
     type(pf_level_t), pointer :: pf_lev
     logical :: zero_rhs_flag
 
-    !  Local variables
-    integer :: nproc  !!  Total number of processors
+    integer :: nproc
     integer :: nsteps_loc  !!  local number of time steps
     real(pfdp) :: tend_loc !!  The final time of run
-    integer :: ierror, iter, k, i, level_index
+    integer :: ierror, iter, k, i, level_index, l
     integer :: Nt, Nt_glob
-    integer :: qc_len
+    integer :: uc_len
     real(pfdp) :: t0, dt, big_dt, t0_glob
     integer :: nlevels, coarsest_level
+    double precision :: wtime_start
 
     k = 1
     nlevels = pf%nlevels
     coarsest_level = mg_ld(nlevels)%coarsest_level
     pf%state%pfblock = 1
-    pf%state%nsteps = pf%comm%nproc
     pf%state%sweep = 1
     pf%state%pstatus = PF_STATUS_ITERATING
 
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
 
-    call pf_start_timer(pf, T_TOTAL)
-
-    mg_ld(nlevels)%cycle_phase = 0
+    !> Restrict initial condition
     level_index = coarsest_level
-    call pf_start_timer(pf, T_SWEEP, level_index)
-    call InitExactSolve(pf, mg_ld, Q0, level_index)
+    call mg_ld(nlevels)%Q0%copy(Q0)
+    do l = nlevels,level_index+1,-1
+       call pf%levels(l)%ulevel%restrict(pf%levels(l), pf%levels(l-1), mg_ld(l)%Q0, mg_ld(l-1)%Q0, mg_ld(l)%t0)
+    end do
+
+    !> Do predictor
+    wtime_start = MPI_Wtime()
+    call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_PREDICTOR)
+    mg_ld(nlevels)%cycle_phase = 0
+    call PredictExactSolve(pf, mg_ld, Q0, level_index)
     zero_rhs_flag = .true.
     call IdealInterp(pf, mg_ld, 0, zero_rhs_flag)
-    call pf_stop_timer(pf, T_SWEEP, level_index)
-    !qc => mg_ld(nlevels)%qc
-    !call qend%copy(qc(size(qc)))
-    !return
+    call pf_stop_timer(pf, T_PREDICTOR)
 
-    do level_index = coarsest_level,nlevels
-       pf_lev => pf%levels(level_index)
-       call pf_lev%qend%setval(0.0_pfdp)
-       call pf_lev%q0%setval(0.0_pfdp)
-    end do
-    
-    !>  Try to sync everyone
-    call mpi_barrier(pf%comm%comm, ierror)
+    if (pf%niters .lt. 1) then
+       uc => mg_ld(nlevels)%uc
+       call qend%copy(uc(size(uc)))
+       return
+    end if
 
-    !> Start timer
+    !> Iterate until convergence is achieved
     do iter = 1, pf%niters
        pf%state%iter = iter
 
        do level_index = coarsest_level,nlevels
           mg_lev => mg_ld(level_index)
           pf_lev => pf%levels(level_index)
-          qc_len = size(mg_lev%qc)
+          uc_len = size(mg_lev%uc)
           if (level_index .gt. coarsest_level) then
-             call pf_lev%delta_q0%copy(mg_lev%qc(qc_len))
+             call pf_lev%delta_q0%copy(mg_lev%uc(uc_len))
           else
              call pf_lev%delta_q0%copy(pf_lev%qend) 
           end if
        end do       
 
-       !  Do a v_cycle
+       !> Do a V-cycle
        call pf_start_timer(pf, T_ITERATION)
        call pf_MGRIT_v_cycle(pf, mg_ld, iter)
        call pf_set_iter(pf, iter)
@@ -388,19 +410,17 @@ contains
        do level_index = coarsest_level,nlevels
           mg_lev => mg_ld(level_index)
           pf_lev => pf%levels(level_index)
-          qc_len = size(mg_lev%qc)
+          uc_len = size(mg_lev%uc)
           if (level_index .gt. coarsest_level) then
-             call pf_lev%delta_q0%axpy(-1.0_pfdp, mg_lev%qc(qc_len))
+             call pf_lev%delta_q0%axpy(-1.0_pfdp, mg_lev%uc(uc_len))
           else
              call pf_lev%delta_q0%axpy(-1.0_pfdp, pf_lev%qend)
           end if
           pf_lev%max_delta_q0 = pf_lev%delta_q0%norm()
           call pf_set_delta_q0(pf, level_index, pf_lev%delta_q0%norm())
-          call pf_set_resid(pf, level_index, mg_lev%res_norm_loc(1))
+          call pf_set_resid(pf, level_index, mg_lev%res_norm_loc)
        end do
 
-       qc => mg_ld(nlevels)%qc
-       call pf%levels(nlevels)%qend%copy(qc(size(qc)))
        call call_hooks(pf, nlevels, PF_POST_ITERATION)
        if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
           exit
@@ -408,25 +428,26 @@ contains
     end do
 
     call pf_stop_timer(pf, T_TOTAL)
+    !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
 
-    call pf_dump_stats(pf)
+    !call pf_dump_stats(pf)
 
-    qc => mg_ld(nlevels)%qc
-    call qend%copy(qc(size(qc)))
+    uc => mg_ld(nlevels)%uc
+    call qend%copy(uc(size(uc)))
 
-   ! qc => mg_ld(pf%nlevels)%qc
+   ! uc => mg_ld(pf%nlevels)%uc
 
    ! if (pf%rank .eq. 0) then
-   !    do i = 1,size(qc)
-   !       print *,i,qc(i)%norm()
+   !    do i = 1,size(uc)
+   !       print *,i,uc(i)%norm()
    !    end do
    ! end if
    ! call mpi_barrier(pf%comm%comm, ierror)
    ! call mpi_barrier(pf%comm%comm, ierror)
    ! call mpi_barrier(pf%comm%comm, ierror)
    ! if (pf%rank .eq. 1) then
-   !    do i = 1,size(qc)
-   !       print *,i,qc(i)%norm()
+   !    do i = 1,size(uc)
+   !       print *,i,uc(i)%norm()
    !    end do
    ! end if
 
@@ -446,10 +467,6 @@ contains
   end subroutine pf_MGRIT_run
 
   !> Execute a MGRIT V-cycle (iteration)
-  !!  It is assumed that we have two levels and two nodes here
-  !!  When this is called the previous coarse integrator result should be stored in Q(1)
-  !!  and the MGRIT iteration in qend (both on coarse level).  If this is called
-  !!  directly after the predictor, these will be the same thing
   subroutine pf_MGRIT_v_cycle(pf, mg_ld, iteration)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -457,12 +474,12 @@ contains
     type(pf_level_t), pointer :: pf_lev, pf_f_lev, pf_c_lev
     type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
     logical :: zero_rhs_flag, zero_c_pts_flag, interp_flag
-    integer :: qc_len
+    integer :: uc_len
     integer :: i, j, k, n, ierr
     integer :: nlevels, level_index, level_index_f
     integer :: ierror
-    real(pfdp) :: res_norm_glob(1)
-    class(pf_encap_t), pointer :: qc(:)
+    real(pfdp) :: res_norm_glob
+    class(pf_encap_t), pointer :: uc(:)
     real(pfdp), pointer :: qend(:)
     real(pfdp) :: qexact, maxerr
     integer :: coarsest_level
@@ -470,60 +487,46 @@ contains
     nlevels = pf%nlevels;
     coarsest_level = mg_ld(nlevels)%coarsest_level
 
-    !> FCF-relaxation on finest grid
+
     mg_ld(nlevels)%cycle_phase = 1
     level_index = nlevels
     mg_lev => mg_ld(level_index)
+
+    !> FCF-relaxation on finest grid
     call pf_start_timer(pf, T_SWEEP, level_index)
     call FCF_Relax(pf, mg_ld, level_index, iteration)
     call pf_stop_timer(pf, T_SWEEP, level_index)
-    
-    if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
-        return
-    end if
 
     do level_index = nlevels-1,coarsest_level+1,-1
         level_index_f = level_index+1
         mg_lev => mg_ld(level_index)
         mg_f_lev => mg_ld(level_index_f)
 
-        !> Restrict residual
-        mg_f_lev%res_norm_loc(1) = 0.0_pfdp
-        if (mg_lev%Nt .gt. 0) then
-           call Restrict(pf, mg_ld, level_index, level_index_f)
-           do i = 1,size(mg_f_lev%qc)
-              call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
-           end do
-        end if
-        !if ((level_index_f .eq. nlevels) .and. (iteration .gt. 1)) then
-        !   call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
-        !   if (res_norm_glob(1) .lt. pf%abs_res_tol) then
-        !      pf%state%pstatus = PF_STATUS_CONVERGED
-        !      return
-        !   end if
-        !end if
         !> FCF-relaxation on intermediate grids
         call pf_start_timer(pf, T_SWEEP, level_index)
         call FCF_Relax(pf, mg_ld, level_index, iteration)
         call pf_stop_timer(pf, T_SWEEP, level_index)
+        
+        if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+           return
+        end if
     end do
 
-    !> Coarsest grid solve
     mg_ld(nlevels)%cycle_phase = 2
     level_index = coarsest_level
-    if (mg_lev%Nt .gt. 0) then
-       call pf_start_timer(pf, T_SWEEP, level_index)
-       call ExactSolve(pf, mg_ld, level_index)
-       call pf_stop_timer(pf, T_SWEEP, level_index)
-       !if ((level_index+1 .eq. nlevels) .and. (iteration .gt. 1)) then
-       !   mg_f_lev => mg_ld(nlevels)
-       !   call mpi_allreduce(mg_f_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_MAX, pf%comm%comm, ierr)
-       !   if (res_norm_glob(1) .lt. pf%abs_res_tol) then
-       !      pf%state%pstatus = PF_STATUS_CONVERGED
-       !      return
-       !   end if
-       !end if
+    level_index_f = level_index+1
+    call Restrict(pf, mg_ld, level_index, level_index_f)
+
+    if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+       return
     end if
+
+    !> Coarsest grid solve
+    call pf_start_timer(pf, T_SWEEP, level_index)
+    call ExactSolve(pf, mg_ld, level_index)
+    call pf_stop_timer(pf, T_SWEEP, level_index)
+
+    !> Ideal interpolation
     zero_rhs_flag = .false.
     mg_ld(nlevels)%cycle_phase = 3
     call pf_start_timer(pf, T_SWEEP, level_index)
@@ -531,6 +534,7 @@ contains
     call pf_stop_timer(pf, T_SWEEP, level_index)
   end subroutine pf_MGRIT_v_cycle
 
+  !> FCF-relaxation
   subroutine FCF_Relax(pf, mg_ld, level_index, iteration)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -538,101 +542,87 @@ contains
      integer, intent(in) :: level_index
      type(pf_level_t), pointer :: pf_lev
      type(mgrit_level_data), pointer :: mg_lev, mg_c_lev
-     logical :: zero_rhs_flag, zero_c_pts_flag, interp_flag, send_flag, recv_flag
-     integer :: qc_len, i, nlevels
+     logical :: zero_rhs_flag, zero_c_pts_flag, interp_flag, restrict_flag, send_flag, recv_flag, FC_relax_flag
+     integer :: uc_len, i, nlevels
      integer :: ierror
-     class(pf_encap_t), pointer :: qc(:)
+     class(pf_encap_t), pointer :: uc(:)
 
      nlevels = pf%nlevels
      mg_lev => mg_ld(level_index)
      mg_c_lev => mg_ld(level_index-1)
      pf_lev => pf%levels(level_index)
 
+     !> If not at finest level, initial values at C-points are zero
      if (level_index .lt. nlevels) then
         zero_c_pts_flag = .true.
      else
         zero_c_pts_flag = .false. 
      end if
 
+     !> If not at finest level, right-hand side is non-zero
      if (level_index .lt. nlevels) then
         zero_rhs_flag = .false.
      else
         zero_rhs_flag = .true.
      end if
+
+     !> Check if we are doing FCF-relaxations (just F-relaxations for Parareal)
+     if (mg_lev%FCF_flag .eqv. .true.) then
+        FC_relax_flag = .true.
+     else
+        FC_relax_flag = .false.
+     end if
+
+     !> Check if we are restricting
+     if (level_index .eq. nlevels) then
+        restrict_flag = .false.
+     !> For the finest level, restrict at C-points first so that
+     !> we can compute residuals and check for convergence
+     else if (level_index .eq. nlevels-1) then
+        restrict_flag = .false.
+        call Restrict(pf, mg_ld, level_index, level_index+1)
+     else
+        restrict_flag = .true.
+     end if
+     if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+        return
+     end if
      
      interp_flag = .false.
 
-
-     qc_len = size(mg_lev%qc)
-     do i = 1,qc_len
-        call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+     uc_len = size(mg_lev%uc)
+     do i = 1,uc_len
+        call mg_lev%uc_prev(i)%copy(mg_lev%uc(i))
      end do
-   
-     if (zero_c_pts_flag .eqv. .false.) then
-        !if ((pf%rank .lt. pf%comm%nproc-1) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
-           call pf_lev%qend%copy(mg_lev%qc(qc_len))
-        !end if
-        send_flag = mg_lev%c_pts_flag
-        recv_flag = mg_lev%f_pts_flag
-        call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
-     else
-        call pf_lev%q0%setval(0.0_pfdp)
-     end if
 
-     if (mg_lev%f_pts_flag .eqv. .true.) then
-        call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)
-     end if
-     if (mg_lev%Nt .eq. 1) then
-        !if ((pf%rank .lt. pf%comm%nproc-1) .and. (mg_lev%f_pts_flag .eqv. .true.)) then
-           call pf_lev%qend%copy(mg_lev%qc(1))
-        !end if
-        send_flag = mg_lev%f_pts_flag
-        recv_flag = mg_lev%c_pts_flag
-        call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
-        if (recv_flag .eqv. .true.) then
-           call mg_lev%qc(1)%copy(mg_lev%qc_boundary)
-        end if
-     end if
+     !> F- or FC-relaxation
+     call RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag) 
 
-     if (level_index .eq. nlevels) then
-        call pf_start_timer(pf, T_RESIDUAL, level_index)
-        call ResidualNorm_Cpoints_L2norm(pf, mg_ld, level_index, zero_rhs_flag)
-        call pf_stop_timer(pf, T_RESIDUAL, level_index)
-        if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
-           return
-        end if
-     end if
-
+     !> F-relaxations if we are doing FCF-relaxations
      if (mg_lev%FCF_flag .eqv. .true.) then
+        restrict_flag = .false.
         zero_c_pts_flag = .false.
-        if (mg_lev%c_pts_flag .eqv. .true.) then
-           call C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
-           call pf_lev%qend%copy(mg_lev%qc(qc_len))
-        end if
-        send_flag = mg_lev%c_pts_flag
-        recv_flag = mg_lev%f_pts_flag
-        call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
+        FC_relax_flag = .false.
         if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-           call mg_lev%qc_fas_boundary%copy(mg_lev%qc_boundary)
+           call mg_lev%uc_fas_ghost%copy(mg_lev%uc_ghost)
         end if
-        do i = 1,qc_len
-           call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+        do i = 1,uc_len
+           call mg_lev%uc_prev(i)%copy(mg_lev%uc(i))
         end do
-        if (mg_lev%f_pts_flag .eqv. .true.) then
-           call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)
-        end if
-        if (mg_lev%Nt .eq. 1) then
-           call pf_lev%qend%copy(mg_lev%qc(1))
-           send_flag = mg_lev%f_pts_flag
-           recv_flag = mg_lev%c_pts_flag
-           call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
-           if (recv_flag .eqv. .true.) then
-              call mg_lev%qc(1)%copy(mg_lev%qc_boundary)
-           end if
-        end if
+        call RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag)
      end if
+
+     !if (level_index .eq. nlevels) then
+     !   call pf_start_timer(pf, T_RESIDUAL, level_index)
+     !   call ResidualNorm_Cpoints_L2norm(pf, mg_ld, level_index, zero_rhs_flag)
+     !   call pf_stop_timer(pf, T_RESIDUAL, level_index)
+     !   if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+     !      return
+     !   end if
+     !end if
   end subroutine FCF_Relax
 
+  !> Ideal interpolation, i.e., interpolation followed by F-relaxations
   subroutine IdealInterp(pf, mg_ld, iteration, zero_rhs_flag)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -640,157 +630,184 @@ contains
     logical, intent(in) :: zero_rhs_flag
     type(pf_level_t), pointer :: pf_lev, pf_f_lev, pf_c_lev
     type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_c_lev
-    logical :: zero_c_pts_flag, interp_flag, send_flag, recv_flag
-    integer :: qc_len
+    logical :: zero_c_pts_flag, interp_flag, restrict_flag, send_flag, recv_flag, FC_relax_flag
+    integer :: uc_len
     integer :: i, j, k, n, ierr
     integer :: nlevels, level_index, level_index_f, level_index_c
-    class(pf_encap_t), pointer :: qc(:)
+    class(pf_encap_t), pointer :: uc(:)
     integer :: coarsest_level
 
     nlevels = pf%nlevels;
     coarsest_level = mg_ld(nlevels)%coarsest_level
     zero_c_pts_flag = .false.
     interp_flag = .true.
+    restrict_flag = .false.
+    FC_relax_flag = .false.
     do level_index = coarsest_level+1,(nlevels-1)
        level_index_f = level_index+1
        mg_lev => mg_ld(level_index)
        pf_lev => pf%levels(level_index)
        mg_f_lev => mg_ld(level_index_f)
        pf_f_lev => pf%levels(level_index_f)
-       qc_len = size(mg_lev%qc)
-       do i = 1,qc_len
-          call mg_lev%qc_prev(i)%copy(mg_lev%qc(i))
+       uc_len = size(mg_lev%uc)
+       do i = 1,uc_len
+          call mg_lev%uc_prev(i)%copy(mg_lev%uc(i))
        end do
-       if (mg_lev%c_pts_flag .eqv. .true.) then
-          call pf_lev%qend%copy(mg_lev%qc(qc_len))
-       end if
-       send_flag = mg_lev%c_pts_flag
-       recv_flag = mg_lev%f_pts_flag
-       call mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
-       if (mg_lev%f_pts_flag .eqv. .true.) then
-          call F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)
-       else
-          call mg_lev%q_temp%copy(mg_lev%qc_prev(1))
-          if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-             call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(1))
-          end if
-          call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_lev%t0)
-          call mg_f_lev%qc(1)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-       end if
-       
-       do i = 1,qc_len
-          call mg_lev%qc(i)%copy(mg_lev%qc_prev(i))
-       end do
-       
+       !> F-relaxation followed by interpolation
+       call RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag) 
     end do
   end subroutine IdealInterp
 
-  subroutine F_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)
+  !> Do a series of relxations followed by an optional grid transfer (restriction or interpolation)
+  subroutine RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
      integer, intent(in) :: level_index
-     logical, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag
+     logical, intent(in) :: zero_rhs_flag, zero_c_pts_flag, interp_flag, restrict_flag, FC_relax_flag
      type(mgrit_level_data), pointer :: mg_f_lev, mg_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
-     integer :: i, j, n, ii
-     integer :: nlevels
-     logical :: q_zero_flag
-     integer :: level_index_f
+     integer :: i, j, n, ii, nlevels, level_index_f, i_upper, uc_len, i_f
 
      nlevels = pf%nlevels
-     level_index_f = level_index + 1;
+     level_index_f = level_index + 1
      mg_lev => mg_ld(level_index)
+     mg_f_lev => mg_ld(level_index_f)
      pf_lev => pf%levels(level_index)
-     if (interp_flag .eqv. .true.) then
-        mg_f_lev => mg_ld(level_index_f)
-        pf_f_lev => pf%levels(level_index_f)
+     pf_f_lev => pf%levels(level_index_f)
+
+     !> In this case of one time point on the fine level, values at C-points need to be sent in advance for restriction
+     if ((restrict_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
+        if (mg_f_lev%f_pts_flag .eqv. .true.) then
+           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
+        else
+           call mgrit_post(pf, mg_ld, level_index_f, 1)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
+        end if
      end if
 
-     do i = 1,size(mg_lev%f_blocks)
-        if ((i .eq. 1) .and. (mg_lev%rank_shifted .eq. 0)) then
-           if ((level_index .eq. nlevels) .or. (mg_ld(nlevels)%cycle_phase .eq. 0)) then
-              call pf_lev%q0%copy(mg_lev%Q0)
-           else if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-              if (zero_c_pts_flag .eqv. .true.) then
-                 call pf_lev%q0%setval(0.0_pfdp)
-              else
+     !> Return if no time points
+     if (mg_lev%Nt .lt. 1) then
+        return
+     end if
+
+     !> Post non-blocking receives
+     if (FC_relax_flag .eqv. .true.) then
+        if ((zero_c_pts_flag .eqv. .false.) .or. ((mg_lev%Nt .eq. 1) .and. (mg_lev%c_pts_flag .eqv. .true.))) then
+           call mgrit_post(pf, mg_ld, level_index, 1)
+        end if
+     else
+        if ((zero_c_pts_flag .eqv. .false.) .and. (mg_lev%f_pts_flag .eqv. .true.)) then
+           call mgrit_post(pf, mg_ld, level_index, 1)
+        end if
+     end if
+
+     if (mg_lev%f_pts_flag .eqv. .true.) then
+        i_upper = size(mg_lev%f_blocks)
+     else
+        i_upper = 1
+     end if
+
+     uc_len = size(mg_lev%uc)
+     !> Start at right-most F-block such that computation and communication can be overlapped
+     do i = i_upper,1,-1
+        !> If this proc has C-points, send the right-most C-point
+        if ((i .eq. i_upper) .and. (zero_c_pts_flag .eqv. .false.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
+           call mgrit_send(pf, mg_ld, mg_lev%uc(uc_len), level_index, 1, .false.)
+        end if
+        !> If this proc has F-points, do F-relaxations
+        if (mg_lev%f_pts_flag .eqv. .true.) then
+           !> Set initial condition for this block
+           if ((i .eq. 1) .and. (mg_lev%rank_shifted .eq. 0)) then
+              if ((level_index .eq. nlevels) .or. (mg_ld(nlevels)%cycle_phase .eq. 0)) then
                  call pf_lev%q0%copy(mg_lev%Q0)
+              else if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
+                 if (zero_c_pts_flag .eqv. .true.) then
+                    call pf_lev%q0%setval(0.0_pfdp)
+                 else
+                    call pf_lev%q0%copy(mg_lev%Q0)
+                 end if
+              else
+                 call pf_lev%q0%setval(0.0_pfdp)
               end if
            else
-              call pf_lev%q0%setval(0.0_pfdp)
+              if (zero_c_pts_flag .eqv. .true.) then
+                 call pf_lev%q0%setval(0.0_pfdp)
+              else if (i .eq. 1) then
+                 !> Receive off-proc C-point
+                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+                 call pf_lev%q0%copy(mg_lev%uc_ghost)
+              else
+                 call pf_lev%q0%copy(mg_lev%uc_prev(i-1))
+              end if
            end if
-        else   
-           if (zero_c_pts_flag .eqv. .true.) then
-              call pf_lev%q0%setval(0.0_pfdp)
-           else if (i .gt. 1) then
-              call pf_lev%q0%copy(mg_lev%qc_prev(i-1))
+       
+           do n = 1,size(mg_lev%f_blocks(i)%val)
+              j = mg_lev%f_blocks(i)%val(n)
+              !> Restrict at this point
+              if (restrict_flag .eqv. .true.) then
+                 i_f = mg_f_lev%c_pts(j)
+                 call InjectRestrictPoint(pf, mg_ld, mg_lev%g(j), level_index, level_index_f, j, i_f, zero_rhs_flag);
+                 call mg_f_lev%uc(j)%copy(mg_f_lev%uc_prev(j))
+              end if
+              !> Do a single step
+              call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
+              !> Add right-hand side to the result
+              if (zero_rhs_flag .eqv. .false.) then
+                 call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g(j))
+              end if
+
+              !> Interpolate at this F-point
+              if (interp_flag .eqv. .true.) then
+                call InjectInterpPoint(pf, mg_ld, pf_lev%qend, level_index, level_index_f, j, j)
+              end if
+              call pf_lev%q0%copy(pf_lev%qend)
+           end do
+           !> If this proc has an F-point but no C-point, send F-point forward
+           if ((FC_relax_flag .eqv. .true.) .and. (mg_lev%c_pts_flag .eqv. .false.)) then
+              call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .false.)
            end if
         end if
-        
-        do n = 1,size(mg_lev%f_blocks(i)%val)
-           j = mg_lev%f_blocks(i)%val(n)
-           !> Do a single step
-           call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
-           !> Add g to the result
-           if (zero_rhs_flag .eqv. .false.) then
-              call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g(j))
-           end if
 
-           !> Interpolate to fine level
-           if (interp_flag .eqv. .true.) then
-              call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
-              call mg_lev%q_temp%copy(pf_lev%qend)
-              if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
-                 call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j))
+        !> Do C-relaxation
+        if (FC_relax_flag .eqv. .true.) then
+           !> If this proc has C-points do C-relaxations
+           if (mg_lev%c_pts_flag .eqv. .true.) then
+              j = mg_lev%c_pts(i)
+              !> Restrict at this C-point
+              if (restrict_flag .eqv. .true.) then
+                 i_f = mg_f_lev%c_pts(j)
+                 call InjectRestrictPoint(pf, mg_ld, mg_lev%g(j), level_index, level_index_f, j, i_f, zero_rhs_flag);
+                 call mg_f_lev%uc(j)%copy(mg_f_lev%uc_prev(j))
               end if
-              call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
-              call mg_f_lev%qc(j)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-              call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
+              !> If there is only one time point, receive F-point
+              if (mg_lev%f_pts_flag .eqv. .false.) then
+                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+                 call pf_lev%q0%copy(mg_lev%uc_ghost)
+              end if
+              call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
+              call mg_lev%uc(i)%copy(pf_lev%qend)
+              if (zero_rhs_flag .eqv. .false.) then
+                 call mg_lev%uc(i)%axpy(1.0_pfdp, mg_lev%g(j))
+              end if
            end if
-           call pf_lev%q0%copy(pf_lev%qend)
-        end do
-        call mg_lev%qc(i)%copy(pf_lev%qend)
+        else if (mg_lev%f_pts_flag .eqv. .true.) then
+           call mg_lev%uc(i)%copy(pf_lev%qend)
+        end if
+
+        !> Interpolate at this C-point
         if ((interp_flag .eqv. .true.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
-           call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
-           call mg_lev%q_temp%copy(mg_lev%qc_prev(i))
-           if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
-              call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(j+1))
+           if (mg_lev%f_pts_flag .eqv. .false.) then
+              j = 1
+           else
+              j = j + 1
            end if
-           call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_lev%t0)
-           call mg_f_lev%qc(j+1)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-           call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
+           call InjectInterpPoint(pf, mg_ld, mg_lev%uc_prev(i), level_index, level_index_f, j, j)
+           call mg_lev%uc(i)%copy(mg_lev%uc_prev(i))
         end if
      end do
-  end subroutine F_Relax
+  end subroutine RelaxTransfer
 
-  subroutine C_Relax(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)
-     type(pf_pfasst_t), target, intent(inout) :: pf
-     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-     integer, intent(in) :: level_index
-     logical, intent(in) :: zero_rhs_flag, interp_flag
-     integer :: i, j, k, n, ii
-     integer :: nlevels
-     logical :: q_zero_flag
-     type(mgrit_level_data), pointer :: mg_lev, mg_finest_lev
-     type(pf_level_t), pointer :: pf_lev
-
-     nlevels = pf%nlevels
-
-     mg_lev => mg_ld(level_index)
-
-     pf_lev => pf%levels(level_index)
-
-     do i = 1,size(mg_lev%c_pts)
-        j = mg_lev%c_pts(i)
-        call pf_lev%q0%copy(mg_lev%qc(i))
-        call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
-        call mg_lev%qc(i)%copy(pf_lev%qend)
-        if (zero_rhs_flag .eqv. .false.) then
-           call mg_lev%qc(i)%axpy(1.0_pfdp, mg_lev%g(j))
-        end if
-    end do
-  end subroutine C_Relax
-
+  !> Blocking send-receive
   subroutine mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -800,79 +817,91 @@ contains
     integer :: ierror
     type(mgrit_level_data), pointer :: mg_lev
 
-    if (pf%comm%nproc .gt. 1) then
-       pf_lev => pf%levels(level_index)
-       mg_lev => mg_ld(level_index)
-       if (mod(mg_lev%rank_shifted, 2) .eq. 0) then
-          if (mg_lev%rank_shifted .gt. 0) then
-             if (recv_flag .eqv. .true.) then
-                call mgrit_recv(pf, mg_ld, level_index, 1, .true.)
-                call mg_lev%qc_boundary%copy(pf_lev%q0)
-             end if
-          end if
-          if (pf%rank .lt. pf%comm%nproc-1) then
-             if (send_flag .eqv. .true.) then
-                call mgrit_send(pf, mg_ld, level_index, 1, .true.)
-             end if 
-          end if
-       else
-          if (pf%rank .lt. pf%comm%nproc-1) then
-             if (send_flag .eqv. .true.) then
-                call mgrit_send(pf, mg_ld, level_index, 1, .true.)
-             end if
-          end if
-          if (mg_lev%rank_shifted .gt. 0) then
-             if (recv_flag .eqv. .true.) then
-                call mgrit_recv(pf, mg_ld, level_index, 1, .true.)
-                call mg_lev%qc_boundary%copy(pf_lev%q0)
-             end if
-          end if
+    pf_lev => pf%levels(level_index)
+    mg_lev => mg_ld(level_index)
+    if (mod(mg_lev%rank_shifted, 2) .eq. 0) then
+       if (recv_flag .eqv. .true.) then
+          call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .true.)
+       end if
+       if (send_flag .eqv. .true.) then
+          call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .true.)
+       end if 
+    else
+       if (send_flag .eqv. .true.) then
+          call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .true.)
+       end if
+       if (recv_flag .eqv. .true.) then
+          call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .true.)
        end if
     end if
   end subroutine mgrit_send_recv
 
-  subroutine mgrit_send(pf, mg_ld, level_index, tag, blocking)
+  !> Non-blocking MPI send
+  subroutine mgrit_send(pf, mg_ld, send_data, level_index, tag, blocking)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    class(pf_encap_t), intent(in) :: send_data
     integer, intent(in) :: level_index, tag
     logical, intent(in) :: blocking
     type(pf_level_t), pointer :: pf_lev
     integer :: ierror, dir, which, stride
+    type(mgrit_level_data), pointer :: mg_lev
 
-    pf_lev => pf%levels(level_index)
+    if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
 
-    !call pf_lev%qend%pack(pf_lev%send)
-    !call pf_start_timer(pf, T_SEND, level_index)
-    !call pf%comm%send(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%send_to_rank)
-    !call pf_stop_timer(pf, T_SEND, level_index)
-
-    dir = 1
-    which = 1
-    stride = mg_ld(level_index)%send_to_rank - pf%rank
-    call pf_send(pf, pf_lev, tag, blocking, dir, which, stride)
+       dir = 1
+       which = 1
+       stride = mg_ld(level_index)%send_to_rank - pf%rank
+       call pf_lev%qend%copy(send_data)
+       call pf_send(pf, pf_lev, tag, blocking, dir, which, stride)
+    end if
   end subroutine mgrit_send
 
-  subroutine mgrit_recv(pf, mg_ld, level_index, tag, blocking)
+  !> Non-blocking MPI receive
+  subroutine mgrit_recv(pf, mg_ld, recv_data, level_index, tag, blocking)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    class(pf_encap_t), intent(inout) :: recv_data
     integer, intent(in) :: level_index, tag
     logical, intent(in) :: blocking
     type(pf_level_t), pointer :: pf_lev
     integer :: ierror, dir, which, stride
+    type(mgrit_level_data), pointer :: mg_lev
 
-    pf_lev => pf%levels(level_index)
+    mg_lev => mg_ld(level_index)
+    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
 
-    !call pf_start_timer(pf, T_RECEIVE, level_index)
-    !call pf%comm%recv(pf, pf_lev, tag, blocking, ierror, mg_ld(level_index)%recv_from_rank)
-    !call pf_stop_timer(pf, T_RECEIVE, level_index)
-    !call pf_lev%q0%unpack(pf_lev%recv)
-
-    dir = 1
-    which = 1
-    stride = pf%rank - mg_ld(level_index)%recv_from_rank
-    call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
+       dir = 1
+       which = 1
+       stride = pf%rank - mg_lev%recv_from_rank
+       call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
+       call recv_data%copy(pf_lev%q0)
+    end if
   end subroutine mgrit_recv
 
+  !> MPI post used in non-blocking communication
+  subroutine mgrit_post(pf, mg_ld, level_index, tag)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror, dir, stride
+    type(mgrit_level_data), pointer :: mg_lev
+
+    mg_lev => mg_ld(level_index)
+
+    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
+
+       dir = 1
+       stride = pf%rank - mg_lev%recv_from_rank
+       call pf_post(pf, pf_lev, tag, dir, stride)
+    end if
+  end subroutine mgrit_post
+
+  !> Exact solve for coarsest grid
   subroutine ExactSolve(pf, mg_ld, level_index)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -896,66 +925,39 @@ contains
      pf_lev => pf%levels(level_index)
      pf_f_lev => pf%levels(level_index_f)
 
-     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
-        call pf_f_lev%qend%copy(mg_f_lev%qc_boundary)
-        send_flag = mg_f_lev%f_pts_flag
-        recv_flag = mg_f_lev%c_pts_flag
-        call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
-        if (recv_flag .eqv. .true.) then
-           call mg_f_lev%qc_fas_boundary%copy(mg_f_lev%qc_boundary)
-        end if
+     if (mg_lev%Nt .lt. 1) then
+        return
      end if
 
-     if (mg_lev%Nt .gt. 0) then
-        mg_f_lev%res_norm_loc(1) = 0.0_pfdp
-
-        if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-           call mgrit_recv(pf, mg_ld, level_index, 3, .true.)
+     if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+        call mgrit_post(pf, mg_ld, level_index, 1)
+        call mgrit_recv(pf, mg_ld, pf_lev%q0, level_index, 1, .false.)
+     else
+        if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
+           call pf_lev%q0%copy(mg_lev%Q0)
         else
-           if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-              call pf_lev%q0%copy(mg_lev%Q0)
-           else
-              call pf_lev%q0%setval(0.0_pfdp);
-           end if
+           call pf_lev%q0%setval(0.0_pfdp);
         end if
-
-        !call pf_lev%ulevel%factory%create_single(gi, level_index, pf_lev%lev_shape)
-        do i = 1,mg_lev%Nt
-           ii = mg_f_lev%c_pts(i)
-           if (level_index_f .eq. nlevels) then
-               zero_rhs_flag = .true.
-           else
-               zero_rhs_flag = .false.
-           end if
-           call InjectRestrictPoint(pf, mg_ld, mg_lev%g_temp, level_index, level_index_f, i, ii, zero_rhs_flag)
-           call mg_f_lev%qc(i)%copy(mg_f_lev%qc_prev(i))
-
-           call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
-           call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g_temp)
-           call pf_lev%q0%copy(pf_lev%qend)
-
-           call mg_lev%q_temp%copy(pf_lev%qend)
-           if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
-              call mg_lev%q_temp%axpy(-1.0_pfdp, mg_lev%qc_fas(i))
-           end if
-           call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
-           call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%q_temp, mg_lev%q_temp, mg_f_lev%t0)
-           call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
-           call mg_f_lev%qc(i)%axpy(1.0_pfdp, mg_f_lev%q_temp)
-        end do
-        !call pf_lev%ulevel%factory%destroy_single(gi)
-
-        !pf_f_lev%residual = mg_f_lev%res_norm_loc(1)
-        !pf_lev%residual = 0.0_pfdp
-
-        if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
-           call mgrit_send(pf, mg_ld, level_index, 3, .true.)
-        end if
-
      end if
+
+     do i = 1,mg_lev%Nt
+        call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+        call pf_lev%qend%axpy(1.0_pfdp, mg_lev%g(i))
+        call pf_lev%q0%copy(pf_lev%qend)
+        call mg_lev%uc(i)%copy(pf_lev%qend)
+     end do
+
+     if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
+        call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .false.)
+     end if
+
+     do i = 1,mg_lev%Nt
+        call InjectInterpPoint(pf, mg_ld, mg_lev%uc(i), level_index, level_index_f, i, i)
+     end do
   end subroutine ExactSolve
- 
-  subroutine InitExactSolve(pf, mg_ld, Q0, level_index)
+
+  !> Coarsest grid exact solver used by predictor
+  subroutine PredictExactSolve(pf, mg_ld, Q0, level_index)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
      class(pf_encap_t), intent(in) :: Q0
@@ -967,6 +969,7 @@ contains
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_finest_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
 
+
      mg_lev => mg_ld(level_index)
      nlevels = pf%nlevels
      level_index_f = level_index + 1
@@ -976,34 +979,33 @@ contains
      pf_lev => pf%levels(level_index)
      pf_f_lev => pf%levels(level_index_f)
 
+     if (mg_lev%Nt .lt. 1) then
+        return
+     end if
+
      if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-        call mgrit_recv(pf, mg_ld, level_index, 3, .true.)
+        call mgrit_post(pf, mg_ld, level_index, 3)
+        call mgrit_recv(pf, mg_ld, pf_lev%q0, level_index, 3, .false.)
      else
-        call mg_finest_lev%Q0%copy(Q0)
-        do l = nlevels,level_index+1,-1
-           call pf%levels(l)%ulevel%restrict(pf%levels(l), pf%levels(l-1), mg_ld(l)%Q0, mg_ld(l-1)%Q0, mg_ld(l)%t0)
-        end do
         call pf_lev%q0%copy(mg_lev%Q0)
      end if
 
-     if (mg_lev%Nt .gt. 0) then
-        do i = 1,mg_lev%Nt
-           call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
-           call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
-           call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%qc(i), pf_lev%qend, mg_f_lev%t0)
-           call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
-           call pf_lev%q0%copy(pf_lev%qend)
+     do i = 1,mg_lev%Nt
+        call PointRelax(pf, mg_ld, level_index, i, pf_lev%q0, pf_lev%qend)
+        call pf_lev%q0%copy(pf_lev%qend)
+        call mg_lev%uc(i)%copy(pf_lev%qend)
+     end do
 
-           !call pf_lev%q0%setval(0.0_pfdp)
-           !call pf_lev%qend%setval(0.0_pfdp)
-        end do
+     call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 3, .false.)
 
-        if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
-           call mgrit_send(pf, mg_ld, level_index, 3, .true.)
-        end if
-     end if
-  end subroutine InitExactSolve
+     do i = 1,mg_lev%Nt
+        call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
+        call pf_lev%ulevel%interpolate(pf_f_lev, pf_lev, mg_f_lev%uc(i), mg_lev%uc(i), mg_f_lev%t0)
+        call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
+     end do
+  end subroutine PredictExactSolve
 
+  !> Restrict residuals corresponding to C-points
   subroutine Restrict(pf, mg_ld, level_index_c, level_index_f)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -1015,46 +1017,70 @@ contains
      real(pfdp) :: r_norm
      type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
+     real(pfdp) :: res_norm_glob
+     integer :: ierr
 
      nlevels = pf%nlevels
 
-     mg_c_lev => mg_ld(level_index_c)
      mg_f_lev => mg_ld(level_index_f)
+     if (mg_f_lev%Nt .lt. 1) then
+        return
+     end if
 
+     mg_c_lev => mg_ld(level_index_c)
      pf_f_lev => pf%levels(level_index_f)
 
-     mg_f_lev%res_norm_loc(1) = 0.0_pfdp
-     mg_f_lev%res_norm_index = 0
+     !if (mg_f_lev%Nt .eq. 1) then
+     !   call pf_f_lev%qend%copy(mg_f_lev%uc(1))
+     !   send_flag = mg_f_lev%f_pts_flag
+     !   recv_flag = mg_f_lev%c_pts_flag
+     !   call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
+     !   if (recv_flag .eqv. .true.) then
+     !      call mg_f_lev%uc_fas_ghost%copy(mg_f_lev%uc_ghost)
+     !   end if
+     !end if
 
-     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
-        call pf_f_lev%qend%copy(mg_f_lev%qc_boundary)
-        send_flag = mg_f_lev%f_pts_flag
-        recv_flag = mg_f_lev%c_pts_flag
-        call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
-        if (recv_flag .eqv. .true.) then
-           call mg_f_lev%qc_fas_boundary%copy(mg_f_lev%qc_boundary)
+     !> In this case of one time point on the fine level, values at C-points need to be sent in advance for restriction
+     if (mg_f_lev%Nt .eq. 1) then
+        if (mg_f_lev%f_pts_flag .eqv. .true.) then
+           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.) 
+        else
+           call mgrit_post(pf, mg_ld, level_index_f, 1)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
         end if
      end if
 
-     do i_c = 1,mg_c_lev%Nt
+     !> Restrict at C-points
+     mg_f_lev%res_norm_loc = 0.0_pfdp
+     do i_c = mg_c_lev%Nt,1,-1
         i_f = mg_f_lev%c_pts(i_c)
         if (level_index_f .eq. nlevels) then
-           zero_rhs_flag = .true.;
+           zero_rhs_flag = .true.
         else
-           zero_rhs_flag = .false.;
+           zero_rhs_flag = .false.
         end if
         call InjectRestrictPoint(pf, mg_ld, mg_c_lev%g(i_c), level_index_c, level_index_f, i_c, i_f, zero_rhs_flag);
+        call mg_f_lev%uc(i_c)%copy(mg_f_lev%uc_prev(i_c))
      end do
 
-     !pf_f_lev%residual = mg_f_lev%res_norm_loc(1)
+     !> If the finest level is finest, check residual norm
+     if (level_index_f .eq. nlevels) then
+        mg_f_lev => mg_ld(nlevels)
+        call mpi_allreduce(mg_f_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
+        res_norm_glob = sqrt(res_norm_glob)
+        pf%levels(nlevels)%residual = res_norm_glob
+        if (res_norm_glob .lt. pf%abs_res_tol) then
+           pf%state%pstatus = PF_STATUS_CONVERGED
+        end if
+     end if
   end subroutine Restrict
 
-  subroutine InjectRestrictPoint(pf, mg_ld, gci, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag)
+  !> Interpolate correction using injection
+  subroutine InjectInterpPoint(pf, mg_ld, eci, level_index_c, level_index_f, i_c, i_f)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-     class(pf_encap_t), intent(inout) :: gci
+     class(pf_encap_t), intent(inout) :: eci
      integer, intent(in) :: level_index_c, level_index_f, i_c, i_f
-     logical, intent(in) :: zero_rhs_flag
      type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
      type(pf_level_t), pointer :: pf_f_lev, pf_c_lev
      integer :: nlevels
@@ -1066,40 +1092,88 @@ contains
      pf_c_lev => pf%levels(level_index_c)
      nlevels = pf%nlevels
 
-     !if (mg_f_lev%Nt .eq. 1) then
-     !   call mg_f_lev%q_temp%copy(mg_f_lev%qc_boundary)
-     !else
-        call mg_f_lev%q_temp%copy(mg_f_lev%qc(i_c))
-     !end if
-     call PointRelax(pf, mg_ld, level_index_f, i_f, mg_f_lev%q_temp, mg_f_lev%r)
-     call mg_f_lev%r%axpy(-1.0_pfdp, mg_f_lev%qc_prev(i_c))
+     call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
+     call mg_c_lev%u_temp%copy(eci)
+     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
+        call mg_c_lev%u_temp%axpy(-1.0_pfdp, mg_c_lev%uc_fas(i_f))
+     end if
+     !> Spacial interpolation
+     call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_c_lev, mg_f_lev%u_temp, mg_c_lev%u_temp, mg_f_lev%t0)
+     call mg_f_lev%uc(i_f)%axpy(1.0_pfdp, mg_f_lev%u_temp)
+     call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
+  end subroutine InjectInterpPoint
+
+  !> Restrict residual using injection
+  subroutine InjectRestrictPoint(pf, mg_ld, gci, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag)
+     type(pf_pfasst_t), target, intent(inout) :: pf
+     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+     class(pf_encap_t), intent(inout) :: gci
+     integer, intent(in) :: level_index_c, level_index_f, i_c, i_f
+     logical, intent(in) :: zero_rhs_flag
+     type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
+     type(pf_level_t), pointer :: pf_f_lev, pf_c_lev
+     integer :: nlevels
+     logical :: send_flag, recv_flag
+
+     mg_c_lev => mg_ld(level_index_c)
+     mg_f_lev => mg_ld(level_index_f)
+
+     pf_f_lev => pf%levels(level_index_f)
+     pf_c_lev => pf%levels(level_index_c)
+     nlevels = pf%nlevels
+
+     send_flag = .false.
+     recv_flag = .false.
+     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
+        send_flag = mg_f_lev%f_pts_flag
+        recv_flag = mg_f_lev%c_pts_flag
+        if (send_flag .eqv. .true.) then
+           call mgrit_send(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+        end if
+        if (recv_flag .eqv. .true.) then
+           call mgrit_post(pf, mg_ld, level_index_f, 1)
+        end if
+     end if
+
+     call mg_f_lev%u_temp%copy(mg_f_lev%uc(i_c))
+     !> Take step
+     call PointRelax(pf, mg_ld, level_index_f, i_f, mg_f_lev%u_temp, mg_f_lev%r)
+     !> Finish computing residual
+     call mg_f_lev%r%axpy(-1.0_pfdp, mg_f_lev%uc_prev(i_c))
      if (zero_rhs_flag .eqv. .false.) then
         call mg_f_lev%r%axpy(1.0_pfdp, mg_f_lev%g(i_f));
      end if
-     if (i_c .eq. mg_c_lev%Nt) then
-        call ResNorm(pf, mg_ld, level_index_f, mg_f_lev%r, i_c, 2)
+     !> Update res norm
+     if (level_index_f .eq. nlevels) then
+        call SumResNorm(pf, mg_ld, level_index_f, mg_f_lev%res_norm_loc, mg_f_lev%r, 2)
      end if
      call pf_start_timer(pf, T_RESTRICT, level_index_f)
+     !> Spacial restriction
      call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%r, mg_c_lev%r, mg_f_lev%t0)
      if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-        call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%qc_prev(i_c), mg_c_lev%qc_fas(i_c), mg_f_lev%t0)
-        call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%qc_fas(i_c))
+        call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c), mg_c_lev%uc_fas(i_c), mg_f_lev%t0)
+        call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%uc_fas(i_c))
         if (i_c .eq. 1) then
            if (mg_c_lev%rank_shifted .eq. 0) then
-              call mg_c_lev%q_temp%copy(mg_c_lev%Q0)
+              call mg_c_lev%u_temp%copy(mg_c_lev%Q0)
            else
-              call mg_c_lev%q_temp%copy(mg_f_lev%qc_fas_boundary)
+              if (recv_flag .eqv. .true.) then
+                 call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+                 call mg_f_lev%uc_fas_ghost%copy(mg_f_lev%uc_ghost)
+              end if
+              call mg_c_lev%u_temp%copy(mg_f_lev%uc_fas_ghost)
            end if
         else
-           call mg_c_lev%q_temp%copy(mg_c_lev%qc_fas(i_c-1))
+           call mg_c_lev%u_temp%copy(mg_c_lev%uc_fas(i_c-1))
         end if
-        call PointRelax(pf, mg_ld, level_index_c, i_c, mg_c_lev%q_temp, pf_c_lev%qend)
+        call PointRelax(pf, mg_ld, level_index_c, i_c, mg_c_lev%u_temp, pf_c_lev%qend)
         call mg_c_lev%r%axpy(-1.0_pfdp, pf_c_lev%qend)
      end if
      call pf_stop_timer(pf, T_RESTRICT, level_index_f)
      call gci%copy(mg_c_lev%r)
   end subroutine InjectRestrictPoint
 
+  !> Compute residual of fine-grid C-points (unused)
   subroutine ResidualNorm_Cpoints_L2norm(pf, mg_ld, level_index, zero_rhs_flag)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -1109,7 +1183,7 @@ contains
      type(pf_level_t), pointer :: pf_lev, pf_c_lev
      integer :: level_index_c, nlevels, i, i_c, ierr
      real(pfdp) :: r_norm
-     real(pfdp) :: res_norm_glob(1)
+     real(pfdp) :: res_norm_glob
 
      nlevels = pf%nlevels
      level_index_c = level_index-1
@@ -1121,24 +1195,25 @@ contains
 
      do i_c = 1,mg_c_lev%Nt
         i = mg_lev%c_pts(i_c)
-        call mg_lev%q_temp%copy(mg_lev%qc(i_c))
-        call PointRelax(pf, mg_ld, level_index, i, mg_lev%q_temp, mg_lev%r)
-        call mg_lev%r%axpy(-1.0_pfdp, mg_lev%qc_prev(i_c))
+        call mg_lev%u_temp%copy(mg_lev%uc(i_c))
+        call PointRelax(pf, mg_ld, level_index, i, mg_lev%u_temp, mg_lev%r)
+        call mg_lev%r%axpy(-1.0_pfdp, mg_lev%uc_prev(i_c))
         if (zero_rhs_flag .eqv. .false.) then
            call mg_lev%r%axpy(1.0_pfdp, mg_lev%g(i));
         end if
-        mg_lev%res_norm_loc(1) = mg_lev%res_norm_loc(1) + (mg_lev%r%norm())**2
+        mg_lev%res_norm_loc = mg_lev%res_norm_loc + (mg_lev%r%norm())**2
      end do
 
-     call mpi_allreduce(mg_lev%res_norm_loc(1), res_norm_glob(1), 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
-     res_norm_glob(1) = sqrt(res_norm_glob(1))
-     pf_lev%residual = res_norm_glob(1)
+     call mpi_allreduce(mg_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
+     res_norm_glob = sqrt(res_norm_glob)
+     pf_lev%residual = res_norm_glob
      
-     if (res_norm_glob(1) .lt. pf%abs_res_tol) then
+     if (res_norm_glob .lt. pf%abs_res_tol) then
         pf%state%pstatus = PF_STATUS_CONVERGED
      end if
   end subroutine ResidualNorm_Cpoints_L2norm
 
+  !> Take a step
   subroutine PointRelax(pf, mg_ld, level_index, n, q0, qend)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -1155,30 +1230,25 @@ contains
      call pf_lev%ulevel%stepper%do_n_steps(pf, level_index, t0n, q0, qend, mg_lev%dt, 1)
   end subroutine PointRelax
 
-  subroutine ResNorm(pf, mg_ld, level_index, r, i, norm_type)
+  !> Compute norm of r and add it to sum_norms (sum of norms)
+  subroutine SumResNorm(pf, mg_ld, level_index, sum_norms, r, norm_type)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+     integer, intent(in) :: level_index
+     real(pfdp), intent(inout) :: sum_norms
      class(pf_encap_t), intent(in) :: r
-     integer, intent(in) :: level_index, i
      integer, intent(in) :: norm_type
-     type(mgrit_level_data), pointer :: mg_lev
-     type(pf_level_t), pointer :: pf_lev
-     integer :: nlevels
      real(pfdp) :: r_norm
 
-     nlevels = pf%nlevels
+     r_norm = r%norm()
 
-     if (norm_type == 2) then
-        r_norm = r%norm()
-     else
-        mg_lev => mg_ld(level_index)
-        pf_lev => pf%levels(level_index)
-        r_norm = r%norm()
-        if (r_norm .gt. mg_lev%res_norm_loc(1)) then
-           mg_lev%res_norm_loc(1) = r_norm
-           mg_lev%res_norm_index = i
-        end if
+     if (norm_type .eq. 0) then
+        sum_norms = max(sum_norms, r_norm)
+     else if (norm_type .eq. 1) then
+        sum_norms = sum_norms + r_norm
+     else if (norm_type == 2) then
+        sum_norms = sum_norms + r_norm*r_norm
      end if
-  end subroutine ResNorm
+  end subroutine SumResNorm
 
 end module pf_mod_MGRIT

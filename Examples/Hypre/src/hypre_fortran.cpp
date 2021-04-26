@@ -325,6 +325,8 @@ extern "C"
 
    void GetHypreStats(void)
    {
-      printf("FComp count %d, wtime %e\n", FComp_count, FComp_wtime);
+      int rank;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      printf("rank %d: FComp count %d, wtime %e\n", rank, FComp_count, FComp_wtime);
    }
 }

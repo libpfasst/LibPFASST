@@ -4,7 +4,7 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels = 20 !  must be set
+    nlevels = 3 !  must be set
 
     niters = 1  !  default is 5
     nnodes = 2 3 5
@@ -16,8 +16,8 @@
     qtype  = 1   
    
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 0
-    rel_res_tol = 0
+    abs_res_tol = 1.d-9
+    rel_res_tol = 1.d-9
 
     !  Variable which determine how the predictor runs  (default is .false. and .true.)
     pipeline_pred =  .true.
@@ -34,17 +34,15 @@
 
     T0 = 0.0
     Tfin = .1
-    nsteps = 4
-    num_grid_points = 3
+    nsteps = 128
+    num_grid_points = 32
     nspace = 1
     ntime = 1
-    init_cond = 50.0
-    space_dim = 2
     max_space_v_cycles = 10
 
     mgrit_coarsen_factor = 2
 
-    solver_type = 2
+    solver_type = 1
 
     nsteps_rk = 4 2
 

@@ -123,14 +123,11 @@ contains
        write(un,*) 'nsteps: ', nsteps, '! Number of steps'
        write(un,*) 'Dt:     ', Dt, '! Time step size'
        write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
-       write(un,*) 'num spatial grid points (on each side of square domain) per processor:   ', num_grid_points
+       write(un,*) 'Number of spatial grid points per processor:   ',num_grid_points*num_grid_points
        write(un,*) 'num spatial procs per temporal proc:   ',   nspace
        write(un,*) 'num temporal procs:   ',   ntime  
-       write(un,*) 'Constant initial condition:   ', init_cond
        write(un,*) 'Number of spacial dimensions:   ', space_dim
-       write(un,*) 'Number of Hypre V-cycles:   ', max_space_v_cycles
-   
-   
+       write(un,*) 'Number of Hypre V-cycles:   ', max_space_v_cycles 
        write(un,*) 'PFASST parameters read from input file ', pfasst_nml
        write(un,*) '=================================================='
     end if
