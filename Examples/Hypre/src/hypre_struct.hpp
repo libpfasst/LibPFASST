@@ -54,7 +54,7 @@ class HypreStruct {
       void SetDim(int in_dim);
       int GetNumRows(void);
       void SetInitCond(double val);
-      void InitGrid(int num_grid_points, int in_nrows = -1, int *extents = NULL);
+      void InitGrid(int nx, int in_nrows = -1, int *extents = NULL);
       double *HeatEquTrueSol(double t, int P, int Q, double init_cond);
 };
 

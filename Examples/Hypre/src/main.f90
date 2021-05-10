@@ -72,7 +72,7 @@ contains
     !> Read problem parameters
     call probin_init(pf_fname)
 
-    n = num_grid_points * num_grid_points
+    n = nx * nx
     call create_simple_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, space_dim)
 
     !>  Set up communicator
@@ -119,7 +119,7 @@ contains
     ! call y_end%setval(init_cond)
     call initial(y_0)
 
-    !> Do the PFASST time stepping
+    !> Do the time stepping
     wtime_start = MPI_Wtime()
     if (solver_type .eq. 1) then !> MGRIT
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
@@ -136,7 +136,7 @@ contains
     end if
     !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
     !call GetHypreStats()
-    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
 
     call mpi_comm_size(pf%comm%comm, nproc, error)
     call mpi_comm_rank(pf%comm%comm, rank, error)

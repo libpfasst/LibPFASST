@@ -17,7 +17,7 @@ void HypreStruct::SetDim(int in_dim)
    dim = in_dim;
 }
 
-void HypreStruct::InitGrid(int num_grid_points, int in_nrows, int *extents)
+void HypreStruct::InitGrid(int nx, int in_nrows, int *extents)
 {
    ilower = (int *)malloc(2 * sizeof(int));
    iupper = (int *)malloc(2 * sizeof(int));
@@ -25,7 +25,7 @@ void HypreStruct::InitGrid(int num_grid_points, int in_nrows, int *extents)
    Lx = 1.0; Ly = 1.0;
 
    if (in_nrows < 0){
-      n = num_grid_points;
+      n = nx;
       N  = sqrt(num_procs);
       h  = 1.0 / (N*n+1); /* note that when calculating h we must
                              remember to count the boundary nodes */

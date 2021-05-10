@@ -26,12 +26,12 @@ contains
     integer :: level_index
 
     integer :: nproc, rank, error
-    real(pfdp) :: f
+    real(pfdp) :: f, dt_lev
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
     integer :: mgrit_nsteps, coarsen_factor, FComp_setup_flag
     logical :: setup_start_coarse_flag
 
-    if ((solver_type .eq. 1) .and. (rk_order .eq. 1)) then
+    if (((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) .and. (rk_order .eq. 1)) then
        FComp_setup_flag = 0
     else
        FComp_setup_flag = 1
@@ -43,7 +43,7 @@ contains
     allocate(lev_shape(pf%nlevels,10))
     !> Loop over levels and set some level specific parameters
     do l = 1,pf%nlevels
-       lev_shape(l,1) = num_grid_points
+       lev_shape(l,1) = nx
        lev_shape(l,2) = space_color
        lev_shape(l,3) = space_dim
        lev_shape(l,4) = max_space_v_cycles
@@ -77,7 +77,7 @@ contains
           st_finest = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
           call HypreSolverInit(st_finest%c_hypre_solver_ptr, &
                                l_finest, &
-                               num_grid_points, &
+                               nx, &
                                space_color, &
                                space_dim, &
                                max_space_v_cycles, &
@@ -91,7 +91,7 @@ contains
              st_lev = cast_as_my_stepper_t(pf%levels(l)%ulevel%stepper)
              call HypreSolverInit(st_lev%c_hypre_solver_ptr, &
                                   l, &
-                                  num_grid_points, &
+                                  nx, &
                                   space_color, &
                                   space_dim, &
                                   max_space_v_cycles, &
@@ -118,7 +118,7 @@ contains
           sw_finest = cast_as_my_sweeper_t(pf%levels(l_finest)%ulevel%sweeper)
           call HypreSolverInit(sw_finest%c_hypre_solver_ptr, &
                                l_finest, &
-                               num_grid_points, &
+                               nx, &
                                space_color, &
                                space_dim, &
                                max_space_v_cycles, &
@@ -133,7 +133,7 @@ contains
              sw_lev = cast_as_my_sweeper_t(pf%levels(l)%ulevel%sweeper)
              call HypreSolverInit(sw_lev%c_hypre_solver_ptr, &
                                   l, &
-                                  num_grid_points, &
+                                  nx, &
                                   space_color, &
                                   space_dim, &
                                   max_space_v_cycles, &
@@ -175,29 +175,39 @@ contains
     end if
 
     if (FComp_setup_flag .eq. 0) then
-       if (solver_type .eq. 1) then
+
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
           do l = pf%nlevels,1,-1
+             if (solver_type .eq. 1) then
+                dt_lev = mg_ld(l)%dt
+             else if (solver_type .eq. 2) then
+                dt_lev = (Tfin - T0) / real(nsteps_rk(l) * nsteps, pfdp)
+             else if (solver_type .eq. 3) then
+                dt_lev = (Tfin - T0) / real(nsteps, pfdp)
+             else
+
+             end if
              st_lev = cast_as_my_stepper_t(pf%levels(l)%ulevel%stepper)
              call HypreImplicitSolverInit(st_lev%c_hypre_solver_ptr, &
                                           l, &
-                                          num_grid_points, &
+                                          nx, &
                                           space_color, &
                                           space_dim, &
                                           max_space_v_cycles, &
                                           pf%nlevels, &
-                                          mg_ld(l)%dt)
+                                          dt_lev)
           end do
        else
           do l = pf%nlevels,1,-1
              sw_lev = cast_as_my_sweeper_t(pf%levels(l)%ulevel%sweeper)
              call HypreImplicitSolverInit(sw_lev%c_hypre_solver_ptr, &
                                           l, &
-                                          num_grid_points, &
+                                          nx, &
                                           space_color, &
                                           space_dim, &
                                           max_space_v_cycles, &
                                           pf%nlevels, &
-                                          mg_ld(l)%dt)
+                                          dt_lev)
           end do
        end if
     end if

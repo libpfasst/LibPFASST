@@ -14,7 +14,7 @@ extern "C"
    int PfasstToHypreLevelIndex(int pfasst_level_index, int num_levels);
    int HypreSolverGetNumRowsLevel(HypreSolver *hypre_solver, int pfasst_level_index);
    void HypreVectorCreate(HypreVector **hypre_vector,
-                          int num_grid_points,
+                          int nx,
                           int comm_color,
                           int space_dim,
                           int nrows,
@@ -33,7 +33,7 @@ extern "C"
    void HypreVectorPrint(HypreVector *hypre_vector);
    void HypreSolverInit(HypreSolver **hypre_solver,
                         int pfasst_level_index,
-                        int num_grid_points,
+                        int nx,
                         int comm_color,
                         int space_dim,
                         int max_iter,
@@ -41,7 +41,7 @@ extern "C"
                         int spacial_coarsen_flag);
    void HypreImplicitSolverInit(HypreSolver **hypre_solver,
                                 int pfasst_level_index,
-                                int num_grid_points,
+                                int nx,
                                 int comm_color,
                                 int space_dim,
                                 int max_iter,

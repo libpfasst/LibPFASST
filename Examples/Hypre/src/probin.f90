@@ -7,7 +7,7 @@ module probin
   use pf_mod_mpi
 
   !  The namlist for local variables
-  integer, save :: num_grid_points, nspace, ntime, space_dim, max_space_v_cycles
+  integer, save :: nx, nspace, ntime, space_dim, max_space_v_cycles
   integer, save :: solver_type, mgrit_coarsen_factor, nsteps_rk(PF_MAXLEVS)
   logical, save :: FAS_flag, FCF_flag
   real(pfdp), save :: init_cond
@@ -19,7 +19,7 @@ module probin
   integer, save :: rk_order
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/ space_dim, num_grid_points, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
+  namelist /params/ space_dim, nx, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
   namelist /params/ mgrit_coarsen_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order, FCF_flag
 
 contains
@@ -51,7 +51,7 @@ contains
 
     nspace = 1
     ntime = nproc
-    num_grid_points = 3
+    nx = 3
     init_cond = 50.0
     space_dim = 2
     max_space_v_cycles = 100
@@ -123,7 +123,7 @@ contains
        write(un,*) 'nsteps: ', nsteps, '! Number of steps'
        write(un,*) 'Dt:     ', Dt, '! Time step size'
        write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
-       write(un,*) 'Number of spatial grid points per processor:   ',num_grid_points*num_grid_points
+       write(un,*) 'Number of grid points in each spatial direction:   ', nx
        write(un,*) 'num spatial procs per temporal proc:   ',   nspace
        write(un,*) 'num temporal procs:   ',   ntime  
        write(un,*) 'Number of spacial dimensions:   ', space_dim

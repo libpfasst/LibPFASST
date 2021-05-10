@@ -35,7 +35,7 @@ module encap
    interface
 
       subroutine HypreVectorCreate(x_ptr, &
-                                   num_grid_points, &
+                                   nx, &
                                    comm_color, &
                                    space_dim, &
                                    nrows, &
@@ -45,7 +45,7 @@ module encap
                                    iupper1) bind(c, name="HypreVectorCreate")
          use iso_c_binding
          type(c_ptr) :: x_ptr
-         integer, value :: num_grid_points, comm_color, space_dim
+         integer, value :: nx, comm_color, space_dim
          integer, value :: nrows, ilower0, ilower1, iupper0, iupper1
       end subroutine HypreVectorCreate
     
@@ -116,10 +116,10 @@ contains
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: ierr
-    integer :: num_grid_points, comm_color, n_space, space_dim, max_space_v_cycles
+    integer :: nx, comm_color, n_space, space_dim, max_space_v_cycles
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
 
-    num_grid_points = lev_shape(1)
+    nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
     max_space_v_cycles = lev_shape(4)
@@ -134,7 +134,7 @@ contains
 
     select type(x)
     type is (hypre_vector_encap)
-       call HypreVectorCreate(x%c_hypre_vector_ptr, num_grid_points, comm_color, space_dim, &
+       call HypreVectorCreate(x%c_hypre_vector_ptr, nx, comm_color, space_dim, &
                               nrows, ilower0, ilower1, iupper0, iupper1)
        x%vector_size = nrows
     end select
@@ -148,10 +148,10 @@ contains
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: i, ierr
-    integer :: num_grid_points, comm_color, n_space, space_dim, max_space_v_cycles
+    integer :: nx, comm_color, n_space, space_dim, max_space_v_cycles
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
 
-    num_grid_points = lev_shape(1)
+    nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
     max_space_v_cycles = lev_shape(4)
@@ -167,7 +167,7 @@ contains
     select type(x)
     type is (hypre_vector_encap)
        do i = 1, n
-           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, num_grid_points, comm_color, space_dim, &
+           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, nx, comm_color, space_dim, &
                                   nrows, ilower0, ilower1, iupper0, iupper1)
            x(i)%vector_size = nrows
        end do

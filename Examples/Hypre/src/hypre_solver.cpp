@@ -3,12 +3,12 @@
 extern int FComp_count;
 extern double FComp_wtime;
 
-HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_max_levels, int num_grid_points)
+HypreSolver::HypreSolver(MPI_Comm in_comm, int in_dim, int in_max_iter, int in_max_levels, int nx)
 {
    //if (setup_done == 1) return;
    SetComm(in_comm);
    SetDim(in_dim);
-   InitGrid(num_grid_points);
+   InitGrid(nx);
 
    n_pre  = 1;
    n_post = 1;
@@ -38,7 +38,7 @@ int HypreSolver::GetNumLevels(void)
 }
 
 void HypreSolver::SetupMatrix(HYPRE_StructMatrix *A,
-                              int num_grid_points,
+                              int nx,
                               int level_index,
                               int spacial_coarsen_flag,
                               int implicit_flag,

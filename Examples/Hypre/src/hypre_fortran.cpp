@@ -77,7 +77,7 @@ extern "C"
    }
 
    void HypreVectorCreate(HypreVector **hypre_vector, 
-                          int num_grid_points,
+                          int nx,
                           int comm_color,
                           int space_dim,
                           int nrows,
@@ -96,7 +96,7 @@ extern "C"
             newcomm = glob_space_comm;
          }
          newcomm = glob_space_comm;
-         *hypre_vector = new HypreVector(num_grid_points, 0.0, newcomm, space_dim, nrows, extents);
+         *hypre_vector = new HypreVector(nx, 0.0, newcomm, space_dim, nrows, extents);
       }
    }
 
@@ -147,16 +147,16 @@ extern "C"
       hypre_vector->Print();
    }
 
-   void HypreSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int num_grid_points, int comm_color, int space_dim, int max_iter, int max_levels, int spacial_coarsen_flag)
+   void HypreSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, int spacial_coarsen_flag)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
       MPI_Comm newcomm;
       if (spacial_coarsen_flag == 1){
          if (level_index == 0){
             //MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
-            //*hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, num_grid_points);
-            //(*hypre_solver)->A_imp = (*hypre_solver)->SetupMatrix(num_grid_points, level_index, spacial_coarsen_flag, 0);
-            //(*hypre_solver)->A_exp = (*hypre_solver)->SetupMatrix(num_grid_points, level_index, spacial_coarsen_flag, 1);
+            //*hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
+            //(*hypre_solver)->A_imp = (*hypre_solver)->SetupMatrix(nx, level_index, spacial_coarsen_flag, 0);
+            //(*hypre_solver)->A_exp = (*hypre_solver)->SetupMatrix(nx, level_index, spacial_coarsen_flag, 1);
             //(*hypre_solver)->x = (*hypre_solver)->SetupVector();
             //(*hypre_solver)->b = (*hypre_solver)->SetupVector();
             //(*hypre_solver)->SetupSpacialCoarsen((*hypre_solver)->A_imp);
@@ -173,9 +173,9 @@ extern "C"
                newcomm = glob_space_comm;
             }
             newcomm = glob_space_comm;
-            *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, num_grid_points);
-            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
-            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), num_grid_points, level_index, spacial_coarsen_flag, 0, 0.0);
+            *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
+            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), nx, level_index, spacial_coarsen_flag, 0, 0.0);
+            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, spacial_coarsen_flag, 0, 0.0);
             (*hypre_solver)->x = (*hypre_solver)->SetupVector();
             (*hypre_solver)->b = (*hypre_solver)->SetupVector();
          }
@@ -187,7 +187,7 @@ extern "C"
       }
    }
 
-   void HypreImplicitSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int num_grid_points, int comm_color, int space_dim, int max_iter, int max_levels, double dtq)
+   void HypreImplicitSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, double dtq)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
       if (glob_spacial_coarsen_flag == 1){
@@ -195,7 +195,7 @@ extern "C"
          }
       }
       else {
-         (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), num_grid_points, level_index, glob_spacial_coarsen_flag, 1, dtq);
+         (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, glob_spacial_coarsen_flag, 1, dtq);
          (*hypre_solver)->SetupStructSolver(&((*hypre_solver)->A_imp), &((*hypre_solver)->solver_imp), &((*hypre_solver)->precond_imp));
       }
    }

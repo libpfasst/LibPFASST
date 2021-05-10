@@ -55,7 +55,7 @@ class HypreSolver: public HypreStruct {
       int setup_done = 0;
       //int setup_spacial_solver_in_FComp_flag = 0;
 
-      HypreSolver(MPI_Comm in_comm = MPI_COMM_WORLD, int dim = 2, int max_iter = 100, int max_levels = 0, int num_grid_points = 32);
+      HypreSolver(MPI_Comm in_comm = MPI_COMM_WORLD, int dim = 2, int max_iter = 100, int max_levels = 0, int nx = 32);
       ~HypreSolver(void);
 
       int GetNumRowsLevel(int level_index);
@@ -65,7 +65,7 @@ class HypreSolver: public HypreStruct {
       void SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver);
       void SetupSpacialCoarsen(void);
       void SetupMatrix(HYPRE_StructMatrix *A,
-                       int num_grid_points,
+                       int nx,
                        int level_index,
                        int spacial_coarsen_flag,
                        int implicit_flag,

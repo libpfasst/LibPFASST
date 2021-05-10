@@ -423,7 +423,7 @@ contains
     call pf_stop_timer(pf, T_TOTAL)
     !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
 
-    !call pf_dump_stats(pf)
+    call pf_dump_stats(pf)
 
     uc => mg_ld(nlevels)%uc
     call qend%copy(uc(size(uc)))
@@ -596,9 +596,6 @@ contains
         restrict_flag = .false.
         zero_c_pts_flag = .false.
         FC_relax_flag = .false.
-        if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-           call mg_lev%uc_fas_ghost%copy(mg_lev%uc_ghost)
-        end if
         do i = 1,uc_len
            call mg_lev%uc_prev(i)%copy(mg_lev%uc(i))
         end do
@@ -703,6 +700,7 @@ contains
      uc_len = size(mg_lev%uc)
      !> Start at right-most F-block such that computation and communication can be overlapped
      do i = i_upper,1,-1
+     !do i = 1,i_upper
         !> If this proc has C-points, send the right-most C-point
         if ((i .eq. i_upper) .and. (zero_c_pts_flag .eqv. .false.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
            call mgrit_send(pf, mg_ld, mg_lev%uc(uc_len), level_index, 1, .false.)
@@ -1011,7 +1009,7 @@ contains
      type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
      real(pfdp) :: res_norm_glob
-     integer :: ierr
+     integer :: ierr, i_upper
 
      nlevels = pf%nlevels
 
@@ -1023,16 +1021,6 @@ contains
      mg_c_lev => mg_ld(level_index_c)
      pf_f_lev => pf%levels(level_index_f)
 
-     !if (mg_f_lev%Nt .eq. 1) then
-     !   call pf_f_lev%qend%copy(mg_f_lev%uc(1))
-     !   send_flag = mg_f_lev%f_pts_flag
-     !   recv_flag = mg_f_lev%c_pts_flag
-     !   call mgrit_send_recv(pf, mg_ld, level_index_f, send_flag, recv_flag)
-     !   if (recv_flag .eqv. .true.) then
-     !      call mg_f_lev%uc_fas_ghost%copy(mg_f_lev%uc_ghost)
-     !   end if
-     !end if
-
      !> In this case of one time point on the fine level, values at C-points need to be sent in advance for restriction
      if (mg_f_lev%Nt .eq. 1) then
         if (mg_f_lev%f_pts_flag .eqv. .true.) then
@@ -1043,9 +1031,12 @@ contains
         end if
      end if
 
-     !> Restrict at C-points
      mg_f_lev%res_norm_loc = 0.0_pfdp
-     do i_c = mg_c_lev%Nt,1,-1
+     i_upper = mg_c_lev%Nt
+
+     !> Restrict at C-points
+     do i_c = i_upper,1,-1
+     !do i_c = 1,i_upper
         i_f = mg_f_lev%c_pts(i_c)
         if (level_index_f .eq. nlevels) then
            zero_rhs_flag = .true.
@@ -1053,6 +1044,9 @@ contains
            zero_rhs_flag = .false.
         end if
         call InjectRestrictPoint(pf, mg_ld, mg_c_lev%g(i_c), level_index_c, level_index_f, i_c, i_f, zero_rhs_flag);
+     end do
+
+     do i_c = 1,i_upper
         call mg_f_lev%uc(i_c)%copy(mg_f_lev%uc_prev(i_c))
      end do
 
@@ -1090,7 +1084,7 @@ contains
      if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_ld(nlevels)%cycle_phase .gt. 0)) then
         call mg_c_lev%u_temp%axpy(-1.0_pfdp, mg_c_lev%uc_fas(i_f))
      end if
-     !> Spacial interpolation
+     !> Spatial interpolation
      call pf_f_lev%ulevel%interpolate(pf_f_lev, pf_c_lev, mg_f_lev%u_temp, mg_c_lev%u_temp, mg_f_lev%t0)
      call mg_f_lev%uc(i_f)%axpy(1.0_pfdp, mg_f_lev%u_temp)
      call pf_stop_timer(pf, T_INTERPOLATE, level_index_f)
@@ -1115,19 +1109,6 @@ contains
      pf_c_lev => pf%levels(level_index_c)
      nlevels = pf%nlevels
 
-     send_flag = .false.
-     recv_flag = .false.
-     if ((mg_ld(nlevels)%FAS_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
-        send_flag = mg_f_lev%f_pts_flag
-        recv_flag = mg_f_lev%c_pts_flag
-        if (send_flag .eqv. .true.) then
-           call mgrit_send(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
-        end if
-        if (recv_flag .eqv. .true.) then
-           call mgrit_post(pf, mg_ld, level_index_f, 1)
-        end if
-     end if
-
      call mg_f_lev%u_temp%copy(mg_f_lev%uc(i_c))
      !> Take step
      call PointRelax(pf, mg_ld, level_index_f, i_f, mg_f_lev%u_temp, mg_f_lev%r)
@@ -1136,29 +1117,38 @@ contains
      if (zero_rhs_flag .eqv. .false.) then
         call mg_f_lev%r%axpy(1.0_pfdp, mg_f_lev%g(i_f));
      end if
-     !> Update res norm
+     !> If on the finest level, update res norm
      if (level_index_f .eq. nlevels) then
         call SumResNorm(pf, mg_ld, level_index_f, mg_f_lev%res_norm_loc, mg_f_lev%r, 2)
      end if
      call pf_start_timer(pf, T_RESTRICT, level_index_f)
-     !> Spacial restriction
+     !> Spatial restriction
      call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%r, mg_c_lev%r, mg_f_lev%t0)
+     !> FAS restriction
      if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
-        call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c), mg_c_lev%uc_fas(i_c), mg_f_lev%t0)
-        call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%uc_fas(i_c))
-        if (i_c .eq. 1) then
+        !> FAS spatial restriction  
+        if (i_c .eq. 1) then !> Case of left-most C-point
+           !> Restrict off-proc C-point
            if (mg_c_lev%rank_shifted .eq. 0) then
               call mg_c_lev%u_temp%copy(mg_c_lev%Q0)
            else
-              if (recv_flag .eqv. .true.) then
-                 call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
-                 call mg_f_lev%uc_fas_ghost%copy(mg_f_lev%uc_ghost)
+              if (mg_c_lev%Nt .eq. 1) then
+                 call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c), mg_c_lev%uc_fas(i_c), mg_f_lev%t0)
               end if
-              call mg_c_lev%u_temp%copy(mg_f_lev%uc_fas_ghost)
+              call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_ghost, mg_c_lev%u_temp, mg_f_lev%t0)
            end if
+        else if (i_c .eq. mg_c_lev%Nt) then !> Case of right-most C-point
+           !> Since we visit C-points from right to left, restrict at current and left C-point 
+           call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c), mg_c_lev%uc_fas(i_c), mg_f_lev%t0)
+           call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c-1), mg_c_lev%uc_fas(i_c-1), mg_f_lev%t0)
+           call mg_c_lev%u_temp%copy(mg_c_lev%uc_fas(i_c-1))
         else
+           !> Restrict at C-point to the left
+           call pf_f_lev%ulevel%restrict(pf_f_lev, pf_c_lev, mg_f_lev%uc_prev(i_c-1), mg_c_lev%uc_fas(i_c-1), mg_f_lev%t0)
            call mg_c_lev%u_temp%copy(mg_c_lev%uc_fas(i_c-1))
         end if
+        !> Update RHS using approximation at C-point
+        call mg_c_lev%r%axpy(1.0_pfdp, mg_c_lev%uc_fas(i_c))
         call PointRelax(pf, mg_ld, level_index_c, i_c, mg_c_lev%u_temp, pf_c_lev%qend)
         call mg_c_lev%r%axpy(-1.0_pfdp, pf_c_lev%qend)
      end if
