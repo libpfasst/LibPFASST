@@ -1,0 +1,19 @@
+!
+!  Test parameters for the nonlinear Schroedinger eq
+!
+
+&PARAMS
+
+    Tfin = 10.0
+    nx =   1024 1024
+    
+    nsteps = 16000
+    nsteps_rk =  1  8
+    rk_order = 3 4
+    
+    eq_type = 3	
+    ic_type = 1	
+
+
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+/
