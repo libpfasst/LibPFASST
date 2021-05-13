@@ -38,7 +38,7 @@ extern "C"
                         int space_dim,
                         int max_iter,
                         int max_levels,
-                        int spacial_coarsen_flag);
+                        int spatial_coarsen_flag);
    void HypreImplicitSolverInit(HypreSolver **hypre_solver,
                                 int pfasst_level_index,
                                 int nx,

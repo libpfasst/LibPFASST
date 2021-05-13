@@ -60,7 +60,6 @@ contains
     integer :: nproc, rank, error
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
-    integer :: spacial_coarsen_flag
     type(mgrit_level_data), allocatable :: mg_ld(:)
 
     double precision :: wtime_start
@@ -94,8 +93,10 @@ contains
        return
     end if
 
-    spacial_coarsen_flag = 0
-    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spacial_coarsen_flag)
+    if (solver_type .eq. 2) then
+       spatial_coarsen_flag = 0
+    end if
+    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spatial_coarsen_flag)
     !print *,time_color,space_color,pf%rank
     
     !>  Add some hooks for output
@@ -136,7 +137,8 @@ contains
     end if
     !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
     !call GetHypreStats()
-    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    return
 
     call mpi_comm_size(pf%comm%comm, nproc, error)
     call mpi_comm_rank(pf%comm%comm, rank, error)

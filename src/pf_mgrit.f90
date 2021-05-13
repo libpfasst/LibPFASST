@@ -14,6 +14,7 @@ module pf_mod_MGRIT
   use pf_mod_pfasst
   use pf_mod_comm
   use pf_mod_results
+  use pf_mod_parareal
   use mpi
   
   implicit none
@@ -56,6 +57,14 @@ module pf_mod_MGRIT
      integer :: coarsest_level !> Index of coarsest level
      logical :: f_pts_flag = .true. !> True if this proc has F-points
      logical :: c_pts_flag = .true. !> True if this proc has C-points
+     logical :: c_converge
+     integer :: c_converge_index
+     integer, allocatable :: recv_procs(:)
+     integer, allocatable :: send_procs(:)
+     integer, allocatable :: recv_converge_status(:)
+     integer :: num_recvs
+     integer :: num_sends
+     integer :: num_recv_converged
   end type 
   
 contains
@@ -74,6 +83,7 @@ contains
      logical :: start_dropping_procs
      integer :: my_rank, rank_send, rank_recv, Nt_temp
      integer :: Nt_coarsest, coarsest_level
+     integer :: num_sends, num_recvs
 
      if (start_coarse_flag .eqv. .false.) then !> Generate starting from coarsest grid
         x = real(pf%comm%nproc, pfdp)
@@ -103,6 +113,8 @@ contains
         mg_lev%T0_glob = T0_glob
         mg_lev%Tfin_glob = Tfin_glob
      end do
+     mg_ld(nlevels)%num_sends = 1
+     mg_ld(nlevels)%num_recvs = 1
      !> Generate the hierarchy of grids
      if (mg_ld(nlevels)%setup_start_coarse_flag .eqv. .true.) then !> Generate starting from the coarsest grid
         coarsest_level = 1
@@ -183,9 +195,14 @@ contains
            end if
            if (start_dropping_procs .eqv. .true.) then
               i = i + 1;
+              if ((mg_lev%send_to_rank .gt. -1) .and. (mg_lev%send_to_rank .lt. pf%comm%nproc)) then
+                 mg_ld(nlevels)%num_sends = mg_ld(nlevels)%num_sends + 1
+              end if
+              if ((mg_lev%recv_from_rank .gt. -1) .and. (mg_lev%recv_from_rank .lt. pf%comm%nproc)) then
+                 mg_ld(nlevels)%num_recvs = mg_ld(nlevels)%num_recvs + 1
+              end if
            end if
         end do
-        
 
         do level_index = coarsest_level,nlevels
            mg_lev => mg_ld(level_index)
@@ -200,6 +217,48 @@ contains
         !   print *,level_index,pf%rank,mg_lev%send_to_rank,mg_lev%recv_from_rank
         !end do
      end if
+
+     allocate(mg_ld(nlevels)%send_procs(mg_ld(nlevels)%num_sends))
+     allocate(mg_ld(nlevels)%recv_procs(mg_ld(nlevels)%num_recvs))
+     allocate(mg_ld(nlevels)%recv_converge_status(mg_ld(nlevels)%num_recvs))
+
+     mg_ld(nlevels)%recv_procs(1) = -1
+     i = 1;
+     do level_index = coarsest_level,nlevels
+        mg_lev => mg_ld(level_index)
+        mg_c_lev => mg_ld(level_index-1)
+        if (mg_ld(nlevels)%recv_procs(i) .eq. -1) then
+           mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
+        else
+           if ((mg_lev%recv_from_rank .gt. -1) .and. (mg_lev%recv_from_rank .lt. pf%comm%nproc)) then
+              if (mg_c_lev%recv_from_rank .ne. mg_lev%recv_from_rank) then
+                 i = i + 1
+                 mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
+              end if
+           end if
+        end if
+     end do
+
+     mg_ld(nlevels)%send_procs(1) = mg_ld(nlevels)%send_to_rank
+     i = 2
+     do level_index = nlevels,coarsest_level+1,-1
+        mg_lev => mg_ld(level_index)
+        mg_c_lev => mg_ld(level_index-1)
+        if ((mg_c_lev%send_to_rank .gt. -1) .and. (mg_c_lev%send_to_rank .lt. pf%comm%nproc)) then
+           if (mg_c_lev%send_to_rank .ne. mg_lev%send_to_rank) then
+              mg_ld(nlevels)%send_procs(i) = mg_c_lev%send_to_rank
+              i = i + 1
+           end if
+        end if 
+     end do
+
+     !print *,pf%rank,mg_ld(nlevels)%num_recvs
+
+     !if (pf%rank .eq. 1) then
+     !   do i = 1,mg_ld(nlevels)%num_sends
+     !      print *,mg_ld(nlevels)%send_procs(i)
+     !   end do
+     !end if
      
      pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
      pf%state%dt = mg_ld(nlevels)%dt
@@ -342,23 +401,32 @@ contains
     type(mgrit_level_data), pointer :: mg_lev
     type(pf_level_t), pointer :: pf_lev
     logical :: zero_rhs_flag
-
-    integer :: nproc
-    integer :: nsteps_loc  !!  local number of time steps
-    real(pfdp) :: tend_loc !!  The final time of run
-    integer :: ierror, iter, k, i, level_index, l
+    integer :: iter, k, i, level_index, l
+    integer :: ierror, source, tag
     integer :: Nt, Nt_glob
     integer :: uc_len
     real(pfdp) :: t0, dt, big_dt, t0_glob
     integer :: nlevels, coarsest_level
     double precision :: wtime_start
+    integer :: stat(MPI_STATUS_SIZE)
 
     k = 1
     nlevels = pf%nlevels
     coarsest_level = mg_ld(nlevels)%coarsest_level
     pf%state%pfblock = 1
     pf%state%sweep = 1
+    !pf%state%status = PF_STATUS_PREDICTOR
+    !pf%state%pstatus = PF_STATUS_PREDICTOR
+    pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
+
+    mg_lev => mg_ld(nlevels)
+
+    if (pf%niters .lt. 0) then
+       uc => mg_ld(nlevels)%uc
+       call qend%copy(uc(size(uc)))
+       return
+    end if
 
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
@@ -385,6 +453,17 @@ contains
        call qend%copy(uc(size(uc)))
        return
     end if
+
+    mg_ld(nlevels)%num_recv_converged = 0
+    do i = 1,mg_ld(nlevels)%num_recvs
+       mg_ld(nlevels)%recv_converge_status(i) = PF_STATUS_ITERATING
+    end do
+
+    mg_ld(nlevels)%c_converge_index = 1
+    mg_ld(nlevels)%c_converge = .false.
+
+    pf%state%status = PF_STATUS_ITERATING
+    pf%state%pstatus = PF_STATUS_ITERATING
 
     !> Iterate until convergence is achieved
     do iter = 1, pf%niters
@@ -415,7 +494,7 @@ contains
        end do
 
        call call_hooks(pf, nlevels, PF_POST_ITERATION)
-       if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+       if (pf%state%status .eq. PF_STATUS_CONVERGED) then
           exit
        end if
     end do
@@ -427,36 +506,6 @@ contains
 
     uc => mg_ld(nlevels)%uc
     call qend%copy(uc(size(uc)))
-
-   ! uc => mg_ld(pf%nlevels)%uc
-
-   ! if (pf%rank .eq. 0) then
-   !    do i = 1,size(uc)
-   !       print *,i,uc(i)%norm()
-   !    end do
-   ! end if
-   ! call mpi_barrier(pf%comm%comm, ierror)
-   ! call mpi_barrier(pf%comm%comm, ierror)
-   ! call mpi_barrier(pf%comm%comm, ierror)
-   ! if (pf%rank .eq. 1) then
-   !    do i = 1,size(uc)
-   !       print *,i,uc(i)%norm()
-   !    end do
-   ! end if
-
-
-   ! if (pf%rank .eq. pf%comm%nproc-1) then
-   !    call qend%eprint()
-   !
-   !    t0 = mg_ld(pf%nlevels)%T0_glob
-   !    Nt = mg_ld(pf%nlevels)%Nt * pf%comm%nproc
-   !    dt = mg_ld(pf%nlevels)%dt
-   !    big_dt = dt * real(Nt, pfdp)
-   !    call pf%levels(pf%nlevels)%q0%copy(q0)
-   !    call pf%levels(pf%nlevels)%ulevel%stepper%do_n_steps(pf, pf%nlevels, t0, pf%levels(pf%nlevels)%q0, &
-   !                               pf%levels(pf%nlevels)%qend, big_dt, Nt)
-   !    call qend%copy(pf%levels(pf%nlevels)%qend)
-   ! end if
   end subroutine pf_MGRIT_run
 
   !> Execute a MGRIT V-cycle (iteration)
@@ -500,7 +549,7 @@ contains
         call FCF_Relax(pf, mg_ld, level_index, iteration)
         call pf_stop_timer(pf, T_SWEEP, level_index)
         
-        if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+        if (pf%state%status .eq. PF_STATUS_CONVERGED) then
            return
         end if
     end do
@@ -510,7 +559,7 @@ contains
     level_index_f = level_index+1
     call Restrict(pf, mg_ld, level_index, level_index_f)
 
-    if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+    if (pf%state%status .eq. PF_STATUS_CONVERGED) then
        return
     end if
 
@@ -577,7 +626,7 @@ contains
      else
         restrict_flag = .true.
      end if
-     if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
+     if (pf%state%status .eq. PF_STATUS_CONVERGED) then
         return
      end if
      
@@ -601,15 +650,6 @@ contains
         end do
         call RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag)
      end if
-
-     !if (level_index .eq. nlevels) then
-     !   call pf_start_timer(pf, T_RESIDUAL, level_index)
-     !   call ResidualNorm_Cpoints_L2norm(pf, mg_ld, level_index, zero_rhs_flag)
-     !   call pf_stop_timer(pf, T_RESIDUAL, level_index)
-     !   if (pf%state%pstatus .eq. PF_STATUS_CONVERGED) then
-     !      return
-     !   end if
-     !end if
   end subroutine FCF_Relax
 
   !> Ideal interpolation, i.e., interpolation followed by F-relaxations
@@ -671,7 +711,8 @@ contains
            call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
         else
            call mgrit_post(pf, mg_ld, level_index_f, 1)
-           call mgrit_recv(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+           call mg_f_lev%uc(1)%copy(mg_f_lev%uc_ghost)
         end if
      end if
 
@@ -827,71 +868,6 @@ contains
     end if
   end subroutine mgrit_send_recv
 
-  !> Non-blocking MPI send
-  subroutine mgrit_send(pf, mg_ld, send_data, level_index, tag, blocking)
-    type(pf_pfasst_t), target, intent(inout) :: pf
-    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-    class(pf_encap_t), intent(in) :: send_data
-    integer, intent(in) :: level_index, tag
-    logical, intent(in) :: blocking
-    type(pf_level_t), pointer :: pf_lev
-    integer :: ierror, dir, which, stride
-    type(mgrit_level_data), pointer :: mg_lev
-
-    if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
-       pf_lev => pf%levels(level_index)
-
-       dir = 1
-       which = 1
-       stride = mg_ld(level_index)%send_to_rank - pf%rank
-       call pf_lev%qend%copy(send_data)
-       call pf_send(pf, pf_lev, tag, blocking, dir, which, stride)
-    end if
-  end subroutine mgrit_send
-
-  !> Non-blocking MPI receive
-  subroutine mgrit_recv(pf, mg_ld, recv_data, level_index, tag, blocking)
-    type(pf_pfasst_t), target, intent(inout) :: pf
-    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-    class(pf_encap_t), intent(inout) :: recv_data
-    integer, intent(in) :: level_index, tag
-    logical, intent(in) :: blocking
-    type(pf_level_t), pointer :: pf_lev
-    integer :: ierror, dir, which, stride
-    type(mgrit_level_data), pointer :: mg_lev
-
-    mg_lev => mg_ld(level_index)
-    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-       pf_lev => pf%levels(level_index)
-
-       dir = 1
-       which = 1
-       stride = pf%rank - mg_lev%recv_from_rank
-       call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
-       call recv_data%copy(pf_lev%q0)
-    end if
-  end subroutine mgrit_recv
-
-  !> MPI post used in non-blocking communication
-  subroutine mgrit_post(pf, mg_ld, level_index, tag)
-    type(pf_pfasst_t), target, intent(inout) :: pf
-    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-    integer, intent(in) :: level_index, tag
-    type(pf_level_t), pointer :: pf_lev
-    integer :: ierror, dir, stride
-    type(mgrit_level_data), pointer :: mg_lev
-
-    mg_lev => mg_ld(level_index)
-
-    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-       pf_lev => pf%levels(level_index)
-
-       dir = 1
-       stride = pf%rank - mg_lev%recv_from_rank
-       call pf_post(pf, pf_lev, tag, dir, stride)
-    end if
-  end subroutine mgrit_post
-
   !> Exact solve for coarsest grid
   subroutine ExactSolve(pf, mg_ld, level_index)
      type(pf_pfasst_t), target, intent(inout) :: pf
@@ -922,7 +898,8 @@ contains
 
      if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
         call mgrit_post(pf, mg_ld, level_index, 1)
-        call mgrit_recv(pf, mg_ld, pf_lev%q0, level_index, 1, .false.)
+        call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+        call pf_lev%q0%copy(mg_lev%uc_ghost)
      else
         if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
            call pf_lev%q0%copy(mg_lev%Q0)
@@ -1003,10 +980,10 @@ contains
      integer, intent(in) :: level_index_c, level_index_f
      class(pf_encap_t), pointer :: gi
      integer :: i_c, i_f, k, n
-     integer :: nlevels
+     integer :: nlevels, level_index
      logical :: zero_rhs_flag, send_flag, recv_flag
      real(pfdp) :: r_norm
-     type(mgrit_level_data), pointer :: mg_c_lev, mg_f_lev
+     type(mgrit_level_data), pointer :: mg_lev, mg_c_lev, mg_f_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
      real(pfdp) :: res_norm_glob
      integer :: ierr, i_upper
@@ -1027,7 +1004,8 @@ contains
            call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.) 
         else
            call mgrit_post(pf, mg_ld, level_index_f, 1)
-           call mgrit_recv(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+           call mg_f_lev%uc(1)%copy(mg_f_lev%uc_ghost)
         end if
      end if
 
@@ -1035,8 +1013,8 @@ contains
      i_upper = mg_c_lev%Nt
 
      !> Restrict at C-points
-     do i_c = i_upper,1,-1
-     !do i_c = 1,i_upper
+     !do i_c = i_upper,1,-1
+     do i_c = 1,i_upper
         i_f = mg_f_lev%c_pts(i_c)
         if (level_index_f .eq. nlevels) then
            zero_rhs_flag = .true.
@@ -1052,13 +1030,21 @@ contains
 
      !> If the finest level is finest, check residual norm
      if (level_index_f .eq. nlevels) then
-        mg_f_lev => mg_ld(nlevels)
-        call mpi_allreduce(mg_f_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
-        res_norm_glob = sqrt(res_norm_glob)
-        pf%levels(nlevels)%residual = res_norm_glob
-        if (res_norm_glob .lt. pf%abs_res_tol) then
-           pf%state%pstatus = PF_STATUS_CONVERGED
-        end if
+!        if () then
+!           call mpi_allreduce(mg_f_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
+!           res_norm_glob = sqrt(res_norm_glob)
+!           pf%levels(nlevels)%residual = res_norm_glob
+!           if (res_norm_glob .lt. pf%abs_res_tol) then
+!              pf%state%pstatus = PF_STATUS_CONVERGED
+!           end if
+!        else 
+           pf%levels(nlevels)%residual = sqrt(mg_f_lev%res_norm_loc)
+           call mgrit_check_convergence(mg_ld, pf, nlevels, 0)
+           do level_index = mg_ld(nlevels)%coarsest_level,(nlevels-1)
+              mg_lev => mg_ld(level_index)
+              call mg_lev%uc_ghost%setval(0.0_pfdp)
+           end do
+!        end if
      end if
   end subroutine Restrict
 
@@ -1119,7 +1105,7 @@ contains
      end if
      !> If on the finest level, update res norm
      if (level_index_f .eq. nlevels) then
-        call SumResNorm(pf, mg_ld, level_index_f, mg_f_lev%res_norm_loc, mg_f_lev%r, 2)
+        call SumResNorm(pf, mg_ld, level_index_f, mg_f_lev%res_norm_loc, mg_f_lev%r, i_c, 2)
      end if
      call pf_start_timer(pf, T_RESTRICT, level_index_f)
      !> Spatial restriction
@@ -1156,46 +1142,6 @@ contains
      call gci%copy(mg_c_lev%r)
   end subroutine InjectRestrictPoint
 
-  !> Compute residual of fine-grid C-points (unused)
-  subroutine ResidualNorm_Cpoints_L2norm(pf, mg_ld, level_index, zero_rhs_flag)
-     type(pf_pfasst_t), target, intent(inout) :: pf
-     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-     integer, intent(in) :: level_index
-     logical, intent(in) :: zero_rhs_flag
-     type(mgrit_level_data), pointer :: mg_lev, mg_c_lev
-     type(pf_level_t), pointer :: pf_lev, pf_c_lev
-     integer :: level_index_c, nlevels, i, i_c, ierr
-     real(pfdp) :: r_norm
-     real(pfdp) :: res_norm_glob
-
-     nlevels = pf%nlevels
-     level_index_c = level_index-1
-     mg_lev => mg_ld(level_index)
-     mg_c_lev => mg_ld(level_index_c)
-
-     pf_lev => pf%levels(level_index)
-     pf_c_lev => pf%levels(level_index_c)
-
-     do i_c = 1,mg_c_lev%Nt
-        i = mg_lev%c_pts(i_c)
-        call mg_lev%u_temp%copy(mg_lev%uc(i_c))
-        call PointRelax(pf, mg_ld, level_index, i, mg_lev%u_temp, mg_lev%r)
-        call mg_lev%r%axpy(-1.0_pfdp, mg_lev%uc_prev(i_c))
-        if (zero_rhs_flag .eqv. .false.) then
-           call mg_lev%r%axpy(1.0_pfdp, mg_lev%g(i));
-        end if
-        mg_lev%res_norm_loc = mg_lev%res_norm_loc + (mg_lev%r%norm())**2
-     end do
-
-     call mpi_allreduce(mg_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
-     res_norm_glob = sqrt(res_norm_glob)
-     pf_lev%residual = res_norm_glob
-     
-     if (res_norm_glob .lt. pf%abs_res_tol) then
-        pf%state%pstatus = PF_STATUS_CONVERGED
-     end if
-  end subroutine ResidualNorm_Cpoints_L2norm
-
   !> Take a step
   subroutine PointRelax(pf, mg_ld, level_index, n, q0, qend)
      type(pf_pfasst_t), target, intent(inout) :: pf
@@ -1214,16 +1160,30 @@ contains
   end subroutine PointRelax
 
   !> Compute norm of r and add it to sum_norms (sum of norms)
-  subroutine SumResNorm(pf, mg_ld, level_index, sum_norms, r, norm_type)
+  subroutine SumResNorm(pf, mg_ld, level_index, sum_norms, r, i, norm_type)
      type(pf_pfasst_t), target, intent(inout) :: pf
      type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
-     integer, intent(in) :: level_index
+     integer, intent(in) :: level_index, i
      real(pfdp), intent(inout) :: sum_norms
      class(pf_encap_t), intent(in) :: r
      integer, intent(in) :: norm_type
      real(pfdp) :: r_norm
+     type(mgrit_level_data), pointer :: mg_lev, mg_c_lev
+
+     mg_lev => mg_ld(level_index)
+     mg_c_lev => mg_ld(level_index-1)
 
      r_norm = r%norm()
+
+     mg_lev%c_converge = .false.
+     !if (pf%rank .eq. 1) print *,i,mg_lev%c_converge_index,mg_c_lev%Nt,r_norm
+     if ((i .eq. mg_lev%c_converge_index) .and. (r_norm .lt. pf%abs_res_tol))  then
+        if (mg_lev%c_converge_index .eq. mg_c_lev%Nt) then
+           mg_lev%c_converge = .true.
+        else
+           mg_lev%c_converge_index = mg_lev%c_converge_index + 1
+        end if
+     end if
 
      if (norm_type .eq. 0) then
         sum_norms = max(sum_norms, r_norm)
@@ -1233,5 +1193,172 @@ contains
         sum_norms = sum_norms + r_norm*r_norm
      end if
   end subroutine SumResNorm
+
+  subroutine mgrit_check_convergence(mg_ld, pf, level_index, tag)
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    type(pf_pfasst_t), intent(inout) :: pf
+    integer, intent(in) :: level_index
+    integer, intent(in) :: tag  !! identifier for status send and receive
+    logical :: residual_converged, converged, send_flag
+    type(mgrit_level_data), pointer :: mg_lev
+    integer :: ierr, pstatus, istatus, source, dest
+
+    mg_lev => mg_ld(level_index)
+
+    !> Check to see if tolerances are met
+    residual_converged = .false.
+    if (mg_lev%c_converge)  then
+       residual_converged = .true.
+    end if    
+
+    !>  Until I hear the previous processor is done, recieve it's status
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
+       call mgrit_recv_status(pf, mg_ld, level_index, tag)
+    end if
+
+    !>  Check to see if I am converged
+    converged = .false.
+    if (residual_converged) then
+       if (pf%rank == 0) then
+          converged = .true.
+       else  !  I am not the first processor, so I need to check the previous one
+          if (pf%state%pstatus == PF_STATUS_CONVERGED) converged = .true.
+       end if
+    end if ! (residual_converged)
+
+    if ((mg_lev%Nt * (pf%rank+1)) .lt. pf%state%iter) then
+       converged = .true.
+    end if
+
+    send_flag = .false.
+    !> Assign status and send it forward
+    if (converged) then
+       if (pf%state%status == PF_STATUS_ITERATING) then
+          !  If I am converged for the first time
+          !  then flip my flag and send the last status update
+          pf%state%status = PF_STATUS_CONVERGED
+          send_flag = .true.
+       end if
+    else
+       !  I am not converged, send the news
+       pf%state%status = PF_STATUS_ITERATING
+       send_flag = .true.
+    end if
+
+    if (send_flag) call mgrit_send_status(pf, mg_ld, level_index, tag)
+  end subroutine mgrit_check_convergence
+
+  !> Non-blocking MPI send
+  subroutine mgrit_send(pf, mg_ld, send_data, level_index, tag, blocking)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    class(pf_encap_t), intent(in) :: send_data
+    integer, intent(in) :: level_index, tag
+    logical, intent(in) :: blocking
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror, dir, which, stride
+    type(mgrit_level_data), pointer :: mg_lev
+
+    if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
+
+       dir = 1
+       which = 1
+       stride = mg_ld(level_index)%send_to_rank - pf%rank
+       call pf_lev%qend%copy(send_data)
+       call pf_send(pf, pf_lev, tag, blocking, dir, which, stride)
+    end if
+  end subroutine mgrit_send
+
+  !> Non-blocking MPI receive
+  subroutine mgrit_recv(pf, mg_ld, recv_data, level_index, tag, blocking)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    class(pf_encap_t), intent(inout) :: recv_data
+    integer, intent(in) :: level_index, tag
+    logical, intent(in) :: blocking
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror, dir, which, stride
+    type(mgrit_level_data), pointer :: mg_lev
+
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
+       mg_lev => mg_ld(level_index)
+       if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+          pf_lev => pf%levels(level_index)
+
+          dir = 1
+          which = 1
+          stride = pf%rank - mg_lev%recv_from_rank
+          call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
+          call recv_data%copy(pf_lev%q0)
+       end if
+    end if
+  end subroutine mgrit_recv
+
+  !> MPI post used in non-blocking communication
+  subroutine mgrit_post(pf, mg_ld, level_index, tag)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    type(pf_level_t), pointer :: pf_lev
+    integer :: ierror, dir, stride
+    type(mgrit_level_data), pointer :: mg_lev
+
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
+       mg_lev => mg_ld(level_index)
+       if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+          pf_lev => pf%levels(level_index)
+
+          dir = 1
+          stride = pf%rank - mg_lev%recv_from_rank
+          call pf_post(pf, pf_lev, tag, dir, stride)
+       end if
+    end if
+  end subroutine mgrit_post
+
+
+  !> Non-blocking MPI send
+  subroutine mgrit_send_status(pf, mg_ld, level_index, tag)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    type(mgrit_level_data), pointer :: mg_lev
+    integer :: ierr, istatus, dest, i
+
+    if (pf%rank .lt. pf%comm%nproc-1) then
+       mg_lev => mg_ld(pf%nlevels)
+       istatus = pf%state%status
+       do i = 1,mg_lev%num_sends
+          dest = mg_lev%send_procs(i)
+          call pf%comm%send_status(pf, tag, istatus, ierr, dest)
+       end do
+    end if
+  end subroutine mgrit_send_status
+
+  !> Non-blocking MPI receive
+  subroutine mgrit_recv_status(pf, mg_ld, level_index, tag)
+    type(pf_pfasst_t), target, intent(inout) :: pf
+    type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
+    integer, intent(in) :: level_index, tag
+    type(mgrit_level_data), pointer :: mg_lev
+    integer :: i, ierr, pstatus, source
+
+    if (pf%rank .gt. 0) then
+       mg_lev => mg_ld(pf%nlevels)
+       do i = 1,mg_lev%num_recvs
+          if (mg_lev%recv_converge_status(i) .ne. PF_STATUS_CONVERGED) then
+             source = mg_lev%recv_procs(i)
+             call pf%comm%recv_status(pf, tag, pstatus, ierr, source)
+             mg_lev%recv_converge_status(i) = pstatus
+             if (pstatus .eq. PF_STATUS_CONVERGED) then
+                 mg_lev%num_recv_converged = mg_lev%num_recv_converged + 1
+             end if
+          end if
+       end do
+       if (mg_lev%num_recv_converged .eq. mg_lev%num_recvs) then
+          pf%state%pstatus = PF_STATUS_CONVERGED
+       end if
+    end if
+  end subroutine mgrit_recv_status
 
 end module pf_mod_MGRIT

@@ -29,17 +29,22 @@ class HypreSolver: public HypreStruct {
       HYPRE_StructSolver solver_imp = NULL;
       HYPRE_StructSolver precond_imp = NULL;
 
-      hypre_PFMGData *pfmg_data;
       HYPRE_StructSolver pfmg_level_data;
+
+      HYPRE_StructSolver *solver_imp_lev;
+      HYPRE_StructSolver *precond_imp_lev;
       HYPRE_StructMatrix *A_exp_lev;
       HYPRE_StructMatrix *A_imp_lev;
+      HYPRE_StructVector *x_lev;
+      HYPRE_StructVector *b_lev;
+
+      hypre_PFMGData *pfmg_data;
       hypre_StructMatrix **RT_lev;
       hypre_StructMatrix **P_lev;
-      hypre_StructVector **x_lev;
-      hypre_StructVector **b_lev;
       void **restrict_data_lev;
       void **interp_data_lev;
       int *nrows_lev;
+      int *nnz_lev;
       int **ilower_lev;
       int **iupper_lev;
 
@@ -52,31 +57,33 @@ class HypreSolver: public HypreStruct {
       int relax_type;
       int solver_type;
       int max_levels;
+      int spatial_num_levels;
       int setup_done = 0;
-      //int setup_spacial_solver_in_FComp_flag = 0;
+      //int setup_spatial_solver_in_FComp_flag = 0;
 
       HypreSolver(MPI_Comm in_comm = MPI_COMM_WORLD, int dim = 2, int max_iter = 100, int max_levels = 0, int nx = 32);
       ~HypreSolver(void);
 
       int GetNumRowsLevel(int level_index);
       int GetNumLevels(void);
-      void SetupStructSolver(HYPRE_StructMatrix *A, HYPRE_StructSolver *solver, HYPRE_StructSolver *precond);
+      void SetupStructSolver(int level_index);
       void CleanupStructSolver(HYPRE_StructSolver *solver, HYPRE_StructSolver *precond);
       void SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver);
-      void SetupSpacialCoarsen(void);
       void SetupMatrix(HYPRE_StructMatrix *A,
                        int nx,
                        int level_index,
-                       int spacial_coarsen_flag,
+                       int spatial_coarsen_flag,
                        int implicit_flag,
                        double dtq);
-      double* UpdateImplicitMatrix(HYPRE_StructMatrix *A, double dtq);
+      double* UpdateImplicitMatrix(int level_index, double dtq);
+      HYPRE_StructVector SetupVectorLevel(HYPRE_StructMatrix A, int level_index);
       HYPRE_StructVector SetupVector(void);
       void FEval(double *y, double t, int level_index, double **f);
       void FComp(double **y, double t, double dtq, double *rhs, int level_index, double **f);
       void Restrict(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_level, int c_level);
       void Prolong(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_level, int c_level);
       void Cleanup(void);
+      void SetupLevels(int spatial_coarsen_flag, int nx);
 };
 
 #endif

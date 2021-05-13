@@ -17,10 +17,12 @@ module probin
   integer, save :: imex_stat
   integer, save :: ark_stat
   integer, save :: rk_order
+  integer, save :: spatial_coarsen_flag
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
   namelist /params/ space_dim, nx, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
   namelist /params/ mgrit_coarsen_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order, FCF_flag
+  namelist /params/ spatial_coarsen_flag
 
 contains
   
@@ -69,6 +71,8 @@ contains
     FAS_flag = .false.
     FCF_flag = .true.
     solver_type = 0
+
+    spatial_coarsen_flag = 0
     
     !>  Read in stuff from input file
     un = 9
@@ -126,7 +130,7 @@ contains
        write(un,*) 'Number of grid points in each spatial direction:   ', nx
        write(un,*) 'num spatial procs per temporal proc:   ',   nspace
        write(un,*) 'num temporal procs:   ',   ntime  
-       write(un,*) 'Number of spacial dimensions:   ', space_dim
+       write(un,*) 'Number of spatial dimensions:   ', space_dim
        write(un,*) 'Number of Hypre V-cycles:   ', max_space_v_cycles 
        write(un,*) 'PFASST parameters read from input file ', pfasst_nml
        write(un,*) '=================================================='

@@ -30,7 +30,7 @@ contains
     class(my_stepper_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout),target :: pf
     integer, intent(in) :: level_index
-    integer :: nx, comm_color, space_dim, max_space_v_cycles, spacial_coarsen_flag
+    integer :: nx, comm_color, space_dim, max_space_v_cycles, spatial_coarsen_flag
 
     if (solver_type .eq. 2) then
        this%nsteps=nsteps_rk(level_index)
@@ -54,7 +54,7 @@ contains
     comm_color = pf%levels(level_index)%lev_shape(2)
     space_dim = pf%levels(level_index)%lev_shape(3)
     max_space_v_cycles = pf%levels(level_index)%lev_shape(4)
-    spacial_coarsen_flag = pf%levels(level_index)%lev_shape(10)
+    spatial_coarsen_flag = pf%levels(level_index)%lev_shape(10)
 
     !> Call the Hypre solver initialization
     call HypreSolverInit(this%c_hypre_solver_ptr, &
@@ -64,7 +64,7 @@ contains
                          space_dim, &
                          max_space_v_cycles, &
                          pf%nlevels, &
-                         spacial_coarsen_flag)
+                         spatial_coarsen_flag)
   end subroutine initialize_stepper
 
   !>  destroy_stepper the stepper type
@@ -130,19 +130,6 @@ contains
                           f_encap%c_hypre_vector_ptr, &
                           piece)
   end subroutine f_comp_stepper
-
-  subroutine stepper_hypre_set_level_data(pf)
-     type(pf_pfasst_t), intent(inout) :: pf
-     type(my_stepper_t) :: s_finest, s
-     integer :: l
-
-     s_finest = cast_as_my_stepper_t(pf%levels(pf%nlevels)%ulevel%stepper)
-
-     do l = 1, pf%nlevels-1
-        s = cast_as_my_stepper_t(pf%levels(l)%ulevel%stepper)
-        call HypreSolverSetLevelData(s%c_hypre_solver_ptr, s_finest%c_hypre_solver_ptr, l);
-     end do
-  end subroutine stepper_hypre_set_level_data
 
   function stepper_get_nrows(this, level_index) result(nrows)
      class(my_stepper_t), intent(inout) :: this

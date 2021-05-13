@@ -6,7 +6,7 @@
  */
 
 HypreSolver *glob_hypre_solver = nullptr;
-int glob_spacial_coarsen_flag = 0;
+int glob_spatial_coarsen_flag = 0;
 MPI_Comm glob_space_comm = MPI_COMM_NULL;
 
 int FComp_count = 0;
@@ -24,53 +24,30 @@ extern "C"
    {
       int level_index;
       int num_rows;
-      if (glob_spacial_coarsen_flag == 1){
-         level_index = 0;
-         num_rows = hypre_solver->GetNumRowsLevel(level_index);
-      }
-      else {
-         level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-         num_rows = hypre_solver->nrows;
-      }
+
+      level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
+      num_rows = glob_hypre_solver->GetNumRowsLevel(level_index);
+
       return num_rows;
    }
 
    int HypreSolverGetExtentLevel(HypreSolver *hypre_solver, int pfasst_level_index, int i)
    {
       int level_index, extent;
-      level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-      if (glob_spacial_coarsen_flag == 1){
-         level_index = 0;
-         switch(i){
-            case 0:
-               extent = hypre_solver->ilower_lev[level_index][0];
-               break;
-            case 1:
-               extent = hypre_solver->ilower_lev[level_index][1];
-               break;
-            case 2:
-               extent = hypre_solver->iupper_lev[level_index][0];
-               break;
-            case 3:
-               extent = hypre_solver->iupper_lev[level_index][1];
-               break;
-         }
-      }
-      else {
-         switch(i){
-            case 0:
-               extent = hypre_solver->ilower[0];
-               break;
-            case 1:
-               extent = hypre_solver->ilower[1];
-               break;
-            case 2:
-               extent = hypre_solver->iupper[0];
-               break;
-            case 3:
-               extent = hypre_solver->iupper[1];
-               break;
-         }
+      level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
+      switch(i){
+         case 0:
+            extent = glob_hypre_solver->ilower_lev[level_index][0];
+            break;
+         case 1:
+            extent = glob_hypre_solver->ilower_lev[level_index][1];
+            break;
+         case 2:
+            extent = glob_hypre_solver->iupper_lev[level_index][0];
+            break;
+         case 3:
+            extent = glob_hypre_solver->iupper_lev[level_index][1];
+            break;
       }
 
       return extent;
@@ -95,7 +72,6 @@ extern "C"
          else {
             newcomm = glob_space_comm;
          }
-         newcomm = glob_space_comm;
          *hypre_vector = new HypreVector(nx, 0.0, newcomm, space_dim, nrows, extents);
       }
    }
@@ -147,62 +123,87 @@ extern "C"
       hypre_vector->Print();
    }
 
-   void HypreSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, int spacial_coarsen_flag)
+   void HypreSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, int spatial_coarsen_flag)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
-      MPI_Comm newcomm;
-      if (spacial_coarsen_flag == 1){
-         if (level_index == 0){
-            //MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
-            //*hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
-            //(*hypre_solver)->A_imp = (*hypre_solver)->SetupMatrix(nx, level_index, spacial_coarsen_flag, 0);
-            //(*hypre_solver)->A_exp = (*hypre_solver)->SetupMatrix(nx, level_index, spacial_coarsen_flag, 1);
-            //(*hypre_solver)->x = (*hypre_solver)->SetupVector();
-            //(*hypre_solver)->b = (*hypre_solver)->SetupVector();
-            //(*hypre_solver)->SetupSpacialCoarsen((*hypre_solver)->A_imp);
-            //(*hypre_solver)->SetupSpacialCoarsen((*hypre_solver)->A_imp);
-
-         }
+      if (glob_space_comm == MPI_COMM_NULL){
+         MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
       }
-      else {
-         if (*hypre_solver == nullptr){
-            if (glob_space_comm == MPI_COMM_NULL){
-               MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
-            }
-            else {
-               newcomm = glob_space_comm;
-            }
-            newcomm = glob_space_comm;
-            *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
-            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), nx, level_index, spacial_coarsen_flag, 0, 0.0);
-            (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, spacial_coarsen_flag, 0, 0.0);
-            (*hypre_solver)->x = (*hypre_solver)->SetupVector();
-            (*hypre_solver)->b = (*hypre_solver)->SetupVector();
-         }
+      MPI_Comm newcomm = glob_space_comm;
+
+      if (glob_hypre_solver == nullptr){
+         glob_spatial_coarsen_flag = spatial_coarsen_flag;
+         glob_hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
+         glob_hypre_solver->SetupMatrix(&(glob_hypre_solver->A_exp), nx, level_index, spatial_coarsen_flag, 0, 0.0);
+         glob_hypre_solver->SetupMatrix(&(glob_hypre_solver->A_imp), nx, level_index, spatial_coarsen_flag, 0, 0.0);
+         glob_hypre_solver->x = glob_hypre_solver->SetupVector();
+         glob_hypre_solver->b = glob_hypre_solver->SetupVector();
+         glob_hypre_solver->SetupLevels(spatial_coarsen_flag, nx);
+      }
+      
+      if (*hypre_solver == nullptr){
+         *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
       }
 
-      if (level_index == 0){
-         glob_hypre_solver = *hypre_solver;
-         glob_spacial_coarsen_flag = spacial_coarsen_flag;
-      }
+      //if (spatial_coarsen_flag == 1){
+      //   if (level_index == 0){
+      //      //MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &newcomm);
+      //      //*hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
+      //      //(*hypre_solver)->A_imp = (*hypre_solver)->SetupMatrix(nx, level_index, spatial_coarsen_flag, 0);
+      //      //(*hypre_solver)->A_exp = (*hypre_solver)->SetupMatrix(nx, level_index, spatial_coarsen_flag, 1);
+      //      //(*hypre_solver)->x = (*hypre_solver)->SetupVector();
+      //      //(*hypre_solver)->b = (*hypre_solver)->SetupVector();
+      //      //(*hypre_solver)->SetupSpatialCoarsen((*hypre_solver)->A_imp);
+      //      //(*hypre_solver)->SetupSpatialCoarsen((*hypre_solver)->A_imp);
+
+      //   }
+      //}
+      //else {
+      //   if (*hypre_solver == nullptr){
+      //      if (glob_space_comm == MPI_COMM_NULL){
+      //         MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
+      //      }
+      //      else {
+      //         newcomm = glob_space_comm;
+      //      }
+      //      newcomm = glob_space_comm;
+      //      *hypre_solver = new HypreSolver(newcomm, space_dim, max_iter, max_levels, nx);
+      //      (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_exp), nx, level_index, spatial_coarsen_flag, 0, 0.0);
+      //      (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, spatial_coarsen_flag, 0, 0.0);
+      //      (*hypre_solver)->x = (*hypre_solver)->SetupVector();
+      //      (*hypre_solver)->b = (*hypre_solver)->SetupVector();
+      //   }
+      //}
+
+      //if (level_index == 0){
+      //   glob_hypre_solver = *hypre_solver;
+      //   glob_spatial_coarsen_flag = spatial_coarsen_flag;
+      //}
    }
 
    void HypreImplicitSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, double dtq)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
-      if (glob_spacial_coarsen_flag == 1){
-         if (level_index == 0){
-         }
+      if (glob_spatial_coarsen_flag == 1){
+         if (level_index >= glob_hypre_solver->spatial_num_levels-1) return;
       }
-      else {
-         (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, glob_spacial_coarsen_flag, 1, dtq);
-         (*hypre_solver)->SetupStructSolver(&((*hypre_solver)->A_imp), &((*hypre_solver)->solver_imp), &((*hypre_solver)->precond_imp));
-      }
+
+      glob_hypre_solver->UpdateImplicitMatrix(level_index, dtq);
+      glob_hypre_solver->SetupStructSolver(level_index);
+
+      //if (glob_spatial_coarsen_flag == 1){
+      //   if (level_index == 0){
+      //   }
+      //}
+      //else {
+      //   (*hypre_solver)->SetupMatrix(&((*hypre_solver)->A_imp), nx, level_index, glob_spatial_coarsen_flag, 1, dtq);
+      //   (*hypre_solver)->SetupStructSolver(&((*hypre_solver)->A_imp), &((*hypre_solver)->solver_imp), &((*hypre_solver)->precond_imp));
+      //}
    }
 
    void HypreSolverDestroy(HypreSolver *hypre_solver, int pfasst_level_index)
    {
-      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
+      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
       if (hypre_solver != nullptr){
          delete hypre_solver;
       }
@@ -210,12 +211,11 @@ extern "C"
 
    void HypreSolverFEval(HypreSolver *hypre_solver, HypreVector *y, double t, int pfasst_level_index, HypreVector *f, int piece)
    {
-      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
-
-      int nrows = hypre_solver->GetNumRows();
+      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
+      int nrows = glob_hypre_solver->GetNumRowsLevel(level_index);
       double *f_values = (double *)malloc(nrows * sizeof(double));
       if (piece == 2){
-         hypre_solver->FEval(y->GetBoxValues(), t, level_index, &f_values);
+         glob_hypre_solver->FEval(y->GetBoxValues(), t, level_index, &f_values);
       }
       else {
          for (int i = 0; i < nrows; i++){
@@ -234,12 +234,12 @@ extern "C"
       
       double wtime_start = MPI_Wtime();
 
-      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, hypre_solver->GetNumLevels());
+      int level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
 
-      int nrows = hypre_solver->GetNumRows();
+      int nrows = glob_hypre_solver->GetNumRowsLevel(level_index);
       double *y_values = (double *)malloc(nrows * sizeof(double));
       double *f_values = (double *)malloc(nrows * sizeof(double));
-      hypre_solver->FComp(&y_values, t, dtq, rhs->GetBoxValues(), level_index, &f_values);
+      glob_hypre_solver->FComp(&y_values, t, dtq, rhs->GetBoxValues(), level_index, &f_values);
       y->SetBoxValues(y_values);
       f->SetBoxValues(f_values);
 
@@ -277,10 +277,15 @@ extern "C"
 
    void HypreRestrict(HypreVector *y_f, HypreVector *y_c, int pfasst_f_level, int pfasst_c_level)
    {
-      if (glob_spacial_coarsen_flag == 1){   
-         int f_level = PfasstToHypreLevelIndex(pfasst_f_level, glob_hypre_solver->GetNumLevels());
+      if (glob_spatial_coarsen_flag == 1){   
          int c_level = PfasstToHypreLevelIndex(pfasst_c_level, glob_hypre_solver->GetNumLevels());
-         glob_hypre_solver->Restrict(y_f->GetVector(), y_c->GetVector(), f_level, c_level);
+         if (c_level < glob_hypre_solver->spatial_num_levels){
+            int f_level = PfasstToHypreLevelIndex(pfasst_f_level, glob_hypre_solver->GetNumLevels());
+            glob_hypre_solver->Restrict(y_f->GetVector(), y_c->GetVector(), f_level, c_level);
+         }
+         else {
+            HypreVectorCopy(y_c, y_f);
+         }
       }
       else {
          HypreVectorCopy(y_c, y_f);
@@ -289,38 +294,24 @@ extern "C"
 
    void HypreProlong(HypreVector *y_f, HypreVector *y_c, int pfasst_f_level, int pfasst_c_level)
    {
-      if (glob_spacial_coarsen_flag == 1){
-         int f_level = PfasstToHypreLevelIndex(pfasst_f_level, glob_hypre_solver->GetNumLevels());
+      if (glob_spatial_coarsen_flag == 1){
          int c_level = PfasstToHypreLevelIndex(pfasst_c_level, glob_hypre_solver->GetNumLevels());
-         glob_hypre_solver->Prolong(y_f->GetVector(), y_c->GetVector(), f_level, c_level);
+         if (c_level < glob_hypre_solver->spatial_num_levels){
+            int f_level = PfasstToHypreLevelIndex(pfasst_f_level, glob_hypre_solver->GetNumLevels());
+            glob_hypre_solver->Prolong(y_f->GetVector(), y_c->GetVector(), f_level, c_level);
+         }
+         else {
+            HypreVectorCopy(y_f, y_c);
+         }
       }
       else {
          HypreVectorCopy(y_f, y_c);
       }
    }
 
-   void HypreSolverSetLevelData(HypreSolver **y, HypreSolver *x, int pfasst_level_index)
-   {
-      int level_index;
-      if (glob_spacial_coarsen_flag == 1){
-         //level_index = PfasstToHypreLevelIndex(pfasst_level_index, x->GetNumLevels());
-         //(*y)->A = x->A_l[level_index];
-         //(*y)->x = x->x_l[level_index];
-         //(*y)->b = x->b_l[level_index];
-         //(*y)->nrows = x->nrows_l[level_index];
-         //(*y)->ilower = x->ilower_l[level_index];
-         //(*y)->iupper = x->iupper_l[level_index];
-         //(*y)->nentries = x->nentries;
-         //(*y)->stencil_indices = x->stencil_indices;
-         //(*y)->stencil = hypre_StructMatrixStencil((*y)->A);
-         //(*y)->nnz = (*y)->nrows * (*y)->nentries;
-         //(*y)->num_levels = x->num_levels;
-      }
-   }
-
    int HypreSolverGetNumLevels(HypreSolver *hypre_solver)
    {
-      return hypre_solver->GetNumLevels();
+      return glob_hypre_solver->GetNumLevels();
    }
 
    void GetHypreStats(void)
