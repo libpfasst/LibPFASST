@@ -156,23 +156,22 @@ void HypreSolver::SetupMatrix(HYPRE_StructMatrix *A,
 
 double *HypreSolver::UpdateImplicitMatrix(int level_index, double dtq)
 {
-   HYPRE_StructMatrix AA = A_imp_lev[level_index];
    int nn = nrows_lev[level_index];
    int *iup = iupper_lev[level_index];
    int *ilow = ilower_lev[level_index];
    int nnz_l = nnz_lev[level_index];
 
-   HYPRE_StructStencil stencil = hypre_StructMatrixStencil(AA);
+   HYPRE_StructStencil stencil = hypre_StructMatrixStencil(A_imp_lev[level_index]);
    //int nentries = hypre_StructStencilSize(stencil);
    //hypre_Index *stencil_indices = hypre_StructStencilShape(stencil);
 
    double *values_poisson = (double *)calloc(nnz_l, sizeof(double));
    double *values = (double *)calloc(nnz_l, sizeof(double));
 
-   hypre_Index *stencil_shape = hypre_StructStencilShape(hypre_StructMatrixStencil(AA));
-   HYPRE_StructMatrixGetBoxValues(AA, ilow, iup, nentries, stencil_indices, values_poisson);
+   hypre_Index *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_StructMatrixGetBoxValues(A_imp_lev[level_index], ilow, iup, nentries, stencil_indices, values_poisson);
    int diag_index = 0;
-   for (int i = 0; i < hypre_StructStencilSize(hypre_StructMatrixStencil(AA)); i++){
+   for (int i = 0; i < hypre_StructStencilSize(stencil); i++){
       if (hypre_IndexD(stencil_shape[i], 0) == 0 && hypre_IndexD(stencil_shape[i], 1) == 0){
          diag_index = i;
       }
@@ -187,7 +186,7 @@ double *HypreSolver::UpdateImplicitMatrix(int level_index, double dtq)
          }
       }
    }
-   HYPRE_StructMatrixSetBoxValues(AA, ilow, iup, nentries, stencil_indices, values);
+   HYPRE_StructMatrixSetBoxValues(A_imp_lev[level_index], ilow, iup, nentries, stencil_indices, values);
 
    free(values);
    return values_poisson;
@@ -229,7 +228,7 @@ HYPRE_StructVector HypreSolver::SetupVector(void)
 
 void HypreSolver::FEval(double *y, double t, int level_index, double **f)
 {
-   HYPRE_StructMatrix AA = A_imp_lev[level_index];
+   HYPRE_StructMatrix AA = A_exp_lev[level_index];
    HYPRE_StructVector bb = b_lev[level_index];
    HYPRE_StructVector xx = x_lev[level_index];
    int nn = nrows_lev[level_index];
@@ -267,8 +266,6 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    HYPRE_StructMatrix AA = A_imp_lev[level_index];
    HYPRE_StructVector bb = b_lev[level_index];
    HYPRE_StructVector xx = x_lev[level_index];
-   HYPRE_StructSolver hypre_solver = solver_imp_lev[level_index];
-   HYPRE_StructSolver hypre_precond = precond_imp_lev[level_index];
    int nn = nrows_lev[level_index];
    int nnz_l = nnz_lev[level_index];
    int *iup = iupper_lev[level_index];
@@ -290,19 +287,22 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    }
    HYPRE_StructVectorSetBoxValues(xx, ilow, iup, values);
 
-   //HYPRE_StructVectorAssemble(b);
-   //HYPRE_StructVectorAssemble(x);
-   
+   HYPRE_StructVectorAssemble(bb);
+   HYPRE_StructVectorAssemble(xx);
+  
+   HYPRE_StructSolver hypre_solver = solver_imp_lev[level_index];
+ 
    if (hypre_solver == NULL){
       setup_flag = 1;
       values_poisson = UpdateImplicitMatrix(level_index, dtq);
       SetupStructSolver(level_index);
-      hypre_solver = solver_imp_lev[level_index];
-      hypre_precond = precond_imp_lev[level_index];
    }
 
+   hypre_solver = solver_imp_lev[level_index];
+   HYPRE_StructSolver hypre_precond = precond_imp_lev[level_index];
+
    if (solver_type == SOLVER_JACOBI){
-      HYPRE_StructJacobiSolve(hypre_solver, AA, bb, xx);
+      HYPRE_StructJacobiSolve(hypre_solver, A_imp_lev[level_index], bb, xx);
 
       //HYPRE_StructJacobiGetNumIterations(solver, &num_iterations);
       //HYPRE_StructJacobiGetFinalRelativeResidualNorm(solver, &final_res_norm);
@@ -311,8 +311,8 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
       HYPRE_StructJacobiDestroy(hypre_solver);
    }
    else if (solver_type == SOLVER_JACOBI_CG){
-      HYPRE_PCGSolve((HYPRE_Solver)hypre_solver,
-                     (HYPRE_Matrix)AA,
+      HYPRE_PCGSolve((HYPRE_Solver)(solver_imp_lev[level_index]),
+                     (HYPRE_Matrix)(A_imp_lev[level_index]),
                      (HYPRE_Vector)bb,
                      (HYPRE_Vector)xx);
 
@@ -325,8 +325,8 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
 
    }
    else if (solver_type == SOLVER_PFMG_CG){
-      HYPRE_PCGSolve((HYPRE_Solver)hypre_solver,
-                     (HYPRE_Matrix)AA,
+      HYPRE_PCGSolve((HYPRE_Solver)(solver_imp_lev[level_index]),
+                     (HYPRE_Matrix)(A_imp_lev[level_index]),
                      (HYPRE_Vector)bb,
                      (HYPRE_Vector)xx);
 
@@ -339,7 +339,7 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
    }
    else {
       double wtime_start = MPI_Wtime();
-      HYPRE_StructPFMGSolve(hypre_solver, AA, bb, xx);
+      HYPRE_StructPFMGSolve(solver_imp_lev[level_index], A_imp_lev[level_index], bb, xx);
       FComp_wtime += MPI_Wtime() - wtime_start;
 
       //HYPRE_StructPFMGGetNumIterations(hypre_solver, &num_iterations);
@@ -357,7 +357,7 @@ void HypreSolver::FComp(double **y, double t, double dtq, double *rhs, int level
 
    free(values);
    if (setup_flag == 1){
-      HYPRE_StructMatrixSetBoxValues(AA, ilow, iup, nentries, stencil_indices, values_poisson);
+      HYPRE_StructMatrixSetBoxValues(A_imp_lev[level_index], ilow, iup, nentries, stencil_indices, values_poisson);
       free(values_poisson);
       CleanupStructSolver(&(solver_imp_lev[level_index]), &(precond_imp_lev[level_index]));
       solver_imp_lev[level_index] = NULL;
@@ -379,12 +379,17 @@ void HypreSolver::SetupLevels(int spatial_coarsen_flag, int nx)
    iupper_lev = (int **)malloc(num_levels * sizeof(int *));
 
    if (spatial_coarsen_flag == 1){
-      SetupStructPFMGSolver(&(pfmg_level_data));
-      HYPRE_StructPFMGSetMaxLevels(pfmg_level_data, max_levels);
-      HYPRE_StructPFMGSetRAPType(pfmg_level_data, 0);
-      HYPRE_StructPFMGSetup(pfmg_level_data, A_imp, b, x);
-      pfmg_data = (hypre_PFMGData *)(pfmg_level_data);
+      SetupStructPFMGSolver(&(spatial_pfmg_data));
+      HYPRE_StructPFMGSetMaxLevels(spatial_pfmg_data, 20);
+      HYPRE_StructPFMGSetRAPType(spatial_pfmg_data, 0);
+      HYPRE_StructPFMGSetup(spatial_pfmg_data, A_imp, b, x);
+      pfmg_data = (hypre_PFMGData *)(spatial_pfmg_data);
       spatial_num_levels = pfmg_data->num_levels;
+      if (spatial_num_levels < num_levels){
+         printf("ERROR: Cannot further coarsen in space.  Please request fewer time levels (reduce 'nlevels' variable).\n");
+         MPI_Finalize();
+         exit(1);
+      }
       RT_lev = pfmg_data->RT_l;
       P_lev = pfmg_data->P_l;
       x_lev = pfmg_data->x_l;
@@ -408,8 +413,8 @@ void HypreSolver::SetupLevels(int spatial_coarsen_flag, int nx)
 
          A_imp_lev[level] = pfmg_data->A_l[pfmg_level];
          A_exp_lev[level] = pfmg_data->A_l[pfmg_level];
-         x_lev[level] = pfmg_data->x_l[pfmg_level];
-         b_lev[level] = pfmg_data->b_l[pfmg_level];
+         //x_lev[level] = pfmg_data->x_l[pfmg_level];
+         //b_lev[level] = pfmg_data->b_l[pfmg_level];
          nrows_lev[level] = A_imp_lev[pfmg_level]->grid->local_size;
          nnz_lev[level] = nrows_lev[level] * A_imp_lev[pfmg_level]->stencil->size;
          if (nrows_lev[level] > 0){
@@ -422,6 +427,8 @@ void HypreSolver::SetupLevels(int spatial_coarsen_flag, int nx)
             iupper_lev[level][0] = -1;
             iupper_lev[level][1] = -1;
          }
+         x_lev[level] = SetupVectorLevel(A_imp_lev[level], level);
+         b_lev[level] = SetupVectorLevel(A_imp_lev[level], level);
       }
    }
    else {
@@ -536,7 +543,7 @@ void HypreSolver::SetupStructPFMGSolver(HYPRE_StructSolver *pfmg_solver)
    HYPRE_StructPFMGSetNumPostRelax(*pfmg_solver, n_post);
    HYPRE_StructPFMGSetSkipRelax(*pfmg_solver, 1);
    HYPRE_StructPFMGSetLogging(*pfmg_solver, 1);
-   HYPRE_StructPFMGSetPrintLevel(*pfmg_solver, 3);
+   HYPRE_StructPFMGSetPrintLevel(*pfmg_solver, 1);
 }
 
 void HypreSolver::Restrict(HYPRE_StructVector y_f, HYPRE_StructVector y_c, int f_level, int c_level)

@@ -14,8 +14,8 @@ module pf_mod_MGRIT
   use pf_mod_pfasst
   use pf_mod_comm
   use pf_mod_results
-  use pf_mod_parareal
   use mpi
+  !use pf_mod_parareal
   
   implicit none
 
@@ -211,11 +211,6 @@ contains
            mg_lev%tfin = mg_lev%t0 + mg_lev%Nt * mg_lev%dt
            pf%state%t0 = mg_lev%t0
         end do
-
-        !do level_index = nlevels,coarsest_level,-1
-        !   mg_lev => mg_ld(level_index)
-        !   print *,level_index,pf%rank,mg_lev%send_to_rank,mg_lev%recv_from_rank
-        !end do
      end if
 
      allocate(mg_ld(nlevels)%send_procs(mg_ld(nlevels)%num_sends))
@@ -251,14 +246,6 @@ contains
            end if
         end if 
      end do
-
-     !print *,pf%rank,mg_ld(nlevels)%num_recvs
-
-     !if (pf%rank .eq. 1) then
-     !   do i = 1,mg_ld(nlevels)%num_sends
-     !      print *,mg_ld(nlevels)%send_procs(i)
-     !   end do
-     !end if
      
      pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
      pf%state%dt = mg_ld(nlevels)%dt
@@ -629,13 +616,14 @@ contains
      if (pf%state%status .eq. PF_STATUS_CONVERGED) then
         return
      end if
-     
+ 
      interp_flag = .false.
 
      uc_len = size(mg_lev%uc)
      do i = 1,uc_len
         call mg_lev%uc_prev(i)%copy(mg_lev%uc(i))
      end do
+
 
      !> F- or FC-relaxation
      call RelaxTransfer(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, restrict_flag, zero_c_pts_flag, FC_relax_flag) 
