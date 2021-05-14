@@ -57,11 +57,12 @@ module pf_mod_MGRIT
      integer :: coarsest_level !> Index of coarsest level
      logical :: f_pts_flag = .true. !> True if this proc has F-points
      logical :: c_pts_flag = .true. !> True if this proc has C-points
-     logical :: c_converge
-     integer :: c_converge_index
+     logical :: res_converge
+     integer :: res_converge_index
      integer, allocatable :: recv_procs(:)
      integer, allocatable :: send_procs(:)
      integer, allocatable :: recv_converge_status(:)
+     integer, allocatable :: proc_converge_status(:)
      integer :: num_recvs
      integer :: num_sends
      integer :: num_recv_converged
@@ -153,7 +154,9 @@ contains
         mg_ld(nlevels)%Nt = Nt_start
         mg_ld(nlevels)%rank_shifted = pf%rank
         mg_ld(nlevels)%send_to_rank = pf%rank+1
+        if (mg_ld(nlevels)%send_to_rank .gt. pf%comm%nproc-1) mg_ld(nlevels)%num_sends = mg_ld(nlevels)%num_sends - 1
         mg_ld(nlevels)%recv_from_rank = pf%rank-1
+        if (mg_ld(nlevels)%recv_from_rank .lt. 0) mg_ld(nlevels)%num_recvs = mg_ld(nlevels)%num_recvs - 1
         start_dropping_procs = .false.
         i = 0
         !> Loop over levels to determine number of time points, C-points, and F-points
@@ -213,39 +216,44 @@ contains
         end do
      end if
 
-     allocate(mg_ld(nlevels)%send_procs(mg_ld(nlevels)%num_sends))
-     allocate(mg_ld(nlevels)%recv_procs(mg_ld(nlevels)%num_recvs))
-     allocate(mg_ld(nlevels)%recv_converge_status(mg_ld(nlevels)%num_recvs))
+     if (mg_ld(nlevels)%num_sends .gt. 0) allocate(mg_ld(nlevels)%send_procs(mg_ld(nlevels)%num_sends))
+     if (mg_ld(nlevels)%num_recvs .gt. 0) allocate(mg_ld(nlevels)%recv_procs(mg_ld(nlevels)%num_recvs))
+     if (mg_ld(nlevels)%num_recvs .gt. 0) allocate(mg_ld(nlevels)%recv_converge_status(mg_ld(nlevels)%num_recvs))
+     allocate(mg_ld(nlevels)%proc_converge_status(pf%comm%nproc))
 
-     mg_ld(nlevels)%recv_procs(1) = -1
-     i = 1;
-     do level_index = coarsest_level,nlevels
-        mg_lev => mg_ld(level_index)
-        mg_c_lev => mg_ld(level_index-1)
-        if (mg_ld(nlevels)%recv_procs(i) .eq. -1) then
-           mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
-        else
-           if ((mg_lev%recv_from_rank .gt. -1) .and. (mg_lev%recv_from_rank .lt. pf%comm%nproc)) then
-              if (mg_c_lev%recv_from_rank .ne. mg_lev%recv_from_rank) then
-                 i = i + 1
-                 mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
+     if (mg_ld(nlevels)%num_recvs .gt. 0) then
+        mg_ld(nlevels)%recv_procs(1) = -1
+        i = 1;
+        do level_index = coarsest_level,nlevels
+           mg_lev => mg_ld(level_index)
+           mg_c_lev => mg_ld(level_index-1)
+           if (mg_ld(nlevels)%recv_procs(i) .eq. -1) then
+              mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
+           else
+              if ((mg_lev%recv_from_rank .gt. -1) .and. (mg_lev%recv_from_rank .lt. pf%comm%nproc)) then
+                 if (mg_c_lev%recv_from_rank .ne. mg_lev%recv_from_rank) then
+                    i = i + 1
+                    mg_ld(nlevels)%recv_procs(i) = mg_lev%recv_from_rank
+                 end if
               end if
            end if
-        end if
-     end do
+        end do
+     end if
 
-     mg_ld(nlevels)%send_procs(1) = mg_ld(nlevels)%send_to_rank
-     i = 2
-     do level_index = nlevels,coarsest_level+1,-1
-        mg_lev => mg_ld(level_index)
-        mg_c_lev => mg_ld(level_index-1)
-        if ((mg_c_lev%send_to_rank .gt. -1) .and. (mg_c_lev%send_to_rank .lt. pf%comm%nproc)) then
-           if (mg_c_lev%send_to_rank .ne. mg_lev%send_to_rank) then
-              mg_ld(nlevels)%send_procs(i) = mg_c_lev%send_to_rank
-              i = i + 1
-           end if
-        end if 
-     end do
+     if (mg_ld(nlevels)%num_sends .gt. 0) then
+        mg_ld(nlevels)%send_procs(1) = mg_ld(nlevels)%send_to_rank
+        i = 2
+        do level_index = nlevels,coarsest_level+1,-1
+           mg_lev => mg_ld(level_index)
+           mg_c_lev => mg_ld(level_index-1)
+           if ((mg_c_lev%send_to_rank .gt. -1) .and. (mg_c_lev%send_to_rank .lt. pf%comm%nproc)) then
+              if (mg_c_lev%send_to_rank .ne. mg_lev%send_to_rank) then
+                 mg_ld(nlevels)%send_procs(i) = mg_c_lev%send_to_rank
+                 i = i + 1
+              end if
+           end if 
+        end do
+     end if
      
      pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
      pf%state%dt = mg_ld(nlevels)%dt
@@ -402,21 +410,28 @@ contains
     coarsest_level = mg_ld(nlevels)%coarsest_level
     pf%state%pfblock = 1
     pf%state%sweep = 1
-    !pf%state%status = PF_STATUS_PREDICTOR
-    !pf%state%pstatus = PF_STATUS_PREDICTOR
-    pf%state%status = PF_STATUS_ITERATING
-    pf%state%pstatus = PF_STATUS_ITERATING
 
     mg_lev => mg_ld(nlevels)
 
     if (pf%niters .lt. 0) then
-       uc => mg_ld(nlevels)%uc
-       call qend%copy(uc(size(uc)))
+       call qend%setval(0.0_pfdp)
        return
     end if
 
     !>  Allocate stuff for holding results 
     call initialize_results(pf)
+
+    mg_ld(nlevels)%num_recv_converged = 0
+    do i = 1,mg_ld(nlevels)%num_recvs
+       mg_ld(nlevels)%recv_converge_status(i) = PF_STATUS_ITERATING
+       mg_ld(nlevels)%proc_converge_status(mg_ld(nlevels)%recv_procs(i)+1) = PF_STATUS_ITERATING
+    end do
+
+    mg_ld(nlevels)%res_converge_index = 1
+    mg_ld(nlevels)%res_converge = .false.
+
+    pf%state%status = PF_STATUS_ITERATING
+    pf%state%pstatus = PF_STATUS_ITERATING
 
     !> Restrict initial condition
     level_index = coarsest_level
@@ -440,17 +455,6 @@ contains
        call qend%copy(uc(size(uc)))
        return
     end if
-
-    mg_ld(nlevels)%num_recv_converged = 0
-    do i = 1,mg_ld(nlevels)%num_recvs
-       mg_ld(nlevels)%recv_converge_status(i) = PF_STATUS_ITERATING
-    end do
-
-    mg_ld(nlevels)%c_converge_index = 1
-    mg_ld(nlevels)%c_converge = .false.
-
-    pf%state%status = PF_STATUS_ITERATING
-    pf%state%pstatus = PF_STATUS_ITERATING
 
     !> Iterate until convergence is achieved
     do iter = 1, pf%niters
@@ -1161,15 +1165,17 @@ contains
      mg_lev => mg_ld(level_index)
      mg_c_lev => mg_ld(level_index-1)
 
+     mg_lev%res_converge = .false.
+
      r_norm = r%norm()
 
-     mg_lev%c_converge = .false.
-     !if (pf%rank .eq. 1) print *,i,mg_lev%c_converge_index,mg_c_lev%Nt,r_norm
-     if ((i .eq. mg_lev%c_converge_index) .and. (r_norm .lt. pf%abs_res_tol))  then
-        if (mg_lev%c_converge_index .eq. mg_c_lev%Nt) then
-           mg_lev%c_converge = .true.
-        else
-           mg_lev%c_converge_index = mg_lev%c_converge_index + 1
+     if (pf%abs_res_tol .gt. 0) then
+        if ((i .eq. mg_lev%res_converge_index) .and. (r_norm .lt. pf%abs_res_tol))  then
+           if (mg_lev%res_converge_index .eq. mg_c_lev%Nt) then
+              mg_lev%res_converge = .true.
+           else
+              mg_lev%res_converge_index = mg_lev%res_converge_index + 1
+           end if
         end if
      end if
 
@@ -1195,12 +1201,12 @@ contains
 
     !> Check to see if tolerances are met
     residual_converged = .false.
-    if (mg_lev%c_converge)  then
+    if (mg_lev%res_converge)  then
        residual_converged = .true.
     end if    
 
     !>  Until I hear the previous processor is done, recieve it's status
-    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
+    if (pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
        call mgrit_recv_status(pf, mg_ld, level_index, tag)
     end if
 
@@ -1267,19 +1273,24 @@ contains
     logical, intent(in) :: blocking
     type(pf_level_t), pointer :: pf_lev
     integer :: ierror, dir, which, stride
-    type(mgrit_level_data), pointer :: mg_lev
+    type(mgrit_level_data), pointer :: mg_lev, mg_finest_lev
+    integer :: source
 
-    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
-       mg_lev => mg_ld(level_index)
-       if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-          pf_lev => pf%levels(level_index)
+    mg_lev => mg_ld(level_index)
+    mg_finest_lev => mg_ld(pf%nlevels)
+    source = mg_lev%recv_from_rank
 
-          dir = 1
-          which = 1
-          stride = pf%rank - mg_lev%recv_from_rank
-          call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
-          call recv_data%copy(pf_lev%q0)
-       end if
+    if ((source .ge. pf%comm%nproc-1) .or. (source .lt. 0)) return
+    if (mg_finest_lev%proc_converge_status(source+1) .eq. PF_STATUS_CONVERGED) return
+
+    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
+
+       dir = 1
+       which = 1
+       stride = pf%rank - mg_lev%recv_from_rank
+       call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
+       call recv_data%copy(pf_lev%q0)
     end if
   end subroutine mgrit_recv
 
@@ -1290,17 +1301,22 @@ contains
     integer, intent(in) :: level_index, tag
     type(pf_level_t), pointer :: pf_lev
     integer :: ierror, dir, stride
-    type(mgrit_level_data), pointer :: mg_lev
+    type(mgrit_level_data), pointer :: mg_lev, mg_finest_lev
+    integer :: source
 
-    if (pf%state%pstatus /= PF_STATUS_CONVERGED) then
-       mg_lev => mg_ld(level_index)
-       if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-          pf_lev => pf%levels(level_index)
+    mg_lev => mg_ld(level_index)
+    mg_finest_lev => mg_ld(pf%nlevels)
+    source = mg_lev%recv_from_rank
 
-          dir = 1
-          stride = pf%rank - mg_lev%recv_from_rank
-          call pf_post(pf, pf_lev, tag, dir, stride)
-       end if
+    if ((source .ge. pf%comm%nproc-1) .or. (source .lt. 0)) return
+    if (mg_finest_lev%proc_converge_status(source+1) .eq. PF_STATUS_CONVERGED) return
+
+    if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
+       pf_lev => pf%levels(level_index)
+
+       dir = 1
+       stride = pf%rank - mg_lev%recv_from_rank
+       call pf_post(pf, pf_lev, tag, dir, stride)
     end if
   end subroutine mgrit_post
 
@@ -1338,6 +1354,7 @@ contains
              source = mg_lev%recv_procs(i)
              call pf%comm%recv_status(pf, tag, pstatus, ierr, source)
              mg_lev%recv_converge_status(i) = pstatus
+             mg_lev%proc_converge_status(source+1) = pstatus
              if (pstatus .eq. PF_STATUS_CONVERGED) then
                  mg_lev%num_recv_converged = mg_lev%num_recv_converged + 1
              end if
