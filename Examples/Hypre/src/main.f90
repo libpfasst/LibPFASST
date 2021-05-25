@@ -137,11 +137,8 @@ contains
     end if
     !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
     !call GetHypreStats()
-    if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
-    return
-
-    call mpi_comm_size(pf%comm%comm, nproc, error)
-    call mpi_comm_rank(pf%comm%comm, rank, error)
+    !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
+    return;
 
     !>  Wait for everyone to be done
     call mpi_barrier(MPI_COMM_WORLD, ierror)
