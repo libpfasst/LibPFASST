@@ -194,7 +194,7 @@ contains
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',eq_type)
     end select
-    
+
   end subroutine set_ops
 
   !> Routine to compute the nonlinear operators
@@ -266,6 +266,7 @@ module pf_mod_fftops
      complex(pfdp), allocatable :: ddx(:) ! first derivative operator
      complex(pfdp), allocatable :: opL(:) ! implcit operator
      complex(pfdp), allocatable :: opNL(:) ! explicit operator
+     complex(pfdp), allocatable :: opDamp(:) ! Damping operator
    contains
         procedure :: init  =>  fftops_init
         procedure :: destroy  =>  fftops_destroy
@@ -274,6 +275,7 @@ module pf_mod_fftops
   contains
 
     subroutine fftops_init(this,fft,nx)
+      use probin, only: d0,d1,r0,r1
       class(pf_fft_ops_t), intent(inout)    :: this
       type(pf_fft_t), pointer, intent(in) :: fft
       integer, intent(in) :: nx
@@ -287,12 +289,19 @@ module pf_mod_fftops
       if (istat .ne. 0)  call pf_stop(__FILE__,__LINE__,'Allocate failed ',istat)
       allocate(this%opNL(nx),STAT=istat)
       if (istat .ne. 0)  call pf_stop(__FILE__,__LINE__,'Allocate failed ',istat)
+      allocate(this%opDamp(nx),STAT=istat)
+      if (istat .ne. 0)  call pf_stop(__FILE__,__LINE__,'Allocate failed ',istat)
       
       call fft%make_deriv(this%ddx) !  First derivative
       call fft%make_lap(this%lap)  !  Second derivative
       
       ! initialize  operators
       call set_ops(this%opL,this%opNL,this%ddx,this%lap)
+
+      ! Create damping op
+      this%opDamp= d0*this%ddx**r0 + d1*abs(this%ddx)**r1
+      !  add damping to linear operator
+      this%opL=this%opL+this%opDamp
       deallocate(this%lap)
       deallocate(this%ddx)
     end subroutine fftops_init
@@ -302,6 +311,7 @@ module pf_mod_fftops
 
       deallocate(this%opL)
       deallocate(this%opNL)
+      deallocate(this%opDamp)
     end subroutine fftops_destroy
     
   !> Routine to return out put the solution to numpy (dimension dependent)

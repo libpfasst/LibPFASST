@@ -3,11 +3,11 @@
     nlevels  = 2
 
     !  These are internal pfasst variables that can be reset
-    niters = 8   !  default is 5 - 0 leaves predictor on coarse level
+    niters = 100   !  default is 5 - 0 leaves predictor on coarse level
     
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-11
-     rel_res_tol = 1.d-11
+     abs_res_tol = 1.d-10
+     rel_res_tol = 1.d-10
 
      nnodes =  2 2
 
