@@ -88,7 +88,9 @@ subroutine f_eval(this, y, t, level_index, f)
   fft => this%fft_tool
   
   call f_NL(this%yvec,this%fvec,this%fft_ops%opNL,this%tmp,fft)
-  
+
+  ! include damping
+  if (split_damping)  this%fvec=  this%fvec - this%fft_ops%opDamp*this%yvec
 end subroutine f_eval
 
   subroutine compA(this, dt, i, j, F, val)

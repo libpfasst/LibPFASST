@@ -31,11 +31,12 @@ module probin
   real(pfdp),  save :: kfreqy  ! initial condition parameter for ad solution
   real(pfdp),  save :: kfreqz  ! initial condition parameter for ad solution
   !  parameters for kdv
-  real(pfdp), save :: beta    ! scaling factor
+  real(pfdp), save :: beta    
   !  parameters for burgers term
-  real(pfdp), save :: gamma    ! scaling factor
-
-
+  real(pfdp), save :: gamma    
+  !  parameters for split damping
+  real(pfdp), save :: d0,d1,r0,r1  
+  logical,    save :: split_damping
   character(len=32), save :: pfasst_nml
 
   character(len=64), save :: output ! directory name for output
@@ -45,7 +46,7 @@ module probin
   integer :: ios,iostat 
   namelist /params/  nx,ic_type, eq_type, nsteps,nsteps_rk,rk_order, dt, Tfin
   namelist /params/  pfasst_nml, lam1,lam2,a,b,c, nu, t00, sigma, beta, gamma, splitting
-  namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz
+  namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz,d0,d1,r0,r1,split_damping  
 
 contains
 
@@ -85,6 +86,13 @@ contains
     Lx      = two_pi
     Ly      = two_pi
     Lz      = two_pi
+    ! Default damping parameters are 0
+    split_damping=.true.
+    d0=0.0_pfdp
+    d1=0.0_pfdp
+    r0=0.0_pfdp
+    r1=0.0_pfdp
+    
     t00      = 0.08_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
