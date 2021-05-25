@@ -1,0 +1,26 @@
+!
+!  Test parameters for scalar advection diffusion in DIM=1,2,3
+!    u_t + V.grad(u) = nu lap(u)
+!
+&PARAMS
+
+    Tfin = 6.28318530717958647692528676655900576839433879875021
+    nx = 128 128
+    nu = 0.01
+    a  = 1.0
+    b  = 1.0
+    c  = 1.0
+
+
+    nsteps = 64        !  Number of "parareal" steps
+    nsteps_rk = 1 16   !  Number of steps in coarse and fine propagators
+    rk_order = 4 4     !  Order of coarse and fine propagators
+    
+    eq_type = 1	       !  1 specifies advection-diffusion
+    ic_type = 0        !  0 is Guassian 1 is sin
+
+    ! controls splitting (1 treats u_xx implicit and u_x explicitly, 2 treats u_xx and u_x exponentially)
+    splitting = 1
+
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+/
