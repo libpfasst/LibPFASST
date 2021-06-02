@@ -54,25 +54,33 @@ extern "C"
    }
 
    void HypreVectorCreate(HypreVector **hypre_vector, 
+                          int pfasst_level_index,        
                           int nx,
                           int comm_color,
-                          int space_dim,
-                          int nrows,
-                          int ilower0,
-                          int ilower1,
-                          int iupper0,
-                          int iupper1)
+                          int space_dim)
    {
+      if (glob_hypre_solver == nullptr){
+         printf("ERROR: must set up hypre matrices/solver before vectors.");
+         MPI_Finalize();
+         exit(1);
+      }
+
       if (*hypre_vector == nullptr){
-         int extents[4] = {ilower0, ilower1, iupper0, iupper1};
-         MPI_Comm newcomm;
-         if (glob_space_comm == MPI_COMM_NULL){
-            MPI_Comm_split(MPI_COMM_WORLD, comm_color, 0, &glob_space_comm);
-         }
-         else {
-            newcomm = glob_space_comm;
-         }
-         *hypre_vector = new HypreVector(nx, 0.0, newcomm, space_dim, nrows, extents);
+         int level_index;
+         level_index = PfasstToHypreLevelIndex(pfasst_level_index, glob_hypre_solver->GetNumLevels());
+         int extents[4] = {glob_hypre_solver->ilower_lev[level_index][0], 
+                           glob_hypre_solver->ilower_lev[level_index][1],
+                           glob_hypre_solver->iupper_lev[level_index][0],
+                           glob_hypre_solver->iupper_lev[level_index][1]};
+         *hypre_vector = new HypreVector(nx,
+                                         0.0,
+                                         glob_space_comm,
+                                         glob_hypre_solver->dim,
+                                         glob_hypre_solver->nrows_lev[level_index],
+                                         extents,
+                                         hypre_StructMatrixGrid(glob_hypre_solver->A_imp_lev[level_index]),
+                                         hypre_StructMatrixStencil(glob_hypre_solver->A_imp_lev[level_index]),
+                                         0);
       }
    }
 
@@ -123,7 +131,14 @@ extern "C"
       hypre_vector->Print();
    }
 
-   void HypreSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, int spatial_coarsen_flag)
+   void HypreSolverInit(HypreSolver **hypre_solver,
+                        int pfasst_level_index,
+                        int nx,
+                        int comm_color,
+                        int space_dim,
+                        int max_iter,
+                        int max_levels,
+                        int spatial_coarsen_flag)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
       if (glob_space_comm == MPI_COMM_NULL){
@@ -149,14 +164,22 @@ extern "C"
       }
    }
 
-   void HypreImplicitSolverInit(HypreSolver **hypre_solver, int pfasst_level_index, int nx, int comm_color, int space_dim, int max_iter, int max_levels, double dtq)
+   void HypreImplicitSolverInit(HypreSolver **hypre_solver,
+                                int pfasst_level_index,
+                                int nx,
+                                int comm_color,
+                                int space_dim,
+                                int max_iter,
+                                int max_levels,
+                                double dtq)
    {
       int level_index = PfasstToHypreLevelIndex(pfasst_level_index, max_levels);
       //if (glob_spatial_coarsen_flag == 1){
       //   if (level_index >= glob_hypre_solver->spatial_num_levels-1) return;
       //}
 
-      glob_hypre_solver->UpdateImplicitMatrix(level_index, dtq);
+      double *dummy = glob_hypre_solver->UpdateImplicitMatrix(level_index, dtq);
+      free(dummy);
       glob_hypre_solver->SetupStructSolver(level_index);
    }
 

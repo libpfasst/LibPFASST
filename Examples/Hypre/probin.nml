@@ -6,7 +6,7 @@
 &PF_PARAMS
     nlevels = 3 !  must be set
 
-    niters = 1  !  default is 5
+    niters = 10  !  default is 5
     nnodes = 2 3 5
 
     nsweeps_pred= 1 1 
@@ -16,8 +16,8 @@
     qtype  = 1   
    
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 1.d-9
-    rel_res_tol = 1.d-9
+    abs_res_tol = 0
+    rel_res_tol = 0
 
     !  Variable which determine how the predictor runs  (default is .false. and .true.)
     pipeline_pred =  .true.
@@ -26,7 +26,7 @@
     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
     Vcycle=.TRUE.
 
-    save_timings = 2
+    save_timings = 0
 /
 
 !  Now define the local variables you need
@@ -35,9 +35,11 @@
     T0 = 0.0
     Tfin = .1
     nsteps = 128
-    num_grid_points = 32
+    nx = 32
+
     nspace = 1
     ntime = 1
+
     max_space_v_cycles = 10
 
     mgrit_coarsen_factor = 2
@@ -50,4 +52,6 @@
     ark_stat=1
 
     rk_order=1
+
+    spatial_coarsen_flag = 0
 /

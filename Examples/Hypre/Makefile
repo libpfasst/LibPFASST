@@ -2,7 +2,7 @@
 # User-set variables
 ####################
 # C++ compiler (user must set this)
-CPP_COMPILE = g++ -O3 -g
+CPP_COMPILE = ${CC}
 # LibPFASST directory
 LIBPFASST ?= ../..
 

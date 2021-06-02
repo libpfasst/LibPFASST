@@ -35,18 +35,13 @@ module encap
    interface
 
       subroutine HypreVectorCreate(x_ptr, &
+                                   level_index, &
                                    nx, &
                                    comm_color, &
-                                   space_dim, &
-                                   nrows, &
-                                   ilower0, &
-                                   ilower1, &
-                                   iupper0, &
-                                   iupper1) bind(c, name="HypreVectorCreate")
+                                   space_dim) bind(c, name="HypreVectorCreate")
          use iso_c_binding
          type(c_ptr) :: x_ptr
-         integer, value :: nx, comm_color, space_dim
-         integer, value :: nrows, ilower0, ilower1, iupper0, iupper1
+         integer, value :: level_index, nx, comm_color, space_dim
       end subroutine HypreVectorCreate
     
       subroutine HypreVectorDestroy(x) bind(c, name="HypreVectorDestroy")
@@ -124,18 +119,13 @@ contains
     space_dim = lev_shape(3)
     max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
-    ilower0 = lev_shape(6)
-    ilower1 = lev_shape(7)
-    iupper0 = lev_shape(8)
-    iupper1 = lev_shape(9)
 
     allocate(hypre_vector_encap::x, stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     select type(x)
     type is (hypre_vector_encap)
-       call HypreVectorCreate(x%c_hypre_vector_ptr, nx, comm_color, space_dim, &
-                              nrows, ilower0, ilower1, iupper0, iupper1)
+       call HypreVectorCreate(x%c_hypre_vector_ptr, level_index, nx, comm_color, space_dim)
        x%vector_size = nrows
     end select
   end subroutine hypre_vector_create_single
@@ -156,10 +146,6 @@ contains
     space_dim = lev_shape(3)
     max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
-    ilower0 = lev_shape(6)
-    ilower1 = lev_shape(7)
-    iupper0 = lev_shape(8)
-    iupper1 = lev_shape(9)
 
     allocate(hypre_vector_encap::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',n)
@@ -167,8 +153,7 @@ contains
     select type(x)
     type is (hypre_vector_encap)
        do i = 1, n
-           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, nx, comm_color, space_dim, &
-                                  nrows, ilower0, ilower1, iupper0, iupper1)
+           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, level_index, nx, comm_color, space_dim)
            x(i)%vector_size = nrows
        end do
     end select

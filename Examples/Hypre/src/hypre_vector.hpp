@@ -9,7 +9,15 @@ class HypreVector: public HypreStruct {
    protected:
       HYPRE_StructVector v;
    public:
-      HypreVector(int num_grid_points = 10, double value = 0.0, MPI_Comm in_comm = MPI_COMM_WORLD, int in_dim = 2, int in_nrows = -1, int *extents = NULL);
+      HypreVector(int num_grid_points = 10,
+                  double value = 0.0,
+                  MPI_Comm in_comm = MPI_COMM_WORLD,
+                  int in_dim = 2,
+                  int in_nrows = -1,
+                  int *extents = NULL,
+                  HYPRE_StructGrid in_grid = NULL,
+                  HYPRE_StructStencil in_stencil = NULL,
+                  int generate_grid_data = 1);
       ~HypreVector(void);
 
       HYPRE_StructVector GetVector(void);
