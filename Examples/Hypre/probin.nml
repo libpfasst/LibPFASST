@@ -40,13 +40,13 @@
     nspace = 1
     ntime = 1
 
-    max_space_v_cycles = 10
+    max_space_v_cycles = 20
 
     mgrit_coarsen_factor = 2
 
     solver_type = 1
 
-    nsteps_rk = 4 2
+    nsteps_rk = 1 4
 
     imex_stat=1
     ark_stat=1

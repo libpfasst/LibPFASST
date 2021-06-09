@@ -198,6 +198,7 @@ extern "C"
       double *f_values = (double *)malloc(nrows * sizeof(double));
       glob_hypre_solver->FEval(y->GetBoxValues(), t, level_index, &f_values, piece);
       f->SetBoxValues(f_values);
+      free(f_values);
    }
 
    void HypreSolverFComp(HypreSolver *hypre_solver, HypreVector *y, double t, double dtq, HypreVector *rhs, int pfasst_level_index, HypreVector *f, int piece)
@@ -217,6 +218,8 @@ extern "C"
       glob_hypre_solver->FComp(&y_values, t, dtq, rhs->GetBoxValues(), level_index, &f_values);
       y->SetBoxValues(y_values);
       f->SetBoxValues(f_values);
+      free(y_values);
+      free(f_values);
 
       //FComp_wtime += MPI_Wtime() - wtime_start;
       FComp_count++;

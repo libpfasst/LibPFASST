@@ -117,7 +117,6 @@ contains
     nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
-    max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
 
     allocate(hypre_vector_encap::x, stat=ierr)
@@ -144,7 +143,6 @@ contains
     nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
-    max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
 
     allocate(hypre_vector_encap::x(n),stat=ierr)
