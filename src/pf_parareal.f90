@@ -97,7 +97,6 @@ contains
     integer                   :: nproc   !!  The number of processors being used
     integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
     integer                   :: level_max_depth !!  Finest level in V-cycle
-!    integer::  nsteps_c,nsteps_f  
 
     pf%state%dt      = dt
     pf%state%proc    = pf%rank+1
@@ -216,7 +215,7 @@ contains
     class(pf_level_t), pointer :: c_lev
     class(pf_level_t), pointer :: f_lev     !!
     integer                   :: k,n               !!  Loop indices
-    integer                   :: nsteps_c,nsteps_f    !!  Number of RK  steps
+    integer                   :: nsteps_c        !!  Number of RK  steps on coarse level
     integer                   :: level_index     !!  Local variable for looping over levels
     real(pfdp)                :: t0k             !!  Initial time at time step k
     real(pfdp)                :: dt_all             !!  Initial time at time step k

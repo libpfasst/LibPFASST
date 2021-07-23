@@ -665,10 +665,10 @@ contains
     write(un,122)  '"nlevels" :',     pf%nlevels, ','
     write(un,122)  '"niters" :',      pf%niters, ','
     write(un,122)  '"miniters" :',    pf%miniters, ','
+    write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
     if(pf%use_sdc_sweeper) then 
        write(un,123)  '"nnodes" :',      adjustr(convert_int_array(pf%nnodes(1:pf%nlevels),pf%nlevels)), ','
        write(un,122)  '"q0_style" :',    pf%q0_style, ','
-       write(un,123)  '"nsweeps" :',     adjustr(convert_int_array(pf%nsweeps(1:pf%nlevels),pf%nlevels)), ','
        write(un,122)  '"qtype" :',       pf%qtype, ','
        write(un,123)  '"nsweeps_pred" :',adjustr(convert_int_array(pf%nsweeps_pred(1:pf%nlevels),pf%nlevels)), ','
        write(un,122)  '"nsweeps_burn" :',pf%nsweeps_burn, ','

@@ -1,0 +1,21 @@
+!
+!  Test parameters for a 1-D Dahlquist Eq  y'=lam1*y + lam2*y
+!
+&PARAMS
+
+    Tfin    = 1.0
+    nx      = 1 1
+    lam1    = 1600.0   !  the exponential part
+    lam2    = 1.0
+
+
+    nsteps  = 32 
+    nsteps_rk = 1 32
+    rk_order = 4 4
+
+    eq_type = 0
+    
+    splitting=1
+
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+/
