@@ -4,7 +4,7 @@
 
 &PARAMS
 
-    Tfin = 13.5
+    Tfin = 0.0001
     nx =   1024 1024
     
     nsteps = 1
