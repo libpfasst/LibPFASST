@@ -75,9 +75,9 @@ contains
     call pf_pfasst_setup(pf)
 
     !> add some hooks for output
-    call pf_add_hook(pf, -1, PF_POST_PREDICTOR, echo_error)
-    call pf_add_hook(pf, -1, PF_POST_BLOCK, echo_error)
-    call pf_add_hook(pf, -1, PF_POST_BLOCK, set_error)
+!    call pf_add_hook(pf, -1, PF_POST_PREDICTOR, echo_error)
+!    call pf_add_hook(pf, -1, PF_POST_BLOCK, echo_error)
+!    call pf_add_hook(pf, -1, PF_POST_BLOCK, set_error)
 !    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 !    call pf_add_hook(pf, -1, PF_POST_ITERATION, set_error)
 

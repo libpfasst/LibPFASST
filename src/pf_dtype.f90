@@ -38,7 +38,7 @@ module pf_mod_dtype
   integer, parameter :: PF_STATUS_PREDICTOR = 3
 
   !>  Type for storing timings  later output
-  integer, parameter :: PF_NUM_TIMERS = 18
+  integer, parameter :: PF_NUM_TIMERS = 22
   type :: pf_timer_t
      real(pfdp) :: timers(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0
      real(pfdp) :: runtimes(PF_NUM_TIMERS,PF_MAXLEVS)=0.0d0

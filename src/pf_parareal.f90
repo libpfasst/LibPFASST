@@ -78,7 +78,7 @@ contains
 
     !>  Output stats
     call pf_dump_stats(pf)
-
+    call mpi_barrier(pf%comm%comm, ierr)
   end subroutine pf_parareal_run
 
   !>  parareal controller for block mode
@@ -130,10 +130,7 @@ contains
        !  3.  Move solution to next block
 
        !  Reset some flags
-       !>  For initial block, this is done when initial conditions are set
        pf%state%iter    = 0
-       pf%state%itcnt   = 0
-       pf%state%mysteps = 0
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = MPI_REQUEST_NULL
@@ -154,13 +151,13 @@ contains
              call lev%q0%copy(lev%qend, flags=0)    !!  Just stick qend in q0
           end if
 
-          !>  Update the step and t0 variables for new block
+          !>  Update the step and t_n variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
           pf%state%t0   = pf%state%step * dt
        end if
 
        !> Call the predictor to get an initial guess on all levels and all processors
-       call pf_parareal_predictor(pf, pf%state%t0, dt, flags)
+       call pf_parareal_predictor(pf,  dt, flags)
        ! After the predictor, the residual and delta_q0 are just zero
        if (pf%save_delta_q0) call pf_set_delta_q0(pf,1,0.0_pfdp)       
        call pf_set_resid(pf,pf%nlevels,0.0_pfdp)       
@@ -168,28 +165,34 @@ contains
        
        if (pf%nlevels > 1) then
           !>  Start the parareal iterations
-          do j = 1, pf%niters
-             call call_hooks(pf, -1, PF_PRE_ITERATION)
+           do j = 1, pf%niters
+              call call_hooks(pf, -1, PF_PRE_ITERATION)
              call pf_start_timer(pf, T_ITERATION)
              
              pf%state%iter = j
              
              !  Do a v_cycle
-             call pf_parareal_v_cycle(pf, k, pf%state%t0, dt, 1,2)
+             call pf_parareal_v_cycle(pf, k, dt, 1,2)
              
              !  Check for convergence
              call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
              
-             call pf_stop_timer(pf, T_ITERATION)
-             call call_hooks(pf, -1, PF_POST_ITERATION)
+              call pf_stop_timer(pf, T_ITERATION)
+              call call_hooks(pf, -1, PF_POST_ITERATION)
              
              !  If we are converged, exit block
              if (pf%state%status == PF_STATUS_CONVERGED)  then
-                call call_hooks(pf, -1, PF_POST_CONVERGENCE)
-                call pf_set_iter(pf,j)                 
-                exit
-             end if
+                 call call_hooks(pf, -1, PF_POST_CONVERGENCE)
+                 call pf_set_iter(pf,j)                 
+                 exit
+              end if
           end do  !  Loop over j, the iterations in this block
+          if(pf%rank .ne. nproc-1) then
+!             print *, pf%rank, nproc-1
+             call pf_start_timer(pf, T_AUX)
+!             call pf%comm%wait(pf, 2, ierr)       
+             call pf_stop_timer(pf, T_AUX)
+          endif
        call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
     end if
@@ -206,20 +209,21 @@ contains
 
   !>  The parareal predictor does a serial integration on the coarse level followed
   !>  by a fine integration if there is a fine level
-  subroutine pf_parareal_predictor(pf, t0, dt, flags)
+  subroutine pf_parareal_predictor(pf, dt, flags)
     type(pf_pfasst_t), intent(inout), target :: pf     !! PFASST main data structure
-    real(pfdp),        intent(in   )         :: t0     !! Initial time of this processor
     real(pfdp),        intent(in   )         :: dt     !! time step
     integer,           intent(in   ), optional :: flags(:)  !!  User defined flags
 
     class(pf_level_t), pointer :: c_lev
-    class(pf_level_t), pointer :: f_lev     !!
-    integer                   :: k,n               !!  Loop indices
+    class(pf_level_t), pointer :: f_lev     
+    integer                   :: k,n             !!  Loop indices
     integer                   :: nsteps_c        !!  Number of RK  steps on coarse level
     integer                   :: level_index     !!  Local variable for looping over levels
-    real(pfdp)                :: t0k             !!  Initial time at time step k
-    real(pfdp)                :: dt_all             !!  Initial time at time step k
-    pf%state%iter = 0          
+    real(pfdp)                :: t_n             !!  Initial time of this processor
+    real(pfdp)                :: t_k             !!  Initial time at time step k
+    real(pfdp)                :: dt_all          !!  Length of time to integrate 
+
+
 
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
     call pf_start_timer(pf, T_PREDICTOR)
@@ -236,24 +240,27 @@ contains
           call c_lev%q0%copy(f_lev%q0)
        end if
     end if
+
     !!
     !! Step 2. Do coarse level integration, no communication necessary
+    t_n=pf%state%t0   !  Time at beginning of this processor
+
     !  First mimic all the previous processors to get the correct q0
     if (pf%rank > 0) then
        nsteps_c= c_lev%ulevel%stepper%nsteps*(pf%rank)  
        dt_all=dt*real(pf%rank,pfdp)
-       t0k=t0-real(pf%rank,pfdp)*dt  ! The actual initial time (usually 0)
-       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0k, c_lev%q0,f_lev%q0,dt_all, nsteps_c)
+       t_k=t_n-real(pf%rank,pfdp)*dt  ! The actual initial time (beginning of block)
+       call c_lev%ulevel%stepper%do_n_steps(pf, 1, t_k, c_lev%q0,f_lev%q0,dt_all, nsteps_c)
     end if
-    ! Now do one time step
+    ! Now do one time step  (used as coarse propagator in first parareal iteration)
     nsteps_c= c_lev%ulevel%stepper%nsteps
-    call c_lev%ulevel%stepper%do_n_steps(pf, 1, t0, f_lev%q0,f_lev%qend,dt, nsteps_c)    
+    call c_lev%ulevel%stepper%do_n_steps(pf, 1, t_n, f_lev%q0,f_lev%qend,dt, nsteps_c)    
 
     ! Save the coarse level value to be used in parareal iteration
     call c_lev%Q(1)%copy(f_lev%qend, flags=0)     
     ! Save the fine level value
-    call c_lev%qend%copy(f_lev%qend, flags=0)     
-    call c_lev%q0%copy(f_lev%q0, flags=0)     
+!    call c_lev%qend%copy(f_lev%qend, flags=0)     
+!    call c_lev%q0%copy(f_lev%q0, flags=0)     
 
     call pf_stop_timer(pf, T_PREDICTOR)
 
@@ -270,11 +277,11 @@ contains
   !!  When this is called the previous coarse integrator result should be stored in Q(1)
   !!  and the parareal iteration in qend (both on coarse level).  If this is called
   !!  directly after the predictor, these will be the same thing
-  subroutine pf_parareal_v_cycle(pf, iteration, t0, dt,level_index_c,level_index_f, flags)
+  subroutine pf_parareal_v_cycle(pf, iteration, dt,level_index_c,level_index_f, flags)
 
 
     type(pf_pfasst_t), intent(inout), target :: pf
-    real(pfdp),        intent(in)    :: t0, dt
+    real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: iteration
     integer,           intent(in)    :: level_index_c  !! Coarsest level of V-cycle (not supported)
     integer,           intent(in)    :: level_index_f  !! Finest level of V-cycle (not supported)
@@ -292,15 +299,15 @@ contains
 
     !  Save the old value of q0 and qend so that we can compute difference
 
-    if (pf%save_delta_q0) call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
+     if (pf%save_delta_q0) call c_lev%delta_q0%copy(f_lev%q0, flags=0) !  Prime the delta_q0 stored in c_lev%delta_q0
 
-    call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
+     call f_lev%delta_q0%copy(f_lev%qend, flags=0) !  Holding delta_qend in f_lev%delta_q0
 
     !  Step on fine and store in  fine qend 
     level_index=2
     call f_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,f_lev%qend, dt, nsteps_f)
 
-    !  Subtract the old coarse to get parareal correction  in c_lev%qend
+    !  Subtract the old coarse to get parareal correction  in f_lev%qend
     call f_lev%qend%axpy(-1.0_pfdp,c_lev%Q(1))
     
     ! Get a new initial condition on fine (will be put in q0)
@@ -309,31 +316,33 @@ contains
     !  Step on coarse and save in Q(1) for next iteration
     level_index=1    
     call c_lev%ulevel%stepper%do_n_steps(pf, level_index,pf%state%t0, f_lev%q0,c_lev%Q(1), dt, nsteps_c)
-    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  save in Q(1) for next iteration
+!    call c_lev%qend%copy(c_lev%Q(1), flags=0) !  save in Q(1) for next iteration
     !  Finish the parareal update (store in fine qend) F_old-G_old+G_new
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
     !  Send new solution  forward  (nonblocking)
-    call pf_send(pf, f_lev, 10000+iteration, .false.)
+!d    call pf_send(pf, f_lev, 10000+iteration, .false.)
+      call pf_send(pf, f_lev, 10000+iteration, .true.)
+
 
     !  Complete the delta_q0 on coarse with new initial condition
     call c_lev%delta_q0%axpy(-1.0_pfdp,f_lev%q0, flags=0) !  Complete delta_q0
 
     !  Complete the jump at the end
-    if (pf%save_delta_q0) call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
+     if (pf%save_delta_q0) call f_lev%delta_q0%axpy(-1.0_pfdp,f_lev%qend)
 
     !  Save residual
     if (pf%save_residuals) then    
-       f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
-       call pf_set_resid(pf,1,f_lev%residual)
-       call pf_set_resid(pf,2,f_lev%residual)
-    end if
+        f_lev%residual=f_lev%delta_q0%norm(flags=0)     ! max jump in qend
+        call pf_set_resid(pf,1,f_lev%residual)
+        call pf_set_resid(pf,2,f_lev%residual)
+     end if
     !  Save jumps
-    if (pf%save_delta_q0) then
-       c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
-       call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
-       call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
-    end if
+     if (pf%save_delta_q0) then
+        c_lev%max_delta_q0=c_lev%delta_q0%norm(flags=0) ! max jump in q0
+        call pf_set_delta_q0(pf,1,c_lev%max_delta_q0)
+        call pf_set_delta_q0(pf,2,c_lev%max_delta_q0)
+     end if
 
   end subroutine pf_parareal_v_cycle
   

@@ -82,8 +82,9 @@ contains
     if (dest < 0  .or. dest > pf%comm%nproc-1) return 
     
     if (pf%debug) print  '("DEBUG-rank=",I5," begin send_status, tag=",I8, " istatus=",I2)',rank,tag,istatus
-    
+    call pf_start_timer(pf, T_SEND_STAT)
     call pf%comm%send_status(pf, tag, istatus, ierr, dest)
+    call pf_stop_timer(pf, T_SEND_STAT)
 
     if (ierr /= 0)  call pf_stop(__FILE__,__LINE__,'error during send_status, ierr',val=ierr,rank=rank)
     if (pf%debug) print  '("DEBUG-rank=",I5," end send_status, tag=",I8," istatus=",I2)',rank,tag,istatus
@@ -114,7 +115,9 @@ contains
     source=pf%rank-(dir_)*(stride_)
     if (source < 0  .or. source > pf%comm%nproc-1) return 
     if (pf%debug) print  '("DEBUG-rank=",I5," begin recv_status, tag=",I8," pstatus=",I2)',rank,tag,pstatus   
+    call pf_start_timer(pf, T_RECV_STAT)
     call pf%comm%recv_status(pf, tag, pstatus, ierr, source)
+    call pf_stop_timer(pf, T_RECV_STAT)
 
    if (ierr .ne. 0) call pf_stop(__FILE__,__LINE__,'error during recv_status, ierr',val=ierr,rank=pf%rank)
    pf%state%pstatus = pstatus
@@ -156,9 +159,9 @@ contains
 
        if (pf%debug) print  '("DEBUG-rank=", I5, " begin wait, level=",I4)',rank,level%index
 
-       call pf_start_timer(pf, T_WAIT, level%index)
+       call pf_start_timer(pf, T_WAIT_SEND, level%index)
        call pf%comm%wait(pf, level%index, ierr)       
-       call pf_stop_timer(pf, T_WAIT, level%index)
+       call pf_stop_timer(pf, T_WAIT_SEND, level%index)
        
        if (ierr /= 0) call pf_stop(__FILE__,__LINE__,'error during wait, ierr',val=ierr,rank=rank)
        if (pf%debug) print  '("DEBUG-rank=", I5, " end wait, level=",I4)',rank,level%index
@@ -228,8 +231,7 @@ contains
     if (blocking)  then
        ntimer=T_RECEIVE
     else
-       ntimer=T_WAIT
-
+       ntimer=T_WAIT_REC
     end if
     
     call pf_start_timer(pf, ntimer, level%index)
