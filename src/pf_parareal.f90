@@ -134,6 +134,7 @@ contains
        pf%state%status  = PF_STATUS_PREDICTOR
        pf%state%pstatus = PF_STATUS_PREDICTOR
        pf%comm%statreq  = MPI_REQUEST_NULL
+       pf%comm%sendreq  = MPI_REQUEST_NULL
        pf%state%pfblock = k
        pf%state%sweep = 1   !  Needed for compatibility of residual storage       
 
@@ -175,7 +176,7 @@ contains
              call pf_parareal_v_cycle(pf, k, dt, 1,2)
              
              !  Check for convergence
-             call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
+             !call pf_check_convergence_block(pf, pf%state%finest_level, send_tag=1111*k+j)
              
               call pf_stop_timer(pf, T_ITERATION)
               call call_hooks(pf, -1, PF_POST_ITERATION)
@@ -187,12 +188,13 @@ contains
                  exit
               end if
           end do  !  Loop over j, the iterations in this block
-          if(pf%rank .ne. nproc-1) then
+!          if(pf%rank .ne. nproc-1) then
 !             print *, pf%rank, nproc-1
-             call pf_start_timer(pf, T_AUX)
+!             call pf_start_timer(pf, T_AUX)
 !             call pf%comm%wait(pf, 2, ierr)       
-             call pf_stop_timer(pf, T_AUX)
-          endif
+
+!             call pf_stop_timer(pf, T_AUX)
+!          endif
        call pf_stop_timer(pf, T_BLOCK)
        call call_hooks(pf, -1, PF_POST_BLOCK)
     end if
@@ -321,8 +323,8 @@ contains
     call f_lev%qend%axpy(1.0_pfdp,c_lev%Q(1))        
 
     !  Send new solution  forward  (nonblocking)
-!d    call pf_send(pf, f_lev, 10000+iteration, .false.)
-      call pf_send(pf, f_lev, 10000+iteration, .true.)
+!    call pf_send(pf, f_lev, 10000+iteration, .false.)
+    call pf_send(pf, f_lev, 10000+iteration, .true.)
 
 
     !  Complete the delta_q0 on coarse with new initial condition

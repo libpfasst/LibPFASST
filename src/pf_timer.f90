@@ -70,11 +70,12 @@ contains
 
     if (pf%save_timings .eq. 0) return
     if ((pf%save_timings .eq. 1) .and. (timer_index .ne. T_TOTAL)) return    
-    
+
     l=1
     if (present(level_index)) l=level_index
 
     pf%pf_timers%timers(timer_index,l) = MPI_Wtime()
+!    if (timer_index .eq. 17) print *,'start rec',pf%pf_timers%timers(timer_index,l)
     if (pf%save_timings .eq. 3) then
        write(*, '("start timer:",a10,", rank:",i3,", step:",i4,", level:",i1,", iter: ",i3, ' &
             // '" Current t: ",f20.8, " Elapsed_time: ",f20.8)') &
@@ -114,7 +115,7 @@ contains
     
     pf%pf_timers%timers(timer_index,l)=t_wall
     pf%pf_timers%runtimes(timer_index,l)= pf%pf_timers%runtimes(timer_index,l) + delta_t
-
+!    if (timer_index .eq. 17) print *,'stop timer',t_wall
     !  Echo timings 
     if (pf%save_timings .eq. 3) then
        write(*, '("stop timer:",a10,", rank:",i3,", step:",i4,", level:",i1,", iter: ",i3, ' &
@@ -122,15 +123,6 @@ contains
             timer_names(timer_index), pf%rank, pf%state%step, l, pf%state%iter,  &
             t_wall,t_prev,t_now,delta_t,pf%pf_timers%runtimes(timer_index,l)            
     end if
-    if (pf%rank .eq. 511 .and. timer_index .eq. 12) then
-       write(*, '("stop timer:",a10,", rank:",i3,", step:",i4,", level:",i1,", iter: ",i3, ' &
-            // '" Wall t: ",f20.8, " begin t: ",f20.8, " end t: ",f20.8, " Delta t: ",f20.8, " Cum: ",f20.8)') &
-            timer_names(timer_index), pf%rank, pf%state%step, l, pf%state%iter,  &
-            t_wall,t_prev,t_now,delta_t,pf%pf_timers%runtimes(timer_index,l)            
-    end if
-
-
-
   end subroutine pf_stop_timer
 
 end module pf_mod_timer
