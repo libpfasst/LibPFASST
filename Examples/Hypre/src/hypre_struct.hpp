@@ -19,11 +19,10 @@ class HypreStruct {
       ;
 
    public:
-      /* TODO: make protected */
       HYPRE_StructGrid grid;
       HYPRE_StructStencil stencil;
-      int offsets_1D[5][2] = {{0,0}, {-1,0}, {1,0}, {0,0}, {0,0}};
       int offsets_2D[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+      //int offsets_2D[5][2] = {{0,-1}, {-1,0}, {0,0}, {1,0}, {0,1}};
 
       double Lx, Ly;
       double h, h2;
@@ -40,8 +39,6 @@ class HypreStruct {
       MPI_Comm comm;
       int myid, num_procs;
       int dim;
-      /* end TODO */
-
 
       HypreStruct() {
          ;
@@ -54,7 +51,12 @@ class HypreStruct {
       void SetDim(int in_dim);
       int GetNumRows(void);
       void SetInitCond(double val);
-      void InitGrid(int num_grid_points, int in_nrows = -1, int *extents = NULL);
+      void InitGrid(int nx = 10,
+                    int in_nrows = -1,
+                    int *extents = NULL,
+                    HYPRE_StructGrid in_grid = NULL,
+                    HYPRE_StructStencil in_stencil = NULL,
+                    int generate_grid_data = 0);
       double *HeatEquTrueSol(double t, int P, int Q, double init_cond);
 };
 

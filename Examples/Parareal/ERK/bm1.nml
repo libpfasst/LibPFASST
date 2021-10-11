@@ -6,10 +6,12 @@
 
     Tfin = 13.5
     nx =   1024 1024
+!    nx =   32  32
+
     
-    nsteps = 1
-    nsteps_rk =  1  1
-    rk_order = 4 4
+    nsteps = 512
+    nsteps_rk =  4  128
+    rk_order = 2 4
     
     eq_type = 3	
     ic_type = 3	

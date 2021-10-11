@@ -7,8 +7,8 @@ module probin
   use pf_mod_mpi
 
   !  The namlist for local variables
-  integer, save :: num_grid_points, nspace, ntime, space_dim, max_space_v_cycles
-  integer, save :: solver_type, mgrit_n_init, mgrit_refine_factor, nsteps_rk(PF_MAXLEVS)
+  integer, save :: nx, nspace, ntime, space_dim, max_space_v_cycles
+  integer, save :: solver_type, mgrit_coarsen_factor, nsteps_rk(PF_MAXLEVS)
   logical, save :: FAS_flag, FCF_flag
   real(pfdp), save :: init_cond
   real(pfdp), save :: dt     ! time step
@@ -17,10 +17,12 @@ module probin
   integer, save :: imex_stat
   integer, save :: ark_stat
   integer, save :: rk_order
+  integer, save :: spatial_coarsen_flag
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/ space_dim, num_grid_points, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
-  namelist /params/ mgrit_n_init, mgrit_refine_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order, FCF_flag
+  namelist /params/ space_dim, nx, init_cond, nspace, ntime, dt, T0, Tfin, nsteps, pfasst_nml, max_space_v_cycles
+  namelist /params/ mgrit_coarsen_factor, imex_stat, ark_stat, solver_type, nsteps_rk, FAS_flag, rk_order, FCF_flag
+  namelist /params/ spatial_coarsen_flag
 
 contains
   
@@ -51,25 +53,25 @@ contains
 
     nspace = 1
     ntime = nproc
-    num_grid_points = 3
+    nx = 3
     init_cond = 50.0
     space_dim = 2
     max_space_v_cycles = 100
 
-    dt      = 0.01_pfdp
     T0      = 0.0_pfdp
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
 
-    mgrit_n_init = 10
-    mgrit_refine_factor = 2
-    imex_stat = 2
-    ark_stat = 2
+    mgrit_coarsen_factor = 2
+    imex_stat = 1
+    ark_stat = 1
     rk_order = 1
 
     FAS_flag = .false.
     FCF_flag = .true.
     solver_type = 0
+
+    spatial_coarsen_flag = 0
     
     !>  Read in stuff from input file
     un = 9
@@ -91,7 +93,7 @@ contains
     end do
 
     !  Reset dt if Tfin is set
-    if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
+    dt = Tfin/dble(nsteps)
 
     !  Return the name of the file from which to read PFASST parameters
     pf_fname=pfasst_nml
@@ -122,16 +124,13 @@ contains
        write(un,*) 'Local Variables'
        write(un,*) '----------------'
        write(un,*) 'nsteps: ', nsteps, '! Number of steps'
-       write(un,*) 'Dt:     ', Dt, '! Time step size'
+       write(un,*) 'Dt:     ', dt, '! Time step size'
        write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
-       write(un,*) 'num spatial grid points (on each side of square domain) per processor:   ', num_grid_points
+       write(un,*) 'Number of grid points in each spatial direction:   ', nx
        write(un,*) 'num spatial procs per temporal proc:   ',   nspace
        write(un,*) 'num temporal procs:   ',   ntime  
-       write(un,*) 'Constant initial condition:   ', init_cond
-       write(un,*) 'Number of spacial dimensions:   ', space_dim
-       write(un,*) 'Number of Hypre V-cycles:   ', max_space_v_cycles
-   
-   
+       write(un,*) 'Number of spatial dimensions:   ', space_dim
+       write(un,*) 'Number of Hypre V-cycles:   ', max_space_v_cycles 
        write(un,*) 'PFASST parameters read from input file ', pfasst_nml
        write(un,*) '=================================================='
     end if

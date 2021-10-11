@@ -17,15 +17,21 @@ void HypreStruct::SetDim(int in_dim)
    dim = in_dim;
 }
 
-void HypreStruct::InitGrid(int num_grid_points, int in_nrows, int *extents)
+void HypreStruct::InitGrid(int nx,
+                           int in_nrows,
+                           int *extents,
+                           HYPRE_StructGrid in_grid,
+                           HYPRE_StructStencil in_stencil,
+                           int generate_grid_data)
 {
+
    ilower = (int *)malloc(2 * sizeof(int));
    iupper = (int *)malloc(2 * sizeof(int));
    stencil_indices = (int *)malloc(5 * sizeof(int));
    Lx = 1.0; Ly = 1.0;
 
-   if (in_nrows < 0){
-      n = num_grid_points;
+   if (generate_grid_data){
+      n = nx;
       N  = sqrt(num_procs);
       h  = 1.0 / (N*n+1); /* note that when calculating h we must
                              remember to count the boundary nodes */
@@ -60,30 +66,23 @@ void HypreStruct::InitGrid(int num_grid_points, int in_nrows, int *extents)
    nentries = 5;
    nnz = nentries*nrows;
 
-   /* Set up a grid */
-   {
-      /* Create an empty grid object */
+   if (in_grid == NULL){
       HYPRE_StructGridCreate(comm, dim, &grid);
-
-      /* Add a new box to the grid */
       HYPRE_StructGridSetExtents(grid, ilower, iupper);
-
-      /* This is a collective call finalizing the grid assembly.
-         The grid is now ``ready to be used'' */
       HYPRE_StructGridAssemble(grid);
    }
+   else {
+      grid = in_grid;
+   }
 
-   /* Define the discretization stencil */
-   {
-      /* Create an empty stencil object */
+   if (in_stencil == NULL){
       HYPRE_StructStencilCreate(2, nentries, &stencil);
-
-      /* Define the geometry of the stencil */
-      {
-         for (int entry = 0; entry < nentries; entry++){
-            HYPRE_StructStencilSetElement(stencil, entry, offsets_2D[entry]);
-         }
+      for (int entry = 0; entry < nentries; entry++){
+         HYPRE_StructStencilSetElement(stencil, entry, offsets_2D[entry]);
       }
+   }
+   else {
+      stencil = in_stencil;
    }
 
  

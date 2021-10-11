@@ -24,10 +24,10 @@ module pf_my_sweeper
 
   interface
 
-     subroutine HypreSolverInit(hypre_solver_ptr, level_index, nx, comm_color, space_dim, max_iter, num_levels, spacial_coarsen_flag) bind(c, name="HypreSolverInit")
+     subroutine HypreSolverInit(hypre_solver_ptr, level_index, nx, comm_color, space_dim, max_iter, num_levels, spatial_coarsen_flag) bind(c, name="HypreSolverInit")
         use iso_c_binding
         type(c_ptr) :: hypre_solver_ptr
-        integer, value :: nx, level_index, comm_color, space_dim, max_iter, num_levels, spacial_coarsen_flag
+        integer, value :: nx, level_index, comm_color, space_dim, max_iter, num_levels, spatial_coarsen_flag
      end subroutine HypreSolverInit
 
      subroutine HypreImplicitSolverInit(hypre_solver_ptr, level_index, nx, comm_color, space_dim, max_iter, num_levels, dtq) bind(c, name="HypreImplicitSolverInit")
@@ -107,7 +107,7 @@ contains
     class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout),target :: pf
     integer, intent(in) :: level_index
-    integer :: nx, comm_color, space_dim, max_space_v_cycles, spacial_coarsen_flag
+    integer :: nx, comm_color, space_dim, max_space_v_cycles, spatial_coarsen_flag
  
     !>  Call the imex sweeper initialization
     call this%imex_initialize(pf,level_index)
@@ -128,7 +128,7 @@ contains
     comm_color = pf%levels(level_index)%lev_shape(2)
     space_dim = pf%levels(level_index)%lev_shape(3)
     max_space_v_cycles = pf%levels(level_index)%lev_shape(4)
-    spacial_coarsen_flag = pf%levels(level_index)%lev_shape(10)
+    spatial_coarsen_flag = pf%levels(level_index)%lev_shape(10)
 
     !> Call the Hypre solver initialization
     call HypreSolverInit(this%c_hypre_solver_ptr, &
@@ -138,7 +138,7 @@ contains
                          space_dim, &
                          max_space_v_cycles, &
                          pf%nlevels, &
-                         spacial_coarsen_flag)
+                         spatial_coarsen_flag)
   end subroutine initialize
 
   !>  destroy the sweeper type
@@ -204,19 +204,6 @@ contains
                           f_encap%c_hypre_vector_ptr, &
                           piece)
   end subroutine f_comp
-
-  subroutine sweeper_hypre_set_level_data(pf)
-     type(pf_pfasst_t), intent(inout) :: pf
-     type(my_sweeper_t) :: s_finest, s
-     integer :: l
-     
-     s_finest = cast_as_my_sweeper_t(pf%levels(pf%nlevels)%ulevel%sweeper)
-
-     do l = 1, pf%nlevels-1
-        s = cast_as_my_sweeper_t(pf%levels(l)%ulevel%sweeper)
-        call HypreSolverSetLevelData(s%c_hypre_solver_ptr, s_finest%c_hypre_solver_ptr, l);
-     end do
-  end subroutine sweeper_hypre_set_level_data
 
   function get_nrows(this, level_index) result(nrows)
      class(my_sweeper_t), intent(inout) :: this

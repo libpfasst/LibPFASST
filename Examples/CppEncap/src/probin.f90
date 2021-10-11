@@ -11,23 +11,16 @@ module probin
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
   integer, save :: nsteps    ! number of time steps
-  integer, save :: mgrit_coarsen_factor
-  integer, save :: nsteps_rk(PF_MAXLEVS)
-  logical, save :: use_mgrit
-  integer, save :: imex_stat       ! type of imex splitting
-  integer, save :: ark_stat
-  integer, save :: rk_order
   character(len=128), save :: pfasst_nml  ! file for reading pfasst parameters
 
-  namelist /params/  lam1,lam2, dt, Tfin, nsteps, nsteps_rk, pfasst_nml, mgrit_coarsen_factor, use_mgrit
-  namelist /params/ imex_stat, ark_stat, rk_order
+  namelist /params/  lam1,lam2, dt, Tfin, nsteps, pfasst_nml
 
 contains
   
   subroutine probin_init(pf_fname)
     character(len=*), intent(inout) :: pf_fname
 
-    !  Local variable for reading
+    !  Some local variables for reading
     character(len=128) :: arg  !  command line argument
     character(len=128)    :: probin_fname   !<  file name for input parameters
     character(len=256) :: istring           ! stores command line argument
@@ -37,32 +30,23 @@ contains
     integer :: un  !  file read unit
 
     !> Set the name of the input file
-    probin_fname = "probin.nml" ! default file name - can be overwritten on the
+    probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
     if (command_argument_count() >= 1) &
          call get_command_argument(1, value=probin_fname)
 
     !> set defaults
     nsteps  = -1
-    nsteps_rk  = -1
-    rk_order = 1
 
     lam1       = 1.0_pfdp
     lam2       = -2.0_pfdp
 
-    mgrit_coarsen_factor = 2
-
     dt      = 0.01_pfdp
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
-
-    imex_stat=2    !  Default is full IMEX
-    ark_stat=2
-
-    use_mgrit = .true.
     
     !>  Read in stuff from input file
     un = 9
-    !write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
+    write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
     open(unit=un, file = probin_fname, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)
@@ -107,12 +91,14 @@ contains
     write(un,*) 'nsteps: ', nsteps, '! Number of steps'
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
-    write(un,*) 'lam2:   ', lam1, '! explicit constant'
-    write(un,*) 'lam1:   ', lam2, '! implicit constant'    
+    write(un,*) 'lam1:   ', lam1, '! explicit constant'
+    write(un,*) 'lam2:   ', lam2, '! implicit constant'    
 
 
     write(un,*) 'PFASST parameters read from input file ', pfasst_nml
     write(un,*) '=================================================='
   end subroutine print_loc_options
+  
+  
   
 end module probin

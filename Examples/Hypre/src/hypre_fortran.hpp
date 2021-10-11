@@ -14,14 +14,10 @@ extern "C"
    int PfasstToHypreLevelIndex(int pfasst_level_index, int num_levels);
    int HypreSolverGetNumRowsLevel(HypreSolver *hypre_solver, int pfasst_level_index);
    void HypreVectorCreate(HypreVector **hypre_vector,
-                          int num_grid_points,
+                          int pfasst_level_index,
+                          int nx,
                           int comm_color,
-                          int space_dim,
-                          int nrows,
-                          int ilower0,
-                          int ilower1,
-                          int iupper0,
-                          int iupper1);
+                          int space_dim);
    void HypreVectorDestroy(HypreVector *hypre_vector);
    void HypreVectorSetVal(HypreVector *hypre_vector, double val);
    void HypreVectorSetSinInitCond(HypreVector *hypre_vector);
@@ -33,15 +29,15 @@ extern "C"
    void HypreVectorPrint(HypreVector *hypre_vector);
    void HypreSolverInit(HypreSolver **hypre_solver,
                         int pfasst_level_index,
-                        int num_grid_points,
+                        int nx,
                         int comm_color,
                         int space_dim,
                         int max_iter,
                         int max_levels,
-                        int spacial_coarsen_flag);
+                        int spatial_coarsen_flag);
    void HypreImplicitSolverInit(HypreSolver **hypre_solver,
                                 int pfasst_level_index,
-                                int num_grid_points,
+                                int nx,
                                 int comm_color,
                                 int space_dim,
                                 int max_iter,
@@ -56,6 +52,7 @@ extern "C"
    int HypreSolverGetExtentLevel(HypreSolver *hypre_solver, int pfasst_level_index, int i);
    void HypreSolverSetLevelData(HypreSolver **y, HypreSolver *x, int pfasst_level_index);
    int HypreSolverGetNumLevels(HypreSolver *hypre_solver);
+   void GetHypreStats(void);
 }
 
 #endif

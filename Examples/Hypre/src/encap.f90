@@ -35,18 +35,13 @@ module encap
    interface
 
       subroutine HypreVectorCreate(x_ptr, &
-                                   num_grid_points, &
+                                   level_index, &
+                                   nx, &
                                    comm_color, &
-                                   space_dim, &
-                                   nrows, &
-                                   ilower0, &
-                                   ilower1, &
-                                   iupper0, &
-                                   iupper1) bind(c, name="HypreVectorCreate")
+                                   space_dim) bind(c, name="HypreVectorCreate")
          use iso_c_binding
          type(c_ptr) :: x_ptr
-         integer, value :: num_grid_points, comm_color, space_dim
-         integer, value :: nrows, ilower0, ilower1, iupper0, iupper1
+         integer, value :: level_index, nx, comm_color, space_dim
       end subroutine HypreVectorCreate
     
       subroutine HypreVectorDestroy(x) bind(c, name="HypreVectorDestroy")
@@ -99,6 +94,10 @@ module encap
          type(c_ptr), value :: x
          real(c_double), value :: val
       end subroutine HypreVectorSetInitCond
+      
+      subroutine GetHypreStats() bind(c, name="GetHypreStats")
+        use iso_c_binding
+      end subroutine GetHypreStats
    end interface
 
 contains
@@ -112,26 +111,20 @@ contains
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: ierr
-    integer :: num_grid_points, comm_color, n_space, space_dim, max_space_v_cycles
+    integer :: nx, comm_color, n_space, space_dim, max_space_v_cycles
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
 
-    num_grid_points = lev_shape(1)
+    nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
-    max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
-    ilower0 = lev_shape(6)
-    ilower1 = lev_shape(7)
-    iupper0 = lev_shape(8)
-    iupper1 = lev_shape(9)
 
     allocate(hypre_vector_encap::x, stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
 
     select type(x)
     type is (hypre_vector_encap)
-       call HypreVectorCreate(x%c_hypre_vector_ptr, num_grid_points, comm_color, space_dim, &
-                              nrows, ilower0, ilower1, iupper0, iupper1)
+       call HypreVectorCreate(x%c_hypre_vector_ptr, level_index, nx, comm_color, space_dim)
        x%vector_size = nrows
     end select
   end subroutine hypre_vector_create_single
@@ -144,18 +137,13 @@ contains
     integer,               intent(in   ) ::  level_index ! passed by default,  not needed here
     integer,               intent(in   ) ::  lev_shape(:) ! passed by default, not needed here
     integer :: i, ierr
-    integer :: num_grid_points, comm_color, n_space, space_dim, max_space_v_cycles
+    integer :: nx, comm_color, n_space, space_dim, max_space_v_cycles
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
 
-    num_grid_points = lev_shape(1)
+    nx = lev_shape(1)
     comm_color = lev_shape(2)
     space_dim = lev_shape(3)
-    max_space_v_cycles = lev_shape(4)
     nrows = lev_shape(5)
-    ilower0 = lev_shape(6)
-    ilower1 = lev_shape(7)
-    iupper0 = lev_shape(8)
-    iupper1 = lev_shape(9)
 
     allocate(hypre_vector_encap::x(n),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',n)
@@ -163,8 +151,7 @@ contains
     select type(x)
     type is (hypre_vector_encap)
        do i = 1, n
-           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, num_grid_points, comm_color, space_dim, &
-                                  nrows, ilower0, ilower1, iupper0, iupper1)
+           call HypreVectorCreate(x(i)%c_hypre_vector_ptr, level_index, nx, comm_color, space_dim)
            x(i)%vector_size = nrows
        end do
     end select

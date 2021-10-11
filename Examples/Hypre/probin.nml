@@ -4,10 +4,10 @@
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels = 2 !  must be set
+    nlevels = 3 !  must be set
 
-    niters = 20  !  default is 5
-    nnodes = 2 3
+    niters = 10  !  default is 5
+    nnodes = 2 3 5
 
     nsweeps_pred= 1 1 
     nsweeps= 1 1 1
@@ -16,8 +16,8 @@
     qtype  = 1   
    
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 0
-    rel_res_tol = 0
+    abs_res_tol = 1.d-9
+    rel_res_tol = 1.d-9
 
     !  Variable which determine how the predictor runs  (default is .false. and .true.)
     pipeline_pred =  .true.
@@ -26,35 +26,32 @@
     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
     Vcycle=.TRUE.
 
-    save_timings = 2
+    save_timings = 0
 /
 
 !  Now define the local variables you need
 &PARAMS
 
     T0 = 0.0
-    Tfin = 1
-    nsteps = 2
-    num_grid_points = 128
+    Tfin = .1
+    nsteps = 128
+    nx = 32
+
     nspace = 1
     ntime = 1
-    init_cond = 50.0
-    space_dim = 2
-    max_space_v_cycles = 50
 
-    mgrit_n_init = 4
-    mgrit_refine_factor = 2
+    max_space_v_cycles = 20
+
+    mgrit_coarsen_factor = 2
 
     solver_type = 1
 
-    nsteps_rk = 1 1
+    nsteps_rk = 1 4
 
     imex_stat=1
     ark_stat=1
 
-    rk_order=4
+    rk_order=1
 
-    FAS_flag = .false.
-    FCF_flag = .false.
-
+    spatial_coarsen_flag = 0
 /

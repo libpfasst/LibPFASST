@@ -4,7 +4,7 @@
 
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    nlevels  = 4
+    nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
     niters = 50  !  default is 5
@@ -19,7 +19,7 @@
     nsweeps = 1 1 1
    
     !  optional variables to control termination  (defaults are 0.0)
-    abs_res_tol = 1.d-9
+    abs_res_tol = 1.d-12
     rel_res_tol = 1.d-12
 
     Vcycle=.TRUE.
@@ -36,23 +36,22 @@
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  128 256 512 1024
+    nx =  64 128 256
     nu = 1.0
     v=0.0
     Lx=1
     kfreq = 4
 
-    Tfin = .1
-    nsteps = 6
+    Tfin = 1
+    nsteps = 8
 
-    mgrit_n_coarse = 1
-    mgrit_refine_factor = 2
+    mgrit_coarsen_factor = 2
 
     use_mgrit = .true.
 
     imex_stat=2
     ark_stat=2
 
-    rk_order=2
+    rk_order=4
 
 /

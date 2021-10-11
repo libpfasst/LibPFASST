@@ -60,8 +60,9 @@ contains
     integer :: nproc, rank, error
     real(pfdp) :: f
     integer :: nrows, ilower0, ilower1, iupper0, iupper1
-    integer :: spacial_coarsen_flag
     type(mgrit_level_data), allocatable :: mg_ld(:)
+
+    double precision :: wtime_start
 
     ! check size
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
@@ -70,7 +71,7 @@ contains
     !> Read problem parameters
     call probin_init(pf_fname)
 
-    n = num_grid_points * num_grid_points
+    n = nx * nx
     call create_simple_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, space_dim)
 
     !>  Set up communicator
@@ -92,8 +93,10 @@ contains
        return
     end if
 
-    spacial_coarsen_flag = 0
-    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spacial_coarsen_flag)
+    if (solver_type .eq. 2) then
+       spatial_coarsen_flag = 0
+    end if
+    call PfasstHypreInit(pf, mg_ld, lev_shape, space_color, time_color, spatial_coarsen_flag)
     !print *,time_color,space_color,pf%rank
     
     !>  Add some hooks for output
@@ -103,7 +106,6 @@ contains
        !call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
        call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     end if
-    call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
 
     !>  Output run parameters
     call print_loc_options(pf,un_opt=6)
@@ -118,12 +120,13 @@ contains
     ! call y_end%setval(init_cond)
     call initial(y_0)
 
-    !> Do the PFASST time stepping
-    if (solver_type .eq. 1) then
+    !> Do the time stepping
+    wtime_start = MPI_Wtime()
+    if (solver_type .eq. 1) then !> MGRIT
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
-    else if (solver_type .eq. 2) then
+    else if (solver_type .eq. 2) then !> Parareal
        call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
-    else if (solver_type .eq. 3) then
+    else if (solver_type .eq. 3) then !> Sequential solver
        call initialize_results(pf)
        if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
        call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
@@ -132,11 +135,10 @@ contains
     else
        call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
+    !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
+    !call GetHypreStats()
     !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
-    !call y_end%eprint()
-
-    call mpi_comm_size(pf%comm%comm, nproc, error)
-    call mpi_comm_rank(pf%comm%comm, rank, error)
+    return;
 
     !>  Wait for everyone to be done
     call mpi_barrier(MPI_COMM_WORLD, ierror)
