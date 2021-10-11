@@ -14,14 +14,14 @@ module pf_my_stepper
   type, extends(pf_erk_stepper_t) :: my_stepper_t
      integer ::     nx
      ! phi storage space
-     complex(pfdp),  allocatable :: A_phi(:,:,:)          ! coefficients for A vector
-     complex(pfdp),  allocatable :: b_phi(:,:,:)          ! coefficients for b vector
-     complex(pfdp),  allocatable :: d_phi(:,:,:)          ! coefficients for d vector
-     real(pfdp)                  :: dt_phi              ! dt used to store coefficients
+     complex(pfdp), allocatable :: tmp(:,:)            ! local storage
+     complex(pfdp),  allocatable :: A_phi(:,:,:)       ! coefficients for A vector
+     complex(pfdp),  allocatable :: b_phi(:,:,:)       ! coefficients for b vector
+     complex(pfdp),  allocatable :: d_phi(:,:,:)       ! coefficients for d vector
+     real(pfdp)                  :: dt_phi             ! dt used to store coefficients
      ! fft object and differentiaton matrices
      type(pf_fft_t), pointer :: fft_tool
      type(pf_fft_ops_t), pointer :: fft_ops
-     complex(pfdp), allocatable :: tmp(:,:) ! temp space for feval
      complex(pfdp), pointer :: p_tmp(:,:)   ! a useful pointer
      !  Useful for making f_eval and f_comp generic
      class(pf_zndarray_t), pointer :: f_encap,rhs_encap,y_encap

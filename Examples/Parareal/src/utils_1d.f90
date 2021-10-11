@@ -11,9 +11,7 @@ module pf_mod_zutils
 contains  
 
   !> Routine to return the exact solution
-  !  subroutine exact(this,t, y_exact)
   subroutine exact(fft,t, y_exact)  
-
     type(pf_fft_t), pointer, intent(in) :: fft
     real(pfdp), intent(in)  :: t
     type(pf_zndarray_t), intent(inout) :: y_exact
@@ -30,7 +28,6 @@ contains
     deallocate(yreal)
     
   end subroutine exact
-
   
   !> Routine to return the exact solution
   subroutine exact_realspace(t, yex)
@@ -114,12 +111,13 @@ contains
     real(pfdp), intent(in) :: Lx
     
     integer    :: nx, i
-    real(pfdp) :: x
+    real(pfdp) :: x,eps
 
     nx = SIZE(uex)
+    eps = 0.01_pfdp
     do i = 1, nx
        x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) -Lx/2.0_pfdp
-       uex(i) = 1.0_pfdp + 0.01_pfdp*exp(zi*x*0.25_pfdp)
+       uex(i) = 1.0_pfdp + eps*exp(zi*x*0.25_pfdp)
     end do
 
   end subroutine ic_nls_paper
