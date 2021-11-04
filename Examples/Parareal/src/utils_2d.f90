@@ -83,7 +83,7 @@ contains
        y = Lx(2)*REAL(j-1,pfdp)/REAL(ny,pfdp)
        do i = 1, nx
           x = Lx(1)*REAL(i-1,pfdp)/REAL(nx,pfdp) 
-          uex(i,j) = 1.0_pfdp + eps*exp(zi*(x+y)*0.25_pfdp)
+          uex(i,j) = 1.0_pfdp + eps*exp(zi*(x+y)*0.25_pfdp) + eps/10.0*exp(zi*(x-y)*0.5_pfdp)
        end do
     end do
        

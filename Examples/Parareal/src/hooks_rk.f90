@@ -8,7 +8,29 @@ module hooks
   use pf_mod_zutils
   implicit none
 contains
+  !>  Output the error and residual in the solution
+  subroutine dump_sol(pf, level_index)
+    use probin, only: grid_size
+    use pf_mod_fftops
+    use pf_my_stepper, only: my_stepper_t, as_my_stepper
+    type(pf_pfasst_t), intent(inout) :: pf
+    character(len = 10) :: yname   !!  output file name for delta_q0
+    real(pfdp) :: t    
+    integer, intent(in) :: level_index
 
+    class(my_stepper_t), pointer :: stepper
+    class(pf_zndarray_t), pointer :: yend
+    stepper => as_my_stepper(pf%levels(level_index)%ulevel%stepper)    
+    yend => cast_as_zndarray(pf%levels(level_index)%qend)
+    !>  compute the exact solution
+    t=pf%state%t0+pf%state%dt
+
+    !> save solution at end
+    write (yname, "(A1,I0.5,A4)") 'y',pf%state%step+1,'.npy'
+    call numpy_dump(stepper%fft_tool,t,yend, (trim(pf%results%datpath) // '/' // trim(yname)))
+    print *,'hi',yname
+  end subroutine dump_sol
+  
   !>  Output the error and residual in the solution
   subroutine echo_error(pf, level_index)
     use probin, only: grid_size
