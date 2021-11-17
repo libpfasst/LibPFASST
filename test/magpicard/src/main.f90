@@ -24,11 +24,12 @@ contains
       type(pf_pfasst_t)  :: pf          !< pfasst data structure
       type(pf_comm_t)    :: comm        !< mpi communicator
 
-      type(zndarray) :: dmat_t0, dmat_tfinal
+      type(pf_zndarray_t) :: dmat_t0, dmat_tfinal
 
       character(256) :: probin_fname       !<  file name for input
       integer    :: err, l
-      real(pfdp) :: start, finish
+      integer    :: mpibuflen       !<  Local variable for mpi buffer length
+      real(pfdp) :: start, finish   !<  Timing variabls
 
       probin_fname = "probin.nml"
       if (command_argument_count() >= 1) &
@@ -41,17 +42,16 @@ contains
 
       !---- Create the levels -------------------------------------------------------
       do l = 1, pf%nlevels
-          allocate(pf%levels(l)%shape(2))
-          pf%levels(l)%shape = nparticles
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
-
+          !  Allocate level structures
           allocate(magpicard_context::pf%levels(l)%ulevel)
-          allocate(zndarray_factory::pf%levels(l)%ulevel%factory)
+          allocate(pf_zndarray_factory_t::pf%levels(l)%ulevel%factory)
           allocate(magpicard_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-          call initialize_magpicard_sweeper(pf%levels(l)%ulevel%sweeper, &
-               l, pf%qtype, pf%debug)
+          !  Set level size
+          mpibuflen = nparticles * nparticles * 2
+          call pf_level_set_size(pf,l,[nparticles,nparticles],mpibuflen)          
 
+          !  If Gauss nodes are use, include endpoints in count
           if (pf%qtype == 5) then
             pf%levels(l)%nnodes = nnodes(l)+2
           else
@@ -60,21 +60,24 @@ contains
 
       end do
 
-      print *,'Initializing mpi and pfasst...'
+      if(pf%rank == 0)   print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
 
-      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
-      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)
+      call pf_add_hook(pf, 1, PF_POST_SWEEP, echo_error)
+      call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, pf_echo_residual)      
+      if (save_solutions) call pf_add_hook(pf, 1, PF_POST_CONVERGENCE, save_solution)
 
+      !  Get initial condition
       call zndarray_build(dmat_t0, [nparticles,nparticles])
-      call initial(dmat_t0)  
-      call zndarray_build(dmat_tfinal,[nparticles,nparticles])
+      call initial(dmat_t0)
 
+      !  Allocate space for end solution
+      call zndarray_build(dmat_tfinal,[nparticles,nparticles])
 
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       start = MPI_Wtime()
-      print*, 'Running pfasst...'
+!      print*, 'Running pfasst...'
       call pf_pfasst_run(pf, dmat_t0, dt, 0.0_pfdp, nsteps, dmat_tfinal)
 
 
@@ -85,11 +88,11 @@ contains
       call mpi_barrier(MPI_COMM_WORLD, err)
 
       if(pf%rank == comm%nproc-1) then
-         call dmat_tfinal%write_to_disk('sol_final') !necessary for pfasst.py
-         print *,'solution at end of run'
-         if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
-          call dmat_tfinal%eprint() !only for debug purpose         
-
+!         call dmat_tfinal%write_to_disk('final_solution') !necessary for pfasst.py
+!         print *,'solution at end of run'
+!         if (pf%debug) call dmat_tfinal%eprint() !only for debug purpose
+!         call dmat_tfinal%eprint() !only for debug purpose
+         call echo_error(pf, 1)         
       endif
 
       call zndarray_destroy(dmat_t0)

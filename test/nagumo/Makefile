@@ -3,28 +3,25 @@
 #
 
 LIBPFASST ?= ../..
+BUILDDIR = build
 
 EXE = main_split.exe
 
 include $(LIBPFASST)/Makefile.defaults
 
-VPATHS += src
-FSRC   =  src/feval.f90 src/hooks.f90 src/solutions.f90 src/probin.f90 src/pf_optimization.f90 src/main_split.f90
-CSRC   = src/numpy.c
+
+FSRC   =  feval.f90 hooks.f90 solutions.f90 probin.f90 pf_optimization.f90 main_split.f90 level.f90
+CSRC   = numpy.c
+
+OBJ  = $(addprefix $(BUILDDIR)/,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 FFLAGS  += -I$(LIBPFASST)/include 
-LDFLAGS += -L$(LIBPFASST)/lib -lpfasst 
 
 all: $(EXE)
 
+VPATHS = src
 
 include $(LIBPFASST)/Makefile.rules
-
 #
 # dependencies
 #
-
-build/solutions.o:     build/probin.o
-build/feval.o:         build/probin.o build/solutions.o
-build/pf_optimization.o: build/solutions.o build/feval.o build/probin.o
-build/hooks.o:         build/solutions.o
-build/main_split.o:    build/feval.o build/pf_optimization.o build/hooks.o build/probin.o build/numpy.o $(LIBPFASST)/lib/libpfasst.a
+include $(PWD)/.depend

@@ -8,20 +8,21 @@ vpath %.f   $(VPATHS)
 
 $(EXE): $(OBJ)
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	$(FC) $(FFLAGS) $(FFLAGS_EXTRA)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 else
 	@echo "Linking..."
-	@$(FC) $(FFLAGS) $^ $(OUTPUT_OPTION) $(LDFLAGS)
+	@$(FC) $(FFLAGS) $(FFLAGS_EXTRA)  $^ $(OUTPUT_OPTION) $(LDFLAGS)
 endif
 
 build/%.o build/%.mod: %.f90
 	@mkdir -p build
 	@mkdir -p include
+
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+	$(FC) $(FFLAGS) $(FFLAGS_EXTRA) -c  $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC) $(FFLAGS) -c $< $(OUTPUT_OPTION)
+	@$(FC) $(FFLAGS) $(FFLAGS_EXTRA) -c  $< $(OUTPUT_OPTION)
 endif
 
 build/%.o: %.c
@@ -39,38 +40,28 @@ build/%.o: %.f
 	@mkdir -p build
 	@mkdir -p include
 ifeq ($(MKVERBOSE),TRUE)
-	$(FC)  -c $< $(OUTPUT_OPTION)
+	$(FC) $(FFLAGS_EXTRA) -c -w $< $(OUTPUT_OPTION)
 else
 	@echo "Building $<..."
-	@$(FC)  -c $< $(OUTPUT_OPTION)
+	@$(FC) $(FFLAGS_EXTRA) -c -w $< $(OUTPUT_OPTION)
 endif
 
 .PHONY: clean depend
 
 clean:
-	find . -name build | xargs rm -rf
-	find . -name '*.exe' | xargs rm -f
+	\rm -f *.exe
+	\rm -rf  build
 	\rm -f fort.* *.slog2 *.edf *.trc gmon.out
-	\rm -f include/*.mod
+	\rm -rf include
 	\rm -f lib/*.a
 
 
-#  We can use this to build a new dependency file if makedepf90 is installed  type "make depend"
-depend $(LIBPFASST)/.depend:
-	makedepf90 -b ./build -o foo $(FSRC) > .depend
+#  We can use this to build a new dependency file.  If makedepf90 is installed  type "make depend"
+depend $(PWD)/.depend:
+	makedepf90 -b ./build  $(FSRC) > .depend
 
-#
-# LIBPFASST dependencies
-#
+
 include $(LIBPFASST)/.depend
-
-#  Outdated dependencies
-#ifdef NOMPI
-#  build/pfasst.o: build/pf_parallel.o build/pf_pfasst.o  build/pf_imexQ.o build/pf_imexQ_oc.o build/pf_rks#tepper.o 
-#else
-#build/pfasst.o:         build/pf_parallel.o  build/pf_pfasst.o build/pf_mpi.o build/pf_imexQ.o build/pf_rk#stepper.o 
-#endif
-
 
 
 

@@ -1,0 +1,41 @@
+!
+!  Test parameters for a 1-D advection diffusion
+!
+
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels  = 2
+    !  These are internal pfasst variables that can be reset
+    niters = 10   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1   
+   
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1.0e-10
+     rel_res_tol = 1.0e-10
+     
+     nnodes =    2 2
+
+     save_timings=2
+     save_residuals=.true.
+     save_errors=.true.     
+     use_rk_stepper=.true.
+     outdir="nls"
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+    nx =   16 16
+    
+    Tfin = 0.25
+    nsteps = 16
+    nsteps_rk =  1  16
+    rk_order = 1 4
+    
+    eq_type = 3	
+    ic_type = 1	
+
+
+/

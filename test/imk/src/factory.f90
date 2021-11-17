@@ -79,34 +79,33 @@ module mod_zmkpair
   end subroutine zmkpair_destroy
 
   !> Wrapper routine for allocation of a single zmkpair type array
-  subroutine zmkpair_create_single(this, x, level, shape)
+  subroutine zmkpair_create_single(this, x, level_index, lev_shape)
     class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x
-    integer, intent(in) :: level, shape(:)
+    integer, intent(in) :: level_index, lev_shape(:)
 
     allocate(zmkpair::x)
-    call zmkpair_build(x, shape(1))
+    call zmkpair_build(x, lev_shape(1))
 
   end subroutine zmkpair_create_single
 
   !> Wrapper routine for looped allocation of many zmkpair type arrays
-  subroutine zmkpair_create_array(this, x, n, level, shape)
+  subroutine zmkpair_create_array(this, x, n, level_index, lev_shape)
     class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout), allocatable :: x(:)
-    integer, intent(in) :: n, level, shape(:)
+    integer, intent(in) :: n, level_index, lev_shape(:)
     integer :: i
 
     allocate(zmkpair::x(n))
     do i = 1, n
-       call zmkpair_build(x(i), shape(1))
+       call zmkpair_build(x(i), lev_shape(1))
     end do
 
   end subroutine zmkpair_create_array
 
-  subroutine zmkpair_destroy_single(this, x, level, shape)
+  subroutine zmkpair_destroy_single(this, x)
     class(zmkpair_factory), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: x
-    integer, intent(in) :: level, shape(:)
     class(zmkpair), pointer :: zmkpair_obj
 
     zmkpair_obj => cast_as_zmkpair(x)
@@ -116,14 +115,13 @@ module mod_zmkpair
   end subroutine zmkpair_destroy_single
 
   !> Wrapper routine for looped allocation of many zmkpair type arrays
-  subroutine zmkpair_destroy_array(this, x, n, level, shape)
+  subroutine zmkpair_destroy_array(this, x)
     class(zmkpair_factory), intent(inout):: this
-    class(pf_encap_t), intent(inout), pointer :: x(:)
-    integer, intent(in) :: n, level, shape(:)
+    class(pf_encap_t), intent(inout), allocatable :: x(:)
     class(zmkpair), pointer :: zmkpair_obj
     integer :: i
 
-    do i = 1, n
+    do i = 1, size(x)
       zmkpair_obj => cast_as_zmkpair(x(i))
       deallocate(zmkpair_obj%array)
       deallocate(zmkpair_obj%y)
@@ -240,7 +238,7 @@ module mod_zmkpair
        write(*, 100) real(this%y(i,i))
     end do
     100 format (*(F18.14))
-    call flush
+    call flush(6)
   end subroutine zmkpair_eprint
 
   subroutine write_to_disk(this, filename)

@@ -22,6 +22,7 @@ contains
 
       use mod_zmkpair    !< prog-specified module containing solution type information
       use sweeper    !< prog-specified module containing sweeper information
+      use pf_my_level    !< prog-specified module level
       use hooks      !< prog-specified module containing program hooks
       use utils
 
@@ -33,7 +34,7 @@ contains
       type(zmkpair) :: q0, qend
 
       character(256) :: probin_fname       !<  file name for input
-      integer    :: err, l
+      integer    :: err, l,mpibuflen
       real(pfdp) :: start, finish
 
       probin_fname = "probin.nml"
@@ -44,40 +45,33 @@ contains
       call pf_mpi_create(comm, MPI_COMM_WORLD)
       call pf_pfasst_create(pf, comm, fname=probin_fname)
 
-
-      !---- Create the levels -------------------------------------------------------
+      !---- Create the levels ---------------------------------------------
       do l = 1, pf%nlevels
-          allocate(pf%levels(l)%shape(1))
-          pf%levels(l)%shape(1) = nparticles
+         !>  Allocate the user specific level object
+         allocate(imk_context::pf%levels(l)%ulevel)
 
-          allocate(imk_context::pf%levels(l)%ulevel)
-          allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
+         !>  Allocate the user specific data factory
+         allocate(zmkpair_factory::pf%levels(l)%ulevel%factory)
 
+         !>  Add the sweeper to the level
+         allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
 
-
-          allocate(imk_sweeper_t::pf%levels(l)%ulevel%sweeper)
-
-          call initialize_imk_sweeper(pf%levels(l)%ulevel%sweeper, &
-               l, pf%debug, use_sdc, rk, mkrk, pf%qtype, nterms(l))
-
-          pf%levels(l)%mpibuflen = nparticles * nparticles * 2
+         mpibuflen = nparticles * nparticles * 2
+         call pf_level_set_size(pf,l,[nparticles],mpibuflen)
       end do
 
       if(pf%rank == 0) print *,'Initializing mpi and pfasst...'
       call pf_pfasst_setup(pf)
-!      call pf_add_hook(pf, -1, PF_PRE_ITERATION, echo_residual)
-!      call pf_add_hook(pf, -1, PF_PRE_SWEEP, echo_residual)      
-!      call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_residual)
       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_residual)
+      call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, echo_error)
       !      if (save_solutions) call pf_add_hook(pf, -1, PF_POST_ITERATION, save_solution)
       if (save_solutions) call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, save_solution)      
-
 
       !>  output the run options 
       call pf_print_options(pf,un_opt=6)
       
-      call zmkpair_build(q0, pf%levels(pf%nlevels)%shape(1))
-      call zmkpair_build(qend, pf%levels(pf%nlevels)%shape(1))
+      call zmkpair_build(q0, pf%levels(pf%nlevels)%lev_shape(1))
+      call zmkpair_build(qend, pf%levels(pf%nlevels)%lev_shape(1))
       call initial(q0)
 
       call mpi_barrier(MPI_COMM_WORLD, err)

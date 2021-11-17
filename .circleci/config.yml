@@ -1,10 +1,73 @@
-version: 2
+version: 2.1
 jobs:
     build:
         docker:
-            - image: brandonkrull/libpfasst
+            - image: libpfasst/libpfasst
         steps:
             - checkout
+            - run: # Modify the commands below to build all the tests
+                name: make_LibPFASST
+                command: >
+                  echo "Compiling Libfasst"  &&
+                  cp Makefile.examples/Makefile.FFT ./  &&
+                  cp Makefile.examples/Makefile.local.gnu ./Makefile.local &&
+                  make  DEBUG=TRUE USE_FFT=TRUE USE_FFTW=FALSE &&
+                  echo "making Libnpy"  &&
+                  make libnpy 
+#                  echo "fetching Libnpy"  &&
+#                  ls &&
+#                  wget https://github.com/kovalp/libnpy/archive/master.zip  &&
+#                  echo "unzipping Libnpy"  &&
+#                  unzip master.zip  &&  mv libnpy-master libnpy && cd libnpy && 
+#                  cp archs/arch.inc.gcc arch.inc && make INSTALL_FLAVOR=fortran_mod && ls && cd .. && ls
             - run:
-                name: make_and_test
-                command: ./test/run_tests.sh
+                name: test env_links
+                command: cd test && ln -s ../pf && cd magpicard && ln -s ../../pf && cd ../imk && ln -s ../../pf && cd ../..
+            - run: # Modify the commands below to build all the tests
+                name: make_tests
+                command: >
+                  echo "Compiling magpicard" &&		  
+                  cd test/magpicard &&  make  &&
+                  echo "Compiling imk"	&&	  
+                  cd ../imk &&  make  &&
+                  echo "Compiling nagumo"		  
+                  cd ../nagumo && make  &&
+                  echo "Compiling IMEX"	&&	  
+                  cd ../EXP_adv_diff_fft/1d && make  &&
+                  cd ../../..
+            - run: # Modify the commands below to build  all the tutorials		  
+                name: check_tutorials
+                command: >
+                  echo "Making Tutorial 1"	&&	  		
+                  cd Tutorials/EX1_Dahlquist &&  make  &&
+                  echo "Making Tutorial 2"	&&	  		
+                  cd ../EX2_Dahlquist &&  make DEBUG=TRUE   &&
+                  echo "Making Tutorial 3" &&	  		
+                  cd ../EX3_adv_diff &&  make   &&
+                  echo "Making Tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq &&  make   &&
+                  echo "Done with Tutorials" &&	  		
+                  cd ../..
+            - run: # Modify the commands below to run  all the tutorials
+                name: check_tutorials
+                command: >
+                  echo "Running Tutorial 1"	&&	  		
+                  cd Tutorials/EX1_Dahlquist &&  
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Running Tutorial 2" &&	  		
+                  cd ../EX2_Dahlquist &&  
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Running tutorial 3" &&	  		
+                  cd ../EX3_adv_diff && 
+                  mpirun -n 8 ./main.exe multi_level.nml &&
+                  echo "Running tutorial 4" &&	  		
+                  cd ../EX4_Boussinesq && 
+                  mpirun -n 8 ./main.exe tg.nml &&
+                  echo "Done with Tutorials" &&	  		
+                  cd ../..
+            - run: # Modify the commands below to build and check the zNdarray examples
+                name: check_zNdarray
+                command: >
+                  cd test &&  ./test_encaps.sh &&   cd ../../..
+
+

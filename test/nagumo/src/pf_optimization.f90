@@ -5,6 +5,7 @@ module pf_mod_optimization
   use pf_mod_mpi
   use pf_mod_ndarray_oc
   use pf_mod_parallel_oc
+  use pf_my_level
   use feval
   use probin, only: solve_y
   use solutions
@@ -22,7 +23,7 @@ contains
 
   subroutine evaluate_objective(pf, q1, dt, nsteps, predict, alpha, objective, L2NormUSq, savedAdjoint, predictAdj)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc),          intent(inout) :: q1
+    type(pf_ndarray_oc_t),     intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha
     integer,                   intent(in   ) :: nsteps
     logical,                   intent(in   ) :: predict
@@ -86,7 +87,7 @@ contains
     do m = 1, pf%levels(pf%nlevels)%nnodes
 !       if (pf%rank .eq. 0) print *, m
       call objective_function(pf%levels(pf%nlevels)%ulevel%sweeper, pf%levels(pf%nlevels)%Q(m), &
-                                    product(pf%levels(pf%nlevels)%shape), m, obj(m))
+                                    product(pf%levels(pf%nlevels)%lev_shape), m, obj(m))
     end do
     objective = 0.0
     do m = 1, pf%levels(pf%nlevels)%nnodes-1
@@ -95,7 +96,7 @@ contains
     end do
     objective = 0.5*objective !0.5 for trapezoidal rule
     call control_L2Q(pf%levels(pf%nlevels)%ulevel%sweeper, dt, pf%levels(pf%nlevels)%nodes, &
-                                  product(pf%levels(pf%nlevels)%shape), L2NormUSq)
+                                  product(pf%levels(pf%nlevels)%lev_shape), L2NormUSq)
     objective = 0.5*objective + 0.5*alpha*L2NormUSq
     deallocate(obj)
   end subroutine evaluate_objective
@@ -106,7 +107,7 @@ contains
   ! how to do that dimension independent? this is just for 1d because of the gradient array
   subroutine evaluate_gradient(pf, q1, dt, nsteps, predict, gradient, LinftyNormGrad, L2NormGradSq, savedAdjoint)
     type(pf_pfasst_t),        intent(inout) :: pf
-    type(ndarray_oc), target, intent(inout) :: q1
+    type(pf_ndarray_oc_t), target, intent(inout) :: q1
     real(pfdp),               intent(in   ) :: dt
     integer,                  intent(in   ) :: nsteps
     logical,                  intent(in   ) :: predict
@@ -204,7 +205,7 @@ contains
   subroutine armijo_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
                          globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc), target,  intent(inout) :: q1
+    type(pf_ndarray_oc_t), target,  intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint
@@ -260,7 +261,7 @@ contains
 !                    pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
 !                    globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepTooSmall, globObjLowIn)
 !      type(pf_pfasst_t),         intent(inout) :: pf
-!      type(ndarray_oc), target,  intent(inout) :: q1
+!      type(pf_ndarray_oc_t), target,  intent(inout) :: q1
 !      real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
 !      integer,                   intent(in   ) :: nsteps
 !      integer,                   intent(inout) :: itersState, itersAdjoint
@@ -340,7 +341,7 @@ contains
 !    subroutine wolfe_powell_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
 !                                 globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
 !     type(pf_pfasst_t),         intent(inout) :: pf
-!     type(ndarray_oc), target,  intent(inout) :: q1
+!     type(pf_ndarray_oc_t), target,  intent(inout) :: q1
 !     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
 !     integer,                   intent(in   ) :: nsteps
 !     integer,                   intent(inout) :: itersState, itersAdjoint
@@ -420,7 +421,7 @@ contains
   subroutine strong_wolfe_step(pf, q1, dt, nsteps, itersState, itersAdjoint, predict, searchDir, gradient, savedAdjoint, alpha, &
                           globObj, globDirXGrad, objectiveNew, L2NormUSq, LinftyNormGrad, L2NormGradSq, stepSize, stepTooSmall)
     type(pf_pfasst_t),         intent(inout) :: pf
-    type(ndarray_oc), target,  intent(inout) :: q1
+    type(pf_ndarray_oc_t), target,  intent(inout) :: q1
     real(pfdp),                intent(in   ) :: dt, alpha, globObj, globDirXGrad
     integer,                   intent(in   ) :: nsteps
     integer,                   intent(inout) :: itersState, itersAdjoint

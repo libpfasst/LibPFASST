@@ -7,10 +7,8 @@ module utils
   implicit none
 
   complex(pfdp), parameter :: &
-       z0 = (0.0_pfdp, 0.0_pfdp), &
        z1 = (1.0_pfdp, 0.0_pfdp), &
        zm1 = (-1.0_pfdp, 0.0_pfdp), &
-       zi = (0.0_pfdp, 1.0_pfdp), &
        zmi = (0.0_pfdp, -1.0_pfdp)
 
  contains
@@ -18,13 +16,13 @@ module utils
   subroutine initial(L)
 
     class(pf_encap_t), intent(inout) :: L
-    class(zndarray), pointer :: L_p
+    class(pf_zndarray_t), pointer :: L_p
     complex(pfdp),      pointer :: L_array(:,:)
     integer :: Nmat
     
     L_p => cast_as_zndarray(L)
-    L_array=>get_array2d(L_p)
-    Nmat = L_p%shape(1) !  Assumes a square matrix
+    L_array=>get_array2d(L)
+    Nmat = L_p%arr_shape(1) !  Assumes a square matrix
 
     select case(nprob)
     case (1)
@@ -35,7 +33,7 @@ module utils
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',nprob)
     end select
 
-    nullify(L_p)
+!    nullify(L_p)
     nullify(L_array)
   end subroutine initial
   
@@ -126,13 +124,13 @@ module utils
   end subroutine init_Facke
   
   
-  subroutine compute_F_toda(L_array,B_array,Nmat,t,level)
+  subroutine compute_F_toda(L_array,B_array,Nmat,t,level_index)
     use probin, only: toda_periodic
     ! RHS for Toda lattice problem
     complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
     integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
     integer :: i
 
@@ -154,18 +152,18 @@ module utils
   end subroutine compute_F_toda
   
   
-  subroutine compute_Facke(L_array,B_array,Nmat,t,level)
+  subroutine compute_Facke(L_array,B_array,Nmat,t,level_index)
     use probin, only: Znuc,E0,Xmax
 
     !  RHS for fake Fock matrix example
     complex(pfdp), intent(inout),  pointer :: L_array(:,:), B_array(:,:)
     integer,intent(in) :: Nmat
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
     integer :: i,j,n,m
     real(pfdp) :: xi,xj,xn,xm,cst,dx
-    real(pfdp),allocatable :: x(:)
+    real(pfdp),allocatable :: x(:),x1,x2
 
     allocate(x(Nmat))
 
@@ -181,6 +179,7 @@ module utils
        do j = 1, i
           cst = -Znuc*L_array(i,j)*conjg(L_array(j,i))
           B_array(i,j) = cst*one_electron(x(i),x(j))
+          x1=abs(B_array(i,j))
           do m = 1, Nmat
              do n = 1, Nmat
                 cst = E0*L_array(m,n)*conjg(L_array(n,m))*L_array(i,j)*conjg(L_array(j,i))
@@ -189,9 +188,12 @@ module utils
                 B_array(i,j) =  B_array(i,j) + cst*(-0.5_pfdp*two_electron(x(i),x(n),x(m),x(j))) 
              enddo
           enddo
+          x2=abs(B_array(i,j))
+!          if (i .eq. j) print *,x1/x2
           if (j < i) then
              B_array(j,i) = conjg(B_array(i,j))
           end if
+
        enddo
     end do
 

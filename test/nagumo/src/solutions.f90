@@ -9,7 +9,7 @@ contains
 
   ! Set initial condition.
   subroutine initial(q0, t0, tend)
-    type(ndarray_oc), intent(inout) :: q0
+    type(pf_ndarray_oc_t), intent(inout) :: q0
     real(pfdp),       intent(in)    :: t0, tend
     integer             :: nvars, i
     real(pfdp)          :: dx, x

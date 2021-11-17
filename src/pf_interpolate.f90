@@ -5,7 +5,6 @@
 !> Module to do interpolation between pfasst levels
 module pf_mod_interpolate
   use pf_mod_dtype
-  use pf_mod_restrict
   use pf_mod_timer
   use pf_mod_hooks
   use pf_mod_utils
@@ -24,171 +23,152 @@ contains
     integer, optional, intent(in)    :: flags
 
     !  Local variables
-    class(pf_level_t), pointer :: c_lev_ptr   !  Pointer to coarse level
-    class(pf_level_t), pointer :: f_lev_ptr   !  Pointer to fine level
+    class(pf_level_t), pointer :: c_lev   !  Pointer to coarse level
+    class(pf_level_t), pointer :: f_lev   !  Pointer to fine level
 
-    integer    :: m, p, step
+    integer    :: m, p, step,ierr,i,j
     real(pfdp), allocatable :: c_times(:)   ! coarse level node times
     real(pfdp), allocatable :: f_times(:)   ! fine level node times
 
-    class(pf_encap_t), allocatable :: c_delta(:)    !  Coarse in time and space
-    class(pf_encap_t), allocatable :: cf_delta(:)   !  Coarse in time but fine in space
 
-    f_lev_ptr => pf%levels(level_index)   ! fine level
-    c_lev_ptr => pf%levels(level_index-1) ! coarse level
+    f_lev => pf%levels(level_index)   ! fine level
+    c_lev => pf%levels(level_index-1) ! coarse level
 
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
-    call start_timer(pf, TINTERPOLATE + level_index - 1)
+    call pf_start_timer(pf, T_INTERPOLATE,level_index)
     
     
     step = pf%state%step+1
 
     !> create workspaces
-    call c_lev_ptr%ulevel%factory%create_array(c_delta,  c_lev_ptr%nnodes, c_lev_ptr%index,  c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_array(cf_delta, c_lev_ptr%nnodes, f_lev_ptr%index,  f_lev_ptr%shape)
-
+    if (f_lev%interp_workspace_allocated   .eqv. .false.) then  
+       call c_lev%ulevel%factory%create_array(f_lev%c_delta,  c_lev%nnodes, c_lev%index,  c_lev%lev_shape)
+       call f_lev%ulevel%factory%create_array(f_lev%cf_delta, c_lev%nnodes, f_lev%index,  f_lev%lev_shape)
+       f_lev%interp_workspace_allocated  = .true.     
+    end if
     !> set time at coarse and fine nodes
-    allocate(c_times(c_lev_ptr%nnodes))
-    allocate(f_times(f_lev_ptr%nnodes))
+    allocate(c_times(c_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
+    allocate(f_times(f_lev%nnodes),stat=ierr)
+    if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
 
-    c_times = t0 + dt*c_lev_ptr%nodes
-    f_times = t0 + dt*f_lev_ptr%nodes
+    c_times = t0 + dt*c_lev%nodes
+    f_times = t0 + dt*f_lev%nodes
 
-    do m = 1, c_lev_ptr%nnodes
-       call c_delta(m)%setval(0.0_pfdp,flags)
-       call cf_delta(m)%setval(0.0_pfdp,flags)
+    do m = 1, c_lev%nnodes
+       call f_lev%c_delta(m)%setval(0.0_pfdp,flags)
+       call f_lev%cf_delta(m)%setval(0.0_pfdp,flags)
     end do
 
     !>  interpolate coarse level correction in space only
-    do m = 1, c_lev_ptr%nnodes
-       call c_delta(m)%copy(c_lev_ptr%Q(m), flags)
-       call c_delta(m)%axpy(-1.0_pfdp, c_lev_ptr%pQ(m), flags)
-       call f_lev_ptr%ulevel%interpolate(f_lev_ptr,c_lev_ptr, cf_delta(m), c_delta(m), c_times(m), flags)
+    do m = 1, c_lev%nnodes
+       call f_lev%c_delta(m)%copy(c_lev%Q(m), flags)
+       call f_lev%c_delta(m)%axpy(-1.0_pfdp, c_lev%pQ(m), flags)
+       call f_lev%ulevel%interpolate(f_lev,c_lev, f_lev%cf_delta(m), f_lev%c_delta(m), c_times(m), flags)
     end do
 
     !> interpolate corrections in time
-    call pf_apply_mat(f_lev_ptr%Q, 1.0_pfdp, f_lev_ptr%tmat, cf_delta, .false., flags)
+    call pf_apply_mat(f_lev%Q, 1.0_pfdp, f_lev%tmat, f_lev%cf_delta, .false., flags)
 
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
-      do p = 1,size(c_lev_ptr%F(1,:))
-          do m = 1, c_lev_ptr%nnodes
-             call c_delta(m)%setval(0.0_pfdp, flags)
-             call cf_delta(m)%setval(0.0_pfdp, flags)
+       do p = 1,SIZE(c_lev%F(1,:))
+          do m = 1, c_lev%nnodes
+             call f_lev%c_delta(m)%setval(0.0_pfdp, flags)
+             call f_lev%cf_delta(m)%setval(0.0_pfdp, flags)
           end do
           ! interpolate coarse corrections  in space
-          do m = 1, c_lev_ptr%nnodes
-            call c_delta(m)%copy(c_lev_ptr%F(m,p), flags)
-            call c_delta(m)%axpy(-1.0_pfdp, c_lev_ptr%pF(m,p), flags)
-            call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, cf_delta(m), c_delta(m), c_times(m), flags)
+          do m = 1, c_lev%nnodes
+            call f_lev%c_delta(m)%copy(c_lev%F(m,p), flags)
+            call f_lev%c_delta(m)%axpy(-1.0_pfdp, c_lev%pF(m,p), flags)
+            call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%cf_delta(m), f_lev%c_delta(m), c_times(m), flags)
          end do
 
          ! interpolate corrections  in time
-          call pf_apply_mat(f_lev_ptr%F(:,p), 1.0_pfdp, f_lev_ptr%tmat, cf_delta, .false., flags)
-
+!          call pf_apply_mat(f_lev%F(:,p), 1.0_pfdp, f_lev%tmat, f_lev%cf_delta, .false., flags)
+          do i = 1, SIZE(f_lev%tmat, dim=1)
+             do j = 1, SIZE(f_lev%tmat, dim=2)
+                if (abs(f_lev%tmat(i, j)) /= 0.0_pfdp) then
+!                   call dst(i)%axpy(f_lev%tmat(i, j), src(j), flags)
+                   call f_lev%F(i,p)%axpy(f_lev%tmat(i, j), f_lev%cf_delta(j), flags)
+                end if
+             end do
+          end do
+             
        end do !  Loop on npieces
     else    ! recompute function values
-       call f_lev_ptr%ulevel%sweeper%evaluate_all(f_lev_ptr, f_times, flags=flags, step=step)
+       call f_lev%ulevel%sweeper%evaluate_all(pf,level_index, f_times, flags=flags, step=step)
     end if  !  Feval
 
-    !>  reset qend so that it is up to date
-    !  This block moved to controllers
-!         if (present(flags)) then
-!           if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes), flags=1)
-!           if (flags .eq. 2)  call f_lev_ptr%q0%copy(f_lev_ptr%Q(1), flags=2)
-!         else
-!           call f_lev_ptr%qend%copy(f_lev_ptr%Q(f_lev_ptr%nnodes))
-!         end if
-    
-
     !> destroy local data structures
-    call c_lev_ptr%ulevel%factory%destroy_array(c_delta,  c_lev_ptr%nnodes, &
-      c_lev_ptr%index,   c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_array(cf_delta, c_lev_ptr%nnodes, &
-      f_lev_ptr%index,   f_lev_ptr%shape)
+    deallocate(c_times,f_times)
 
-    call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
-    call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_ALL)
+
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call call_hooks(pf, f_lev%index, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
   !>  Subroutine to update the fine initial condition from coarse increment by spatial interpolation
-  subroutine interpolate_q0(pf, f_lev_ptr, c_lev_ptr, flags)
+  subroutine interpolate_q0(pf, f_lev, c_lev, flags)
 
     type(pf_pfasst_t), intent(inout) :: pf          !!  main pfasst structure
-    class(pf_level_t),  intent(inout) :: f_lev_ptr  !!  fine level
-    class(pf_level_t),  intent(inout) :: c_lev_ptr  !!  coarse level
+    class(pf_level_t),  intent(inout) :: f_lev  !!  fine level
+    class(pf_level_t),  intent(inout) :: c_lev  !!  coarse level
     integer, optional, intent(in)    :: flags       !!  optional: specify component on which to operate
                                                     !   here flags more or less is logical, if it is present we operate on component 1
                                                     !   of the ndarray-type
 
-    class(pf_encap_t), allocatable ::    c_delta    !!  coarse correction
-    class(pf_encap_t), allocatable ::    f_delta    !!  fine correction
 
-    call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
+    call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
+    call pf_start_timer(pf, T_INTERPOLATE, f_lev%index )
 
-    !> create local workspace
-    call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
 
-    call c_delta%setval(0.0_pfdp,flags)
-    call f_delta%setval(0.0_pfdp,flags)
+    call c_lev%delta_q0%setval(0.0_pfdp,flags)
+    call f_lev%delta_q0%setval(0.0_pfdp,flags)
     
 
     !>  restrict fine initial data to coarse
-    call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_lev_ptr%q0, c_delta, pf%state%t0, flags)
+    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%q0, c_lev%delta_q0, pf%state%t0, flags)
     !>  get coarse level correction
-    call c_delta%axpy(-1.0_pfdp, c_lev_ptr%q0, flags)    
+    call c_lev%delta_q0%axpy(-1.0_pfdp, c_lev%q0, flags)    
     !>  interpolate correction in space
-    call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, f_delta, c_delta, pf%state%t0, flags)
+    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%delta_q0, c_lev%delta_q0, pf%state%t0, flags)
     !> update fine inital condition
 
-    call f_lev_ptr%q0%axpy(-1.0_pfdp, f_delta, flags)
-    call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
-    call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_Q0)
+    call f_lev%q0%axpy(-1.0_pfdp, f_lev%delta_q0, flags)
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
-    !> destroy local workspace
-    call c_lev_ptr%ulevel%factory%destroy_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(f_delta, f_lev_ptr%index,  f_lev_ptr%shape)
   end subroutine interpolate_q0
   
     !>  Subroutine to update the fine terminal condition from coarse increment by spatial interpolation
     !>  used for adjoint solver
-  subroutine interpolate_qend(pf, f_lev_ptr, c_lev_ptr)
+  subroutine interpolate_qend(pf, f_lev, c_lev)
   
     type(pf_pfasst_t), intent(inout) :: pf          !!  main pfasst structure
-    class(pf_level_t),  intent(inout) :: f_lev_ptr  !!  fine level
-    class(pf_level_t),  intent(inout) :: c_lev_ptr  !!  coarse level
+    class(pf_level_t),  intent(inout) :: f_lev  !!  fine level
+    class(pf_level_t),  intent(inout) :: c_lev  !!  coarse level
     
-    class(pf_encap_t), allocatable ::    c_delta    !!  coarse correction
-    class(pf_encap_t), allocatable ::    f_delta    !!  fine correction
-
-    call call_hooks(pf, f_lev_ptr%index, PF_PRE_INTERP_Q0)
-    call start_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
-    !> create local workspace
-    call c_lev_ptr%ulevel%factory%create_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%create_single(f_delta, f_lev_ptr%index, f_lev_ptr%shape)
-
-    call c_delta%setval(0.0_pfdp)
-    call f_delta%setval(0.0_pfdp)
+    call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
+    call pf_start_timer(pf, T_INTERPOLATE, f_lev%index)
+    
+    call c_lev%delta_q0%setval(0.0_pfdp)
+    call f_lev%delta_q0%setval(0.0_pfdp)
 
     !>  restrict fine initial data to coarse
-    call f_lev_ptr%ulevel%restrict(f_lev_ptr, c_lev_ptr, f_lev_ptr%qend, c_delta, pf%state%t0, flags=2)
+    call f_lev%ulevel%restrict(f_lev, c_lev, f_lev%qend, c_lev%delta_q0, pf%state%t0, flags=2)
     !>  get coarse level correction
-    call c_delta%axpy(-1.0_pfdp, c_lev_ptr%qend, flags=2)    
+    call c_lev%delta_q0%axpy(-1.0_pfdp, c_lev%qend, flags=2)    
 
     !>  interpolate correction in space
-    call f_lev_ptr%ulevel%interpolate(f_lev_ptr, c_lev_ptr, f_delta, c_delta, pf%state%t0, flags=2)
+    call f_lev%ulevel%interpolate(f_lev, c_lev, f_lev%delta_q0, c_lev%delta_q0, pf%state%t0, flags=2)
 
     !> update fine inital condition
-    call f_lev_ptr%qend%axpy(-1.0_pfdp, f_delta, flags=2)
+    call f_lev%qend%axpy(-1.0_pfdp, f_lev%delta_q0, flags=2)
 
-    call end_timer(pf, TINTERPOLATE + f_lev_ptr%index - 1)
-    call call_hooks(pf, f_lev_ptr%index, PF_POST_INTERP_Q0)
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
-    !> destroy local workspace
-    call c_lev_ptr%ulevel%factory%destroy_single(c_delta, c_lev_ptr%index, c_lev_ptr%shape)
-    call f_lev_ptr%ulevel%factory%destroy_single(f_delta, f_lev_ptr%index,  f_lev_ptr%shape)
 
   end subroutine interpolate_qend
 

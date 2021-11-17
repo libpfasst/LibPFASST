@@ -1,4 +1,4 @@
-!! Calling of user defined routines from various places in the pfasst algorithm
+!! Module for calling of user defined routines from various places in the pfasst algorithm
 !
 ! This file is part of LIBPFASST.
 !
@@ -15,8 +15,8 @@ module pf_mod_hooks
        PF_POST_ITERATION    = 4, &
        PF_PRE_SWEEP         = 5, &
        PF_POST_SWEEP        = 6, &
-       PF_PRE_STEP          = 7, &
-       PF_POST_STEP         = 8, &
+       PF_PRE_BLOCK         = 7, &
+       PF_POST_BLOCK        = 8, &
        PF_PRE_INTERP_ALL    = 9, &
        PF_POST_INTERP_ALL   = 10, &
        PF_PRE_INTERP_Q0     = 11, &
@@ -25,7 +25,8 @@ module pf_mod_hooks
        PF_POST_RESTRICT_ALL = 14, &
        PF_PRE_CONVERGENCE   = 15, &
        PF_POST_CONVERGENCE  = 16, &
-       PF_MAX_HOOK          = 16
+       PF_POST_ALL          = 17, &
+       PF_MAX_HOOK          = 17
 
   integer, parameter :: &
        PF_HOOK_LOG_ONE  = 1, &
@@ -40,8 +41,8 @@ module pf_mod_hooks
        'post-iteration     ',  &
        'pre-sweep          ',  &
        'post-sweep         ',  &
-       'pre-step           ',  &
-       'post-step          ',  &
+       'pre-block          ',  &
+       'post-block         ',  &
        'pre-interp-all     ',  &
        'post-interp-all    ',  &
        'pre-interp-q0      ',  &
@@ -49,68 +50,71 @@ module pf_mod_hooks
        'pre-restrict-all   ',  &
        'post-restrict-all  ',  &
        'pre-convergence    ',  &
-       'post-convergence   ' /)
+       'post-convergence   ',  & 
+       'post-all           ' /)
 
 contains
 
   !> Subroutine to add a procedure to the hook on the given level
-  subroutine pf_add_hook(pf, level_ind, hook, proc)
+  subroutine pf_add_hook(pf, level_index, hook, proc)
     type(pf_pfasst_t), intent(inout) :: pf            !! main pfasst structure
-    integer,           intent(in)    :: level_ind     !! which pfasst level to add hook
+    integer,           intent(in)    :: level_index     !! which pfasst level to add hook
     integer,           intent(in)    :: hook          !! which hook to add
     procedure(pf_hook_p)             :: proc          !! precudre to call from hook
 
     integer :: l   !
 
-    if (level_ind == -1) then  ! Do to all levels
+    if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
           pf%nhooks(l,hook) = pf%nhooks(l,hook) + 1
           pf%hooks(l,hook,pf%nhooks(l,hook))%proc => proc
        end do
-    else  ! Do to just level level_ind
-       pf%nhooks(level_ind,hook) = pf%nhooks(level_ind,hook) + 1
-       pf%hooks(level_ind,hook,pf%nhooks(level_ind,hook))%proc => proc
+    else  ! Do to just level level_index
+       pf%nhooks(level_index,hook) = pf%nhooks(level_index,hook) + 1
+       pf%hooks(level_index,hook,pf%nhooks(level_index,hook))%proc => proc
     end if
 
   end subroutine pf_add_hook
 
   !> Subroutine to call hooks associated with the hook and level
-  subroutine call_hooks(pf, level_ind, hook)
+  subroutine call_hooks(pf, level_index, hook)
     use pf_mod_timer
     type(pf_pfasst_t), intent(inout), target :: pf         !! main pfasst structure
-    integer,           intent(in)            :: level_ind  !! which pfasst level to call hook
+    integer,           intent(in)            :: level_index  !! which pfasst level to call hook
     integer,           intent(in)            :: hook       !! which hook to call
 
     integer :: i  !!  hook loop index
     integer :: l  !!  level loop index
 
-    call start_timer(pf, THOOKS)
 
     pf%state%hook = hook
-
-    if (level_ind == -1) then  ! Do to all levels
+    if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
+          call pf_start_timer(pf, T_HOOKS,l)
           do i = 1, pf%nhooks(l,hook)
-             call pf%hooks(l,hook,i)%proc(pf, pf%levels(l), pf%state)
+             call pf%hooks(l,hook,i)%proc(pf,l)
           end do
+          call pf_stop_timer(pf, T_HOOKS,l)
        end do
-    else  ! Do to just level level_ind
-       do i = 1, pf%nhooks(level_ind,hook)
-          call pf%hooks(level_ind,hook,i)%proc(pf, pf%levels(level_ind), pf%state)
+    else  ! Do to just level level_index
+       call pf_start_timer(pf, T_HOOKS,level_index)
+       do i = 1, pf%nhooks(level_index,hook)
+          call pf%hooks(level_index,hook,i)%proc(pf,level_index)
        end do
+       call pf_stop_timer(pf, T_HOOKS,level_index)
     end if
 
-    call end_timer(pf, THOOKS)
+
+    
   end subroutine call_hooks
 
   !>  Subroutine defining log hook
-  subroutine pf_logger_hook(pf, level, state)
+  subroutine pf_logger_hook(pf, level_index)
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
     
     print '("PF:: trank: ",i4,", step: ",i6,", iter: ",i3,", level: ",i2," location: ",a)', &
-         pf%rank, state%step, state%iter, level%index, hook_names(state%hook)
+         pf%rank, pf%state%step, pf%state%iter, level_index, hook_names(pf%state%hook)
   end subroutine pf_logger_hook
 
   !>  Subroutine to add log hook

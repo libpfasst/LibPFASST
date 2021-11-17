@@ -16,9 +16,7 @@ module sweeper
   implicit none
 
   real(pfdp), parameter :: &
-       pi = 3.141592653589793_pfdp, &
-       two_pi = 6.2831853071795862_pfdp
-
+       pi = 3.141592653589793_pfdp
 
   external :: zgemm
 
@@ -39,7 +37,8 @@ module sweeper
      procedure :: compute_omega
      ! procedure :: compute_time_ev_ops
      procedure :: propagate_solution
-     procedure :: destroy => destroy_magpicard_sweeper
+     procedure :: destroy
+     procedure :: initialize
   end type magpicard_sweeper_t
 
 contains
@@ -58,46 +57,44 @@ contains
 
   end function cast_as_magpicard_sweeper
 
-  subroutine initialize_magpicard_sweeper(this, level, qtype, debug)
+  subroutine initialize(this,pf, level_index)
     use probin, only: nprob, basis, molecule, magnus_order, nparticles, dt
-    class(pf_sweeper_t), intent(inout) :: this
-    integer, intent(in) :: level, qtype
-    logical, intent(in) :: debug
+    class(magpicard_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),  target, intent(inout) :: pf
+    integer, intent(in) :: level_index
+    
 
-    class(magpicard_sweeper_t), pointer :: magpicard !< context data containing integrals, etc
-    integer :: coefs=9
+    integer :: ncoefs=9
 
-    magpicard => cast_as_magpicard_sweeper(this)
+    this%qtype = pf%qtype
+    this%dt = dt
+    this%magnus_order = magnus_order(level_index)
+    this%exp_iterations = 0
+    this%debug = pf%debug
+    this%dim = nparticles
 
-    magpicard%qtype = qtype
-    magpicard%dt = dt
-    magpicard%magnus_order = magnus_order(level)
-    magpicard%exp_iterations = 0
-    magpicard%debug = debug
-    magpicard%dim = nparticles
+    ! initialize the base class structure
+    call this%magpicard_initialize(pf,level_index)
 
-    ! inouts necessary for the base class structure
+    allocate(this%commutator(nparticles, nparticles), &
+         this%commutators(this%dim, this%dim, ncoefs))
 
-    allocate(magpicard%commutator(nparticles, nparticles), &
-         magpicard%commutators(magpicard%dim, magpicard%dim, 9))
+    this%commutators(:,:,:) = z0
+    this%commutator = z0
 
-    magpicard%commutators(:,:,:) = z0
-    magpicard%commutator = z0
+    this%indices(1,1) = 1
+    this%indices(1,2) = 2
 
-    magpicard%indices(1,1) = 1
-    magpicard%indices(1,2) = 2
+    this%indices(2,1) = 1
+    this%indices(2,2) = 3
 
-    magpicard%indices(2,1) = 1
-    magpicard%indices(2,2) = 3
+    this%indices(3,1) = 2
+    this%indices(3,2) = 3
 
-    magpicard%indices(3,1) = 2
-    magpicard%indices(3,2) = 3
-
-    nullify(magpicard)
-  end subroutine initialize_magpicard_sweeper
+  end subroutine initialize
 
 
-  subroutine compute_B(this, y, t, level, f)
+  subroutine compute_B(this, y, t, level_index, f)
     use probin, only: Nprob
 
     
@@ -105,26 +102,24 @@ contains
     class(pf_encap_t), intent(inout) :: y ! prev solution
     class(pf_encap_t), intent(inout) :: f ! output RHS
     real(pfdp), intent(in) :: t
-    integer, intent(in) :: level
+    integer, intent(in) :: level_index
     
-    type(zndarray), pointer :: L, B
+    type(pf_zndarray_t), pointer :: L
     complex(pfdp),      pointer :: L_array(:,:), B_array(:,:)
     integer :: i,j,n,m,dhalf,Nmat
     real(pfdp) :: xi,xj,xn,xm,cst
 
-    
     L => cast_as_zndarray(y)
-    B => cast_as_zndarray(f)
-    L_array=>get_array2d(L)
-    B_array=>get_array2d(B)    
-    Nmat = L%shape(1)  !  Assume square matrix
+    L_array=>get_array2d(y)
+    B_array=>get_array2d(f)    
+    Nmat = L%arr_shape(1)  !  Assume square matrix
     
     if (nprob .eq. 1) then
-       call compute_F_toda(L_array,B_array,Nmat,t,level)
+       call compute_F_toda(L_array,B_array,Nmat,t,level_index)
     else
-       call compute_Facke(L_array,B_array,Nmat,t,level)
+       call compute_Facke(L_array,B_array,Nmat,t,level_index)
     endif
-    nullify(L, B)
+    nullify(L)
     
   end subroutine compute_B
  
@@ -133,7 +128,7 @@ contains
     class(magpicard_sweeper_t), intent(inout) :: this
     class(pf_encap_t), intent(inout) :: f(:,:)
 
-    class(zndarray), pointer :: f1, f2
+    class(pf_zndarray_t), pointer :: f1, f2
     complex(pfdp),      pointer :: f1_array(:,:), f2_array(:,:)    
 
     integer :: i, j, k, nnodes, node_offset
@@ -145,20 +140,22 @@ contains
        node_offset = 1
     endif
 
-    !$omp parallel do private(i, j, k, f1, f2)
+    !$omp parallel do private(i, j, k, f1,f2)
     do i = 1, 3
        j = this%indices(i, 1) + node_offset
        k = this%indices(i, 2) + node_offset
-       f1 => cast_as_zndarray(f(j,1))
+        f1 => cast_as_zndarray(f(j,1))
        f2 => cast_as_zndarray(f(k,1))
        f1_array =>get_array2d(f1)
-       f2_array =>get_array2d(f2)       
+       f2_array =>get_array2d(f2)     
        call compute_commutator(f1_array, f2_array, this%dim, this%commutators(:,:,i))
     enddo
     !$omp end parallel do
 
     !$omp barrier
     nullify(f1, f2)
+
+
   end subroutine compute_single_commutators
 
  !> Compute the matrix $\Omega$ to be exponentiated from AO-Fock matrix
@@ -174,17 +171,15 @@ contains
    real(pfdp), intent(in) :: coefs(:,:), nodes(:), qmat(:,:), dt
    integer, intent(in) :: this_node
 
-   class(zndarray), pointer :: omega_p, ints
+   class(pf_zndarray_t), pointer :: omega_p, ints
    integer ::  dim
    complex(pfdp),      pointer :: omega_array(:,:), ints_array(:,:)
    
    dim = this%dim
 
-   omega_p => cast_as_zndarray(omega)
-   ints => cast_as_zndarray(integrals(this_node))
 
-   omega_array=>get_array2d(omega_p)
-   ints_array=>get_array2d(ints)    
+   omega_array=>get_array2d(omega)
+   ints_array=>get_array2d(integrals(this_node))    
 
    omega_array = ints_array
 
@@ -198,7 +193,6 @@ contains
            qmat, dt, coefs(1,3), dim)
    endif
 
-   nullify(omega_p, ints)
  end subroutine compute_omega
 
  subroutine add_single_commutator_terms(this, omega, coefs, N)
@@ -226,7 +220,6 @@ contains
    real(pfdp), intent(in) :: coefs(:)
    integer, intent(in) :: N
 
-   class(zndarray), pointer :: f1,f2
    complex(pfdp),      pointer :: f1_array(:,:)
    integer :: i, j, k, nnodes, node_offset
    complex(pfdp) :: tmp(N,N,3)
@@ -238,15 +231,14 @@ contains
 
    do i = 1, 3
       j = i + node_offset
-      f1 => cast_as_zndarray(f(j,1))
-      f1_array=>get_array2d(f1)
+      f1_array=>get_array2d(f(j,1))      
       
       tmp(:,:,1) = tmp(:,:,1) + coefs(i)   * f1_array
       tmp(:,:,2) = tmp(:,:,2) + coefs(i+3) * f1_array
       tmp(:,:,3) = tmp(:,:,3) + coefs(i+6) * f1_array
    end do
 
-   !$omp parallel do reduction(+:omega) private(i, j, k, f1, f2)
+   !$omp parallel do reduction(+:omega) private(i, j, k)
    do i = 1, 3
       j = this%indices(i, 1) + node_offset
       k = this%indices(i, 2) + node_offset
@@ -256,7 +248,6 @@ contains
    end do
    !$omp end parallel do
 
-   nullify(f1,f2)
  end subroutine add_double_commutator_terms
 
  subroutine add_triple_commutator_terms(this, omega, f, nodes, this_node, qmat, dt, coef, N)
@@ -266,7 +257,7 @@ contains
    real(pfdp), intent(in) :: coef, nodes(:), qmat(:,:), dt
    integer, intent(in) :: N, this_node
 
-   class(zndarray), pointer :: f1
+   class(pf_zndarray_t), pointer :: f1
    complex(pfdp),      pointer :: f1_array(:,:)
    
    complex(pfdp), allocatable :: tmp(:,:), a(:,:,:)
@@ -281,8 +272,7 @@ contains
    a = z0
 
    do i = 2, nnodes-1
-      f1 => cast_as_zndarray(f(i,1))
-      f1_array =>get_array2d(f1)
+      f1_array =>get_array2d(f(i,1))
        time_scaler = (nodes(i)-0.5_pfdp)
        tmp = dt * qmat(this_node, i) * f1_array
        a(:,:,1) = a(:,:,1) + tmp
@@ -300,7 +290,6 @@ contains
    omega = omega + this%commutator / 60.d0
 
    deallocate(tmp, a)
-   nullify(f1)
  end subroutine add_triple_commutator_terms
 
  subroutine compute_commutator(a, b, N, output)
@@ -321,31 +310,28 @@ contains
 
 
  !> Computes the P_t = U*P_t0*U^dagger
- subroutine propagate_solution(this, sol_t0, sol_tn, omega, level)
+ subroutine propagate_solution(this, sol_t0, sol_tn, omega, level_index)
    use probin, only: nprob, exptol
    class(magpicard_sweeper_t), intent(inout) :: this
    class(pf_encap_t), intent(inout) :: sol_t0
    class(pf_encap_t), intent(inout) :: sol_tn
    class(pf_encap_t), intent(inout) :: omega !< Time-evolution operator
-   integer, intent(in) :: level
+   integer, intent(in) :: level_index
    integer :: dim !< size of dimensions of P, U
-   class(zndarray), pointer :: sol_t0_p, sol_tn_p, omega_p
+   class(pf_zndarray_t), pointer :: sol_t0_p ! , sol_tn_p, omega_p
    complex(pfdp), allocatable :: tmp(:,:), time_ev_op(:,:)
    complex(pfdp),      pointer :: sol_t0_array(:,:), sol_tn_array(:,:),omega_array(:,:)
    
-   sol_t0_p => cast_as_zndarray(sol_t0)
-   sol_tn_p => cast_as_zndarray(sol_tn)
-   omega_p => cast_as_zndarray(omega)
-
+   sol_t0_p =>cast_as_zndarray(sol_t0)
    sol_t0_array =>get_array2d(sol_t0)
    sol_tn_array =>get_array2d(sol_tn)       
    omega_array =>get_array2d(omega)       
 
-   dim = sol_t0_p%shape(1)  !  Assumes square matrix
+   dim = sol_t0_p%arr_shape(1)  !  Assumes square matrix
    allocate(tmp(dim, dim), time_ev_op(dim, dim))
 
    time_ev_op = cmplx(0.0, 0.0, pfdp)
-   time_ev_op = compute_matrix_exp(omega_array, dim, exptol(level))
+   time_ev_op = compute_matrix_exp(omega_array, dim, exptol(level_index))
 
    if (nprob < 10) then
       call zgemm('n', 'n', dim, dim, dim, &
@@ -365,7 +351,7 @@ contains
    endif
 
    deallocate(tmp, time_ev_op)
-   nullify(sol_t0_p, sol_tn_p, omega_p)
+
  end subroutine propagate_solution
 
 function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
@@ -464,52 +450,57 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
  end function compute_inf_norm
 
- !> array of ctx data deallocation
- subroutine destroy_magpicard_sweeper(this, lev)
+
+ !> Destroy sweeper (called from base sweeper destroy from pf_pfasst_destroy)
+  subroutine destroy(this,pf,level_index)
    class(magpicard_sweeper_t), intent(inout) :: this
-   class(pf_level_t),   intent(inout) :: lev
-   integer :: io
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+   integer,              intent(in)    :: level_index
 
-   call this%magpicard_destroy(lev)
+   !>  Destroy the magpicard sweeper
+   call this%magpicard_destroy(pf,level_index)
 
- end subroutine destroy_magpicard_sweeper
+   !>  Destroy local variables
+   deallocate(this%commutators)
 
- subroutine restrict(this, levelF, levelG, qF, qG, t,flags)
-   class(magpicard_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
+ end subroutine destroy
+
+ 
+  subroutine interpolate(this, f_lev, c_lev, f_vec, c_vec, t, flags)
+    class(magpicard_context), intent(inout) :: this
+    class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+    class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
+    real(pfdp),        intent(in   ) :: t
    integer,           intent(in   ), optional :: flags
 
-   class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
-
-   g%flatarray = f%flatarray
- end subroutine restrict
-
- subroutine interpolate(this, levelF, levelG, qF, qG, t,flags)
-   class(magpicard_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer,           intent(in   ), optional :: flags
-
-   class(zndarray), pointer :: f, g
-   f => cast_as_zndarray(qF)
-   g => cast_as_zndarray(qG)
+   class(pf_zndarray_t), pointer :: f, g
+   f => cast_as_zndarray(f_vec)
+   g => cast_as_zndarray(c_vec)
 
    f%flatarray = g%flatarray
  end subroutine interpolate
+
+
+ subroutine restrict(this, f_lev, c_lev, f_vec, c_vec, t, flags)
+   class(magpicard_context), intent(inout) :: this
+   class(pf_level_t), intent(inout)      :: f_lev, c_lev  !  fine and coarse levels
+   class(pf_encap_t),   intent(inout)    :: f_vec, c_vec  !  fine and coarse vectors
+   real(pfdp),        intent(in   ) :: t
+   integer,           intent(in   ), optional :: flags
+
+   class(pf_zndarray_t), pointer :: f, g
+   f => cast_as_zndarray(f_vec)
+   g => cast_as_zndarray(c_vec)
+
+   g%flatarray = f%flatarray
+ end subroutine restrict
 
  subroutine initialize_as_identity_real(matrix)
    real(pfdp), intent(inout) :: matrix(:,:)
 
    integer :: i, dim, shp(2)
 
-   shp = shape(matrix)
+   shp = SHAPE(matrix)
    dim = shp(1)
 
    matrix = 0.0_pfdp
@@ -521,7 +512,7 @@ function compute_matrix_exp(matrix_in, dim, tol) result(matexp)
 
    integer :: i, dim, shp(2)
 
-   shp = shape(zmatrix)
+   shp = SHAPE(zmatrix)
    dim = shp(1)
 
    zmatrix = z0

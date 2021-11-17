@@ -2,12 +2,12 @@
 !  Test parameters for multi-level pipeline IMEX
 !
 
-!  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 3   !  must be set
+   !  Internal pfasst variable that must be set
+   nlevels  = 3   !  must be set
 
     niters = 10   !  default is 5
-    nnodes =    3  3  5
+    nnodes =     3  3  5
 
     nsweeps_pred=3 1 1 
     nsweeps= 3 1 1
@@ -25,7 +25,6 @@
 
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
      Vcycle=.false.
-
 /
 
 !  Now define the local variables you need

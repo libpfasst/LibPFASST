@@ -1,0 +1,18 @@
+!
+!  Test parameters for KdV equation
+!
+&PARAMS
+
+    Tfin = 1.0
+    nx = 384 384
+    beta=8.0
+
+    nsteps=32
+    nsteps_rk = 32  64
+    rk_order = 4 4
+
+    eq_type = 4	
+    ic_type = 1	
+
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+/

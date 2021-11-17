@@ -1,0 +1,45 @@
+!
+!  Test parameters for multi-level imex
+!
+
+!  These are internal pfasst variables that must be set
+&PF_PARAMS
+    nlevels  = 3  !  must be set
+
+    niters = 5 !  default is 5
+
+    qtype   = 1
+    nnodes =    2 3 5
+
+    nsweeps_pred= 1 1 1
+    nsweeps= 1 1 1
+    
+    !  optional variables to control termination  (defaults are 0.0)
+    abs_res_tol = 1.d-12
+    rel_res_tol = 1.d-12
+
+    !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
+    Vcycle=.TRUE.
+
+    save_residuals=.true.
+    save_delta_q0=.true.
+
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+    nsteps = 16
+    Tfin = .1
+
+    lam1=1.0
+    lam2=-2.0
+
+    mgrit_n_coarse = 16
+    mgrit_refine_factor = 8
+
+    use_mgrit = .true.
+
+    imex_stat=2
+    ark_stat=2
+/

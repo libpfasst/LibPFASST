@@ -1,4 +1,4 @@
-# Makefile for pfasst-nwchem example.
+# Makefile for magpicard test
 LIBPFASST = ../..
 BUILDDIR = build
 
@@ -17,7 +17,5 @@ VPATHS = src
 include $(LIBPFASST)/Makefile.rules
 all: $(EXE)
 
-$(BUILDDIR)/sweeper.o: $(BUILDDIR)/utils.o 
-$(BUILDDIR)/utils.o: 
-$(BUILDDIR)/hooks.o: $(BUILDDIR)/sweeper.o $(FSRC)
-$(BUILDDIR)/main.o: $(LIBPFASST)/lib/libpfasst.a $(BUILDDIR)/sweeper.o $(BUILDDIR)/probin.o $(BUILDDIR)/hooks.o
+include $(PWD)/.depend
+main.exe : $(LIBPFASST)/lib/libpfasst.a 

@@ -1,0 +1,6 @@
+./build/main.o : src/main.f90 ./build/probin.o ./build/hooks.o ./build/level.o ./build/sweeper.o 
+./build/sweeper.o : src/sweeper.f90 ./build/probin.o ./build/phi_mod.o 
+./build/level.o : src/level.f90 ./build/sweeper.o ./build/phi_mod.o 
+./build/hooks.o : src/hooks.f90 ./build/sweeper.o 
+./build/probin.o : src/probin.f90 
+./build/phi_mod.o : src/phi_mod.f90 

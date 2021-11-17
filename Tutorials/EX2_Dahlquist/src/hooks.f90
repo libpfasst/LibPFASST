@@ -3,44 +3,40 @@
 !
 !>  User defined routines that can be called from inside libpfasst using hooks
 module hooks
-  use pf_mod_dtype
-  use pf_mod_ndarray
   use encap
+  use pf_my_sweeper
   implicit none
 contains
 
   !>  Output the error and residual in the solution
-  subroutine echo_error(pf, level, state)
-    use feval, only: exact
+  subroutine echo_error(pf, level_index)
+    use pf_my_sweeper, only: exact
     type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
+    integer, intent(in) :: level_index
 
+    class(scalar_encap), pointer :: y_end
     real(pfdp) :: yexact
     real(pfdp) :: maxerr
-    class(scalar_encap), pointer :: y_end
-    y_end => cast_as_scalar(level%qend)
+    real(pfdp) :: time,resid
+    integer ::   step,rank,iter
+    time=pf%state%t0+pf%state%dt
+    step=pf%state%step+1
+    rank=pf%rank
+    iter=pf%state%iter
 
+    !> Get the solution at the end of this step
+    y_end => cast_as_scalar(pf%levels(level_index)%qend)
 
     !>  compute the exact solution
-    call exact(state%t0+state%dt, yexact)
+    call exact(time, yexact)
     !>  compute error
     maxerr = abs(y_end%y-yexact)
+    resid=pf%levels(level_index)%residual
     
-    print '("error: step: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es18.10e4)', &
-         state%step+1, state%iter,level%index, maxerr,level%residual
-    call flush
+    print '("time: ", f10.4," step: ", i7.7," rank: ",i3.3," iter: ",i4.3," level: ",i2.2," error: ",es14.7," res: ",es14.7)', &
+         time, step, rank, iter,level_index, maxerr,resid
+    call flush(6)
   end subroutine echo_error
 
-  !>  Output the current residual in the solution
-  subroutine echo_residual(pf, level, state)
-    type(pf_pfasst_t), intent(inout) :: pf
-    class(pf_level_t), intent(inout) :: level
-    type(pf_state_t),  intent(in   ) :: state
-
-    print '("resid: time: ", f8.4," rank: ",i3.3," step: ",i5.5," iter: ",i3.3," level: ",i1.1," resid: ",es18.10e4)', &
-         state%t0+state%dt, pf%rank, state%step+1, state%iter, level%index, level%residual
-    call flush
-  end subroutine echo_residual
 
 end module hooks

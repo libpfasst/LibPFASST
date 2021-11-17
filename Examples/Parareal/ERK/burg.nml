@@ -1,0 +1,17 @@
+!
+!  Test parameters for a Burgers Eq. in DIM=1,2,3
+!
+&PARAMS
+
+    Tfin = 0.2
+    nx =  128 128
+    nu = 0.0
+
+    nsteps = 128
+    nsteps_rk = 1 10
+    rk_order = 4 4
+
+    eq_type = 2	
+
+    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters
+/

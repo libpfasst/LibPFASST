@@ -15,18 +15,7 @@ module sweeper
 
   implicit none
 
-  real(pfdp), parameter :: &
-       pi = 3.141592653589793_pfdp, &
-       two_pi = 6.2831853071795862_pfdp
-
-
   external :: zgemm
-
-  type, extends(pf_user_level_t) :: imk_context
-   contains
-     procedure :: restrict => restrict
-     procedure :: interpolate => interpolate
-  end type imk_context
 
   type, extends(pf_imk_t) :: imk_sweeper_t
      integer :: dim
@@ -36,7 +25,8 @@ module sweeper
      procedure :: dexpinv
      procedure :: propagate => propagate_solution
      procedure :: commutator_p
-     procedure :: destroy => destroy_imk_sweeper
+     procedure :: initialize
+     procedure :: destroy
   end type imk_sweeper_t
 
 contains
@@ -55,29 +45,37 @@ contains
 
   end function cast_as_imk_sweeper
 
-  subroutine initialize_imk_sweeper(this, level, debug, use_sdc, rk, mkrk, qtype, nterms)
-    use probin, only: nparticles, dt
-    class(pf_sweeper_t), intent(inout) :: this
-    integer, intent(in) :: level, qtype, nterms
-    logical, intent(in) :: debug, use_sdc, rk, mkrk
+  subroutine initialize(this,pf, level_index)
+    use probin, only: nparticles, dt,  use_sdc, rk, mkrk,  nterms
+    class(imk_sweeper_t), intent(inout) :: this
+    type(pf_pfasst_t),   intent(inout),target :: pf
+    integer,             intent(in)    :: level_index
 
-    class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
+!    integer, intent(in) :: level, qtype, nterms
+!    logical, intent(in) :: debug, use_sdc, rk, mkrk
 
-    imk => cast_as_imk_sweeper(this)
+ !   class(imk_sweeper_t), pointer :: imk !< context data containing integrals, etc
 
-    imk%qtype = qtype
-    imk%nterms = nterms
-    imk%debug = debug
-    imk%dim = nparticles
-    imk%use_sdc = use_sdc
-    imk%rk = rk
-    imk%mkrk = mkrk
+ !   imk => cast_as_imk_sweeper(this)
+    !  Call the imk sweeper initialize
 
-    allocate(imk%commutator(nparticles, nparticles))
-    imk%commutator = z0
 
-    nullify(imk)
-  end subroutine initialize_imk_sweeper
+    this%qtype = pf%qtype
+    this%nterms = nterms(level_index)
+    this%debug = pf%debug
+    this%dim = nparticles
+    this%use_sdc = use_sdc
+    this%rk = rk
+    this%mkrk = mkrk
+
+    print *,'calling sweeper initialize',rk,mkrk,use_sdc,nparticles
+    call this%imk_initialize(pf,level_index)    
+
+    allocate(this%commutator(nparticles, nparticles))
+    this%commutator = z0
+
+!    nullify(imk)
+  end subroutine initialize
 
   subroutine f_eval(this, y, t, level, f)
     use probin, only: toda_periodic
@@ -170,20 +168,20 @@ contains
 
   end subroutine commutator_p
 
-  subroutine compute_commutator(a, b, dim, output)
-    complex(pfdp), intent(in) :: a(dim,dim), b(dim,dim)
-    integer, intent(in) :: dim
-    complex(pfdp), intent(inout) :: output(dim,dim)
+  subroutine compute_commutator(a, b, Nmat, output)
+    complex(pfdp), intent(in) :: a(Nmat,Nmat), b(Nmat,Nmat)
+    integer, intent(in) :: Nmat
+    complex(pfdp), intent(inout) :: output(Nmat,Nmat)
 
-    call zgemm('n', 'n', dim, dim, dim, &
-         z1, b, dim, &
-         a, dim, &
-         z0, output, dim) ! output is zeroed here
+    call zgemm('n', 'n', Nmat, Nmat, Nmat, &
+         z1, b, Nmat, &
+         a, Nmat, &
+         z0, output, Nmat) ! output is zeroed here
 
-    call zgemm('n', 'n', dim, dim, dim, &
-         z1, a, dim, &
-         b, dim, &
-         zm1, output, dim)
+    call zgemm('n', 'n', Nmat, Nmat, Nmat, &
+         z1, a, Nmat, &
+         b, Nmat, &
+         zm1, output, Nmat)
   end subroutine compute_commutator
 
   subroutine propagate_solution(this, q0, q)
@@ -348,48 +346,22 @@ contains
 
   end function compute_inf_norm
 
- !> array of ctx data deallocation
- subroutine destroy_imk_sweeper(this, lev)
+ !> Destroy sweeper (bypasses base sweeper destroy)
+ subroutine destroy(this,pf,level_index)
    class(imk_sweeper_t), intent(inout) :: this
-   class(pf_level_t),   intent(inout) :: lev
-   integer :: io
-
+   type(pf_pfasst_t),  target, intent(inout) :: pf
+   integer,              intent(in)    :: level_index
+   
+!   class(imk_sweeper_t), pointer :: sweeper
+   !>  Call base sweeper destroy
+   print *,'calling base sweeper destroy'
+   call this%imk_destroy(pf,level_index)
+   
    deallocate(this%commutator)
-   call this%imk_destroy(lev)
 
- end subroutine destroy_imk_sweeper
+ end subroutine destroy
+ 
 
- subroutine restrict(this, levelF, levelG, qF, qG, t, flags)
-   class(imk_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer, intent(in), optional :: flags
-
-   class(zmkpair), pointer :: f, g
-   f => cast_as_zmkpair(qF)
-   g => cast_as_zmkpair(qG)
-
-   g%array = f%array
-   g%y = f%y
- end subroutine restrict
-
- subroutine interpolate(this, levelF, levelG, qF, qG, t, flags)
-   class(imk_context), intent(inout) :: this
-   class(pf_level_t), intent(inout) :: levelF
-   class(pf_level_t), intent(inout) :: levelG
-   class(pf_encap_t), intent(inout) :: qF, qG
-   real(pfdp),        intent(in   ) :: t
-   integer, intent(in), optional :: flags
-
-   class(zmkpair), pointer :: f, g
-   f => cast_as_zmkpair(qF)
-   g => cast_as_zmkpair(qG)
-
-   f%array = g%array
-   f%y = g%y
- end subroutine interpolate
 
  subroutine initialize_as_identity_real(matrix,dim)
    integer, intent(in)  :: dim

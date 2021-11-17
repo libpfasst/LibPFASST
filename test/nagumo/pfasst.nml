@@ -15,6 +15,5 @@
 
      PFASST_pred = .false.
 
-     echo_timings = .false.
 
 /

@@ -49,16 +49,15 @@ contains
 
      !  Allocate nodes and collocation matrices
      allocate(SDCmats%qnodes(nnodes),stat=ierr)
-     if (ierr /= 0) call pf_stop(__FILE__, &
-          __LINE__,"allocate error qnodes")
-     allocate(SDCmats%qmat(nnodes-1,nnodes),stat=ierr)
-     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmat")
-     allocate(SDCmats%s0mat(nnodes-1,nnodes),stat=ierr)
-     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error s0mat")
+     if (ierr /= 0) call pf_stop(__FILE__, __LINE__,"allocate error qnodes")
+     allocate(SDCmats%Qmat(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error Qmat")
+     allocate(SDCmats%Smat(nnodes-1,nnodes),stat=ierr)
+     if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error Smat")
 
      !  Make the nodes and collocation matrices
      call pf_quadrature(SDCmats%qtype, nnodes, nnodes0, &
-          SDCmats%qnodes, nflags, SDCmats%s0mat, SDCmats%qmat, &
+          SDCmats%qnodes, nflags, SDCmats%Smat, SDCmats%Qmat, &
           SDCmats%use_proper_nodes,SDCmats%use_composite_nodes,SDCmats%use_no_left_q)
 
      !  Make the substepping matrices
@@ -71,13 +70,13 @@ contains
     type(pf_sdcmats_t), intent(inout) :: SDCmats
 
 
-     deallocate(SDCmats%qmat)  
-     deallocate(SDCmats%qmatFE)  
-     deallocate(SDCmats%qmatBE)  
-     deallocate(SDCmats%qmatTrap)  
-     deallocate(SDCmats%qmatVer)  
-     deallocate(SDCmats%qmatLU)  
-     deallocate(SDCmats%s0mat)  
+     deallocate(SDCmats%Qmat)  
+     deallocate(SDCmats%QmatFE)  
+     deallocate(SDCmats%QmatBE)  
+     deallocate(SDCmats%QmatTrap)  
+     deallocate(SDCmats%QmatVer)  
+     deallocate(SDCmats%QmatLU)  
+     deallocate(SDCmats%Smat)  
      deallocate(SDCmats%qnodes)       
   end subroutine pf_destroy_sdcmats
   
@@ -133,13 +132,13 @@ contains
   end subroutine myLUq
 
   !>  Subroutine to create quadrature nodes and matrices
-  subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, smat, qmat,proper,composite,no_left)
+  subroutine pf_quadrature(qtype, nnodes, nnodes0, nodes, nflags, Smat, Qmat,proper,composite,no_left)
     integer,    intent(in)  :: qtype   ! Type of nodes
     integer,    intent(in)  :: nnodes  ! Number of nodes on this level
     integer,    intent(in)  :: nnodes0 ! Number of node on base level (either finest or coarsest)
     real(pfdp), intent(out) :: nodes(nnodes)  !  The nodes
-    real(pfdp), intent(out) :: smat(nnodes-1,nnodes)  !  node to node integration matrix
-    real(pfdp), intent(out) :: qmat(nnodes-1,nnodes)  !  O to node collocation matrix
+    real(pfdp), intent(out) :: Smat(nnodes-1,nnodes)  !  node to node integration matrix
+    real(pfdp), intent(out) :: Qmat(nnodes-1,nnodes)  !  O to node collocation matrix
     integer,    intent(out) :: nflags(nnodes)         !  Flags
     logical,    intent(in)  :: composite  !  Use composite nodes
     logical,    intent(in)  :: proper     !  Use proper nodes instead of node restriction
@@ -148,13 +147,13 @@ contains
     real(pfdp) :: dt  !  The size of the composite base rule
     real(pfqp) :: qnodes0(nnodes0)  ! quad precision base nodes
     real(pfqp) ::  qnodes(nnodes)   ! quad precision nodes
-    real(pfdp) ::  qmat0(nnodes0-1,nnodes0), smat0(nnodes0-1,nnodes0),qcomp0(nnodes0-1,nnodes0)    
+    real(pfdp) ::  Qmat0(nnodes0-1,nnodes0), Smat0(nnodes0-1,nnodes0),qcomp0(nnodes0-1,nnodes0)    
     integer    :: flags0(nnodes0)
 
     integer :: i,j, ri,rj, refine,m
 
-    qmat = 0
-    smat = 0
+    Qmat = 0
+    Smat = 0
     flags0 = 0
     nflags = 0
 
@@ -167,11 +166,11 @@ contains
        refine = (nnodes - 1) / (nnodes0 - 1)
 
        call sdc_qnodes(qnodes0, flags0, qtype, nnodes0)  !  Make coarsest level nodes
-       call sdc_qmats(qmat0, smat0, qnodes0, qnodes0, flags0, nnodes0, nnodes0) !  Make coarsest level qmat
+       call sdc_qmats(Qmat0, Smat0, qnodes0, qnodes0, flags0, nnodes0, nnodes0) !  Make coarsest level Qmat
 
-       !  This block matrix will be used to fill in composite qmat
+       !  This block matrix will be used to fill in composite Qmat
        do m=1,nnodes0-1
-          qcomp0(m,:)=qmat0(nnodes0-1,:)  !  load each row with the integral over the whole composite step    
+          qcomp0(m,:)=Qmat0(nnodes0-1,:)  !  load each row with the integral over the whole composite step    
        end do
 
        !  Build big block matrix
@@ -179,18 +178,18 @@ contains
        do i = 1, refine
           ri = (i-1)*(nnodes0-1)+1  !  beginning of ith composite rule
           qnodes(ri:ri+nnodes0-1) = dt * ((i-1) + qnodes0)  !  Assigns endpoints of composites twice, but no biggie
-          smat(ri:ri+nnodes0-2,ri:ri+nnodes0-1) = dt*smat0   ! Make block diagonal smat
-          qmat(ri:ri+nnodes0-2,ri:ri+nnodes0-1) = dt*qmat0  ! Make block diagonal qmat
+          Smat(ri:ri+nnodes0-2,ri:ri+nnodes0-1) = dt*Smat0   ! Make block diagonal Smat
+          Qmat(ri:ri+nnodes0-2,ri:ri+nnodes0-1) = dt*Qmat0  ! Make block diagonal Qmat
           do j = 1, i-1          !   column blocks to left of diag
              rj=(j-1)*(nnodes0-1)+1
-             qmat(ri:ri+nnodes0-2,rj:rj+nnodes0-1) = qmat(ri:ri+nnodes0-2,rj:rj+nnodes0-1)+ dt*qcomp0
+             Qmat(ri:ri+nnodes0-2,rj:rj+nnodes0-1) = Qmat(ri:ri+nnodes0-2,rj:rj+nnodes0-1)+ dt*qcomp0
           end do
        end do
 
     else if (proper) then
        ! nodes are given by proper quadrature rules
        call sdc_qnodes(qnodes, nflags, qtype, nnodes)
-       call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
+       call sdc_Qmats(Qmat, Smat, qnodes, qnodes, nflags, nnodes, nnodes)
     else
        ! nodes are given by refining the finest set of nodes.  note
        ! that in this case nnodes0 corresponds to the finest number of
@@ -204,7 +203,7 @@ contains
 
        if (no_left) nflags(1) = 0
 
-       call sdc_qmats(qmat, smat, qnodes, qnodes, nflags, nnodes, nnodes)
+       call sdc_Qmats(Qmat, Smat, qnodes, qnodes, nflags, nnodes, nnodes)
 
     end if
 
@@ -224,37 +223,37 @@ contains
 
     nnodes=SDCmats%nnodes
 
-    allocate(SDCmats%qmatFE(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatFE")
-    allocate(SDCmats%qmatBE(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
-    allocate(SDCmats%qmatTrap(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
-    allocate(SDCmats%qmatVer(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatBE")
-    allocate(SDCmats%qmatLU(nnodes-1,nnodes),stat=ierr)
-    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error qmatLU")
+    allocate(SDCmats%QmatFE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error QmatFE")
+    allocate(SDCmats%QmatBE(nnodes-1,nnodes),stat=ierr)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error QmatBE")
+    allocate(SDCmats%QmatTrap(nnodes-1,nnodes),stat=ierr)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error QmatBE")
+    allocate(SDCmats%QmatVer(nnodes-1,nnodes),stat=ierr)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error QmatBE")
+    allocate(SDCmats%QmatLU(nnodes-1,nnodes),stat=ierr)
+    if (ierr /= 0) call pf_stop(__FILE__,__LINE__, "allocate error QmatLU")
     
     !  Make implicit Euler matrices
-    SDCmats%qmatBE=0.0_pfdp
+    SDCmats%QmatBE=0.0_pfdp
     do m = 1, nnodes-1
        do n = 1,m
-          SDCmats%qmatBE(m,n+1) =  SDCmats%qnodes(n+1)-SDCmats%qnodes(n)
+          SDCmats%QmatBE(m,n+1) =  SDCmats%qnodes(n+1)-SDCmats%qnodes(n)
        end do
     end do
     ! Make explicit matrix
-    SDCmats%qmatFE=0.0_pfdp
+    SDCmats%QmatFE=0.0_pfdp
     do m = 1, nnodes-1
        do n = 1,m
-          SDCmats%qmatFE(m,n)   =  SDCmats%qnodes(n+1)-SDCmats%qnodes(n)
+          SDCmats%QmatFE(m,n)   =  SDCmats%qnodes(n+1)-SDCmats%qnodes(n)
        end do
     end do
 
     !  Trapezoid matrix
-    SDCmats%qmatTrap=0.5_pfdp*(SDCmats%qmatFE+SDCmats%qmatBE)
+    SDCmats%QmatTrap=0.5_pfdp*(SDCmats%QmatFE+SDCmats%QmatBE)
 
     !  Get the LU 
-    call myLUq(SDCmats%qmat,SDCmats%qmatLU,nnodes,0)
+    call myLUq(SDCmats%Qmat,SDCmats%QmatLU,nnodes,0)
 
    end subroutine pf_make_matrices
    
@@ -276,7 +275,7 @@ contains
     real(pfqp),  intent(out)        :: qnodes(nnodes)  !!  The computed quadrature nodes
     integer ,       intent(out)        :: flags(nnodes)   !!
 
-    integer :: j, degree
+    integer :: j, degree,ierr
     real(pfqp), allocatable :: roots(:)
     real(pfqp), allocatable :: coeffs(:), coeffs2(:)
 
@@ -288,8 +287,10 @@ contains
     case (SDC_GAUSS_LEGENDRE)
 
        degree = nnodes-2
-       allocate(roots(degree))
-       allocate(coeffs(degree+1))
+       allocate(roots(degree),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
+       allocate(coeffs(degree+1),stat=ierr)
+       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)       
 
        call poly_legendre(coeffs, degree)
        call poly_roots(roots, coeffs, degree)
@@ -308,8 +309,9 @@ contains
     case (SDC_GAUSS_LOBATTO)
        
        degree = nnodes - 1
-       allocate(roots(degree-1))
-       allocate(coeffs(degree+1))
+       allocate(roots(degree-1),stat=ierr)
+
+       allocate(coeffs(degree+1),stat=ierr)
 
        call poly_legendre(coeffs, degree)
        call poly_diff(coeffs, degree)
@@ -329,9 +331,9 @@ contains
     case (SDC_GAUSS_RADAU)
 
        degree = nnodes - 1
-       allocate(roots(degree))
-       allocate(coeffs(degree+1))
-       allocate(coeffs2(degree))
+       allocate(roots(degree),stat=ierr)
+       allocate(coeffs(degree+1),stat=ierr)
+       allocate(coeffs2(degree),stat=ierr)
 
 
        call poly_legendre(coeffs, degree)
@@ -382,30 +384,29 @@ contains
        do j = 1, nnodes
           flags(j) = ibset(flags(j), 0)
        end do
-
-    case default
+    case DEFAULT
        call pf_stop(__FILE__,__LINE__,'Bad case in SELECT',qtype)
     end select
 
   end subroutine sdc_qnodes
 
   !>  Subroutine to compute the quadrature matrices 
-  subroutine sdc_qmats(qmat, smat, dst, src, flags, ndst, nsrc)
+  subroutine sdc_qmats(Qmat, Smat, dst, src, flags, ndst, nsrc)
     integer ,  intent(in), value  :: ndst   !!  Number of destination points
     integer ,   intent(in), value  :: nsrc   !!  Number of source points
     real(pfqp), intent(in)  :: dst(ndst)     !!  Destination points
     real(pfqp), intent(in)  :: src(nsrc)     !!  Source points
-    real(pfdp),      intent(out) :: qmat(ndst-1, nsrc)  !!  O to dst quadrature weights
-    real(pfdp),      intent(out) :: smat(ndst-1, nsrc)  !! dst(m) to dst(m+1) quadrature weights
+    real(pfdp),      intent(out) :: Qmat(ndst-1, nsrc)  !!  O to dst quadrature weights
+    real(pfdp),      intent(out) :: Smat(ndst-1, nsrc)  !! dst(m) to dst(m+1) quadrature weights
     integer ,      intent(in)  :: flags(nsrc)     
 
     integer  :: i, j, m
     real(pfqp) :: q, s, den, p(0:nsrc)
 
-    qmat = 0.0_pfdp
-    smat = 0.0_pfdp
+    Qmat = 0.0_pfdp
+    Smat = 0.0_pfdp
 
-    ! construct qmat and smat
+    ! construct Qmat and Smat
     do i = 1, nsrc
 
        if (not_proper(flags, i)) cycle
@@ -427,11 +428,10 @@ contains
           q = poly_eval(p, nsrc, dst(j)) - poly_eval(p, nsrc,   0.0_pfqp)
           s = poly_eval(p, nsrc, dst(j)) - poly_eval(p, nsrc, dst(j-1))
 
-          qmat(j-1,i) = real(q / den, pfdp)
-          smat(j-1,i) = real(s / den, pfdp)
+          Qmat(j-1,i) = real(q / den, pfdp)
+          Smat(j-1,i) = real(s / den, pfdp)
        end do
     end do
-
   end subroutine sdc_qmats
 
 
@@ -606,7 +606,7 @@ contains
     real(pfqp), intent(inout) :: a(:)
     integer :: iq
 
-    if (size(a) > 1) then
+    if (SIZE(a) > 1) then
        call qsort_partition(a, iq)
        call qsort(a(:iq-1))
        call qsort(a(iq:))
@@ -622,7 +622,7 @@ contains
 
     x = a(1)
     i = 0
-    j = size(a) + 1
+    j = SIZE(a) + 1
 
     do
        j = j-1

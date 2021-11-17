@@ -1,0 +1,18 @@
+#  Example Makefile to use AMReX with LibPFASST
+#  You can download and get install instructions at
+#  https://github.com/AMReX-Codes/amrex
+#  
+
+AMREX_HOME=$(LIBPFASST)/../amrex
+AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
+
+FSRC += src/pf_amrex_encap.f90
+
+LIBDIR := $(AMREX_LIBRARY_HOME)/lib
+INCDIR := $(AMREX_LIBRARY_HOME)/include
+
+COMPILE_CPP_FLAGS ?= $(shell awk '/Cflags:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
+COMPILE_LIB_FLAGS ?= $(shell awk '/Libs:/ {$$1=$$2=""; print $$0}' $(LIBDIR)/pkgconfig/amrex.pc)
+
+FFLAGS += -I$(INCDIR) $(COMPILE_CPP_FLAGS)
+LDFLAGS += -L$(LIBDIR) $(COMPILE_LIB_FLAGS) -lamrex -lpthread -lstdc++

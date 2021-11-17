@@ -4,7 +4,8 @@ program main
   use pf_mod_ndarray_oc
 
   use pf_mod_optimization
-  use feval
+  use pf_my_level
+  use feval  
   use hooks
   use probin
   use solutions
@@ -17,7 +18,7 @@ program main
   class(ad_sweeper_t), pointer   :: ad_sweeper_ptr     !<  pointer to SDC sweeper 
 
 
-  type(ndarray_oc) :: q1, qend
+  type(pf_ndarray_oc_t) :: q1, qend
   integer        :: ierror, iprovided, l, m, k, i, p
   character(len = 64) :: fout
   character(len =128) :: logfilename
@@ -67,28 +68,19 @@ program main
   call pf_mpi_create(comm, MPI_COMM_WORLD)
   call pf_pfasst_create(pf, comm,  fname=pfasst_nml)
   
-  pf%echo_timings = .false.
-       
   do l = 1, pf%nlevels
-!        pf%levels(l)%nsweeps = nsweeps(l)
-!        pf%levels(l)%nsweeps_pred = nsweeps_pred(l)
-
        pf%levels(l)%nnodes = nnodes(l)
 
        !  Allocate the user specific level object
        allocate(ad_level_t::pf%levels(l)%ulevel)
-       allocate(ndarray_oc_factory::pf%levels(l)%ulevel%factory)
+       allocate(pf_ndarray_oc_factory_t::pf%levels(l)%ulevel%factory)
 
        !  Add the sweeper to the level
        allocate(ad_sweeper_t::pf%levels(l)%ulevel%sweeper)
-       call sweeper_setup(pf%levels(l)%ulevel%sweeper, nvars(l), nnodes(l))
 
-       !  Allocate the shape array for level (here just one dimension)
-       allocate(pf%levels(l)%shape(1))
-       pf%levels(l)%shape(1) = nvars(l)
-       !  Set the size of the send/receive buffer
-       pf%levels(l)%mpibuflen  = nvars(l)
-  end do
+       ! Set the size of the data on this level
+       call pf_level_set_size(pf,l,[nvars(l)])
+    end do
 
   call pf_pfasst_setup(pf)
  
@@ -96,7 +88,6 @@ program main
 
   pf%debug = .false.
   
-  pf%save_results = .false.
   
   !
 !   ! run
@@ -105,8 +96,8 @@ program main
 !   call pf_add_hook(pf, 3, PF_PRE_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf, 3, PF_POST_PREDICTOR, echo_error_hook)
 !   call pf_add_hook(pf,3,PF_POST_ITERATION,echo_error_hook)
-  call pf_add_hook(pf,pf%nlevels,PF_POST_STEP,echo_error_hook)
-!   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_residual_hook)
+  call pf_add_hook(pf,pf%nlevels,PF_POST_BLOCK,echo_error_hook)
+!   call pf_add_hook(pf,-1,PF_POST_SWEEP,echo_error_hook)
 !   call pf_add_hook(pf,-1,PF_POST_ITERATION,echo_residual_hook)
 
 
@@ -114,7 +105,6 @@ program main
      nsteps = comm%nproc
   end if
 
-  call initialize_results(pf%results, nsteps, pf%niters, pf%comm%nproc, pf%nlevels,pf%rank)
   
   if (warmstart .eq. 1) then
     predict = .false.
@@ -154,7 +144,7 @@ program main
   end if
 
 
-  call ndarray_oc_build(q1, pf%levels(pf%nlevels)%shape)
+  call ndarray_oc_build(q1, pf%levels(pf%nlevels)%lev_shape)
   do l = 1, pf%nlevels
      call initialize_oc(pf%levels(l)%ulevel%sweeper, pf%rank*dt, dt, pf%levels(l)%nodes, nvars(l), alpha)
   end do
@@ -198,6 +188,7 @@ program main
   end if
   call pf%levels(pf%nlevels)%q0%copy(q1, 1)
   if (pf%rank .eq. 0)  print *, ' **** solve state with zero control ***'
+  pf%state%pfblock=1
   call pf_pfasst_block_oc(pf, dt, nsteps, .true., 1)
   ! solution at t=2.5 has to be send to all later ranks
   allocate(solAt25(nvars(pf%nlevels)))    
@@ -443,10 +434,6 @@ program main
 
 !   print *, pf%rank, "destroy q1"
   call ndarray_oc_destroy(q1)
-  
-  do l = 1, pf%nlevels
-    call sweeper_destroy(pf%levels(l)%ulevel%sweeper)
-  end do
   
 !   print *, pf%rank, "destroy pf"
   call pf_pfasst_destroy(pf)

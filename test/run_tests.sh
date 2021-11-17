@@ -7,7 +7,7 @@ if ! [ -x "$(command -v pytest)" ]; then
 fi
 
 
-# Get path to PFASSE root directory
+# Get path to PFASS root directory
 PFASSTDIR="$(dirname $0)/.."
 
 # Convert to absolute path
@@ -29,24 +29,39 @@ test -h "pf" || ln -s "$PFASSTDIR/pf"
 cd "$TESTDIR/imk"
 test -h "pf" || ln -s "$PFASSTDIR/pf"
 
-
-
+echo "Building libpfasst"
 cd "$PFASSTDIR"
-OMP=y make -j || exit 1
+make clean
+make -j || exit 1
 
+echo "Building magpicard"
 cd "$TESTDIR/magpicard"
-OMP=y make -j || exit 1
+make clean
+make -j || exit 1
 
+echo "Building imk"
 cd "$TESTDIR/imk"
+make clean
 OMP=y make -j || exit 1
 
+echo "Building nagumo"
 cd "$TESTDIR/nagumo"
+make clean
 make -j || exit 1
 
+echo "Building EXP 1d"
+cd "$TESTDIR/EXP_adv_diff_fft/1d"
+make clean
+make -j || exit 1
+
+echo "Building ad 1d"
 cd "$TESTDIR/adv_diff_fft/1d"
+make clean
 make -j || exit 1
 
+echo "Building ad 2d"
 cd "$TESTDIR/adv_diff_fft/2d"
+make clean
 make -j
 
 
