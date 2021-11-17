@@ -62,26 +62,35 @@ FSRC = src/pfasst.f90 \
        src/pf_fexp_sweeper.f90 \
 #       src/pf_amisdc.f90  pf_amisdcQ.f90 \
 
-#   AMReX options
+
+
+# AMReX options
 ifeq ($(USE_AMREX),TRUE)
 include $(LIBPFASST)/Makefile.AMReX
 endif
 
-#  FFT options
+# FFT options
 ifeq ($(USE_FFT),TRUE)
 include $(LIBPFASST)/Makefile.FFT
 endif
 
-#   PETSc options
+# FFTW specific
+ifeq ($(USE_FFTW),TRUE)
+include $(LIBPFASST)/Makefile.FFTW
+endif
+
+
+# PETSc options
 ifeq ($(USE_PETSC),TRUE)
 include $(LIBPFASST)/Makefile.PETSc
 endif
 
-#  SUNDIALS options
+# SUNDIALS options
 ifeq ($(USE_SUNDIALS),TRUE)
 include $(LIBPFASST)/Makefile.SUNDIALS
 endif
 
+# Hypre
 ifeq ($(USE_HYPRE),TRUE)
 include $(LIBPFASST)/Makefile.hypre
 endif
@@ -97,6 +106,7 @@ ifdef OMP
 endif
 
 OBJ  = $(subst src, build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
+
 ifeq ($(USE_FFT),TRUE)
 OBJ  += $(subst src,build,$(F77SRC:.f=.o))
 endif

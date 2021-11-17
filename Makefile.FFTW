@@ -1,0 +1,5 @@
+
+FSRC += src/pf_fftw.f90
+LDFLAGS += -lfftw3
+
+
