@@ -57,7 +57,7 @@ def errors(reference, approximate, **kwargs):
       err = abs(ref - app).max()
       errors[step, aiter, alev] = err
     except:
-      print 'WARNING: size mismatch:', step, aiter, alev
+      print('WARNING: size mismatch:', step, aiter, alev)
 
   return errors, steps, iters, levels
 

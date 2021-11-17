@@ -67,8 +67,9 @@ def errors(out):
 
 """scrape the output looking for the resid statement"""
 def resids(out):
-    rx = re.compile(r"resid:\s*time:\s*(\S+)\s*step:\s*(\d+)\s*rank:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*resid:\s*(\S+)")
-    cast = [float, int, int, int,int,  float]
+    #rx = re.compile(r"resid:\s*time:\s*(\S+)\s*step:\s*(\d+)\s*rank:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*resid:\s*(\S+)")
+    rx = re.compile(r"time:\s*(\S+)\s*step:\s*(\d+)\s*rank:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*resid:\s*(\S+)")
+    cast = [float, int, int, int, int,  float]
 
     resids = []
     for line in out.splitlines():
@@ -90,8 +91,9 @@ tests.extend(make_sdc())
 def test_advdiff(nodes, mpi_tasks, nml,nsteps):
     command = 'mpirun -np {} {} {} nnodes={} nsteps={}'.format(mpi_tasks, EXE, nml, nodes, nsteps)
 
-    print command
+    print(command)
     output = subprocess.check_output(command.split())   #  This will run all the tests
+    output = output.decode('ascii')
 
     try:
         err = resids(output)   # Try to read the output for error statistics

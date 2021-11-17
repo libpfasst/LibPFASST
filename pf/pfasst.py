@@ -91,7 +91,7 @@ class Params(object):
         return attr.asdict(self)
 
     def unpack(self, params):
-        for k, v in params.iteritems():
+        for k, v in params.items():
             setattr(self, k, v)
 
 
@@ -362,7 +362,7 @@ class PFASST(object):
             self.p = params
 
         self.exe = self.p.exe
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self.p, k, v)
 
         try:
@@ -418,8 +418,7 @@ class PFASST(object):
                 if self.p.verbose:
                     nodes = ' '.join(map(str, self.p.nodes))
 
-                    print '---- running pfasst: tasks={}, nodes={}, dt={} ----'.format(
-                        self.p.tasks, nodes, self.p.dt)
+                    print('---- running pfasst: tasks={}, nodes={}, dt={} ----'.format(self.p.tasks, nodes, self.p.dt))
 
                 command = self._build_command()
 
@@ -533,7 +532,7 @@ class PFASST(object):
 
     @staticmethod
     def _get_solution(path_to_solution):
-        print path_to_solution
+        print(path_to_solution)
         f = FortranFile(path_to_solution)
         solution = f.read_record(np.complex_)
         f.close()
@@ -681,7 +680,7 @@ class Results(pd.DataFrame):
         except:
             raise
         else:
-            print 'recovering results from pickle!'
+            print('recovering results from pickle!')
             self.loc[0] = traj.loc[0]
             return
 
@@ -804,7 +803,7 @@ class Experiment(object):
         results.astype({'dt': np.float_, 'nsteps': np.int_, 'error': np.float_})
 
         slope, _ = self.get_linear_fit_loglog(results.dt, results.error)
-        print 'slope = {}'.format(slope)
+        print('slope = {}'.format(slope))
 
         return results
 

@@ -50,8 +50,9 @@ tests.extend(make_pfasst())
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
     command = 'mpirun -np {} {} {} max_opt_iter={}'.format(mpi_tasks, EXE, nml, max_opt_iter)
 
-    print command
+    print(command)
     output = subprocess.check_output(command.split())   #  This will run all the tests
+    output = output.decode('ascii')
 
     try:
         err = errors(output)   # Try to read the output for error statistics
