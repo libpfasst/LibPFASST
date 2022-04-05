@@ -90,7 +90,7 @@ contains
     dt = big_dt/real(nsteps_rk, pfdp)   ! Set the internal time step size based on the number of rk steps
 
     call this%y0%copy(y0)
-    call pf_start_timer(pf, T_SWEEP, level_index)    
+    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP, level_index)    
     do n = 1, nsteps_rk      ! Loop over time steps
        tn=t0+dt*real(n-1,pfdp)
        ! Reset initial condition
@@ -98,15 +98,15 @@ contains
 
 
        ! this assumes that cvec(1) == 0
-       call pf_start_timer(pf,T_FEVAL,level_index)       
+       if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)       
        if (this%explicit) &
             call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,1),1)
        if (this%implicit) &
             call this%f_eval(this%y0, tn+dt*this%cvec(1), level_index, this%F(1,2),2)
-       call pf_stop_timer(pf,T_FEVAL,level_index)            
+       if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)            
        ! Loop over stage values
        do m = 1, this%nstages-1  
-          
+           
           ! Set current time
           tc = tn + dt*this%cvec(m+1)
 
@@ -127,18 +127,18 @@ contains
 
           ! Solve the implicit system
           if (this%implicit .and. this%AmatI(m+1,m+1) /= 0) then
-             call pf_start_timer(pf,T_FCOMP,level_index)
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FCOMP,level_index)
              call this%f_comp(this%ytemp, tc, dt*this%AmatI(m+1,m+1), this%rhs, level_index,this%F(m+1,2), 2)
-             call pf_stop_timer(pf,T_FCOMP,level_index)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FCOMP,level_index)
           else
              call this%ytemp%copy(this%rhs)
           end if
                     
           ! Reevaluate explicit rhs with the new solution
           if (this%explicit) then
-             call pf_start_timer(pf,T_FEVAL,level_index)
+             if (pf%save_timings > 1) call pf_start_timer(pf,T_FEVAL,level_index)
              call this%f_eval(this%ytemp, tc, level_index, this%F(m+1,1), 1)
-             call pf_stop_timer(pf,T_FEVAL,level_index)
+             if (pf%save_timings > 1) call pf_stop_timer(pf,T_FEVAL,level_index)
           end if
        end do  ! End loop over stage values
        
@@ -159,7 +159,7 @@ contains
        end do ! End loop over stage values
 
     end do ! End Loop over time steps
-    call pf_stop_timer(pf, T_SWEEP,level_index)    
+    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)    
     
     call yend%copy(this%ytemp)
   end subroutine ark_do_n_steps
@@ -172,13 +172,14 @@ contains
 
     integer    :: nstages,npieces   !  Local copies for convenience
     integer    :: i,ierr   
-    real(pfdp) :: gamma, delta
+    real(pfdp) :: gamma, delta, x, temp1, temp2
     type(pf_level_t), pointer  :: lev    !  Current level
     lev => pf%levels(level_index)   !  Assign level pointer
 
     !  The implicit and explicit flags should be set before calling initialize
+
     npieces = 1
-    if (this%implicit .eqv. .true. .and. this%explicit .eqv. .true.) npieces=2
+    if (this%implicit .eqv. .true.) npieces=2
 
     select case (this%order)
     case (1)  !  Forward-backward Euler
@@ -188,7 +189,12 @@ contains
     case (3) ! Third-order Kennedy-Carpenter
        nstages = 4
     case (4) ! Fourth-order Kennedy-Carpenter
-       nstages = 6 
+       if (this%implicit .eqv. .true. .and. this%explicit .eqv. .true.) then
+          nstages = 6
+       else if (this%implicit .eqv. .true. .and. this%explicit .eqv. .false.) then
+          nstages = 4
+          !nstages = 5
+       end if
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'RK order is not supported ,order=',this%order)              
     end select
@@ -265,49 +271,108 @@ contains
        this%bvecI      = this%bvecE   
 
     case (4) ! Fourth-order Kennedy-Carpenter
-       this%AmatE(2,1) =   0.5_pfdp
-       this%AmatE(3,1) =   13861.0_pfdp          / 62500.0_pfdp
-       this%AmatE(3,2) =   6889.0_pfdp           / 62500.0_pfdp
-       this%AmatE(4,1) = - 116923316275.0_pfdp   / 2393684061468.0_pfdp
-       this%AmatE(4,2) = - 2731218467317.0_pfdp  / 15368042101831.0_pfdp
-       this%AmatE(4,3) =   9408046702089.0_pfdp  / 11113171139209.0_pfdp
-       this%AmatE(5,1) = - 451086348788.0_pfdp   / 2902428689909.0_pfdp
-       this%AmatE(5,2) = - 2682348792572.0_pfdp  / 7519795681897.0_pfdp
-       this%AmatE(5,3) =   12662868775082.0_pfdp / 11960479115383.0_pfdp
-       this%AmatE(5,4) =   3355817975965.0_pfdp  / 11060851509271.0_pfdp
-       this%AmatE(6,1) =   647845179188.0_pfdp   / 3216320057751.0_pfdp
-       this%AmatE(6,2) =   73281519250.0_pfdp    / 8382639484533.0_pfdp
-       this%AmatE(6,3) =   552539513391.0_pfdp   / 3454668386233.0_pfdp
-       this%AmatE(6,4) =   3354512671639.0_pfdp  / 8306763924573.0_pfdp 
-       this%AmatE(6,5) =   4040.0_pfdp           / 17871.0_pfdp
-       
-       this%AmatI(2,1) =   0.25_pfdp
-       this%AmatI(2,2) =   0.25_pfdp
-       this%AmatI(3,1) =   8611.0_pfdp        / 62500.0_pfdp
-       this%AmatI(3,2) = - 1743.0_pfdp        / 31250.0_pfdp
-       this%AmatI(3,3) =   0.25_pfdp
-       this%AmatI(4,1) =   5012029.0_pfdp     / 34652500.0_pfdp
-       this%AmatI(4,2) = - 654441.0_pfdp      / 2922500.0_pfdp
-       this%AmatI(4,3) =   174375.0_pfdp      / 388108.0_pfdp
-       this%AmatI(4,4) =   0.25_pfdp
-       this%AmatI(5,1) =   15267082809.0_pfdp / 155376265600.0_pfdp
-       this%AmatI(5,2) = - 71443401.0_pfdp    / 120774400.0_pfdp
-       this%AmatI(5,3) =   730878875.0_pfdp   / 902184768.0_pfdp
-       this%AmatI(5,4) =   2285395.0_pfdp     / 8070912.0_pfdp
-       this%AmatI(5,5) =   0.25_pfdp     
-       this%AmatI(6,1) =   82889.0_pfdp       / 524892.0_pfdp
-       this%AmatI(6,2) =   0.0_pfdp
-       this%AmatI(6,3) =   15625.0_pfdp       / 83664.0_pfdp
-       this%AmatI(6,4) =   69875.0_pfdp       / 102672.0_pfdp
-       this%AmatI(6,5) = - 2260.0_pfdp        / 8211.0_pfdp
-       this%AmatI(6,6) =   0.25_pfdp
-      
-       this%cvec       = (/ 0.0_pfdp,                     0.5_pfdp,                  83.0_pfdp / 250.0_pfdp,       &
-                            31.0_pfdp / 50.0_pfdp,        17.0_pfdp / 20.0_pfdp,     1.0_pfdp /)
-       this%bvecE      = (/ 82889.0_pfdp / 524892.0_pfdp, 0.0_pfdp,                  15625.0_pfdp /  83664.0_pfdp, &
-                            69875.0_pfdp / 102672.0_pfdp, - 2260.0_pfdp / 8211.0_pfdp, 0.25_pfdp /)
-       this%bvecI      = this%bvecE   
+       if (this%implicit .eqv. .true. .and. this%explicit .eqv. .true.) then
+          this%AmatE(2,1) =   0.5_pfdp
+          this%AmatE(3,1) =   13861.0_pfdp          / 62500.0_pfdp
+          this%AmatE(3,2) =   6889.0_pfdp           / 62500.0_pfdp
+          this%AmatE(4,1) = - 116923316275.0_pfdp   / 2393684061468.0_pfdp
+          this%AmatE(4,2) = - 2731218467317.0_pfdp  / 15368042101831.0_pfdp
+          this%AmatE(4,3) =   9408046702089.0_pfdp  / 11113171139209.0_pfdp
+          this%AmatE(5,1) = - 451086348788.0_pfdp   / 2902428689909.0_pfdp
+          this%AmatE(5,2) = - 2682348792572.0_pfdp  / 7519795681897.0_pfdp
+          this%AmatE(5,3) =   12662868775082.0_pfdp / 11960479115383.0_pfdp
+          this%AmatE(5,4) =   3355817975965.0_pfdp  / 11060851509271.0_pfdp
+          this%AmatE(6,1) =   647845179188.0_pfdp   / 3216320057751.0_pfdp
+          this%AmatE(6,2) =   73281519250.0_pfdp    / 8382639484533.0_pfdp
+          this%AmatE(6,3) =   552539513391.0_pfdp   / 3454668386233.0_pfdp
+          this%AmatE(6,4) =   3354512671639.0_pfdp  / 8306763924573.0_pfdp 
+          this%AmatE(6,5) =   4040.0_pfdp           / 17871.0_pfdp
+          
+          this%AmatI(2,1) =   0.25_pfdp
+          this%AmatI(2,2) =   0.25_pfdp
+          this%AmatI(3,1) =   8611.0_pfdp        / 62500.0_pfdp
+          this%AmatI(3,2) = - 1743.0_pfdp        / 31250.0_pfdp
+          this%AmatI(3,3) =   0.25_pfdp
+          this%AmatI(4,1) =   5012029.0_pfdp     / 34652500.0_pfdp
+          this%AmatI(4,2) = - 654441.0_pfdp      / 2922500.0_pfdp
+          this%AmatI(4,3) =   174375.0_pfdp      / 388108.0_pfdp
+          this%AmatI(4,4) =   0.25_pfdp
+          this%AmatI(5,1) =   15267082809.0_pfdp / 155376265600.0_pfdp
+          this%AmatI(5,2) = - 71443401.0_pfdp    / 120774400.0_pfdp
+          this%AmatI(5,3) =   730878875.0_pfdp   / 902184768.0_pfdp
+          this%AmatI(5,4) =   2285395.0_pfdp     / 8070912.0_pfdp
+          this%AmatI(5,5) =   0.25_pfdp     
+          this%AmatI(6,1) =   82889.0_pfdp       / 524892.0_pfdp
+          this%AmatI(6,2) =   0.0_pfdp
+          this%AmatI(6,3) =   15625.0_pfdp       / 83664.0_pfdp
+          this%AmatI(6,4) =   69875.0_pfdp       / 102672.0_pfdp
+          this%AmatI(6,5) = - 2260.0_pfdp        / 8211.0_pfdp
+          this%AmatI(6,6) =   0.25_pfdp
 
+          this%cvec       = (/ 0.0_pfdp,                     0.5_pfdp,                  83.0_pfdp / 250.0_pfdp,       &
+                               31.0_pfdp / 50.0_pfdp,        17.0_pfdp / 20.0_pfdp,     1.0_pfdp /)
+          this%bvecE      = (/ 82889.0_pfdp / 524892.0_pfdp, 0.0_pfdp,                  15625.0_pfdp /  83664.0_pfdp, &
+                               69875.0_pfdp / 102672.0_pfdp, - 2260.0_pfdp / 8211.0_pfdp, 0.25_pfdp /)
+          this%bvecI      = this%bvecE
+       else if (this%implicit .eqv. .true. .and. this%explicit .eqv. .false.) then
+          x = 1.06858_pfdp
+          !x = .30254_pfdp
+          !x = .12889_pfdp
+
+          this%AmatI(2,2) =   x
+          this%AmatI(3,2) =   1.0_pfdp / 2.0_pfdp - x
+          this%AmatI(3,3) =   x
+          this%AmatI(4,2) =   2.0_pfdp * x
+          this%AmatI(4,3) =   1.0_pfdp - 4.0_pfdp * x
+          this%AmatI(4,4) =   x
+
+          temp1 = 1.0_pfdp / (6.0_pfdp * (1.0_pfdp - 2.0_pfdp * x)**(2.0_pfdp))
+          temp2 = 3.0_pfdp * (1.0_pfdp - 2.0_pfdp * x)**(2.0_pfdp)
+
+          this%cvec       = (/ 0.0_pfdp, x, 1.0_pfdp / 2.0_pfdp, 1.0_pfdp - x /)
+          this%bvecI      = (/ 0.0_pfdp, temp1, (temp2 - 1.0_pfdp) / temp2,  temp1 /)
+
+          !this%AmatI(2,1) =   0.25_pfdp
+          !this%AmatI(2,2) =   0.25_pfdp
+          !this%AmatI(3,1) =   8611.0_pfdp        / 62500.0_pfdp
+          !this%AmatI(3,2) = - 1743.0_pfdp        / 31250.0_pfdp
+          !this%AmatI(3,3) =   0.25_pfdp
+          !this%AmatI(4,1) =   5012029.0_pfdp     / 34652500.0_pfdp
+          !this%AmatI(4,2) = - 654441.0_pfdp      / 2922500.0_pfdp
+          !this%AmatI(4,3) =   174375.0_pfdp      / 388108.0_pfdp
+          !this%AmatI(4,4) =   0.25_pfdp
+          !this%AmatI(5,1) =   15267082809.0_pfdp / 155376265600.0_pfdp
+          !this%AmatI(5,2) = - 71443401.0_pfdp    / 120774400.0_pfdp
+          !this%AmatI(5,3) =   730878875.0_pfdp   / 902184768.0_pfdp
+          !this%AmatI(5,4) =   2285395.0_pfdp     / 8070912.0_pfdp
+          !this%AmatI(5,5) =   0.25_pfdp
+          !this%AmatI(6,1) =   82889.0_pfdp       / 524892.0_pfdp
+          !this%AmatI(6,2) =   0.0_pfdp
+          !this%AmatI(6,3) =   15625.0_pfdp       / 83664.0_pfdp
+          !this%AmatI(6,4) =   69875.0_pfdp       / 102672.0_pfdp
+          !this%AmatI(6,5) = - 2260.0_pfdp        / 8211.0_pfdp
+          !this%AmatI(6,6) =   0.25_pfdp
+
+          !this%cvec       = (/ 0.0_pfdp,                     0.5_pfdp,                  83.0_pfdp / 250.0_pfdp,       &
+          !                     31.0_pfdp / 50.0_pfdp,        17.0_pfdp / 20.0_pfdp,     1.0_pfdp /)
+          !this%bvecI      = (/ 82889.0_pfdp / 524892.0_pfdp, 0.0_pfdp,                  15625.0_pfdp /  83664.0_pfdp, &
+          !                     69875.0_pfdp / 102672.0_pfdp, - 2260.0_pfdp / 8211.0_pfdp, 0.25_pfdp /)
+
+          !this%AmatI(2,2) =   .2_pfdp
+          !this%AmatI(3,2) =   -.15_pfdp
+          !this%AmatI(3,3) =   .2_pfdp
+          !this%AmatI(4,2) =   -0.78518518518519_pfdp
+          !this%AmatI(4,3) =   0.98518518518519_pfdp
+          !this%AmatI(4,4) =   .2_pfdp
+          !this%AmatI(5,2) =   0.70671936758894_pfdp
+          !this%AmatI(5,3) =   -0.19819311123659_pfdp
+          !this%AmatI(5,4) =   0.091473743647652_pfdp
+          !this%AmatI(5,5) =   .2_pfdp
+
+          !this%cvec       = (/ 0.0_pfdp, .2_pfdp, .05_pfdp, .4_pfdp, .8_pfdp /)
+          !this%bvecI      = (/ 0.0_pfdp, 0.40740740740741_pfdp, 0.016931216931217_pfdp, &
+          !                               0.10714285714286_pfdp, 0.46851851851852_pfdp /)
+       end if
     case DEFAULT
        call pf_stop(__FILE__,__LINE__,'RK order is not supported ,order=',this%order)              
     end select

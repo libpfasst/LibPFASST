@@ -64,6 +64,8 @@ contains
 
     double precision :: wtime_start
 
+    integer :: temp_nsweeps, temp_nsweeps_pred
+
     ! check size
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
     call mpi_comm_rank(MPI_COMM_WORLD, rank,  error)
@@ -78,7 +80,7 @@ contains
     call pf_mpi_create(comm, time_comm)
     
 
-    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
        pf%use_rk_stepper = .true.
        pf%use_sdc_sweeper = .false.
     else
@@ -100,10 +102,9 @@ contains
     !print *,time_color,space_color,pf%rank
     
     !>  Add some hooks for output
-    if (solver_type .eq. 1) then
-       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
+    if (solver_type .eq. 5) then
+       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
     else
-       !call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
        call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     end if
 
@@ -122,14 +123,25 @@ contains
 
     !> Do the time stepping
     wtime_start = MPI_Wtime()
-    if (solver_type .eq. 1) then !> MGRIT
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 4)) then !> MGRIT
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
     else if (solver_type .eq. 2) then !> Parareal
        call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
     else if (solver_type .eq. 3) then !> Sequential solver
+       !call initialize_results(pf)
+       !if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+       !call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
+       !if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+       !call pf_dump_stats(pf)
+       pf%state%nsteps = nsteps
+       pf%state%step = nsteps-1
+       pf%state%iter = 1
+       pf%state%sweep = 1;
        call initialize_results(pf)
        if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
        call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
+       call pf%levels(pf%nlevels)%qend%copy(y_end)
+       call echo_error(pf, pf%nlevels)
        if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
        call pf_dump_stats(pf)
     else
@@ -138,7 +150,6 @@ contains
     !if (pf%rank .eq. pf%comm%nproc-1) print *,"solve time ",MPI_Wtime()-wtime_start
     !call GetHypreStats()
     !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
-    return;
 
     !>  Wait for everyone to be done
     call mpi_barrier(MPI_COMM_WORLD, ierror)

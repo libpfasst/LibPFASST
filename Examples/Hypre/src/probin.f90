@@ -58,13 +58,14 @@ contains
     space_dim = 2
     max_space_v_cycles = 100
 
+    dt      = 0.01_pfdp
     T0      = 0.0_pfdp
     Tfin    = 1.0_pfdp
     pfasst_nml=probin_fname
 
     mgrit_coarsen_factor = 2
-    imex_stat = 1
-    ark_stat = 1
+    imex_stat = 2
+    ark_stat = 2
     rk_order = 1
 
     FAS_flag = .false.
@@ -93,7 +94,7 @@ contains
     end do
 
     !  Reset dt if Tfin is set
-    dt = Tfin/dble(nsteps)
+    if (Tfin .gt. 0.0) dt = Tfin/dble(nsteps)
 
     !  Return the name of the file from which to read PFASST parameters
     pf_fname=pfasst_nml
@@ -124,7 +125,7 @@ contains
        write(un,*) 'Local Variables'
        write(un,*) '----------------'
        write(un,*) 'nsteps: ', nsteps, '! Number of steps'
-       write(un,*) 'Dt:     ', dt, '! Time step size'
+       write(un,*) 'Dt:     ', Dt, '! Time step size'
        write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
        write(un,*) 'Number of grid points in each spatial direction:   ', nx
        write(un,*) 'num spatial procs per temporal proc:   ',   nspace

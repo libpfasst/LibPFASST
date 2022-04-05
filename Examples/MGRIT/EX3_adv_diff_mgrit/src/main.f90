@@ -49,13 +49,32 @@ contains
     real(pfdp) :: T0
     logical :: FAS_flag, FCF_flag, setup_start_coarse_flag
 
+    real(pfdp), allocatable :: yexact_1d(:), yexact_2d(:,:), yexact_3d(:,:,:)
+    real(pfdp), pointer :: y_0_1d(:), y_0_2d(:,:), y_0_3d(:,:,:)
+    real(pfdp) :: error
+    integer :: temp_nsweeps, temp_nsweeps_pred, l_nx_not_zero
+
+    integer :: nx_old(PF_MAXLEVS)
+
+    integer, save :: nx_coarse
+
     !> Read problem parameters
     call probin_init(pf_fname)
+
+    v(1) = vx
+    v(2) = vx
+    v(3) = vx
+    kfreq(1) = kfreqx
+    kfreq(2) = kfreqx
+    kfreq(3) = kfreqx
+    space_len(1) = Lx
+    space_len(2) = Lx
+    space_len(3) = Lx
 
     !>  Set up communicator
     call pf_mpi_create(comm, MPI_COMM_WORLD)
 
-    if (use_mgrit .eqv. .true.) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
        pf%use_rk_stepper = .true.
        pf%use_sdc_sweeper = .false.
     else
@@ -65,6 +84,36 @@ contains
 
     !>  Create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
+    if (((solver_type .eq. 2)  .or. (solver_type .eq. 4)) .and. (pf%nlevels .ne. 2)) then
+       print *, 'ERROR: nlevels must be 2 for Parareal.'
+       return
+    end if
+
+    do l = 1,pf%nlevels 
+       if (nx(l) .gt. 0) then
+          l_nx_not_zero = l
+       end if
+    end do
+    nx_old = nx
+    if (l_nx_not_zero .lt. pf%nlevels) then
+       do l = pf%nlevels,1,-1
+          if (l_nx_not_zero .gt. 0) then
+             nx(l) = nx_old(l_nx_not_zero)
+             l_nx_not_zero = l_nx_not_zero - 1
+          else
+             nx(l) = 0
+          end if
+       end do
+    end if
+
+    do l = pf%nlevels,1,-1
+       if (nx(l) .le. 0) then
+          nx(l) = nx_coarse
+       else
+          nx_coarse = nx(l)
+       end if
+       !print *,nx(l)
+    end do
 
     !> Loop over levels and set some level specific parameters
     do l = 1, pf%nlevels
@@ -75,27 +124,42 @@ contains
        allocate(pf_ndarray_factory_t::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
-       if (use_mgrit .eqv. .true.) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
           allocate(my_stepper_t::pf%levels(l)%ulevel%stepper)
        else
           allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
        end if
 
        !>  Set the size of the data on this level (here just one)
-       call pf_level_set_size(pf,l,[nx(l)])
+       if (ndim == 1) then
+          call pf_level_set_size(pf,l,[nx(l)])
+       else if (ndim == 2) then
+          call pf_level_set_size(pf,l,[nx(l), nx(l)])
+       else if (ndim == 3) then
+          call pf_level_set_size(pf,l,[nx(l), nx(l), nx(l)])
+       else
 
-       if (use_mgrit .eqv. .true.) then 
+       end if
+
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
           pf%levels(l)%ulevel%stepper%order = rk_order
-          pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+          if (solver_type .eq. 2) then
+             pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
+          end if
        end if
     end do
 
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    if (use_mgrit .eqv. .true.) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 4)) then
+       if (solver_type .eq. 4) then
+          FCF_flag = .false.
+       else
+          FCF_flag = .true.
+       end if
+
        FAS_flag = .false.
-       FCF_flag = .true.
        T0 = 0.0_pfdp
        setup_start_coarse_flag = .false.
        mgrit_nsteps = max(1, nsteps/pf%comm%nproc)
@@ -103,10 +167,11 @@ contains
     end if
 
     !> Add some hooks for output
-    if (use_mgrit .eqv. .true.) then
+    if (solver_type .eq. 1) then
        call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     else
-       call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+       !call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
+       call pf_add_hook(pf, -1, PF_POST_ITERATION, echo_error)
     end if
 
     !>  Output the run options 
@@ -116,17 +181,65 @@ contains
     call print_loc_options(pf,un_opt=6)
     
     !> Allocate initial and final solutions
-    call ndarray_build(y_0, [ nx(pf%nlevels) ])
-    call ndarray_build(y_end, [ nx(pf%nlevels) ])    
+
+    if (ndim == 1) then
+       call ndarray_build(y_0, [nx(pf%nlevels)])
+       call ndarray_build(y_end, [nx(pf%nlevels)])    
+    else if (ndim == 2) then
+       call ndarray_build(y_0, [nx(pf%nlevels), nx(pf%nlevels)])
+       call ndarray_build(y_end, [nx(pf%nlevels), nx(pf%nlevels)])
+    else if (ndim == 3) then
+       call ndarray_build(y_0, [nx(pf%nlevels), nx(pf%nlevels), nx(pf%nlevels)])
+       call ndarray_build(y_end, [nx(pf%nlevels), nx(pf%nlevels), nx(pf%nlevels)])
+    else
+
+    end if
 
     !> compute initial condition
     call initial_sol(y_0)
 
-    !> Do the PFASST stepping
-    if (use_mgrit .eqv. .true.) then
+    !if (ndim == 1) then
+    !   allocate(yexact_1d(pf%levels(pf%nlevels)%lev_shape(1)))
+    !   y_0_1d => get_array1d(y_0)
+    !   call exact(pf%state%t0+pf%state%dt, yexact_1d)
+    !   error = maxval(abs(y_0_1d-yexact_1d))
+    !   deallocate(yexact_1d)
+    !else if (ndim == 2) then
+    !   allocate(yexact_2d(pf%levels(pf%nlevels)%lev_shape(1), &
+    !                      pf%levels(pf%nlevels)%lev_shape(2)))
+    !   y_0_2d => get_array2d(y_0)
+    !   call exact(pf%state%t0+pf%state%dt, yexact_2d)
+    !   error = maxval(abs(y_0_2d-yexact_2d))
+    !   deallocate(yexact_2d)
+    !else if (ndim == 3) then
+    !   allocate(yexact_3d(pf%levels(pf%nlevels)%lev_shape(1), &
+    !                      pf%levels(pf%nlevels)%lev_shape(2), &
+    !                      pf%levels(pf%nlevels)%lev_shape(3)))
+    !   y_0_3d => get_array3d(y_0)
+    !   call exact(pf%state%t0+pf%state%dt, yexact_3d)
+    !   error = maxval(abs(y_0_3d-yexact_3d))
+    !   deallocate(yexact_3d)
+    !else
+    !end if
+
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 4)) then !> MGRIT and MGRIT-Parareal
        call pf_MGRIT_run(pf, mg_ld, y_0, y_end)
+    else if (solver_type .eq. 2) then !> Parareal
+       call pf_parareal_run(pf, y_0, dt, Tfin, nsteps, y_end)
+    else if (solver_type .eq. 3) then !> Sequential solver
+       pf%state%nsteps = nsteps
+       pf%state%step = nsteps-1
+       pf%state%iter = 1
+       pf%state%sweep = 1;
+       call initialize_results(pf)
+       if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+       call pf%levels(1)%ulevel%stepper%do_n_steps(pf, 1, T0, y_0, y_end, dt, nsteps)
+       call pf%levels(pf%nlevels)%qend%copy(y_end)
+       call echo_error(pf, pf%nlevels)
+       if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+       call pf_dump_stats(pf)
     else
-       call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps, y_end)
+       call pf_pfasst_run(pf, y_0, dt, Tfin, nsteps, y_end)
     end if
     !if (pf%rank .eq. pf%comm%nproc-1) call y_end%eprint()
 

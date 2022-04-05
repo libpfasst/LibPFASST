@@ -14,10 +14,14 @@ extern "C"
    int PfasstToHypreLevelIndex(int pfasst_level_index, int num_levels);
    int HypreSolverGetNumRowsLevel(HypreSolver *hypre_solver, int pfasst_level_index);
    void HypreVectorCreate(HypreVector **hypre_vector,
-                          int pfasst_level_index,
                           int nx,
                           int comm_color,
-                          int space_dim);
+                          int space_dim,
+                          int nrows,
+                          int ilower0,
+                          int ilower1,
+                          int iupper0,
+                          int iupper1);
    void HypreVectorDestroy(HypreVector *hypre_vector);
    void HypreVectorSetVal(HypreVector *hypre_vector, double val);
    void HypreVectorSetSinInitCond(HypreVector *hypre_vector);

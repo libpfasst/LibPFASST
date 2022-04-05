@@ -57,6 +57,8 @@ module pf_mod_MGRIT
      integer :: coarsest_level !> Index of coarsest level
      logical :: f_pts_flag = .true. !> True if this proc has F-points
      logical :: c_pts_flag = .true. !> True if this proc has C-points
+     logical :: send_neighb_is_f_pt_flag = .true.
+     logical :: recv_neighb_is_f_pt_flag = .true.
      logical :: res_converge
      integer :: res_converge_index
      integer, allocatable :: recv_procs(:)
@@ -109,6 +111,7 @@ contains
      allocate(mg_ld(nlevels))
      mg_ld(nlevels)%setup_start_coarse_flag = start_coarse_flag
 
+
      do level_index = 1,nlevels
         mg_lev => mg_ld(level_index)
         mg_lev%T0_glob = T0_glob
@@ -126,8 +129,9 @@ contains
            mg_lev%Nt = N
            mg_lev%Nt_glob = N * pf%comm%nproc
            mg_lev%dt = (Tfin_glob - T0_glob)/real(mg_lev%Nt_glob, pfdp)
-           mg_lev%t0 = T0_glob + real(N, pfdp) * mg_lev%dt * real(pf%rank, pfdp) + mg_lev%dt
-           mg_lev%tfin = mg_lev%t0 + N * mg_lev%dt - mg_lev%dt
+           !mg_lev%t0 = T0_glob + real(N, pfdp) * mg_lev%dt * real(pf%rank, pfdp) + mg_lev%dt
+           mg_lev%t0 = T0_glob + real(N, pfdp) * mg_lev%dt * real(pf%rank, pfdp)
+           mg_lev%tfin = mg_lev%t0 + N*mg_lev%dt - mg_lev%dt
            pf%state%t0 = mg_lev%t0
            N = N * coarsen_factor
            
@@ -177,10 +181,30 @@ contains
                  mg_lev%rank_shifted = (mg_f_lev%rank_shifted+1)/ coarsen_factor - 1
                  mg_lev%send_to_rank = (mg_lev%rank_shifted+2) * coarsen_factor**(i+1) - 1
                  mg_lev%recv_from_rank = mg_lev%rank_shifted * coarsen_factor**(i+1) - 1
+                 !print *,level_index,pf%rank,mg_lev%send_to_rank,mg_lev%recv_from_rank
+                 mg_f_lev%send_neighb_is_f_pt_flag = .true.
+                 mg_f_lev%recv_neighb_is_f_pt_flag = .true.
+                 !if (level_index .eq. 1) then
+                 !   print *,pf%rank,mg_f_lev%send_neighb_is_f_pt_flag,mg_f_lev%recv_neighb_is_f_pt_flag
+                 !end if
                  mg_f_lev%f_pts_flag = .false.
                  mg_f_lev%c_pts_flag = .true.
               else !> Otherwise, the fine grid has an F-point
                  mg_f_lev%f_pts_flag = .true.
+                 !> is the point that belongs to my send neighb an F or C-point?
+                 if (mod(mg_f_lev%send_to_rank+1, coarsen_factor**(i+1)) .eq. 0) then
+                    mg_f_lev%send_neighb_is_f_pt_flag = .false.
+                 else
+                    mg_f_lev%send_neighb_is_f_pt_flag = .true.
+                 end if
+                 if (mod(mg_f_lev%recv_from_rank+1, coarsen_factor**(i+1)) .eq. 0) then
+                    mg_f_lev%recv_neighb_is_f_pt_flag = .false.
+                 else
+                    mg_f_lev%recv_neighb_is_f_pt_flag = .true.
+                 end if
+                 !if (level_index .eq. 1) then
+                 !   print *,pf%rank,mg_f_lev%send_neighb_is_f_pt_flag,mg_f_lev%recv_neighb_is_f_pt_flag
+                 !end if
                  mg_f_lev%c_pts_flag = .false.
                  mg_lev%c_pts_flag = .false.
                  mg_lev%f_pts_flag = .false.
@@ -191,6 +215,8 @@ contains
               mg_lev%rank_shifted = pf%rank
               mg_lev%send_to_rank = pf%rank+1
               mg_lev%recv_from_rank = pf%rank-1
+              mg_lev%send_neighb_is_f_pt_flag = .true.
+              mg_lev%recv_neighb_is_f_pt_flag = .false.
            else
               mg_lev%Nt = 0
               mg_lev%c_pts_flag = .false.
@@ -210,7 +236,8 @@ contains
         do level_index = coarsest_level,nlevels
            mg_lev => mg_ld(level_index)
            mg_lev%dt = (Tfin_glob - T0_glob)/mg_lev%Nt_glob
-           mg_lev%t0 = T0_glob + mg_lev%dt * pf%rank * mg_lev%Nt + mg_lev%dt 
+           !mg_lev%t0 = T0_glob + mg_lev%dt * pf%rank * mg_lev%Nt + mg_lev%dt 
+           mg_lev%t0 = T0_glob + mg_lev%dt * real(pf%rank * mg_lev%Nt, pfdp)! + mg_lev%dt
            mg_lev%tfin = mg_lev%t0 + mg_lev%Nt * mg_lev%dt
            pf%state%t0 = mg_lev%t0
         end do
@@ -254,7 +281,7 @@ contains
            end if 
         end do
      end if
-     
+    
      pf%state%t0 = mg_ld(nlevels)%tfin - mg_ld(nlevels)%dt
      pf%state%dt = mg_ld(nlevels)%dt
      pf%state%step = (pf%rank+1) * mg_ld(nlevels)%Nt - 1
@@ -323,6 +350,7 @@ contains
         call pf_lev%ulevel%factory%create_single(mg_lev%u_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%g_temp, level_index, pf_lev%lev_shape)
         call pf_lev%ulevel%factory%create_single(mg_lev%r, level_index, pf_lev%lev_shape)
+        call mg_lev%r%setval(0.0_pfdp)
         call pf_lev%ulevel%factory%create_single(mg_lev%Q0, level_index, pf_lev%lev_shape)
         if (FAS_flag .eqv. .true.) then
            call pf_lev%ulevel%factory%create_single(mg_lev%uc_fas_ghost, level_index, pf_lev%lev_shape)
@@ -408,13 +436,14 @@ contains
     k = 1
     nlevels = pf%nlevels
     coarsest_level = mg_ld(nlevels)%coarsest_level
-    pf%state%pfblock = 1
+    pf%state%pfblock = pf%state%nsteps/pf%comm%nproc
     pf%state%sweep = 1
 
     mg_lev => mg_ld(nlevels)
 
     if (pf%niters .lt. 0) then
-       call qend%setval(0.0_pfdp)
+       uc => mg_ld(nlevels)%uc
+       call qend%copy(uc(size(uc)))
        return
     end if
 
@@ -428,10 +457,18 @@ contains
     end do
 
     mg_ld(nlevels)%res_converge_index = 1
-    mg_ld(nlevels)%res_converge = .false.
+   
+    !> Set residual convergence flags 
+    if (mg_ld(nlevels-1)%Nt > 0) then !> If we have at least one C-point, we need to check the residual
+       mg_ld(nlevels)%res_converge = .false.
+    else
+       mg_ld(nlevels)%res_converge = .true.
+    end if
 
     pf%state%status = PF_STATUS_ITERATING
     pf%state%pstatus = PF_STATUS_ITERATING
+
+    call pf_start_timer(pf, T_TOTAL)
 
     !> Restrict initial condition
     level_index = coarsest_level
@@ -442,7 +479,6 @@ contains
 
     !> Do predictor
     wtime_start = MPI_Wtime()
-    call pf_start_timer(pf, T_TOTAL)
     call pf_start_timer(pf, T_PREDICTOR)
     mg_ld(nlevels)%cycle_phase = 0
     call PredictExactSolve(pf, mg_ld, Q0, level_index)
@@ -689,6 +725,7 @@ contains
      type(mgrit_level_data), pointer :: mg_f_lev, mg_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
      integer :: i, j, n, ii, nlevels, level_index_f, i_upper, uc_len, i_f
+     integer :: tag, tag_f
 
      nlevels = pf%nlevels
      level_index_f = level_index + 1
@@ -697,13 +734,23 @@ contains
      pf_lev => pf%levels(level_index)
      pf_f_lev => pf%levels(level_index_f)
 
+     tag_f = 3+level_index_f
+     tag = 3+level_index
+
+     !if (level_index .eq. 2) then
+     !   print *,'RelaxTransfer',pf%rank,mg_lev%f_pts_flag,mg_lev%c_pts_flag,mg_lev%send_neighb_is_f_pt_flag
+     !end if
+
      !> In this case of one time point on the fine level, values at C-points need to be sent in advance for restriction
      if ((restrict_flag .eqv. .true.) .and. (mg_f_lev%Nt .eq. 1)) then
-        if (mg_f_lev%f_pts_flag .eqv. .true.) then
-           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.)
-        else
-           call mgrit_post(pf, mg_ld, level_index_f, 1)
-           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+        !> If the next processor is a C-point, send foward
+        !if (mg_f_lev%f_pts_flag .eqv. .true.) then
+        if (mg_f_lev%send_neighb_is_f_pt_flag .eqv. .false.) then
+           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, tag_f, .false.)
+        !> If this processor is a C-point, receive
+        else if (mg_f_lev%c_pts_flag .eqv. .true.) then
+           call mgrit_post(pf, mg_ld, level_index_f, tag_f)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, tag_f, .false.)
            call mg_f_lev%uc(1)%copy(mg_f_lev%uc_ghost)
         end if
      end if
@@ -715,12 +762,16 @@ contains
 
      !> Post non-blocking receives
      if (FC_relax_flag .eqv. .true.) then
-        if ((zero_c_pts_flag .eqv. .false.) .or. ((mg_lev%Nt .eq. 1) .and. (mg_lev%c_pts_flag .eqv. .true.))) then
-           call mgrit_post(pf, mg_ld, level_index, 1)
+        if ((zero_c_pts_flag .eqv. .false.) .or. &
+            ((mg_lev%Nt .eq. 1) .and. &
+             (mg_lev%recv_neighb_is_f_pt_flag .eqv. .true.))) then
+             !(mg_lev%c_pts_flag .eqv. .true.)
+           call mgrit_post(pf, mg_ld, level_index, tag)
         end if
      else
-        if ((zero_c_pts_flag .eqv. .false.) .and. (mg_lev%f_pts_flag .eqv. .true.)) then
-           call mgrit_post(pf, mg_ld, level_index, 1)
+        if ((zero_c_pts_flag .eqv. .false.) .and. &
+            (mg_lev%f_pts_flag .eqv. .true.)) then
+           call mgrit_post(pf, mg_ld, level_index, tag)
         end if
      end if
 
@@ -735,8 +786,10 @@ contains
      do i = i_upper,1,-1
      !do i = 1,i_upper
         !> If this proc has C-points, send the right-most C-point
-        if ((i .eq. i_upper) .and. (zero_c_pts_flag .eqv. .false.) .and. (mg_lev%c_pts_flag .eqv. .true.)) then
-           call mgrit_send(pf, mg_ld, mg_lev%uc(uc_len), level_index, 1, .false.)
+        if ((i .eq. i_upper) .and. &
+            (zero_c_pts_flag .eqv. .false.) .and. &
+            (mg_lev%c_pts_flag .eqv. .true.)) then
+           call mgrit_send(pf, mg_ld, mg_lev%uc(uc_len), level_index, tag, .false.)
         end if
         !> If this proc has F-points, do F-relaxations
         if (mg_lev%f_pts_flag .eqv. .true.) then
@@ -757,8 +810,8 @@ contains
               if (zero_c_pts_flag .eqv. .true.) then
                  call pf_lev%q0%setval(0.0_pfdp)
               else if (i .eq. 1) then
-                 !> Receive off-proc C-point
-                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+                 !> Receive off-proc point
+                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, tag, .false.)
                  call pf_lev%q0%copy(mg_lev%uc_ghost)
               else
                  call pf_lev%q0%copy(mg_lev%uc_prev(i-1))
@@ -787,10 +840,12 @@ contains
               call pf_lev%q0%copy(pf_lev%qend)
            end do
            !> If this proc has an F-point but no C-point, send F-point forward
-           if ((FC_relax_flag .eqv. .true.) .and. (mg_lev%c_pts_flag .eqv. .false.)) then
-              call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .false.)
+           if (((FC_relax_flag .eqv. .true.) .or. &
+                (mg_lev%send_neighb_is_f_pt_flag .eqv. .true.)) .and. &
+               (mg_lev%c_pts_flag .eqv. .false.)) then
+              call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, tag, .false.)
            end if
-        end if
+        end if !> F-relaxations
 
         !> Do C-relaxation
         if (FC_relax_flag .eqv. .true.) then
@@ -805,7 +860,7 @@ contains
               end if
               !> If there is only one time point, receive F-point
               if (mg_lev%f_pts_flag .eqv. .false.) then
-                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+                 call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, tag, .false.)
                  call pf_lev%q0%copy(mg_lev%uc_ghost)
               end if
               call PointRelax(pf, mg_ld, level_index, j, pf_lev%q0, pf_lev%qend)
@@ -831,7 +886,7 @@ contains
      end do
   end subroutine RelaxTransfer
 
-  !> Blocking send-receive
+  !> Blocking send-receive (no longer used)
   subroutine mgrit_send_recv(pf, mg_ld, level_index, send_flag, recv_flag)
     type(pf_pfasst_t), target, intent(inout) :: pf
     type(mgrit_level_data), allocatable, target, intent(inout) :: mg_ld(:)
@@ -873,6 +928,7 @@ contains
      logical :: zero_rhs_flag, send_flag, recv_flag
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_finest_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
+     integer :: tag
 
      mg_lev => mg_ld(level_index)
      nlevels = pf%nlevels
@@ -888,9 +944,11 @@ contains
         return
      end if
 
+     tag = 2
+
      if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-        call mgrit_post(pf, mg_ld, level_index, 1)
-        call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, 1, .false.)
+        call mgrit_post(pf, mg_ld, level_index, tag)
+        call mgrit_recv(pf, mg_ld, mg_lev%uc_ghost, level_index, tag, .false.)
         call pf_lev%q0%copy(mg_lev%uc_ghost)
      else
         if (mg_ld(nlevels)%FAS_flag .eqv. .true.) then
@@ -908,7 +966,7 @@ contains
      end do
 
      if ((pf%rank .lt. pf%comm%nproc-1) .and. (pf%comm%nproc .gt. 1)) then
-        call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 1, .false.)
+        call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, tag, .false.)
      end if
 
      do i = 1,mg_lev%Nt
@@ -928,6 +986,7 @@ contains
      integer :: nlevels
      type(mgrit_level_data), pointer :: mg_lev, mg_f_lev, mg_finest_lev
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
+     integer :: tag
 
 
      mg_lev => mg_ld(level_index)
@@ -943,9 +1002,11 @@ contains
         return
      end if
 
+     tag = 1
+
      if ((mg_lev%rank_shifted .gt. 0) .and. (pf%comm%nproc .gt. 1)) then
-        call mgrit_post(pf, mg_ld, level_index, 3)
-        call mgrit_recv(pf, mg_ld, pf_lev%q0, level_index, 3, .false.)
+        call mgrit_post(pf, mg_ld, level_index, tag)
+        call mgrit_recv(pf, mg_ld, pf_lev%q0, level_index, tag, .false.)
      else
         call pf_lev%q0%copy(mg_lev%Q0)
      end if
@@ -956,7 +1017,7 @@ contains
         call mg_lev%uc(i)%copy(pf_lev%qend)
      end do
 
-     call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, 3, .false.)
+     call mgrit_send(pf, mg_ld, pf_lev%qend, level_index, tag, .false.)
 
      do i = 1,mg_lev%Nt
         call pf_start_timer(pf, T_INTERPOLATE, level_index_f)
@@ -979,6 +1040,7 @@ contains
      type(pf_level_t), pointer :: pf_lev, pf_f_lev
      real(pfdp) :: res_norm_glob
      integer :: ierr, i_upper
+     integer :: tag_f
 
      nlevels = pf%nlevels
 
@@ -990,13 +1052,15 @@ contains
      mg_c_lev => mg_ld(level_index_c)
      pf_f_lev => pf%levels(level_index_f)
 
+     tag_f = 3+level_index_f
      !> In this case of one time point on the fine level, values at C-points need to be sent in advance for restriction
      if (mg_f_lev%Nt .eq. 1) then
-        if (mg_f_lev%f_pts_flag .eqv. .true.) then
-           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, 1, .false.) 
-        else
-           call mgrit_post(pf, mg_ld, level_index_f, 1)
-           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, 1, .false.)
+        !if (mg_f_lev%f_pts_flag .eqv. .true.) then
+        if (mg_f_lev%send_neighb_is_f_pt_flag .eqv. .false.) then
+           call mgrit_send(pf, mg_ld, mg_f_lev%uc(1), level_index_f, tag_f, .false.) 
+        else if (mg_f_lev%c_pts_flag .eqv. .true.) then
+           call mgrit_post(pf, mg_ld, level_index_f, tag_f)
+           call mgrit_recv(pf, mg_ld, mg_f_lev%uc_ghost, level_index_f, tag_f, .false.)
            call mg_f_lev%uc(1)%copy(mg_f_lev%uc_ghost)
         end if
      end if
@@ -1020,7 +1084,7 @@ contains
         call mg_f_lev%uc(i_c)%copy(mg_f_lev%uc_prev(i_c))
      end do
 
-     !> If the finest level is finest, check residual norm
+     !> If the fine level is finest, check residual norm
      if (level_index_f .eq. nlevels) then
 !        if () then
 !           call mpi_allreduce(mg_f_lev%res_norm_loc, res_norm_glob, 1, myMPI_Datatype, MPI_SUM, pf%comm%comm, ierr)
@@ -1168,7 +1232,7 @@ contains
      mg_lev%res_converge = .false.
 
      r_norm = r%norm()
-
+     
      if (pf%abs_res_tol .gt. 0) then
         if ((i .eq. mg_lev%res_converge_index) .and. (r_norm .lt. pf%abs_res_tol))  then
            if (mg_lev%res_converge_index .eq. mg_c_lev%Nt) then
@@ -1201,9 +1265,11 @@ contains
 
     !> Check to see if tolerances are met
     residual_converged = .false.
-    if (mg_lev%res_converge)  then
-       residual_converged = .true.
-    end if    
+    !if (pf%rank .eq. pf%comm%nproc-1) then
+       if (mg_lev%res_converge)  then
+          residual_converged = .true.
+       end if
+    !end if
 
     !>  Until I hear the previous processor is done, recieve it's status
     if (pf%state%pstatus .ne. PF_STATUS_CONVERGED) then
@@ -1259,6 +1325,9 @@ contains
        dir = 1
        which = 1
        stride = mg_ld(level_index)%send_to_rank - pf%rank
+       !if (level_index .eq. 2) then
+       !   print *,'send',level_index,pf%rank,pf%rank+stride
+       !end if
        call pf_lev%qend%copy(send_data)
        call pf_send(pf, pf_lev, tag, blocking, dir, which, stride)
     end if
@@ -1289,7 +1358,13 @@ contains
        dir = 1
        which = 1
        stride = pf%rank - mg_lev%recv_from_rank
+       !if (level_index .eq. 2) then
+       !   print *,'pre recv',level_index,pf%rank,pf%rank-stride
+       !end if
        call pf_recv(pf, pf_lev, tag, blocking, dir, which, stride)
+       !if (level_index .eq. 2) then
+       !   print *,'post recv',level_index,pf%rank,pf%rank-stride
+       !end if
        call recv_data%copy(pf_lev%q0)
     end if
   end subroutine mgrit_recv
@@ -1316,6 +1391,9 @@ contains
 
        dir = 1
        stride = pf%rank - mg_lev%recv_from_rank
+       !if (level_index .eq. 1) then
+       !   print *,'post',level_index,pf%rank,pf%rank-stride
+       !end if
        call pf_post(pf, pf_lev, tag, dir, stride)
     end if
   end subroutine mgrit_post

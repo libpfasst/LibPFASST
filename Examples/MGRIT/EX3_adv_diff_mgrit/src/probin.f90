@@ -8,18 +8,23 @@ module probin
 
   character(len=64), save :: problem_type
 
-  real(pfdp), save :: v      ! advection velocity
+  real(pfdp), save :: vx     ! advection velocity
   real(pfdp), save :: nu     ! viscosity
-  real(pfdp), save :: kfreq  ! initial condition parameter
+  real(pfdp), save :: kfreqx ! initial condition parameter
   real(pfdp), save :: dt     ! time step
   real(pfdp), save :: Tfin   ! Final time
   real(pfdp), save :: Lx     ! Domain size
+
+  real(pfdp), save :: space_len(3)     ! Domain size
+  real(pfdp), save :: v(3)     ! advection velocity
+  real(pfdp), save :: kfreq(3) ! initial condition parameter
 
   integer, save :: nx(PF_MAXLEVS)     ! number of grid points
   integer, save :: nsteps          ! number of time steps
   integer, save :: imex_stat       ! type of imex splitting
   integer, save :: ark_stat
   integer, save :: ic_type         ! specifies the initial condition
+  integer, save :: ndim
 
   character(len=128), save :: pfasst_nml
 
@@ -29,13 +34,13 @@ module probin
 
   integer, save :: nsteps_rk(PF_MAXLEVS)
   integer, save :: rk_order
-  logical, save :: use_mgrit
+  integer, save :: solver_type
   integer, save :: mgrit_coarsen_factor
 
   integer :: ios,iostat
-  namelist /params/  nx, nsteps, dt, Tfin
-  namelist /params/  pfasst_nml, v, nu, kfreq,Lx,imex_stat,ark_stat, ic_type
-  namelist /params/  nsteps_rk, use_mgrit, mgrit_coarsen_factor, rk_order
+  namelist /params/  nx, nsteps, dt, Tfin, ndim
+  namelist /params/  pfasst_nml, vx, nu, kfreqx, Lx, imex_stat, ark_stat, ic_type
+  namelist /params/  nsteps_rk, solver_type, mgrit_coarsen_factor, rk_order
 
 contains
 
@@ -52,23 +57,23 @@ contains
          call get_command_argument(1, value=probin_fname)
     
     !> set defaults
-    nsteps  = -1
-    v       = 1.0_pfdp
+    nsteps  = 16
+    vx      = 1.0_pfdp
     nu      = 0.01_pfdp
-    kfreq   = 1.0_pfdp
+    kfreqx  = 1.0_pfdp
     dt      = 0.01_pfdp
     Tfin    = 0.0_pfdp
     Lx      = 1.0_pfdp
     imex_stat=2    !  Default is full IMEX
     ark_stat=2
-    ic_type=1      !  Default is a sine wave    
+    ic_type=2      !  Default is a sine wave    
     pfasst_nml=probin_fname
+    ndim = 1
 
     mgrit_coarsen_factor = 2
-    nsteps_rk = -1
-    use_mgrit = .true.
+    nsteps_rk = 1
+    solver_type = 4
     rk_order = 1
-    nsteps_rk = -1
 
     !>  Read in stuff from input file
     un = 9
@@ -114,7 +119,7 @@ contains
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
     write(un,*) 'nx:     ',  nx(1:pf%nlevels), '! grid size per level'
-    write(un,*) 'v:      ',  v, '! advection constant'
+    write(un,*) 'v:      ',  vx, '! advection constant'
     write(un,*) 'nu:     ', nu, '! diffusion constant'
     select case (imex_stat)
     case (0)  

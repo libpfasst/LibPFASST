@@ -1,18 +1,11 @@
 #include "hypre_vector.hpp"
 
-HypreVector::HypreVector(int num_grid_points,
-                         double value,
-                         MPI_Comm in_comm,
-                         int in_dim,
-                         int in_nrows,
-                         int *extents,
-                         HYPRE_StructGrid in_grid,
-                         HYPRE_StructStencil in_stencil,
-                         int generate_grid_data)
+HypreVector::HypreVector(int num_grid_points, double value, MPI_Comm in_comm, int in_dim, int in_nrows, int *extents)
 {
    SetComm(in_comm);
    SetDim(in_dim);
-   InitGrid(num_grid_points, in_nrows, extents, in_grid, in_stencil, generate_grid_data);
+   InitGrid(num_grid_points, in_nrows, extents);
+   //printf("%d %d %d %d %d\n", nrows, ilower[0], ilower[1], iupper[0], iupper[1]);
 
    double *values = (double *)calloc(nrows, sizeof(double));
 

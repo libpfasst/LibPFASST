@@ -29,8 +29,7 @@ class HypreSolver: public HypreStruct {
       HYPRE_StructSolver solver_imp = NULL;
       HYPRE_StructSolver precond_imp = NULL;
 
-      HYPRE_StructSolver coarse_space_data;
-      
+      HYPRE_StructSolver spatial_pfmg_data;
 
       HYPRE_StructSolver *solver_imp_lev;
       HYPRE_StructSolver *precond_imp_lev;
@@ -40,7 +39,8 @@ class HypreSolver: public HypreStruct {
       HYPRE_StructVector *x_lev;
       HYPRE_StructVector *b_lev;
 
-      hypre_StructMatrix **R_lev;
+      hypre_PFMGData *pfmg_data;
+      hypre_StructMatrix **RT_lev;
       hypre_StructMatrix **P_lev;
       void **restrict_data_lev;
       void **interp_data_lev;

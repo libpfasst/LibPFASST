@@ -108,9 +108,6 @@ contains
     type(pf_pfasst_t), intent(inout),target :: pf
     integer, intent(in) :: level_index
     integer :: nx, comm_color, space_dim, max_space_v_cycles, spatial_coarsen_flag
- 
-    !>  Call the imex sweeper initialization
-    call this%imex_initialize(pf,level_index)
 
     if (imex_stat .eq. 0 ) then
        this%explicit=.TRUE.
@@ -121,7 +118,10 @@ contains
     else
        this%implicit=.TRUE.
        this%explicit=.TRUE.
-    end if    
+    end if
+ 
+    !>  Call the imex sweeper initialization
+    call this%imex_initialize(pf,level_index)
 
     ! Space variables
     nx = pf%levels(level_index)%lev_shape(1)

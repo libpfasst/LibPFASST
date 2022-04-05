@@ -36,18 +36,18 @@ contains
        this%nsteps=nsteps_rk(level_index)
     end if
 
-    call this%ark_initialize(pf,level_index)
-
     if (ark_stat .eq. 0) then
-       this%explicit=.TRUE.
-       this%implicit=.FALSE.
-    elseif (ark_stat .eq. 1) then
-       this%implicit=.TRUE.
-       this%explicit=.FALSE.
+       this%explicit=.true.
+       this%implicit=.false.
+    else if (ark_stat .eq. 1) then
+       this%implicit=.true.
+       this%explicit=.false.
     else
-       this%implicit=.TRUE.
-       this%explicit=.TRUE.
+       this%implicit=.true.
+       this%explicit=.true.
     end if
+
+    call this%ark_initialize(pf,level_index)
 
     ! Space variables
     nx = pf%levels(level_index)%lev_shape(1)

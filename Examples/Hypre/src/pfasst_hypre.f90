@@ -31,11 +31,13 @@ contains
     integer :: mgrit_nsteps, coarsen_factor, FComp_setup_flag
     logical :: setup_start_coarse_flag
 
-    if (((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) .and. (rk_order .eq. 1)) then
+    if (((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) .and. & 
+        (rk_order .eq. 1)) then
        FComp_setup_flag = 0
     else
        FComp_setup_flag = 1
     end if
+    FComp_setup_flag = 1
     
     call mpi_comm_size(MPI_COMM_WORLD, nproc, error)
     call mpi_comm_rank(MPI_COMM_WORLD, rank,  error)
@@ -55,7 +57,7 @@ contains
        allocate(hypre_vector_factory::pf%levels(l)%ulevel%factory)
 
        !>  Add the sweeper to the level
-       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
           allocate(my_stepper_t::pf%levels(l)%ulevel%stepper)
        else
           allocate(my_sweeper_t::pf%levels(l)%ulevel%sweeper)
@@ -63,7 +65,7 @@ contains
 
        call pf_level_set_size(pf, l, lev_shape(l,:), 0)
 
-       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
           pf%levels(l)%ulevel%stepper%order = rk_order
           if (solver_type .eq. 2) then
              pf%levels(l)%ulevel%stepper%nsteps = nsteps_rk(l)
@@ -72,7 +74,7 @@ contains
     end do
 
     l_finest = pf%nlevels
-    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
        st_lev = cast_as_my_stepper_t(pf%levels(l_finest)%ulevel%stepper)
        call HypreSolverInit(st_lev%c_hypre_solver_ptr, &
                             l_finest, &
@@ -129,18 +131,25 @@ contains
     !>  Set up some pfasst stuff
     call pf_pfasst_setup(pf)
 
-    if (solver_type .eq. 1) then
+    if ((solver_type .eq. 1) .or. (solver_type .eq. 4)) then
+       if (solver_type .eq. 4) then
+          FCF_flag = .false.
+       else
+          FCF_flag = .true.
+       end if
+
        T0 = 0.0_pfdp
        setup_start_coarse_flag = .false.
        mgrit_nsteps = max(1, nsteps/pf%comm%nproc)
        coarsen_factor = mgrit_coarsen_factor
+       print *,mgrit_coarsen_factor
        call mgrit_initialize(pf, mg_ld, T0, Tfin, mgrit_nsteps, mgrit_coarsen_factor, FAS_flag, FCF_flag, setup_start_coarse_flag)
     end if
 
     if (FComp_setup_flag .eq. 0) then
-       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3)) then
+       if ((solver_type .eq. 1) .or. (solver_type .eq. 2) .or. (solver_type .eq. 3) .or. (solver_type .eq. 4)) then
           do l = pf%nlevels,1,-1
-             if (solver_type .eq. 1) then
+             if ((solver_type .eq. 1) .or. (solver_type .eq. 4)) then
                 dt_lev = mg_ld(l)%dt
              else if (solver_type .eq. 2) then
                 dt_lev = (Tfin - T0) / real(nsteps_rk(l) * nsteps, pfdp)
