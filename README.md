@@ -6,6 +6,11 @@ Approximation Scheme in Space and Time (PFASST) algorithm.  It is
 written in Fortran (mostly F90, with some F03), but can be interfaced
 with C and C++ fairly easily.
 
+#  Documentation
+We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.github.io/LibPFASST.
+The documentation can be edited on the gh-pages branch of this repo.
+
+# License
 
 Libpfasst Copyright (c) 2018, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy) and Sebastian Goetschel.  All rights reserved.
 
@@ -23,9 +28,7 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 
 
 
-#  Documentation
-We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.github.io/LibPFASST.
-The documentation can be edited on the gh-pages branch of this repo.
+
 
 
 
