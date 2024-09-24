@@ -6,9 +6,21 @@ Approximation Scheme in Space and Time (PFASST) algorithm.  It is
 written in Fortran (mostly F90, with some F03), but can be interfaced
 with C and C++ fairly easily.
 
+## References
+- Matthew Emmett, Michael Minion: Toward an efficient parallel in time method for partial differential equations, Commun. Appl. Math. Comput. Sci. 7(1), 105-132, 2012. [http://dx.doi.org/10.2140/camcos.2012.7.105](http://dx.doi.org/10.2140/camcos.2012.7.105)
+- Matthew Emmett, Michael Minion: Efficient Implementation of a Multi-Level Parallel in Time Algorithm. In: Erhel, J., Gander, M., Halpern, L., Pichot, G., Sassi, T., Widlund, O. (eds) Domain Decomposition Methods in Science and Engineering XXI. Lecture Notes in Computational Science and Engineering, vol 98. Springer, Cham, 2014. [https://doi.org/10.1007/978-3-319-05789-7_33](https://doi.org/10.1007/978-3-319-05789-7_33)
+
 ##  Documentation
-We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.github.io/LibPFASST.
+We are currently writing better documentation, examples, and a tutorial, at [https://libpfasst.github.io/LibPFASST](https://libpfasst.github.io/LibPFASST).
 The documentation can be edited on the gh-pages branch of this repo.
+
+## Requirements
+- a Fortran compiler, for some external libraries like FFTW C/C++ compiler
+- an MPI library
+
+## Quickstart
+- compile the library, see [https://libpfasst.github.io/LibPFASST/docs/build/html/compiling.html](https://libpfasst.github.io/LibPFASST/docs/build/html/compiling.html)
+- look through the tutorials, see [https://libpfasst.github.io/LibPFASST/docs/build/html/tutorial.html](https://libpfasst.github.io/LibPFASST/docs/build/html/tutorial.html)
 
 ## License
 
