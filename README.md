@@ -25,6 +25,11 @@ You are under no obligation whatsoever to provide any bug fixes, patches, or upg
 
 #  Documentation
 We are currently writing better documentation, examples, and a tutorial, at https://libpfasst.github.io/LibPFASST.
+
+Acknowledgements according to [CRediT](https://credit.niso.org/):
+
+
+
 The documentation can be edited on the gh-pages branch of this repo.
 
 
