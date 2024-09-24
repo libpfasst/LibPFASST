@@ -36,7 +36,8 @@ module probin
   real(pfdp), save :: gamma    
   !  parameters for split damping
   real(pfdp), save :: d0,d1,r0,r1  
-  logical,    save :: split_damping
+  logical,    save :: split_damp
+  real(pfdp), save :: split_rho
   character(len=32), save :: pfasst_nml
 
   character(len=64), save :: output ! directory name for output
@@ -46,7 +47,7 @@ module probin
   integer :: ios,iostat 
   namelist /params/  nx,ic_type, eq_type, nsteps,nsteps_rk,rk_order, dt, Tfin
   namelist /params/  pfasst_nml, lam1,lam2,a,b,c, nu, t00, sigma, beta, gamma, splitting
-  namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz,d0,d1,r0,r1,split_damping  
+  namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz,d0,d1,r0,r1,split_damp,split_rho  
 
 contains
 
@@ -87,7 +88,8 @@ contains
     Ly      = two_pi
     Lz      = two_pi
     ! Default damping parameters are 0
-    split_damping=.true.
+    split_damp=.true.
+    split_rho=two_pi/256.0_pfdp
     d0=0.0_pfdp
     d1=0.0_pfdp
     r0=0.0_pfdp

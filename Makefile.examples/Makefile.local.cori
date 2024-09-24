@@ -1,0 +1,27 @@
+#  Set some compiler flags
+
+AR = ar rcs
+ifeq ($(PE_ENV),INTEL)
+#FC = mpiifort
+#CC = mpiiCC
+FC = ftn
+LD = ftn -static
+CC = cc
+FFLAGS = -Ibuild -module include -cpp -static
+ifeq ($(DEBUG),TRUE)
+FFLAGS +=   -g -O0
+endif
+endif
+
+ifeq ($(PE_ENV),CRAY)
+#FC = mpiifort
+#CC = mpiiCC
+FC = ftn
+LD = ftn
+CC = cc
+FFLAGS = -Ibuild -Jinclude 
+LDLAGS = -Ibuild -Jinclude 
+ifeq ($(DEBUG),TRUE)
+FFLAGS +=   -g
+endif
+endif
