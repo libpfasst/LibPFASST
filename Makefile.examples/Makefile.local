@@ -7,7 +7,9 @@ AR=ar rcs
 
 FFLAGS = -Ibuild -Jinclude -cpp -ffree-line-length-none
 #  Use this flag on newer compilers with stricter bounds checking
-#FFLAGS = -fallow-argument-mismatch
+#  FFLAGS_EXTRA is used for F77 in building dfftpack
+#FFLAGS += -fallow-argument-mismatch
+#FFLAGS_EXTRA += fallow-argument-mismatch
 
 ifeq ($(DEBUG),TRUE)
 FFLAGS += -fcheck=all -fbacktrace -g -ffpe-trap=invalid,zero,overflow -fbounds-check -fimplicit-none -ffree-line-length-none

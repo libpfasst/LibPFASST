@@ -12,7 +12,7 @@ USE_PETSC ?= FALSE
 USE_HYPRE ?= FALSE
 USE_SUNDIALS ?= FALSE
 USE_AMREX ?= FALSE
-USE_FFT ?= FALSE
+USE_FFT ?= TRUE
 
 
 #  File for compiler options
