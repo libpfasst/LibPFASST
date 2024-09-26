@@ -17,6 +17,8 @@ The documentation can be edited on the gh-pages branch of this repo.
 ## Requirements
 - a Fortran compiler, for some external libraries like FFTW C/C++ compiler
 - an MPI library
+- makedepf90 for generating dependencies
+- python 3.12 for the test (including numpy, matplotlib, pandas, scipy, tqdm, pytest)
 
 ## Quickstart
 - compile the library, see [https://libpfasst.github.io/LibPFASST/docs/build/html/compiling.html](https://libpfasst.github.io/LibPFASST/docs/build/html/compiling.html)

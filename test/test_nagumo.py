@@ -50,8 +50,8 @@ tests.extend(make_pfasst())
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
     command = 'mpirun -np {} {} {} max_opt_iter={}'.format(mpi_tasks, EXE, nml, max_opt_iter)
 
-    print command
-    output = subprocess.check_output(command.split())   #  This will run all the tests
+    print(command)
+    output = subprocess.check_output(command.split(), text=True)   #  This will run all the tests
 
     try:
         err = errors(output)   # Try to read the output for error statistics
@@ -72,7 +72,7 @@ def test_nagumo(mpi_tasks, nml, max_opt_iter):
           maxstep = max([x.step for x in err if x.rank == minrank])
           maxiter = max([x.iter for x in err if x.step == maxstep and x.rank == minrank])
           lasterr = max([x.residual for x in err if x.step == maxstep and x.iter == maxiter and x.rank == minrank])
-          #print minrank, maxstep, maxiter, lasterr
+          #print(minrank, maxstep, maxiter, lasterr)
           
           assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)   # This decides if the test was successful
 

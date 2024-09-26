@@ -18,7 +18,8 @@ except OSError as exc:
     if exc.errno == EEXIST:
         pass
     else:
-        raise OSError, exc.message
+        print(exc.message)
+        raise OSError #, exc.message
 
 params = IMKParams(exe=exe, nodes=[3], nterms=[2], \
                    nsteps=128, tfinal=1.0, \
@@ -57,15 +58,15 @@ def test_toda(levels, vcycle, sdc, nodes, nterms):
     e0 = particle0 - ref_particle0
     e8 = particle8 - ref_particle8
 
-    print particle0
-    print e0
-    print particle8
-    print e8
+    print(particle0)
+    print(e0)
+    print(particle8)
+    print(e8)
 
-    print ref_particle8
+    print(ref_particle8)
 
     e = max(e0, e8)
 
-    print 'e = {}'.format(e)
+    print('e = {}'.format(e))
 
     assert abs(e) < 1e-6

@@ -85,8 +85,8 @@ tests.extend(make_pfasst())
 def test_advdiff(nodes, nu, splitting, mpi_tasks, nml,nsteps):
     command = 'mpirun -np {} {} {} nnodes={} nu={} splitting={} nsteps={} '.format(mpi_tasks, EXE, nml, nodes, nu, splitting, nsteps)
 
-    print command
-    output = subprocess.check_output(command.split())   #  This will run all the tests
+    print(command)
+    output = subprocess.check_output(command.split(), text=True)   #  This will run all the tests
 
     try:
         err = errors(output)   # Try to read the output for error statistics

@@ -2,7 +2,7 @@ import re
 from os import getcwd, chdir, makedirs, devnull
 from subprocess import call
 from scipy.io import FortranFile
-from pfasst import PFASST
+from pf.pfasst import PFASST
 import numpy as np
 
 class NWC(PFASST):
@@ -11,7 +11,7 @@ class NWC(PFASST):
         if params is None:
             params = Params()
         PFASST.__init__(self, home, params, **kwargs)
-        print 'Setting up NWC'
+        print('Setting up NWC')
         self.nwc = self.home + '/nwc.sh'
         self.cwd = getcwd() + '/'
         self.nwc_base_string = 'echo\nscratch_dir ./scratch\npermanent_dir ./perm\n\n'\
@@ -33,7 +33,7 @@ class NWC(PFASST):
             except:
                 raise Exception('unsuccessful NWC run, check input!')
         else:
-            print 'exact dirs already exist'
+            print('exact dirs already exist')
 
         self.xtrans, self.ytrans = self._parse_transforms()
         self.initial = self._get_nwc_dmat('initial_condition')
@@ -68,7 +68,7 @@ class NWC(PFASST):
     def _run_nwc(self):
         FNULL = open(devnull, 'w')
         chdir(self.p.exact_dir)
-        print '---- running nwc ----'
+        print('---- running nwc ----')
         call([self.nwc, 'nw'], stdout=FNULL)
         chdir(self.cwd)
         FNULL.close()
