@@ -149,9 +149,9 @@ program main
   
   call initialize_results(pf)
 
-  call system('if [ ! -e ./Dat ]; then mkdir Dat; fi')
-  shell_cmd = 'if [ ! -e ./Dat/'//trim(fbase)//' ]; then mkdir Dat/'//trim(fbase)//'; fi'
-  call system(shell_cmd)
+  !call system('if [ ! -e ./Dat ]; then mkdir Dat; fi')
+  !shell_cmd = 'if [ ! -e ./Dat/'//trim(fbase)//' ]; then mkdir Dat/'//trim(fbase)//'; fi'
+  !call system(shell_cmd)
   ! open output files
   write (fname, "(A,I0.2,A3,I0.3,A6,I0.3,A6,I0.3)") 'Niter',pf%niters,'_Nx',nvars(pf%nlevels),'_Nstep',nsteps,'_Nproc',comm%nproc
   foutbase = 'Dat/'//trim(fbase)//'/'//trim(fname)
@@ -176,19 +176,19 @@ program main
       write (logfilename, "(A,'_storage',I0.12)") trim(logfile), storage_level
       logfile = logfilename
       if(inexact_adjoint) then
-        logfile = trim(logfile)//'_inexAdj'
-      end if
-    end if
-    
-  else
-    predict = .true.
-    logfile = trim(logfile)//'_cold'
-  endif    
-  if(adapt_res_tol) then
-     logfile = trim(logfile)//'_adapt'
-  end if
+logfile = trim(logfile)//'_inexAdj'
+end if
+end if
 
-  write(logfilename, "(A,'_tol',i0.3,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), test_no, max_opt_iter, nsteps, comm%nproc
+else
+predict = .true.
+logfile = trim(logfile)//'_cold'
+endif    
+if(adapt_res_tol) then
+logfile = trim(logfile)//'_adapt'
+end if
+
+write(logfilename, "(A,'_tol',i0.3,'_optiter',i0.4,'_Nstep',i0.3,'_Nproc',i0.3,'.log')") trim(logfile), test_no, max_opt_iter, nsteps, comm%nproc
 
 
 !  open(unit=101, file = foutbase, status = 'unknown', action = 'write')
@@ -196,10 +196,10 @@ program main
   !  Output the run parameters
   if (pf%rank == 0) then
      call pf_print_options(pf, 6,.TRUE.)
-     fout = 'Dat/'//trim(fbase)//'/'//trim(fname)//'_params.m'
+!     fout = 'Dat/'//trim(fbase)//'/'//trim(fname)//'_params.m'
 !     print*, fout
-     open(unit=103, file = fout, status = 'unknown', action = 'write')
-     do iout=1,2
+!     open(unit=103, file = fout, status = 'unknown', action = 'write')
+     do iout=2,2 !1,2
         if (iout .eq. 1) then
            nout = 103
         else
@@ -349,10 +349,10 @@ program main
   if(pf%rank == 0) &
     print *, pf%abs_res_tol, pf%rel_res_tol, gamma
   
-  if(pf%rank == 0) &
-     open(unit=105, file = logfilename , & 
-         status = 'unknown',  action = 'write')
-  if(pf%rank == 0) write(105,*) 'iter ', 'L2_grad ', 'objective ', 'stepsize '
+ ! if(pf%rank == 0) &
+ !    open(unit=105, file = logfilename , & 
+ !        status = 'unknown',  action = 'write')
+ ! if(pf%rank == 0) write(105,*) 'iter ', 'L2_grad ', 'objective ', 'stepsize '
          
   allocate(gradient(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
   allocate(prevGrad(nsteps_per_rank, pf%levels(pf%nlevels)%nnodes, nvars(pf%nlevels)))
@@ -423,7 +423,7 @@ program main
      call mpi_allreduce(L2NormGradSq, globL2NormGradSq, 1, MPI_REAL8, MPI_SUM, pf%comm%comm, ierror)
      call mpi_allreduce(LinftyNormGrad, globLinftyNormGrad, 1, MPI_REAL8, MPI_MAX, pf%comm%comm, ierror)
      if(pf%rank == 0) print *, k, 'gradient (L2, Linf) = ', sqrt(globL2NormGradSq), globLinftyNormGrad
-     if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
+!     if(pf%rank == 0) write(105,*) k, sqrt(globL2NormGradSq), globObj, prevStepSize
      if(k == 1) then 
         initialGradNorm = sqrt(globL2NormGradSq)
      else
