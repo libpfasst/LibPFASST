@@ -25,19 +25,21 @@ def make_pfasst():
 def errors(out):
     #rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
     rx = re.compile(r"rank:\s*(\d+)\s*lev:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*res:\s*(\S+)")
-# rank:    0 lev:    3 step:    1 t= 1.562E-01 t0= 0.000E+00 iter: 14 Max_y: 1.866421E+00 Max_p: 5.796460E+00 yres: 7.590695E-11 pres: 3.757933E-11 Res: 2.202122E-12
+# rank:    0 lev:    3 step:   17 iter:  2 res: 3.172733E-13
 
     cast = [int, int, int, int, float]
 
     errors = []
     for line in out.splitlines():
+        print(line)
         m = rx.search(line)
         if m:
+            print(m)
             try:
                 errors.append(ErrorTuple(*[c(x) for c, x in zip(cast, m.groups())]))
             except ValueError:
                 raise ValueError
-
+    print(errors)
     return errors
 
 """set up the list of tests to do and call the routines to make the list of tests"""

@@ -48,10 +48,8 @@ subroutine echo_error_hook(pf, level_index)
 
     res = min(pf%levels(level_index)%residual, pf%levels(level_index)%residual_rel)
     !res = pf%levels(level_index)%residual
-    print '(" rank:",i5," lev:",i5," step:",i5," iter:",i3, &
-          " yres:",es13.6," pres:",es13.6," res:",es13.6)', &
-          pf%rank, level_index, pf%state%step+1, pf%state%iter, &
-          maxval(abs(ynorms)), maxval(abs(pnorms)), res
+    print '(" rank:",i5," lev:",i5," step:",i5," iter:",i3," res:",es13.6)', &
+          pf%rank, level_index, pf%state%step+1, pf%state%iter, res
 
 
 !     un = 1000+state%step+1
