@@ -15,7 +15,7 @@ TOL = 1e-11                                                                     
 def make_pfasst():
     pfasst = []
     nml = NMLFILE.format('probin')
-    mpi_tasks = 32
+    mpi_tasks = 1 #32
     for max_opt_iter in [0, 1]:   # 0: check state solution; 1: check adjoint solution
        pfasst.append((mpi_tasks, nml, max_opt_iter))
 
@@ -24,7 +24,9 @@ def make_pfasst():
 """scrape the output looking for the error statement"""
 def errors(out):
     #rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
-    rx = re.compile(r"rank:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*res:\s*(\S+)")
+    rx = re.compile(r"rank:\s*(\d+)\s*lev:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*res:\s*(\S+)")
+# rank:    0 lev:    3 step:    1 t= 1.562E-01 t0= 0.000E+00 iter: 14 Max_y: 1.866421E+00 Max_p: 5.796460E+00 yres: 7.590695E-11 pres: 3.757933E-11 Res: 2.202122E-12
+
     cast = [int, int, int, int, float]
 
     errors = []

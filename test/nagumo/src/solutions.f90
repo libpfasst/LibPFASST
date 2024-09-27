@@ -1,7 +1,7 @@
 module solutions
   use pf_mod_dtype
   use pf_mod_ndarray_oc
-  use probin, only : sizex
+  use probin
   implicit none
 
 contains
@@ -16,7 +16,7 @@ contains
       
     q0%yflatarray = 0.0_pfdp
     nvars = size(q0%yflatarray)
-    dx = sizex/dble(nvars)
+    dx = Lx/dble(nvars)
     do i = 1, nvars
        x = dble(i-1)*dx
         if( x >= 9.0 .and. x <= 11.0 ) q0%yflatarray(i) = 1.2*sqrt(3.0)

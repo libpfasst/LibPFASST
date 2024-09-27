@@ -3,7 +3,7 @@
     nlevels  = 3
 
     !  These are internal pfasst variables that can be reset
-    niters = 250   !  default is 5
+    niters = 50   !  default is 5
 
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1
@@ -13,10 +13,10 @@
      abs_res_tol = 1e-11
      rel_res_tol = 1e-11
 
-     PFASST_pred = .false.
+     PFASST_pred = .true.
 
-     save_residuals = .false.
-
+     save_residuals = .true.
+     save_errors = .false.
 /
 
 
@@ -34,7 +34,7 @@
   nvars = 32 64 128
   nnodes = 3 5 9
 
-  sizex = 20.0
+  Lx = 20.0
   dt           = 0.1
   Tfin = 5
   

@@ -1,5 +1,9 @@
 module probin
   use pf_mod_dtype
+  use iso_fortran_env
+
+  double precision, parameter :: pi     = 3.141592653589793d0
+!   double precision, parameter :: two_pi = 6.2831853071795862d0
 
   integer, parameter :: maxlevs = 3
 
@@ -8,7 +12,7 @@ module probin
   character(len=64), save :: problem_type, window_type
 
   double precision, save :: v      ! advection velocity
-  double precision, save :: sizex  ! domain size
+  double precision, save :: Lx     ! domain size
   double precision, save :: nu     ! viscosity
   double precision, save :: t0     ! initial time for exact solution
   double precision, save :: sigma  ! initial condition parameter
@@ -36,15 +40,26 @@ module probin
   integer, save :: do_mixed         ! set to 1 to sweep on state and adjoint simultaneously (but without communication in adjoint)
 !   integer, save :: nsweeps(maxlevs) !  Sweeps at each levels
 !   integer, save :: nsweeps_pred(maxlevs)   !  Sweeps during predictor
+  integer, save ::  test_no
 
   ! optimization problem parameters
   double precision, save :: alpha        ! regularization parameter
   double precision, save :: tol_grad     ! gradient tolerance, stop optimization if gradient norm below
   double precision, save :: tol_obj      ! objective function tolerance, stop optimization if objective function value below
   integer,          save :: max_opt_iter ! maximum number of optimization iterations
-  
+  integer,          save :: restart_interval ! in case of warmstart, do a full prediction step every n iterations
+  double precision, save :: gamma        ! to steer influence of nonlinearity
+  integer,          save :: max_newton_iter ! maximum number of Newton iterations if nonlinear solver is used
+  logical,          save :: lagging      ! if false, use Newton to solve nonlinearity
   logical, save :: solve_y
-  
+  logical, save :: adapt_res_tol         ! if true, reduce res_tol's by a given factor if gradient norm has decreased by some other factor  
+  double precision, save :: res_tol_factor
+  double precision, save :: res_tol_graddec
+  logical, save :: compress
+  integer(kind=int64), save :: N_digits
+  integer,             save :: storage_level
+  logical, save :: inexact_adjoint
+
   character(len=32), save :: pfasst_nml
   character(len=20), save :: fbase   !  base name for run
   character(len=64), save :: foutbase   !  base name for output file
@@ -59,11 +74,12 @@ module probin
   integer :: ios,iostat
   namelist /params/ Finterp, ndim, nnodes, nvars,nprob, nsteps
   namelist /params/ spatial_order,interp_order, mg_interp_order, do_spec, N_Vcycles,Nrelax
-  namelist /params/ pfasst_nml,fbase ,poutmod
+  namelist /params/ pfasst_nml,fbase ,poutmod, output, restart_interval
   namelist /params/  abs_res_tol, rel_res_tol, tol_grad, tol_obj
-  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, sizex, max_opt_iter, alpha
-  namelist /params/  do_imex, warmstart, do_mixed, logfile !, nsweeps, nsweeps_pred
-
+  namelist /params/  v, nu, t0, dt, Tfin,sigma, kfreq, Lx, max_opt_iter, alpha, gamma
+  namelist /params/  do_imex, warmstart, do_mixed, logfile, inexact_adjoint !, nsweeps, nsweeps_pred
+  namelist /params/  max_newton_iter, lagging, adapt_res_tol, res_tol_factor
+  namelist /params/  res_tol_graddec, test_no, compress, N_digits, storage_level
 contains
 
   subroutine probin_init(filename)
@@ -84,7 +100,7 @@ contains
     nsteps  = -1
 
     v       = 0.0_pfdp
-    sizex      = 1._pfdp
+    Lx      = 1._pfdp
     nu      = 0.02_pfdp
     sigma   = 0.004_pfdp
     kfreq   = 1
@@ -95,6 +111,10 @@ contains
     abs_res_tol = 0.0
     rel_res_tol = 0.0
 
+    adapt_res_tol = .false.
+    res_tol_factor = 0.1
+    res_tol_graddec= 0.5
+
     spatial_order=2
     interp_order = 2
 
@@ -103,6 +123,10 @@ contains
     Nrelax = 1
     mg_interp_order = 2
     
+    gamma = 1
+    
+    test_no=0
+    
     do_imex = 1
     warmstart = 0
     do_mixed = 0   
@@ -110,13 +134,22 @@ contains
     max_opt_iter = 200
     tol_grad = 1e-6
     tol_obj  = 1e-6
+    restart_interval = max_opt_iter
  
     poutmod = 1
 
     logfile = "progress.log"
-    
-    pfasst_nml=filename
+    pfasst_nml = filename
 
+    output = "Dat/pfasst_V/numpy"
+    lagging = .true.
+    max_newton_iter = 10
+    
+    compress = .false.
+    N_digits = 100000000 ! 8 digits
+    storage_level = 1
+    inexact_adjoint = .false.
+    
 !     nsweeps =  [1, 1, 1]
 !     nsweeps_pred = [1, 1, 1]
     !
@@ -153,8 +186,6 @@ contains
 !     case ("ring")
 !        wtype = PF_WINDOW_RING
 !     end select
-
-    output = "Dat/pfasst_V/numpy"
 
   end subroutine probin_init
 
