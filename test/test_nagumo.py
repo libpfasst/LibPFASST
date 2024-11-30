@@ -15,7 +15,7 @@ TOL = 1e-11                                                                     
 def make_pfasst():
     pfasst = []
     nml = NMLFILE.format('probin')
-    mpi_tasks = 32
+    mpi_tasks = 1 #32
     for max_opt_iter in [0, 1]:   # 0: check state solution; 1: check adjoint solution
        pfasst.append((mpi_tasks, nml, max_opt_iter))
 
@@ -24,18 +24,22 @@ def make_pfasst():
 """scrape the output looking for the error statement"""
 def errors(out):
     #rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
-    rx = re.compile(r"rank:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*res:\s*(\S+)")
+    rx = re.compile(r"rank:\s*(\d+)\s*lev:\s*(\d+)\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*res:\s*(\S+)")
+# rank:    0 lev:    3 step:   17 iter:  2 res: 3.172733E-13
+
     cast = [int, int, int, int, float]
 
     errors = []
     for line in out.splitlines():
+        print(line)
         m = rx.search(line)
         if m:
+            print(m)
             try:
                 errors.append(ErrorTuple(*[c(x) for c, x in zip(cast, m.groups())]))
             except ValueError:
                 raise ValueError
-
+    print(errors)
     return errors
 
 """set up the list of tests to do and call the routines to make the list of tests"""
@@ -50,8 +54,8 @@ tests.extend(make_pfasst())
 def test_nagumo(mpi_tasks, nml, max_opt_iter):
     command = 'mpirun -np {} {} {} max_opt_iter={}'.format(mpi_tasks, EXE, nml, max_opt_iter)
 
-    print command
-    output = subprocess.check_output(command.split())   #  This will run all the tests
+    print(command)
+    output = subprocess.check_output(command.split(), text=True)   #  This will run all the tests
 
     try:
         err = errors(output)   # Try to read the output for error statistics
@@ -72,7 +76,7 @@ def test_nagumo(mpi_tasks, nml, max_opt_iter):
           maxstep = max([x.step for x in err if x.rank == minrank])
           maxiter = max([x.iter for x in err if x.step == maxstep and x.rank == minrank])
           lasterr = max([x.residual for x in err if x.step == maxstep and x.iter == maxiter and x.rank == minrank])
-          #print minrank, maxstep, maxiter, lasterr
+          #print(minrank, maxstep, maxiter, lasterr)
           
           assert lasterr < TOL, "error: {}, tol: {}".format(lasterr, TOL)   # This decides if the test was successful
 

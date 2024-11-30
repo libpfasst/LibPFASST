@@ -1,0 +1,23 @@
+!
+!  Test parameters for the nonlinear Schroedinger eq
+!
+
+&PARAMS
+
+    Tfin = 13.5
+    nx =   1024
+    
+    nsteps = 4096
+    nsteps_rk =  128
+    rk_order = 4 
+    
+    eq_type = 3	
+    ic_type = 3	
+
+    split_damp=.false.   
+    split_rho=0.0245436926061703   !  pi/128
+    Lx=25.1327412287183      !  8 pi
+
+    pfasst_nml="serial.nml"  !  Use the common input file for pfasst parameters
+!    pfasst_nml="parareal.nml"  !  Use the common input file for pfasst parameters    
+/

@@ -2,7 +2,8 @@
 from itertools import product
 
 import numpy as np
-import pylab
+#import pylab
+import matplotlib.pyplot as plt
 import pf.io
 
 
@@ -57,7 +58,7 @@ def errors(reference, approximate, **kwargs):
       err = abs(ref - app).max()
       errors[step, aiter, alev] = err
     except:
-      print 'WARNING: size mismatch:', step, aiter, alev
+      print('WARNING: size mismatch:', step, aiter, alev)
 
   return errors, steps, iters, levels
 
@@ -84,7 +85,7 @@ def plot(errs, steps, iters, levels, **kwargs):
   # if not isinstance(ax, list):
   #   ax = [ ax ]
 
-  pylab.figure()
+  plt.figure()
 
   for l, level in enumerate(levels):
     for i, iter in enumerate(iters):
@@ -92,11 +93,11 @@ def plot(errs, steps, iters, levels, **kwargs):
       x = steps
       y = [ errs[step,iter,level] for step in steps ]
 
-      pylab.subplot(1, len(levels), l+1)
+      plt.subplot(1, len(levels), l+1)
 
-      pylab.semilogy(x, y, **kwargs)
-      pylab.title('level %d' % level)
-      pylab.xlabel('step/processor')
-      pylab.ylabel('max abs. error')
+      plt.semilogy(x, y, **kwargs)
+      plt.title('level %d' % level)
+      plt.xlabel('step/processor')
+      plt.ylabel('max abs. error')
 
   # return fig, ax

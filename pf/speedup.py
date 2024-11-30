@@ -56,26 +56,26 @@ def theoretical_speedup_fixed_block(serial, parallel, nvars, nnodes, C=-1, verbo
             OR = np.mean([ x.delta for x in parallel if x.timer == 'restrict%d' % (l) ])
             measO.append(OI + OR)
 
-        print ''
-        print 'steps:                      ', N
-        print 'serial iterations:          ', Ks
-        print 'mean cost of serial sweeps: ', Y0
-        print 'estimated serial cost:      ', Cs
-        print 'actual serial cost:         ', measCs
-        print 'parallel levels:            ', L
-        print 'parallel iterations:        ', Kp
-        print 'parallel processors:        ', P
-        print 'parallel blocks:            ', B
-        print 'max cost of any/all comm:   ', C
-        print 'alpha ratios:               ', alpha
-        print 'estimated cost of sweeps:   ', Y
-        print 'actual cost of sweeps:      ', measY
-        print 'estimated cost of overhead: ', O
-        print 'actual cost of overhead:    ', measO
-        print 'estimated parallel cost:    ', Cp
-        print 'actual parallel cost:       ', measCp
-        print 'estimated speedup:          ', Cs/Cp
-        print 'actual speedup:             ', measCs/measCp
+        print('')
+        print('steps:                      ', N)
+        print('serial iterations:          ', Ks)
+        print('mean cost of serial sweeps: ', Y0)
+        print('estimated serial cost:      ', Cs)
+        print('actual serial cost:         ', measCs)
+        print('parallel levels:            ', L)
+        print('parallel iterations:        ', Kp)
+        print('parallel processors:        ', P)
+        print('parallel blocks:            ', B)
+        print('max cost of any/all comm:   ', C)
+        print('alpha ratios:               ', alpha)
+        print('estimated cost of sweeps:   ', Y)
+        print('actual cost of sweeps:      ', measY)
+        print('estimated cost of overhead: ', O)
+        print('actual cost of overhead:    ', measO)
+        print('estimated parallel cost:    ', Cp)
+        print('actual parallel cost:       ', measCp)
+        print('estimated speedup:          ', Cs/Cp)
+        print('actual speedup:             ', measCs/measCp)
 
     return Cs / Cp
 
@@ -116,10 +116,10 @@ def echo_speedup(sdname, pdname):
     ptime = list(ptime.itervalues())
     nproc = len(processors)
 
-    print "processors:           ", nproc
-    print "serial time:          ", stime
-    print "parallel time:        ", max(ptime)
-    print "speedup (slowest):    ", stime/max(ptime)
-    print "efficiency (slowest): ", stime/max(ptime)/nproc
-    print "speedup (fastest):    ", stime/min(ptime)
-    print "efficiency (fastest): ", stime/min(ptime)/nproc
+    print("processors:           ", nproc)
+    print("serial time:          ", stime)
+    print("parallel time:        ", max(ptime))
+    print("speedup (slowest):    ", stime/max(ptime))
+    print("efficiency (slowest): ", stime/max(ptime)/nproc)
+    print("speedup (fastest):    ", stime/min(ptime))
+    print("efficiency (fastest): ", stime/min(ptime)/nproc)

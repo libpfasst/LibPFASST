@@ -51,7 +51,7 @@ def make_pfasst():
 
 """scrape the output looking for the error statement"""
 def errors(out):
-    rx = re.compile(r"error:\s*step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
+    rx = re.compile(r"step:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*error:\s*(\S+)")
     cast = [int, int, int, float]
 
     errors = []
@@ -67,7 +67,7 @@ def errors(out):
 
 """scrape the output looking for the resid statement"""
 def resids(out):
-    rx = re.compile(r"resid:\s*time:\s*(\S+)\s*step:\s*(\d+)\s*rank:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*resid:\s*(\S+)")
+    rx = re.compile(r"time:\s*(\S+)\s*step:\s*(\d+)\s*rank:\s*(\d+)\s*iter:\s*(\d+)\s*level:\s*(\d+)\s*resid:\s*(\S+)")
     cast = [float, int, int, int,int,  float]
 
     resids = []
@@ -90,11 +90,13 @@ tests.extend(make_sdc())
 def test_advdiff(nodes, mpi_tasks, nml,nsteps):
     command = 'mpirun -np {} {} {} nnodes={} nsteps={}'.format(mpi_tasks, EXE, nml, nodes, nsteps)
 
-    print command
-    output = subprocess.check_output(command.split())   #  This will run all the tests
+    print(command)
+    output = subprocess.check_output(command.split(), text=True)   #  This will run all the tests
+    print(output)
 
     try:
         err = resids(output)   # Try to read the output for error statistics
+        print(err)
     except ValueError:
             assert True, \
                 'Expected poor convergence behavior\nunable to parse output\n {}'.format(line)

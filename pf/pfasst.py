@@ -66,7 +66,7 @@ class Params(object):
     verbose = attr.ib(default=False, repr=False)
     nersc = attr.ib(default=False)
     dt = attr.ib(default=None)
-    timings = attr.ib(default=False)
+    timings = attr.ib(default=0)
     vcycle = attr.ib(default=False)
     tolerance = attr.ib(default=1e-12)
     qtype = attr.ib(default='lobatto')
@@ -127,7 +127,7 @@ class MagpicardParams(Params):
     base_string = attr.ib(default=
                           '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
                           'nnodes = {}\n\tnsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
-                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
+                          'qtype = {}\n\tsave_timings = {}\n\tabs_res_tol = {}\n\t'+ \
                           'rel_res_tol = {}\n\tpipeline_pred = .true.\n\t' + \
                           'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
                           '&params\n\tfbase = {}\n\t'+ \
@@ -165,9 +165,9 @@ class MagpicardParams(Params):
             solns = '.false.'
 
         if self.timings == True:
-            timings = '.true.'
+            timings = 3
         else:
-            timings = '.false.'
+            timings = 2
 
         if self.periodic == True:
             periodic = '.true.'
@@ -224,7 +224,7 @@ class IMKParams(Params):
                           '&pf_params\n\tnlevels = {}\n\tniters = {}\n\t'+ \
                           'nnodes = {}\n\t' + \
                           'nsweeps_pred = {}\n\tnsweeps = {}\n\t'+ \
-                          'qtype = {}\n\techo_timings = {}\n\tabs_res_tol = {}\n\t'+ \
+                          'qtype = {}\n\tsave_timings = {}\n\tabs_res_tol = {}\n\t'+ \
                           'rel_res_tol = {}\n\tpipeline_pred = .true.\n\t' + \
                           'pfasst_pred = .true.\n\tvcycle = {}\n/\n\n'+ \
                           '&params\n\tfbase = {}\n\t'+ \
@@ -271,9 +271,9 @@ class IMKParams(Params):
             solns = '.false.'
 
         if self.timings == True:
-            timings = '.true.'
+            timings = 3
         else:
-            timings = '.false.'
+            timings = 2
 
         if self.periodic == True:
             periodic = '.true.'
@@ -362,7 +362,7 @@ class PFASST(object):
             self.p = params
 
         self.exe = self.p.exe
-        for k, v in kwargs.iteritems():
+        for k, v in iter(kwargs.items()):
             setattr(self.p, k, v)
 
         try:
@@ -418,15 +418,19 @@ class PFASST(object):
                 if self.p.verbose:
                     nodes = ' '.join(map(str, self.p.nodes))
 
-                    print '---- running pfasst: tasks={}, nodes={}, dt={} ----'.format(
-                        self.p.tasks, nodes, self.p.dt)
+                    print('---- running pfasst: tasks={}, nodes={}, dt={} ----'.format(
+                        self.p.tasks, nodes, self.p.dt))
 
                 command = self._build_command()
-
-                output = check_output(command, stderr=STDOUT)
+                print(command)
+                output = check_output(command, stderr=STDOUT, text=True)
             except CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
+            except Exception as e:
+                print(type(e))
+                print(e)
             else:
+                print(output)
                 trajectory, total_times = self._get_trajectory_from_output(
                     output, self.p.nsteps, ref=ref)
                 trajectory.to_pickle(pkl_path)
@@ -493,7 +497,7 @@ class PFASST(object):
                     total_times[rank] = cpu_time
 
 
-        if self.p.timings:
+        if self.p.timings > 2:
             timings = read_all_timings(dname='.')
             self._merge_timings_into(trajectory, timings)
 
@@ -506,7 +510,8 @@ class PFASST(object):
         last_row = len(trajectory) - 1
         if ref:
             last_row = 0
-        trajectory.set_value(last_row, 'solution', sol)
+        #trajectory.set_value(last_row, 'solution', sol)
+        trajectory.at[last_row, 'solution'] = sol
 
         return trajectory, total_times
 
@@ -533,7 +538,7 @@ class PFASST(object):
 
     @staticmethod
     def _get_solution(path_to_solution):
-        print path_to_solution
+        print(path_to_solution)
         f = FortranFile(path_to_solution)
         solution = f.read_record(np.complex_)
         f.close()
@@ -681,7 +686,7 @@ class Results(pd.DataFrame):
         except:
             raise
         else:
-            print 'recovering results from pickle!'
+            print('recovering results from pickle!')
             self.loc[0] = traj.loc[0]
             return
 
@@ -804,7 +809,7 @@ class Experiment(object):
         results.astype({'dt': np.float_, 'nsteps': np.int_, 'error': np.float_})
 
         slope, _ = self.get_linear_fit_loglog(results.dt, results.error)
-        print 'slope = {}'.format(slope)
+        print('slope = {}'.format(slope))
 
         return results
 

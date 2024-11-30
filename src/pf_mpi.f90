@@ -14,25 +14,25 @@ module pf_mod_comm_mpi
   use pf_mod_mpi, only: MPI_REAL16, MPI_REAL8
   implicit none
   !  For normal double precision
-  integer, parameter :: myMPI_Datatype=MPI_REAL8  
+  integer, parameter :: myMPI_Datatype=MPI_REAL8
   !  For  quadruple precision  (see top of pf_dtype.f90)
-  ! integer, parameter :: myMPI_Datatype=MPI_REAL16  
+  ! integer, parameter :: myMPI_Datatype=MPI_REAL16
 contains
 
   !> Subroutine to create an MPI based PFASST communicator using the MPI communicator *mpi_comm*.
   subroutine pf_mpi_create(pf_comm, mpi_comm)
     type(pf_comm_t), intent(out) :: pf_comm
     integer,         intent(in)  :: mpi_comm
-    
+
     integer :: ierror
-    
+
 
     pf_comm%comm = mpi_comm       !! assign communicator
-    
-    
+
+
     !> assign number of processors
     call mpi_comm_size(mpi_comm, pf_comm%nproc, ierror)
-    
+
     !>  assign procedure pointers
     pf_comm%post => pf_mpi_post
     pf_comm%recv => pf_mpi_recv
@@ -45,12 +45,12 @@ contains
 
 
   !> Subroutine to set up the PFASST communicator.
-  !! This should be called soon after adding levels to the PFASST controller 
+  !! This should be called soon after adding levels to the PFASST controller
   subroutine pf_mpi_setup(pf_comm, pf,ierror)
     use pf_mod_mpi, only: MPI_REQUEST_NULL
     use pf_mod_stop, only: pf_stop
 
-    type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator 
+    type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator
     type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
     integer,           intent(inout) :: ierror     !!  error flag
 
@@ -61,7 +61,7 @@ contains
     allocate(pf_comm%recvreq(pf%nlevels),stat=ierror)
     if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
     allocate(pf_comm%sendreq(pf%nlevels),stat=ierror)
-    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)    
+    if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
 
     pf_comm%sendreq = MPI_REQUEST_NULL
     pf_comm%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
@@ -105,7 +105,7 @@ contains
 
     integer :: message(1),isize
     message = istatus
-    
+
 
     if (pf%comm%statreq /= MPI_REQUEST_NULL) then
        if (pf%debug) print*, 'DEBUG --',pf%rank, 'waiting in send_status with statreq',pf%comm%statreq
@@ -135,7 +135,7 @@ contains
     integer :: message(1)
 
     ! Get the message
-    call mpi_recv(message, 1, MPI_INTEGER4,source, tag, pf%comm%comm, stat, ierror)
+    call mpi_recv(message, 1, MPI_INTEGER4, source, tag, pf%comm%comm, stat, ierror)
     istatus=message(1)
     if (pf%debug) print *,'DEBUG- rank=',pf%rank,'in recv_status, istatus,message', istatus, message
   end subroutine pf_mpi_recv_status
@@ -154,7 +154,7 @@ contains
 
     integer ::  stat(MPI_STATUS_SIZE)
 
-    
+
     if (blocking) then
        call mpi_ssend(level%send, level%mpibuflen, myMPI_Datatype, &
                      dest, tag, pf%comm%comm, stat, ierror)
