@@ -93,10 +93,10 @@ contains
 
   !> Helper routine to set the size and mpi buffer length for regular grids
   subroutine pf_level_set_size(pf,level_index,shape_in,buflen_in)
-    type(pf_pfasst_t), intent(inout) :: pf   !!  Main pfasst structure
-    integer, intent(in)  ::  level_index
-    integer, intent(in)  ::  shape_in(:)
-    integer, intent(in),optional  ::  buflen_in
+    type(pf_pfasst_t), intent(inout) :: pf      !! Main pfasst structure
+    integer, intent(in)  ::  level_index        !! Level number  
+    integer, intent(in)  ::  shape_in(:)        !! Array of dimensions
+    integer, intent(in),optional  ::  buflen_in !! Scalar number of dimensions - if supplied shape_in not really needed
 
     integer ::  buflen_local,ierr
 
@@ -109,8 +109,7 @@ contains
     if (present(buflen_in))     buflen_local= buflen_in
     
     pf%levels(level_index)%mpibuflen = buflen_local
-
-    ! 
+ 
   end subroutine pf_level_set_size
   
 
@@ -121,8 +120,7 @@ contains
     class(pf_level_t), pointer :: f_lev, c_lev  !!  Pointers to level structures for brevity
     integer                   :: l                      !!  Level loop index
     integer                   :: ierr                   !!  error flag
-
-
+    
     !>  loop over levels to set parameters
     do l = 1, pf%nlevels
        call pf_level_setup(pf, l)
@@ -176,7 +174,7 @@ contains
     
     !> do some sanity checks
     mpibuflen  = lev%mpibuflen
-    if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'bad value for mpibulen=',mpibuflen)
+    if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'bad value for mpibuflen=',mpibuflen)
 
     nnodes = lev%nnodes
     if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'bad value for nnodes=',nnodes)    
@@ -185,7 +183,7 @@ contains
 
     !> (re)allocate tauQ 
     if ((lev%index < pf%nlevels) .and. (.not. allocated(lev%tauQ))) then
-       call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
+      call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
     end if
 
     !> skip the rest if we're already allocated

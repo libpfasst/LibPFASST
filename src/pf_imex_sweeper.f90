@@ -82,7 +82,7 @@ contains
   !> Perform nsweeps SDC sweeps on level level_index and set qend appropriately.
   subroutine imex_sweep(this, pf, level_index, t0, dt,nsweeps, flags)
     use pf_mod_hooks
-
+    
     !>  Inputs
     class(pf_imex_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t), intent(inout),target :: pf    !!  PFASST structure
@@ -98,9 +98,10 @@ contains
     integer     :: m,n,k   !!  Loop variables
     real(pfdp)  :: t        !!  Time at nodes
 
+    !>  Assign level pointer
     lev => pf%levels(level_index)   !  Assign level pointer
     
-
+   
     sweeps: do k = 1,nsweeps   !!  Loop over sweeps
        pf%state%sweep=k
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
@@ -111,7 +112,7 @@ contains
        !   call lev%I(m)%setval(0.0_pfdp)
        !end do
 
-        !if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
+       !if (this%explicit) call pf_apply_mat(lev%I, dt, this%QdiffE, lev%F(:,1), .false.)             
        !if (this%implicit) call pf_apply_mat(lev%I, dt, this%QdiffI, lev%F(:,2), .false.)
        ! compute integrals and add fas correction
        do m = 1, lev%nnodes-1
@@ -156,7 +157,7 @@ contains
 
        t = t0
        ! do the sub-stepping in sweep
-
+       
        substeps: do m = 1, lev%nnodes-1  !!  Loop over substeps
           t = t + dt*this%dtsdc(m)
 
@@ -311,8 +312,8 @@ contains
     end do
 
 
-!    if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
-!    if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
+    !if (this%explicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,1), .false.)    
+    !if (this%implicit) call pf_apply_mat(fintSDC, dt, lev%sdcmats%Qmat, fSDC(:,2), .false.)    
   end subroutine imex_integrate
 
 
@@ -349,7 +350,7 @@ contains
        end if
     end do
     
-!    call pf_generic_residual(this, pf, level_index, dt)
+    !call pf_generic_residual(this, pf, level_index, dt)
   end subroutine imex_residual
 
 
@@ -362,6 +363,7 @@ contains
 
     call pf_generic_spreadq0(this, pf,level_index, t0)
   end subroutine imex_spreadq0
+  
   subroutine imex_compute_dt(this,pf,level_index,  t0, dt,flags)
     class(pf_imex_sweeper_t),  intent(inout) :: this
     type(pf_pfasst_t), target, intent(inout) :: pf

@@ -46,23 +46,23 @@ module pf_mod_dtype
   
   !>  The type that holds the state of the system
   type, bind(c) :: pf_state_t
-    real(pfdp) :: t0  !!  Time at beginning of this time step
-    real(pfdp) :: dt  !!  Time step size
-    integer :: nsteps   !! total number of time steps
-    integer :: pfblock  !! pfasst block being worked on
-    integer :: iter     !! current iteration number
-    integer :: step     !! current time step number assigned to processor
+    real(pfdp) :: t0        !!  Time at beginning of this time step
+    real(pfdp) :: dt        !!  Time step size
+    integer :: nsteps       !! total number of time steps
+    integer :: pfblock      !! pfasst block being worked on
+    integer :: iter         !! current iteration number
+    integer :: step         !! current time step number assigned to processor
     integer :: level_index  !! which level is currently being operated on
     integer :: finest_level !! the current finest level (for variable depth V cycles)
-    integer :: hook     !! which hook
-    integer :: proc     !! which processor
-    integer :: sweep    !! sweep number
-    integer :: status   !! status (iterating, converged etc)
-    integer :: pstatus  !! previous rank's status
-    logical :: pconverged  !! is previous rank converged
-    integer :: itcnt    !! total iterations by this processor
-    integer :: skippedy !! skipped sweeps for state (for mixed integration)
-    integer :: mysteps  !! steps I did
+    integer :: hook         !! which hook
+    integer :: proc         !! which processor
+    integer :: sweep        !! sweep number
+    integer :: status       !! status (iterating, converged etc)
+    integer :: pstatus      !! previous rank's status
+    logical :: pconverged   !! is previous rank converged
+    integer :: itcnt        !! total iterations by this processor
+    integer :: skippedy     !! skipped sweeps for state (for mixed integration)
+    integer :: mysteps      !! steps I did
   end type pf_state_t
 
   !>  Abstract hook type: hooks call diagnostic routines from various places in code
@@ -236,10 +236,10 @@ module pf_mod_dtype
   end type pf_comm_t
 
   type :: pf_results_t
-     real(pfdp), allocatable ::    errors(:,:,:,:)
-     real(pfdp), allocatable :: residuals(:,:,:,:)  !  (level,block,niter+1,sweep)
-     real(pfdp), allocatable ::  delta_q0(:,:,:,:)  !  (level,block,niter+1,sweep)
-     real(pfdp), allocatable ::  iters(:)  !           (block)
+     real(pfdp), allocatable ::    errors(:,:,:,:)  ! (level,block,niter+1,sweep)
+     real(pfdp), allocatable :: residuals(:,:,:,:)  ! (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  delta_q0(:,:,:,:)  ! (level,block,niter+1,sweep)
+     real(pfdp), allocatable ::  iters(:)           ! (block)
      integer :: nlevs
      integer :: nsteps
      integer :: niters  !  really the max niters
@@ -340,7 +340,7 @@ module pf_mod_dtype
   !> Interfaces for subroutines
   interface
     !> hooks subroutines
-    subroutine pf_hook_p(pf, level_index)
+     subroutine pf_hook_p(pf, level_index)
        use iso_c_binding
        import pf_pfasst_t
        type(pf_pfasst_t), intent(inout) :: pf

@@ -92,7 +92,9 @@ contains
     
     nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)            ! computes solution at beginning of time block
+       !x = Lx*REAL(i,pfdp)/REAL(nx,pfdp)             ! computes solution at end of time block
+       !x = Lx*(REAL(i-1,pfdp)+HALF)/REAL(nx,pfdp)    ! computes solution at center of time block
        uex(i) = ad_cos_ex(t, x,nu,v,kfreq(1),Lx)
     end do
 

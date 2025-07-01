@@ -27,7 +27,7 @@ contains
     real(pfdp),        intent(in   )           :: tend !!  The final time of run
     integer,           intent(in   ), optional :: nsteps  !!  The number of time steps
     class(pf_encap_t), intent(inout), optional :: qend    !!  The computed solution at tend
-    integer,           intent(in   ), optional :: flags(:)!!  User defnined flags
+    integer,           intent(in   ), optional :: flags(:)!!  User defined flags
 
 
     !  Local variables
@@ -45,7 +45,7 @@ contains
     !!  pass in the time step size and length of run
     if (present(nsteps)) then
       nsteps_loc = nsteps
-      tend_loc=dble(nsteps_loc*dt)
+      tend_loc=dble(nsteps_loc*dt)  
     else
       nsteps_loc = ceiling(tend/dt)
       !  Do  sanity check on steps
@@ -369,11 +369,12 @@ contains
 
     class(pf_level_t), pointer :: lev  !!  pointer to the one level we are operating on
     integer                   :: j, k
-    integer                   :: nblocks !!  The number of blocks of steps to do
-    integer                   :: nproc   !!  The number of processors being used
-    integer                   :: level_index_c !!  Coarsest level in V (Lambda)-cycle
-    integer                   :: level_max_depth !!  Finest level in V-cycle
-
+    integer                   :: nblocks           !!  The number of blocks of steps to do
+    integer                   :: nproc             !!  The number of processors being used
+    integer                   :: level_index_c     !!  Coarsest level in V (Lambda)-cycle
+    integer                   :: level_max_depth   !!  Finest level in V-cycle
+    ! helpers for debugging
+    integer                   :: io
 
 
     pf%state%dt      = dt
@@ -397,7 +398,7 @@ contains
     !  Decide what the coarsest level in the V-cycle is
     level_index_c=1
     if (.not. pf%Vcycle)     level_index_c=pf%state%finest_level
-
+    
     do k = 1, nblocks   !  Loop over blocks of time steps
        call pf_start_timer(pf, T_BLOCK)
 
@@ -433,7 +434,7 @@ contains
 
           !>  Update the step and t0 variables for new block
           pf%state%step = pf%state%step + pf%comm%nproc
-          pf%state%t0   = pf%state%step * dt
+          pf%state%t0   = pf%state%step * dt 
        end if
 
        !> Call the predictor to get an initial guess on all levels and all processors
@@ -454,8 +455,8 @@ contains
 
           !  Do a V-cycle
           if (pf%use_pySDC_V) then
-             call pf_Vcycle_pySDC(pf,k,pf%state%t0,dt,level_index_c, pf%state%finest_level)
-          else
+            call pf_Vcycle_pySDC(pf,k,pf%state%t0,dt,level_index_c, pf%state%finest_level)
+         else
              call pf_Vcycle(pf, k, pf%state%t0, dt, level_index_c, pf%state%finest_level)
           end if
           
@@ -487,7 +488,7 @@ contains
        call call_hooks(pf, -1, PF_POST_BLOCK)
        
     end do !  Loop over the blocks
-
+    
     call call_hooks(pf, -1, PF_POST_ALL)
 
     !  Grab the last solution for return (if wanted)
