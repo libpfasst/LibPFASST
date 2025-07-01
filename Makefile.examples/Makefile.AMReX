@@ -1,10 +1,26 @@
 #  Example Makefile to use AMReX with LibPFASST
 #  You can download and get install instructions at
 #  https://github.com/AMReX-Codes/amrex
+#
+# Need to compile AMReX libraries for each dimension
+# in /path_to/amrex run:
+#   $ ./configure --prefix=amrex_lib_$(DIM)d --dim=$(DIM)
+#           (with DIM \in [1,2,3])
+#   $ make
+#   $ make install
+# 
+#   Compiling libamrex requires setting spatial dimension at compile-time
+#   ~/LIBPFASST/src/pf_amrex_encap.f90 is build during compilation of LibPFASST
+#   so we need to make LibPFASST with DIM for USE_AMREX=TRUE
+#   and currently need to rebuild pf_amrex_encap.f90 for changing dimensions
+# in ~/LIBPFASST run:
+#   $ make USE_AMREX=TRUE DIM=2 
 #  
 
 AMREX_HOME=$(LIBPFASST)/../amrex
-AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
+AMREX_LIBRARY_HOME= $(AMREX_HOME)/amrex_lib_$(DIM)d
+#AMREX_LIBRARY_HOME= $(AMREX_HOME)/tmp_install_dir
+$(info Makefile.AMReX includes lib from path $(AMREX_LIBRARY_HOME))
 
 FSRC += src/pf_amrex_encap.f90
 
