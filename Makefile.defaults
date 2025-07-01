@@ -64,26 +64,26 @@ FSRC = src/pfasst.f90 \
 
 #   AMReX options
 ifeq ($(USE_AMREX),TRUE)
-include $(LIBPFASST)/Makefile.AMReX
+include $(LIBPFASST)/Makefile.examples/Makefile.AMReX
 endif
 
 #  FFT options
 ifeq ($(USE_FFT),TRUE)
-include $(LIBPFASST)/Makefile.FFT
+include $(LIBPFASST)/Makefile.examples/Makefile.FFT
 endif
 
 #   PETSc options
 ifeq ($(USE_PETSC),TRUE)
-include $(LIBPFASST)/Makefile.PETSc
+include $(LIBPFASST)/Makefile.examples/Makefile.PETSc
 endif
 
 #  SUNDIALS options
 ifeq ($(USE_SUNDIALS),TRUE)
-include $(LIBPFASST)/Makefile.SUNDIALS
+include $(LIBPFASST)/Makefile.examples/Makefile.SUNDIALS
 endif
 
 ifeq ($(USE_HYPRE),TRUE)
-include $(LIBPFASST)/Makefile.hypre
+include $(LIBPFASST)/Makefile.examples/Makefile.hypre
 endif
 
 ifdef NOMPI
