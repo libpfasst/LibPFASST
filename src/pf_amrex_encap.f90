@@ -368,7 +368,8 @@ contains
     
     allocate(mfab_data_flat(this%ndof))
     call this%pack(mfab_data_flat)
-    print *, mfab_data_flat         ! prints without ghost cells
+    !print *, mfab_data_flat         ! prints without ghost cells
+    print *, mfab_data_flat(1:10)         ! prints without ghost cells
     deallocate(mfab_data_flat)  
   
   end subroutine AMReX_mfab_eprint
