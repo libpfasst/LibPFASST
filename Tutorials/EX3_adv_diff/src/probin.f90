@@ -104,6 +104,7 @@ contains
     write(un,*) 'Dt:     ', Dt, '! Time step size'
     write(un,*) 'Tfin:   ', Tfin,   '! Final time of run'
     write(un,*) 'nx:     ',  nx(1:pf%nlevels), '! grid size per level'
+    write(un,*) 'Domain:     ', Lx, '! domain size'
     write(un,*) 'v:      ',  v, '! advection constant'
     write(un,*) 'nu:     ', nu, '! diffusion constant'
     write(un,*) 'fd_ord: ', fd_ord, '! spatial order of accuracy'

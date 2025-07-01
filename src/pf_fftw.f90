@@ -37,7 +37,8 @@ contains
     class(pf_fft_t), intent(inout) :: this
     integer,             intent(in   ) :: ndim
     integer,             intent(in   ) :: grid_shape(ndim)    
-    real(pfdp), optional, intent(in   ) :: grid_size(ndim)    
+    !real(pfdp), optional, intent(in   ) :: grid_size(ndim)    
+    real(pfdp),          intent(in   ) :: grid_size(ndim)    
 
     integer     :: nx,ny,nz
     integer     :: i,j,k
@@ -50,13 +51,16 @@ contains
     this%nx = nx
 
     ! Defaults for grid_size
-    this%Lx = 1.0_pfdp
-    this%Ly = 1.0_pfdp
-    this%Lz = 1.0_pfdp
+    ! why tf do we introduce defaults here again and make grid_size optional 
+    ! very prone to cause errors 
+    !this%Lx = 1.0_pfdp
+    !this%Ly = 1.0_pfdp
+    !this%Lz = 1.0_pfdp
 
     select case (ndim)
     case (1)            
-       if(present(grid_size)) this%Lx = grid_size(1)
+       !if(present(grid_size)) this%Lx = grid_size(1)
+       this%Lx = grid_size(1)
        this%normfact=REAL(nx,pfdp)
        wk = fftw_alloc_complex(int(nx, c_size_t))
        call c_f_pointer(wk, this%wk_1d, [nx])          
@@ -66,11 +70,13 @@ contains
        this%ifftw = fftw_plan_dft_1d(nx, &
             this%wk_1d, this%wk_1d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (2)  
-       if(present(grid_size)) then
-          this%Lx = grid_size(1)
-          this%Ly = grid_size(2)
-       end if
-       
+       !if(present(grid_size)) then
+       !   this%Lx = grid_size(1)
+       !   this%Ly = grid_size(2)
+       !end if
+       this%Lx = grid_size(1)
+       this%Ly = grid_size(2)
+
        ny=grid_SHAPE(2)          
        this%ny = ny
        this%normfact=REAL(nx*ny,pfdp)
@@ -83,12 +89,15 @@ contains
        this%ifftw = fftw_plan_dft_2d(nx,ny, &
             this%wk_2d, this%wk_2d, FFTW_BACKWARD, FFTW_ESTIMATE)
     case (3)
-       if(present(grid_size))then
-          this%Lx = grid_size(1)
-          this%Ly = grid_size(2)
-          this%Lz = grid_size(3)
-       end if
-    
+       !if(present(grid_size))then
+       !   this%Lx = grid_size(1)
+       !   this%Ly = grid_size(2)
+       !   this%Lz = grid_size(3)
+       !end if
+       this%Lx = grid_size(1)
+       this%Ly = grid_size(2)
+       this%Lz = grid_size(3)
+
        ny=grid_SHAPE(2)          
        nz=grid_SHAPE(3)          
        this%ny = ny
