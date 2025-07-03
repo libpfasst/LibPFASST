@@ -26,6 +26,7 @@ contains
     call exact_realspace(t,yex)
     yex_flat(1:n) => yex
     call y_exact%unpack(yex_flat)
+    deallocate(yex)
   end subroutine exact
 
   

@@ -16,7 +16,7 @@ contains
     real(pfdp), intent(in)  :: t
     type(pf_amrex_mfab_t), intent(inout) :: y_exact
     !> local helper
-    real(pfdp), allocatable :: yex(:,:,:)
+    real(pfdp), allocatable, target :: yex(:,:,:)
     integer :: n
     real(pfdp), pointer :: yex_flat(:)
     
@@ -25,7 +25,8 @@ contains
     ! compute and unpack flatarray into mfab
     call exact_realspace(t,yex)
     yex_flat(1:n) => yex
-    call y_exact%unpack(yex)
+    call y_exact%unpack(yex_flat)
+    deallocate(yex)
   end subroutine exact
 
   

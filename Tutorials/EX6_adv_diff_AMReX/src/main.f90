@@ -62,7 +62,6 @@ contains
     
     !> local parameters
     type(amrex_box)       :: bx          ! add. single box only needed for debugging 
-    real(pfdp),  allocatable  :: mfab_data(:)
     integer               ::  l                   ! loop variable over levels
     integer, allocatable  ::  grid_size_amrex(:)  ! extended to account for amrex need of nghost (nx,ny,nz,ncomp,nghost)
     integer               ::  nghost
@@ -71,13 +70,6 @@ contains
     !> test stuff
     integer               ::  io, i
     
-    !> delete write files - only  needed for debugging / verification
-      open(newunit=io, file="ic.txt",status = 'replace')
-      close(io)
-      open(newunit=io, file="final.txt",status = 'replace')
-      close(io)
-      open(newunit=io, file="intermediate_solutions.txt",status = 'replace')
-      close(io)
     
     !> read problem parameters
     call probin_init(pf_fname)
@@ -210,9 +202,8 @@ contains
     !> compute initial condition on finest level (owned by sweeper)
     sweeper => as_my_sweeper(pf%levels(pf%nlevels)%ulevel%sweeper)        
     print *, 'main: set initial condition'
-    call set_ic(sweeper,y_0)
-    !call y_0%setval(1.0_pfdp)
-    
+    call set_ic(sweeper,y_0)    
+
     !> do the PFASST stepping
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
 

@@ -86,7 +86,7 @@ contains
     do iz=lo(3),hi(3)
        do iy=lo(2),hi(2)
           do ix=lo(1),hi(1)
-             f(i,j,k) = a * dxinv * (fx(ix+1,iy  ,iz  ) - fx(ix,iy,iz)) &
+             f(ix,iy,iz) = a * dxinv * (fx(ix+1,iy  ,iz  ) - fx(ix,iy,iz)) &
                       + b * dyinv * (fy(ix  ,iy+1,iz  ) - fy(ix,iy,iz)) &
                       + c * dzinv * (fz(ix  ,iy  ,iz+1) - fz(ix,iy,iz))
           end do
@@ -105,8 +105,8 @@ contains
       real(amrex_real), intent(inout) :: f(plo(1):phi(1), plo(2):phi(2), plo(3):phi(3))
       real(amrex_real), intent(in) :: dx(3)
       ! local
-      integer :: ix, iy
-      real(amrex_real) :: dxinv, dyinv
+      integer :: ix, iy, iz
+      real(amrex_real) :: dxinv, dyinv, dzinv
       real(amrex_real) :: fx(lo(1):hi(1)+1,lo(2):hi(2)  ,lo(3):hi(3)  )
       real(amrex_real) :: fy(lo(1):hi(1)  ,lo(2):hi(2)+1,lo(3):hi(3)  )
       real(amrex_real) :: fz(lo(1):hi(1)  ,lo(2):hi(2)  ,lo(3):hi(3)+1)
