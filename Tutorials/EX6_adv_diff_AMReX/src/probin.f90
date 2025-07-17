@@ -4,10 +4,13 @@
 !>  Module for reading local parameters for the problem
 module probin
   use pfasst
-  use pf_mod_dim, only: echo_dim 
-
+  use pf_mod_dim, only: echo_dim
+  use pf_mod_mpi
+  
   character(len=64), save :: problem_type
   integer,  save :: Ndim   ! Number of dimesions
+  integer,  save :: nspace   ! Number of process in space
+  integer,  save :: ntime   ! Number of process in time
   real(pfdp),  save,allocatable :: dom_size(:)    ! Domain size
   real(pfdp),  save :: Lx,Ly,Lz    ! Components of domain size
   real(pfdp), save :: dt     ! time step
@@ -26,7 +29,7 @@ module probin
   integer, save :: splitting                    ! type of imex splitting
   !  parameters for advection diffusion
   real(pfdp), save :: lam1,lam2                 ! coefficients for Dahlquist
-  real(pfdp), save :: a,b,c                     ! advection velocities
+  real(pfdp), save :: vx,vy,vz                     ! advection velocities
   real(pfdp), save :: nu                        ! viscosity
   real(pfdp), save :: t00                       ! initial time for exact ad solution
   real(pfdp), save :: sigma                     ! initial condition parameter for ad solution
@@ -57,10 +60,10 @@ module probin
 
   integer :: ios,iostat 
   namelist /params/  nx,ny,nz,ic_type, eq_type, nsteps,nsteps_rk,rk_order, dt, Tfin
-  namelist /params/  pfasst_nml, lam1,lam2,a,b,c, nu, t00, sigma, beta, gamma, splitting
+  namelist /params/  pfasst_nml, lam1,lam2,vx,vy,vz, nu, t00, sigma, beta, gamma, splitting
   namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz, max_grid_size
   namelist /params/  linop_maxorder, linop_bc_lo, linop_bc_hi, geom_bc_lo, geom_bc_hi
-  namelist /params/  mlmg_max_iter, mlmg_tol_rel, mlmg_tol_abs
+  namelist /params/  mlmg_max_iter, mlmg_tol_rel, mlmg_tol_abs, nspace, ntime
 
 contains
 
@@ -70,6 +73,7 @@ contains
     integer :: un  !  file read unit
     character(len=32) :: arg  !  command line argument
     character(128)    :: probin_fname   !<  file name for input parameters
+    integer :: gSize, gRank, err
 
     !> Set the name of the input file
     probin_fname = "probin.nml" ! default file name - can be overwritten on the command line
@@ -93,9 +97,9 @@ contains
 
     lam1          = 0.0_pfdp  !-1.0_pfdp
     lam2          = 0.0_pfdp  !0.5_pfdp
-    a             = 1.0_pfdp
-    b             = 1.0_pfdp
-    c             = 0.0_pfdp
+    vx            = 1.0_pfdp
+    vy            = 1.0_pfdp
+    vz            = 0.0_pfdp
     nu            = 0.01_pfdp
     kfreqx        = 1.0_pfdp
     kfreqy        = 0.0_pfdp
@@ -114,9 +118,16 @@ contains
     splitting     = 1  !  Default is IMEX
     pfasst_nml    = probin_fname
 
+    !> MPI-communicator stuff
+    ! default to time only paralleliation
+    call mpi_comm_size(MPI_COMM_WORLD, gSize, err)
+    call mpi_comm_rank(MPI_COMM_WORLD, gRank, err)
+    ntime = 1
+    nspace = gSize      
+
     !>  Read in stuff from input file
     un = 9
-    write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
+    if (gRank .eq. 0) write(*,*) 'opening file ',TRIM(probin_fname), '  for input'
     open(unit=un, file = probin_fname, status = 'old', action = 'read')
     read(unit=un, nml = params)
     close(unit=un)
@@ -153,7 +164,7 @@ contains
     type(pf_pfasst_t), intent(inout)           :: pf   
     integer,           intent(in   ), optional :: un_opt
     integer :: un = 6
-
+    
     if (pf%rank /= 0) return
     if (present(un_opt)) un = un_opt
 
@@ -163,6 +174,8 @@ contains
     write(un,*) 'Local Variables'
     write(un,*) '----------------'
     write(un,*) 'Ndim:   ', Ndim, '! Number of dimensions'
+    write(un,*) 'nSpace: ', nspace, '! Number of proccesses in space'
+    write(un,*) 'nTime:  ', ntime, '! Number of proccesses in time'
     write(un,*) 'nsteps: ', nsteps, '! Number of steps'
     write(un,*) 'nsteps_rk: ', nsteps_rk(1:pf%nlevels), '! Number of rk substeps'
     write(un,*) 'rk_order: ', rk_order(1:pf%nlevels), '! Order of rk substeps'        
@@ -192,11 +205,11 @@ contains
        write(un,*) 'Solving the linear advection diffusion equation'
        select case (Ndim)
        case (1)
-         write(un,*) 'adevct coef: ',  a, '! advection velocities'
+         write(un,*) 'adevct coef: ',  vx, '! advection velocities'
        case (2)
-         write(un,*) 'adevct coef: ',  a,b, '! advection velocities'
+         write(un,*) 'adevct coef: ',  vx,vy, '! advection velocities'
        case (3)
-         write(un,*) 'adevct coef: ',  a,b,c, '! advection velocities'
+         write(un,*) 'adevct coef: ',  vx,vy,vz, '! advection velocities'
        end select
        write(un,*) 'nu:     ', nu, '! diffusion constant'
        select case (ic_type)

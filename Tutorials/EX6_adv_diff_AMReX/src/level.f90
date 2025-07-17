@@ -39,7 +39,7 @@ contains
     !> local 
     class(pf_amrex_mfab_t), pointer         :: mfab_f,mfab_c        ! pointer to encaps
     class(pf_AMReX_mfab_factory_t), pointer :: factory_f, factory_c
-    integer     :: refine_ratio, rem
+    integer     :: refine_ratio
     integer     :: nc
     integer, allocatable :: lo_bc(:,:), hi_bc(:,:)
 
@@ -51,9 +51,6 @@ contains
 
     !> compute refinement ratio
     ! checked during initalization that refinement ratio is of integer-type and same for all dimensions 
-    ! might be better to do in in level initialization
-    !rem = modulo(mfab_f%arr_shape(1), mfab_c%arr_shape(1))
-    !if (rem .ne. 0) call pf_stop(__FILE__,__LINE__,'Error - integer-type refinement-ratio required!') 
     refine_ratio = mfab_f%arr_shape(1) / mfab_c%arr_shape(1)
     
     !> interpolate using amrex_fillcoarsepatch 
@@ -165,10 +162,7 @@ contains
     class(pf_amrex_mfab_t), pointer         :: mfab_f,mfab_c        ! pointer to encaps
     class(pf_AMReX_mfab_factory_t), pointer :: factory_f, factory_c
     integer     :: refine_ratio, nc
-    integer, pointer ::   ncoarse(:), nfine(:)
-    real(amrex_real), pointer, dimension(:,:,:,:) :: p
-    type(amrex_box) :: bx   
-
+    
     !> set pointers
     factory_c => cast_as_AMReX_factory(c_lev%ulevel%factory)
     factory_f => cast_as_AMReX_factory(f_lev%ulevel%factory)

@@ -9,6 +9,7 @@ module pf_my_sweeper
   use amrex_abeclaplacian_module
   use amrex_linop_module
   use amrex_multigrid_module
+  use mpi
   
   implicit none
 
@@ -36,7 +37,7 @@ contains
    subroutine advect_2d (lo, hi, y, f, plo, phi, dx)
       ! evaluate RHS for single patch
       use amrex_fort_module,  only : amrex_real
-      use probin,             only: a, b        ! advective velocities
+      use probin,             only: vx, vy        ! advective velocities
       ! in- / outputs
       integer, intent(in) :: lo(2), hi(2), plo(2), phi(2)
       real(amrex_real), intent(in   ) :: y(plo(1):phi(1), plo(2):phi(2))
@@ -71,8 +72,8 @@ contains
       ! eval f
       do iy=lo(2),hi(2)
          do ix=lo(1),hi(1)
-            f(ix,iy) = -a * dxinv * (fx(ix+1,iy  )-fx(ix,iy)) &
-                     - b * dyinv * (fy(ix  ,iy+1)-fy(ix,iy))
+            f(ix,iy) = -vx * dxinv * (fx(ix+1,iy  )-fx(ix,iy)) &
+                     -vy * dyinv * (fy(ix  ,iy+1)-fy(ix,iy))
          end do
       end do
 
@@ -144,6 +145,7 @@ contains
    !>  Routine to set up sweeper variables and operators
    subroutine initialize(this, pf,level_index)
       use probin, only:  Ndim, splitting, mlmg_max_iter, linop_maxorder, linop_bc_lo, linop_bc_hi
+      use amrex_paralleldescriptor_module, only: amrex_pd_ioprocessor
       class(my_sweeper_t), intent(inout) :: this
       type(pf_pfasst_t),   intent(inout),target :: pf
       integer, intent(in) :: level_index
@@ -151,7 +153,11 @@ contains
       class(pf_level_t), pointer    :: lev
       real(8)                       :: a_scalar, b_scalar
       type(amrex_multifab)          :: alpha, beta(Ndim)
-      
+      logical                       :: ioProc
+
+      !> check if proc is defined as ioProc internal in AMReX for verbose stuff
+      ioProc = amrex_pd_ioprocessor()
+
       !>  get level + shape
       lev => pf%levels(level_index)
       this%nx=lev%lev_shape(1)
@@ -163,15 +169,15 @@ contains
       if (splitting .eq. 0 ) then     ! do implicit only
          this%implicit=.TRUE.
          this%explicit=.FALSE.
-         print *, 'sweeper_2d.f90: fully implicit detected'
+         if (ioProc) print *, 'sweeper_2d.f90: fully implicit detected'
       elseif (splitting .eq. 1 ) then ! IMEX
          this%implicit=.TRUE.
          this%explicit=.TRUE.
-         print *, 'sweeper_2d.f90: IMEX detected'
+         if (ioProc) print *, 'sweeper_2d.f90: IMEX detected'
       elseif (splitting .eq. 2 ) then ! do explicit only 
          this%implicit=.FALSE.
          this%explicit=.TRUE.
-         print *, 'sweeper_2d.f90: fully explicit detected'
+         if (ioProc) print *, 'sweeper_2d.f90: fully explicit detected'
       else                            ! do IMEX otherwise
          this%implicit=.TRUE.
          this%explicit=.TRUE.
@@ -184,17 +190,15 @@ contains
       !             - agglomeration         :: logical - default:  0 (in path_to_amrex/Src/LinearSolvers/MLMG/AMReX_MLLinOp.H = true)
       !             - consolidation         :: logical - default:  0 (in path_to_amrex/Src/LinearSolvers/MLMG/AMReX_MLLinOp.H = true)
       !             - max_coarsening_level  :: integer - default: 30 (in path_to_amrex/Src/LinearSolvers/MLMG/AMReX_MLLinOp.H =   30)
-      print *, 'Initialize AMReX MLMG Laplacian'
       select type (fac => lev%ulevel%factory)
         type is (pf_amrex_mfab_factory_t)
         call amrex_abeclaplacian_build(this%abeclap, [fac%geom], [fac%ba], [fac%dm])
       end select
-      print *, 'Finished initalizing AMReX MLMG Laplacian'
-
+      
       !> set order of stencil
       !linop_maxorder = 2
       call this%abeclap%set_maxorder(linop_maxorder) 
-      print *, 'Setted maxorder of Laplacian stencil to: ', linop_maxorder
+      if (ioProc) print *, 'Setted maxorder of Laplacian stencil to: ', linop_maxorder
 
       !> define and set boundary conditions
       ! build array of boundary conditions needed by MLABecLaplacian (LinOpBCType)
@@ -214,17 +218,15 @@ contains
       !     bogus            = 1729
       !
       !linop_bc_lo(Ndim), linop_bc_hi(Ndim) defined in inputfile, available via probin
-      print *, 'LinOP BC lo, hi:', linop_bc_lo,',', linop_bc_hi
+      if (ioProc) print *, 'LinOP BC lo, hi:', linop_bc_lo,',', linop_bc_hi
       call this%abeclap%set_domain_bc(linop_bc_lo, linop_bc_hi)  ! set boundary conditions
-      print *, 'Set boundary conditions of Laplacian'
-
+      
       !> set coefficients for equation (a_scalar * \alpha + b_scalar\nabla  * \beta\nabla) u = f
       ! a_scalar, b_scalar are scalar constants, \alpha and \beta are scalar fields, u is the unknown, f the rhs
       ! set a_scalar, b_scalar
       a_scalar = 1.0       ! 1.0 as value just for initialization        
       b_scalar = 1.0       ! 1.0 as value just for initialization  
       call this%abeclap%set_scalars(a_scalar, b_scalar)
-      print *, 'Initialized A, B coefficients of Laplacian'
       ! set \alpha - \alpha is cell centered value -> single mfab
       select type (fac => lev%ulevel%factory)
         type is (pf_amrex_mfab_factory_t)
@@ -232,7 +234,6 @@ contains
       end select
       call alpha%setval(1.0_pfdp)                 ! 1.0 as value just for initialization
       call this%abeclap%set_acoeffs(0, alpha)     ! inputs: (level, alpha)
-      print *, 'Initialized alpha coefficients of Laplacian'
       
       !> build beta - array pf face centered multifab
       call amrex_multifab_build(beta(1), alpha%ba, alpha%dm, 1, 0, [.true., .false.])  ! build multifab with nodalized boxarray
@@ -240,11 +241,6 @@ contains
       call amrex_multifab_build(beta(2), alpha%ba, alpha%dm, 1, 0, [.false., .true.])  ! build multifab with nodalized boxarray
       call beta(2)%setval(1.0_pfdp)               ! 1.0 as value just for initialization   
       call this%abeclap%set_bcoeffs(0, beta)      ! inputs: (level, beta)
-      print *, 'beta(1)'
-      call amrex_print(beta(1)%ba)
-      print *, 'beta(2)'
-      call amrex_print(beta(2)%ba)
-      print *, 'Initialized beta coefficients of Laplacian'
       
       !> build MLMG solver
       call amrex_multigrid_build(this%mlmg, this%abeclap)
@@ -253,7 +249,7 @@ contains
       !call this%mlmg%set_max_fmg_iter()          ! max number of multigrid cycles before switching to V-cycle -> not used here
       !call this%mlmg%set_fixed_iter()            ! sets fixed number of iterations
       call this%mlmg%set_bottom_solver(1)         ! s :: int 
-      print *, 'Use default biconjugate gradient stabilized method (bicgstab) as AMReX MLMG solver!'
+      if (ioProc) print *, 'Use default biconjugate gradient stabilized method (bicgstab) as AMReX MLMG solver!'
         ! Defined in path_to_amrex/Src/F_Interfaces/LinearSolvers/AMReX_multigrid_fi.cpp
         ! s = [ 0 -> smoother (such as Gauss-Seidel)
         !       1 -> bicgstab (default)
@@ -437,7 +433,6 @@ contains
          !   see -> https://amrex-codes.github.io/amrex/docs_html/LinearSolvers.html# 
          y_sol = this%mlmg%solve([this%y_encap%mfab], [this%rhs_encap%mfab], mlmg_tol_rel, mlmg_tol_abs)
          !call this%mlmg%get_fluxes(this%f_encap%mfab)
-         !print *, 'AMReX MLMG fluxes computed'
          ! further functionality of mlmg:
          !call this%mlmg%get_grad_solutions(grad_sol)    ! init grad_sol before as type(amrex_multifab)
          !call this%mlmg%comp_residual(residual,this%y_encap%mfab,this%rhs_encap%mfab)   ! init residual before as type(amrex_multifab)
@@ -457,4 +452,64 @@ contains
 
 end module pf_my_sweeper
 
-
+! boundary conditions used in AMReX (BCType defined in path_to_amrex/Src/Base/AMReX_BC_TYPES.H)
+    !    ---------------------------------------------------------------------
+    !          CONVERSIONS FROM PHYSICAL TO MATHEMATICAL BCs
+    !  Note that it is up to application codes to enforce conversions
+    !
+    !
+    !PHYS BC        |   Velocity      |    Temperature   |    Scalars     |
+    !----------------------------------------------------------------------
+    !INTERIOR       |                 |                  |                |
+    !   or          |    INT_DIR      |     INT_DIR      |    INT_DIR     |
+    !PERIODIC       |                 |                  |                |
+    !----------------------------------------------------------------------
+    !               |                 |                  |                |
+    !INFLOW         |    EXT_DIR      |     EXT_DIR      |    EXT_DIR     |
+    !               |                 |                  |                |
+    !----------------------------------------------------------------------
+    !               |                 |                  |                |
+    !OUTFLOW        |    FOEXTRAP     |     FOEXTRAP     |    FOEXTRAP    |
+    !               |                 |                  |                |
+    !----------------------------------------------------------------------
+    !NO SLIP WALL   |                 |                  |                |
+    !  with         |    EXT_DIR      |  REFLECT_EVEN    |    FOEXTRAP    |
+    !ADIABATIC TEMP |    U = V = 0    |    dT/dn = 0     |                |
+    !----------------------------------------------------------------------
+    !NO SLIP WALL   |                 |                  |                |
+    !  with         |    EXT_DIR      |     EXT_DIR      |    FOEXTRAP    |
+    !FIXED TEMP     |    U = V = 0    |                  |                |
+    !----------------------------------------------------------------------
+    !SLIP WALL      |                 |                  |                |
+    !  with         |  Un=0 EXT_DIR   |  REFLECT_EVEN    |    HOEXTRAP    |
+    !ADIABATIC TEMP |  Ut   HOEXTRAP  |    dT/dn = 0     |                |
+    !----------------------------------------------------------------------
+    !SLIP WALL      |                 |                  |                |
+    !  with         |  Un=0 EXT_DIR   |     EXT_DIR      |    HOEXTRAP    |
+    !FIXED TEMP     |  Ut   HOEXTRAP  |                  |                |
+    !----------------------------------------------------------------------
+    !               |                 |                  |                |
+    !SYMMETRY       |  Un REFLECT_ODD |  REFLECT_EVEN    | REFLECT_EVEN   |
+    !               |  Ut REFLECT_EVEN|                  |                |
+    !----------------------------------------------------------------------
+    !
+    !
+    !INT_DIR      : data taken from other grids or interpolated
+    !EXT_DIR      : data specified on EDGE (FACE)
+    !EXT_DIR_CC   : data specified at cell center
+    !HOEXTRAP     : higher order extrapolation to EDGE of bndry
+    !HOEXTRAPCC   : linear extrapolation to CELL of bndry
+    !FOEXTRAP     : first order extrapolation from last cell in interior
+    !REFLECT_EVEN : F(-n) = F(n)   true reflection from interior cells
+    !REFLECT_ODD  : F(-n) = -F(n)  true reflection from interior cells
+    !
+    !bogus               = -666
+    !reflect_odd         =   -1
+    !int_dir             =    0
+    !reflect_even        =    1
+    !foextrap            =    2
+    !ext_dir             =    3
+    !hoextrap            =    4
+    !hoextrapcc          =    5
+    !ext_dir_cc          =    6
+    !direction_dependent =    7

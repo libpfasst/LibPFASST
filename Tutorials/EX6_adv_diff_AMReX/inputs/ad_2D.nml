@@ -8,13 +8,13 @@
     nlevels = 1	
 
     !  These are internal pfasst variables that can be reset
-    niters = 4   !  default is 5
+    niters = 3   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1 
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
+     abs_res_tol = 1.d-10
      rel_res_tol = 1.d-12
 
      nnodes = 5
@@ -25,7 +25,7 @@
      ! additional - are these needed ?
      Pipeline_pred =  .true.
      PFASST_pred = .true.
-     Vcycle=.false.
+     Vcycle=.true.
 
      
 /
@@ -33,14 +33,16 @@
 !  Now define the local variables you need
 &PARAMS
 
+    ntime = 1
+    nspace = 8
 
-    nx = 32
-    ny = 32
-    max_grid_size = 8     ! maximum number of points per dim - generate boxarray from domain-box
+    nx = 60
+    ny = 80
+    max_grid_size = 20     ! maximum number of points per dim - generate boxarray from domain-box
 
     nu = 0.02       ! default = 0.02
-    a = 1.0         ! default = 1.0
-    b = 0.6         ! default = 1.0
+    vx = 1.0         ! default = 1.0
+    vy = 0.6         ! default = 1.0
     
     !Lx=6.28318530717958647692528676655900576839433879875021
     Lx = 2.0
@@ -48,7 +50,7 @@
     Lz = 0.0
     
     Tfin = 0.5              
-    nsteps = 20             ! 16
+    nsteps = 5            ! 16
     eq_type = 1             ! 1 -> adv-diff	
     ic_type = 1             ! 1 -> Sin-wave
     kfreqx = 1.0

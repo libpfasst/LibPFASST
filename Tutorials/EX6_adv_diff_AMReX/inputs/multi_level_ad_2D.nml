@@ -1,58 +1,62 @@
 !
-!  Test parameters for multi-level imex
+!  Test parameters for a 2-D advection diffusion
+!	u_t = -vx * u_x -vy * u_y + nu * (u_xx + u_yy)
 !
+! this needs 162.4 s 
 
-!  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 2   !  must be set
+   !  These are internal pfasst variables that must be set
+    nlevels = 2	
 
-    niters = 4   !  default is 5
-    nnodes =     3 5  
-
-    use_proper_nodes=.false.
-    nsweeps_pred= 1 1 1
-    nsweeps= 1 1 1
-    
-    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-    qtype  = 1   
+    !  These are internal pfasst variables that can be reset
+    niters = 5   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1 
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
+     abs_res_tol = 1.d-10
      rel_res_tol = 1.d-12
 
+     nnodes = 3 5
+	
+     nsweeps_pred= 1 
+     nsweeps= 1
 
-     !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     pipeline_pred =  .false.
+     ! additional - are these needed ?
+     Pipeline_pred =  .true.
      PFASST_pred = .true.
+     Vcycle=.true.
 
-     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
-     Vcycle=.TRUE.
-
-     outdir="ad"
+     
 /
 
 !  Now define the local variables you need
 &PARAMS
 
-    nx =  64 128
-    ny =  64 128
-    max_grid_size = 16     ! maximum number of points per dim - generate
+    ntime = 2
+    nspace = 8
+
+    nx = 64 128
+    ny = 96 192
+    max_grid_size = 16     ! maximum number of points per dim - generate boxarray from domain-box
+
+    nu = 0.02       ! default = 0.02
+    vx = 1.0         ! default = 1.0
+    vy = 0.6         ! default = 1.0
     
-    nu = 0.02
-    a  = 1.0
-    b  = 0.6
-    
+    !Lx=6.28318530717958647692528676655900576839433879875021
     Lx = 2.0
     Ly = 3.0
     Lz = 0.0
-
-    Tfin = 0.5
-    nsteps = 10
+    
+    Tfin = 0.5              
+    nsteps = 20            ! 16
     eq_type = 1             ! 1 -> adv-diff	
     ic_type = 1             ! 1 -> Sin-wave
     kfreqx = 1.0
     kfreqy = 2.0
-    
+
     ! controls splitting (0 fully implicit, 1 treats u_xx implicitly and u_x explicitly, 2 fully explicit)
     splitting = 1
 
@@ -76,8 +80,8 @@
         !     symmetry         =  109
         !     Periodic         =  200
         !     bogus            = 1729
-    geom_bc_lo  = 0 0                    ! array size of dimension
-    geom_bc_hi  = 0 0                    ! array size of dimension
+    geom_bc_lo  = 0 0                     ! array size of dimension
+    geom_bc_hi  = 0 0                     ! array size of dimension
         !     amrex_bc_bogus        = -666
         !     amrex_bc_reflect_odd  = -1
         !     amrex_bc_int_dir      =  0

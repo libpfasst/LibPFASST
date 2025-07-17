@@ -40,9 +40,9 @@
     max_grid_size = 8     ! maximum number of points per dim - generate boxarray from domain-box
 
     nu = 0.02       ! default = 0.02
-    a = 1.0         ! default = 1.0
-    b = 0.6         ! default = 1.0
-    c = 0.4         ! default = 1.0
+    vx = 1.0         ! default = 1.0
+    vy = 0.6         ! default = 1.0
+    vz = 0.4         ! default = 1.0
     
     !Lx=6.28318530717958647692528676655900576839433879875021
     Lx = 2.0

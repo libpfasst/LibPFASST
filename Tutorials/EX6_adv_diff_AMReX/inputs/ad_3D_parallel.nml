@@ -1,49 +1,65 @@
 !
-!  Test parameters for multi-level imex
+!  Test parameters for a 2-D advection diffusion
+!	u_t = -vx * u_x -vy * u_y + nu * (u_xx + u_yy)
 !
 
-!  These are internal pfasst variables that must be set
 &PF_PARAMS
-    nlevels  = 2   !  must be set
+   !  These are internal pfasst variables that must be set
+    nlevels = 1	
 
-    niters = 15   !  default is 5
-    nnodes =     3 5  
-
-    use_proper_nodes=.false.
-    nsweeps_pred= 1 1 1
-    nsweeps= 1 1 1
-    
-    !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
-    qtype  = 1   
+    !  These are internal pfasst variables that can be reset
+    niters = 4   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 2 
    
      !  optional variables to control termination  (defaults are 0.0)
      abs_res_tol = 1.d-12
      rel_res_tol = 1.d-12
 
+     nnodes = 5
+	
+     nsweeps_pred= 1 
+     nsweeps= 2
 
-     !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     pipeline_pred =  .false.
+     ! additional - are these needed ?
+     Pipeline_pred =  .true.
      PFASST_pred = .true.
+     Vcycle=.false.
 
-     !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
-     Vcycle=.TRUE.
-
-     outdir="ad"
+     
 /
 
 !  Now define the local variables you need
 &PARAMS
+    
+    ! ATTENTION: user must make sure that nprocs = ntime * nspace holds!
+    ntime = 2       ! number of processes in time     
+    nspace = 4      ! number of processes in space
 
-    nx = 32 64
-    max_grid_size = 8     ! maximum number of points per dim - generate
+    nx = 32
+    ny = 32
+    nz = 32
+    max_grid_size = 8     ! maximum number of points per dim - generate boxarray from domain-box
+
+    nu = 0.02       ! default = 0.02
+    vx = 1.0         ! default = 1.0
+    vy = 0.6         ! default = 1.0
+    vz = 0.4         ! default = 1.0
     
-    nu = 0.1
-    vx=0.9
+    !Lx=6.28318530717958647692528676655900576839433879875021
+    Lx = 2.0
+    Ly = 3.0
+    Lz = 2.0
     
-    Lx=2.0
-    Tfin = 0.5
-    nsteps = 16
-    
+    Tfin = 0.5              
+    nsteps = 10             ! 16
+    eq_type = 1             ! 1 -> adv-diff	
+    ic_type = 1             ! 1 -> Sin-wave
+    kfreqx = 1.0
+    kfreqy = 2.0
+    kfreqz = 1.0
+
     ! controls splitting (0 fully implicit, 1 treats u_xx implicitly and u_x explicitly, 2 fully explicit)
     splitting = 1
 
@@ -52,8 +68,8 @@
     mlmg_tol_rel        =   1.d-10       ! relative tolerance for MLMG solver
     mlmg_tol_abs        =   1.d-12       ! absolute tolerance for MLMG solver
     linop_maxorder      =        2       ! order of stencil for Laplacian
-    linop_bc_lo         =      200       ! array size of dimension           
-    linop_bc_hi         =      200       ! array size of dimension
+    linop_bc_lo         =      200 200 200   ! array size of dimension           
+    linop_bc_hi         =      200 200 200   ! array size of dimension
         ! LinOpBCType :: Integer
         !     interior         =    0
         !     Dirichlet        =  101
@@ -67,8 +83,8 @@
         !     symmetry         =  109
         !     Periodic         =  200
         !     bogus            = 1729
-    geom_bc_lo  = 0                     ! array size of dimension
-    geom_bc_hi  = 0                     ! array size of dimension
+    geom_bc_lo  = 0 0 0                     ! array size of dimension
+    geom_bc_hi  = 0 0 0                     ! array size of dimension
         !     amrex_bc_bogus        = -666
         !     amrex_bc_reflect_odd  = -1
         !     amrex_bc_int_dir      =  0

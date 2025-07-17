@@ -12,32 +12,37 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   !> Routine to return the exact solution
-  subroutine exact(t, y_exact)  
+  subroutine exact(t, y_exact)
+    use probin, only: nu, vx, kfreqx, ic_type
     real(pfdp), intent(in)  :: t
     type(pf_amrex_mfab_t), intent(inout) :: y_exact
     !> local helper
-    real(pfdp), allocatable :: yex(:)
-    allocate(yex(y_exact%arr_shape(1))) ! use either y_exact%ndof or y_exact%arr_shape - y_exact%pack_size contains ghost cells 
+    type(amrex_mfiter) :: mfi
+    type(amrex_box) :: bx    
+    real(pfdp), allocatable :: y_exact_flat(:)
+    integer :: lo(3), hi(3), ix, iy, k
+    real(pfdp) :: Lx, x
 
-    ! compute and unpack flatarray into mfab
-    call exact_realspace(t,yex)
-    call y_exact%unpack(yex)
+    ! allocate
+    allocate(y_exact_flat(y_exact%max_dof_proc)) 
+    call amrex_mfiter_build(mfi, y_exact%mfab, tiling=.true.)
+    Lx = amrex_probhi(1) - amrex_problo(1)
+    k = 0
+    ! loop over boxes
+    do while (mfi%next())
+      bx = mfi%tilebox()
+      lo = bx%lo          ! min and max index per dimension in c++ style
+      hi = bx%hi          ! min and max index per dimension in c++ style
+      do ix = lo(1), hi(1)
+        k = k + 1
+        x = ix * y_exact%geom%dx(1) 
+        y_exact_flat(k) = ad_cos_ex(t, x,nu,vx,kfreqx,Lx)
+      end do
+    end do  
+    ! unpack into mfab & de-alloc
+    call y_exact%unpack(y_exact_flat)
+    deallocate(y_exact_flat)
+    
   end subroutine exact
-
-  
-  !> Routine to return the exact solution
-  subroutine exact_realspace(t, yex)
-    use probin, only: nu, a, kfreq, Lx, ic_type
-    real(pfdp), intent(in)  :: t
-    real(pfdp), intent(out) :: yex(:)
-    
-    yex=0.0_pfdp
-    
-    if (ic_type .eq. 1) then
-      call exact_ad_cos(t,yex,nu,a,kfreq,Lx)
-    else
-      call exact_ad_exp(t,yex,nu,a,Lx)
-    end if
-   end subroutine exact_realspace  
   
 end module pf_mod_rutils

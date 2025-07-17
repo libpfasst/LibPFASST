@@ -39,8 +39,9 @@
     max_grid_size = 16     ! maximum number of points per dim - generate
     
     nu = 0.02
-    a  = 1.0
-    b  = 0.6
+    vx  = 1.0
+    vy  = 0.6
+    vz = 1.0
     
     Lx = 2.0
     Ly = 3.0

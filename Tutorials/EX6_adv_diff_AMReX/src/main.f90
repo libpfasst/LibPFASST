@@ -11,39 +11,41 @@ program main
   use pfasst         !<  This module has include statements for the main pfasst routines
   use pf_mod_mpi
 
-  integer ::  ierror
+  integer ::  ierror, gRank, gSize
   interface
      subroutine add_parameters () bind(c)
      end subroutine add_parameters
   end interface
 
-  !> initialize MPI
-  call mpi_init(ierror)
-  if (ierror /= 0) &
-       call pf_stop(__FILE__,__LINE__,'Can not initialize MPI, ierrer',ierror)
+   !> initialize MPI
+   print *,'main.f90:initialize mpi'
+   call mpi_init(ierror)
+   if (ierror /= 0) call pf_stop(__FILE__,__LINE__,'Can not initialize MPI, ierrer',ierror)
+   call mpi_comm_rank(MPI_COMM_WORLD, gRank, ierror)
+   call mpi_comm_size(MPI_COMM_WORLD, gSize, ierror)
+      
 
-  !> call the routine to do PFASST
-  call run_pfasst()
-  print *,'main.f90:finalize mpi'
-  !> close mpi
-  call mpi_finalize(ierror)
-  if (ierror /= 0) &
-       call pf_stop(__FILE__,__LINE__,'Can not finalize MPI, ierrer',ierror)
-
-    print *,'main.f90:all done'
+   !> call the routine to do PFASST
+   call run_pfasst()
+  
+   !> close mpi
+   if (gRank .eq. 0) print *,'main.f90:finalize mpi'
+   call mpi_finalize(ierror)
+   if (ierror /= 0) call pf_stop(__FILE__,__LINE__,'Can not finalize MPI, ierrer',ierror)
+   if (gRank .eq. 0) print *,'main.f90:all done'
 
 contains
   !>  This subroutine implements pfasst to PDEs in spectral space
   subroutine run_pfasst()  
-    use pf_my_sweeper       !<  Local module for defining sweeper and function evaluations
+    use pf_my_sweeper       !< Local module for defining sweeper and function evaluations
     use pf_my_level         !< Local module defining the levels and restriction/interpolation
     use pf_mod_AMReX_mfab   !< Libpfasst encapsulation for  AMReX multifabs
-    use hooks               !<  Local module for diagnostics and i/o
+    use pf_space_time_comm  !< Local module for space and time mpi communicator
+    use hooks               !< Local module for diagnostics and i/o
     use probin              !< Local module reading/parsing problem parameters
     use pf_mod_rutils       !< module with a few helpful subroutines
     use amrex_base_module
-    !use amrex_amr_module
-
+    
     implicit none
 
     !>  Local variables
@@ -53,7 +55,7 @@ contains
     type(pf_amrex_mfab_t) :: y_end          !<  the solution at the final time
     character(256)        :: pf_fname       !<  file name for input parameters
     class(my_sweeper_t), pointer :: sweeper
-
+    
     !> AMReX level specifics
     type(amrex_box)                             :: domain
     type(amrex_boxarray), allocatable,  target  :: ba(:)
@@ -61,27 +63,41 @@ contains
     type(amrex_geometry), allocatable,  target  :: geom(:)      ! need one per level, since comtains domain & dx 
     
     !> local parameters
-    type(amrex_box)       :: bx          ! add. single box only needed for debugging 
-    integer               ::  l                   ! loop variable over levels
-    integer, allocatable  ::  grid_size_amrex(:)  ! extended to account for amrex need of nghost (nx,ny,nz,ncomp,nghost)
-    integer               ::  nghost
-    integer               ::  mpibuflen           ! length of MPI buffer
-    integer		  ::  ref_ratio
-    !> test stuff
-    integer               ::  io, i
+    integer                :: l                    ! loop variable over levels
+    integer, allocatable   :: grid_size_amrex(:)   ! extended to account for amrex need of nghost (nx,ny,nz,ncomp,nghost)
+    integer                :: nghost
+    integer                :: box_per_proc         ! number of boxes handled per proc - needed for mpibuflen
+    integer                :: mpibuflen            ! length of MPI buffer
+    integer                :: ref_ratio
+    type(amrex_string)     :: am_string
     
+    !> mpi parameters
+    integer :: space_comm, time_comm, space_color, time_color, err
+    integer :: tRank, tSize, sRank, sSize, io
+    logical :: group_space
+    real    :: startT, endT
     
     !> read problem parameters
     call probin_init(pf_fname)
     
     !>  set up communicator
-    call pf_mpi_create(comm, MPI_COMM_WORLD)
-    print *,'main.f90:intializing amrex'    
-    call amrex_init(comm=MPI_COMM_WORLD, arg_parmparse=.false., proc_parmparse=add_parameters)
-    print *,'main.f90:amrex is initialized'
+    group_space = .TRUE.
+    call create_space_time_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, group_space)
+
+    !call pf_mpi_create(comm, MPI_COMM_WORLD)
+    call pf_mpi_create(comm, time_comm)
+    if (gRank .eq. 0) print *,'main.f90:intializing amrex'    
+    !call amrex_init(comm=MPI_COMM_WORLD, arg_parmparse=.false., proc_parmparse=add_parameters)
+    call amrex_init(comm=space_comm, arg_parmparse=.false., proc_parmparse=add_parameters)
+    if (gRank .eq. 0) print *,'main.f90:amrex is initialized'
     
     !>  create the pfasst structure
     call pf_pfasst_create(pf, comm, fname=pf_fname)
+    call mpi_comm_size(space_comm, sSize, err)
+    call mpi_comm_rank(space_comm, sRank,  err)
+    call mpi_comm_size(time_comm, tSize, err)
+    call mpi_comm_rank(time_comm, tRank,  err)
+    call mpi_barrier(MPI_COMM_WORLD, err)
     
     !> Define grid_size & amrex_grid_size
     allocate(grid_size_amrex(Ndim+2))       ! [nx(,ny,nz),ncomp,nghost]
@@ -135,11 +151,7 @@ contains
 
       !> This defines a amrex_geometry object.
       call amrex_geometry_build(geom(l), domain)
-      print *, 'AMReX Ndim:', amrex_spacedim
-      print *, 'geom real min(3), max(3), pmask(3)', amrex_problo, ',', amrex_probhi, ',', amrex_pmask
-      print *, 'geom dx', geom(l)%dx
-      print *, 'main: boxarray after maxSize - level:', l
-      call amrex_print(ba(l))
+
     end do
     
     !> loop over levels and set some level specific parameters
@@ -165,18 +177,31 @@ contains
        if (Ndim > 1) grid_size(2) = ny(l)
        if (Ndim > 2) grid_size(3) = nz(l)
        grid_size_amrex(:) = [grid_size, nghost]     ! extended to account for amrex need of nghost (nx,ny,nz,ncomp,nghost)
-       mpibuflen = product(grid_size)               ! need to extend this for nghost!!
-       print *, 'level', l
-       if (Ndim .eq. 1) then
-        print *,'grid_size_amrex', grid_size_amrex, ' [nx,ncomp,nghost]'
-       else if (Ndim .eq. 2) then
-        print *,'grid_size_amrex', grid_size_amrex, ' [nx,ny,ncomp,nghost]'
-       else if (Ndim .eq. 3) then 
-        print *,'grid_size_amrex', grid_size_amrex, ' [nx,ny,nz,ncomp,nghost]'
+       if (mod(ba(l)%nboxes(),sSize) .ne. 0) then
+         if (gRank == 0) & 
+               print *, "WARNING: best-performance if number of boxes is multiple of nspace!"
+         if (gRank == 0) & 
+               print *, "Number of boxes: ", ba(l)%nboxes(), " number of space-procs: ", sSize 
+         box_per_proc = ba(l)%nboxes() / sSize + 1
+       else
+         box_per_proc = ba(l)%nboxes() / sSize
        end if 
-       print *,'mpibuflen', mpibuflen, ' = number of DoFs without ghost cells - required for sending/receiving'
+       ! mpibuflen = length of data vector handled by processor 
+       mpibuflen = box_per_proc * (max_grid_size ** Ndim) * grid_size(Ndim+1)  
+       if (gRank .eq. 0) print *, 'Level: ', l
+       if (gRank .eq. 0) print *, 'BoxArray: '
+       if (gRank == 0) call amrex_print(ba(l))
+       if (gRank .eq. 0) print *, 'Distribution Map: '
+       if (gRank == 0) call amrex_print(dm(l))
+       if (Ndim .eq. 1) then
+        if (gRank .eq. 0) print *,'grid_size_amrex: ', grid_size_amrex, ' [nx,ncomp,nghost]'
+       else if (Ndim .eq. 2) then
+        if (gRank .eq. 0) print *,'grid_size_amrex: ', grid_size_amrex, ' [nx,ny,ncomp,nghost]'
+       else if (Ndim .eq. 3) then 
+        if (gRank .eq. 0) print *,'grid_size_amrex: ', grid_size_amrex, ' [nx,ny,nz,ncomp,nghost]'
+       end if 
+       if (gRank .eq. 0) print *,'mpibuflen: ', mpibuflen, ' = number of DoFs handled per processor without ghost cells - required for sending/receiving'
        call pf_level_set_size(pf,l,grid_size_amrex,mpibuflen)
-    
     end do
     
     !>  Set up some pfasst stuff
@@ -188,27 +213,37 @@ contains
     
     
     !>  output the run options 
-    call pf_print_options(pf,un_opt=6)
+    if (gRank .eq. 0) call pf_print_options(pf,un_opt=6)
 
     !>  output local parameters
-    call print_loc_options(pf,un_opt=6)
+    if (gRank .eq. 0) call print_loc_options(pf,un_opt=6)
     
     !> allocate initial and final solutions
-    print *, 'main: building y_0'
     call amrex_mfab_build(y_0, grid_size_amrex, ba(pf%nlevels), dm(pf%nlevels), geom(pf%nlevels))
-    print *, 'main: building y_end'
     call amrex_mfab_build(y_end, grid_size_amrex, ba(pf%nlevels), dm(pf%nlevels), geom(pf%nlevels))
        
     !> compute initial condition on finest level (owned by sweeper)
     sweeper => as_my_sweeper(pf%levels(pf%nlevels)%ulevel%sweeper)        
-    print *, 'main: set initial condition'
     call set_ic(sweeper,y_0)    
-
+    
     !> do the PFASST stepping
+    call mpi_barrier(MPI_COMM_WORLD, ierror)
+    call cpu_time(startT)
     call pf_pfasst_run(pf, y_0, dt, 0.0_pfdp, nsteps,y_end)
+    call cpu_time(endT)
+    print 1000, "RANK ", gRank, "Elasped time: ", endT - startT, " [s]"
+    1000 format (A5,I2,A20,F10.5,A4)
+    call mpi_barrier(MPI_COMM_WORLD, ierror)
+    
+    !> print final
+    call amrex_multifab_write(y_0%mfab, "dat/"//trim(pf%outdir)//"/plt_initial_sol")
+    call amrex_multifab_write(y_end%mfab, "dat/"//trim(pf%outdir)//"/plt_final_sol")
+    call amrex_string_build(am_string, "conc")
+    call amrex_write_plotfile("dat/"//trim(pf%outdir)//"/plt_file_final_sol", &
+                              1, [y_end%mfab], [am_string], [y_end%geom], real(0.0,8), [1], [1])
 
     !>  wait for everyone to be done
-    call mpi_barrier(pf%comm%comm, ierror)
+    call mpi_barrier(MPI_COMM_WORLD, ierror)
 
     !>  deallocate initial condition, final solution and AMReX stuff
     call amrex_mfab_destroy(y_0)
@@ -222,10 +257,8 @@ contains
     deallocate(grid_size_amrex)
 
     !>  close down amrex
-    !call amr_data_finalize()
-    !call amrex_amrcore_finalize()
     call amrex_finalize()    
-
+    
   end subroutine run_pfasst
 
   !> Routine to set initial condition.
