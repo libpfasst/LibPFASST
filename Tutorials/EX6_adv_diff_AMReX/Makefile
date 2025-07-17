@@ -18,7 +18,7 @@ FSRC = src/sweeper_$(DIM)d.f90
 #  Include the standard 
 FSRC +=  src/probin.f90  src/utils_$(DIM)d.f90 src/dim_$(DIM)d.f90
 #  Choose the main and level to include
-FSRC += src/main.f90 src/hooks.f90 src/level.f90
+FSRC += src/main.f90 src/hooks.f90 src/level.f90 src/mpi_comm.f90
 
 OBJ  = $(subst src, build,$(FSRC:.f90=.o) $(CSRC:.c=.o))
 
