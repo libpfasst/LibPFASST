@@ -13,6 +13,7 @@ module pf_mod_AMReX_mfab
   use iso_c_binding
   use pf_mod_dtype
   use pf_mod_utils
+  use mpi
   implicit none
 
   !>  Type to create and destroy N-dimenstional arrays 
@@ -33,10 +34,10 @@ module pf_mod_AMReX_mfab
      integer                        :: ncomp                ! Number of solution components
      integer                        :: nghost               ! Number of ghost cells
      integer                        :: ndof                 ! Number of DOFs
+     integer                        :: max_dof_proc         ! Max number of DOFs handled per proc
      integer                        :: max_grid_size        ! AMReX BoxArray Parameter
      integer                        :: arr_shape(4)         ! (nx,ny,nz,ncomp)
      integer                        :: pack_size(4)         ! arr_shape plus ghost cells (nx+2*nghost,ny+2*nghost,nz+2*nghost,ncomp)
-     integer, allocatable           :: am_to_flat(:,:,:,:)  ! index for the array
      type(amrex_geometry)           :: geom                 ! pointer to global geometry - needed for fill_boundary in AMReX mfab
      type(amrex_multifab)  :: mfab  !  The actual multifab
      
@@ -74,7 +75,8 @@ contains
 
   !>  Subroutine to allocate the mfab and set its pararmeters
   subroutine AMReX_mfab_build(this, shape_in, ba, dm, geom)
-    use pf_mod_comm_mpi
+    use pf_mod_comm_mpi                   ! PFASST internal MPI-mod
+    use amrex_paralleldescriptor_module   ! AMReX internal MPI-mod
     class(pf_encap_t),              intent(inout)   :: this
     integer,                        intent(in   )   :: shape_in(:)  ! new def: [nx,(ny,nz,)ncomp,nghost] 
     type(amrex_boxarray),           intent(in   )   :: ba
@@ -83,13 +85,15 @@ contains
 
     ! local 
     integer :: k      ! iterator
-    integer :: ierr
+    integer :: nprocs, dof_per_box, box_per_proc
+    
     !
     select type (this)
     class is (pf_AMReX_mfab_t)
        ! dimension check
        this%ndim   = SIZE(shape_in)-2   ! -2 to account for ncomp and nghost
        if (this%ndim .ne. amrex_spacedim) then
+          print *, "AMReX Space_dim = ", amrex_spacedim
           call pf_stop(__FILE__,__LINE__,'bad dimension in amrex encap, ndim=',this%ndim)
        end if
        
@@ -100,7 +104,11 @@ contains
        this%ncomp                   = shape_in(this%ndim+1)   ! kinda double here
        this%nghost                  = shape_in(this%ndim+2)
        this%ndof                    = product(shape_in(1:this%ndim+1))
-       
+       dof_per_box                  = this%ndof / ba%nboxes() 
+       nprocs                       = amrex_pd_nprocs()
+       box_per_proc                 = ceiling(real(ba%nboxes()) / nprocs)
+       this%max_dof_proc            = box_per_proc * dof_per_box
+
        !  Make a shape the size of the grid with ghost cells
        this%pack_size = 1
        this%pack_size(1:this%ndim+1) = shape_in(1:this%ndim+1)
@@ -115,13 +123,6 @@ contains
 
        !> Build data multifabs
        call amrex_multifab_build(this%mfab, ba, dm, this%ncomp, this%nghost)
-
-       !> Build the index for the flat array
-       ! we use C++ indexing convention for am_to_flat since bx%lo,bx%hi use that convention 
-       allocate(this%am_to_flat(this%arr_shape(1), this%arr_shape(2), this%arr_shape(3), this%arr_shape(4)),stat=ierr)
-       if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)
-       this%am_to_flat = reshape( (/ (k, k=1,product(this%arr_shape)) /), this%arr_shape)
-
       end select
 
   end subroutine AMReX_mfab_build
@@ -252,9 +253,8 @@ contains
     real(amrex_real), contiguous, dimension(:,:,:,:), pointer :: mfab_data
     type(amrex_box) :: bx    
     type(amrex_mfiter) :: mfi
-    integer :: lo(3), hi(3), n(3), i
-    integer, allocatable :: flat_idx(:)
-
+    integer :: lo(3), hi(3), n(3), ncurrent, npacked
+    
     !> loop over boxes
     if (this%mfab%ba%nboxes() == 1) then    
       ! single box -> single reshape is sufficient
@@ -263,7 +263,7 @@ contains
       z = reshape(mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp),[product(this%arr_shape)])
     else    ! multiple boxes -> use mfiter to loop over boxes
       call amrex_mfiter_build(mfi, this%mfab, tiling=.true.)
-      z = 0.0_pfdp
+      npacked = 0
       do while (mfi%next())
         ! get current box and data pointer
         bx = mfi%tilebox()
@@ -273,14 +273,11 @@ contains
         hi = bx%hi          ! min and max index per dimension in c++ style
         lo(1:amrex_spacedim) = lo(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing   
         hi(1:amrex_spacedim) = hi(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing
-        n = hi - lo + 1     ! dofs per dim inside current box 
-        ! generate the index for the flat array
-        if (allocated(flat_idx)) deallocate(flat_idx)
-        allocate(flat_idx(product(n)))  
-        flat_idx = reshape(this%am_to_flat(lo(1):hi(1),lo(2):hi(2),lo(3):hi(3),1:this%ncomp) , [product(n)*this%ncomp])
+        n = hi - lo + 1     ! dofs per dim inside current box
+        ncurrent = product(n) * this%ncomp
         ! assign the data to the flat array
-        z(flat_idx) = reshape(mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp),[product(n)*this%ncomp])
-        deallocate(flat_idx)
+        z(npacked+1:npacked+ncurrent) = reshape(mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp),[ncurrent])
+        npacked = npacked + ncurrent
       end do   
       call amrex_mfiter_destroy(mfi)
     end if
@@ -296,9 +293,9 @@ contains
     real(pfdp),  pointer :: mfab_data(:,:,:,:)
     type(amrex_box) :: bx
     type(amrex_mfiter) :: mfi 
-    integer :: lo(3), hi(3), n(3), i
-    integer, allocatable :: flat_idx(:)
+    integer :: lo(3), hi(3), n(3), ncurrent, npacked
 
+    !> loop over boxes
     if (this%mfab%ba%nboxes() == 1) then
       ! single box -> single reshape is sufficient
       mfab_data=>this%mfab%dataPtr(0)         ! get c-pointer to data - 0 index due to c++ indexing
@@ -307,6 +304,7 @@ contains
     else
       ! multiple boxes -> use mfiter to loop over boxes
       call amrex_mfiter_build(mfi, this%mfab, tiling=.true.)
+      npacked = 0
       do while (mfi%next())
         ! get box and data pointer
         bx = mfi%tilebox()
@@ -316,15 +314,14 @@ contains
         hi = bx%hi          ! min and max index per dimension in c++ style
         lo(1:amrex_spacedim) = lo(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing   
         hi(1:amrex_spacedim) = hi(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing
-        n = hi - lo + 1     ! dofs per dim inside current box
-        ! generate the index for the flat array
-        if (allocated(flat_idx)) deallocate(flat_idx)
-        allocate(flat_idx(product(n)))  
-        flat_idx = reshape(this%am_to_flat(lo(1):hi(1),lo(2):hi(2),lo(3):hi(3),1:this%ncomp) , [product(n)*this%ncomp])
+        n = hi - lo + 1     ! dofs per dim inside current box 
+        ncurrent = product(n) * this%ncomp
         ! assign the data from the flat array
-        mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp) = reshape(z(flat_idx),[n(1), n(2), n(3), this%ncomp])
-        deallocate(flat_idx)
-      end do   
+        mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp) = &
+              reshape(z(npacked+1:npacked+ncurrent),[n(1), n(2), n(3), this%ncomp])
+        npacked = npacked + ncurrent
+      end do
+      ! de-alloc   
       call amrex_mfiter_destroy(mfi)
     end if
 
