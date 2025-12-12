@@ -39,16 +39,20 @@ module pf_mod_AMReX_mfab
      integer                        :: arr_shape(4)         ! (nx,ny,nz,ncomp)
      integer                        :: pack_size(4)         ! arr_shape plus ghost cells (nx+2*nghost,ny+2*nghost,nz+2*nghost,ncomp)
      type(amrex_geometry)           :: geom                 ! pointer to global geometry - needed for fill_boundary in AMReX mfab
-     type(amrex_multifab)  :: mfab  !  The actual multifab
+     type(amrex_multifab)           :: mfab                 !  The actual multifab
      
    contains
      procedure :: setval => AMReX_mfab_setval
      procedure :: copy => AMReX_mfab_copy
      procedure :: norm => AMReX_mfab_norm
+     procedure :: normLinf => AMReX_mfab_normLinf
+     procedure :: normL1 => AMReX_mfab_normL1
+     procedure :: normL2 => AMReX_mfab_normL2
      procedure :: pack => AMReX_mfab_pack
      procedure :: unpack => AMReX_mfab_unpack
      procedure :: axpy => AMReX_mfab_axpy
      procedure :: eprint => AMReX_mfab_eprint
+     procedure :: txtprint => AMReX_mfab_txtprint
      !procedure, private  :: get_array_func
   end type pf_amrex_mfab_t
 
@@ -111,11 +115,12 @@ contains
 
        !  Make a shape the size of the grid with ghost cells
        this%pack_size = 1
-       this%pack_size(1:this%ndim+1) = shape_in(1:this%ndim+1)
+       this%pack_size(1:this%ndim) = shape_in(1:this%ndim)
+       this%pack_size(4) = shape_in(this%ndim+1)   !ncomp
        do k=1,this%ndim
            this%pack_size(k)=this%pack_size(k)+2*this%nghost 
        end do
-
+       
        ! Only point to amrex_geometry object here, needed in sweeper for fill_boundary
        this%geom = geom
        ! DistributionMapping "dm" & Boxarray "ba" build in main and used for multifab build are available via the mfab:
@@ -253,7 +258,7 @@ contains
     real(amrex_real), contiguous, dimension(:,:,:,:), pointer :: mfab_data
     type(amrex_box) :: bx    
     type(amrex_mfiter) :: mfi
-    integer :: lo(3), hi(3), n(3), ncurrent, npacked
+    integer :: lo(3), hi(3), n(3), ncurrent, npacked, nc, shift
     
     !> loop over boxes
     if (this%mfab%ba%nboxes() == 1) then    
@@ -264,6 +269,7 @@ contains
     else    ! multiple boxes -> use mfiter to loop over boxes
       call amrex_mfiter_build(mfi, this%mfab, tiling=.true.)
       npacked = 0
+      shift = this%max_dof_proc / this%ncomp
       do while (mfi%next())
         ! get current box and data pointer
         bx = mfi%tilebox()
@@ -274,9 +280,12 @@ contains
         lo(1:amrex_spacedim) = lo(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing   
         hi(1:amrex_spacedim) = hi(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing
         n = hi - lo + 1     ! dofs per dim inside current box
-        ncurrent = product(n) * this%ncomp
+        ncurrent = product(n)
         ! assign the data to the flat array
-        z(npacked+1:npacked+ncurrent) = reshape(mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp),[ncurrent])
+        do nc = 1,this%ncomp
+          z(shift*(nc-1)+npacked+1:shift*(nc-1)+npacked+ncurrent) = &
+                  reshape(mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),nc),[ncurrent])
+        end do
         npacked = npacked + ncurrent
       end do   
       call amrex_mfiter_destroy(mfi)
@@ -293,7 +302,7 @@ contains
     real(pfdp),  pointer :: mfab_data(:,:,:,:)
     type(amrex_box) :: bx
     type(amrex_mfiter) :: mfi 
-    integer :: lo(3), hi(3), n(3), ncurrent, npacked
+    integer :: lo(3), hi(3), n(3), ncurrent, npacked, nc, shift
 
     !> loop over boxes
     if (this%mfab%ba%nboxes() == 1) then
@@ -305,6 +314,7 @@ contains
       ! multiple boxes -> use mfiter to loop over boxes
       call amrex_mfiter_build(mfi, this%mfab, tiling=.true.)
       npacked = 0
+      shift = this%max_dof_proc / this%ncomp
       do while (mfi%next())
         ! get box and data pointer
         bx = mfi%tilebox()
@@ -315,10 +325,12 @@ contains
         lo(1:amrex_spacedim) = lo(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing   
         hi(1:amrex_spacedim) = hi(1:amrex_spacedim) + 1     ! +1 to go  from c++ indexing to fortran indexing
         n = hi - lo + 1     ! dofs per dim inside current box 
-        ncurrent = product(n) * this%ncomp
+        ncurrent = product(n)
         ! assign the data from the flat array
-        mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),1:this%ncomp) = &
-              reshape(z(npacked+1:npacked+ncurrent),[n(1), n(2), n(3), this%ncomp])
+        do nc = 1,this%ncomp
+          mfab_data(bx%lo(1):bx%hi(1),bx%lo(2):bx%hi(2),bx%lo(3):bx%hi(3),nc) = &
+                reshape(z(shift*(nc-1)+npacked+1:shift*(nc-1)+npacked+ncurrent),[n(1), n(2), n(3)])
+        end do
         npacked = npacked + ncurrent
       end do
       ! de-alloc   
@@ -327,19 +339,72 @@ contains
 
   end subroutine AMReX_mfab_unpack
 
-  !> Subroutine to define the norm of the array (here the max norm)
+  !> Subroutine to define the default norm of the array (here the Linf-norm)
   function AMReX_mfab_norm(this, flags) result (norm)
     class(pf_AMReX_mfab_t), intent(in   ) :: this
     integer,     intent(in   ), optional :: flags
+    ! local
+    real(pfdp) :: normVec(this%ncomp)
     real(pfdp) :: norm
+
+    ! Linf norm
+    normVec = AMReX_mfab_normLinf(this, flags)
+    norm = maxval(normVec)
     
-    norm=1.0
-    !if (present(flags)) then
-      norm = this%mfab%norm0()
-    !else
-       !norm = this%mfab%norm2()
-    !end if
+    ! L1 norm
+    !normVec = AMReX_mfab_normL1(this, flags)
+    !norm = sum(normVec)
+
+    ! L2 norm
+    !normVec = AMReX_mfab_norm2(this, flags)
+    !norm = sqrt(sum(normVec**2))
+
   end function AMReX_mfab_norm
+
+  !> Subroutine to define the norm of the array (here the max norm)
+  function AMReX_mfab_normLinf(this, flags) result (norm)
+    class(pf_AMReX_mfab_t), intent(in   ) :: this
+    integer,     intent(in   ), optional :: flags
+    ! local
+    real(pfdp) :: norm(this%ncomp)
+    integer :: nc
+
+    norm=1.0
+    do nc = 1,this%ncomp
+      norm(nc) = this%mfab%norm0(nc)
+    end do
+      
+  end function AMReX_mfab_normLinf
+
+  !> Subroutine to define the norm of the array (here the L1-norm)
+  function AMReX_mfab_normL1(this, flags) result (norm)
+    class(pf_AMReX_mfab_t), intent(in   ) :: this
+    integer,     intent(in   ), optional :: flags
+    ! local
+    real(pfdp) :: norm(this%ncomp)
+    integer :: nc
+
+    norm=1.0
+    do nc = 1,this%ncomp
+      norm(nc) = this%mfab%norm1(nc)
+    end do
+      
+  end function AMReX_mfab_normL1
+
+  !> Subroutine to define the norm of the array (here the L2-norm)
+  function AMReX_mfab_normL2(this, flags) result (norm)
+    class(pf_AMReX_mfab_t), intent(in   ) :: this
+    integer,     intent(in   ), optional :: flags
+    ! local
+    real(pfdp) :: norm(this%ncomp)
+    integer :: nc
+
+    norm=1.0
+    do nc = 1,this%ncomp
+      norm(nc) = this%mfab%norm2(nc)
+    end do
+      
+  end function AMReX_mfab_normL2
 
   !> Subroutine to compute y = a x + y where a is a scalar and x and y are arrays
   subroutine AMReX_mfab_axpy(this, a, x, flags)
@@ -347,10 +412,10 @@ contains
     class(pf_encap_t), intent(in   )           :: x
     real(pfdp),        intent(in   )           :: a
     integer,           intent(in   ), optional :: flags
-
+    
     select type(x)
     type is (pf_AMReX_mfab_t)
-       call this%mfab%saxpy(a,x%mfab,1,1,this%ncomp,this%nghost)       
+      call this%mfab%saxpy(a,x%mfab,1,1,this%ncomp,this%nghost)       
     class default
        call pf_stop(__FILE__,__LINE__,'Type error')
     end select
@@ -365,11 +430,58 @@ contains
     
     allocate(mfab_data_flat(this%ndof))
     call this%pack(mfab_data_flat)
-    !print *, mfab_data_flat         ! prints without ghost cells
-    print *, mfab_data_flat(1:10)         ! prints without ghost cells
+    print *, 'Size: ', size(mfab_data_flat)      ! prints without ghost cells
+    print *, 'First 10: ', mfab_data_flat(1:10)         ! prints without ghost cells
+    print *, 'Last 10: ', mfab_data_flat(this%ndof-10:this%ndof)         ! prints without ghost cells
     deallocate(mfab_data_flat)  
   
   end subroutine AMReX_mfab_eprint
+
+  !>  Subroutine to print the array to txt file
+  subroutine AMReX_mfab_txtprint(this,filename,time,step,iter)
+    class(pf_AMReX_mfab_t), intent(inout) :: this
+    character(len=*), intent(in) :: filename
+    real(amrex_real) :: time
+    integer :: step, iter, ierror
+    ! local
+    real(amrex_real), allocatable:: flat_data(:)
+    type(amrex_box) :: bx    
+    type(amrex_mfiter) :: mfi
+    integer :: lo(3), hi(3), ix, iy, iz, nb, nc, io, k
+    !> write to single file
+    io = 40
+    open(unit=io, file=trim(filename)//".txt", action='write', position='append')
+    write(io, '(A,ES15.7,A,I8,A,I8)') "time: ", time, " step: ", step, " iter: ", iter
+    write(io, '(A)') "ix iy iz icomp value"
+
+    !> get flat data
+    allocate(flat_data(this%ndof))
+    call this%pack(flat_data)
+    
+    
+    !> multiple boxes -> use mfiter to loop over boxes
+    k = 0
+    do nb = 1, this%mfab%ba%nboxes()
+      bx = this%mfab%ba%get_box(nb-1)     ! Fotran - c++ index shift      
+      lo = bx%lo
+      hi = bx%hi
+      do nc = 1, this%ncomp
+        do iz = lo(3), hi(3)
+          do iy = lo(2), hi(2)
+            do ix = lo(1), hi(1)
+              k = k + 1
+              write(io, '(I8,1X,I8,1X,I8,1X,I8,1X,ES15.7)') ix, iy, iz, nc, flat_data(k)
+            end do  ! ix
+          end do    ! iy
+        end do      ! iz
+      end do        ! nc
+    end do          ! nb   
+    
+    deallocate(flat_data)
+
+    close(io)
+    
+  end subroutine AMReX_mfab_txtprint
 
   !>  Helper functions to return the array part
   function get_array_func(x) result(r)
