@@ -4,7 +4,7 @@ module pf_space_time_comm
   implicit none
 contains
 
-   subroutine create_space_time_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, group_space)
+  subroutine create_space_time_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, group_space)
     integer, intent(out) :: space_comm, time_comm
     integer, intent(out) :: space_color, time_color
     integer, intent(in) :: nspace, ntime

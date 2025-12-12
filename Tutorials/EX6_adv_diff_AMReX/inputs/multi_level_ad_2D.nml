@@ -24,7 +24,7 @@
      nsweeps= 1
 
      ! additional - are these needed ?
-     Pipeline_pred =  .true.
+     Pipeline_pred = .true.
      PFASST_pred = .true.
      Vcycle=.true.
 
@@ -34,8 +34,8 @@
 !  Now define the local variables you need
 &PARAMS
 
-    ntime = 2
-    nspace = 8
+    ntime = 1
+    nspace = 20
 
     nx = 64 128
     ny = 96 192

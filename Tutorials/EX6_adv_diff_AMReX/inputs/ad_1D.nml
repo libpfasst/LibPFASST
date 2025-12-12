@@ -1,24 +1,23 @@
 !
-!  Test parameters for a 1-D advection diffusion
-!	u_t = -v * u_x + nu * u_xx
+!  Test parameters for a 2-D advection diffusion
+!	u_t = -vx * u_x -vy * u_y + nu * (u_xx + u_yy)
 !
 
 &PF_PARAMS
    !  These are internal pfasst variables that must be set
-    !nlevels  = 2
     nlevels = 1	
 
     !  These are internal pfasst variables that can be reset
-    niters = 4   !  default is 5
+    niters = 10   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1 
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
-     rel_res_tol = 1.d-12
+     abs_res_tol = 1.d-20
+     rel_res_tol = 1.d-20
 
-     nnodes = 5
+     nnodes = 6
 	
      nsweeps_pred= 1 
      nsweeps= 1
@@ -26,38 +25,41 @@
      ! additional - are these needed ?
      Pipeline_pred =  .true.
      PFASST_pred = .true.
-     Vcycle=.false.
+     Vcycle=.true.
 
+    !
+    !outdir = 'AD_1D_steps-4_nnodes-6_'
      
 /
 
 !  Now define the local variables you need
 &PARAMS
 
+    ntime = 6
+    nspace = 1
 
-    nx = 64
-    max_grid_size = 8     ! maximum number of points per dim - generate boxarray from domain-box
+    nx = 240
+    max_grid_size = 20     ! maximum number of points per dim - generate boxarray from domain-box
 
-    nu = 0.1       ! default = 0.02
-    vx = 0.9         ! default = 1.0
+    nu = 0.02       ! default = 0.02
+    vx = 1.0         ! default = 1.0
     
-    !Lx=6.28318530717958647692528676655900576839433879875021
-    Lx = 2.0
-    Ly = 0.0
-    Lz = 0.0
+    Lx=6.28318530717958647692528676655900576839433879875021
+    !Lx = 2.0
     
-    Tfin = 0.5              
-    nsteps = 16             ! 16
+    Tfin = 1.0              
+    nsteps = 12              ! 16
     eq_type = 1             ! 1 -> adv-diff	
     ic_type = 1             ! 1 -> Sin-wave
-
+    kfreqx = 1.0
+    
     ! controls splitting (0 fully implicit, 1 treats u_xx implicitly and u_x explicitly, 2 fully explicit)
     splitting = 1
 
     ! AMReX general and MLMG solver options
     mlmg_max_iter       =       10       ! maximum number of iterations for MLMG solver
-    mlmg_tol_rel        =   1.d-10       ! relative tolerance for MLMG solver
-    mlmg_tol_abs        =   1.d-12       ! absolute tolerance for MLMG solver
+    mlmg_tol_rel        =   1.d-14       ! relative tolerance for MLMG solver
+    mlmg_tol_abs        =   1.d-14       ! absolute tolerance for MLMG solver
     linop_maxorder      =        2       ! order of stencil for Laplacian
     linop_bc_lo         =      200       ! array size of dimension           
     linop_bc_hi         =      200       ! array size of dimension
@@ -74,8 +76,8 @@
         !     symmetry         =  109
         !     Periodic         =  200
         !     bogus            = 1729
-    geom_bc_lo  = 0                     ! array size of dimension
-    geom_bc_hi  = 0                     ! array size of dimension
+    geom_bc_lo  = 0                       ! array size of dimension
+    geom_bc_hi  = 0                       ! array size of dimension
         !     amrex_bc_bogus        = -666
         !     amrex_bc_reflect_odd  = -1
         !     amrex_bc_int_dir      =  0

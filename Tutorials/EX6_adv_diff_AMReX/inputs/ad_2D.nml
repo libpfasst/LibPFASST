@@ -8,7 +8,7 @@
     nlevels = 1	
 
     !  These are internal pfasst variables that can be reset
-    niters = 3   !  default is 5
+    niters = 5   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1 
@@ -23,10 +23,12 @@
      nsweeps= 1
 
      ! additional - are these needed ?
-     Pipeline_pred =  .true.
+     Pipeline_pred =  .false.
      PFASST_pred = .true.
-     Vcycle=.true.
+     Vcycle=.false.
 
+    !
+    !outdir = 'AD_2D_steps-2_nnodes-5_'
      
 /
 
@@ -34,23 +36,23 @@
 &PARAMS
 
     ntime = 1
-    nspace = 8
+    nspace = 4
 
-    nx = 60
-    ny = 80
-    max_grid_size = 20     ! maximum number of points per dim - generate boxarray from domain-box
+    nx = 512
+    ny = 512
+    max_grid_size = 64     ! maximum number of points per dim - generate boxarray from domain-box
 
     nu = 0.02       ! default = 0.02
     vx = 1.0         ! default = 1.0
-    vy = 0.6         ! default = 1.0
+    vy = 1.0         ! default = 1.0
     
     !Lx=6.28318530717958647692528676655900576839433879875021
-    Lx = 2.0
-    Ly = 3.0
+    Lx = 1.0
+    Ly = 1.0
     Lz = 0.0
     
-    Tfin = 0.5              
-    nsteps = 5            ! 16
+    Tfin = 1.0              
+    nsteps = 100             ! 16
     eq_type = 1             ! 1 -> adv-diff	
     ic_type = 1             ! 1 -> Sin-wave
     kfreqx = 1.0
@@ -61,8 +63,8 @@
 
     ! AMReX general and MLMG solver options
     mlmg_max_iter       =       10       ! maximum number of iterations for MLMG solver
-    mlmg_tol_rel        =   1.d-10       ! relative tolerance for MLMG solver
-    mlmg_tol_abs        =   1.d-12       ! absolute tolerance for MLMG solver
+    mlmg_tol_rel        =   1.d-14       ! relative tolerance for MLMG solver
+    mlmg_tol_abs        =   1.d-14       ! absolute tolerance for MLMG solver
     linop_maxorder      =        2       ! order of stencil for Laplacian
     linop_bc_lo         =      200 200   ! array size of dimension           
     linop_bc_hi         =      200 200   ! array size of dimension

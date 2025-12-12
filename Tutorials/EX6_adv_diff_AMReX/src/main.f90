@@ -23,7 +23,7 @@ program main
    if (ierror /= 0) call pf_stop(__FILE__,__LINE__,'Can not initialize MPI, ierrer',ierror)
    call mpi_comm_rank(MPI_COMM_WORLD, gRank, ierror)
    call mpi_comm_size(MPI_COMM_WORLD, gSize, ierror)
-      
+   print *, 'main.f90: mpi initialized, rank ', gRank, ' of ', gSize   
 
    !> call the routine to do PFASST
    call run_pfasst()
@@ -81,7 +81,7 @@ contains
     call probin_init(pf_fname)
     
     !>  set up communicator
-    group_space = .TRUE.
+    group_space = .FALSE.
     call create_space_time_communicators(nspace, ntime, space_comm, time_comm, space_color, time_color, group_space)
 
     !call pf_mpi_create(comm, MPI_COMM_WORLD)
@@ -209,7 +209,9 @@ contains
     
     !> add some hooks for output
     call pf_add_hook(pf, -1, PF_POST_SWEEP, echo_error)
-    call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, echo_error)
+    call pf_add_hook(pf, -1, PF_POST_BLOCK, echo_error)
+    !call pf_add_hook(pf, -1, PF_POST_CONVERGENCE, echo_error)
+    !call pf_add_hook(pf, -1, PF_POST_BLOCK, write_plotfile)
     
     
     !>  output the run options 
@@ -236,11 +238,13 @@ contains
     call mpi_barrier(MPI_COMM_WORLD, ierror)
     
     !> print final
-    call amrex_multifab_write(y_0%mfab, "dat/"//trim(pf%outdir)//"/plt_initial_sol")
-    call amrex_multifab_write(y_end%mfab, "dat/"//trim(pf%outdir)//"/plt_final_sol")
-    call amrex_string_build(am_string, "conc")
-    call amrex_write_plotfile("dat/"//trim(pf%outdir)//"/plt_file_final_sol", &
-                              1, [y_end%mfab], [am_string], [y_end%geom], real(0.0,8), [1], [1])
+    !call amrex_multifab_write(y_0%mfab, "dat/"//trim(pf%outdir)//"/plt_initial_sol")
+    !call amrex_multifab_write(y_end%mfab, "dat/"//trim(pf%outdir)//"/plt_final_sol")
+    !call amrex_string_build(am_string, "conc")
+    !call amrex_write_plotfile("dat/"//trim(pf%outdir)//"/plt_file_initial_sol", &
+    !                          1, [y_0%mfab], [am_string], [y_0%geom], real(0.0,8), [1], [1])
+    !call amrex_write_plotfile("dat/"//trim(pf%outdir)//"/plt_file_final_sol", &
+    !                          1, [y_end%mfab], [am_string], [y_end%geom], real(Tfin,8), [1], [1])
 
     !>  wait for everyone to be done
     call mpi_barrier(MPI_COMM_WORLD, ierror)

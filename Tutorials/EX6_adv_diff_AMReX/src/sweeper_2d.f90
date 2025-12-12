@@ -397,26 +397,14 @@ contains
       if (piece == 1) then        ! implicit advection
         call pf_stop(__FILE__,__LINE__,'f_comp for advection term not implemented')
       else if (piece == 2) then   ! implicit diffusion
-        ! fill ghost cells of each grid - includes periodic domain boundaries
-        call this%rhs_encap%mfab%fill_boundary(this%rhs_encap%geom)     ! does this take care of all BCs?
+        ! fill internal ghost cells of each grid - includes periodic domain boundaries
+        call this%rhs_encap%mfab%fill_boundary(this%rhs_encap%geom)     
         ! fill_boundary final ref to path_to_amrex/Src/Base/AMReX_FabArray.H
         ! seems to fill all boundaries, including periodic ones if periodic is provided
-        ! strange thing SDC example in AMReX calls rhs.FillBoundary(geom.periodicity()); and afterwards FillDomainBoundary(rhs, geom, bc);
         !
         if (amrex_is_all_periodic() .eqv. .false.) then
           ! Fill non-periodic physical boundaries
           print *, 'WARNING: non-periodic BC'
-          ! in C++ code:
-          ! FillDomainBoundary(rhs, geom, bc);
-          ! bc = [bc_x_lo, bc_y_lo, bc_x_hi, bc_y_hi] for 2D with bc_x/y_lo/hi :: Integer see below
-          ! 
-          ! added fill_domain_boundary to interface in path_to_amrex/Src/F_Interfaces/Base/AMReX_multifab_mod.f90
-          ! should work like this:
-          !bc = [0, 0]
-          !call this%rhs_encap%mfab%fill_domain_boundary(this%y_encap%geom, bc) 
-          !
-          ! AMReX_linop_mod.f90 also offers set_domain_bc(this::amrex_linop, lobc::integer(Ndim), hibc::integer(Ndim))
-          ! amrex_abeclaplacian is child of amrex_linop -> are set during initialization
         end if
 
          !> set diffusion parameters
