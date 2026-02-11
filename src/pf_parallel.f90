@@ -98,7 +98,7 @@ contains
   !!  The goal is to have a solution at each level and each node set to a consistent value
   !!  When this is called, the value of q0 at the fine level on each processor has been set somehow (see q0_style below)
   !!
-  !! This can be broken down into four substeps
+  !! This can be broken down into five substeps
   !! 1. Get the  initial condition on the finest level at each node
   !! 2. Coarsen the initial condition to each coarser level with tau corrections
   !! 3. Do the "Burn in" step on the coarse level to make the coarse values consistent
@@ -114,7 +114,6 @@ contains
   !! logical  PFASST_pred:  If true, the burn-in step uses the "PFASST predictor" trick
   !! integer  nsweeps_burn: Determines how many sweeps are done on the coarse level during burn in
   !! integer  nsweeps_pred: Determines how many sweeps are done at the coarse level after burn in
-  !! logical Pipeline_burn: True if coarse sweeps during burn in are pipelined  (meaningless if nsweeps_burn>1 on coarse level)
   !! logical Pipeline_pred: True if coarse sweeps after burn in are pipelined  (meaningless if nsweeps_pred>1 on coarse level)
   !!    Pipeline variables do nothing if there is only one processor
   !! logical  RK_pred:      If true, the coarse level is initialized with Runge-Kutta instead of the  PFASST burn in.
