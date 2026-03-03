@@ -21,7 +21,7 @@ contains
     type(pf_amrex_mfab_t) :: y_ex      
 
     real(pfdp) :: maxerr, time, resid, relresid
-    integer    :: rank, iter, step
+    integer    :: rank, iter, step, sweep
     real(pfdp) :: errL2(1), errL1(1), errLinf(1)
     real(pfdp) :: refL2(1), refL1(1), refLinf(1)
      
@@ -30,6 +30,7 @@ contains
     step     = pf%state%step+1
     time     = pf%state%t0+pf%state%dt
     iter     = pf%state%iter
+    sweep    = pf%state%sweep
     rank     = pf%rank
     resid    = pf%levels(level_index)%residual
     relresid = pf%levels(level_index)%residual_rel
@@ -54,10 +55,12 @@ contains
     errL1  = y_ex%normL1()
     errLinf= y_ex%normLinf()   
     
-    print '("error: time: ", f4.2," step: ",i2.1," rank: ",i2.2," iter: ",i2.2," level: ",i2.2," err0: ",es12.5," err1: ",es12.5," err2: ",es12.5," resid: ",es12.5," relresid: ",es12.5)', &
-         time,step, rank, iter,level_index,errLinf,errL1,errL2,resid,relresid
-    print '("err0rel: ",es12.5," err1rel: ",es12.5," err2rel: ",es12.5)', &
-         errLinf(1)/refLinf(1),errL1(1)/refL1(1),errL2(1)/refL2(1)
+    print '("error: time: ", f4.2," step: ",i2.1," rank: ",i2.2," iter: ",i3.2, " sweep:",i2.2, " level: ",i2.2," relresid: ",es12.5)', &
+         time,step, rank, iter, sweep, level_index, relresid
+    !print '("error: time: ", f4.2," step: ",i2.1," rank: ",i2.2," iter: ",i2.2," level: ",i2.2," err0: ",es12.5," err1: ",es12.5," err2: ",es12.5," resid: ",es12.5," relresid: ",es12.5)', &
+    !     time,step, rank, iter,level_index,errLinf,errL1,errL2,resid,relresid
+    !print '("err0rel: ",es12.5," err1rel: ",es12.5," err2rel: ",es12.5)', &
+    !     errLinf(1)/refLinf(1),errL1(1)/refL1(1),errL2(1)/refL2(1)
 
     call flush(6)
 
@@ -110,46 +113,5 @@ contains
     call amrex_mfab_destroy(y_ex)
 
   end subroutine write_plotfile
-
-  !>  Output the error and residual in the solution
-  subroutine write_plotfile_txt(pf, level_index)
-    type(pf_pfasst_t), intent(inout) :: pf
-    integer, intent(in) :: level_index
-
-    !>  Local
-    real(pfdp)          :: time
-    integer             :: rank, iter, step 
-    character(len=4)    :: step_str, iter_str
-    type(pf_amrex_mfab_t) :: y_ex      
-
-    ! compute vars & set pointers
-    step     = pf%state%step+1
-    time     = pf%state%t0+pf%state%dt
-    iter     = pf%state%iter
-
-    ! Convert integers to strings BEFORE using them
-    write(step_str, '(I0)') step
-    write(iter_str, '(I0)') iter
-    
-    ! write
-    select type (qend_ptr => pf%levels(level_index)%qend)
-    type is (pf_amrex_mfab_t)
-      call qend_ptr%txtprint("dat/"//trim(pf%outdir)//"/plt_file_intermediate_step"//trim(step_str)//"_iter"//trim(iter_str), &
-                              time, step, iter)      
-    end select
-    
-    select type (am_fac => pf%levels(level_index)%ulevel%factory)
-    type is (pf_AMReX_mfab_factory_t)
-      !>  build mfab to store exact solution
-      call amrex_mfab_build(y_ex, pf%levels(level_index)%lev_shape, am_fac%ba, am_fac%dm, am_fac%geom)
-    end select
-    !>  compute the exact solution
-    call exact(time,y_ex)
-    call y_ex%txtprint("dat/"//trim(pf%outdir)//"/plt_file_real_step"//trim(step_str)//"_iter"//trim(iter_str), &
-                              time, step, iter) 
-    call amrex_mfab_destroy(y_ex)
-
-
-  end subroutine write_plotfile_txt
 
 end module hooks

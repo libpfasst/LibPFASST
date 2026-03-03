@@ -1,6 +1,6 @@
 !
-!  Test parameters for a 2-D advection diffusion
-!	u_t = -vx * u_x -vy * u_y + nu * (u_xx + u_yy)
+!  Test parameters for a 3-D advection diffusion
+!	du_dt = -vx * du_dx -vy * du_dy -vz * du_dz + nu * (du_dxx + du_dyy + du_dzz)
 !
 
 &PF_PARAMS
@@ -9,23 +9,27 @@
 
     !  These are internal pfasst variables that can be reset
     niters = 4   !  default is 5
- 
+     
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 2 
-   
-     !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
-     rel_res_tol = 1.d-12
-
      nnodes = 5
-	
-     nsweeps_pred= 1 
-     nsweeps= 2
+	 
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 0.d0
+     rel_res_tol = 0.d0
 
-     ! additional - are these needed ?
+     ! predictor options
+     nsweeps_pred= 1 
      Pipeline_pred =  .true.
-     PFASST_pred = .true.
+     PFASST_pred = .false. 
+     
+     ! run options
+     nsweeps= 1
      Vcycle=.false.
+
+     !
+     debug = .false.
+     !outdir = 'AD_3D'
 
      
 /

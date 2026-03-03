@@ -1,6 +1,6 @@
 !
-!  Test parameters for a 2-D advection diffusion
-!	u_t = -vx * u_x -vy * u_y + nu * (u_xx + u_yy)
+!  Test parameters for 1-D advection diffusion
+!	du_dt = -vx * du_dx + nu * du_dxx
 !
 
 &PF_PARAMS
@@ -8,48 +8,47 @@
     nlevels = 1	
 
     !  These are internal pfasst variables that can be reset
-    niters = 10   !  default is 5
+    niters = 5   !  default is 5
  
      !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
      qtype   = 1 
+     nnodes = 5
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-20
-     rel_res_tol = 1.d-20
-
-     nnodes = 6
+     abs_res_tol = 0.d0
+     rel_res_tol = 0.d0
 	
+     ! predictor
      nsweeps_pred= 1 
+     Pipeline_pred = .true.
+     PFASST_pred = .false.
+
+     ! additional
+     Vcycle=.false.
      nsweeps= 1
 
-     ! additional - are these needed ?
-     Pipeline_pred =  .true.
-     PFASST_pred = .true.
-     Vcycle=.true.
-
-    !
-    !outdir = 'AD_1D_steps-4_nnodes-6_'
+     !
+     debug = .false.
+     !outdir = 'AD_1D'
      
 /
 
 !  Now define the local variables you need
 &PARAMS
 
-    ntime = 6
-    nspace = 1
+    ntime = 2
+    nspace = 5
 
-    nx = 240
-    max_grid_size = 20     ! maximum number of points per dim - generate boxarray from domain-box
+    nx = 160
+    max_grid_size = 32     ! maximum number of points per dim - generate boxarray from domain-box
 
-    nu = 0.02       ! default = 0.02
+    nu = 0.02        ! default = 0.02
     vx = 1.0         ! default = 1.0
     
     Lx=6.28318530717958647692528676655900576839433879875021
-    !Lx = 2.0
     
     Tfin = 1.0              
-    nsteps = 12              ! 16
-    eq_type = 1             ! 1 -> adv-diff	
+    nsteps = 12             ! 16
     ic_type = 1             ! 1 -> Sin-wave
     kfreqx = 1.0
     

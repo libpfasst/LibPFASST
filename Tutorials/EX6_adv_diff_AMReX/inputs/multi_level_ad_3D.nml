@@ -1,34 +1,36 @@
 !
 !  Test parameters for multi-level imex
+!	du_dt = -vx * du_dx -vy * du_dy -vz * du_dz + nu * (du_dxx + du_dyy + du_dzz)
 !
 
 !  These are internal pfasst variables that must be set
 &PF_PARAMS
     nlevels  = 2   !  must be set
 
-    niters = 5   !  default is 5
-    nnodes =     3 5 5  
+    niters = 15   !  default is 5
+    nnodes = 3 5  
 
-    use_proper_nodes=.true.
-    nsweeps_pred= 3 1 1
-    nsweeps= 3 1 1
-    
     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
     qtype  = 1   
    
      !  optional variables to control termination  (defaults are 0.0)
-     abs_res_tol = 1.d-12
-     rel_res_tol = 1.d-12
+     abs_res_tol = 0.d0
+     rel_res_tol = 0.d0
 
 
      !  Variable which determine how the predictor runs  (default is .false. and .true.)
-     pipeline_pred =  .false.
+     pipeline_pred =  .true.
      PFASST_pred = .true.
-
+     nsweeps_pred= 1
+    
      !  Variable to tell if Vcycling will be done.  Here PFASST vcycles
      Vcycle=.TRUE.
+     nsweeps= 3 1
+    
 
-     outdir="ad"
+     !
+     debug = .false.
+     !outdir = 'AD_3Level_3D'
 /
 
 !  Now define the local variables you need
@@ -38,9 +40,9 @@
     ntime = 1       ! number of processes in time     
     nspace = 16     ! number of processes in space
 
-    nx =  32 64 128 
-    ny =  32 64 128
-    nz =  32 64 128
+    nx =  64 128 
+    ny =  64 128
+    nz =  64 128
     max_grid_size = 16     ! maximum number of points per dim - generate
     
     nu = 0.02
