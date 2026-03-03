@@ -73,15 +73,16 @@ default values as below:
 .. code-block:: fortran
 
      !>  ===  Optional pfasst parameters ====
-     integer :: niters  = 5             !! number of PFASST iterations to do
-     integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
-     logical :: use_proper_nodes =  .false.
-     logical :: use_composite_nodes = .false.
-     logical :: use_no_left_q = .false.
+     integer :: niters  = 5                   !! number of PFASST iterations to do
+     integer :: MINiters  = 0                 !! minimum number of PFASST iterations to do
+     integer :: qtype   = SDC_GAUSS_LOBATTO   !! type of nodes
+     logical :: use_proper_nodes =  .false.   !! usage of proper nodes instead of node restriction - if true uses Gauss nodes in coarsening
+     logical :: use_composite_nodes = .false. !! usage of composite nodes - level nodes are given by repeating coarsest node-set (base is nnodes on coarsest level)  
+     logical :: use_no_left_q = .false.       !! don't use left hand end point
 
      ! --  level dependent parameters
-     integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
-     integer :: nsweeps_pred(PF_MAXLEVS) =1   !!  number of sweeps during predictor
+     integer :: nsweeps(PF_MAXLEVS) = 1       !! number of sweeps at each levels
+     integer :: nsweeps_pred(PF_MAXLEVS) =1   !! number of sweeps during predictor
      integer :: nnodes(PF_MAXLEVS)=3          !! number of nodes
 
      ! --  tolerances
@@ -89,9 +90,10 @@ default values as below:
      real(pfdp) :: rel_res_tol = 0.d0   !!  relative convergence tolerance
 
      ! --  predictor options  (should be set before pfasst_run is called)
+     integer :: nsweeps_burn =  1       !!  number of sdc sweeps to perform during coarse level burn-in
+     logical :: RK_pred = .false.       !! decides if RK steps are used instead of the sweeps (if false default PFASST burn-in is used)
      logical :: PFASST_pred = .true.    !!  true if the PFASST type predictor is used
      logical :: pipeline_pred = .false. !!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred>1 on coarse level)
-     integer :: nsweeps_burn =  1       !!  number of sdc sweeps to perform during coarse level burn in
      integer :: q0_style =  0           !!  q0 can take 3 values
                                         !!  0:  Only the q0 at t=0 is valid  (default)
                                         !!  1:  The q0 at each processor is valid
@@ -100,28 +102,32 @@ default values as below:
 
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
-     logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
+     logical :: use_pysdc_V = .false.   !!  decides if Vcycles are done
      logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
-     logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
-     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
-     logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
-     integer :: taui0 = -99          !! iteration cutoff for tau inclusion
+     logical :: Finterp = .false.       !!  True if transfer functions operate on rhs
+     logical :: use_LUq = .true.        !!  True if LU type implicit matrix is used
+     logical :: use_Sform = .false.     !!  True if Qmat type of stepping is used
+     integer :: taui0 = -99             !! iteration cutoff for tau inclusion
 
 
      ! -- RK and Parareal options
-     logical :: use_sdc_sweeper =.true.  !! decides if SDC sweeper is used (can be turned off for pure parareal)
-     logical :: use_rk_stepper = .false. !! decides if RK steps are used instead of the sweeps
-     integer :: nsteps_rk(PF_MAXLEVS)=3  !! number of runge-kutta steps per time step
-     logical :: RK_pred = .false.        !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
+     logical :: use_sdc_sweeper =.true.   !! decides if SDC sweeper is used 
+     logical :: use_rk_stepper = .false.  !! decides if RK steps are used instead of the sweeps
+     integer :: nsteps_rk(PF_MAXLEVS)=-1  !! number of runge-kutta steps per time step
+     integer :: rk_order(PF_MAXLEVS)=-1   !! order of runge-kutta method per level
+     integer :: rk_nstages(PF_MAXLEVS)=-1 !! number of runge-kutta stages per level
+     logical :: RK_pred = .false.         !!  true if the coarse level is initialized with Runge-Kutta instead of PFASST
 
      ! -- misc
-     logical :: debug = .false.         !!  If true, debug diagnostics are printed
+     logical :: debug = .false.          !!  If true, debug diagnostics are printed
 
      ! -- controller for the results 
      logical :: save_residuals = .true.  !!  Will save residuals every time they are set
      logical :: save_delta_q0 = .true.   !!  Will save change in initial condition
      logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
+     logical :: save_json = .true.       !!  Will save a jason file of run parameters
      integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
+     integer :: save_solutions  = 0      !!  0=none, 1=end, 2=all time steps, 3=all iterations
 
 
 Mandatory level parameters
@@ -146,10 +152,9 @@ Optional level parameters
      !  level parameters set by the pfasst_t values
      integer  :: index        = -1   !! level number (1 is the coarsest)
      integer  :: nnodes       = -1   !! number of sdc nodes
-     integer  :: nsteps_rk    = -1   !! number of rk steps to perform
      integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
-     integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
-     logical     :: Finterp = .false.   !! interpolate functions instead of solutions
+     integer  :: nsweeps_pred = -1   !! number of coarse sdc sweeps to perform predictor in predictor
+     logical  :: Finterp = .false.   !! interpolate functions instead of solutions
 
 
 Mandatory local parameters
@@ -188,7 +193,7 @@ File input for pfasst  variables
 --------------------------------
 
 The pfasst parameters are specified in a namelist ``PF_PARAMS``
-defined in routine ``pf_read_opts`` in `src/pf_options.f90`.  This
+defined in routine ``pf_read_opts`` in `src/pf_pfasst.f90`.  This
 routine is called from ``pf_pfasst_create`` in `src/pf_pfasst.f90`
 (which is typically called when initializing PFASST).  If no file is
 specified in the call to ``pf_pfasst_create``, then no file is read.
@@ -223,7 +228,7 @@ Variables for the predictor
 
 The two variables ``pipeline_pred`` and ``PFASST_pred`` determine how the
 predictor works.  The different combinations of these variables and
-the parameter nsweeps_pred on the coarsest level great some subtle
+the parameter ``nsweeps_pred`` on the coarsest level great some subtle
 differences in how the predictor performs.
 
 Some cases:

@@ -9,7 +9,8 @@ or directly from `github`_ as in
 
 `$ git clone https://github.com/libpfasst/LibPFASST.git`
 
-In either case, you will get the source code for the library, Makefiles, tutorials, and the files from which the documentation is made.
+In either case, you will get the source code for the library, Makefiles, tutorials, and the files from which the documentation is made. 
+Additional required software is declared in next topic :Compiling:. 
 
 
 

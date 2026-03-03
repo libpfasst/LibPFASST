@@ -19,4 +19,4 @@ The advanced user might also consider the encapsulations
 
 * ``petscVec``:  uses the standard Vec structure from PETSc
 * ``hamsys``:    provides encapsulation of two Hamiltonian variables for Verlet sweepers
-* ``amrex``:  based on the multifab structure from the AMReX code (under construction)
+* ``amrex``:  based on the multifab structure from the AMReX code (detailed explanation in :Tutorial: :Example6:)

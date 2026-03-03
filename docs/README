@@ -1,9 +1,9 @@
 
 This directory contains the source for generating the LibPFASST documentation.  There are two different parts to it:
 
-1. Sphinx-based .rst files located in LibPFASST/docs/
+1. Sphinx-based .rst files located in LibPFASST/docs/source/
 
-2. FORD (FORtran Documentation) code in FORD
+2. FORD (FORtran Documentation) code in LibPFASST/docs/FORD/
 
 It is expected that the documentation files should only be updated on the gh-pages branch of LibPFASST.
 

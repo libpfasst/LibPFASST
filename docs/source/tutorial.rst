@@ -261,3 +261,28 @@ Here (:math:`\omega`) is the vorticity, (:math:`\bf{u}`)  is the velocity, and
 (:math:`\rho`) a density or bouyancy term.  The constants (:math:`\nu`) and (:math:`\kappa`) determine the diffusion terms, and (:math:`g`) is  "gravity".
 
 The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called ``zndsysarray``.  Using the input file `tg.nml`, will run a special case with an exact solution and report errors.
+
+Example 5
+---------
+
+.. _tut5:
+
+(work in progress)
+
+
+Example 6
+---------
+
+.. _tut6:
+
+Space-time parallel solving of IMEX advection-diffusion equation in 1D, 2D and 3D using LibPFASST for parallel time-integration and AMReX together with the `pf_amrex_encap.f90` for space-parallel solving of the explicit and implicit parts.  
+
+Problem: AMReX requires definition of dimension on compile time -> can compile LibAMReX for each dimension, see `compiling libamrex`_
+-> need to point `pf_amrex_encap.f90` to the correct libamrex when compiling LibPFASST -> currently we need to rebuild LibPFASST when the dimensionality of our problem / tutorial changes
+-> then need to rebuild our Tutorial again
+
+
+
+
+
+.. _`compiling libamrex`: https://pfasst.lbl.govhttps://amrex-codes.github.io/amrex/docs_html/BuildingAMReX.html#building-libamrex
