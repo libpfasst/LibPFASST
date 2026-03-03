@@ -142,7 +142,7 @@ module pf_mod_dtype
      real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat
      real(pfdp), allocatable :: Smat(:,:)    !  The node to node version of Qmat
 
-     logical :: use_proper_nodes =  .false. !  If true use gauss nodes in coarsening
+     logical :: use_proper_nodes =  .false.   ! If true use gauss nodes in coarsening
      logical :: use_composite_nodes = .false. ! If true, finer nodes are composite
      logical :: use_no_left_q = .false.       ! If true don't use left endpoint in rule
   end type pf_sdcmats_t
@@ -262,12 +262,12 @@ module pf_mod_dtype
      integer :: nlevels = -1             !! number of pfasst levels
 
      !>  ===  Optional pfasst parameters ====
-     integer :: niters  = 5             !! number of PFASST iterations to do
-     integer :: MINiters  = 0           !! MIN number of PFASST iterations to do
-     integer :: qtype   = SDC_GAUSS_LOBATTO  !! type of nodes
-     logical :: use_proper_nodes =  .false.
-     logical :: use_composite_nodes = .false.
-     logical :: use_no_left_q = .false.
+     integer :: niters  = 5                   !! number of PFASST iterations to do
+     integer :: MINiters  = 0                 !! minimum number of PFASST iterations to do
+     integer :: qtype   = SDC_GAUSS_LOBATTO   !! type of nodes
+     logical :: use_proper_nodes =  .false.   !! usage of proper nodes instead of node restriction - if true uses Gauss nodes in coarsening
+     logical :: use_composite_nodes = .false. !! usage of composite nodes - level nodes are given by repeating coarsest node-set (base is nnodes on coarsest level)  
+     logical :: use_no_left_q = .false.       !! don't use left hand end point
 
      ! --  level dependent parameters
      integer :: nsweeps(PF_MAXLEVS) = 1       !!  number of sweeps at each levels
@@ -290,12 +290,12 @@ module pf_mod_dtype
 
      ! --  run options  (should be set before pfasst_run is called)
      logical :: Vcycle = .true.         !!  decides if Vcycles are done
-     logical :: use_pysdc_V = .false.         !!  decides if Vcycles are done
+     logical :: use_pysdc_V = .false.   !!  decides if Vcycles are done
      logical :: sweep_at_conv = .false. !!  decides if one final sweep after convergence is done
-     logical :: Finterp = .false.    !!  True if transfer functions operate on rhs
-     logical :: use_LUq = .true.     !!  True if LU type implicit matrix is used
-     logical :: use_Sform = .false.  !!  True if Qmat type of stepping is used
-     integer :: taui0 = -99          !! iteration cutoff for tau inclusion
+     logical :: Finterp = .false.       !!  True if transfer functions operate on rhs
+     logical :: use_LUq = .true.        !!  True if LU type implicit matrix is used
+     logical :: use_Sform = .false.     !!  True if Qmat type of stepping is used
+     integer :: taui0 = -99             !! iteration cutoff for tau inclusion
 
 
      ! -- RK and Parareal options
@@ -313,7 +313,7 @@ module pf_mod_dtype
      logical :: save_residuals = .true.  !!  Will save residuals every time they are set
      logical :: save_delta_q0 = .true.   !!  Will save change in initial condition
      logical :: save_errors  = .true.    !!  Will save errors, but set_error must be called externally
-     logical :: save_json = .true.       !!  Will save a jason file of run parameters
+     logical :: save_json = .true.       !!  Will save a json file of run parameters
      integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
      integer :: save_solutions  = 0      !!  0=none, 1=end, 2=all time steps, 3=all iterations
 

@@ -52,7 +52,6 @@ module pf_mod_AMReX_mfab
      procedure :: unpack => AMReX_mfab_unpack
      procedure :: axpy => AMReX_mfab_axpy
      procedure :: eprint => AMReX_mfab_eprint
-     procedure :: txtprint => AMReX_mfab_txtprint
      !procedure, private  :: get_array_func
   end type pf_amrex_mfab_t
 
@@ -430,58 +429,12 @@ contains
     
     allocate(mfab_data_flat(this%ndof))
     call this%pack(mfab_data_flat)
-    print *, 'Size: ', size(mfab_data_flat)      ! prints without ghost cells
-    print *, 'First 10: ', mfab_data_flat(1:10)         ! prints without ghost cells
-    print *, 'Last 10: ', mfab_data_flat(this%ndof-10:this%ndof)         ! prints without ghost cells
+    print *, 'Size: ', size(mfab_data_flat)                             ! prints without ghost cells
+    print *, 'First 10: ', mfab_data_flat(1:10)                         ! prints without ghost cells
+    print *, 'Last 10: ', mfab_data_flat(this%ndof-10:this%ndof)        ! prints without ghost cells
     deallocate(mfab_data_flat)  
   
   end subroutine AMReX_mfab_eprint
-
-  !>  Subroutine to print the array to txt file
-  subroutine AMReX_mfab_txtprint(this,filename,time,step,iter)
-    class(pf_AMReX_mfab_t), intent(inout) :: this
-    character(len=*), intent(in) :: filename
-    real(amrex_real) :: time
-    integer :: step, iter, ierror
-    ! local
-    real(amrex_real), allocatable:: flat_data(:)
-    type(amrex_box) :: bx    
-    type(amrex_mfiter) :: mfi
-    integer :: lo(3), hi(3), ix, iy, iz, nb, nc, io, k
-    !> write to single file
-    io = 40
-    open(unit=io, file=trim(filename)//".txt", action='write', position='append')
-    write(io, '(A,ES15.7,A,I8,A,I8)') "time: ", time, " step: ", step, " iter: ", iter
-    write(io, '(A)') "ix iy iz icomp value"
-
-    !> get flat data
-    allocate(flat_data(this%ndof))
-    call this%pack(flat_data)
-    
-    
-    !> multiple boxes -> use mfiter to loop over boxes
-    k = 0
-    do nb = 1, this%mfab%ba%nboxes()
-      bx = this%mfab%ba%get_box(nb-1)     ! Fotran - c++ index shift      
-      lo = bx%lo
-      hi = bx%hi
-      do nc = 1, this%ncomp
-        do iz = lo(3), hi(3)
-          do iy = lo(2), hi(2)
-            do ix = lo(1), hi(1)
-              k = k + 1
-              write(io, '(I8,1X,I8,1X,I8,1X,I8,1X,ES15.7)') ix, iy, iz, nc, flat_data(k)
-            end do  ! ix
-          end do    ! iy
-        end do      ! iz
-      end do        ! nc
-    end do          ! nb   
-    
-    deallocate(flat_data)
-
-    close(io)
-    
-  end subroutine AMReX_mfab_txtprint
 
   !>  Helper functions to return the array part
   function get_array_func(x) result(r)
