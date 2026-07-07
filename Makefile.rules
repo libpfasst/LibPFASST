@@ -57,7 +57,7 @@ clean:
 
 
 #  We can use this to build a new dependency file.  If makedepf90 is installed  type "make depend"
-depend $(PWD)/.depend:
+depend:
 	makedepf90 -b ./build  $(FSRC) > .depend
 
 
