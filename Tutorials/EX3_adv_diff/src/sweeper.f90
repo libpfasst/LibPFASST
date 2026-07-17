@@ -220,16 +220,16 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nu,vx,vy,kfreq,Lx,Ly,ic_type
+    use probin, only: nu,v,kfreq,Lx,ic_type
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
 
     !  Call exact solution from Libpfasst for ad problem
     if (ic_type .eq. 1) then
-       call exact_ad_cos(t,yex,nu,[vx,vy],[kfreq,kfreq],[Lx,Ly])  ! Cosine wave
+       call exact_ad_cos(t,yex,nu,v,kfreq,Lx)  ! Cosine wave
     else
-       call exact_ad_exp(t,yex,nu,[vx,vy],[Lx,Ly])   !  Exponential
+       call exact_ad_exp(t,yex,nu,v,Lx)   !  Exponential
     endif
   end subroutine exact
 
