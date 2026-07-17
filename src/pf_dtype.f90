@@ -131,16 +131,16 @@ module pf_mod_dtype
 
    !>  The type to store quadrature matrices
    type :: pf_sdcmats_t
-      integer :: nnodes                      !  Number of nodes
-      integer :: qtype                   !  Type of nodes
-      real(pfdp), allocatable :: qnodes(:)   !  The quadrature nodes
-      real(pfdp), allocatable :: Qmat(:,:)   !  Collocation matrix
-      real(pfdp), allocatable :: QmatFE(:,:) !  Forward Euler matrix
-      real(pfdp), allocatable :: QmatBE(:,:) !  Backward Euler matrix
+      integer :: nnodes                        !  Number of nodes
+      integer :: qtype                         !  Type of nodes
+      real(pfdp), allocatable :: qnodes(:)     !  The quadrature nodes
+      real(pfdp), allocatable :: Qmat(:,:)     !  Collocation matrix
+      real(pfdp), allocatable :: QmatFE(:,:)   !  Forward Euler matrix
+      real(pfdp), allocatable :: QmatBE(:,:)   !  Backward Euler matrix
       real(pfdp), allocatable :: QmatTrap(:,:) ! Trapezoid rule matrix
       real(pfdp), allocatable :: QmatVer(:,:)  ! Verlet Matrix
       real(pfdp), allocatable :: QmatLU(:,:)   !  LU of Wmat
-      real(pfdp), allocatable :: Smat(:,:)    !  The node to node version of Qmat
+      real(pfdp), allocatable :: Smat(:,:)     !  The node to node version of Qmat
 
       logical :: use_proper_nodes =  .false.   ! If true use gauss nodes in coarsening
       logical :: use_composite_nodes = .false. ! If true, finer nodes are composite
@@ -157,8 +157,8 @@ module pf_mod_dtype
       integer  :: index        = -1   !! level number (1 is the coarsest)
       integer  :: nnodes       = -1   !! number of sdc nodes
       integer  :: nsweeps      = -1   !! number of sdc sweeps to perform
-      integer  :: nsweeps_pred = -1      !! number of coarse sdc sweeps to perform predictor in predictor
-      logical     :: Finterp = .false.   !! interpolate functions instead of solutions
+      integer  :: nsweeps_pred = -1   !! number of coarse sdc sweeps to perform predictor in predictor
+      logical  :: Finterp = .false.   !! interpolate functions instead of solutions
 
 
       !  Diagnostics
@@ -301,7 +301,6 @@ module pf_mod_dtype
       ! -- RK and Parareal options
       logical :: use_sdc_sweeper =.true.   !! decides if SDC sweeper is used
       logical :: use_diag_sweeper =.false. !! decides if a block-parallel sweeper is used
-      integer :: diag_comm_size = 1        !! defines size of diagonal
       logical :: use_rk_stepper = .false.  !! decides if RK steps are used instead of the sweeps
       integer :: nsteps_rk(PF_MAXLEVS)=-1  !! number of runge-kutta steps per time step
       integer :: rk_order(PF_MAXLEVS)=-1   !! order of runge-kutta method per level
@@ -319,14 +318,15 @@ module pf_mod_dtype
       integer :: save_timings  = 2        !!  0=none, 1=total only, 2=all, 3=all and echo
       integer :: save_solutions  = 0      !!  0=none, 1=end, 2=all time steps, 3=all iterations
 
-      integer :: rank      = -1           !! rank of current processor for PFASST
-      integer :: rank_diag = -1           !! rank of current processor for diagonal sweep
+      integer :: rank        = -1           !! rank of current processor for PFASST
+      integer :: rank_diag   = -1           !! rank of current processor for diagonal sweep
+      integer :: rank_global = -1           !! global rank of current processor
 
       !> pf objects
       type(pf_state_t), allocatable :: state     !! Describes where in the algorithm  is
       type(pf_level_t), allocatable :: levels(:) !! Holds the levels
-      type(pf_comm_t),  allocatable :: comm      !! Holds communicator used for inter-block communication
-      type(pf_comm_t),  allocatable :: comm_diag !! Holds communicator used for intra-block communication (diagonal Q_Delta)
+      type(pf_comm_t),  pointer :: comm          !! Pointer to inter-block communication
+      type(pf_comm_t),  pointer :: diag_comm     !! Pointer to intra-block communication (diagonal Q_Delta)
       type(pf_results_t) :: results              !! Hold results for each level
 
       !> hooks variables

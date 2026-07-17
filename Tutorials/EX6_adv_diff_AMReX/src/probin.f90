@@ -11,6 +11,7 @@ module probin
   integer,  save :: Ndim   ! Number of dimesions
   integer,  save :: nspace   ! Number of process in space
   integer,  save :: ntime   ! Number of process in time
+  integer,  save :: ndiag   ! Number of process for diag sweeper
   real(pfdp),  save,allocatable :: dom_size(:)    ! Domain size
   real(pfdp),  save :: Lx,Ly,Lz    ! Components of domain size
   real(pfdp), save :: dt     ! time step
@@ -63,7 +64,7 @@ module probin
   namelist /params/  pfasst_nml, lam1,lam2,vx,vy,vz, nu, t00, sigma, beta, gamma, splitting
   namelist /params/  kfreqx,kfreqy,kfreqz,Lx,Ly,Lz, max_grid_size
   namelist /params/  linop_maxorder, linop_bc_lo, linop_bc_hi, geom_bc_lo, geom_bc_hi
-  namelist /params/  mlmg_max_iter, mlmg_tol_rel, mlmg_tol_abs, nspace, ntime
+  namelist /params/  mlmg_max_iter, mlmg_tol_rel, mlmg_tol_abs, nspace, ntime, ndiag
 
 contains
 
@@ -123,6 +124,7 @@ contains
     call mpi_comm_size(MPI_COMM_WORLD, gSize, err)
     call mpi_comm_rank(MPI_COMM_WORLD, gRank, err)
     ntime = 1
+    ndiag = 1
     nspace = gSize      
 
     !>  Read in stuff from input file
@@ -176,6 +178,7 @@ contains
     write(un,*) 'Ndim:   ', Ndim, '! Number of dimensions'
     write(un,*) 'nSpace: ', nspace, '! Number of proccesses in space'
     write(un,*) 'nTime:  ', ntime, '! Number of proccesses in time'
+    write(un,*) 'nDiag:  ', ndiag, '! Number of proccesses for diagonal sweeper'
     write(un,*) 'nsteps: ', nsteps, '! Number of steps'
     write(un,*) 'nsteps_rk: ', nsteps_rk(1:pf%nlevels), '! Number of rk substeps'
     write(un,*) 'rk_order: ', rk_order(1:pf%nlevels), '! Order of rk substeps'        

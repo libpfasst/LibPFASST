@@ -6,6 +6,7 @@
 module pf_mod_pfasst
    use pf_mod_dtype
    use pf_mod_comm_mpi
+   use pf_mod_mpi
    use pf_mod_utils
    use pf_mod_results
 
@@ -13,25 +14,21 @@ module pf_mod_pfasst
 contains
 
    !> Create a PFASST object
-   subroutine pf_pfasst_create(pf, comm, nlevels, fname, nocmd)
+   subroutine pf_pfasst_create(pf, comm, diag_comm, nlevels, fname, nocmd)
       use pf_mod_hooks, only: PF_MAX_HOOK
-      use pf_mod_mpi, only: MPI_COMM_SELF
-      use pf_mod_comm_mpi, only: pf_mpi_create
-
-      type(pf_pfasst_t), intent(inout)           :: pf        !! Main pfasst object
-      type(pf_comm_t),   intent(inout), target   :: comm      !! Communicator
-      integer,           intent(in   ), optional :: nlevels   !! number of pfasst levels
-      character(len=*),  intent(in   ), optional :: fname     !! Input file for pfasst parameters
-      logical,           intent(in   ), optional :: nocmd     !! Determines if command line variables are to be read
+      
+      type(pf_pfasst_t), intent(inout)                   :: pf          !! Main pfasst object
+      type(pf_comm_t),   intent(inout), target           :: comm        !! Communicator
+      type(pf_comm_t),   intent(inout), target, optional :: diag_comm   !! Communicator
+      integer,           intent(in   ), optional         :: nlevels     !! number of pfasst levels
+      character(len=*),  intent(in   ), optional         :: fname       !! Input file for pfasst parameters
+      logical,           intent(in   ), optional         :: nocmd       !! Determines if command line variables are to be read
 
       logical :: read_cmd              !! Local version of nocmd
       integer :: ierr                  !! Record system call error
       integer :: l                     !! Loop variable for levels
       integer :: system                !! For opening directory
       character(len=5) :: dirname     ! used to append output directory
-      ! diagonal split variables
-      integer :: comm_size             !! Size of inter-block communicator
-      integer :: colorPF, colorDiag
       if (present(nlevels)) pf%nlevels = nlevels
 
       !> gather some input from a file and command line
@@ -47,34 +44,40 @@ contains
 
       !>  set communicator & split if diagonal sdc is used
       ! switch pf%comm from pointer to allocatable since we split initial comm into two communicators for diagonal sweeper
-      allocate(pf%comm, stat=ierr)
-      if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error in pf_pfasst_create for pf%comm")
-      allocate(pf%comm_diag, stat=ierr)
-      if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate error in pf_pfasst_create for pf%comm_diag")
-      ! if diagonal sweeper is not used or if only one process is used, then we don't need to split the communicator
-      if (pf%use_diag_sweeper .eqv. .false. .or. pf%diag_comm_size == 1) then
-         call pf_mpi_create(pf%comm,comm%comm)
-         call pf_mpi_create(pf%comm_diag, MPI_COMM_SELF)
-      else
-         ! compute size of other comm - correct sizing is checked in split routine
-         comm_size = comm%nproc / pf%diag_comm_size
-         ! split comm
-         call pf_mpi_split_comm(comm_size, pf%diag_comm_size, pf%comm, pf%comm_diag, colorPF, colorDiag, comm)
+      pf%comm => comm
+      pf%use_diag_sweeper = .false.
+      if (present(diag_comm)) then
+         if (pf%rank_global == 0) print *, 'INFO: Diagonal sweeper is being used'
+         pf%diag_comm => diag_comm
          pf%use_diag_sweeper = .true.
-         pf%use_sdc_sweeper = .false.  ! just making sure we don't run into trouble with allocation calls
       end if
 
-      !>  Set up the mpi communicator
+      !>  Set up the mpi communicators
       if (pf%use_diag_sweeper) then
-         call pf_mpi_setup(pf%comm, pf,ierr, pf%comm_diag)
+         ! check if size of diag_comm is equal to number of nodes-1 
+         if (pf%diag_comm%nproc /= pf%nnodes(pf%nlevels) - 1) then
+            call pf_stop(__FILE__,__LINE__,"ERROR: size of diag_comm must be equal to number of nodes - 1")
+         end if
+         ! check if all pf%nnodes are equal on all levels (so diagonal sweeper only with space coarsing)
+         do l = 1, pf%nlevels
+            if (pf%nnodes(l) /= pf%nnodes(pf%nlevels)) then
+               call pf_stop(__FILE__,__LINE__,"ERROR: all levels must have the same number of nodes for diagonal sweeper")
+            end if
+         end do
+         !
+         call pf_mpi_setup(pf%comm, pf,ierr, pf%diag_comm)
+         if (ierr /=0 )  call pf_stop(__FILE__,__LINE__,"ERROR: mpi_setup pf%comm and pf%diag_comm failed")
+         !
+         call mpi_comm_rank(MPI_COMM_WORLD,pf%rank_global,ierr) 
       else
          call pf_mpi_setup(pf%comm, pf,ierr)
+         if (ierr /=0 )  call pf_stop(__FILE__,__LINE__,"ERROR: mpi_setup pf%comm failed")
+         call mpi_comm_rank(MPI_COMM_WORLD,pf%rank_global,ierr)
       end if
-      if (ierr /=0 )  call pf_stop(__FILE__,__LINE__,"ERROR: mpi_setup failed")
 
-      if (pf%rank < 0) then
+      if (pf%rank < 0 .or. pf%rank_global < 0) then
          call pf_stop(__FILE__,__LINE__,&
-            "Invalid PF rank: did you call setup correctly?")
+            "ERROR: Invalid PF rank: did you call setup correctly?")
       end if
 
       !>  allocate level pointers
@@ -107,7 +110,11 @@ contains
       if (ierr .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory dat")
 
       !  Stick the number of processors on the end of the output directory
-      write (dirname, "(A1,I0.4)") 'P',pf%comm%nproc
+      if (pf%use_diag_sweeper) then
+         write (dirname, "(A1,I0.4)") 'P',pf%comm%nproc+pf%diag_comm%nproc
+      else
+         write (dirname, "(A1,I0.4)") 'P',pf%comm%nproc
+      end if
       pf%outdir       = trim(pf%outdir)//trim(dirname)
       ierr= system('mkdir -p dat/' // trim(pf%outdir))
       if (ierr .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make base directory")
@@ -145,6 +152,7 @@ contains
       integer                   :: ierr                   !!  error flag
 
       !>  loop over levels to set parameters
+      if (pf%rank_global == 0) print *, 'Starting level setup'
       do l = 1, pf%nlevels
          call pf_level_setup(pf, l)
       end do
@@ -185,20 +193,21 @@ contains
    !! (or deallocate) tauQ appropriately.
    subroutine pf_level_setup(pf, level_index)
       use pf_mod_quadrature
+      use pf_mod_mpi, only: MPI_COMM_WORLD
       type(pf_pfasst_t), intent(inout),target :: pf   !!  Main pfasst structure
       integer,           intent(in)    :: level_index  !!  level to set up
 
       class(pf_level_t),  pointer :: lev  !!  Level to set up
 
       integer :: mpibuflen, nnodes, npieces
-      integer :: i,ierr
+      integer :: i,ierr,fidx
 
       lev => pf%levels(level_index)   !!  Assign level pointer
-
+      fidx = 1 + merge(1,0,pf%rank_diag .eq. 0)
+      
       !> do some sanity checks
       mpibuflen  = lev%mpibuflen
       if (mpibuflen <= 0) call pf_stop(__FILE__,__LINE__,'bad value for mpibuflen=',mpibuflen)
-
       nnodes = lev%nnodes
       if (nnodes <= 0) call pf_stop(__FILE__,__LINE__,'bad value for nnodes=',nnodes)
 
@@ -212,11 +221,11 @@ contains
             call lev%ulevel%factory%create_array(lev%tauQ, nnodes-1, lev%index,  lev%lev_shape)
          end if
       end if
-
+      
       !> skip the rest if we're already allocated
       if (lev%allocated) return
       lev%allocated = .true.
-
+      
       !> allocate flat buffers for send, and recv
       allocate(lev%send(mpibuflen),stat=ierr)
       if (ierr /= 0) call pf_stop(__FILE__,__LINE__,"allocate fail")
@@ -267,23 +276,25 @@ contains
          if (lev%index < pf%nlevels) then
             call lev%ulevel%factory%create_array(lev%pQ, nnodes, lev%index,  lev%lev_shape)
          end if
+      else if (pf%use_diag_sweeper) then
          !> allocate solution and function arrays for diagonal sweepers
          ! essentially sdc sweeper with holding just a single node (always to 0 -> node)
          ! still allocating as array of encaps to be consistent with rank-1 definitions in pf_mod_dtype
-      else if (pf%use_diag_sweeper) then
          npieces = lev%ulevel%sweeper%npieces
          call lev%ulevel%factory%create_array(lev%I, 1, lev%index,  lev%lev_shape)
-
+         
          !  Space for function values
-         call lev%ulevel%factory%create_array(lev%Fflt, (1 + merge(1,0,pf%rank_diag .eq. 0))*npieces, lev%index,  lev%lev_shape)
+         call lev%ulevel%factory%create_array(lev%Fflt, fidx*npieces, lev%index,  lev%lev_shape)
          do i = 1, npieces
             call lev%Fflt(i)%setval(0.0_pfdp, 0)
          end do
-         lev%F(1:1,1:npieces) => lev%Fflt
-
+         lev%F(1:fidx,1:npieces) => lev%Fflt
+         
          !  Need space for old function values in im sweepers
-         call lev%ulevel%factory%create_array(lev%pFflt, (1 + merge(1,0,pf%rank_diag .eq. 0))*npieces, lev%index, lev%lev_shape)
-         lev%pF(1:1,1:npieces) => lev%pFflt
+         call lev%ulevel%factory%create_array(lev%pFflt, fidx*npieces, lev%index, lev%lev_shape)
+         
+         lev%pF(1:fidx,1:npieces) => lev%pFflt
+         
          if (lev%index < pf%nlevels) then
             call lev%ulevel%factory%create_array(lev%pQ, 1, lev%index,  lev%lev_shape)
          end if
@@ -299,7 +310,7 @@ contains
       call lev%ulevel%factory%create_single(lev%qend, lev%index,   lev%lev_shape)
       call lev%ulevel%factory%create_single(lev%q0, lev%index,   lev%lev_shape)
       call lev%ulevel%factory%create_single(lev%delta_q0, lev%index,   lev%lev_shape)
-
+      
    end subroutine pf_level_setup
 
 
@@ -419,8 +430,7 @@ contains
       integer    :: save_timings, save_solutions
       logical    :: use_no_left_q,use_composite_nodes,use_proper_nodes
       logical    :: use_diag_sweeper
-      integer    :: diag_comm_size
-
+      
       ! stuff for reading the command line
       integer, parameter :: un = 9
       integer            :: i, ios,stat
@@ -437,7 +447,7 @@ contains
       namelist /pf_params/ Vcycle,Finterp,  debug, save_timings,save_residuals,save_delta_q0, save_errors, save_solutions
       namelist /pf_params/ use_sdc_sweeper,sweep_at_conv,use_pysdc_V,use_LUq, use_Sform
       namelist /pf_params/ use_no_left_q,use_composite_nodes,use_proper_nodes, use_rk_stepper, outdir
-      namelist /pf_params/ use_diag_sweeper, diag_comm_size
+      namelist /pf_params/ use_diag_sweeper
 
       !> set local variables to pf_pfasst defaults
       nlevels      = pf%nlevels
@@ -475,8 +485,7 @@ contains
       sweep_at_conv= pf%sweep_at_conv
 
       use_diag_sweeper = pf%use_diag_sweeper
-      diag_comm_size = pf%diag_comm_size
-
+      
       use_no_left_q      = pf%use_no_left_q
       use_composite_nodes= pf%use_composite_nodes
       use_proper_nodes   = pf%use_proper_nodes
@@ -538,8 +547,7 @@ contains
       pf%sweep_at_conv= sweep_at_conv
 
       pf%use_diag_sweeper = use_diag_sweeper
-      pf%diag_comm_size = diag_comm_size
-
+      
       pf%use_no_left_q       = use_no_left_q
       pf%use_composite_nodes = use_composite_nodes
       pf%use_proper_nodes    = use_proper_nodes
@@ -565,7 +573,7 @@ contains
       character(len = 128) :: fname  !!  output file name for residuals
       character(len = 128) :: datpath  !!  path to output files
 
-      if (pf%rank /= 0) return
+      if (pf%rank_global /= 0) return
       if (present(un_opt)) un = un_opt
       write(un,*) '================================================'
       write(un,*) '----------- LibPFASST Parameters ---------------'
@@ -709,7 +717,7 @@ contains
       character(len = 128) :: fname  !!  output file name for residuals
       character(len = 128) :: datpath  !!  path to output files
 
-      if (pf%rank /= 0) return
+      if (pf%rank_global /= 0) return
 
       istat= system('mkdir -p dat/' // trim(pf%outdir))
       if (istat .ne. 0) call pf_stop(__FILE__,__LINE__, "Cannot make directory in pf_print_options")

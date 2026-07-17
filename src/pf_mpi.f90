@@ -18,12 +18,6 @@ module pf_mod_comm_mpi
    !  For  quadruple precision  (see top of pf_dtype.f90)
    ! integer, parameter :: myMPI_Datatype=MPI_REAL16
 
-   !> generic subroutine to split either MPI_comm or pf_comm returning same type
-   interface pf_mpi_split_comm
-      module procedure pf_mpi_split_mpicomm
-      module procedure pf_mpi_split_pfcomm
-   end interface pf_mpi_split_comm
-
 contains
 
    !> Subroutine to create an MPI based PFASST communicator using the MPI communicator *mpi_comm*.
@@ -53,14 +47,14 @@ contains
 
    !> Subroutine to set up the PFASST communicator.
    !! This should be called soon after adding levels to the PFASST controller
-   subroutine pf_mpi_setup(pf_comm, pf,ierror, pf_comm_diag)
+   subroutine pf_mpi_setup(pf_comm, pf,ierror, pf_diag_comm)
       use pf_mod_mpi, only: MPI_REQUEST_NULL
       use pf_mod_stop, only: pf_stop
 
       type(pf_comm_t),   intent(inout) :: pf_comm    !!  communicator
       type(pf_pfasst_t), intent(inout) :: pf         !!  main pfasst structure
       integer,           intent(inout) :: ierror     !!  error flag
-      type(pf_comm_t),   intent(inout), optional :: pf_comm_diag    !!  diagonal sdc communicator
+      type(pf_comm_t),   intent(inout), optional :: pf_diag_comm    !!  diagonal sdc communicator
 
       !>  set the rank
       call mpi_comm_rank(pf_comm%comm, pf%rank, ierror)
@@ -75,18 +69,18 @@ contains
       pf_comm%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
 
       ! add setup for diagonal comm if available
-      if (present(pf_comm_diag)) then
+      if (present(pf_diag_comm)) then
          !>  set the rank
-         call mpi_comm_rank(pf_comm_diag%comm, pf%rank_diag, ierror)
+         call mpi_comm_rank(pf_diag_comm%comm, pf%rank_diag, ierror)
 
          !>  allocate arrarys for and and receive requests
-         allocate(pf_comm_diag%recvreq(pf%nlevels),stat=ierror)
+         allocate(pf_diag_comm%recvreq(pf%nlevels),stat=ierror)
          if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
-         allocate(pf_comm_diag%sendreq(pf%nlevels),stat=ierror)
+         allocate(pf_diag_comm%sendreq(pf%nlevels),stat=ierror)
          if (ierror /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierror)
 
-         pf_comm_diag%sendreq = MPI_REQUEST_NULL
-         pf_comm_diag%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
+         pf_diag_comm%sendreq = MPI_REQUEST_NULL
+         pf_diag_comm%statreq = MPI_REQUEST_NULL   !Tells the first send_status not to wait for previous one to arrive
       end if
 
    end subroutine pf_mpi_setup
@@ -233,88 +227,128 @@ contains
    end subroutine pf_mpi_broadcast
 
    !> core subroutine to split - only works on plain MPI comms
-   subroutine pf_mpi_split_comm_core(size_comm1, size_comm2, comm1, comm2, color1, color2, parent_comm)
+   subroutine pf_mpi_orthosplit(size_comm1, size_comm2, comm1, comm2, color1, color2, parent_comm, &
+                                size_comm3, comm3, color3)
       use pf_mod_mpi, only: mpi_comm_size, mpi_comm_rank, mpi_comm_split, mpi_barrier, MPI_COMM_SELF
       integer, intent(out) :: comm1, comm2
       integer, intent(out) :: color1, color2
       integer, intent(in) :: size_comm1, size_comm2
       integer, intent(in) :: parent_comm
+      ! optional 3D extension
+      integer, intent(in),  optional :: size_comm3
+      integer, intent(out), optional :: comm3
+      integer, intent(out), optional :: color3 
       ! local variables
-      integer :: pSize, pRank, err
+      integer :: pSize, pRank, err, required_size
+      integer :: rank1, size1, rank2, size2, rank3, size3
 
       !> check size
       call mpi_comm_size(parent_comm, pSize, err)
       call mpi_comm_rank(parent_comm, pRank,  err)
-      ! sanity check on size_comm1, size_comm2
-      if (pSize .ne. (size_comm1 * size_comm2)) then
-         print '(a)', 'ERROR: create_simple_communicators: processor number mismatch.'
-         print '(a,i4,a,i4)', '       Expecting ', &
-            size_comm1 * size_comm2, ' MPI processors but received ', &
-            pSize
+      
+      !> sanity check on size_comm1, size_comm2
+      if (present(size_comm3)) then
+         required_size = size_comm1 * size_comm2 * size_comm3
+      else
+         required_size = size_comm1 * size_comm2
+      end if
+      ! 
+      if (pSize .ne. required_size) then
+         print '(a)', 'ERROR: pf_mpi_orthosplit_comm_core: processor number mismatch.'
+         print '(a,i4,a,i4)', ' Expecting ', required_size, ' MPI processors but received ', pSize
          stop
       end if
 
       !> do the actual splitting
-      if (size_comm2 == 1) then            ! full group 1 split
-         !!if (pRank .eq. 0) print *, "Full group 1 parallel split"
-         color2 = pRank
-         color1 = 0
-         comm1 = parent_comm
-         comm2  = MPI_COMM_SELF
-      else if (size_comm1 == 1) then      ! full group 2 split
-         !!if (pRank .eq. 0) print *, "Full group 2 parallel split"
-         color2 = 0
-         color1 = pRank
-         comm1 = MPI_COMM_SELF
-         comm2  = parent_comm
-      else                              ! actually do some splitting
-         ! space procs grouped
-         color1 = (pRank - mod(pRank,size_comm1)) / size_comm1
-         call mpi_comm_split(parent_comm, color1, pRank, comm1, err)
-         call mpi_barrier(parent_comm, err)
+      ! Think of ranks arranged in a (size_comm2 x size_comm1) grid:
+      !  pSize = 12, size_comm1=4, size_comm2=3 
+      !      comm1 ranks (size 4)
+      !       r0   r1   r2   r3
+      !     +----+----+----+----+
+      !  c  |  0 |  1 |  2 |  3 |  <- comm2 rank 0 (size 3)
+      !  o  +----+----+----+----+
+      !  m  |  4 |  5 |  6 |  7 |  <- comm2 rank 1
+      !  m  +----+----+----+----+
+      !  2  |  8 |  9 | 10 | 11 |  <- comm2 rank 2
+      !     +----+----+----+----+
+      !
+      ! 3D example, pSize = 23, size_comm1=4, size_comm2=3, size_comm3=2 
+      !         layer 0 (color3=0):          layer 1 (color3=1):
+      !          comm1 (size 4)               comm1 (size 4)
+      !          c0  c1  c2  c3               c0  c1  c2  c3
+      !         +---+---+---+---+            +---+---+---+---+
+      !    c  c0| 0 | 1 | 2 | 3 |       c  c0|12 |13 |14 |15 |
+      !    o    +---+---+---+---+       o    +---+---+---+---+
+      !    m  c1| 4 | 5 | 6 | 7 |       m  c1|16 |17 |18 |19 |
+      !    m    +---+---+---+---+       m    +---+---+---+---+
+      !    2  c2| 8 | 9 |10 |11 |       2  c2|20 |21 |22 |23 |
+      !         +---+---+---+---+            +---+---+---+---+
+      ! comm1: groups of size_comm1 consecutive ranks (rows)
+      color1 = pRank / size_comm1
+      call mpi_comm_split(parent_comm, color1, pRank, comm1, err)
 
-         color2 = mod(pRank, size_comm1)
-         call mpi_comm_split(parent_comm, color2, pRank, comm2, err)
-         call mpi_barrier(parent_comm, err)
+      ! comm2: interleaved groups (columns)
+      color2 = (pRank / (size_comm1 * size_comm2)) * size_comm1 + mod(pRank, size_comm1)
+      call mpi_comm_split(parent_comm, color2, pRank, comm2, err)
+
+      ! comm3: optional third dimension (layers)
+      if (present(size_comm3) .and. present(comm3) .and. present(color3)) then
+         color3 = mod(pRank, (size_comm1 * size_comm2))
+         call mpi_comm_split(parent_comm, color3, pRank, comm3, err)
       end if
-   end subroutine pf_mpi_split_comm_core
 
-   !> parent_comm, comm1, comm2 are all plain MPI communicators
-   subroutine pf_mpi_split_mpicomm(size_comm1, size_comm2, comm1, comm2, &
-      color1, color2, parent_comm)
-      use pf_mod_mpi, only: MPI_COMM_WORLD
-      integer, intent(out) :: comm1, comm2
-      integer, intent(out) :: color1, color2
-      integer, intent(in)  :: size_comm1, size_comm2
-      integer, intent(in), optional :: parent_comm
-      ! local variables
-      integer :: parent_comm_loc
+      !> rest is just some verbosity output
+      call mpi_comm_rank(comm1, rank1, err)
+      call mpi_comm_size(comm1, size1, err)
+      call mpi_comm_rank(comm2, rank2, err)
+      call mpi_comm_size(comm2, size2, err)
 
-      ! if no parent_comm supplied default back to MPI_COMM_WORLD
-      parent_comm_loc = MPI_COMM_WORLD
-      if (present(parent_comm)) parent_comm_loc = parent_comm
+      call mpi_barrier(parent_comm, err)
+      
+      if (pRank == 0) then
+         print '(a)', ''
+         print '(a)', '============ pf_mpi_orthosplit results ============'
+         if (present(size_comm3)) then
+            print '(a,i4,a,i4,a,i4,a,i4)', &
+               ' parent size=', pSize, &
+               ' comm1 size=', size_comm1, &
+               ' comm2 size=', size_comm2, &
+               ' comm3 size=', size_comm3
+         else
+            print '(a,i4,a,i4,a,i4)', &
+               ' parent size=', pSize, &
+               ' comm1 size=', size_comm1, &
+               ' comm2 size=', size_comm2
+         end if
+         print '(a)', ''
+         print '(a)', ' parent_rank | comm1_rank/size | comm2_rank/size' // &
+                      merge(' | comm3_rank/size', '                  ', present(size_comm3))
+         print '(a)', ' ----------- | --------------- | ---------------' // &
+                      merge(' | ---------------', '                  ', present(size_comm3))
+      end if
 
-      call pf_mpi_split_comm_core(size_comm1, size_comm2, comm1, comm2, &
-         color1, color2, parent_comm_loc)
-   end subroutine pf_mpi_split_mpicomm
+      call mpi_barrier(parent_comm, err)
+      flush(6)
+      call sleep(pRank/10)
+      if (present(size_comm3) .and. present(comm3) .and. present(color3)) then
+         call mpi_comm_rank(comm3, rank3, err)
+         call mpi_comm_size(comm3, size3, err)
+         print '(a,i6,a,i6,a,i4,a,i6,a,i4,a,i6,a,i4)', &
+            '  ', pRank, '     | ', &
+            rank1, ' / ', size1, '   | ', &
+            rank2, ' / ', size2, '   | ', &
+            rank3, ' / ', size3
+      else
+         print '(a,i6,a,i6,a,i4,a,i6,a,i4)', &
+            '  ', pRank, '     | ', &
+            rank1, ' / ', size1, '   | ', &
+            rank2, ' / ', size2
+      end if
 
-   !> parent_comm, comm1, comm2 are all pf_comm_t
-   subroutine pf_mpi_split_pfcomm(size_comm1, size_comm2, comm1, comm2, &
-      color1, color2, parent_comm)
-      type(pf_comm_t), intent(in)  :: parent_comm
-      type(pf_comm_t), intent(out) :: comm1, comm2
-      integer,         intent(out) :: color1, color2
-      integer,         intent(in)  :: size_comm1, size_comm2
-      ! local variable
-      integer :: mpi_comm1, mpi_comm2
+      call mpi_barrier(parent_comm, err)
+      if (pRank == 0) print '(a)', '================================================='
 
-      ! split into 2 mpi_comms
-      call pf_mpi_split_comm_core(size_comm1, size_comm2, mpi_comm1, mpi_comm2, &
-         color1, color2, parent_comm%comm)
-      ! turn back into pf_comm_t
-      call pf_mpi_create(comm1, mpi_comm1)
-      call pf_mpi_create(comm2, mpi_comm2)
-   end subroutine pf_mpi_split_pfcomm
+   end subroutine pf_mpi_orthosplit
 
 end module pf_mod_comm_mpi
 

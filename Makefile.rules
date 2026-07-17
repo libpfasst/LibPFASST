@@ -57,9 +57,18 @@ clean:
 
 
 #  We can use this to build a new dependency file.  If makedepf90 is installed  type "make depend"
+#depend:
+#	makedepf90 -b ./build  $(FSRC) > .depend
 depend:
-	makedepf90 -b ./build  $(FSRC) > .depend
-
+	@echo "Generating dependencies..."
+	@rm -f .depend
+	@for f in $(FSRC); do \
+		obj="build/$$(basename $${f%.f90}).o"; \
+		deps=$$(grep -i '^\s*use ' $$f | grep -iv 'use mpi\|use omp' | \
+		        sed 's/.*use\s*\(\w*\).*/build\/\1.o/' | tr '\n' ' '); \
+		echo "$$obj: $$deps" >> .depend; \
+	done
+	@echo "Done."
 
 include $(LIBPFASST)/.depend
 

@@ -34,7 +34,7 @@ contains
     pf%results%niters=niters
     pf%results%nblocks=nblocks
     pf%results%max_nsweeps=max_nsweeps
-    pf%results%rank=pf%rank
+    pf%results%rank=pf%rank_global
     pf%results%save_residuals=pf%save_residuals
     pf%results%save_errors=pf%save_errors
     pf%results%save_delta_q0=pf%save_delta_q0
@@ -152,7 +152,7 @@ contains
     
     !  Write a json file with timer numbers and times
     fullname = trim(this%datpath) // '/runtime.json'
-    iout = 4000+pf%rank !  Use processor dependent file number
+    iout = 4000+pf%rank_global !  Use processor dependent file number
     nlev=pf%nlevels
     !  output timings
     open(iout, file=trim(fullname), form='formatted',err=998)

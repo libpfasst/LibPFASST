@@ -559,9 +559,9 @@ contains
     complex(pfqp) :: num, den, z0(n), z1(n)
     real(pfqp)    :: p(0:n)
     
-    real(pfqp) ::  eps 
+    real(pfqp) ::  epsi 
 
-    eps = epsilon(1.0_pfqp)*100.0_pfqp
+    epsi = epsilon(1.0_pfqp)*100.0_pfqp
     p = p0 / p0(n)
 
     ! initial guess
@@ -589,13 +589,13 @@ contains
        end do
 
        ! converged?
-       if (sum(abs(z0 - z1)) < eps) exit
+       if (sum(abs(z0 - z1)) < epsi) exit
 
        z1 = z0
     end do
 
     roots = real(z0)
-    where (abs(roots) < eps) roots = 0.0_pfqp
+    where (abs(roots) < epsi) roots = 0.0_pfqp
     call qsort(roots)
 
   end subroutine poly_roots

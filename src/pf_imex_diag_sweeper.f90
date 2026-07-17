@@ -32,7 +32,8 @@ module pf_mod_imex_diag_sweeper
       logical    :: explicit  !!  True if there is an explicit piece (must set in derived sweeper)
       logical    :: implicit  !!  True if there an implicit piece (must set in derived sweeper)
       integer    :: m_sub     !!  Substep loop variable (useful in the function evaluation routines in derived sweepers)
-      class(pf_encap_t), allocatable :: rhs   !! holds rhs for implicit solve
+      class(pf_encap_t), allocatable :: rhs        !! holds rhs for implicit solve
+      class(pf_encap_t), allocatable :: local_sum  !! holds intermediate results on each rank
 
       real(pfdp), allocatable :: send_flat(:)  !!  flat array for sending encap data
       real(pfdp), allocatable :: recv_flat(:)  !!  flat array for receiving encap data
@@ -104,15 +105,14 @@ contains
       real(pfdp)  :: t          !!  Time at nodes
 
       !> Diagonal sweeper specific
-      integer :: rank, fidx
-      type(pf_encap_t) :: local_sum
+      integer :: rank, fidx, ierror
 
       !>  Assign level pointer
       lev => pf%levels(level_index)   ! Assign level pointer
       rank = pf%rank_diag             ! Diag rank is index for nodes in diagonal sweeper (shifted by 2 or 1 since first node is not stored explicitly in PFASST)
-      fidx = 1 + (rank .eq. 0)        ! We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
+      fidx = 1 + merge(1,0,pf%rank_diag .eq. 0)        ! We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
 
-      call local_sum%setval(0.0_pfdp)
+      call this%local_sum%setval(0.0_pfdp)
 
       sweeps: do k = 1,nsweeps   !!  Loop over sweeps
          pf%state%sweep=k
@@ -132,25 +132,29 @@ contains
             if (this%explicit) then
                ! loop over nodes replaced by MPI_Reduce with sum
                ! omit node 1 since QdiffE is zero in first column
-               call local_sum%setval(0.0_pfdp)
-               call local_sum%axpy(dt * this%QdiffE(m,rank+2),lev%F(fidx,1))
-               call local_sum%pack(this%send_flat)       ! encap to array
+               call this%local_sum%setval(0.0_pfdp)
+               call this%local_sum%axpy(dt * this%QdiffE(m,rank+2),lev%F(fidx,1))
+               call this%local_sum%pack(this%send_flat)       ! encap to array
                ! collect at rank m-1 since node m is stored on rank m-1
-               call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm)
-               call local_sum%unpack(this%recv_flat)     ! array to encap
-               call lev%I(1)%axpy(1.0_pfdp, local_sum)   ! add to integral
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep explicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
+               call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep explicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
+               call this%local_sum%unpack(this%recv_flat)     ! array to encap
+               call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
             end if
             ! add implicit part
             if (this%implicit) then
                ! loop over nodes replaced by MPI_Reduce with sum
                ! omit node 1 since QdiffI is zero in first column
-               call local_sum%setval(0.0_pfdp)
-               call local_sum%axpy(dt * this%QdiffI(m,rank+2),lev%F(fidx,2))
-               call local_sum%pack(this%send_flat)       ! encap to array
+               call this%local_sum%setval(0.0_pfdp)
+               call this%local_sum%axpy(dt * this%QdiffI(m,rank+2),lev%F(fidx,2))
+               call this%local_sum%pack(this%send_flat)       ! encap to array
                ! collect at rank m-1 since node m is stored on rank m-1
-               call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm)
-               call local_sum%unpack(this%recv_flat)     ! array to encap
-               call lev%I(1)%axpy(1.0_pfdp, local_sum)   ! add to integral
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep implicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
+               call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep implicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
+               call this%local_sum%unpack(this%recv_flat)     ! array to encap
+               call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
             end if
          end do   ! node loop
 
@@ -167,6 +171,7 @@ contains
          if (k .eq. 1 .and. rank == 0) then
             ! explicit part
             if (this%explicit) then
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'f_eval sweep explicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
                call pf_start_timer(pf,T_FEVAL,level_index)
                call this%f_eval(lev%q0, t0, level_index, lev%F(1,1),1)
                call pf_stop_timer(pf,T_FEVAL,level_index)
@@ -177,6 +182,7 @@ contains
             end if
             ! implicit part
             if (this%implicit) then
+               if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'feval sweep implicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
                call pf_start_timer(pf,T_FEVAL,level_index)
                call this%f_eval(lev%q0, t0, level_index, lev%F(1,2),2)
                call pf_stop_timer(pf,T_FEVAL,level_index)
@@ -191,24 +197,26 @@ contains
 
          !> loop over substeps is parallel loop over ranks here
          ! boils down to a single implicit step due to diagonal QtilI and zero QtilE
-         t = t + dt*this%dtsdc(1)
+         t = t0 + dt*this%dtsdc(1)
 
          this%m_sub=rank+1
          !>  Accumulate rhs
          call this%rhs%setval(0.0_pfdp)
          ! only need to add the implicit part since QtilE is zero
          ! omitting the first node since QtilI is zero in first column
-         if (this%implicit) then
-            call this%rhs%axpy(dt*this%QtilI(rank+1,rank+2), lev%F(fidx,2))
-         end if
+         !if (this%implicit) then         
+            ! isn't this also not 0, since org. sweeper goes n=1,m ?? which is just lower-triangular matrix 
+         !   call this%rhs%axpy(dt*this%QtilI(rank+1,rank+2), lev%F(fidx,2))      
+         !end if
          !>  Add the integral term
          call this%rhs%axpy(1.0_pfdp, lev%I(1))
 
-         !>  Add the starting value - flip from lev%Q(1) to lev%q0
+         !>  Add the starting value - changed from lev%Q(1) to lev%q0
          call this%rhs%axpy(1.0_pfdp, lev%q0)
 
          !>  Solve for the implicit piece
          if (this%implicit) then
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'fcomp sweep implicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
             call pf_start_timer(pf,T_FCOMP,level_index)
             call this%f_comp(lev%Q(1), t, dt*this%QtilI(rank+1,rank+2), this%rhs, level_index,lev%F(fidx,2),2)
             call pf_stop_timer(pf,T_FCOMP,level_index)
@@ -223,14 +231,18 @@ contains
             call pf_stop_timer(pf,T_FEVAL,level_index)
          end if
 
+         ! all substeps computed in parallel
+
+         ! compute residual at every node/rank
+         call pf_residual(pf, level_index, dt)
          !> identify the rank holding the last node, broadcast and copy into qend
          if (rank+2 .eq. lev%nnodes) then
             !>  Copy the last node to qend
             call lev%qend%pack(this%send_flat)    ! encap to array
-            call mpi_bcast(this%send_flat,lev%mpibuflen,myMPI_Datatype,rank,pf%diag_comm, ierror)
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'bcast sweep end before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
+            call mpi_bcast(this%send_flat,lev%mpibuflen,myMPI_Datatype,lev%nnodes-2,pf%diag_comm%comm, ierror)
             call lev%qend%unpack(this%send_flat)  ! array to encap
          end if
-         call pf_residual(pf, level_index, dt)
          call pf_stop_timer(pf, T_SWEEP,level_index)
 
          call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -251,17 +263,18 @@ contains
       lev => pf%levels(level_index)   !  Assign level pointer
       this%npieces = 2
 
-      !
-      if (pf%comm_diag%nproc /= nnodes - 1) then
-         ! diagonal sweeper only doable if diagsize
-         call pf_stop(__FILE__,__LINE__,"initialization error - pf%useSform=true for diagonal sweeper - how did we came here?")
-      end if
-
       !  The default is to use both pieces, but can be overriddent in local sweeper
       this%explicit=.TRUE.
       this%implicit=.TRUE.
 
+      !
       nnodes = lev%nnodes
+      if (pf%diag_comm%nproc /= nnodes - 1) then
+         ! diagonal sweeper only doable if diagsize
+         call pf_stop(__FILE__,__LINE__,"initialization error - number of diagonal processes need to be nnodes-1")
+      end if
+
+      !
       allocate(this%QdiffE(nnodes-1,nnodes),stat=ierr)
       if (ierr /=0) stop "allocate fail in imex_diag_initialize for QdiffE"
       allocate(this%QdiffI(nnodes-1,nnodes),stat=ierr)
@@ -283,16 +296,16 @@ contains
 
       !>  Substep sizes (zero-to-node) for diagonal sweeper
       ! Use
-      this%dtsdc = lev%sdcmats%qnodes(pf%rank_diag+2) - lev%sdcmats%qnodes(1)
-
+      this%dtsdc(1) = lev%sdcmats%qnodes(pf%rank_diag+2) - lev%sdcmats%qnodes(1)
+      
       ! Implicit matrix
       ! Use row sum to compute diagonal version of QtilI
       do i = 1, nnodes - 1
          do j = 1, i+1
             if (this%use_LUq) then
-               this%QtilI(i,i+1) += lev%sdcmats%qmatLU(i,j)
+               this%QtilI(i,i+1) = this%QtilI(i,i+1) + lev%sdcmats%qmatLU(i,j)
             else
-               this%QtilI(i,i+1) += lev%sdcmats%qmatBE(i,j)
+               this%QtilI(i,i+1) = this%QtilI(i,i+1) +lev%sdcmats%qmatBE(i,j)
             end if
          end do
       end do
@@ -308,8 +321,10 @@ contains
          ! node-to-node not possible with diagonal sweeper
          call pf_stop(__FILE__,__LINE__,"initialization error - pf%useSform=true for diagonal sweeper - how did we came here?")
       end if
-      !>  Make space for rhs
+      !>  Make space for rhs & local_sum
       call lev%ulevel%factory%create_single(this%rhs, level_index,   lev%lev_shape)
+      call lev%ulevel%factory%create_single(this%local_sum, level_index,   lev%lev_shape)
+
 
    end subroutine imex_diag_initialize
 
@@ -332,6 +347,7 @@ contains
       deallocate(this%recv_flat)
 
       call lev%ulevel%factory%destroy_single(this%rhs)
+      call lev%ulevel%factory%destroy_single(this%local_sum)
 
    end subroutine imex_diag_destroy
 
@@ -347,12 +363,11 @@ contains
       class(pf_encap_t), intent(inout) :: fintSDC(:)   !!  Integral from t_1 to t_m
       integer, optional, intent(in   ) :: flags
 
-      integer :: m, rank, fidx
+      integer :: m, rank, fidx, ierror
       type(pf_level_t), pointer :: lev        !  Current level
-      type(pf_encap_t) :: local_sum
       lev => pf%levels(level_index)   !  Assign level pointer
       rank = pf%rank_diag
-      fidx = 1 + (rank .eq. 0)        ! We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
+      fidx = 1 + merge(1,0,rank .eq. 0)        ! We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
 
       !
       call fintSDC(1)%setval(0.0_pfdp)
@@ -360,21 +375,29 @@ contains
       do m = 1, lev%nnodes-1
          ! explicit part
          if (this%explicit) then
-            call local_sum%setval(0.0_pfdp)
-            call local_sum%axpy(dt*lev%sdcmats%qmat(m,rank+2), fSDC(fidx,1))
-            call local_sum%pack(this%send_flat)       ! encap to array
-            call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm)
-            call local_sum%unpack(this%recv_flat)     ! array to encap
-            call fintSDC(1)%axpy(1.0_pfdp, local_sum) ! add to integral
+            call this%local_sum%setval(0.0_pfdp)
+            call this%local_sum%axpy(dt*lev%sdcmats%qmat(m,rank+2), fSDC(fidx,1))
+            call this%local_sum%pack(this%send_flat)       ! encap to array
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce explicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
+            call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce explicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
+            if (pf%rank_diag == m-1) then
+               call this%local_sum%unpack(this%recv_flat)     ! array to encap
+               call fintSDC(1)%axpy(1.0_pfdp, this%local_sum) ! add to integral
+            end if
          end if
          ! implicit part
          if (this%implicit) then
-            call local_sum%setval(0.0_pfdp)
-            call local_sum%axpy(dt*lev%sdcmats%qmat(m,rank+2), fSDC(fidx,2))
-            call local_sum%pack(this%send_flat)       ! encap to array
-            call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm)
-            call local_sum%unpack(this%recv_flat)     ! array to encap
-            call fintSDC(1)%axpy(1.0_pfdp, local_sum) ! add to integral
+            call this%local_sum%setval(0.0_pfdp)
+            call this%local_sum%axpy(dt*lev%sdcmats%qmat(m,rank+2), fSDC(fidx,2))
+            call this%local_sum%pack(this%send_flat)       ! encap to array
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce implicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
+            call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
+            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce implicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
+            if (pf%rank_diag == m-1) then
+               call this%local_sum%unpack(this%recv_flat)     ! array to encap
+               call fintSDC(1)%axpy(1.0_pfdp, this%local_sum) ! add to integral
+            end if
          end if
 
       end do
@@ -392,7 +415,6 @@ contains
       real(pfdp),        intent(in   ) :: dt           !!  Time step
       integer, intent(in), optional   :: flags
 
-      integer :: m
       type(pf_level_t), pointer :: lev        !  Current level
       lev => pf%levels(level_index)   !  Assign level pointer
 
@@ -442,7 +464,7 @@ contains
       ! No need to spread F and Q
       ! Copy F on rank 0 into second spot (holds F for node 1 and 2)
       if (pf%rank_diag .eq. 0) then
-         do p = 1, lev%npieces
+         do p = 1, this%npieces
             call lev%F(2,p)%copy(lev%F(1,p))
          end do
       end if
@@ -472,24 +494,26 @@ contains
       integer,           intent(in   ) :: m    !!  Node at which to evaluate
       integer, intent(in), optional   :: flags, step
 
+      integer :: fidx
       type(pf_level_t), pointer :: lev        !  Current level
       lev => pf%levels(level_index)   !  Assign level pointer
+      fidx = 1 + merge(1,0,pf%rank_diag .eq. 0)    !!  We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
 
       ! no need for m here since each rank holds only one node
       ! we keep it for consistency with generic sweeper
       ! do some sanity check here - should only be called for m=1
       if (m > 1) then
-         call pf_stop(__FILE__,__LINE__,"imex_diag_evaluate: m>1")
+         call pf_stop(__FILE__,__LINE__,"imex_diag_evaluate: m>1 - evaluate only for intial condition")
       end if
       if (this%explicit) then
          call pf_start_timer(pf,T_FEVAL,level_index)
-         call this%f_eval(lev%Q(1), t, level_index, lev%F(1,1),1)
+         call this%f_eval(lev%Q(1), t, level_index, lev%F(fidx,1),1)
          call pf_stop_timer(pf,T_FEVAL,level_index)
       end if
 
       if (this%implicit) then
          call pf_start_timer(pf,T_FEVAL,level_index)
-         call this%f_eval(lev%Q(1), t, level_index, lev%F(1,2),2)
+         call this%f_eval(lev%Q(1), t, level_index, lev%F(fidx,2),2)
          call pf_stop_timer(pf,T_FEVAL,level_index)
       end if
 
@@ -503,14 +527,22 @@ contains
       real(pfdp),        intent(in   ) :: t(:)  !!  Array of times at each node
       integer, intent(in), optional   :: flags, step
 
-      integer :: m, fidx
+      integer :: fidx
       class(pf_level_t), pointer :: lev   !!  points to current level
       lev => pf%levels(level_index)       !!  Assign level pointer
-      fidx = 1 + (pf%rank_diag .eq. 0)    !!  We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
+      fidx = 1 + merge(1,0,pf%rank_diag .eq. 0)    !!  We need this since rank 0 holds two F-arrays for node 1 and node 2, while all other ranks hold only one F-array for their node
 
-      do m = 1, lev%nnodes
-         call lev%ulevel%sweeper%evaluate(pf,level_index, t(m), m, flags=flags, step=step)
-      end do
+      if (this%explicit) then
+         call pf_start_timer(pf,T_FEVAL,level_index)
+         call this%f_eval(lev%Q(1), t(pf%rank_diag+2), level_index, lev%F(fidx,1),1)
+         call pf_stop_timer(pf,T_FEVAL,level_index)
+      end if
+
+      if (this%implicit) then
+         call pf_start_timer(pf,T_FEVAL,level_index)
+         call this%f_eval(lev%Q(1), t(pf%rank_diag+2), level_index, lev%F(fidx,2),2)
+         call pf_stop_timer(pf,T_FEVAL,level_index)
+      end if
 
    end subroutine imex_diag_evaluate_all
 

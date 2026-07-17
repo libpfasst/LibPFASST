@@ -18,37 +18,60 @@ contains
       real(pfdp),         intent(in)    :: dt
       integer, optional,  intent(in)    :: flag
 
-      real(pfdp) :: res_norms(pf%levels(level_index)%nnodes-1)    !!  Holds norms of residual
-      real(pfdp) :: sol_norms(pf%levels(level_index)%nnodes)      !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
-      integer :: m
+      real(pfdp) :: res_norm                       !!  Holds norms of residual
+      real(pfdp) :: sol_norm                       !!  Holds norms of solution ! for adjoint: need sol at t0 as well, not only t0+dt
+      real(pfdp) :: sol_norm_loc, res_norm_loc     !!  Holds single norm of solution and residual for diagonal version (would be nice to have a cleaner way to not use double allocation)
+      integer :: m, nnodes
       type(pf_level_t), pointer   :: lev
 
       call pf_start_timer(pf, T_RESIDUAL,level_index)
 
       lev => pf%levels(level_index)
+      nnodes = lev%nnodes
       call lev%ulevel%sweeper%residual(pf,level_index, dt, flag)
 
       ! compute max residual norm
-      !   sol_norms(1) = lev%Q(1)%norm(flag) ! for adjoint
-      sol_norms = lev%Q(1)%norm(flag) ! for adjoint
-!    do m = 1, lev%nnodes-1
-!       res_norms(m) = lev%R(m)%norm(flag)
-      res_norms = lev%R(lev%nnodes-1)%norm(flag)
-      !       sol_norms(m+1) = lev%Q(m+1)%norm(flag) ! only the value at lev%nnodes is needed for forward integration, right?
-!       sol_norms(m+1) = sol_norms(1) ! only the value at lev%nnodes is needed for forward integration, right?
-!    end do
-
-      !    lev%residual = res_norms(lev%nnodes-1)
-      m = lev%nnodes  ! for usual forward integration
-      if(present(flag)) then
-         if(flag==2) m = 1
-
-      end if
-      lev%residual = maxval(res_norms)
-      if (sol_norms(m) > 0.0d0) then
-         lev%residual_rel = lev%residual/sol_norms(m)
+      if (pf%use_diag_sweeper) then
+         sol_norm_loc = lev%Q(1)%norm(flag)               ! solution at node held by current rank
+         if(present(flag)) then
+            if(flag==2) sol_norm_loc = lev%q0%norm(flag)  ! adjoint case - need to pivot to q0 here since q0 /= Q(1)
+         end if
+         res_norm_loc = lev%R(1)%norm(flag)               ! residual at node held by current rank
+         ! since lev%residual and lev%residual_rel are purely diagnostic, just set at current node and each rank outputs
+         lev%residual = res_norm_loc
+         if (sol_norm_loc > 0.0d0) then
+            lev%residual_rel = lev%residual/sol_norm_loc
+         else
+            lev%residual_rel = 0.0d0
+         end if
       else
-         lev%residual_rel = 0.0d0
+         !>  previous version saved scalar (for q0 and Rend) in res_norms and sol_norms
+         !>    res_norms was array size nnodes-1, sol_norms was array size nnodes
+         !sol_norm = lev%Q(1)%norm(flag) ! for adjoint
+         !res_norm = lev%R(lev%nnodes-1)%norm(flag)
+         
+         !> for forward sweep we take resiudal and solution at the last node 
+         sol_norm = lev%Q(nnodes)%norm(flag)          ! isn't this also lev%qend ?
+         res_norm = lev%R(nnodes-1)%norm(flag)        ! R does not include left node, thus -1 shift
+         lev%residual = res_norm
+         
+         ! for adjoint
+         if(present(flag)) then
+            if(flag==2) then
+               sol_norm = lev%Q(1)%norm(flag)         ! isn't this also lev%q0 ?
+               do m = 1, nnodes-2
+                  res_norm_loc = lev%R(m)%norm(flag) 
+                  lev%residual = max(lev%residual, res_norm_loc)
+               end do
+            end if 
+         end if
+         
+         ! compute relative residual (forward sweep: ||R_end||/||Q_end|| adjoint: max(||R||)/||Q_0||)
+         if (sol_norm > 0.0d0) then
+            lev%residual_rel = lev%residual/sol_norm
+         else
+            lev%residual_rel = 0.0d0
+         end if
       end if
 
       call pf_set_resid(pf,lev%index,lev%residual)

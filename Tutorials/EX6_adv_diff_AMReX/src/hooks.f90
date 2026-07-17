@@ -21,7 +21,7 @@ contains
     type(pf_amrex_mfab_t) :: y_ex      
 
     real(pfdp) :: maxerr, time, resid, relresid
-    integer    :: rank, iter, step, sweep
+    integer    :: rank, Drank, Grank, iter, step, sweep
     real(pfdp) :: errL2(1), errL1(1), errLinf(1)
     real(pfdp) :: refL2(1), refL1(1), refLinf(1)
      
@@ -32,6 +32,8 @@ contains
     iter     = pf%state%iter
     sweep    = pf%state%sweep
     rank     = pf%rank
+    Drank    = pf%rank_diag
+    Grank    = pf%rank_global
     resid    = pf%levels(level_index)%residual
     relresid = pf%levels(level_index)%residual_rel
     
@@ -55,8 +57,8 @@ contains
     errL1  = y_ex%normL1()
     errLinf= y_ex%normLinf()   
     
-    print '("error: time: ", f4.2," step: ",i2.1," rank: ",i2.2," iter: ",i3.2, " sweep:",i2.2, " level: ",i2.2," relresid: ",es12.5)', &
-         time,step, rank, iter, sweep, level_index, relresid
+    print '("error: time: ", f4.2," step: ",i2.1," rank(PF,D,G): ",i2.2,i4.2,i3.2," iter: ",i3.2, " sweep:",i2.2, " level: ",i2.2," relresid: ",es12.5)', &
+         time,step, rank, Drank, Grank, iter, sweep, level_index, relresid
     !print '("error: time: ", f4.2," step: ",i2.1," rank: ",i2.2," iter: ",i2.2," level: ",i2.2," err0: ",es12.5," err1: ",es12.5," err2: ",es12.5," resid: ",es12.5," relresid: ",es12.5)', &
     !     time,step, rank, iter,level_index,errLinf,errL1,errL2,resid,relresid
     !print '("err0rel: ",es12.5," err1rel: ",es12.5," err2rel: ",es12.5)', &
