@@ -1,6 +1,6 @@
 # Advection-diffusion with AMReX and LIBPFASST
 This directory contains examples that use the amrex_mfab encapsulation to solve the 
-advection-diffusion equation (examples are provided in 1D, 2D and 3D).
+advection-diffusion equation (examples are provided in 1D and 2D).
 
 ## AMReX
 Current workflow is still a bit cumbersome, since we first need to download and compile 
@@ -17,31 +17,22 @@ in /path_to/amrex run (*with DIM = [1,2,3]*):
 ## LIBPFASST
 AMReX stores all data in an own data-strucutre, so-called *MultiFabs*. Thus we need again an encapsulation, 
 which is provided via LIBPFASST/src/pf_amrex_encap.f90. 
-Currently, this is build during the compilation of the LIBPFASST Library. To chose the correct libamrex, we need to compile LIBPFASST with DIM using USE_AMREX=TRUE, so e.g. `$ make DIM=2 USE_AMREX=TRUE`.
+Currently, this is build during the compilation of the LIBPFASST Library. To chose the correct libamrex, we need to compile
+LIBPFASST with DIM using USE_AMREX=TRUE.
 Consequently, we need to rebuild pf_amrex_encap.f90 as soon as the dimensionality changes.
 
 ### Building LIBPFASST
-in ~/LIBPFASST run (e.g. for 2D):
+in ~/LIBPFASST run (here only in 1D):
 ```
-   $ make USE_AMREX=TRUE DIM=2
+   $ make USE_AMREX=TRUE DIM=1
 ```
 
-### Building the Tutorial - pure Space-Time Parallel
-To run the examples (here again for the 2D examples)
+### Building the Tutorial
+To run the examples (here again for the 1D examples)
 in ~/LIBPFASST/Tutorials/EX6_adv_diff_AMReX run:
 ```
-   $ make DIM=2
-   $ ./main_2d.exe inputs/ad_2D.nml
+   $ make DIM=1
+   $ ./main_1d.exe inputs/burgers_1D.nml
 ```
-
-### Building the Tutorial - pure Space-Time² Parallel with Diagonal Sweeper
-**DOES NOT WORK CURRENTLY**
-To run the examples (here again for the 2D examples)
-in ~/LIBPFASST/Tutorials/EX6_adv_diff_AMReX run:
-```
-   $ make DIM=2 USE_DIAG=TRUE
-   $ ./main_2d.exe inputs/ad_2D.nml
-```
-
 ### Additional info
 for more information see ~LIBPFASST/Makefile.examples/Makefile.AMReX

@@ -1,0 +1,14 @@
+# WARNING currently still experimental stage
+
+# Example program calling libpfasst to solve the 1D advection-diffusion equation
+#   This example uses a parallel-sweep (time-time parallel) 
+
+    u_t + v*u_x = nu*u_xx
+
+# Building the Tutorial:
+Call `$ make` in the ../LIBPFASST/Tutorials/EX3_adv_diff.
+
+# Running the Tutorial
+Call `$ mpirun -n 2 ./main.exe sdc_diag.nml` for parallel single level SDC with diagonal sweep
+Make sure that **n = nnodes-1** otherwise diagonal sweeper will throw an error.
+

@@ -1,0 +1,86 @@
+!
+!  Test parameters for a 1-D viscid burgers
+!	u_t = nu * u_xx - u * u_x
+!
+
+&PF_PARAMS
+   !  These are internal pfasst variables that must be set
+    nlevels = 1	
+
+    !  These are internal pfasst variables that can be reset
+    niters = 8   !  default is 5
+ 
+     !  Type of quadrature nodes (default is 1=Gauss-Lobatto)
+     qtype   = 1 
+   
+     !  optional variables to control termination  (defaults are 0.0)
+     abs_res_tol = 1.d-42
+     rel_res_tol = 1.d-42
+
+     nnodes = 5
+	
+     nsweeps_pred= 1 
+     nsweeps= 1
+
+     ! additional - are these needed ?
+     Pipeline_pred =  .true.
+     PFASST_pred = .true.
+     Vcycle=.true.
+
+    !
+    outdir = 'steps-20_nnodes-5_nu-0_5_'
+     
+/
+
+!  Now define the local variables you need
+&PARAMS
+
+    ntime = 1
+    nspace = 1
+
+    nx = 60
+    max_grid_size = 10     ! maximum number of points per dim - generate boxarray from domain-box
+
+    nu = 0.5      ! default = 0.02
+    
+    Lx=6.28318530717958647692528676655900576839433879875021
+    !Lx = 1.0
+    
+    Tfin = 1.5              
+    nsteps = 30             ! 16
+    
+    ! controls splitting (0 fully implicit, 1 treats u_xx implicitly and u_x explicitly, 2 fully explicit)
+    splitting = 1
+
+    ! AMReX general and MLMG solver options
+    mlmg_max_iter       =       10       ! maximum number of iterations for MLMG solver
+    mlmg_tol_rel        =   1.d-10       ! relative tolerance for MLMG solver
+    mlmg_tol_abs        =   1.d-12       ! absolute tolerance for MLMG solver
+    linop_maxorder      =        2       ! order of stencil for Laplacian
+    linop_bc_lo         =      200       ! array size of dimension           
+    linop_bc_hi         =      200       ! array size of dimension
+        ! LinOpBCType :: Integer
+        !     interior         =    0
+        !     Dirichlet        =  101
+        !     Neumann          =  102
+        !     reflect_odd      =  103
+        !     Marshak          =  104
+        !     SanchezPomraning =  105
+        !     inflow           =  106
+        !     inhomogNeumann   =  107
+        !     Robin            =  108
+        !     symmetry         =  109
+        !     Periodic         =  200
+        !     bogus            = 1729
+    geom_bc_lo  = 0                      ! array size of dimension
+    geom_bc_hi  = 0                      ! array size of dimension
+        !     amrex_bc_bogus        = -666
+        !     amrex_bc_reflect_odd  = -1
+        !     amrex_bc_int_dir      =  0
+        !     amrex_bc_reflect_even =  1
+        !     amrex_bc_foextrap     =  2
+        !     amrex_bc_ext_dir      =  3
+        !     amrex_bc_hoextrap     =  4
+        !     amrex_bc_hoextrapcc   =  5
+        !     amrex_bc_ext_dir_cc   =  6
+/

@@ -15,7 +15,13 @@
 #   and currently need to rebuild pf_amrex_encap.f90 for changing dimensions
 # in ~/LIBPFASST run:
 #   $ make USE_AMREX=TRUE DIM=2 
-#  
+#
+#   The default paths below assume that LibPFASST and AMReX have the same parentfolder
+#       ../parentfolder
+#           |- LIBPFASST
+#           |- amrex
+#   If this is **NOT** the case on your machine, please change the `AMREX_HOME` below.
+
 
 AMREX_HOME=$(LIBPFASST)/../amrex
 AMREX_LIBRARY_HOME= $(AMREX_HOME)/amrex_lib_$(DIM)d
