@@ -115,6 +115,7 @@ contains
     if (source < 0  .or. source > pf%comm%nproc-1) return 
     if (pf%debug) print  '("DEBUG-rank=",I5," begin recv_status, tag=",I8," pstatus=",I2)',rank,tag,pstatus   
     call pf%comm%recv_status(pf, tag, pstatus, ierr, source)
+    if (pf%debug) print  '("DEBUG-rank=",I5," end recv_status, tag=",I8," pstatus=",I2)',rank,tag,pstatus
 
    if (ierr .ne. 0) call pf_stop(__FILE__,__LINE__,'error during recv_status, ierr',val=ierr,rank=pf%rank)
    pf%state%pstatus = pstatus

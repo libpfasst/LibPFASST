@@ -330,9 +330,11 @@ contains
       !> Check to see if tolerances are met
       call pf_check_residual(pf, level_index, residual_converged)
 
+      if (pf%debug) print*, 'DEBUG --', pf%rank, 'check_convergence start', 'pstatus=', pf%state%pstatus, 'status=', pf%state%status, 'tag=', send_tag
 
       !>  Until I hear the previous processor is done, recieve it's status
       if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, send_tag)
+      if (pf%debug) print*, 'DEBUG --', pf%rank, 'check_convergence after recv', 'pstatus=', pf%state%pstatus, 'status=', pf%state%status
 
       !>  Check to see if I am converged
       converged = .false.
@@ -517,13 +519,19 @@ contains
       integer, optional, intent(in)    :: flags
 
       type(pf_level_t), pointer :: f_lev, c_lev
-      integer :: level_index, j
+      integer :: level_index, j, diag_offset
 
-      !>  Post the nonblocking receives on the all the levels that will be recieving later
+      if (pf%use_diag_sweeper) then
+         diag_offset = pf%rank_diag
+      else
+         diag_offset = 0
+      end if
+
+      !>  Post the nonblocking receives on the all the levels that will be receiving later
       !>    (for single level this will be skipped)
       do level_index = level_index_c+1, level_index_f
          f_lev => pf%levels(level_index)
-         call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+         call pf_post(pf, f_lev, f_lev%index*10000+diag_offset*100+iteration)
       end do
 
 
@@ -534,7 +542,7 @@ contains
 
          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep at beginning of Vycle lev=',level_index
          call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
-         call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
+         call pf_send(pf, f_lev, level_index*10000+diag_offset*100+iteration, .false.)
          call restrict_time_space_fas(pf, t0, dt, level_index)
          call save(pf,c_lev)
       end do
@@ -546,19 +554,19 @@ contains
       if (pf%pipeline_pred) then
          do j = 1, f_lev%nsweeps
             call f_lev%delta_q0%copy(f_lev%q0)
-            call pf_recv(pf, f_lev, f_lev%index*10000+iteration+j, .true.)
+            call pf_recv(pf, f_lev, f_lev%index*10000+diag_offset*100+iteration+j, .true.)
             call pf_delta_q0(pf,level_index)
             if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep in mid of Vcycle,lev=',level_index
             call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1)
-            call pf_send(pf, f_lev, f_lev%index*10000+iteration+j, .false.)
+            call pf_send(pf, f_lev, f_lev%index*10000+diag_offset*100+iteration+j, .false.)
          end do
       else
          call f_lev%delta_q0%copy(f_lev%q0)
-         call pf_recv(pf, f_lev, f_lev%index*10000+iteration, .true.)
+         call pf_recv(pf, f_lev, f_lev%index*10000+diag_offset*100+iteration, .true.)
          call pf_delta_q0(pf,level_index)
          if (pf%debug) print*,  'DEBUG --',pf%rank,'sweep in mid of Vcycle,lev=',level_index
          call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
-         call pf_send(pf, f_lev, f_lev%index*10000+iteration, .false.)
+         call pf_send(pf, f_lev, f_lev%index*10000+diag_offset*100+iteration, .false.)
       endif
 
       ! Now move coarse to fine interpolating and sweeping
@@ -568,7 +576,7 @@ contains
          call interpolate_time_space(pf, t0, dt, level_index, c_lev%Finterp)
          call f_lev%qend%copy(f_lev%Q(f_lev%nnodes), flags=0)
          call f_lev%delta_q0%copy(f_lev%q0)
-         call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the receive was posted above
+         call pf_recv(pf, f_lev, level_index*10000+diag_offset*100+iteration, .false.)   ! This is actually a wait since the receive was posted above
          call pf_delta_q0(pf,level_index)
 
          if (pf%rank /= 0) then
@@ -602,7 +610,13 @@ contains
       integer, optional, intent(in)    :: flags
 
       type(pf_level_t), pointer :: f_lev, c_lev
-      integer :: level_index, j
+      integer :: level_index, j, diag_offset
+
+      if (pf%use_diag_sweeper) then
+         diag_offset = pf%rank_diag
+      else
+         diag_offset = 0
+      end if
 
       !>  Post the nonblocking receives on the all the levels that will be recieving later
       !>    (for single level this will be skipped)
@@ -617,10 +631,10 @@ contains
          f_lev => pf%levels(level_index);
          c_lev => pf%levels(level_index-1)
          call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps)
-         call pf_send(pf, f_lev, level_index*10000+iteration, .false.)
-         call pf_post(pf, f_lev, f_lev%index*10000+iteration)
+         call pf_send(pf, f_lev, level_index*10000+diag_offset*1000+iteration, .false.)
+         call pf_post(pf, f_lev, f_lev%index*10000+diag_offset*1000+iteration)
          call f_lev%delta_q0%copy(f_lev%q0)
-         call pf_recv(pf, f_lev, level_index*10000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
+         call pf_recv(pf, f_lev, level_index*10000+diag_offset*1000+iteration, .false.)   ! This is actually a wait since the recieve was posted above
          call pf_delta_q0(pf,level_index)
          call restrict_time_space_fas(pf, t0, dt, level_index)
          call save(pf,c_lev)

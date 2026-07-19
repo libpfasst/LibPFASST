@@ -139,8 +139,10 @@ contains
                if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep explicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
                call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
                if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep explicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
-               call this%local_sum%unpack(this%recv_flat)     ! array to encap
-               call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
+               if (pf%rank_diag == m-1) then
+                  call this%local_sum%unpack(this%recv_flat)     ! array to encap
+                  call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
+               end if
             end if
             ! add implicit part
             if (this%implicit) then
@@ -153,8 +155,10 @@ contains
                if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep implicit before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
                call mpi_reduce(this%send_flat,this%recv_flat,lev%mpibuflen,myMPI_Datatype,MPI_SUM,m-1,pf%diag_comm%comm,ierror)
                if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'diag_reduce sweep implicit after :', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'ierror=', ierror
-               call this%local_sum%unpack(this%recv_flat)     ! array to encap
-               call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
+               if (pf%rank_diag == m-1) then
+                  call this%local_sum%unpack(this%recv_flat)     ! array to encap
+                  call lev%I(1)%axpy(1.0_pfdp, this%local_sum)   ! add to integral
+               end if
             end if
          end do   ! node loop
 
@@ -204,9 +208,9 @@ contains
          call this%rhs%setval(0.0_pfdp)
          ! only need to add the implicit part since QtilE is zero
          ! omitting the first node since QtilI is zero in first column
-         !if (this%implicit) then         
-            ! isn't this also not 0, since org. sweeper goes n=1,m ?? which is just lower-triangular matrix 
-         !   call this%rhs%axpy(dt*this%QtilI(rank+1,rank+2), lev%F(fidx,2))      
+         !if (this%implicit) then
+         ! isn't this also not 0, since org. sweeper goes n=1,m ?? which is just lower-triangular matrix
+         !   call this%rhs%axpy(dt*this%QtilI(rank+1,rank+2), lev%F(fidx,2))
          !end if
          !>  Add the integral term
          call this%rhs%axpy(1.0_pfdp, lev%I(1))
@@ -235,14 +239,16 @@ contains
 
          ! compute residual at every node/rank
          call pf_residual(pf, level_index, dt)
-         !> identify the rank holding the last node, broadcast and copy into qend
+         !> Identify the rank holding the last node, broadcast and copy into qend.
+         !> MPI_Bcast must be called by all ranks in the communicator, so the
+         !> non-root ranks need to enter the collective as well.
          if (rank+2 .eq. lev%nnodes) then
-            !>  Copy the last node to qend
+            !> Copy the last node to qend on the root rank.
             call lev%qend%pack(this%send_flat)    ! encap to array
-            if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'bcast sweep end before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', m-1, 'nproc=', pf%diag_comm%nproc
-            call mpi_bcast(this%send_flat,lev%mpibuflen,myMPI_Datatype,lev%nnodes-2,pf%diag_comm%comm, ierror)
-            call lev%qend%unpack(this%send_flat)  ! array to encap
          end if
+         if (pf%debug) print*, 'DEBUG --', pf%rank_global, 'bcast sweep end before:', 'rank=', pf%rank, 'rank_diag=', pf%rank_diag, 'm=', m, 'root=', lev%nnodes-2, 'nproc=', pf%diag_comm%nproc
+         call mpi_bcast(this%send_flat,lev%mpibuflen,myMPI_Datatype,lev%nnodes-2,pf%diag_comm%comm, ierror)
+         call lev%qend%unpack(this%send_flat)  ! array to encap
          call pf_stop_timer(pf, T_SWEEP,level_index)
 
          call call_hooks(pf, level_index, PF_POST_SWEEP)
@@ -297,7 +303,7 @@ contains
       !>  Substep sizes (zero-to-node) for diagonal sweeper
       ! Use
       this%dtsdc(1) = lev%sdcmats%qnodes(pf%rank_diag+2) - lev%sdcmats%qnodes(1)
-      
+
       ! Implicit matrix
       ! Use row sum to compute diagonal version of QtilI
       do i = 1, nnodes - 1

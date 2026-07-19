@@ -30,7 +30,7 @@
      !  Variable to tell if Vcycling will be done.  Here we do pipelining
      Vcycle=.false.
 
-     DEBUG = .true.
+     DEBUG = .false.
 /
 
 !  Now define the local variables you need
