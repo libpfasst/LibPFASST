@@ -5,6 +5,7 @@ fftw*
 hdf5*
 gcc*
 xz*
+libnpy*
 
 *.exe
 *.defs
@@ -14,11 +15,13 @@ fort.*
 *.pyc
 *.pkl
 *.npy
+*.jl
 
 lib/
 build/
 include/
 staging/
+slurm/
 src/pf_version.f90
 /.project
 
@@ -34,3 +37,6 @@ final_solution
 .pytest_cache
 /TAGS
 *.ipynb_checkpoints
+*.pdf
+*.json
+*.txt
