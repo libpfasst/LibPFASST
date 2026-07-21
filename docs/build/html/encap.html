@@ -1,19 +1,17 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Data encapsulation &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -21,7 +19,7 @@
     <link rel="next" title="Output" href="output.html" />
     <link rel="prev" title="Steppers" href="steppers.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -33,7 +31,8 @@
         <li class="right" >
           <a href="steppers.html" title="Steppers"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Data encapsulation</a></li> 
       </ul>
     </div>  
 
@@ -42,8 +41,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="data-encapsulation">
-<h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Permalink to this headline">¶</a></h1>
+  <section id="data-encapsulation">
+<h1>Data encapsulation<a class="headerlink" href="#data-encapsulation" title="Link to this heading">¶</a></h1>
 <p>!  Under construction</p>
 <p>The temporal integration routines in LibPFASST do not specify the form of the solution in terms of its data layout, but rather this must be described by an encapsulation module which tells LibPFASST how to operate on the data.  For convenience LibPFASST provides sample encapsulations corresponding to regular Fortran arrays. These are provided in
 <cite>src/</cite> within module files whose names  include <cite>encap</cite>.</p>
@@ -54,28 +53,34 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">zndarray</span></code>: An N-dimensional complex array</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">zndsysarray</span></code>: System of complex ndarrays</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ndarray_oc</span></code>:  Optimal control version of ndarray</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amrex_mfab</span></code>:  Offers interface to AMReX and encapsulation for AMReX Multi FAB data</p></li>
 </ul>
 <p>A discussion of how to construct an encapsulation is included in the 2nd tutorial.
 The advanced user might also consider the encapsulations</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">petscVec</span></code>:  uses the standard Vec structure from PETSc</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">hamsys</span></code>:    provides encapsulation of two Hamiltonian variables for Verlet sweepers</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">amrex</span></code>:  based on the multifab structure from the AMReX code (under construction)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amrex</span></code>:  based on the multifab structure from the AMReX code (detailed explanation in :Tutorial: :Example6:)</p></li>
 </ul>
-</div>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="steppers.html"
-                        title="previous chapter">Steppers</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="output.html"
-                        title="next chapter">Output</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="steppers.html"
+                          title="previous chapter">Steppers</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="output.html"
+                          title="next chapter">Output</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -83,21 +88,21 @@ The advanced user might also consider the encapsulations</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -109,12 +114,13 @@ The advanced user might also consider the encapsulations</p>
         <li class="right" >
           <a href="steppers.html" title="Steppers"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Data encapsulation</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

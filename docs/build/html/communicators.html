@@ -1,31 +1,31 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>LibPFASST communicators &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LibPFASST communicators</a></li> 
       </ul>
     </div>  
 
@@ -34,8 +34,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="libpfasst-communicators">
-<h1>LibPFASST communicators<a class="headerlink" href="#libpfasst-communicators" title="Permalink to this headline">¶</a></h1>
+  <section id="libpfasst-communicators">
+<h1>LibPFASST communicators<a class="headerlink" href="#libpfasst-communicators" title="Link to this heading">¶</a></h1>
 <p>LibPFASST includes several (time) communicators:</p>
 <ul class="simple">
 <li><p>MPI</p></li>
@@ -87,8 +87,8 @@ number of processors that moved.</p>
 steps it stop iterating.  In this case, other processors move their
 last marker accordingly so that they do not include stopped processors
 in their communications.</p>
-<div class="section" id="mpi">
-<h2>MPI<a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h2>
+<section id="mpi">
+<h2>MPI<a class="headerlink" href="#mpi" title="Link to this heading">¶</a></h2>
 <p>The PFASST MPI communicator can be used in conjunction with spatial
 MPI communications.  The user is responsible for splitting
 <code class="docutils literal notranslate"><span class="pre">MPI_COMM_WORLD</span></code> appropriately (this can be done, eg, using a simple
@@ -98,22 +98,24 @@ colouring algorithm).</p>
 corresponding to the first and last processors in the current block.</p>
 <p>At the beginning of each PFASST iteration the MPI communicator posts
 receive requests on all PFASST levels.</p>
-</div>
-<div class="section" id="fake">
-<h2>fake<a class="headerlink" href="#fake" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="fake">
+<h2>fake<a class="headerlink" href="#fake" title="Link to this heading">¶</a></h2>
 <p>The PFASST fake communicator allows us to study the convergence
 behaviour of PFASST in <code class="docutils literal notranslate"><span class="pre">PF_WINDOW_BLOCK</span></code> mode using only a single core.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">LibPFASST communicators</a><ul>
 <li><a class="reference internal" href="#mpi">MPI</a></li>
 <li><a class="reference internal" href="#fake">fake</a></li>
@@ -121,6 +123,7 @@ behaviour of PFASST in <code class="docutils literal notranslate"><span class="p
 </li>
 </ul>
 
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -128,32 +131,33 @@ behaviour of PFASST in <code class="docutils literal notranslate"><span class="p
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">LibPFASST communicators</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

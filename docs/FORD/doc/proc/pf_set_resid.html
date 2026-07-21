@@ -1,855 +1,793 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <meta name="description" content="The library for running PFASST">
-    
+      <meta name="description" content="The library for running PFASST">
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_set_resid &ndash; LibPFASST</title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-    
-    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-    
-    
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    <script src="../js/jquery-2.1.3.min.js"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
-
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">LibPFASST </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-        
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-              data-toggle="dropdown" role="button"
-              aria-haspopup="true"
-     aria-expanded="false">Contents <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          
-              
-            <li><a href="../lists/files.html">Source Files</a></li>
-        
-        
-        
-            <li><a href="../lists/modules.html">Modules</a></li>
-        
-            
-                                
-            <li><a href="../lists/procedures.html">Procedures</a></li>
-        
-               
-            <li><a href="../lists/types.html">Derived Types</a></li>
-        
-        
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
             </ul>
-            </li>
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
-
-                             
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
-
-
-          </ul>
-        
-        <form action="../search.html" class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
         </div>
-<!--
-        <button type="submit" class="btn btn-default">Submit</button>
--->
-        </form>
-        
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
+    </div>
 
     <div class="container">
-    
-  
   <div class="row">
     <h1>pf_set_resid
       <small>Subroutine</small>
-    
+      
     </h1>
-    
-<div class="row">
-  <div class="col-lg-12">
-<div class="well well-sm">
-  <ul class="list-inline" style="margin-bottom:0px;display:inline">
-     
-     
-     
-     
-    
-    
-     <li><i class="fa fa-list-ol"></i>
-       <a data-toggle="tooltip"
-    data-placement="bottom" data-html="true"
-    title=" 0.0% of total for procedures.">9 statements</a>
-     </li> 
-     
-     
-     
-    <li><i class="fa fa-code"></i><a href="../src/pf_utils.f90"> Source File</a></li>
-     
-     
-  </ul>
-  <ol class="breadcrumb in-well text-right">
-  
-    
-     <li><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></li>
-    
-     <li><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
-    
-  
-     <li class="active">pf_set_resid</li>
-  </ol>
-</div>
-</div>
-</div>
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  })
-</script>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.0% of total for procedures.">9 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_utils.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
+            <li class="breadcrumb-item active" aria-current="page">pf_set_resid</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
 
   </div>
   
   <div class="row">
     <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
-    
-<div id="sidebar">
+      <div id="sidebar">
+      <h3>Contents</h3>
   
-<h3>Contents</h3>
- 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/pf_set_resid.html#src">pf_set_resid</a>
+      </div>
+    </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/pf_set_resid.html#src">pf_set_resid</a>
   </div>
-</div>
-
-
-
-</div>
 
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>
-public subroutine pf_set_resid(pf, level_index, resid)
-    
-    
-   
+    <h2>public  subroutine pf_set_resid(pf, level_index, resid)  
 </h2>
     
-  
 
-
-    
     <p>Subroutine to store a residual value</p>
-    
+
 
     <h3>Arguments</h3>
-    
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~118"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~104"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-resid~2"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>resid</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
 
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-pf%7E181"></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-level_index%7E181"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-resid"></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>resid</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    
-    
-    
     <br>
-    
-    
-     
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Called by</h3>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Called by</h3>
       </div>
-      <div class="panel-body">
+      <div class="card-body">
   <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: proc~~pf_set_resid~~CalledByGraph Pages: 1 -->
-<svg id="procpf_set_residCalledByGraph" width="634pt" height="822pt"
- viewBox="0.00 0.00 634.00 822.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~pf_set_resid~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 818)">
+<svg id="procpf_set_residCalledByGraph" width="641pt" height="778pt"
+ viewBox="0.00 0.00 641.00 777.84" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_set_resid~~CalledByGraph" class="graph" transform="scale(0.9 0.9) rotate(0) translate(4 860)">
 <title>proc~~pf_set_resid~~CalledByGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-818 630,-818 630,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-860 708,-860 708,4 -4,4"/>
 <!-- proc~pf_set_resid -->
 <g id="proc~~pf_set_resid~~CalledByGraph_node1" class="node">
 <title>proc~pf_set_resid</title>
-<polygon fill="none" stroke="#000000" points="626,-83 555,-83 555,-59 626,-59 626,-83"/>
-<text text-anchor="middle" x="590.5" y="-68.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_set_resid</text>
+<polygon fill="none" stroke="black" points="704,-104 634,-104 634,-80 704,-80 704,-104"/>
+<text text-anchor="middle" x="669" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_set_resid</text>
 </g>
 <!-- proc~pf_block_run -->
 <g id="proc~~pf_set_resid~~CalledByGraph_node2" class="node">
 <title>proc~pf_block_run</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node2"><a xlink:href=".././proc/pf_block_run.html" xlink:title="pf_block_run">
-<polygon fill="#d9534f" stroke="#d9534f" points="203,-163 129,-163 129,-139 203,-139 203,-163"/>
-<text text-anchor="middle" x="166" y="-148.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_block_run</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node2"><a xlink:href="../proc/pf_block_run.html" xlink:title="pf_block_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="208.5,-205 134.5,-205 134.5,-181 208.5,-181 208.5,-205"/>
+<text text-anchor="middle" x="171.5" y="-190.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_block_run</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_block_run&#45;&gt;proc~pf_set_resid -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge1" class="edge">
 <title>proc~pf_block_run&#45;&gt;proc~pf_set_resid</title>
-<path fill="none" stroke="#000000" d="M186.2118,-138.956C203.5715,-129.2082 229.5881,-115.9901 254,-109 355.1301,-80.0426 479.2775,-73.0005 544.8637,-71.385"/>
-<polygon fill="#000000" stroke="#000000" points="544.9521,-74.884 554.8746,-71.1697 544.8016,-67.8856 544.9521,-74.884"/>
-</g>
-<!-- proc~pf_vcycle_pysdc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node8" class="node">
-<title>proc~pf_vcycle_pysdc</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node8"><a xlink:href=".././proc/pf_vcycle_pysdc.html" xlink:title="pf_Vcycle_pySDC">
-<polygon fill="#d9534f" stroke="#d9534f" points="362.5,-226 265.5,-226 265.5,-202 362.5,-202 362.5,-226"/>
-<text text-anchor="middle" x="314" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_Vcycle_pySDC</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge26" class="edge">
-<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc</title>
-<path fill="none" stroke="#000000" d="M189.5884,-163.1183C207.1306,-171.9183 231.7755,-183.8388 254,-193 258.4831,-194.848 263.1948,-196.6802 267.9245,-198.4477"/>
-<polygon fill="#000000" stroke="#000000" points="266.9967,-201.8347 277.5907,-201.969 269.3927,-195.2575 266.9967,-201.8347"/>
-</g>
-<!-- proc~pf_vcycle -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node11" class="node">
-<title>proc~pf_vcycle</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node11"><a xlink:href=".././proc/pf_vcycle.html" xlink:title="pf_Vcycle">
-<polygon fill="#d9534f" stroke="#d9534f" points="343,-184 285,-184 285,-160 343,-160 343,-184"/>
-<text text-anchor="middle" x="314" y="-169.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_Vcycle</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge27" class="edge">
-<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle</title>
-<path fill="none" stroke="#000000" d="M203.3466,-156.2992C225.0805,-159.3831 252.4578,-163.2677 274.5429,-166.4014"/>
-<polygon fill="#000000" stroke="#000000" points="274.2015,-169.8879 284.5941,-167.8275 275.185,-162.9573 274.2015,-169.8879"/>
+<path fill="none" stroke="#000000" d="M193.83,-180.99C212.13,-171.26 239.5,-158.05 265,-151 408.57,-111.28 452.08,-142.96 598,-113 606.49,-111.26 615.43,-108.95 623.97,-106.5"/>
+<polygon fill="#000000" stroke="#000000" points="625.18,-109.8 633.77,-103.59 623.19,-103.08 625.18,-109.8"/>
 </g>
 <!-- proc~pf_predictor -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node20" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node19" class="node">
 <title>proc~pf_predictor</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node20"><a xlink:href=".././proc/pf_predictor.html" xlink:title="pf_predictor">
-<polygon fill="#d9534f" stroke="#d9534f" points="349,-142 279,-142 279,-118 349,-118 349,-142"/>
-<text text-anchor="middle" x="314" y="-127.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_predictor</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node19"><a xlink:href="../proc/pf_predictor.html" xlink:title="pf_predictor">
+<polygon fill="#d9534f" stroke="#d9534f" points="394,-268 325,-268 325,-244 394,-244 394,-268"/>
+<text text-anchor="middle" x="359.5" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_predictor</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_block_run&#45;&gt;proc~pf_predictor -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge30" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge28" class="edge">
 <title>proc~pf_block_run&#45;&gt;proc~pf_predictor</title>
-<path fill="none" stroke="#000000" d="M203.3466,-145.7008C223.2896,-142.8711 247.9843,-139.3671 268.9816,-136.3877"/>
-<polygon fill="#000000" stroke="#000000" points="269.5463,-139.8428 278.9554,-134.9725 268.5628,-132.9122 269.5463,-139.8428"/>
+<path fill="none" stroke="#000000" d="M195.54,-205.06C213.93,-214.3 240.59,-226.81 265,-235 280.92,-240.34 298.81,-244.73 314.65,-248.09"/>
+<polygon fill="#000000" stroke="#000000" points="314.22,-251.58 324.72,-250.15 315.63,-244.72 314.22,-251.58"/>
 </g>
-<!-- proc~pf_residual -->
+<!-- proc~pf_vcycle -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node22" class="node">
+<title>proc~pf_vcycle</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node22"><a xlink:href="../proc/pf_vcycle.html" xlink:title="pf_Vcycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="388.5,-226 330.5,-226 330.5,-202 388.5,-202 388.5,-226"/>
+<text text-anchor="middle" x="359.5" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_Vcycle</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge31" class="edge">
+<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle</title>
+<path fill="none" stroke="#000000" d="M208.8,-197.1C240.95,-200.73 287.72,-206.01 320.4,-209.7"/>
+<polygon fill="#000000" stroke="#000000" points="320.15,-213.19 330.48,-210.84 320.93,-206.24 320.15,-213.19"/>
+</g>
+<!-- proc~pf_vcycle_pysdc -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node23" class="node">
+<title>proc~pf_vcycle_pysdc</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node23"><a xlink:href="../proc/pf_vcycle_pysdc.html" xlink:title="pf_Vcycle_pySDC">
+<polygon fill="#d9534f" stroke="#d9534f" points="408,-184 311,-184 311,-160 408,-160 408,-184"/>
+<text text-anchor="middle" x="359.5" y="-169.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_Vcycle_pySDC</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge32" class="edge">
+<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc</title>
+<path fill="none" stroke="#000000" d="M208.8,-188.9C234.92,-185.95 270.69,-181.91 300.72,-178.52"/>
+<polygon fill="#000000" stroke="#000000" points="301.11,-182 310.66,-177.4 300.33,-175.05 301.11,-182"/>
+</g>
+<!-- proc~pf_mgrit_run -->
 <g id="proc~~pf_set_resid~~CalledByGraph_node3" class="node">
-<title>proc~pf_residual</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node3"><a xlink:href=".././proc/pf_residual.html" xlink:title="pf_residual">
-<polygon fill="#d9534f" stroke="#d9534f" points="497,-457 432,-457 432,-433 497,-433 497,-457"/>
-<text text-anchor="middle" x="464.5" y="-442.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_residual</text>
+<title>proc~pf_mgrit_run</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node3"><a xlink:href="../proc/pf_mgrit_run.html" xlink:title="pf_MGRIT_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="586,-104 502,-104 502,-80 586,-80 586,-104"/>
+<text text-anchor="middle" x="544" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_run</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_residual&#45;&gt;proc~pf_set_resid -->
+<!-- proc~pf_mgrit_run&#45;&gt;proc~pf_set_resid -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge2" class="edge">
-<title>proc~pf_residual&#45;&gt;proc~pf_set_resid</title>
-<path fill="none" stroke="#000000" d="M468.5495,-432.9799C486.5792,-379.4634 559.6924,-162.4447 583.1899,-92.6982"/>
-<polygon fill="#000000" stroke="#000000" points="586.5263,-93.7574 586.4022,-83.1633 579.8927,-91.5225 586.5263,-93.7574"/>
-</g>
-<!-- proc~pf_parareal_v_cycle -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node4" class="node">
-<title>proc~pf_parareal_v_cycle</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node4"><a xlink:href=".././proc/pf_parareal_v_cycle.html" xlink:title="pf_parareal_v_cycle">
-<polygon fill="#d9534f" stroke="#d9534f" points="519,-24 410,-24 410,0 519,0 519,-24"/>
-<text text-anchor="middle" x="464.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_v_cycle</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge3" class="edge">
-<title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid</title>
-<path fill="none" stroke="#000000" d="M490.302,-24.0819C509.1576,-32.9111 534.9393,-44.9835 555.6283,-54.6712"/>
-<polygon fill="#000000" stroke="#000000" points="554.1919,-57.8633 564.7325,-58.9343 557.1604,-51.5238 554.1919,-57.8633"/>
+<title>proc~pf_mgrit_run&#45;&gt;proc~pf_set_resid</title>
+<path fill="none" stroke="#000000" d="M586.3,-92C598.4,-92 611.68,-92 623.95,-92"/>
+<polygon fill="#000000" stroke="#000000" points="623.97,-95.5 633.97,-92 623.97,-88.5 623.97,-95.5"/>
 </g>
 <!-- proc~pf_parareal_block_run -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node5" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node4" class="node">
 <title>proc~pf_parareal_block_run</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node5"><a xlink:href=".././proc/pf_parareal_block_run.html" xlink:title="pf_parareal_block_run">
-<polygon fill="#d9534f" stroke="#d9534f" points="374,-43 254,-43 254,-19 374,-19 374,-43"/>
-<text text-anchor="middle" x="314" y="-28.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_block_run</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node4"><a xlink:href="../proc/pf_parareal_block_run.html" xlink:title="pf_parareal_block_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="419,-44 300,-44 300,-20 419,-20 419,-44"/>
+<text text-anchor="middle" x="359.5" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parareal_block_run</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_set_resid -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge4" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge3" class="edge">
 <title>proc~pf_parareal_block_run&#45;&gt;proc~pf_set_resid</title>
-<path fill="none" stroke="#000000" d="M374.3374,-39.7287C425.599,-47.1445 498.0797,-57.63 544.689,-64.3727"/>
-<polygon fill="#000000" stroke="#000000" points="544.4018,-67.8675 554.7999,-65.8354 545.4041,-60.9397 544.4018,-67.8675"/>
+<path fill="none" stroke="#000000" d="M419.47,-39.53C467.78,-46.22 537.75,-57.08 598,-71 606.44,-72.95 615.36,-75.35 623.9,-77.83"/>
+<polygon fill="#000000" stroke="#000000" points="623.12,-81.25 633.7,-80.75 625.11,-74.54 623.12,-81.25"/>
+</g>
+<!-- proc~pf_parareal_v_cycle -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node5" class="node">
+<title>proc~pf_parareal_v_cycle</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node5"><a xlink:href="../proc/pf_parareal_v_cycle.html" xlink:title="pf_parareal_v_cycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="598,-24 490,-24 490,0 598,0 598,-24"/>
+<text text-anchor="middle" x="544" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parareal_v_cycle</text>
+</a>
+</g>
 </g>
 <!-- proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge23" class="edge">
-<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle</title>
-<path fill="none" stroke="#000000" d="M374.3469,-23.3815C382.7189,-22.3245 391.3473,-21.2352 399.7948,-20.1688"/>
-<polygon fill="#000000" stroke="#000000" points="400.497,-23.608 409.9799,-18.8829 399.6202,-16.6631 400.497,-23.608"/>
-</g>
-<!-- proc~imexq_oc_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node6" class="node">
-<title>proc~imexq_oc_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node6"><a xlink:href=".././proc/imexq_oc_sweep.html" xlink:title="imexQ_oc_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="362.5,-814 265.5,-814 265.5,-790 362.5,-790 362.5,-814"/>
-<text text-anchor="middle" x="314" y="-799.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imexQ_oc_sweep</text>
-</a>
-</g>
-</g>
-<!-- proc~imexq_oc_sweep&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge6" class="edge">
-<title>proc~imexq_oc_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M362.4921,-789.9672C366.7535,-787.5127 370.6949,-784.5576 374,-781 417.6235,-734.0428 451.1056,-534.0937 461.2883,-467.0294"/>
-<polygon fill="#000000" stroke="#000000" points="464.7536,-467.5213 462.77,-457.1138 457.8304,-466.4867 464.7536,-467.5213"/>
-</g>
-<!-- proc~pf_v_cycle_oc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node7" class="node">
-<title>proc~pf_v_cycle_oc</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node7"><a xlink:href=".././proc/pf_v_cycle_oc.html" xlink:title="pf_v_cycle_oc">
-<polygon fill="#d9534f" stroke="#d9534f" points="354,-772 274,-772 274,-748 354,-748 354,-772"/>
-<text text-anchor="middle" x="314" y="-757.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_v_cycle_oc</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge7" class="edge">
-<title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M354.2006,-751.7941C361.5306,-748.7743 368.5657,-744.6451 374,-739 412.6159,-698.8858 448.3677,-529.0603 460.3008,-467.4473"/>
-<polygon fill="#000000" stroke="#000000" points="463.8086,-467.7369 462.247,-457.2578 456.9329,-466.4236 463.8086,-467.7369"/>
-</g>
-<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge8" class="edge">
-<title>proc~pf_vcycle_pysdc&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M361.0885,-226.0644C365.7822,-228.5173 370.2057,-231.4632 374,-235 430.115,-287.3064 453.0791,-380.2959 460.9666,-422.7509"/>
-<polygon fill="#000000" stroke="#000000" points="457.5634,-423.6086 462.7328,-432.8567 464.4588,-422.4034 457.5634,-423.6086"/>
+<title>proc~pf_parareal_block_run&#45;&gt;proc~pf_parareal_v_cycle</title>
+<path fill="none" stroke="#000000" d="M419.25,-25.56C438.59,-23.44 460.18,-21.08 479.84,-18.92"/>
+<polygon fill="#000000" stroke="#000000" points="480.36,-22.39 489.92,-17.82 479.6,-15.43 480.36,-22.39"/>
+</g>
+<!-- proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge4" class="edge">
+<title>proc~pf_parareal_v_cycle&#45;&gt;proc~pf_set_resid</title>
+<path fill="none" stroke="#000000" d="M572.26,-24.08C580.7,-28.16 589.91,-32.96 598,-38 615.05,-48.61 632.96,-62.48 646.39,-73.51"/>
+<polygon fill="#000000" stroke="#000000" points="644.21,-76.24 654.13,-79.95 648.69,-70.86 644.21,-76.24"/>
+</g>
+<!-- proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node6" class="node">
+<title>proc~pf_residual</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node6"><a xlink:href="../proc/pf_residual.html" xlink:title="pf_residual">
+<polygon fill="#d9534f" stroke="#d9534f" points="576,-499 512,-499 512,-475 576,-475 576,-499"/>
+<text text-anchor="middle" x="544" y="-484.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_residual</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_residual&#45;&gt;proc~pf_set_resid -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge5" class="edge">
+<title>proc~pf_residual&#45;&gt;proc~pf_set_resid</title>
+<path fill="none" stroke="#000000" d="M548.82,-474.75C566.25,-418.76 638.44,-186.92 661.14,-114.03"/>
+<polygon fill="#000000" stroke="#000000" points="664.6,-114.7 664.23,-104.11 657.91,-112.62 664.6,-114.7"/>
 </g>
 <!-- proc~exp_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node9" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node7" class="node">
 <title>proc~exp_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node9"><a xlink:href=".././proc/exp_sweep.html" xlink:title="exp_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="347.5,-688 280.5,-688 280.5,-664 347.5,-664 347.5,-688"/>
-<text text-anchor="middle" x="314" y="-673.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">exp_sweep</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node7"><a xlink:href="../proc/exp_sweep.html" xlink:title="pf_exp_t%exp_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="417,-856 302,-856 302,-832 417,-832 417,-856"/>
+<text text-anchor="middle" x="359.5" y="-841.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_exp_t%exp_sweep</text>
 </a>
 </g>
 </g>
 <!-- proc~exp_sweep&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge20" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge9" class="edge">
 <title>proc~exp_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M347.8019,-669.5046C357.1616,-666.3787 366.7343,-661.7725 374,-655 430.115,-602.6936 453.0791,-509.7041 460.9666,-467.2491"/>
-<polygon fill="#000000" stroke="#000000" points="464.4588,-467.5966 462.7328,-457.1433 457.5634,-466.3914 464.4588,-467.5966"/>
+<path fill="none" stroke="#000000" d="M417.26,-841.31C430.73,-838.15 444.05,-832.58 454,-823 500.12,-778.6 530.93,-576.97 540.12,-509.25"/>
+<polygon fill="#000000" stroke="#000000" points="543.61,-509.61 541.46,-499.24 536.67,-508.69 543.61,-509.61"/>
 </g>
-<!-- proc~verlet_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node10" class="node">
-<title>proc~verlet_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node10"><a xlink:href=".././proc/verlet_sweep.html" xlink:title="verlet_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="352,-646 276,-646 276,-622 352,-622 352,-646"/>
-<text text-anchor="middle" x="314" y="-631.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">verlet_sweep</text>
+<!-- proc~exp_sweep~2 -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node8" class="node">
+<title>proc~exp_sweep~2</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node8"><a xlink:href="../proc/exp_sweep~2.html" xlink:title="pf_fexp_sweeper_t%exp_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="442,-814 277,-814 277,-790 442,-790 442,-814"/>
+<text text-anchor="middle" x="359.5" y="-799.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fexp_sweeper_t%exp_sweep</text>
 </a>
 </g>
 </g>
-<!-- proc~verlet_sweep&#45;&gt;proc~pf_residual -->
+<!-- proc~exp_sweep~2&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge10" class="edge">
-<title>proc~verlet_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M352.1275,-625.4112C359.9486,-622.4023 367.705,-618.3745 374,-613 420.8089,-573.0362 447.3406,-502.5989 458.3738,-466.9649"/>
-<polygon fill="#000000" stroke="#000000" points="461.813,-467.6784 461.3056,-457.0957 455.1028,-465.685 461.813,-467.6784"/>
+<title>proc~exp_sweep~2&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M441.46,-789.99C445.99,-787.48 450.22,-784.51 454,-781 533.66,-706.95 542.88,-564.29 543.34,-509.34"/>
+<polygon fill="#000000" stroke="#000000" points="546.84,-509.27 543.33,-499.28 539.84,-509.28 546.84,-509.27"/>
 </g>
-<!-- proc~pf_vcycle&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge21" class="edge">
-<title>proc~pf_vcycle&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M343.1038,-176.695C353.9801,-179.7452 365.6945,-184.7616 374,-193 439.6764,-258.146 457.9323,-374.2837 462.806,-422.7724"/>
-<polygon fill="#000000" stroke="#000000" points="459.3279,-423.1732 463.7174,-432.8159 466.2992,-422.5405 459.3279,-423.1732"/>
-</g>
-<!-- proc~magpicard_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node12" class="node">
-<title>proc~magpicard_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node12"><a xlink:href=".././proc/magpicard_sweep.html" xlink:title="magpicard_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="364,-604 264,-604 264,-580 364,-580 364,-604"/>
-<text text-anchor="middle" x="314" y="-589.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">magpicard_sweep</text>
+<!-- proc~imex_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node9" class="node">
+<title>proc~imex_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node9"><a xlink:href="../proc/imex_sweep.html" xlink:title="pf_imex_sweeper_t%imex_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="445.5,-772 273.5,-772 273.5,-748 445.5,-748 445.5,-772"/>
+<text text-anchor="middle" x="359.5" y="-757.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imex_sweeper_t%imex_sweep</text>
 </a>
 </g>
 </g>
-<!-- proc~magpicard_sweep&#45;&gt;proc~pf_residual -->
+<!-- proc~imex_sweep&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge11" class="edge">
-<title>proc~magpicard_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M358.5146,-579.9374C364.0004,-577.4571 369.3164,-574.5039 374,-571 411.6455,-542.8365 440.0307,-494.4957 454.2806,-466.5899"/>
-<polygon fill="#000000" stroke="#000000" points="457.576,-467.8226 458.882,-457.3086 451.3044,-464.7133 457.576,-467.8226"/>
-</g>
-<!-- proc~pf_parareal_run -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node13" class="node">
-<title>proc~pf_parareal_run</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node13"><a xlink:href=".././proc/pf_parareal_run.html" xlink:title="pf_parareal_run">
-<polygon fill="#d9534f" stroke="#d9534f" points="210.5,-43 121.5,-43 121.5,-19 210.5,-19 210.5,-43"/>
-<text text-anchor="middle" x="166" y="-28.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_parareal_run</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge24" class="edge">
-<title>proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run</title>
-<path fill="none" stroke="#000000" d="M210.8065,-31C221.1635,-31 232.4291,-31 243.5858,-31"/>
-<polygon fill="#000000" stroke="#000000" points="243.7719,-34.5001 253.7719,-31 243.7719,-27.5001 243.7719,-34.5001"/>
-</g>
-<!-- proc~pf_pfasst_run -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node14" class="node">
-<title>proc~pf_pfasst_run</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node14"><a xlink:href=".././proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
-<polygon fill="#d9534f" stroke="#d9534f" points="78,-163 0,-163 0,-139 78,-139 78,-163"/>
-<text text-anchor="middle" x="39" y="-148.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_pfasst_run</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_pfasst_run&#45;&gt;proc~pf_block_run -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge5" class="edge">
-<title>proc~pf_pfasst_run&#45;&gt;proc~pf_block_run</title>
-<path fill="none" stroke="#000000" d="M78.1405,-151C91.0338,-151 105.5063,-151 118.9275,-151"/>
-<polygon fill="#000000" stroke="#000000" points="118.9423,-154.5001 128.9423,-151 118.9423,-147.5001 118.9423,-154.5001"/>
+<title>proc~imex_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M441.28,-747.79C445.85,-745.33 450.14,-742.42 454,-739 523.2,-677.55 538.6,-558.87 542.02,-509.45"/>
+<polygon fill="#000000" stroke="#000000" points="545.53,-509.41 542.62,-499.22 538.54,-509 545.53,-509.41"/>
 </g>
 <!-- proc~imex_sweep~2 -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node15" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node10" class="node">
 <title>proc~imex_sweep~2</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node15"><a xlink:href=".././proc/imex_sweep%7E2.html" xlink:title="imex_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="350,-562 278,-562 278,-538 350,-538 350,-562"/>
-<text text-anchor="middle" x="314" y="-547.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imex_sweep</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node10"><a xlink:href="../proc/imex_sweep~2.html" xlink:title="pf_imexR_sweeper_t%imex_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="449.5,-730 269.5,-730 269.5,-706 449.5,-706 449.5,-730"/>
+<text text-anchor="middle" x="359.5" y="-715.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexR_sweeper_t%imex_sweep</text>
 </a>
 </g>
 </g>
 <!-- proc~imex_sweep~2&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge12" class="edge">
 <title>proc~imex_sweep~2&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M350.3059,-539.9908C358.3938,-537.0344 366.7219,-533.3867 374,-529 402.9475,-511.5527 430.5665,-483.7336 447.5131,-464.9367"/>
-<polygon fill="#000000" stroke="#000000" points="450.308,-467.0594 454.3051,-457.2475 445.0616,-462.4253 450.308,-467.0594"/>
+<path fill="none" stroke="#000000" d="M440.14,-705.96C445.1,-703.48 449.78,-700.52 454,-697 513.01,-647.75 533.7,-552.46 540.26,-509.26"/>
+<polygon fill="#000000" stroke="#000000" points="543.74,-509.61 541.66,-499.22 536.81,-508.64 543.74,-509.61"/>
 </g>
-<!-- proc~pf_predictor_oc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node16" class="node">
-<title>proc~pf_predictor_oc</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node16"><a xlink:href=".././proc/pf_predictor_oc.html" xlink:title="pf_predictor_oc">
-<polygon fill="#d9534f" stroke="#d9534f" points="357.5,-730 270.5,-730 270.5,-706 357.5,-706 357.5,-730"/>
-<text text-anchor="middle" x="314" y="-715.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_predictor_oc</text>
+<!-- proc~imexq_oc_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node11" class="node">
+<title>proc~imexq_oc_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node11"><a xlink:href="../proc/imexq_oc_sweep.html" xlink:title="pf_imexQ_oc_t%imexQ_oc_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="448,-688 271,-688 271,-664 448,-664 448,-688"/>
+<text text-anchor="middle" x="359.5" y="-673.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imexQ_oc_t%imexQ_oc_sweep</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_predictor_oc&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge15" class="edge">
-<title>proc~pf_predictor_oc&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M357.6954,-707.9785C363.6982,-705.1729 369.3771,-701.5855 374,-697 439.6764,-631.854 457.9323,-515.7163 462.806,-467.2276"/>
-<polygon fill="#000000" stroke="#000000" points="466.2992,-467.4595 463.7174,-457.1841 459.3279,-466.8268 466.2992,-467.4595"/>
+<!-- proc~imexq_oc_sweep&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge13" class="edge">
+<title>proc~imexq_oc_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M438.89,-663.97C444.26,-661.5 449.37,-658.53 454,-655 502.73,-617.78 527.61,-546.1 537.58,-509.58"/>
+<polygon fill="#000000" stroke="#000000" points="541.09,-510.01 540.21,-499.46 534.31,-508.26 541.09,-510.01"/>
 </g>
-<!-- proc~imex_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node17" class="node">
-<title>proc~imex_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node17"><a xlink:href=".././proc/imex_sweep.html" xlink:title="imex_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="350,-520 278,-520 278,-496 350,-496 350,-520"/>
-<text text-anchor="middle" x="314" y="-505.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imex_sweep</text>
+<!-- proc~imk_actually_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node12" class="node">
+<title>proc~imk_actually_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node12"><a xlink:href="../proc/imk_actually_sweep.html" xlink:title="imk_actually_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="413.5,-646 305.5,-646 305.5,-622 413.5,-622 413.5,-646"/>
+<text text-anchor="middle" x="359.5" y="-631.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">imk_actually_sweep</text>
 </a>
 </g>
 </g>
-<!-- proc~imex_sweep&#45;&gt;proc~pf_residual -->
+<!-- proc~imk_actually_sweep&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge14" class="edge">
-<title>proc~imex_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M350.0662,-496.0199C358.0051,-493.2046 366.3305,-490.1131 374,-487 393.0513,-479.2669 413.8928,-469.6751 430.7682,-461.6109"/>
-<polygon fill="#000000" stroke="#000000" points="432.7131,-464.559 440.2024,-457.065 429.6744,-458.2529 432.7131,-464.559"/>
+<title>proc~imk_actually_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M413.69,-629.02C427.64,-625.92 442.1,-620.94 454,-613 493.26,-586.81 520.64,-536.97 533.9,-508.45"/>
+<polygon fill="#000000" stroke="#000000" points="537.09,-509.88 537.99,-499.33 530.7,-507.02 537.09,-509.88"/>
 </g>
-<!-- proc~mkrk_step -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node18" class="node">
-<title>proc~mkrk_step</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node18"><a xlink:href=".././proc/mkrk_step.html" xlink:title="mkrk_step">
-<polygon fill="#d9534f" stroke="#d9534f" points="345,-478 283,-478 283,-454 345,-454 345,-478"/>
-<text text-anchor="middle" x="314" y="-463.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mkrk_step</text>
+<!-- proc~magpicard_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node13" class="node">
+<title>proc~magpicard_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node13"><a xlink:href="../proc/magpicard_sweep.html" xlink:title="pf_magpicard_t%magpicard_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="451,-520 268,-520 268,-496 451,-496 451,-520"/>
+<text text-anchor="middle" x="359.5" y="-505.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_magpicard_t%magpicard_sweep</text>
 </a>
 </g>
 </g>
-<!-- proc~mkrk_step&#45;&gt;proc~pf_residual -->
+<!-- proc~magpicard_sweep&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge15" class="edge">
+<title>proc~magpicard_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M451.22,-497.56C468.95,-495.52 486.71,-493.48 501.82,-491.74"/>
+<polygon fill="#000000" stroke="#000000" points="502.29,-495.21 511.82,-490.59 501.49,-488.25 502.29,-495.21"/>
+</g>
+<!-- proc~misdcq_oc_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node14" class="node">
+<title>proc~misdcq_oc_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node14"><a xlink:href="../proc/misdcq_oc_sweep.html" xlink:title="pf_misdcQ_oc_t%misdcQ_oc_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="454,-478 265,-478 265,-454 454,-454 454,-478"/>
+<text text-anchor="middle" x="359.5" y="-463.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_oc_t%misdcQ_oc_sweep</text>
+</a>
+</g>
+</g>
+<!-- proc~misdcq_oc_sweep&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge16" class="edge">
-<title>proc~mkrk_step&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M345.1837,-461.6488C367.3325,-458.5583 397.3454,-454.3704 421.7286,-450.9681"/>
-<polygon fill="#000000" stroke="#000000" points="422.3741,-454.412 431.7945,-449.5636 421.4067,-447.4792 422.3741,-454.412"/>
+<title>proc~misdcq_oc_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M454.16,-476.78C470.92,-478.71 487.57,-480.62 501.85,-482.26"/>
+<polygon fill="#000000" stroke="#000000" points="501.46,-485.74 511.8,-483.41 502.26,-478.79 501.46,-485.74"/>
 </g>
 <!-- proc~misdcq_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node19" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node15" class="node">
 <title>proc~misdcq_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node19"><a xlink:href=".././proc/misdcq_sweep.html" xlink:title="misdcQ_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="356.5,-352 271.5,-352 271.5,-328 356.5,-328 356.5,-352"/>
-<text text-anchor="middle" x="314" y="-337.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">misdcQ_sweep</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node15"><a xlink:href="../proc/misdcq_sweep.html" xlink:title="pf_misdcQ_t%misdcQ_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="436.5,-436 282.5,-436 282.5,-412 436.5,-412 436.5,-436"/>
+<text text-anchor="middle" x="359.5" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_misdcQ_t%misdcQ_sweep</text>
 </a>
 </g>
 </g>
 <!-- proc~misdcq_sweep&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge17" class="edge">
 <title>proc~misdcq_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M355.6841,-352.0689C362.02,-354.6123 368.3287,-357.5818 374,-361 402.9475,-378.4473 430.5665,-406.2664 447.5131,-425.0633"/>
-<polygon fill="#000000" stroke="#000000" points="445.0616,-427.5747 454.3051,-432.7525 450.308,-422.9406 445.0616,-427.5747"/>
+<path fill="none" stroke="#000000" d="M422.9,-436C433.39,-438.59 444.09,-441.59 454,-445 473.72,-451.78 494.87,-461.64 511.6,-470.1"/>
+<polygon fill="#000000" stroke="#000000" points="510.4,-473.42 520.89,-474.89 513.61,-467.2 510.4,-473.42"/>
+</g>
+<!-- proc~mkrk_step -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node16" class="node">
+<title>proc~mkrk_step</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node16"><a xlink:href="../proc/mkrk_step.html" xlink:title="mkrk_step">
+<polygon fill="#d9534f" stroke="#d9534f" points="390.5,-604 328.5,-604 328.5,-580 390.5,-580 390.5,-604"/>
+<text text-anchor="middle" x="359.5" y="-589.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mkrk_step</text>
+</a>
+</g>
+</g>
+<!-- proc~mkrk_step&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge18" class="edge">
+<title>proc~mkrk_step&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M390.55,-589.37C409.62,-586.73 434.32,-581.47 454,-571 483.9,-555.1 511.08,-526.43 527.32,-507.06"/>
+<polygon fill="#000000" stroke="#000000" points="530.17,-509.1 533.79,-499.14 524.75,-504.67 530.17,-509.1"/>
+</g>
+<!-- proc~pf_parareal_run -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node17" class="node">
+<title>proc~pf_parareal_run</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node17"><a xlink:href="../proc/pf_parareal_run.html" xlink:title="pf_parareal_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="215.5,-44 127.5,-44 127.5,-20 215.5,-20 215.5,-44"/>
+<text text-anchor="middle" x="171.5" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_parareal_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge7" class="edge">
+<title>proc~pf_parareal_run&#45;&gt;proc~pf_parareal_block_run</title>
+<path fill="none" stroke="#000000" d="M215.64,-32C237.62,-32 264.87,-32 289.66,-32"/>
+<polygon fill="#000000" stroke="#000000" points="289.74,-35.5 299.74,-32 289.74,-28.5 289.74,-35.5"/>
+</g>
+<!-- proc~pf_pfasst_run -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node18" class="node">
+<title>proc~pf_pfasst_run</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node18"><a xlink:href="../proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="78,-205 0,-205 0,-181 78,-181 78,-205"/>
+<text text-anchor="middle" x="39" y="-190.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_pfasst_run&#45;&gt;proc~pf_block_run -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge6" class="edge">
+<title>proc~pf_pfasst_run&#45;&gt;proc~pf_block_run</title>
+<path fill="none" stroke="#000000" d="M78.1,-193C92.52,-193 109.1,-193 124.2,-193"/>
+<polygon fill="#000000" stroke="#000000" points="124.37,-196.5 134.37,-193 124.37,-189.5 124.37,-196.5"/>
 </g>
 <!-- proc~pf_predictor&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge18" class="edge">
-<title>proc~pf_predictor&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M349.2151,-136.3286C358.2785,-139.4417 367.3411,-144.0827 374,-151 412.6159,-191.1142 448.3677,-360.9397 460.3008,-422.5527"/>
-<polygon fill="#000000" stroke="#000000" points="456.9329,-423.5764 462.247,-432.7422 463.8086,-422.2631 456.9329,-423.5764"/>
-</g>
-<!-- proc~exp_sweep~2 -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node21" class="node">
-<title>proc~exp_sweep~2</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node21"><a xlink:href=".././proc/exp_sweep%7E2.html" xlink:title="exp_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="347.5,-310 280.5,-310 280.5,-286 347.5,-286 347.5,-310"/>
-<text text-anchor="middle" x="314" y="-295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">exp_sweep</text>
-</a>
-</g>
-</g>
-<!-- proc~exp_sweep~2&#45;&gt;proc~pf_residual -->
 <g id="proc~~pf_set_resid~~CalledByGraph_edge19" class="edge">
-<title>proc~exp_sweep~2&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M347.5575,-305.7451C356.7035,-308.8827 366.2235,-313.1822 374,-319 411.6455,-347.1635 440.0307,-395.5043 454.2806,-423.4101"/>
-<polygon fill="#000000" stroke="#000000" points="451.3044,-425.2867 458.882,-432.6914 457.576,-422.1774 451.3044,-425.2867"/>
+<title>proc~pf_predictor&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M394.09,-256.18C413.54,-257.94 437.39,-263.14 454,-277 513.01,-326.25 533.7,-421.54 540.26,-464.74"/>
+<polygon fill="#000000" stroke="#000000" points="536.81,-465.36 541.66,-474.78 543.74,-464.39 536.81,-465.36"/>
 </g>
-<!-- proc~misdcq_oc_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node22" class="node">
-<title>proc~misdcq_oc_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node22"><a xlink:href=".././proc/misdcq_oc_sweep.html" xlink:title="misdcQ_oc_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="365.5,-268 262.5,-268 262.5,-244 365.5,-244 365.5,-268"/>
-<text text-anchor="middle" x="314" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">misdcQ_oc_sweep</text>
+<!-- proc~pf_predictor_oc -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node20" class="node">
+<title>proc~pf_predictor_oc</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node20"><a xlink:href="../proc/pf_predictor_oc.html" xlink:title="pf_predictor_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="402.5,-394 316.5,-394 316.5,-370 402.5,-370 402.5,-394"/>
+<text text-anchor="middle" x="359.5" y="-379.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_predictor_oc</text>
 </a>
 </g>
 </g>
-<!-- proc~misdcq_oc_sweep&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge9" class="edge">
-<title>proc~misdcq_oc_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M360.1799,-268.0991C365.1507,-270.5522 369.8873,-273.4887 374,-277 420.8089,-316.9638 447.3406,-387.4011 458.3738,-423.0351"/>
-<polygon fill="#000000" stroke="#000000" points="455.1028,-424.315 461.3056,-432.9043 461.813,-422.3216 455.1028,-424.315"/>
+<!-- proc~pf_predictor_oc&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge20" class="edge">
+<title>proc~pf_predictor_oc&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M402.68,-386.57C419.37,-389.6 438.28,-394.64 454,-403 483.9,-418.9 511.08,-447.57 527.32,-466.94"/>
+<polygon fill="#000000" stroke="#000000" points="524.75,-469.33 533.79,-474.86 530.17,-464.9 524.75,-469.33"/>
 </g>
-<!-- proc~imk_actually_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node23" class="node">
-<title>proc~imk_actually_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node23"><a xlink:href=".././proc/imk_actually_sweep.html" xlink:title="imk_actually_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="368,-436 260,-436 260,-412 368,-412 368,-436"/>
-<text text-anchor="middle" x="314" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imk_actually_sweep</text>
+<!-- proc~pf_v_cycle_oc -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node21" class="node">
+<title>proc~pf_v_cycle_oc</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node21"><a xlink:href="../proc/pf_v_cycle_oc.html" xlink:title="pf_v_cycle_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="399.5,-352 319.5,-352 319.5,-328 399.5,-328 399.5,-352"/>
+<text text-anchor="middle" x="359.5" y="-337.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_v_cycle_oc</text>
 </a>
 </g>
 </g>
-<!-- proc~imk_actually_sweep&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge13" class="edge">
-<title>proc~imk_actually_sweep&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M368.334,-431.5815C385.9048,-434.0332 405.1284,-436.7156 421.7384,-439.0333"/>
-<polygon fill="#000000" stroke="#000000" points="421.3168,-442.5083 431.7045,-440.4239 422.2842,-435.5754 421.3168,-442.5083"/>
+<!-- proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge21" class="edge">
+<title>proc~pf_v_cycle_oc&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M399.86,-342.43C417.6,-345.06 438.08,-350.38 454,-361 493.26,-387.19 520.64,-437.03 533.9,-465.55"/>
+<polygon fill="#000000" stroke="#000000" points="530.7,-466.98 537.99,-474.67 537.09,-464.12 530.7,-466.98"/>
+</g>
+<!-- proc~pf_vcycle&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge22" class="edge">
+<title>proc~pf_vcycle&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M388.67,-213.43C409.12,-214.5 436.21,-219.2 454,-235 523.2,-296.45 538.6,-415.13 542.02,-464.55"/>
+<polygon fill="#000000" stroke="#000000" points="538.54,-465 542.62,-474.78 545.53,-464.59 538.54,-465"/>
+</g>
+<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge23" class="edge">
+<title>proc~pf_vcycle_pysdc&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M408.29,-173.19C424.54,-175.88 441.69,-181.56 454,-193 533.66,-267.05 542.88,-409.71 543.34,-464.66"/>
+<polygon fill="#000000" stroke="#000000" points="539.84,-464.72 543.33,-474.72 546.84,-464.73 539.84,-464.72"/>
 </g>
 <!-- proc~rk_step -->
 <g id="proc~~pf_set_resid~~CalledByGraph_node24" class="node">
 <title>proc~rk_step</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node24"><a xlink:href=".././proc/rk_step.html" xlink:title="rk_step">
-<polygon fill="#d9534f" stroke="#d9534f" points="341,-394 287,-394 287,-370 341,-370 341,-394"/>
-<text text-anchor="middle" x="314" y="-379.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">rk_step</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node24"><a xlink:href="../proc/rk_step.html" xlink:title="rk_step">
+<polygon fill="#d9534f" stroke="#d9534f" points="386.5,-562 332.5,-562 332.5,-538 386.5,-538 386.5,-562"/>
+<text text-anchor="middle" x="359.5" y="-547.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">rk_step</text>
 </a>
 </g>
 </g>
 <!-- proc~rk_step&#45;&gt;proc~pf_residual -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge22" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge24" class="edge">
 <title>proc~rk_step&#45;&gt;proc~pf_residual</title>
-<path fill="none" stroke="#000000" d="M341.0909,-390.8529C351.4686,-394.4079 363.365,-398.6832 374,-403 393.0513,-410.7331 413.8928,-420.3249 430.7682,-428.3891"/>
-<polygon fill="#000000" stroke="#000000" points="429.6744,-431.7471 440.2024,-432.935 432.7131,-425.441 429.6744,-431.7471"/>
+<path fill="none" stroke="#000000" d="M386.72,-545.71C405.7,-542.22 431.81,-536.62 454,-529 473.72,-522.22 494.87,-512.36 511.6,-503.9"/>
+<polygon fill="#000000" stroke="#000000" points="513.61,-506.8 520.89,-499.11 510.4,-500.58 513.61,-506.8"/>
+</g>
+<!-- proc~verlet_sweep -->
+<g id="proc~~pf_set_resid~~CalledByGraph_node25" class="node">
+<title>proc~verlet_sweep</title>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node25"><a xlink:href="../proc/verlet_sweep.html" xlink:title="pf_verlet_t%verlet_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="427,-310 292,-310 292,-286 427,-286 427,-310"/>
+<text text-anchor="middle" x="359.5" y="-295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_verlet_t%verlet_sweep</text>
+</a>
+</g>
+</g>
+<!-- proc~verlet_sweep&#45;&gt;proc~pf_residual -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge25" class="edge">
+<title>proc~verlet_sweep&#45;&gt;proc~pf_residual</title>
+<path fill="none" stroke="#000000" d="M427.05,-305.42C436.72,-308.57 446.07,-312.94 454,-319 502.73,-356.22 527.61,-427.9 537.58,-464.42"/>
+<polygon fill="#000000" stroke="#000000" points="534.31,-465.74 540.21,-474.54 541.09,-463.99 534.31,-465.74"/>
 </g>
 <!-- proc~imk_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node25" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node26" class="node">
 <title>proc~imk_sweep</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node25"><a xlink:href=".././proc/imk_sweep.html" xlink:title="imk_sweep">
-<polygon fill="#d9534f" stroke="#d9534f" points="199,-436 133,-436 133,-412 199,-412 199,-436"/>
-<text text-anchor="middle" x="166" y="-421.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">imk_sweep</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node26"><a xlink:href="../proc/imk_sweep.html" xlink:title="pf_imk_t%imk_sweep">
+<polygon fill="#d9534f" stroke="#d9534f" points="229,-604 114,-604 114,-580 229,-580 229,-604"/>
+<text text-anchor="middle" x="171.5" y="-589.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_imk_t%imk_sweep</text>
 </a>
 </g>
-</g>
-<!-- proc~imk_sweep&#45;&gt;proc~mkrk_step -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge29" class="edge">
-<title>proc~imk_sweep&#45;&gt;proc~mkrk_step</title>
-<path fill="none" stroke="#000000" d="M199.2141,-433.4256C221.0404,-439.6196 249.751,-447.7672 272.998,-454.3643"/>
-<polygon fill="#000000" stroke="#000000" points="272.3437,-457.8168 282.9194,-457.1798 274.2548,-451.0827 272.3437,-457.8168"/>
 </g>
 <!-- proc~imk_sweep&#45;&gt;proc~imk_actually_sweep -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge31" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge26" class="edge">
 <title>proc~imk_sweep&#45;&gt;proc~imk_actually_sweep</title>
-<path fill="none" stroke="#000000" d="M199.2141,-424C214.1751,-424 232.3707,-424 249.8241,-424"/>
-<polygon fill="#000000" stroke="#000000" points="249.9846,-427.5001 259.9846,-424 249.9846,-420.5001 249.9846,-427.5001"/>
+<path fill="none" stroke="#000000" d="M225.32,-604.01C238.3,-606.96 252.15,-610.1 265,-613 274.74,-615.2 285.05,-617.52 295.12,-619.79"/>
+<polygon fill="#000000" stroke="#000000" points="294.57,-623.25 305.09,-622.03 296.11,-616.42 294.57,-623.25"/>
+</g>
+<!-- proc~imk_sweep&#45;&gt;proc~mkrk_step -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge27" class="edge">
+<title>proc~imk_sweep&#45;&gt;proc~mkrk_step</title>
+<path fill="none" stroke="#000000" d="M229.06,-592C257.81,-592 292.07,-592 318.12,-592"/>
+<polygon fill="#000000" stroke="#000000" points="318.38,-595.5 328.38,-592 318.38,-588.5 318.38,-595.5"/>
 </g>
 <!-- proc~imk_sweep&#45;&gt;proc~rk_step -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge32" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge33" class="edge">
 <title>proc~imk_sweep&#45;&gt;proc~rk_step</title>
-<path fill="none" stroke="#000000" d="M199.2141,-414.5744C222.3314,-408.0141 253.1716,-399.2621 277.0632,-392.4821"/>
-<polygon fill="#000000" stroke="#000000" points="278.1697,-395.8063 286.8343,-389.7092 276.2587,-389.0722 278.1697,-395.8063"/>
+<path fill="none" stroke="#000000" d="M225.32,-579.99C238.3,-577.04 252.15,-573.9 265,-571 283.81,-566.75 304.76,-562.04 322.06,-558.16"/>
+<polygon fill="#000000" stroke="#000000" points="323.31,-561.47 332.3,-555.87 321.78,-554.64 323.31,-561.47"/>
 </g>
 <!-- proc~pf_pfasst_block_oc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_node26" class="node">
+<g id="proc~~pf_set_resid~~CalledByGraph_node27" class="node">
 <title>proc~pf_pfasst_block_oc</title>
-<g id="a_proc~~pf_set_resid~~CalledByGraph_node26"><a xlink:href=".././proc/pf_pfasst_block_oc.html" xlink:title="pf_pfasst_block_oc">
-<polygon fill="#d9534f" stroke="#d9534f" points="218,-751 114,-751 114,-727 218,-727 218,-751"/>
-<text text-anchor="middle" x="166" y="-736.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_pfasst_block_oc</text>
+<g id="a_proc~~pf_set_resid~~CalledByGraph_node27"><a xlink:href="../proc/pf_pfasst_block_oc.html" xlink:title="pf_pfasst_block_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="223.5,-373 119.5,-373 119.5,-349 223.5,-349 223.5,-373"/>
+<text text-anchor="middle" x="171.5" y="-358.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_block_oc</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge25" class="edge">
-<title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc</title>
-<path fill="none" stroke="#000000" d="M218.1793,-746.4038C233.0553,-748.5146 249.2235,-750.8087 263.9683,-752.9009"/>
-<polygon fill="#000000" stroke="#000000" points="263.523,-756.3727 273.9155,-754.3123 264.5064,-749.4421 263.523,-756.3727"/>
-</g>
 <!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_predictor_oc -->
-<g id="proc~~pf_set_resid~~CalledByGraph_edge28" class="edge">
+<g id="proc~~pf_set_resid~~CalledByGraph_edge29" class="edge">
 <title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_predictor_oc</title>
-<path fill="none" stroke="#000000" d="M218.1793,-731.5962C231.7082,-729.6765 246.3057,-727.6053 259.9295,-725.6722"/>
-<polygon fill="#000000" stroke="#000000" points="260.7149,-729.0959 270.124,-724.2257 259.7314,-722.1653 260.7149,-729.0959"/>
+<path fill="none" stroke="#000000" d="M223.82,-366.79C249.54,-369.7 280.63,-373.21 306.46,-376.12"/>
+<polygon fill="#000000" stroke="#000000" points="306.11,-379.61 316.44,-377.25 306.9,-372.65 306.11,-379.61"/>
+</g>
+<!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc -->
+<g id="proc~~pf_set_resid~~CalledByGraph_edge30" class="edge">
+<title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc</title>
+<path fill="none" stroke="#000000" d="M223.82,-355.21C250.49,-352.19 282.94,-348.53 309.3,-345.56"/>
+<polygon fill="#000000" stroke="#000000" points="309.9,-349.01 319.44,-344.41 309.11,-342.05 309.9,-349.01"/>
 </g>
 </g>
 </svg>
-</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+</div>                <script>
+                  var panprocpf_set_residCalledByGraph = svgPanZoom('#procpf_set_residCalledByGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
-<svg width="560pt" height="32pt"
- viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
 <!-- Subroutine -->
 <g id="node1" class="node">
 <title>Subroutine</title>
 <polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
-<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
 </g>
 <!-- Function -->
 <g id="node2" class="node">
 <title>Function</title>
 <polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
-<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
 </g>
 <!-- Interface -->
 <g id="node3" class="node">
 <title>Interface</title>
 <polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
-<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Interface</text>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
 </g>
 <!-- Unknown Procedure Type -->
-<g id="node4" class="node">
+<g id="node5" class="node">
 <title>Unknown Procedure Type</title>
-<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,0 364,0 364,-24"/>
-<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Unknown Procedure Type</text>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
 </g>
 <!-- Program -->
-<g id="node5" class="node">
+<g id="node6" class="node">
 <title>Program</title>
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,0 436,0 436,-24"/>
-<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
 </g>
 <!-- This Page&#39;s Entity -->
-<g id="node6" class="node">
+<g id="node7" class="node">
 <title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="#000000" points="551.5,-24 454.5,-24 454.5,0 551.5,0 551.5,-24"/>
-<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
 
-    
-    <p>Solid arrows point from a procedure to one which it calls. Dashed 
-    arrows point from an interface to procedures which implement that interface.
-    This could include the module procedures in a generic interface or the
-    implementation in a submodule of an interface in a parent module.
-    </p>
-    </div></div></div></div>
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-     
     <br>
 
-    <section class="visible-xs visible-sm hidden-md">
-      
-<h3>Contents</h3>
- 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/pf_set_resid.html#src">pf_set_resid</a>
-  </div>
-</div>
-
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
-    
-
-    
-    
-    
     
     
 
     
     
-    
-    
-    
 
 
-    
-    
+
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_set_resid</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span><span class="n">resid</span><span class="p">)</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf</span>
-    <span class="kt">integer</span><span class="p">,</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">level_index</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">resid</span>
-    <span class="c">!  Make sure indices are valid</span>
-    <span class="k">if</span><span class="p">(</span> <span class="nb">min</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pfblock</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span>
-<span class="k">    if</span> <span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span>  <span class="k">then</span>
-<span class="k">       </span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pfblock</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="p">)</span> <span class="o">=</span> <span class="n">resid</span>
-    <span class="k">end if</span>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">pf_set_resid</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">level_index</span><span class="p">,</span><span class="n">resid</span><span class="p">)</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf</span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">level_index</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">resid</span>
+<span class="w">    </span><span class="c">!  Make sure indices are valid</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="nb">min</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pfblock</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span>
+<span class="k">    if</span><span class="w"> </span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span><span class="w">  </span><span class="k">then</span>
+<span class="k">       </span><span class="n">pf</span><span class="p">%</span><span class="n">results</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">pfblock</span><span class="p">,</span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">iter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">sweep</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resid</span>
+<span class="w">    </span><span class="k">end if</span>
 <span class="k">    </span>
 <span class="k">  end subroutine </span><span class="n">pf_set_resid</span>
 </pre></div>
@@ -857,59 +795,29 @@ public subroutine pf_set_resid(pf, level_index, resid)
     </section>
     <br>
     
-    
     </div>
   </div>
 
-
-    <hr>    
+      <hr>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-      <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
-          <p class="text-right">
-            Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
-          </p>
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
-      </div>
-      <br>
-      </div> <!-- /container -->    
+        <br>
+      </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
--->
-    <script src="../js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../js/ie10-viewport-bug-workaround.js"></script>
-
-    <!-- MathJax JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-      });
-    </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-    <script src="../tipuesearch/tipuesearch_content.js"></script>
-    <script src="../tipuesearch/tipuesearch_set.js"></script>
-    <script src="../tipuesearch/tipuesearch.js"></script>
-    
-    
   </body>
 </html>

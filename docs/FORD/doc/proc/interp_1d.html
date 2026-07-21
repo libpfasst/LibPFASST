@@ -1,439 +1,611 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <meta name="description" content="The library for running PFASST">
-    
+      <meta name="description" content="The library for running PFASST">
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>interp_1d &ndash; LibPFASST</title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-    
-    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-    
-    
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    <script src="../js/jquery-2.1.3.min.js"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
-
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">LibPFASST </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-        
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-              data-toggle="dropdown" role="button"
-              aria-haspopup="true"
-     aria-expanded="false">Contents <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          
-              
-            <li><a href="../lists/files.html">Source Files</a></li>
-        
-        
-        
-            <li><a href="../lists/modules.html">Modules</a></li>
-        
-            
-                                
-            <li><a href="../lists/procedures.html">Procedures</a></li>
-        
-               
-            <li><a href="../lists/types.html">Derived Types</a></li>
-        
-        
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
             </ul>
-            </li>
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
-
-                             
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
-
-
-          </ul>
-        
-        <form action="../search.html" class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
         </div>
-<!--
-        <button type="submit" class="btn btn-default">Submit</button>
--->
-        </form>
-        
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
+    </div>
 
     <div class="container">
-    
-  
   <div class="row">
     <h1>interp_1d
       <small>Subroutine</small>
-    
+      
     </h1>
-    
-<div class="row">
-  <div class="col-lg-12">
-<div class="well well-sm">
-  <ul class="list-inline" style="margin-bottom:0px;display:inline">
-     
-     
-     
-     
-    
-    
-     <li><i class="fa fa-list-ol"></i>
-       <a data-toggle="tooltip"
-    data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">21 statements</a>
-     </li> 
-     
-     
-     
-    <li><i class="fa fa-code"></i><a href="../src/pf_fftw.f90"> Source File</a></li>
-     
-     
-  </ul>
-  <ol class="breadcrumb in-well text-right">
-  
-    
-     <li><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></li>
-    
-     <li><a href='../module/pf_mod_fftpackage%7E2.html'>pf_mod_fftpackage</a></li>
-    
-  
-     <li class="active">interp_1d</li>
-  </ol>
-</div>
-</div>
-</div>
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  })
-</script>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.2% of total for procedures.">47 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_fftw.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_fftpackage~2.html'>pf_mod_fftpackage</a></li>
+            <li class="breadcrumb-item active" aria-current="page">interp_1d</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
 
   </div>
   
   <div class="row">
     <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
-    
-<div id="sidebar">
+      <div id="sidebar">
+      <h3>Contents</h3>
   
-<h3>Contents</h3>
- 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/interp_1d.html#src">interp_1d</a>
+      </div>
+    </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/interp_1d.html#src">interp_1d</a>
   </div>
-</div>
-
-
-
-</div>
 
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>
-public subroutine interp_1d(this, yvec_c, fft_f, yvec_f)
-    
-    
-   
+    <h2>public  subroutine interp_1d(this, yvec_c, fft_f, yvec_f, order)  
 </h2>
     
-  
 
 
-    
+    <h3>Type Bound</h3>
+    <p><a href='../type/pf_fft_t.html'>pf_fft_t</a></p>
 
     <h3>Arguments</h3>
-    
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-this~128"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-yvec_c~4"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>yvec_c</strong>(:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fft_f"></span>
+              type(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>fft_f</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-yvec_f~4"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>yvec_f</strong>(:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-order~10"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>order</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
 
+    <br>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Calls</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~interp_1d~~CallsGraph Pages: 1 -->
+<svg id="procinterp_1dCallsGraph" width="435pt" height="242pt"
+ viewBox="0.00 0.00 435.00 242.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~interp_1d~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 238)">
+<title>proc~~interp_1d~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 431,-238 431,4 -4,4"/>
+<!-- proc~interp_1d -->
+<g id="proc~~interp_1d~~CallsGraph_node1" class="node">
+<title>proc~interp_1d</title>
+<polygon fill="none" stroke="black" points="100,-108 0,-108 0,-84 100,-84 100,-108"/>
+<text text-anchor="middle" x="50" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_fft_t%interp_1d</text>
+</g>
+<!-- none~get_wk_ptr~2 -->
+<g id="proc~~interp_1d~~CallsGraph_node2" class="node">
+<title>none~get_wk_ptr~2</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node2"><a xlink:href="../type/pf_fft_t.html#boundprocedure-get_wk_ptr~2" xlink:title="pf_fft_t%get_wk_ptr">
+<polygon fill="#a7506f" stroke="#a7506f" points="243,-190 136,-190 136,-166 243,-166 243,-190"/>
+<text text-anchor="middle" x="189.5" y="-175.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t%get_wk_ptr</text>
+</a>
+</g>
+</g>
+<!-- proc~interp_1d&#45;&gt;none~get_wk_ptr~2 -->
+<g id="proc~~interp_1d~~CallsGraph_edge1" class="edge">
+<title>proc~interp_1d&#45;&gt;none~get_wk_ptr~2</title>
+<path fill="none" stroke="#000000" d="M69.32,-108.21C86.37,-119.43 112.59,-136.35 136,-150 142.44,-153.76 149.42,-157.62 156.13,-161.23"/>
+<polygon fill="#000000" stroke="#000000" points="154.56,-164.36 165.03,-165.97 157.85,-158.18 154.56,-164.36"/>
+</g>
+<!-- proc~fftb -->
+<g id="proc~~interp_1d~~CallsGraph_node3" class="node">
+<title>proc~fftb</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node3"><a xlink:href="../proc/fftb.html" xlink:title="pf_fft_t%fftb">
+<polygon fill="#d9534f" stroke="#d9534f" points="224.5,-66 154.5,-66 154.5,-42 224.5,-42 224.5,-66"/>
+<text text-anchor="middle" x="189.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t%fftb</text>
+</a>
+</g>
+</g>
+<!-- proc~interp_1d&#45;&gt;proc~fftb -->
+<g id="proc~~interp_1d~~CallsGraph_edge2" class="edge">
+<title>proc~interp_1d&#45;&gt;proc~fftb</title>
+<path fill="none" stroke="#000000" d="M90.4,-83.96C107.25,-78.82 127,-72.79 144.34,-67.49"/>
+<polygon fill="#000000" stroke="#000000" points="145.69,-70.74 154.23,-64.47 143.64,-64.04 145.69,-70.74"/>
+</g>
+<!-- proc~fftf -->
+<g id="proc~~interp_1d~~CallsGraph_node4" class="node">
+<title>proc~fftf</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node4"><a xlink:href="../proc/fftf.html" xlink:title="pf_fft_t%fftf">
+<polygon fill="#d9534f" stroke="#d9534f" points="223,-108 156,-108 156,-84 223,-84 223,-108"/>
+<text text-anchor="middle" x="189.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t%fftf</text>
+</a>
+</g>
+</g>
+<!-- proc~interp_1d&#45;&gt;proc~fftf -->
+<g id="proc~~interp_1d~~CallsGraph_edge3" class="edge">
+<title>proc~interp_1d&#45;&gt;proc~fftf</title>
+<path fill="none" stroke="#000000" d="M100.25,-96C115.13,-96 131.35,-96 145.76,-96"/>
+<polygon fill="#000000" stroke="#000000" points="145.9,-99.5 155.9,-96 145.9,-92.5 145.9,-99.5"/>
+</g>
+<!-- proc~pf_stop -->
+<g id="proc~~interp_1d~~CallsGraph_node5" class="node">
+<title>proc~pf_stop</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node5"><a xlink:href="../proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="380,-108 326,-108 326,-84 380,-84 380,-108"/>
+<text text-anchor="middle" x="353" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop</text>
+</a>
+</g>
+</g>
+<!-- proc~interp_1d&#45;&gt;proc~pf_stop -->
+<g id="proc~~interp_1d~~CallsGraph_edge4" class="edge">
+<title>proc~interp_1d&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M91.27,-108.07C105.29,-111.7 121.21,-115.2 136,-117 183.21,-122.75 195.66,-121.52 243,-117 267.57,-114.66 294.83,-109.4 315.94,-104.74"/>
+<polygon fill="#000000" stroke="#000000" points="316.79,-108.13 325.77,-102.51 315.25,-101.31 316.79,-108.13"/>
+</g>
+<!-- proc~zinterp_1d -->
+<g id="proc~~interp_1d~~CallsGraph_node6" class="node">
+<title>proc~zinterp_1d</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node6"><a xlink:href="../proc/zinterp_1d.html" xlink:title="pf_fft_t%zinterp_1d">
+<polygon fill="#d9534f" stroke="#d9534f" points="242,-24 137,-24 137,0 242,0 242,-24"/>
+<text text-anchor="middle" x="189.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_t%zinterp_1d</text>
+</a>
+</g>
+</g>
+<!-- proc~interp_1d&#45;&gt;proc~zinterp_1d -->
+<g id="proc~~interp_1d~~CallsGraph_edge5" class="edge">
+<title>proc~interp_1d&#45;&gt;proc~zinterp_1d</title>
+<path fill="none" stroke="#000000" d="M64.97,-83.87C81.2,-70.21 109.22,-47.95 136,-33 139.01,-31.32 142.17,-29.71 145.4,-28.18"/>
+<polygon fill="#000000" stroke="#000000" points="146.87,-31.35 154.57,-24.08 144.02,-24.96 146.87,-31.35"/>
+</g>
+<!-- proc~get_wk_ptr_1d -->
+<g id="proc~~interp_1d~~CallsGraph_node8" class="node">
+<title>proc~get_wk_ptr_1d</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node8"><a xlink:href="../proc/get_wk_ptr_1d.html" xlink:title="pf_fft_abs_t%get_wk_ptr_1d">
+<polygon fill="#d9534f" stroke="#d9534f" points="427,-234 279,-234 279,-210 427,-210 427,-234"/>
+<text text-anchor="middle" x="353" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_abs_t%get_wk_ptr_1d</text>
+</a>
+</g>
+</g>
+<!-- none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_1d -->
+<g id="proc~~interp_1d~~CallsGraph_edge6" class="edge">
+<title>none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_1d</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M234.63,-190.02C254.21,-195.36 277.44,-201.69 298.05,-207.3"/>
+<polygon fill="#000000" stroke="#000000" points="297.35,-210.74 307.92,-209.99 299.19,-203.99 297.35,-210.74"/>
+</g>
+<!-- proc~get_wk_ptr_2d -->
+<g id="proc~~interp_1d~~CallsGraph_node9" class="node">
+<title>proc~get_wk_ptr_2d</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node9"><a xlink:href="../proc/get_wk_ptr_2d.html" xlink:title="pf_fft_abs_t%get_wk_ptr_2d">
+<polygon fill="#d9534f" stroke="#d9534f" points="427,-192 279,-192 279,-168 427,-168 427,-192"/>
+<text text-anchor="middle" x="353" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_abs_t%get_wk_ptr_2d</text>
+</a>
+</g>
+</g>
+<!-- none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_2d -->
+<g id="proc~~interp_1d~~CallsGraph_edge7" class="edge">
+<title>none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_2d</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M243.38,-178.65C251.51,-178.76 260.08,-178.86 268.68,-178.97"/>
+<polygon fill="#000000" stroke="#000000" points="268.73,-182.47 278.77,-179.09 268.81,-175.47 268.73,-182.47"/>
+</g>
+<!-- proc~get_wk_ptr_3d -->
+<g id="proc~~interp_1d~~CallsGraph_node10" class="node">
+<title>proc~get_wk_ptr_3d</title>
+<g id="a_proc~~interp_1d~~CallsGraph_node10"><a xlink:href="../proc/get_wk_ptr_3d.html" xlink:title="pf_fft_abs_t%get_wk_ptr_3d">
+<polygon fill="#d9534f" stroke="#d9534f" points="427,-150 279,-150 279,-126 427,-126 427,-150"/>
+<text text-anchor="middle" x="353" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_fft_abs_t%get_wk_ptr_3d</text>
+</a>
+</g>
+</g>
+<!-- none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_3d -->
+<g id="proc~~interp_1d~~CallsGraph_edge8" class="edge">
+<title>none~get_wk_ptr~2&#45;&gt;proc~get_wk_ptr_3d</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M238.96,-166C256.12,-161.75 275.62,-156.92 293.54,-152.48"/>
+<polygon fill="#000000" stroke="#000000" points="294.43,-155.86 303.3,-150.06 292.75,-149.07 294.43,-155.86"/>
+</g>
+<!-- proc~fftb&#45;&gt;proc~pf_stop -->
+<g id="proc~~interp_1d~~CallsGraph_edge10" class="edge">
+<title>proc~fftb&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M224.75,-62.91C251.52,-69.87 288.62,-79.52 315.86,-86.6"/>
+<polygon fill="#000000" stroke="#000000" points="315.21,-90.05 325.77,-89.18 316.97,-83.27 315.21,-90.05"/>
+</g>
+<!-- fftw_execute_dft -->
+<g id="proc~~interp_1d~~CallsGraph_node7" class="node">
+<title>fftw_execute_dft</title>
+<polygon fill="#777777" stroke="#777777" points="398,-66 308,-66 308,-42 398,-42 398,-66"/>
+<text text-anchor="middle" x="353" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">fftw_execute_dft</text>
+</g>
+<!-- proc~fftb&#45;&gt;fftw_execute_dft -->
+<g id="proc~~interp_1d~~CallsGraph_edge9" class="edge">
+<title>proc~fftb&#45;&gt;fftw_execute_dft</title>
+<path fill="none" stroke="#000000" d="M224.75,-54C245.98,-54 273.71,-54 297.86,-54"/>
+<polygon fill="#000000" stroke="#000000" points="297.96,-57.5 307.96,-54 297.96,-50.5 297.96,-57.5"/>
+</g>
+<!-- proc~fftf&#45;&gt;proc~pf_stop -->
+<g id="proc~~interp_1d~~CallsGraph_edge12" class="edge">
+<title>proc~fftf&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M223.18,-96C249.99,-96 287.91,-96 315.66,-96"/>
+<polygon fill="#000000" stroke="#000000" points="315.76,-99.5 325.76,-96 315.76,-92.5 315.76,-99.5"/>
+</g>
+<!-- proc~fftf&#45;&gt;fftw_execute_dft -->
+<g id="proc~~interp_1d~~CallsGraph_edge11" class="edge">
+<title>proc~fftf&#45;&gt;fftw_execute_dft</title>
+<path fill="none" stroke="#000000" d="M223.18,-87.5C244.57,-81.94 273.03,-74.54 297.76,-68.11"/>
+<polygon fill="#000000" stroke="#000000" points="298.94,-71.42 307.74,-65.51 297.18,-64.64 298.94,-71.42"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
 
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-this%7E39"></span>class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>this</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-yvec_c"></span>real(kind=pfdp),</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>pointer</td><td>::</td>
-  <td><strong>yvec_c</strong>(:)</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-fft_f"></span>type(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),</td>
-  <td>intent(in),</td>
-  <td></td>
-  
-  <td>pointer</td><td>::</td>
-  <td><strong>fft_f</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-yvec_f"></span>real(kind=pfdp),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>pointer</td><td>::</td>
-  <td><strong>yvec_f</strong>(:)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    
-    
-    
-    
-     
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <br>
 
-    <section class="visible-xs visible-sm hidden-md">
-      
-<h3>Contents</h3>
- 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/interp_1d.html#src">interp_1d</a>
-  </div>
-</div>
-
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
-    
-
-    
-    
-    
     
     
 
     
     
-    
-    
-    
 
 
-    
-    
+
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">interp_1d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">yvec_c</span><span class="p">,</span> <span class="n">fft_f</span><span class="p">,</span><span class="n">yvec_f</span><span class="p">)</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span>  <span class="k">pointer</span> <span class="kd">::</span> <span class="n">yvec_f</span><span class="p">(:)</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span>     <span class="k">pointer</span> <span class="kd">::</span> <span class="n">yvec_c</span><span class="p">(:)</span>
-    <span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span>  <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fft_f</span>
-    <span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>         <span class="k">pointer</span> <span class="kd">::</span> <span class="n">wk_f</span><span class="p">(:),</span> <span class="n">wk_c</span><span class="p">(:)</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nx_f</span><span class="p">,</span> <span class="n">nx_c</span>
+    <div class="hl codehilite"><pre><span></span><span class="w">   </span><span class="k">subroutine </span><span class="n">interp_1d</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="w"> </span><span class="n">yvec_c</span><span class="p">,</span><span class="w"> </span><span class="n">fft_f</span><span class="p">,</span><span class="n">yvec_f</span><span class="p">,</span><span class="n">order</span><span class="p">)</span>
+<span class="w">      </span><span class="k">class</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">this</span>
+<span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">),</span><span class="w">  </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">yvec_f</span><span class="p">(:)</span>
+<span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="w">     </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">yvec_c</span><span class="p">(:)</span>
+<span class="w">      </span><span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="w">  </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fft_f</span>
+<span class="w">      </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">optional</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">order</span>
 
-    <span class="n">nx_f</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_f</span><span class="p">)</span>
-    <span class="n">nx_c</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">nx_f</span> <span class="p">.</span><span class="n">eq</span><span class="p">.</span> <span class="n">nx_c</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">       </span><span class="n">yvec_f</span><span class="o">=</span><span class="n">yvec_c</span>
-       <span class="k">return</span>
-<span class="k">    end if</span>
+<span class="w">      </span><span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w">         </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">wk_f</span><span class="p">(:),</span><span class="w"> </span><span class="n">wk_c</span><span class="p">(:)</span>
+<span class="w">      </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nx_f</span><span class="p">,</span><span class="w"> </span><span class="n">nx_c</span><span class="p">,</span><span class="n">local_order</span>
+<span class="w">      </span><span class="kt">real</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">c1</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span>
+<span class="w">      </span><span class="n">local_order</span><span class="o">=</span><span class="mi">0</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">order</span><span class="p">))</span><span class="w"> </span><span class="n">local_order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">order</span>
 
-<span class="k">    call </span><span class="n">this</span><span class="p">%</span><span class="n">get_wk_ptr</span><span class="p">(</span><span class="n">wk_c</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">fft_f</span><span class="p">%</span><span class="n">get_wk_ptr</span><span class="p">(</span><span class="n">wk_f</span><span class="p">)</span>
-    
-    <span class="n">wk_c</span><span class="o">=</span><span class="n">yvec_c</span>
+<span class="w">      </span><span class="n">nx_f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_f</span><span class="p">)</span>
+<span class="w">      </span><span class="n">nx_c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SIZE</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">)</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nx_f</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="n">nx_c</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">         </span><span class="n">yvec_f</span><span class="o">=</span><span class="n">yvec_c</span>
+<span class="w">         </span><span class="k">return</span>
+<span class="k">      end if</span>
 
-    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftf</span><span class="p">()</span>       <span class="c">!  internal forward fft call    </span>
-    <span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">zinterp_1d</span><span class="p">(</span><span class="n">wk_c</span><span class="p">,</span> <span class="n">wk_f</span><span class="p">)</span>
-    <span class="k">call </span><span class="n">fft_f</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span>     <span class="c">!  internal inverse fft call</span>
+<span class="k">      select case</span><span class="w"> </span><span class="p">(</span><span class="n">local_order</span><span class="p">)</span>
+<span class="w">       </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">         </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">get_wk_ptr</span><span class="p">(</span><span class="n">wk_c</span><span class="p">)</span>
+<span class="w">         </span><span class="k">call </span><span class="n">fft_f</span><span class="p">%</span><span class="n">get_wk_ptr</span><span class="p">(</span><span class="n">wk_f</span><span class="p">)</span>
 
-    <span class="n">yvec_f</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">wk_f</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>     <span class="c">!  grab the real part</span>
-    
-  <span class="k">end subroutine </span><span class="n">interp_1d</span>
+<span class="w">         </span><span class="n">wk_c</span><span class="o">=</span><span class="n">yvec_c</span>
+
+<span class="w">         </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">fftf</span><span class="p">()</span><span class="w">       </span><span class="c">!  internal forward fft call</span>
+<span class="w">         </span><span class="k">call </span><span class="n">this</span><span class="p">%</span><span class="n">zinterp_1d</span><span class="p">(</span><span class="n">wk_c</span><span class="p">,</span><span class="w"> </span><span class="n">wk_f</span><span class="p">)</span>
+<span class="w">         </span><span class="k">call </span><span class="n">fft_f</span><span class="p">%</span><span class="n">fftb</span><span class="p">()</span><span class="w">     </span><span class="c">!  internal inverse fft call</span>
+
+<span class="w">         </span><span class="n">yvec_f</span><span class="o">=</span><span class="kt">REAL</span><span class="p">(</span><span class="n">wk_f</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span><span class="w">     </span><span class="c">!  grab the real part</span>
+<span class="w">       </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w">  </span><span class="c">!  This is for 2nd order Finite Difference in periodic domains</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_f</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="n">yvec_c</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_f</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_c</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">yvec_c</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_c</span><span class="p">))</span><span class="o">*</span><span class="mf">0.5_pfdp</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="n">nx_f</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yvec_f</span><span class="p">(</span><span class="n">nx_f</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="mf">0.5_pfdp</span>
+<span class="w">       </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="w">         </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nx_c</span><span class="w"> </span><span class="p">.</span><span class="n">lt</span><span class="p">.</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Coarse grid too small in interp_1d &#39;</span><span class="p">,</span><span class="n">nx_c</span><span class="p">)</span>
+<span class="w">         </span><span class="n">c2</span><span class="o">=-</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="mi">1</span><span class="mf">6.0_pfdp</span>
+<span class="w">         </span><span class="n">c1</span><span class="o">=</span><span class="w"> </span><span class="mf">9.0_pfdp</span><span class="o">/</span><span class="mi">1</span><span class="mf">6.0_pfdp</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_f</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="n">yvec_c</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_f</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="n">c2</span><span class="o">*</span><span class="p">(</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="n">yvec_c</span><span class="o">+</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="w">       </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="w">         </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nx_c</span><span class="w"> </span><span class="p">.</span><span class="n">lt</span><span class="p">.</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="w"> </span><span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Coarse grid too small in interp_1d &#39;</span><span class="p">,</span><span class="n">nx_c</span><span class="p">)</span>
+<span class="w">         </span><span class="n">c3</span><span class="o">=</span><span class="w">  </span><span class="mf">3.0_pfdp</span><span class="o">/</span><span class="mi">25</span><span class="mf">6.0_pfdp</span>
+<span class="w">         </span><span class="n">c2</span><span class="o">=-</span><span class="mi">2</span><span class="mf">5.0_pfdp</span><span class="o">/</span><span class="mi">25</span><span class="mf">6.0_pfdp</span>
+<span class="w">         </span><span class="n">c1</span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="mf">5.0_pfdp</span><span class="o">/</span><span class="mi">12</span><span class="mf">8.0_pfdp</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nx_f</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="n">yvec_c</span>
+<span class="w">         </span><span class="n">yvec_f</span><span class="p">(</span><span class="mi">2</span><span class="p">:</span><span class="n">nx_f</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">=</span><span class="n">c3</span><span class="o">*</span><span class="p">(</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="n">c2</span><span class="o">*</span><span class="p">(</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="n">c1</span><span class="o">*</span><span class="p">(</span><span class="n">yvec_c</span><span class="o">+</span><span class="nb">cshift</span><span class="p">(</span><span class="n">yvec_c</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="w">       </span><span class="k">case </span><span class="n">DEFAULT</span>
+<span class="w">         </span><span class="k">call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;Bad case in SELECT&#39;</span><span class="p">,</span><span class="n">local_order</span><span class="p">)</span>
+<span class="w">      </span><span class="k">end select</span>
+
+<span class="k">   end subroutine </span><span class="n">interp_1d</span>
 </pre></div>
 
     </section>
     <br>
     
-    
     </div>
   </div>
 
-
-    <hr>    
+      <hr>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-      <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
-          <p class="text-right">
-            Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
-          </p>
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
-      </div>
-      <br>
-      </div> <!-- /container -->    
+        <br>
+      </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
--->
-    <script src="../js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../js/ie10-viewport-bug-workaround.js"></script>
-
-    <!-- MathJax JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-      });
-    </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-    <script src="../tipuesearch/tipuesearch_content.js"></script>
-    <script src="../tipuesearch/tipuesearch_set.js"></script>
-    <script src="../tipuesearch/tipuesearch.js"></script>
-    
-    
   </body>
 </html>

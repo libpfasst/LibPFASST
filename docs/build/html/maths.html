@@ -1,31 +1,31 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Maths &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Maths</a></li> 
       </ul>
     </div>  
 
@@ -34,8 +34,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="maths">
-<h1>Maths<a class="headerlink" href="#maths" title="Permalink to this headline">¶</a></h1>
+  <section id="maths">
+<h1>Maths<a class="headerlink" href="#maths" title="Link to this heading">¶</a></h1>
 <p>The Parallel Full Approximation Scheme in Spact and Time (PFASST)
 algorithm is time-parallel (across the domain) algorithm for marching
 time-dependent ODEs or PDEs through time.</p>
@@ -43,12 +43,12 @@ time-dependent ODEs or PDEs through time.</p>
 version of the multi-level Spectral Deferred Correction (MLSDC) scheme
 (see below).  Some aspects of PFASST are also reminiscent of the
 Parareal algorithm (see below).</p>
-<div class="section" id="mlsdc">
-<h2>MLSDC<a class="headerlink" href="#mlsdc" title="Permalink to this headline">¶</a></h2>
+<section id="mlsdc">
+<h2>MLSDC<a class="headerlink" href="#mlsdc" title="Link to this heading">¶</a></h2>
 <p>During a PFASST iteration, each processor</p>
-</div>
-<div class="section" id="parareal">
-<h2>Parareal<a class="headerlink" href="#parareal" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="parareal">
+<h2>Parareal<a class="headerlink" href="#parareal" title="Link to this heading">¶</a></h2>
 <p>The Parareal method can be roughly described in terms of two numerical
 approximation methods, denoted here by <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> and
 <span class="math notranslate nohighlight">\(\mathcal{F}\)</span>.  Both <span class="math notranslate nohighlight">\(\mathcal{G}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{F}\)</span>
@@ -85,20 +85,22 @@ the fine propagator through time to later processors.</p>
 <p>The PFASST method operaters in a similar manner to the Parareal
 method, but it employs the MLSDC time-integration technique in a novel
 way to improve the parallel efficiency of the method.</p>
-</div>
-<div class="section" id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Maths</a><ul>
 <li><a class="reference internal" href="#mlsdc">MLSDC</a></li>
 <li><a class="reference internal" href="#parareal">Parareal</a></li>
@@ -107,6 +109,7 @@ way to improve the parallel efficiency of the method.</p>
 </li>
 </ul>
 
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -114,32 +117,33 @@ way to improve the parallel efficiency of the method.</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Maths</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

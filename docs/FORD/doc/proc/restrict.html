@@ -1,0 +1,852 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="The library for running PFASST">
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>Restrict &ndash; LibPFASST</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
+    <link href="../css/local.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>Restrict
+      <small>Subroutine</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.2% of total for procedures.">36 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_mgrit.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_mgrit.f90.html'>pf_mgrit.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_mgrit.html'>pf_mod_MGRIT</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Restrict</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/restrict.html#src">Restrict</a>
+      </div>
+    </div>
+
+
+  </div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public  subroutine Restrict(pf, mg_ld, level_index_c, level_index_f)  
+</h2>
+    
+
+
+
+    <h3>Arguments</h3>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~180"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~13"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_c~7"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_c</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_f~9"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_f</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <br>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Calls</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~restrict~~CallsGraph Pages: 1 -->
+<svg id="procrestrictCallsGraph" width="617pt" height="339pt"
+ viewBox="0.00 0.00 617.00 338.74" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~restrict~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 334.74)">
+<title>proc~~restrict~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-334.74 613,-334.74 613,4 -4,4"/>
+<!-- proc~restrict -->
+<g id="proc~~restrict~~CallsGraph_node1" class="node">
+<title>proc~restrict</title>
+<polygon fill="none" stroke="black" points="54,-246.74 0,-246.74 0,-222.74 54,-222.74 54,-246.74"/>
+<text text-anchor="middle" x="27" y="-232.34" font-family="Helvetica,sans-Serif" font-size="10.50">Restrict</text>
+</g>
+<!-- copy -->
+<g id="proc~~restrict~~CallsGraph_node2" class="node">
+<title>copy</title>
+<polygon fill="#777777" stroke="#777777" points="284,-246.74 230,-246.74 230,-222.74 284,-222.74 284,-246.74"/>
+<text text-anchor="middle" x="257" y="-232.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">copy</text>
+</g>
+<!-- proc~restrict&#45;&gt;copy -->
+<g id="proc~~restrict~~CallsGraph_edge1" class="edge">
+<title>proc~restrict&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M54.15,-234.74C94.85,-234.74 173.43,-234.74 219.63,-234.74"/>
+<polygon fill="#000000" stroke="#000000" points="219.8,-238.24 229.8,-234.74 219.8,-231.24 219.8,-238.24"/>
+</g>
+<!-- proc~injectrestrictpoint -->
+<g id="proc~~restrict~~CallsGraph_node3" class="node">
+<title>proc~injectrestrictpoint</title>
+<g id="a_proc~~restrict~~CallsGraph_node3"><a xlink:href="../proc/injectrestrictpoint.html" xlink:title="InjectRestrictPoint">
+<polygon fill="#d9534f" stroke="#d9534f" points="188,-142.74 90,-142.74 90,-118.74 188,-118.74 188,-142.74"/>
+<text text-anchor="middle" x="139" y="-128.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">InjectRestrictPoint</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict&#45;&gt;proc~injectrestrictpoint -->
+<g id="proc~~restrict~~CallsGraph_edge2" class="edge">
+<title>proc~restrict&#45;&gt;proc~injectrestrictpoint</title>
+<path fill="none" stroke="#000000" d="M41.05,-222.4C60.09,-204.4 95.64,-170.79 118,-149.65"/>
+<polygon fill="#000000" stroke="#000000" points="120.44,-152.16 125.31,-142.74 115.64,-147.07 120.44,-152.16"/>
+</g>
+<!-- proc~mgrit_send_recv -->
+<g id="proc~~restrict~~CallsGraph_node4" class="node">
+<title>proc~mgrit_send_recv</title>
+<g id="a_proc~~restrict~~CallsGraph_node4"><a xlink:href="../proc/mgrit_send_recv.html" xlink:title="mgrit_send_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="184.5,-287.74 93.5,-287.74 93.5,-263.74 184.5,-263.74 184.5,-287.74"/>
+<text text-anchor="middle" x="139" y="-273.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_send_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict&#45;&gt;proc~mgrit_send_recv -->
+<g id="proc~~restrict~~CallsGraph_edge3" class="edge">
+<title>proc~restrict&#45;&gt;proc~mgrit_send_recv</title>
+<path fill="none" stroke="#000000" d="M54.07,-244.46C66.56,-249.11 81.84,-254.81 95.92,-260.05"/>
+<polygon fill="#000000" stroke="#000000" points="94.83,-263.38 105.42,-263.6 97.27,-256.83 94.83,-263.38"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;copy -->
+<g id="proc~~restrict~~CallsGraph_edge5" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M150.74,-142.77C166.1,-159.63 195.63,-190.79 224,-213.74 225.31,-214.8 226.68,-215.86 228.08,-216.91"/>
+<polygon fill="#000000" stroke="#000000" points="226.08,-219.78 236.27,-222.68 230.11,-214.06 226.08,-219.78"/>
+</g>
+<!-- axpy -->
+<g id="proc~~restrict~~CallsGraph_node5" class="node">
+<title>axpy</title>
+<polygon fill="#777777" stroke="#777777" points="284,-162.74 230,-162.74 230,-138.74 284,-138.74 284,-162.74"/>
+<text text-anchor="middle" x="257" y="-148.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">axpy</text>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;axpy -->
+<g id="proc~~restrict~~CallsGraph_edge4" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;axpy</title>
+<path fill="none" stroke="#000000" d="M188.19,-139.05C198.81,-140.88 209.89,-142.79 219.94,-144.52"/>
+<polygon fill="#000000" stroke="#000000" points="219.53,-148 229.98,-146.25 220.72,-141.11 219.53,-148"/>
+</g>
+<!-- proc~pf_start_timer -->
+<g id="proc~~restrict~~CallsGraph_node8" class="node">
+<title>proc~pf_start_timer</title>
+<g id="a_proc~~restrict~~CallsGraph_node8"><a xlink:href="../proc/pf_start_timer.html" xlink:title="pf_start_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="509,-225.74 430,-225.74 430,-201.74 509,-201.74 509,-225.74"/>
+<text text-anchor="middle" x="469.5" y="-211.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_start_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~restrict~~CallsGraph_edge6" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M143.87,-118.74C152.98,-92.76 178.5,-31.77 224,-7.74 249.94,5.96 261.21,-2.15 290,-7.74 338.93,-17.25 358.01,-15.25 394,-49.74 435.56,-89.57 455.87,-156.91 464,-191.61"/>
+<polygon fill="#000000" stroke="#000000" points="460.65,-192.65 466.23,-201.65 467.48,-191.13 460.65,-192.65"/>
+</g>
+<!-- proc~pf_stop_timer -->
+<g id="proc~~restrict~~CallsGraph_node9" class="node">
+<title>proc~pf_stop_timer</title>
+<g id="a_proc~~restrict~~CallsGraph_node9"><a xlink:href="../proc/pf_stop_timer.html" xlink:title="pf_stop_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="508.5,-267.74 430.5,-267.74 430.5,-243.74 508.5,-243.74 508.5,-267.74"/>
+<text text-anchor="middle" x="469.5" y="-253.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~restrict~~CallsGraph_edge7" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M188.07,-125.63C217.72,-123.65 256.38,-123.21 290,-129.74 338.93,-139.25 356.45,-138.96 394,-171.74 418.29,-192.95 406.97,-212.16 430,-234.74 431.05,-235.77 432.17,-236.77 433.33,-237.73"/>
+<polygon fill="#000000" stroke="#000000" points="431.31,-240.59 441.49,-243.53 435.37,-234.89 431.31,-240.59"/>
+</g>
+<!-- proc~pointrelax -->
+<g id="proc~~restrict~~CallsGraph_node10" class="node">
+<title>proc~pointrelax</title>
+<g id="a_proc~~restrict~~CallsGraph_node10"><a xlink:href="../proc/pointrelax.html" xlink:title="PointRelax">
+<polygon fill="#d9534f" stroke="#d9534f" points="289,-204.74 225,-204.74 225,-180.74 289,-180.74 289,-204.74"/>
+<text text-anchor="middle" x="257" y="-190.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">PointRelax</text>
+</a>
+</g>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pointrelax -->
+<g id="proc~~restrict~~CallsGraph_edge8" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M162.64,-142.84C180.29,-152.27 204.99,-165.48 224.56,-175.93"/>
+<polygon fill="#000000" stroke="#000000" points="222.95,-179.04 233.42,-180.67 226.25,-172.87 222.95,-179.04"/>
+</g>
+<!-- proc~resnorm -->
+<g id="proc~~restrict~~CallsGraph_node11" class="node">
+<title>proc~resnorm</title>
+<g id="a_proc~~restrict~~CallsGraph_node11"><a xlink:href="../proc/resnorm.html" xlink:title="ResNorm">
+<polygon fill="#d9534f" stroke="#d9534f" points="286,-82.74 228,-82.74 228,-58.74 286,-58.74 286,-82.74"/>
+<text text-anchor="middle" x="257" y="-68.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ResNorm</text>
+</a>
+</g>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~resnorm -->
+<g id="proc~~restrict~~CallsGraph_edge9" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~resnorm</title>
+<path fill="none" stroke="#000000" d="M163.47,-118.6C180.77,-109.65 204.5,-97.38 223.61,-87.5"/>
+<polygon fill="#000000" stroke="#000000" points="225.29,-90.57 232.56,-82.86 222.07,-84.35 225.29,-90.57"/>
+</g>
+<!-- restrict -->
+<g id="proc~~restrict~~CallsGraph_node12" class="node">
+<title>restrict</title>
+<polygon fill="#777777" stroke="#777777" points="284,-40.74 230,-40.74 230,-16.74 284,-16.74 284,-40.74"/>
+<text text-anchor="middle" x="257" y="-26.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict</text>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;restrict -->
+<g id="proc~~restrict~~CallsGraph_edge10" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;restrict</title>
+<path fill="none" stroke="#000000" d="M151.32,-118.47C166.88,-101.93 196.14,-71.99 224,-49.74 225.32,-48.69 226.69,-47.63 228.1,-46.59"/>
+<polygon fill="#000000" stroke="#000000" points="230.13,-49.45 236.3,-40.84 226.11,-43.72 230.13,-49.45"/>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;copy -->
+<g id="proc~~restrict~~CallsGraph_edge11" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M174.18,-263.66C188.62,-258.56 205.45,-252.61 220.08,-247.44"/>
+<polygon fill="#000000" stroke="#000000" points="221.53,-250.63 229.8,-244 219.2,-244.04 221.53,-250.63"/>
+</g>
+<!-- proc~mgrit_recv -->
+<g id="proc~~restrict~~CallsGraph_node6" class="node">
+<title>proc~mgrit_recv</title>
+<g id="a_proc~~restrict~~CallsGraph_node6"><a xlink:href="../proc/mgrit_recv.html" xlink:title="mgrit_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="288,-330.74 226,-330.74 226,-306.74 288,-306.74 288,-330.74"/>
+<text text-anchor="middle" x="257" y="-316.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;proc~mgrit_recv -->
+<g id="proc~~restrict~~CallsGraph_edge12" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;proc~mgrit_recv</title>
+<path fill="none" stroke="#000000" d="M172.62,-287.83C186.12,-292.84 201.91,-298.69 216.1,-303.95"/>
+<polygon fill="#000000" stroke="#000000" points="215.02,-307.28 225.61,-307.48 217.45,-300.72 215.02,-307.28"/>
+</g>
+<!-- proc~mgrit_send -->
+<g id="proc~~restrict~~CallsGraph_node7" class="node">
+<title>proc~mgrit_send</title>
+<g id="a_proc~~restrict~~CallsGraph_node7"><a xlink:href="../proc/mgrit_send.html" xlink:title="mgrit_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="290,-288.74 224,-288.74 224,-264.74 290,-264.74 290,-288.74"/>
+<text text-anchor="middle" x="257" y="-274.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_send</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;proc~mgrit_send -->
+<g id="proc~~restrict~~CallsGraph_edge13" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;proc~mgrit_send</title>
+<path fill="none" stroke="#000000" d="M184.52,-276.12C194.09,-276.21 204.18,-276.29 213.67,-276.38"/>
+<polygon fill="#000000" stroke="#000000" points="213.64,-279.88 223.67,-276.46 213.7,-272.88 213.64,-279.88"/>
+</g>
+<!-- proc~pf_recv -->
+<g id="proc~~restrict~~CallsGraph_node16" class="node">
+<title>proc~pf_recv</title>
+<g id="a_proc~~restrict~~CallsGraph_node16"><a xlink:href="../proc/pf_recv.html" xlink:title="pf_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="387,-309.74 333,-309.74 333,-285.74 387,-285.74 387,-309.74"/>
+<text text-anchor="middle" x="360" y="-295.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_recv&#45;&gt;proc~pf_recv -->
+<g id="proc~~restrict~~CallsGraph_edge14" class="edge">
+<title>proc~mgrit_recv&#45;&gt;proc~pf_recv</title>
+<path fill="none" stroke="#000000" d="M288.03,-312.5C298.89,-310.24 311.28,-307.66 322.63,-305.3"/>
+<polygon fill="#000000" stroke="#000000" points="323.61,-308.67 332.68,-303.21 322.18,-301.82 323.61,-308.67"/>
+</g>
+<!-- proc~pf_send -->
+<g id="proc~~restrict~~CallsGraph_node17" class="node">
+<title>proc~pf_send</title>
+<g id="a_proc~~restrict~~CallsGraph_node17"><a xlink:href="../proc/pf_send.html" xlink:title="pf_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="387,-267.74 333,-267.74 333,-243.74 387,-243.74 387,-267.74"/>
+<text text-anchor="middle" x="360" y="-253.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_send</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_send&#45;&gt;proc~pf_send -->
+<g id="proc~~restrict~~CallsGraph_edge15" class="edge">
+<title>proc~mgrit_send&#45;&gt;proc~pf_send</title>
+<path fill="none" stroke="#000000" d="M290.23,-270.04C300.65,-267.87 312.26,-265.46 322.93,-263.24"/>
+<polygon fill="#000000" stroke="#000000" points="323.72,-266.65 332.8,-261.19 322.3,-259.8 323.72,-266.65"/>
+</g>
+<!-- mpi_wtime -->
+<g id="proc~~restrict~~CallsGraph_node14" class="node">
+<title>mpi_wtime</title>
+<polygon fill="#777777" stroke="#777777" points="609,-246.74 545,-246.74 545,-222.74 609,-222.74 609,-246.74"/>
+<text text-anchor="middle" x="577" y="-232.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_wtime</text>
+</g>
+<!-- proc~pf_start_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~restrict~~CallsGraph_edge16" class="edge">
+<title>proc~pf_start_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M509.19,-221.44C517.55,-223.11 526.42,-224.87 534.87,-226.55"/>
+<polygon fill="#000000" stroke="#000000" points="534.42,-230.03 544.91,-228.55 535.78,-223.17 534.42,-230.03"/>
+</g>
+<!-- proc~pf_stop_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~restrict~~CallsGraph_edge17" class="edge">
+<title>proc~pf_stop_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M508.59,-248.16C517.16,-246.45 526.29,-244.64 534.97,-242.91"/>
+<polygon fill="#000000" stroke="#000000" points="535.78,-246.32 544.9,-240.93 534.41,-239.45 535.78,-246.32"/>
+</g>
+<!-- do_n_steps -->
+<g id="proc~~restrict~~CallsGraph_node13" class="node">
+<title>do_n_steps</title>
+<polygon fill="#777777" stroke="#777777" points="394,-204.74 326,-204.74 326,-180.74 394,-180.74 394,-204.74"/>
+<text text-anchor="middle" x="360" y="-190.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">do_n_steps</text>
+</g>
+<!-- proc~pointrelax&#45;&gt;do_n_steps -->
+<g id="proc~~restrict~~CallsGraph_edge18" class="edge">
+<title>proc~pointrelax&#45;&gt;do_n_steps</title>
+<path fill="none" stroke="#000000" d="M289.13,-192.74C297.46,-192.74 306.62,-192.74 315.49,-192.74"/>
+<polygon fill="#000000" stroke="#000000" points="315.7,-196.24 325.7,-192.74 315.7,-189.24 315.7,-196.24"/>
+</g>
+<!-- norm -->
+<g id="proc~~restrict~~CallsGraph_node15" class="node">
+<title>norm</title>
+<polygon fill="#777777" stroke="#777777" points="387,-82.74 333,-82.74 333,-58.74 387,-58.74 387,-82.74"/>
+<text text-anchor="middle" x="360" y="-68.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">norm</text>
+</g>
+<!-- proc~resnorm&#45;&gt;norm -->
+<g id="proc~~restrict~~CallsGraph_edge19" class="edge">
+<title>proc~resnorm&#45;&gt;norm</title>
+<path fill="none" stroke="#000000" d="M286.13,-70.74C297.42,-70.74 310.57,-70.74 322.58,-70.74"/>
+<polygon fill="#000000" stroke="#000000" points="322.75,-74.24 332.75,-70.74 322.75,-67.24 322.75,-74.24"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~restrict~~CallsGraph_edge20" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M382.26,-285.52C386.31,-282.84 390.41,-279.86 394,-276.74 412.57,-260.63 410.89,-250.21 430,-234.74 431.51,-233.52 433.1,-232.33 434.74,-231.19"/>
+<polygon fill="#000000" stroke="#000000" points="436.64,-234.12 443.22,-225.81 432.9,-228.21 436.64,-234.12"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~restrict~~CallsGraph_edge22" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M387.02,-287.57C399.44,-282.72 414.58,-276.81 428.43,-271.4"/>
+<polygon fill="#000000" stroke="#000000" points="429.71,-274.65 437.75,-267.75 427.17,-268.13 429.71,-274.65"/>
+</g>
+<!-- proc~pf_stop -->
+<g id="proc~~restrict~~CallsGraph_node18" class="node">
+<title>proc~pf_stop</title>
+<g id="a_proc~~restrict~~CallsGraph_node18"><a xlink:href="../proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="496.5,-309.74 442.5,-309.74 442.5,-285.74 496.5,-285.74 496.5,-309.74"/>
+<text text-anchor="middle" x="469.5" y="-295.34" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_stop -->
+<g id="proc~~restrict~~CallsGraph_edge21" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M387.02,-297.74C400.52,-297.74 417.24,-297.74 432.01,-297.74"/>
+<polygon fill="#000000" stroke="#000000" points="432.34,-301.24 442.34,-297.74 432.34,-294.24 432.34,-301.24"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~restrict~~CallsGraph_edge23" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M387.02,-245.57C399.44,-240.72 414.58,-234.81 428.43,-229.4"/>
+<polygon fill="#000000" stroke="#000000" points="429.71,-232.65 437.75,-225.75 427.17,-226.13 429.71,-232.65"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~restrict~~CallsGraph_edge25" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M387.02,-255.74C396.92,-255.74 408.54,-255.74 419.86,-255.74"/>
+<polygon fill="#000000" stroke="#000000" points="420.11,-259.24 430.11,-255.74 420.11,-252.24 420.11,-259.24"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_stop -->
+<g id="proc~~restrict~~CallsGraph_edge24" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M387.02,-265.91C400.79,-271.28 417.89,-277.97 432.87,-283.82"/>
+<polygon fill="#000000" stroke="#000000" points="431.76,-287.14 442.34,-287.52 434.3,-280.62 431.76,-287.14"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Called by</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~restrict~~CalledByGraph Pages: 1 -->
+<svg id="procrestrictCalledByGraph" width="321pt" height="32pt"
+ viewBox="0.00 0.00 321.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~restrict~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~restrict~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 317,-28 317,4 -4,4"/>
+<!-- proc~restrict -->
+<g id="proc~~restrict~~CalledByGraph_node1" class="node">
+<title>proc~restrict</title>
+<polygon fill="none" stroke="black" points="313,-24 259,-24 259,0 313,0 313,-24"/>
+<text text-anchor="middle" x="286" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">Restrict</text>
+</g>
+<!-- proc~pf_mgrit_v_cycle -->
+<g id="proc~~restrict~~CalledByGraph_node2" class="node">
+<title>proc~pf_mgrit_v_cycle</title>
+<g id="a_proc~~restrict~~CalledByGraph_node2"><a xlink:href="../proc/pf_mgrit_v_cycle.html" xlink:title="pf_MGRIT_v_cycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="223,-24 120,-24 120,0 223,0 223,-24"/>
+<text text-anchor="middle" x="171.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_v_cycle</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~restrict -->
+<g id="proc~~restrict~~CalledByGraph_edge1" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~restrict</title>
+<path fill="none" stroke="#000000" d="M223.16,-12C231.75,-12 240.53,-12 248.66,-12"/>
+<polygon fill="#000000" stroke="#000000" points="248.92,-15.5 258.92,-12 248.92,-8.5 248.92,-15.5"/>
+</g>
+<!-- proc~pf_mgrit_run -->
+<g id="proc~~restrict~~CalledByGraph_node3" class="node">
+<title>proc~pf_mgrit_run</title>
+<g id="a_proc~~restrict~~CalledByGraph_node3"><a xlink:href="../proc/pf_mgrit_run.html" xlink:title="pf_MGRIT_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="84,-24 0,-24 0,0 84,0 84,-24"/>
+<text text-anchor="middle" x="42" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle -->
+<g id="proc~~restrict~~CalledByGraph_edge2" class="edge">
+<title>proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle</title>
+<path fill="none" stroke="#000000" d="M84.04,-12C92.21,-12 100.94,-12 109.6,-12"/>
+<polygon fill="#000000" stroke="#000000" points="109.7,-15.5 119.7,-12 109.7,-8.5 109.7,-15.5"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+
+
+    
+    
+
+    
+    
+
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">Restrict</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_c</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">)</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(:)</span>
+<span class="w">     </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">level_index_c</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span>
+<span class="w">     </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gi</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i_c</span><span class="p">,</span><span class="w"> </span><span class="n">i_f</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">n</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nlevels</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">zero_rhs_flag</span><span class="p">,</span><span class="w"> </span><span class="n">send_flag</span><span class="p">,</span><span class="w"> </span><span class="n">recv_flag</span>
+<span class="w">     </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">r_norm</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_c_lev</span><span class="p">,</span><span class="w"> </span><span class="n">mg_f_lev</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_lev</span><span class="p">,</span><span class="w"> </span><span class="n">pf_f_lev</span>
+
+<span class="w">     </span><span class="n">nlevels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+
+<span class="w">     </span><span class="n">mg_c_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">level_index_c</span><span class="p">)</span>
+<span class="w">     </span><span class="n">mg_f_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">level_index_f</span><span class="p">)</span>
+
+<span class="w">     </span><span class="n">pf_f_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index_f</span><span class="p">)</span>
+
+<span class="w">     </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">res_norm_loc</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_pfdp</span>
+<span class="w">     </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">res_norm_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)%</span><span class="n">FAS_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">Nt</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        call </span><span class="n">pf_f_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_boundary</span><span class="p">)</span>
+<span class="w">        </span><span class="n">send_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">f_pts_flag</span>
+<span class="w">        </span><span class="n">recv_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">c_pts_flag</span>
+<span class="w">        </span><span class="k">call </span><span class="n">mgrit_send_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">,</span><span class="w"> </span><span class="n">send_flag</span><span class="p">,</span><span class="w"> </span><span class="n">recv_flag</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">recv_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">           call </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_fas_boundary</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_boundary</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end if</span>
+<span class="k">     end if</span>
+
+<span class="k">     do </span><span class="n">i_c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mg_c_lev</span><span class="p">%</span><span class="n">Nt</span>
+<span class="w">        </span><span class="n">i_f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">c_pts</span><span class="p">(</span><span class="n">i_c</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">level_index_f</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="n">nlevels</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">           </span><span class="n">zero_rhs_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.;</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">           </span><span class="n">zero_rhs_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.;</span>
+<span class="w">        </span><span class="k">end if</span>
+<span class="k">        call </span><span class="n">InjectRestrictPoint</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">mg_c_lev</span><span class="p">%</span><span class="n">g</span><span class="p">(</span><span class="n">i_c</span><span class="p">),</span><span class="w"> </span><span class="n">level_index_c</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">,</span><span class="w"> </span><span class="n">i_c</span><span class="p">,</span><span class="w"> </span><span class="n">i_f</span><span class="p">,</span><span class="w"> </span><span class="n">zero_rhs_flag</span><span class="p">);</span>
+<span class="w">     </span><span class="k">end do</span>
+
+<span class="w">     </span><span class="c">!pf_f_lev%residual = mg_f_lev%res_norm_loc(1)</span>
+<span class="w">  </span><span class="k">end subroutine </span><span class="n">Restrict</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+  </body>
+</html>

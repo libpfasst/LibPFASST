@@ -1,746 +1,796 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <meta name="description" content="The library for running PFASST">
-    
+      <meta name="description" content="The library for running PFASST">
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_apply_mat &ndash; LibPFASST</title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-    
-    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-    
-    
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    <script src="../js/jquery-2.1.3.min.js"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
-
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">LibPFASST </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-        
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-              data-toggle="dropdown" role="button"
-              aria-haspopup="true"
-     aria-expanded="false">Contents <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          
-              
-            <li><a href="../lists/files.html">Source Files</a></li>
-        
-        
-        
-            <li><a href="../lists/modules.html">Modules</a></li>
-        
-            
-                                
-            <li><a href="../lists/procedures.html">Procedures</a></li>
-        
-               
-            <li><a href="../lists/types.html">Derived Types</a></li>
-        
-        
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
             </ul>
-            </li>
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
-
-                             
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
-
-
-          </ul>
-        
-        <form action="../search.html" class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
         </div>
-<!--
-        <button type="submit" class="btn btn-default">Submit</button>
--->
-        </form>
-        
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
+    </div>
 
     <div class="container">
-    
-  
   <div class="row">
     <h1>pf_apply_mat
       <small>Subroutine</small>
-    
+      
     </h1>
-    
-<div class="row">
-  <div class="col-lg-12">
-<div class="well well-sm">
-  <ul class="list-inline" style="margin-bottom:0px;display:inline">
-     
-     
-     
-     
-    
-    
-     <li><i class="fa fa-list-ol"></i>
-       <a data-toggle="tooltip"
-    data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">26 statements</a>
-     </li> 
-     
-     
-     
-    <li><i class="fa fa-code"></i><a href="../src/pf_utils.f90"> Source File</a></li>
-     
-     
-  </ul>
-  <ol class="breadcrumb in-well text-right">
-  
-    
-     <li><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></li>
-    
-     <li><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
-    
-  
-     <li class="active">pf_apply_mat</li>
-  </ol>
-</div>
-</div>
-</div>
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  })
-</script>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.1% of total for procedures.">26 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_utils.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_utils.f90.html'>pf_utils.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
+            <li class="breadcrumb-item active" aria-current="page">pf_apply_mat</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
 
   </div>
   
   <div class="row">
     <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
-    
-<div id="sidebar">
+      <div id="sidebar">
+      <h3>Contents</h3>
   
-<h3>Contents</h3>
- 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/pf_apply_mat.html#src">pf_apply_mat</a>
+      </div>
+    </div>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/pf_apply_mat.html#src">pf_apply_mat</a>
   </div>
-</div>
-
-
-
-</div>
 
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>
-public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
-    
-    
-   
+    <h2>public  subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)  
 </h2>
     
-  
 
-
-    
     <p>Apply a matrix (tmat or rmat) to src and add to dst.
- Mathematically this is 
-     dst= dst + a<em>mat</em>src
-  Where dst and src are vectors, mat is a matrix, and a is a scalar
-  If the optional variable "zero" is provided and is true, then we compute
-     dst=  a<em>mat</em>src</p>
-    
+Mathematically this is 
+    dst= dst + a<em>mat</em>src
+ Where dst and src are vectors, mat is a matrix, and a is a scalar
+ If the optional variable "zero" is provided and is true, then we compute
+    dst=  a<em>mat</em>src</p>
+
 
     <h3>Arguments</h3>
-    
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dst"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dst</strong>(:)</td>
+            <td>
+                <p>destination vector</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-a~8"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>a</strong></td>
+            <td>
+                <p>scalar</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mat"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>mat</strong>(:,:)</td>
+            <td>
+                <p>matrix</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-src~6"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>src</strong>(:)</td>
+            <td>
+                <p>src vector</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_first"></span>
+              logical,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_first</strong></td>
+            <td>
+                <p>If true, zero out the the dst variable before computing </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~108"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong></td>
+            <td>
+                <p>Used for choosing which variable to operate on </p>
+<p>Local variables</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
 
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-dst%7E2"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dst</strong>(:)</td><td><p>destination vector</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-a%7E16"></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>a</strong></td><td><p>scalar</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-mat"></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>mat</strong>(:,:)</td><td><p>matrix</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-src%7E12"></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>src</strong>(:)</td><td><p>src vector</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-zero_first"></span>logical,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>zero_first</strong></td><td><p>If true, zero out the the dst variable before computing </p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-flags%7E207"></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong></td><td><p>Used for choosing which variable to operate on </p>
-<p>Local variables</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-    
-    
-    
     <br>
-    
-    
-     
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Called by</h3>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Calls</h3>
       </div>
-      <div class="panel-body">
+      <div class="card-body">
   <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~pf_apply_mat~~CallsGraph Pages: 1 -->
+<svg id="procpf_apply_matCallsGraph" width="175pt" height="74pt"
+ viewBox="0.00 0.00 175.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_apply_mat~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<title>proc~~pf_apply_mat~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-70 171,-70 171,4 -4,4"/>
+<!-- proc~pf_apply_mat -->
+<g id="proc~~pf_apply_mat~~CallsGraph_node1" class="node">
+<title>proc~pf_apply_mat</title>
+<polygon fill="none" stroke="black" points="77,-45 0,-45 0,-21 77,-21 77,-45"/>
+<text text-anchor="middle" x="38.5" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_apply_mat</text>
+</g>
+<!-- axpy -->
+<g id="proc~~pf_apply_mat~~CallsGraph_node2" class="node">
+<title>axpy</title>
+<polygon fill="#777777" stroke="#777777" points="167,-66 113,-66 113,-42 167,-42 167,-66"/>
+<text text-anchor="middle" x="140" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">axpy</text>
+</g>
+<!-- proc~pf_apply_mat&#45;&gt;axpy -->
+<g id="proc~~pf_apply_mat~~CallsGraph_edge1" class="edge">
+<title>proc~pf_apply_mat&#45;&gt;axpy</title>
+<path fill="none" stroke="#000000" d="M77.12,-40.94C85.57,-42.72 94.52,-44.61 102.9,-46.38"/>
+<polygon fill="#000000" stroke="#000000" points="102.28,-49.83 112.78,-48.47 103.72,-42.98 102.28,-49.83"/>
+</g>
+<!-- setval -->
+<g id="proc~~pf_apply_mat~~CallsGraph_node3" class="node">
+<title>setval</title>
+<polygon fill="#777777" stroke="#777777" points="167,-24 113,-24 113,0 167,0 167,-24"/>
+<text text-anchor="middle" x="140" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setval</text>
+</g>
+<!-- proc~pf_apply_mat&#45;&gt;setval -->
+<g id="proc~~pf_apply_mat~~CallsGraph_edge2" class="edge">
+<title>proc~pf_apply_mat&#45;&gt;setval</title>
+<path fill="none" stroke="#000000" d="M77.12,-25.06C85.57,-23.28 94.52,-21.39 102.9,-19.62"/>
+<polygon fill="#000000" stroke="#000000" points="103.72,-23.02 112.78,-17.53 102.28,-16.17 103.72,-23.02"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Called by</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: proc~~pf_apply_mat~~CalledByGraph Pages: 1 -->
-<svg id="procpf_apply_matCalledByGraph" width="641pt" height="166pt"
- viewBox="0.00 0.00 641.00 166.49" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~pf_apply_mat~~CalledByGraph" class="graph" transform="scale(.8325 .8325) rotate(0) translate(4 196)">
+<svg id="procpf_apply_matCalledByGraph" width="641pt" height="167pt"
+ viewBox="0.00 0.00 641.00 166.71" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pf_apply_mat~~CalledByGraph" class="graph" transform="scale(0.83 0.83) rotate(0) translate(4 196)">
 <title>proc~~pf_apply_mat~~CalledByGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-196 766,-196 766,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-196 765,-196 765,4 -4,4"/>
 <!-- proc~pf_apply_mat -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_node1" class="node">
 <title>proc~pf_apply_mat</title>
-<polygon fill="none" stroke="#000000" points="762,-127 685,-127 685,-103 762,-103 762,-127"/>
-<text text-anchor="middle" x="723.5" y="-112.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_apply_mat</text>
-</g>
-<!-- proc~restrict_ts_integral -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node2" class="node">
-<title>proc~restrict_ts_integral</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node2"><a xlink:href=".././proc/restrict_ts_integral.html" xlink:title="restrict_ts_integral">
-<polygon fill="#d9534f" stroke="#d9534f" points="649,-127 549,-127 549,-103 649,-103 649,-127"/>
-<text text-anchor="middle" x="599" y="-112.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">restrict_ts_integral</text>
-</a>
-</g>
-</g>
-<!-- proc~restrict_ts_integral&#45;&gt;proc~pf_apply_mat -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge3" class="edge">
-<title>proc~restrict_ts_integral&#45;&gt;proc~pf_apply_mat</title>
-<path fill="none" stroke="#000000" d="M649.28,-115C657.7244,-115 666.4741,-115 674.8755,-115"/>
-<polygon fill="#000000" stroke="#000000" points="674.9069,-118.5001 684.9069,-115 674.9069,-111.5001 674.9069,-118.5001"/>
-</g>
-<!-- proc~restrict_ts -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node3" class="node">
-<title>proc~restrict_ts</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node3"><a xlink:href=".././proc/restrict_ts.html" xlink:title="restrict_ts">
-<polygon fill="#d9534f" stroke="#d9534f" points="628.5,-169 569.5,-169 569.5,-145 628.5,-145 628.5,-169"/>
-<text text-anchor="middle" x="599" y="-154.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">restrict_ts</text>
-</a>
-</g>
-</g>
-<!-- proc~restrict_ts&#45;&gt;proc~pf_apply_mat -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge2" class="edge">
-<title>proc~restrict_ts&#45;&gt;proc~pf_apply_mat</title>
-<path fill="none" stroke="#000000" d="M628.5048,-147.0466C643.2917,-142.0582 661.5249,-135.9073 678.0505,-130.3324"/>
-<polygon fill="#000000" stroke="#000000" points="679.1877,-133.6426 687.5443,-127.1296 676.9501,-127.0098 679.1877,-133.6426"/>
+<polygon fill="none" stroke="black" points="761,-89 684,-89 684,-65 761,-65 761,-89"/>
+<text text-anchor="middle" x="722.5" y="-74.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_apply_mat</text>
 </g>
 <!-- proc~interpolate_time_space -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node4" class="node">
+<g id="proc~~pf_apply_mat~~CalledByGraph_node2" class="node">
 <title>proc~interpolate_time_space</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node4"><a xlink:href=".././proc/interpolate_time_space.html" xlink:title="interpolate_time_space">
-<polygon fill="#d9534f" stroke="#d9534f" points="512,-87 388,-87 388,-63 512,-63 512,-87"/>
-<text text-anchor="middle" x="450" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">interpolate_time_space</text>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node2"><a xlink:href="../proc/interpolate_time_space.html" xlink:title="interpolate_time_space">
+<polygon fill="#d9534f" stroke="#d9534f" points="511.5,-129 387.5,-129 387.5,-105 511.5,-105 511.5,-129"/>
+<text text-anchor="middle" x="449.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpolate_time_space</text>
 </a>
 </g>
 </g>
 <!-- proc~interpolate_time_space&#45;&gt;proc~pf_apply_mat -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_edge1" class="edge">
 <title>proc~interpolate_time_space&#45;&gt;proc~pf_apply_mat</title>
-<path fill="none" stroke="#000000" d="M512.251,-78.0643C551.6884,-80.7139 603.6288,-85.5107 649,-94 657.8293,-95.652 667.127,-97.8731 676.0465,-100.2533"/>
-<polygon fill="#000000" stroke="#000000" points="675.3397,-103.6893 685.9112,-102.9866 677.2088,-96.9434 675.3397,-103.6893"/>
+<path fill="none" stroke="#000000" d="M511.85,-113.99C551.05,-111.35 602.82,-106.55 648,-98 656.72,-96.35 665.89,-94.13 674.69,-91.75"/>
+<polygon fill="#000000" stroke="#000000" points="675.74,-95.09 684.42,-89.02 673.85,-88.35 675.74,-95.09"/>
+</g>
+<!-- proc~restrict_ts -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node3" class="node">
+<title>proc~restrict_ts</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node3"><a xlink:href="../proc/restrict_ts.html" xlink:title="restrict_ts">
+<polygon fill="#d9534f" stroke="#d9534f" points="627,-47 569,-47 569,-23 627,-23 627,-47"/>
+<text text-anchor="middle" x="598" y="-32.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict_ts</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_ts&#45;&gt;proc~pf_apply_mat -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge2" class="edge">
+<title>proc~restrict_ts&#45;&gt;proc~pf_apply_mat</title>
+<path fill="none" stroke="#000000" d="M627.1,-44.64C641.75,-49.66 660.01,-55.92 676.56,-61.59"/>
+<polygon fill="#000000" stroke="#000000" points="675.47,-64.92 686.06,-64.85 677.74,-58.3 675.47,-64.92"/>
+</g>
+<!-- proc~restrict_ts_integral -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node4" class="node">
+<title>proc~restrict_ts_integral</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node4"><a xlink:href="../proc/restrict_ts_integral.html" xlink:title="restrict_ts_integral">
+<polygon fill="#d9534f" stroke="#d9534f" points="648,-89 548,-89 548,-65 648,-65 648,-89"/>
+<text text-anchor="middle" x="598" y="-74.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict_ts_integral</text>
+</a>
+</g>
+</g>
+<!-- proc~restrict_ts_integral&#45;&gt;proc~pf_apply_mat -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge3" class="edge">
+<title>proc~restrict_ts_integral&#45;&gt;proc~pf_apply_mat</title>
+<path fill="none" stroke="#000000" d="M648.12,-77C656.54,-77 665.29,-77 673.67,-77"/>
+<polygon fill="#000000" stroke="#000000" points="673.69,-80.5 683.69,-77 673.69,-73.5 673.69,-80.5"/>
+</g>
+<!-- proc~pf_predictor -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node5" class="node">
+<title>proc~pf_predictor</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node5"><a xlink:href="../proc/pf_predictor.html" xlink:title="pf_predictor">
+<polygon fill="#d9534f" stroke="#d9534f" points="337,-108 268,-108 268,-84 337,-84 337,-108"/>
+<text text-anchor="middle" x="302.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_predictor</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_predictor&#45;&gt;proc~interpolate_time_space -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge4" class="edge">
+<title>proc~pf_predictor&#45;&gt;proc~interpolate_time_space</title>
+<path fill="none" stroke="#000000" d="M337.13,-100.87C349.18,-102.62 363.27,-104.66 377.29,-106.69"/>
+<polygon fill="#000000" stroke="#000000" points="377.06,-110.19 387.45,-108.16 378.06,-103.26 377.06,-110.19"/>
+</g>
+<!-- proc~restrict_time_space_fas -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node10" class="node">
+<title>proc~restrict_time_space_fas</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node10"><a xlink:href="../proc/restrict_time_space_fas.html" xlink:title="restrict_time_space_fas">
+<polygon fill="#d9534f" stroke="#d9534f" points="512,-87 387,-87 387,-63 512,-63 512,-87"/>
+<text text-anchor="middle" x="449.5" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict_time_space_fas</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_predictor&#45;&gt;proc~restrict_time_space_fas -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge16" class="edge">
+<title>proc~pf_predictor&#45;&gt;proc~restrict_time_space_fas</title>
+<path fill="none" stroke="#000000" d="M337.13,-91.13C349.05,-89.4 362.95,-87.39 376.82,-85.38"/>
+<polygon fill="#000000" stroke="#000000" points="377.48,-88.82 386.88,-83.92 376.48,-81.89 377.48,-88.82"/>
+</g>
+<!-- proc~pf_predictor_oc -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node6" class="node">
+<title>proc~pf_predictor_oc</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node6"><a xlink:href="../proc/pf_predictor_oc.html" xlink:title="pf_predictor_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="345.5,-150 259.5,-150 259.5,-126 345.5,-126 345.5,-150"/>
+<text text-anchor="middle" x="302.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_predictor_oc</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_predictor_oc&#45;&gt;proc~interpolate_time_space -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge5" class="edge">
+<title>proc~pf_predictor_oc&#45;&gt;proc~interpolate_time_space</title>
+<path fill="none" stroke="#000000" d="M345.83,-131.87C355.65,-130.45 366.37,-128.9 377.05,-127.35"/>
+<polygon fill="#000000" stroke="#000000" points="377.86,-130.77 387.26,-125.87 376.86,-123.84 377.86,-130.77"/>
+</g>
+<!-- proc~pf_predictor_oc&#45;&gt;proc~restrict_time_space_fas -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge17" class="edge">
+<title>proc~pf_predictor_oc&#45;&gt;proc~restrict_time_space_fas</title>
+<path fill="none" stroke="#000000" d="M332.13,-125.96C338.41,-123.15 344.98,-120.08 351,-117 367.5,-108.58 370.15,-103.7 387,-96 391.09,-94.13 395.4,-92.33 399.77,-90.63"/>
+<polygon fill="#000000" stroke="#000000" points="401.18,-93.84 409.33,-87.07 398.74,-87.28 401.18,-93.84"/>
 </g>
 <!-- proc~pf_v_cycle_oc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node5" class="node">
+<g id="proc~~pf_apply_mat~~CalledByGraph_node7" class="node">
 <title>proc~pf_v_cycle_oc</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node5"><a xlink:href=".././proc/pf_v_cycle_oc.html" xlink:title="pf_v_cycle_oc">
-<polygon fill="#d9534f" stroke="#d9534f" points="342.5,-150 262.5,-150 262.5,-126 342.5,-126 342.5,-150"/>
-<text text-anchor="middle" x="302.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_v_cycle_oc</text>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node7"><a xlink:href="../proc/pf_v_cycle_oc.html" xlink:title="pf_v_cycle_oc">
+<polygon fill="#d9534f" stroke="#d9534f" points="342.5,-192 262.5,-192 262.5,-168 342.5,-168 342.5,-192"/>
+<text text-anchor="middle" x="302.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_v_cycle_oc</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_v_cycle_oc&#45;&gt;proc~interpolate_time_space -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_edge6" class="edge">
 <title>proc~pf_v_cycle_oc&#45;&gt;proc~interpolate_time_space</title>
-<path fill="none" stroke="#000000" d="M331.9984,-125.8972C338.3327,-123.1128 344.9413,-120.065 351,-117 367.5286,-108.6384 370.1239,-103.636 387,-96 391.1293,-94.1316 395.4761,-92.3418 399.8762,-90.6505"/>
-<polygon fill="#000000" stroke="#000000" points="401.3447,-93.84 409.53,-87.1131 398.9363,-87.2674 401.3447,-93.84"/>
-</g>
-<!-- proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node7" class="node">
-<title>proc~restrict_time_space_fas</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node7"><a xlink:href=".././proc/restrict_time_space_fas.html" xlink:title="restrict_time_space_fas">
-<polygon fill="#d9534f" stroke="#d9534f" points="513,-129 387,-129 387,-105 513,-105 513,-129"/>
-<text text-anchor="middle" x="450" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">restrict_time_space_fas</text>
-</a>
-</g>
+<path fill="none" stroke="#000000" d="M331.46,-167.85C354.12,-158 386.28,-144.04 411.15,-133.23"/>
+<polygon fill="#000000" stroke="#000000" points="412.85,-136.3 420.63,-129.11 410.06,-129.88 412.85,-136.3"/>
 </g>
 <!-- proc~pf_v_cycle_oc&#45;&gt;proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge13" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge18" class="edge">
 <title>proc~pf_v_cycle_oc&#45;&gt;proc~restrict_time_space_fas</title>
-<path fill="none" stroke="#000000" d="M342.805,-132.2617C353.2945,-130.7682 364.9293,-129.1118 376.5539,-127.4567"/>
-<polygon fill="#000000" stroke="#000000" points="377.3311,-130.8815 386.7379,-126.0068 376.3444,-123.9513 377.3311,-130.8815"/>
-</g>
-<!-- proc~pf_vcycle_pysdc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node6" class="node">
-<title>proc~pf_vcycle_pysdc</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node6"><a xlink:href=".././proc/pf_vcycle_pysdc.html" xlink:title="pf_Vcycle_pySDC">
-<polygon fill="#d9534f" stroke="#d9534f" points="351,-108 254,-108 254,-84 351,-84 351,-108"/>
-<text text-anchor="middle" x="302.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_Vcycle_pySDC</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~interpolate_time_space -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge7" class="edge">
-<title>proc~pf_vcycle_pysdc&#45;&gt;proc~interpolate_time_space</title>
-<path fill="none" stroke="#000000" d="M351.2058,-89.0656C359.7413,-87.8504 368.7847,-86.5629 377.7973,-85.2797"/>
-<polygon fill="#000000" stroke="#000000" points="378.5242,-88.7116 387.931,-83.8369 377.5374,-81.7815 378.5242,-88.7116"/>
-</g>
-<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge14" class="edge">
-<title>proc~pf_vcycle_pysdc&#45;&gt;proc~restrict_time_space_fas</title>
-<path fill="none" stroke="#000000" d="M351.2058,-102.9344C359.4083,-104.1022 368.0798,-105.3368 376.7423,-106.5701"/>
-<polygon fill="#000000" stroke="#000000" points="376.4849,-110.0687 386.8784,-108.0132 377.4716,-103.1385 376.4849,-110.0687"/>
-</g>
-<!-- proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts_integral -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge4" class="edge">
-<title>proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts_integral</title>
-<path fill="none" stroke="#000000" d="M513.1894,-116.1518C521.6478,-116.0383 530.3052,-115.9221 538.712,-115.8092"/>
-<polygon fill="#000000" stroke="#000000" points="538.8597,-119.3077 548.8118,-115.6737 538.7657,-112.3083 538.8597,-119.3077"/>
-</g>
-<!-- proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge5" class="edge">
-<title>proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts</title>
-<path fill="none" stroke="#000000" d="M494.7049,-129.0013C515.3843,-134.5528 539.7307,-141.0888 559.6974,-146.449"/>
-<polygon fill="#000000" stroke="#000000" points="558.8382,-149.8422 569.4038,-149.0547 560.6532,-143.0816 558.8382,-149.8422"/>
-</g>
-<!-- proc~pf_predictor_oc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node8" class="node">
-<title>proc~pf_predictor_oc</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node8"><a xlink:href=".././proc/pf_predictor_oc.html" xlink:title="pf_predictor_oc">
-<polygon fill="#d9534f" stroke="#d9534f" points="346,-192 259,-192 259,-168 346,-168 346,-192"/>
-<text text-anchor="middle" x="302.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_predictor_oc</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_predictor_oc&#45;&gt;proc~interpolate_time_space -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge8" class="edge">
-<title>proc~pf_predictor_oc&#45;&gt;proc~interpolate_time_space</title>
-<path fill="none" stroke="#000000" d="M337.7933,-167.9832C342.5372,-165.4643 347.1032,-162.4883 351,-159 375.0283,-137.4909 362.0605,-116.4455 387,-96 388.7386,-94.5747 390.5779,-93.2446 392.4924,-92.0037"/>
-<polygon fill="#000000" stroke="#000000" points="394.2498,-95.0313 401.2897,-87.1136 390.8488,-88.913 394.2498,-95.0313"/>
-</g>
-<!-- proc~pf_predictor_oc&#45;&gt;proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge15" class="edge">
-<title>proc~pf_predictor_oc&#45;&gt;proc~restrict_time_space_fas</title>
-<path fill="none" stroke="#000000" d="M330.9395,-167.853C354.0996,-157.9608 386.9932,-143.9114 412.3393,-133.0856"/>
-<polygon fill="#000000" stroke="#000000" points="413.8263,-136.2564 421.6478,-129.1097 411.0767,-129.819 413.8263,-136.2564"/>
-</g>
-<!-- proc~pf_predictor -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node9" class="node">
-<title>proc~pf_predictor</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node9"><a xlink:href=".././proc/pf_predictor.html" xlink:title="pf_predictor">
-<polygon fill="#d9534f" stroke="#d9534f" points="337.5,-66 267.5,-66 267.5,-42 337.5,-42 337.5,-66"/>
-<text text-anchor="middle" x="302.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_predictor</text>
-</a>
-</g>
-</g>
-<!-- proc~pf_predictor&#45;&gt;proc~interpolate_time_space -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge9" class="edge">
-<title>proc~pf_predictor&#45;&gt;proc~interpolate_time_space</title>
-<path fill="none" stroke="#000000" d="M337.8299,-59.03C349.9003,-60.7485 363.8756,-62.7382 377.7785,-64.7176"/>
-<polygon fill="#000000" stroke="#000000" points="377.4673,-68.2085 387.8609,-66.1531 378.4541,-61.2784 377.4673,-68.2085"/>
-</g>
-<!-- proc~pf_predictor&#45;&gt;proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge16" class="edge">
-<title>proc~pf_predictor&#45;&gt;proc~restrict_time_space_fas</title>
-<path fill="none" stroke="#000000" d="M331.9984,-66.1028C338.3327,-68.8872 344.9413,-71.935 351,-75 367.5286,-83.3616 370.1239,-88.364 387,-96 391.1293,-97.8684 395.4761,-99.6582 399.8762,-101.3495"/>
-<polygon fill="#000000" stroke="#000000" points="398.9363,-104.7326 409.53,-104.8869 401.3447,-98.16 398.9363,-104.7326"/>
+<path fill="none" stroke="#000000" d="M338.31,-167.77C342.87,-165.29 347.25,-162.38 351,-159 374.95,-137.4 362.14,-116.54 387,-96 388.73,-94.57 390.57,-93.24 392.48,-91.99"/>
+<polygon fill="#000000" stroke="#000000" points="394.24,-95.02 401.26,-87.08 390.82,-88.91 394.24,-95.02"/>
 </g>
 <!-- proc~pf_vcycle -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_node10" class="node">
+<g id="proc~~pf_apply_mat~~CalledByGraph_node8" class="node">
 <title>proc~pf_vcycle</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node10"><a xlink:href=".././proc/pf_vcycle.html" xlink:title="pf_Vcycle">
-<polygon fill="#d9534f" stroke="#d9534f" points="331.5,-24 273.5,-24 273.5,0 331.5,0 331.5,-24"/>
-<text text-anchor="middle" x="302.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_Vcycle</text>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node8"><a xlink:href="../proc/pf_vcycle.html" xlink:title="pf_Vcycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="331.5,-66 273.5,-66 273.5,-42 331.5,-42 331.5,-66"/>
+<text text-anchor="middle" x="302.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_Vcycle</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_vcycle&#45;&gt;proc~interpolate_time_space -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge10" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge7" class="edge">
 <title>proc~pf_vcycle&#45;&gt;proc~interpolate_time_space</title>
-<path fill="none" stroke="#000000" d="M330.9395,-24.147C354.0996,-34.0392 386.9932,-48.0886 412.3393,-58.9144"/>
-<polygon fill="#000000" stroke="#000000" points="411.0767,-62.181 421.6478,-62.8903 413.8263,-55.7436 411.0767,-62.181"/>
+<path fill="none" stroke="#000000" d="M331.62,-65.81C338.06,-68.68 344.82,-71.84 351,-75 367.5,-83.42 370.15,-88.3 387,-96 391.09,-97.87 395.4,-99.67 399.77,-101.37"/>
+<polygon fill="#000000" stroke="#000000" points="398.74,-104.72 409.33,-104.93 401.18,-98.16 398.74,-104.72"/>
 </g>
 <!-- proc~pf_vcycle&#45;&gt;proc~restrict_time_space_fas -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge17" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge19" class="edge">
 <title>proc~pf_vcycle&#45;&gt;proc~restrict_time_space_fas</title>
-<path fill="none" stroke="#000000" d="M331.743,-21.074C338.5736,-24.1204 345.4624,-28.0429 351,-33 375.0283,-54.5091 362.0605,-75.5545 387,-96 388.7386,-97.4253 390.5779,-98.7554 392.4924,-99.9963"/>
-<polygon fill="#000000" stroke="#000000" points="390.8488,-103.087 401.2897,-104.8864 394.2498,-96.9687 390.8488,-103.087"/>
+<path fill="none" stroke="#000000" d="M331.8,-58.1C344.84,-59.99 360.96,-62.32 377.01,-64.65"/>
+<polygon fill="#000000" stroke="#000000" points="376.57,-68.12 386.97,-66.09 377.57,-61.19 376.57,-68.12"/>
+</g>
+<!-- proc~pf_vcycle_pysdc -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_node9" class="node">
+<title>proc~pf_vcycle_pysdc</title>
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node9"><a xlink:href="../proc/pf_vcycle_pysdc.html" xlink:title="pf_Vcycle_pySDC">
+<polygon fill="#d9534f" stroke="#d9534f" points="351,-24 254,-24 254,0 351,0 351,-24"/>
+<text text-anchor="middle" x="302.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_Vcycle_pySDC</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~interpolate_time_space -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge8" class="edge">
+<title>proc~pf_vcycle_pysdc&#45;&gt;proc~interpolate_time_space</title>
+<path fill="none" stroke="#000000" d="M338.31,-24.23C342.87,-26.71 347.25,-29.62 351,-33 374.95,-54.6 362.14,-75.46 387,-96 388.73,-97.43 390.57,-98.76 392.48,-100.01"/>
+<polygon fill="#000000" stroke="#000000" points="390.82,-103.09 401.26,-104.92 394.24,-96.98 390.82,-103.09"/>
+</g>
+<!-- proc~pf_vcycle_pysdc&#45;&gt;proc~restrict_time_space_fas -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge20" class="edge">
+<title>proc~pf_vcycle_pysdc&#45;&gt;proc~restrict_time_space_fas</title>
+<path fill="none" stroke="#000000" d="M331.46,-24.15C354.12,-34 386.28,-47.96 411.15,-58.77"/>
+<polygon fill="#000000" stroke="#000000" points="410.06,-62.12 420.63,-62.89 412.85,-55.7 410.06,-62.12"/>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge9" class="edge">
+<title>proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts</title>
+<path fill="none" stroke="#000000" d="M494.45,-63C514.98,-57.39 539.18,-50.79 558.92,-45.4"/>
+<polygon fill="#000000" stroke="#000000" points="560.06,-48.71 568.79,-42.7 558.22,-41.96 560.06,-48.71"/>
+</g>
+<!-- proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts_integral -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge10" class="edge">
+<title>proc~restrict_time_space_fas&#45;&gt;proc~restrict_ts_integral</title>
+<path fill="none" stroke="#000000" d="M512.2,-75.84C520.65,-75.96 529.32,-76.08 537.72,-76.19"/>
+<polygon fill="#000000" stroke="#000000" points="537.77,-79.69 547.82,-76.33 537.87,-72.69 537.77,-79.69"/>
 </g>
 <!-- proc~pf_block_run -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_node11" class="node">
 <title>proc~pf_block_run</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node11"><a xlink:href=".././proc/pf_block_run.html" xlink:title="pf_block_run">
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node11"><a xlink:href="../proc/pf_block_run.html" xlink:title="pf_block_run">
 <polygon fill="#d9534f" stroke="#d9534f" points="203,-66 129,-66 129,-42 203,-42 203,-66"/>
-<text text-anchor="middle" x="166" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_block_run</text>
+<text text-anchor="middle" x="166" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_block_run</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge12" class="edge">
-<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc</title>
-<path fill="none" stroke="#000000" d="M203.2992,-65.4767C218.7262,-70.2235 236.8299,-75.7938 253.3191,-80.8674"/>
-<polygon fill="#000000" stroke="#000000" points="252.7518,-84.3547 263.3389,-83.9504 254.8104,-77.6643 252.7518,-84.3547"/>
-</g>
 <!-- proc~pf_block_run&#45;&gt;proc~pf_predictor -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge19" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge11" class="edge">
 <title>proc~pf_block_run&#45;&gt;proc~pf_predictor</title>
-<path fill="none" stroke="#000000" d="M203.2992,-54C219.7721,-54 239.297,-54 256.6492,-54"/>
-<polygon fill="#000000" stroke="#000000" points="257.126,-57.5001 267.1259,-54 257.1259,-50.5001 257.126,-57.5001"/>
+<path fill="none" stroke="#000000" d="M203.04,-65.26C219.98,-70.54 240.32,-76.89 258.09,-82.45"/>
+<polygon fill="#000000" stroke="#000000" points="257.08,-85.8 267.67,-85.44 259.17,-79.11 257.08,-85.8"/>
 </g>
 <!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge20" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge14" class="edge">
 <title>proc~pf_block_run&#45;&gt;proc~pf_vcycle</title>
-<path fill="none" stroke="#000000" d="M203.2992,-42.5233C222.0341,-36.7587 244.7167,-29.7795 263.661,-23.9505"/>
-<polygon fill="#000000" stroke="#000000" points="264.9399,-27.219 273.4683,-20.9328 262.8812,-20.5285 264.9399,-27.219"/>
+<path fill="none" stroke="#000000" d="M203.04,-54C221.69,-54 244.45,-54 263.39,-54"/>
+<polygon fill="#000000" stroke="#000000" points="263.46,-57.5 273.46,-54 263.46,-50.5 263.46,-57.5"/>
+</g>
+<!-- proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge15" class="edge">
+<title>proc~pf_block_run&#45;&gt;proc~pf_vcycle_pysdc</title>
+<path fill="none" stroke="#000000" d="M203.04,-42.74C218.52,-37.91 236.84,-32.19 253.45,-27"/>
+<polygon fill="#000000" stroke="#000000" points="254.5,-30.34 263,-24.02 252.41,-23.66 254.5,-30.34"/>
 </g>
 <!-- proc~pf_pfasst_block_oc -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_node12" class="node">
 <title>proc~pf_pfasst_block_oc</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node12"><a xlink:href=".././proc/pf_pfasst_block_oc.html" xlink:title="pf_pfasst_block_oc">
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node12"><a xlink:href="../proc/pf_pfasst_block_oc.html" xlink:title="pf_pfasst_block_oc">
 <polygon fill="#d9534f" stroke="#d9534f" points="218,-171 114,-171 114,-147 218,-147 218,-171"/>
-<text text-anchor="middle" x="166" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_pfasst_block_oc</text>
+<text text-anchor="middle" x="166" y="-156.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_block_oc</text>
 </a>
 </g>
 </g>
-<!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge11" class="edge">
-<title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc</title>
-<path fill="none" stroke="#000000" d="M218.3841,-150.9409C229.5511,-149.2229 241.3181,-147.4126 252.3971,-145.7081"/>
-<polygon fill="#000000" stroke="#000000" points="252.9898,-149.1582 262.3413,-144.1783 251.9254,-142.2396 252.9898,-149.1582"/>
-</g>
 <!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_predictor_oc -->
-<g id="proc~~pf_apply_mat~~CalledByGraph_edge18" class="edge">
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge12" class="edge">
 <title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_predictor_oc</title>
-<path fill="none" stroke="#000000" d="M218.3841,-167.0591C228.421,-168.6032 238.9426,-170.2219 249.0137,-171.7713"/>
-<polygon fill="#000000" stroke="#000000" points="248.4841,-175.231 258.9,-173.2923 249.5485,-168.3124 248.4841,-175.231"/>
+<path fill="none" stroke="#000000" d="M218.23,-151C228.37,-149.42 239.01,-147.76 249.18,-146.17"/>
+<polygon fill="#000000" stroke="#000000" points="249.82,-149.61 259.16,-144.61 248.74,-142.7 249.82,-149.61"/>
+</g>
+<!-- proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc -->
+<g id="proc~~pf_apply_mat~~CalledByGraph_edge13" class="edge">
+<title>proc~pf_pfasst_block_oc&#45;&gt;proc~pf_v_cycle_oc</title>
+<path fill="none" stroke="#000000" d="M218.23,-167C229.37,-168.74 241.14,-170.58 252.2,-172.3"/>
+<polygon fill="#000000" stroke="#000000" points="251.7,-175.77 262.13,-173.85 252.78,-168.85 251.7,-175.77"/>
 </g>
 <!-- proc~pf_pfasst_run -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_node13" class="node">
 <title>proc~pf_pfasst_run</title>
-<g id="a_proc~~pf_apply_mat~~CalledByGraph_node13"><a xlink:href=".././proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
+<g id="a_proc~~pf_apply_mat~~CalledByGraph_node13"><a xlink:href="../proc/pf_pfasst_run.html" xlink:title="pf_pfasst_run">
 <polygon fill="#d9534f" stroke="#d9534f" points="78,-66 0,-66 0,-42 78,-42 78,-66"/>
-<text text-anchor="middle" x="39" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_pfasst_run</text>
+<text text-anchor="middle" x="39" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_pfasst_run</text>
 </a>
 </g>
 </g>
 <!-- proc~pf_pfasst_run&#45;&gt;proc~pf_block_run -->
 <g id="proc~~pf_apply_mat~~CalledByGraph_edge21" class="edge">
 <title>proc~pf_pfasst_run&#45;&gt;proc~pf_block_run</title>
-<path fill="none" stroke="#000000" d="M78.1405,-54C91.0338,-54 105.5063,-54 118.9275,-54"/>
-<polygon fill="#000000" stroke="#000000" points="118.9423,-57.5001 128.9423,-54 118.9423,-50.5001 118.9423,-57.5001"/>
+<path fill="none" stroke="#000000" d="M78.18,-54C90.87,-54 105.15,-54 118.4,-54"/>
+<polygon fill="#000000" stroke="#000000" points="118.76,-57.5 128.76,-54 118.76,-50.5 118.76,-57.5"/>
 </g>
 </g>
 </svg>
-</div><script>var panprocpf_apply_matCalledByGraph = svgPanZoom('#procpf_apply_matCalledByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+</div>                <script>
+                  var panprocpf_apply_matCalledByGraph = svgPanZoom('#procpf_apply_matCalledByGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
-<svg width="560pt" height="32pt"
- viewBox="0.00 0.00 559.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 555.5,-28 555.5,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
 <!-- Subroutine -->
 <g id="node1" class="node">
 <title>Subroutine</title>
 <polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
-<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
 </g>
 <!-- Function -->
 <g id="node2" class="node">
 <title>Function</title>
 <polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
-<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
 </g>
 <!-- Interface -->
 <g id="node3" class="node">
 <title>Interface</title>
 <polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
-<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Interface</text>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
 </g>
 <!-- Unknown Procedure Type -->
-<g id="node4" class="node">
+<g id="node5" class="node">
 <title>Unknown Procedure Type</title>
-<polygon fill="#777777" stroke="#777777" points="364,-24 228,-24 228,0 364,0 364,-24"/>
-<text text-anchor="middle" x="296" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Unknown Procedure Type</text>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
 </g>
 <!-- Program -->
-<g id="node5" class="node">
+<g id="node6" class="node">
 <title>Program</title>
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="436,-24 382,-24 382,0 436,0 436,-24"/>
-<text text-anchor="middle" x="409" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
 </g>
 <!-- This Page&#39;s Entity -->
-<g id="node6" class="node">
+<g id="node7" class="node">
 <title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="#000000" points="551.5,-24 454.5,-24 454.5,0 551.5,0 551.5,-24"/>
-<text text-anchor="middle" x="503" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
 
-    
-    <p>Solid arrows point from a procedure to one which it calls. Dashed 
-    arrows point from an interface to procedures which implement that interface.
-    This could include the module procedures in a generic interface or the
-    implementation in a submodule of an interface in a parent module.
-    </p>
-    </div></div></div></div>
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-     
     <br>
 
-    <section class="visible-xs visible-sm hidden-md">
-      
-<h3>Contents</h3>
- 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../proc/pf_apply_mat.html#src">pf_apply_mat</a>
-  </div>
-</div>
-
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
-    
-
-    
-    
-    
     
     
 
     
     
-    
-    
-    
 
 
-    
-    
+
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">subroutine </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">zero_first</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-    <span class="c">!! Apply a matrix (tmat or rmat) to src and add to dst.</span>
-    <span class="c">!! Mathematically this is </span>
-    <span class="c">!!     dst= dst + a*mat*src</span>
-    <span class="c">!!  Where dst and src are vectors, mat is a matrix, and a is a scalar</span>
-    <span class="c">!!  If the optional variable &quot;zero&quot; is provided and is true, then we compute</span>
-    <span class="c">!!     dst=  a*mat*src</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dst</span><span class="p">(:)</span>       <span class="c">!!  destination vector</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">a</span>            <span class="c">!!  scalar</span>
-    <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span>        <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">mat</span><span class="p">(:,</span> <span class="p">:)</span>    <span class="c">!!  matrix</span>
-    <span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">src</span><span class="p">(:)</span>       <span class="c">!!  src vector</span>
-    <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">zero_first</span>   <span class="c">!! If true, zero out the the dst variable before computing </span>
-    <span class="kt">integer</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">flags</span>  <span class="c">!! Used for choosing which variable to operate on </span>
-    
-    <span class="c">!!  Local variables</span>
-    <span class="kt">logical</span> <span class="kd">::</span> <span class="n">lzero</span>   <span class="c">!!  local version of input parameter zero</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">which</span>   <span class="c">!!  local version of flags</span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span>    <span class="c">!!  size of mat   </span>
-    <span class="kt">integer</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span>    <span class="c">!!  loop variables</span>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">pf_apply_mat</span><span class="p">(</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">mat</span><span class="p">,</span><span class="w"> </span><span class="n">src</span><span class="p">,</span><span class="w"> </span><span class="n">zero_first</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">)</span>
+<span class="w">    </span><span class="c">!! Apply a matrix (tmat or rmat) to src and add to dst.</span>
+<span class="w">    </span><span class="c">!! Mathematically this is </span>
+<span class="w">    </span><span class="c">!!     dst= dst + a*mat*src</span>
+<span class="w">    </span><span class="c">!!  Where dst and src are vectors, mat is a matrix, and a is a scalar</span>
+<span class="w">    </span><span class="c">!!  If the optional variable &quot;zero&quot; is provided and is true, then we compute</span>
+<span class="w">    </span><span class="c">!!     dst=  a*mat*src</span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">dst</span><span class="p">(:)</span><span class="w">       </span><span class="c">!!  destination vector</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w">        </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">    </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="w">            </span><span class="c">!!  scalar</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w">        </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">    </span><span class="kd">::</span><span class="w"> </span><span class="n">mat</span><span class="p">(:,</span><span class="w"> </span><span class="p">:)</span><span class="w">    </span><span class="c">!!  matrix</span>
+<span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">    </span><span class="kd">::</span><span class="w"> </span><span class="n">src</span><span class="p">(:)</span><span class="w">       </span><span class="c">!!  src vector</span>
+<span class="w">    </span><span class="kt">logical</span><span class="p">,</span><span class="w">           </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="w"> </span><span class="k">optional</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">zero_first</span><span class="w">   </span><span class="c">!! If true, zero out the the dst variable before computing </span>
+<span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w">           </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="w"> </span><span class="k">optional</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flags</span><span class="w">  </span><span class="c">!! Used for choosing which variable to operate on </span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c">!!  Local variables</span>
+<span class="w">    </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">lzero</span><span class="w">   </span><span class="c">!!  local version of input parameter zero</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">which</span><span class="w">   </span><span class="c">!!  local version of flags</span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="w">    </span><span class="c">!!  size of mat   </span>
+<span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="w">    </span><span class="c">!!  loop variables</span>
 
-    <span class="n">lzero</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">zero_first</span><span class="p">))</span> <span class="n">lzero</span> <span class="o">=</span> <span class="n">zero_first</span>
-    <span class="n">which</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>      <span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span> <span class="n">which</span> <span class="o">=</span> <span class="n">flags</span>
-        
-    <span class="n">n</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-    
-    <span class="k">do </span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">lzero</span><span class="p">)</span> <span class="k">call </span><span class="n">dst</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
-      <span class="k">do </span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span>
-         <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">mat</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span> <span class="o">/=</span> <span class="mf">0.0_pfdp</span><span class="p">)</span> <span class="k">then</span>
-<span class="k">            call </span><span class="n">dst</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">mat</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="n">src</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="n">flags</span><span class="p">)</span>
-         <span class="k">end if</span>
+<span class="w">    </span><span class="n">lzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">zero_first</span><span class="p">))</span><span class="w"> </span><span class="n">lzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero_first</span>
+<span class="w">    </span><span class="n">which</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">flags</span><span class="p">))</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flags</span>
+<span class="w">        </span>
+<span class="w">    </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="w"> </span><span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SIZE</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="w"> </span><span class="nb">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">n</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lzero</span><span class="p">)</span><span class="w"> </span><span class="k">call </span><span class="n">dst</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">flags</span><span class="p">)</span>
+<span class="w">      </span><span class="k">do </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">m</span>
+<span class="w">         </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">mat</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">))</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="mf">0.0_pfdp</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">            call </span><span class="n">dst</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">mat</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">),</span><span class="w"> </span><span class="n">src</span><span class="p">(</span><span class="n">j</span><span class="p">),</span><span class="w"> </span><span class="n">flags</span><span class="p">)</span>
+<span class="w">         </span><span class="k">end if</span>
 <span class="k">         </span>
 <span class="k">      end do</span>
 <span class="k">    end do</span>
@@ -750,59 +800,29 @@ public subroutine pf_apply_mat(dst, a, mat, src, zero_first, flags)
     </section>
     <br>
     
-    
     </div>
   </div>
 
-
-    <hr>    
+      <hr>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-      <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
-          <p class="text-right">
-            Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
-          </p>
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
-      </div>
-      <br>
-      </div> <!-- /container -->    
+        <br>
+      </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
--->
-    <script src="../js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../js/ie10-viewport-bug-workaround.js"></script>
-
-    <!-- MathJax JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-      });
-    </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-    <script src="../tipuesearch/tipuesearch_content.js"></script>
-    <script src="../tipuesearch/tipuesearch_set.js"></script>
-    <script src="../tipuesearch/tipuesearch.js"></script>
-    
-    
   </body>
 </html>

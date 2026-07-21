@@ -1,19 +1,18 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Tutorial &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -21,7 +20,7 @@
     <link rel="next" title="Parameters and variables" href="parameters.html" />
     <link rel="prev" title="Compiling" href="compiling.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -33,7 +32,8 @@
         <li class="right" >
           <a href="compiling.html" title="Compiling"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Tutorial</a></li> 
       </ul>
     </div>  
 
@@ -42,10 +42,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="example-1">
-<h2>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h2>
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading">¶</a></h1>
+<section id="example-1">
+<h2>Example 1<a class="headerlink" href="#example-1" title="Link to this heading">¶</a></h2>
 <p>The following material will walk the user through a couple of examples to demonstrate how to set up an application using
 LibPFASST.</p>
 <p>Once libpfasst has been successfully built, move to the directory  LibPFASST/Tutorials/EX1_Dahlquist
@@ -80,23 +80,23 @@ only initializes MPI, calls a routine <code class="docutils literal notranslate"
 the MPI based communicator is set up, the routine <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code> is called to allocate the main PFASST structure called <code class="docutils literal notranslate"><span class="pre">pf</span></code>.  Note that the filename for PFASST parameters is
 passed to this routine so that it can be read.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Create the pfasst structure</span>
-<span class="k">call </span><span class="n">pf_pfasst_create</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="n">pf_fname</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_pfasst_create</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">fname</span><span class="o">=</span><span class="n">pf_fname</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The most important part of the initialization in <code class="docutils literal notranslate"><span class="pre">run_pfasst</span></code> is the loop over levels where the level, sweeper, and data encapsulation are specified.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Loop over levels and set some level specific parameters</span>
-<span class="k">do </span><span class="n">l</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
-   <span class="c">!&gt;  Allocate the user specific level object</span>
-   <span class="k">allocate</span><span class="p">(</span><span class="n">my_level_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">)</span>
+<span class="k">do </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<span class="w">   </span><span class="c">!&gt;  Allocate the user specific level object</span>
+<span class="w">   </span><span class="k">allocate</span><span class="p">(</span><span class="n">my_level_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">)</span>
 
-   <span class="c">!&gt;  Allocate the user specific data constructor</span>
-   <span class="k">allocate</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
+<span class="w">   </span><span class="c">!&gt;  Allocate the user specific data constructor</span>
+<span class="w">   </span><span class="k">allocate</span><span class="p">(</span><span class="n">ndarray_factory</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">factory</span><span class="p">)</span>
 
-   <span class="c">!&gt;  Allocate the sweeper at this level</span>
-   <span class="k">allocate</span><span class="p">(</span><span class="n">my_sweeper_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">)</span>
+<span class="w">   </span><span class="c">!&gt;  Allocate the sweeper at this level</span>
+<span class="w">   </span><span class="k">allocate</span><span class="p">(</span><span class="n">my_sweeper_t</span><span class="kd">::</span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">l</span><span class="p">)%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">sweeper</span><span class="p">)</span>
 
-   <span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
-   <span class="k">call </span><span class="n">pf_level_set_size</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">   </span><span class="c">!&gt;  Set the size of the data on this level (here just one)</span>
+<span class="w">   </span><span class="k">call </span><span class="n">pf_level_set_size</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="n">l</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
 <span class="k">end do</span>
 </pre></div>
 </div>
@@ -116,20 +116,20 @@ backward-Euler step.  These routines are in <cite>src/sweeper.f90</cite> and are
 </div>
 <p>Next, a hook is added that will echo residuals to the screen after every iteration.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output  (using a LibPFASST hook here)</span>
-<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">pf_echo_residual</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">PF_POST_ITERATION</span><span class="p">,</span><span class="w"> </span><span class="n">pf_echo_residual</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>After a routine to echo
 the run options to the screen, the initial conditions are set, and then the
 routine to actually do the time stepping is called.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
-<span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">y_0</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The rest is just cleanup.</p>
-</div>
-<div class="section" id="example-2">
-<h2>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="example-2">
+<h2>Example 2<a class="headerlink" href="#example-2" title="Link to this heading">¶</a></h2>
 <p>This example solves exactly the same equation as Example 1, but using more user generated code.
 The main difference is that instead of using the LibPFASST data encapsulation <code class="docutils literal notranslate"><span class="pre">ndarray</span></code>, a local data
 encapsulation called <code class="docutils literal notranslate"><span class="pre">scalar_encap</span></code> is defined</p>
@@ -139,12 +139,12 @@ encapsulation called <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>The relevant code for the factory is in <cite>src/encap.f90</cite>.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Type to create and destroy the local data encapsulation</span>
-<span class="k">type</span><span class="p">,</span> <span class="k">extends</span><span class="p">(</span><span class="n">pf_factory_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">scalar_factory</span>
- <span class="k">contains</span>
-<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">create_single</span>  <span class="o">=&gt;</span> <span class="n">scalar_create_single</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">create_array</span>  <span class="o">=&gt;</span> <span class="n">scalar_create_array</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy_single</span> <span class="o">=&gt;</span> <span class="n">scalar_destroy_single</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy_array</span> <span class="o">=&gt;</span> <span class="n">scalar_destroy_array</span>
+<span class="k">type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">pf_factory_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">scalar_factory</span>
+<span class="w"> </span><span class="k">contains</span>
+<span class="k">   procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">create_single</span><span class="w">  </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_create_single</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">create_array</span><span class="w">  </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_create_array</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">destroy_single</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_destroy_single</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">destroy_array</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_destroy_array</span>
 <span class="k">end type </span><span class="n">scalar_factory</span>
 </pre></div>
 </div>
@@ -153,20 +153,20 @@ encapsulation called <code class="docutils literal notranslate"><span class="pre
 7 subroutines that define actions on the data set corresponding to the procedures in
 <cite>src/encap.f90</cite>.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">contains</span>
-<span class="k">   procedure</span> <span class="kd">::</span> <span class="n">setval</span> <span class="o">=&gt;</span> <span class="n">scalar_setval</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">copy</span> <span class="o">=&gt;</span> <span class="n">scalar_copy</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">norm</span> <span class="o">=&gt;</span> <span class="n">scalar_norm</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">pack</span> <span class="o">=&gt;</span> <span class="n">scalar_pack</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="nb">unpack</span> <span class="o">=&gt;</span> <span class="n">scalar_unpack</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">axpy</span> <span class="o">=&gt;</span> <span class="n">scalar_axpy</span>
-   <span class="k">procedure</span> <span class="kd">::</span> <span class="n">eprint</span> <span class="o">=&gt;</span> <span class="n">scalar_eprint</span>
+<span class="k">   procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">setval</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_setval</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">copy</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_copy</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">norm</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_norm</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">pack</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_pack</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="nb">unpack</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_unpack</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">axpy</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_axpy</span>
+<span class="w">   </span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">eprint</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">scalar_eprint</span>
 <span class="k">end type </span><span class="n">scalar_encap</span>
 </pre></div>
 </div>
 <p>In this example, these are all trivial and should be self-explanatory from the code.  The last of these, eprint, is not typically needed  by LibPFASST but is included for convenience in debugging.</p>
 <p>The sweeper assigned in this example is the same as in Example 1, but there are two additional routines defined in <cite>src/sweeper.f90</cite>.</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">procedure</span> <span class="kd">::</span> <span class="n">initialize</span> <span class="c">!  Overwrites imex sweeper initialize</span>
-<span class="k">procedure</span> <span class="kd">::</span> <span class="n">destroy</span>    <span class="c">!  Overwrites imex sweeper destroy</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">initialize</span><span class="w"> </span><span class="c">!  Overwrites imex sweeper initialize</span>
+<span class="k">procedure</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">destroy</span><span class="w">    </span><span class="c">!  Overwrites imex sweeper destroy</span>
 </pre></div>
 </div>
 <p>These two routines will be called instead of the base sweeper initialize and destroy in LibPFASST.  The point is that this then allows the user to add whatever things to the sweeper as necessary.  Here, there is nothing to do, but one must explicitly call the LibPFASST versions of these routines, as in</p>
@@ -176,18 +176,18 @@ encapsulation called <code class="docutils literal notranslate"><span class="pre
 </div>
 <p>Another difference in this example, is that a local hook is defined in the file <cite>src/hooks.f90</cite> to print the error to the screen.  It is assigned by</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  Add some hooks for output</span>
-<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">PF_POST_ITERATION</span><span class="p">,</span><span class="w"> </span><span class="n">echo_error</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The user can construct custom hooks following this template.</p>
 <p>Finally, note that in this example, an optional argument to return the solution at the final time, <code class="docutils literal notranslate"><span class="pre">y_end</span></code> is included in the call to <code class="docutils literal notranslate"><span class="pre">pf_pfasst_run</span></code></p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; Do the PFASST time stepping</span>
-<span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">y_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="mf">0.0_pfdp</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span><span class="n">y_end</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">y_0</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">,</span><span class="n">y_end</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="example-3">
-<h2>Example 3<a class="headerlink" href="#example-3" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="example-3">
+<h2>Example 3<a class="headerlink" href="#example-3" title="Link to this heading">¶</a></h2>
 <p>Please see the <cite>LibPFASST/Tutorials/EX3_adv_diff</cite> directory included in LibPFASST
 for a simple PDE application of LibPFASST.</p>
 <p>This example solves a 1d linear advection diffusion equation</p>
@@ -208,22 +208,22 @@ from the variable <code class="docutils literal notranslate"><span class="pre">n
 are not trivial as in the Dahlquist examples.  This example is done with a pseudo-spectral discretization in space and the method of lines in time.
 In the local definition of the sweeper,  variables are added to facilitate operations in spectral space</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  FFT and Spectral derivatives</span>
-<span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span> <span class="k">pointer</span> <span class="kd">::</span> <span class="n">fft_tool</span>
-<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opE</span><span class="p">(:)</span> <span class="c">! Explicit spectral operator</span>
-<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">opI</span><span class="p">(:)</span> <span class="c">! Implicit spectral operator</span>
+<span class="k">type</span><span class="p">(</span><span class="n">pf_fft_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">fft_tool</span>
+<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">opE</span><span class="p">(:)</span><span class="w"> </span><span class="c">! Explicit spectral operator</span>
+<span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">opI</span><span class="p">(:)</span><span class="w"> </span><span class="c">! Implicit spectral operator</span>
 </pre></div>
 </div>
 <p>The first of these is a pointer to the fft based type included in LibPFASST.  These variables are allocated and initialized in the local sweeper initialization routine.  In both  <code class="docutils literal notranslate"><span class="pre">feval</span></code> and <code class="docutils literal notranslate"><span class="pre">f_comp</span></code> the convolution subroutine <code class="docutils literal notranslate"><span class="pre">conv</span></code> is used for either implicit or explicit
 function evaluations in spectral space, e.g.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">! Apply the inverse operator with the FFT convolution</span>
-<span class="k">call </span><span class="n">fft</span><span class="p">%</span><span class="n">conv</span><span class="p">(</span><span class="n">rhsvec</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0_pfdp</span> <span class="o">-</span> <span class="n">dtq</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">opI</span><span class="p">),</span><span class="n">yvec</span><span class="p">)</span>
+<span class="k">call </span><span class="n">fft</span><span class="p">%</span><span class="n">conv</span><span class="p">(</span><span class="n">rhsvec</span><span class="p">,</span><span class="mf">1.0_pfdp</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">dtq</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">opI</span><span class="p">),</span><span class="n">yvec</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>In a similar manner, in the local definition of the <code class="docutils literal notranslate"><span class="pre">level</span></code>, the interpolation is done in spectral space while the restriction is just pointwise coarsening.</p>
 <p>When creating an example using a new data structure or equation, the most important things that must be provided are in fact the function evaluations and interpolation restriction operators.  The user is allowed to add any useful code to the local sweeper and level structures to implement these routines.</p>
-</div>
-<div class="section" id="example-4">
-<h2>Example 4<a class="headerlink" href="#example-4" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="example-4">
+<h2>Example 4<a class="headerlink" href="#example-4" title="Link to this heading">¶</a></h2>
 <p id="tut4">In the directory <cite>LibPFASST/Tutorials/EX4_Boussinesq</cite> is a more complicated example involving the 2-dimenstional Boussinesq eqauations in a vorticity stream-function formulation</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\omega_t  = - (\bf{u} \cdot \nabla)\omega + \nu \nabla^2 \omega - g\rho_x \\
@@ -231,32 +231,62 @@ function evaluations in spectral space, e.g.</p>
 <p>Here (<span class="math notranslate nohighlight">\(\omega\)</span>) is the vorticity, (<span class="math notranslate nohighlight">\(\bf{u}\)</span>)  is the velocity, and
 (<span class="math notranslate nohighlight">\(\rho\)</span>) a density or bouyancy term.  The constants (<span class="math notranslate nohighlight">\(\nu\)</span>) and (<span class="math notranslate nohighlight">\(\kappa\)</span>) determine the diffusion terms, and (<span class="math notranslate nohighlight">\(g\)</span>) is  “gravity”.</p>
 <p>The example code is similar to Example 3 except is based on the encapsulation for a complex N-dimensional system of equations called <code class="docutils literal notranslate"><span class="pre">zndsysarray</span></code>.  Using the input file <cite>tg.nml</cite>, will run a special case with an exact solution and report errors.</p>
-</div>
-</div>
+</section>
+<section id="example-5">
+<h2>Example 5<a class="headerlink" href="#example-5" title="Link to this heading">¶</a></h2>
+<p id="tut5">(work in progress)</p>
+</section>
+<section id="example-6">
+<h2>Example 6<a class="headerlink" href="#example-6" title="Link to this heading">¶</a></h2>
+<p id="tut6">Space-time parallel solving of IMEX advection-diffusion equation in 1D, 2D and 3D using LibPFASST for parallel time-integration and AMReX together with the <cite>pf_amrex_encap.f90</cite> for space-parallel solving of the explicit and implicit parts.</p>
+<div class="math notranslate nohighlight">
+\[\c_t  = - v \nabla c + D \nabla^2 c\]</div>
+<p>Problem: AMReX requires definition of dimension on compile time -&gt; can compile LibAMReX for each dimension, see <a class="reference external" href="https://pfasst.lbl.govhttps://amrex-codes.github.io/amrex/docs_html/BuildingAMReX.html#building-libamrex">compiling libamrex</a>
+-&gt; need to point <cite>pf_amrex_encap.f90</cite> to the correct libamrex when compiling LibPFASST -&gt; currently we need to rebuild LibPFASST when the dimensionality of our problem / tutorial changes
+-&gt; then need to rebuild our Tutorial again</p>
+<p>additional information can also be found in <cite>Makefile.examples/Makefile.AMReX`</cite></p>
+</section>
+<section id="example-7">
+<h2>Example 7<a class="headerlink" href="#example-7" title="Link to this heading">¶</a></h2>
+<p id="tut7">Space-time parallel solving of 1D Burgers equation in 1D using LibPFASST for parallel time-integration and AMReX together with the <cite>pf_amrex_encap.f90</cite> for space-parallel solving of the explicit and implicit parts.</p>
+<div class="math notranslate nohighlight">
+\[\u_t  = - u \nabla u + \nu \nabla^2 u\]</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
 <li><a class="reference internal" href="#example-1">Example 1</a></li>
 <li><a class="reference internal" href="#example-2">Example 2</a></li>
 <li><a class="reference internal" href="#example-3">Example 3</a></li>
 <li><a class="reference internal" href="#example-4">Example 4</a></li>
+<li><a class="reference internal" href="#example-5">Example 5</a></li>
+<li><a class="reference internal" href="#example-6">Example 6</a></li>
+<li><a class="reference internal" href="#example-7">Example 7</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="compiling.html"
-                        title="previous chapter">Compiling</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="parameters.html"
-                        title="next chapter">Parameters and variables</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="compiling.html"
+                          title="previous chapter">Compiling</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="parameters.html"
+                          title="next chapter">Parameters and variables</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -264,21 +294,21 @@ function evaluations in spectral space, e.g.</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -290,12 +320,13 @@ function evaluations in spectral space, e.g.</p>
         <li class="right" >
           <a href="compiling.html" title="Compiling"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Tutorial</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

@@ -1,791 +1,747 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <meta name="description" content="The library for running PFASST">
-    
+      <meta name="description" content="The library for running PFASST">
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_mod_parallel &ndash; LibPFASST</title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-    
-    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-    
-    
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    <script src="../js/jquery-2.1.3.min.js"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
-
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">LibPFASST </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-        
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-              data-toggle="dropdown" role="button"
-              aria-haspopup="true"
-     aria-expanded="false">Contents <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          
-              
-            <li><a href="../lists/files.html">Source Files</a></li>
-        
-        
-        
-            <li><a href="../lists/modules.html">Modules</a></li>
-        
-            
-                                
-            <li><a href="../lists/procedures.html">Procedures</a></li>
-        
-               
-            <li><a href="../lists/types.html">Derived Types</a></li>
-        
-        
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
             </ul>
-            </li>
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
-
-                             
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
-
-
-          </ul>
-        
-        <form action="../search.html" class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
         </div>
-<!--
-        <button type="submit" class="btn btn-default">Submit</button>
--->
-        </form>
-        
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
+    </div>
 
     <div class="container">
-    
-  
   <div class="row">
-    <h1>pf_mod_parallel 
-    <small>Module</small>
-    
+    <h1>pf_mod_parallel
+      <small>Module</small>
+      
     </h1>
-    
-<div class="row">
-  <div class="col-lg-12">
-<div class="well well-sm">
-  <ul class="list-inline" style="margin-bottom:0px;display:inline">
-     
-     
-     
-     
-    
-    
-     <li><i class="fa fa-list-ol"></i>
-       <a data-toggle="tooltip"
-    data-placement="bottom" data-html="true"
-    title=" 3.3% of total for modules and submodules.">403 statements</a>
-     </li> 
-     
-     
-     
-    <li><i class="fa fa-code"></i><a href="../src/pf_parallel.f90"> Source File</a></li>
-     
-     
-  </ul>
-  <ol class="breadcrumb in-well text-right">
-  
-    
-     <li><a href='../sourcefile/pf_parallel.f90.html'>pf_parallel.f90</a></li>
-    
-  
-     <li class="active">pf_mod_parallel</li>
-  </ol>
-</div>
-</div>
-</div>
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  })
-</script>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
 
-  </div>
-  
-  <div class="row">
-    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
-    
-<div id="sidebar">
-  
-<h3>Contents</h3>
- 
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 2.9% of total for modules and submodules.">400 statements</a>
+            </li>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
-  <div class="list-group">
-    <div id="subs-0" class="panel-collapse collapse">
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_pfasst_run">pf_pfasst_run</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_predictor">pf_predictor</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_residual">pf_check_residual</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_convergence_block">pf_check_convergence_block</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_block_run">pf_block_run</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle">pf_Vcycle</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle_pysdc">pf_Vcycle_pySDC</a>
-      
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-</div>
-
-    </div>
-    
-    <div class="col-md-9" id='text'>
-    <p>Module of routines to run  PFASST</p>
-      <br>
-    
-  
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Uses</h3>
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_parallel.f90"> Source File</a>
+            </li>
+        </ul>
       </div>
-      <ul class="list-group">
-      
-      <li class="list-group-item">
-  <ul class="list-inline">
-    
-    <li><a href='../module/pf_mod_pfasst.html'>pf_mod_pfasst</a></li>
-    
-    <li><a href='../module/pf_mod_interpolate.html'>pf_mod_interpolate</a></li>
-    
-    <li><a href='../module/pf_mod_restrict.html'>pf_mod_restrict</a></li>
-    
-    <li><a href='../module/pf_mod_utils.html'>pf_mod_utils</a></li>
-    
-    <li><a href='../module/pf_mod_timer.html'>pf_mod_timer</a></li>
-    
-    <li><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></li>
-    
-    <li><a href='../module/pf_mod_hooks.html'>pf_mod_hooks</a></li>
-    
-    <li><a href='../module/pf_mod_comm.html'>pf_mod_comm</a></li>
-    
-    <li><a href='../module/pf_mod_results.html'>pf_mod_results</a></li>
-    
-  </ul>
-      </li>
-      
-      
-      
-      <li class="list-group-item">
-  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_parallel.f90.html'>pf_parallel.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">pf_mod_parallel</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_pfasst_run">pf_pfasst_run</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_predictor">pf_predictor</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_residual">pf_check_residual</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_convergence_block">pf_check_convergence_block</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_block_run">pf_block_run</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle">pf_Vcycle</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle_pysdc">pf_Vcycle_pySDC</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+  
+  
+  
+  
+  
+
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      <p>Module of routines to run  PFASST</p>
+<br>          <div class="card mb-4">
+      <h3 class="card-header card-title bg-light">Uses</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <ul class="list-inline">
+                  <li class="list-inline-item"><a href='pf_mod_timer.html'>pf_mod_timer</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_interpolate.html'>pf_mod_interpolate</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_comm.html'>pf_mod_comm</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_results.html'>pf_mod_results</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_restrict.html'>pf_mod_restrict</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_hooks.html'>pf_mod_hooks</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_pfasst.html'>pf_mod_pfasst</a></li>
+              </ul>
+            </li>
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: module~~pf_mod_parallel~~UsesGraph Pages: 1 -->
-<svg id="modulepf_mod_parallelUsesGraph" width="641pt" height="198pt"
- viewBox="0.00 0.00 641.00 197.72" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="module~~pf_mod_parallel~~UsesGraph" class="graph" transform="scale(.6608 .6608) rotate(0) translate(4 295.2079)">
+<svg id="modulepf_mod_parallelUsesGraph" width="641pt" height="193pt"
+ viewBox="0.00 0.00 641.00 193.08" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_parallel~~UsesGraph" class="graph" transform="scale(0.66 0.66) rotate(0) translate(4 288.18)">
 <title>module~~pf_mod_parallel~~UsesGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-295.2079 966,-295.2079 966,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-288.18 966,-288.18 966,4 -4,4"/>
 <!-- module~pf_mod_parallel -->
 <g id="module~~pf_mod_parallel~~UsesGraph_node1" class="node">
 <title>module~pf_mod_parallel</title>
-<polygon fill="none" stroke="#000000" points="962,-213.2079 873,-213.2079 873,-189.2079 962,-189.2079 962,-213.2079"/>
-<text text-anchor="middle" x="917.5" y="-198.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_mod_parallel</text>
+<polygon fill="none" stroke="black" points="962,-129.97 873,-129.97 873,-105.97 962,-105.97 962,-129.97"/>
+<text text-anchor="middle" x="917.5" y="-115.57" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_parallel</text>
 </g>
-<!-- module~pf_mod_results -->
+<!-- module~pf_mod_comm -->
 <g id="module~~pf_mod_parallel~~UsesGraph_node2" class="node">
-<title>module~pf_mod_results</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node2"><a xlink:href=".././module/pf_mod_results.html" xlink:title="pf_mod_results">
-<polygon fill="#337ab7" stroke="#337ab7" points="588.5,-158.2079 502.5,-158.2079 502.5,-134.2079 588.5,-134.2079 588.5,-158.2079"/>
-<text text-anchor="middle" x="545.5" y="-143.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_results</text>
+<title>module~pf_mod_comm</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node2"><a xlink:href="../module/pf_mod_comm.html" xlink:title="pf_mod_comm">
+<polygon fill="#337ab7" stroke="#337ab7" points="837,-129.97 753,-129.97 753,-105.97 837,-105.97 837,-129.97"/>
+<text text-anchor="middle" x="795" y="-115.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_comm</text>
 </a>
 </g>
 </g>
-<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_results -->
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_comm -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge1" class="edge">
-<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_results</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M675.5,-104.2079C666.5418,-103.5059 622.6356,-118.3524 588.2959,-130.5853"/>
-<polygon fill="#000000" stroke="#000000" points="586.6822,-127.4456 578.4492,-134.114 589.0437,-134.0352 586.6822,-127.4456"/>
+<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_comm</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M873,-117.97C864.66,-117.97 855.85,-117.97 847.3,-117.97"/>
+<polygon fill="#000000" stroke="#000000" points="847.03,-114.47 837.03,-117.97 847.03,-121.47 847.03,-114.47"/>
 </g>
 <!-- module~pf_mod_dtype -->
 <g id="module~~pf_mod_parallel~~UsesGraph_node3" class="node">
 <title>module~pf_mod_dtype</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node3"><a xlink:href=".././module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
-<polygon fill="#337ab7" stroke="#337ab7" points="195,-172.2079 114,-172.2079 114,-148.2079 195,-148.2079 195,-172.2079"/>
-<text text-anchor="middle" x="154.5" y="-157.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_dtype</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node3"><a xlink:href="../module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-133.97 114,-133.97 114,-109.97 195,-109.97 195,-133.97"/>
+<text text-anchor="middle" x="154.5" y="-119.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_dtype</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_dtype -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge2" class="edge">
 <title>module~pf_mod_parallel&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M898.7283,-189.0499C859.2985,-164.5879 764.1705,-111.1563 675.5,-104.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M675.5,-104.2079C632.113,-94.8278 636.634,-63.0674 598,-41.2079 576.403,-28.9881 569.4165,-28.8227 545.5,-22.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-22.2079C489.3388,-6.675 472.3174,7.7203 415.5,-5.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M415.5,-5.2079C395.72,-9.7087 390.4215,-12.2983 374,-24.2079 326.5149,-58.6463 341.3469,-106.7417 284.5,-121.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M284.5,-121.2079C256.7028,-128.2817 225.9476,-137.4462 201.3324,-145.1139"/>
-<polygon fill="#000000" stroke="#000000" points="200.0254,-141.8556 191.5316,-148.1885 202.1208,-148.5347 200.0254,-141.8556"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-277.97C488.74,-289.25 473.24,-282.06 416.5,-277.97"/>
+</g>
+<!-- module~pf_mod_hooks -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node4" class="node">
+<title>module~pf_mod_hooks</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node4"><a xlink:href="../module/pf_mod_hooks.html" xlink:title="pf_mod_hooks">
+<polygon fill="#337ab7" stroke="#337ab7" points="457,-249.97 374,-249.97 374,-225.97 457,-225.97 457,-249.97"/>
+<text text-anchor="middle" x="415.5" y="-235.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_hooks</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_hooks -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge3" class="edge">
+<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_hooks</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C631.02,-198.83 635.88,-237.62 598,-258.97 576.75,-270.95 570.41,-273.14 546.5,-277.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-277.97C509.14,-285.12 469.68,-268.96 444.05,-255.09"/>
+<polygon fill="#000000" stroke="#000000" points="445.69,-252 435.26,-250.13 442.25,-258.09 445.69,-252"/>
 </g>
 <!-- module~pf_mod_interpolate -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node4" class="node">
+<g id="module~~pf_mod_parallel~~UsesGraph_node5" class="node">
 <title>module~pf_mod_interpolate</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node4"><a xlink:href=".././module/pf_mod_interpolate.html" xlink:title="pf_mod_interpolate">
-<polygon fill="#337ab7" stroke="#337ab7" points="598,-116.2079 493,-116.2079 493,-92.2079 598,-92.2079 598,-116.2079"/>
-<text text-anchor="middle" x="545.5" y="-101.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_interpolate</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node5"><a xlink:href="../module/pf_mod_interpolate.html" xlink:title="pf_mod_interpolate">
+<polygon fill="#337ab7" stroke="#337ab7" points="598,-249.97 493,-249.97 493,-225.97 598,-225.97 598,-249.97"/>
+<text text-anchor="middle" x="545.5" y="-235.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_interpolate</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_interpolate -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge4" class="edge">
 <title>module~pf_mod_parallel&#45;&gt;module~pf_mod_interpolate</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M675.5,-104.2079C653.6499,-102.4957 629.6706,-102.0825 608.3215,-102.2292"/>
-<polygon fill="#000000" stroke="#000000" points="608.0336,-98.732 598.0731,-102.3429 608.1114,-105.7316 608.0336,-98.732"/>
-</g>
-<!-- module~pf_mod_timer -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node5" class="node">
-<title>module~pf_mod_timer</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node5"><a xlink:href=".././module/pf_mod_timer.html" xlink:title="pf_mod_timer">
-<polygon fill="#337ab7" stroke="#337ab7" points="324,-173.2079 245,-173.2079 245,-149.2079 324,-149.2079 324,-173.2079"/>
-<text text-anchor="middle" x="284.5" y="-158.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_timer</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_timer -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge3" class="edge">
-<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_timer</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-241.2079C469.1612,-233.8918 445.9256,-248.8132 374,-222.2079 348.0832,-212.6213 322.429,-193.9403 305.2759,-179.7648"/>
-<polygon fill="#000000" stroke="#000000" points="307.4631,-177.0305 297.5743,-173.2275 302.9331,-182.3672 307.4631,-177.0305"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C641.27,-198.46 605.29,-210.85 579.97,-221.71"/>
+<polygon fill="#000000" stroke="#000000" points="578.54,-218.51 570.81,-225.76 581.37,-224.91 578.54,-218.51"/>
 </g>
 <!-- module~pf_mod_pfasst -->
 <g id="module~~pf_mod_parallel~~UsesGraph_node6" class="node">
 <title>module~pf_mod_pfasst</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node6"><a xlink:href=".././module/pf_mod_pfasst.html" xlink:title="pf_mod_pfasst">
-<polygon fill="#337ab7" stroke="#337ab7" points="717,-213.2079 634,-213.2079 634,-189.2079 717,-189.2079 717,-213.2079"/>
-<text text-anchor="middle" x="675.5" y="-198.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_pfasst</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node6"><a xlink:href="../module/pf_mod_pfasst.html" xlink:title="pf_mod_pfasst">
+<polygon fill="#337ab7" stroke="#337ab7" points="717,-89.97 634,-89.97 634,-65.97 717,-65.97 717,-89.97"/>
+<text text-anchor="middle" x="675.5" y="-75.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_pfasst</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_pfasst -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge5" class="edge">
 <title>module~pf_mod_parallel&#45;&gt;module~pf_mod_pfasst</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M892.424,-213.3482C868.1646,-224.1306 830.0263,-238.5797 795,-241.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M795,-241.2079C762.9782,-243.6107 728.3926,-230.109 704.7096,-218.1507"/>
-<polygon fill="#000000" stroke="#000000" points="706.0557,-214.904 695.5767,-213.3414 702.7941,-221.0977 706.0557,-214.904"/>
-</g>
-<!-- module~pf_mod_utils -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node7" class="node">
-<title>module~pf_mod_utils</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node7"><a xlink:href=".././module/pf_mod_utils.html" xlink:title="pf_mod_utils">
-<polygon fill="#337ab7" stroke="#337ab7" points="452,-213.2079 379,-213.2079 379,-189.2079 452,-189.2079 452,-213.2079"/>
-<text text-anchor="middle" x="415.5" y="-198.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_utils</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_utils -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge6" class="edge">
-<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M795,-241.2079C684.422,-249.5051 656.0661,-249.6633 545.5,-241.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-241.2079C513.0889,-238.1017 477.8784,-226.7375 452.2866,-216.9121"/>
-<polygon fill="#000000" stroke="#000000" points="453.5621,-213.6528 442.9752,-213.2421 450.9953,-220.1652 453.5621,-213.6528"/>
-</g>
-<!-- module~pf_mod_comm -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node8" class="node">
-<title>module~pf_mod_comm</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node8"><a xlink:href=".././module/pf_mod_comm.html" xlink:title="pf_mod_comm">
-<polygon fill="#337ab7" stroke="#337ab7" points="837,-213.2079 753,-213.2079 753,-189.2079 837,-189.2079 837,-213.2079"/>
-<text text-anchor="middle" x="795" y="-198.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_comm</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_comm -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge7" class="edge">
-<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_comm</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M872.9282,-201.2079C864.6602,-201.2079 855.9534,-201.2079 847.4755,-201.2079"/>
-<polygon fill="#000000" stroke="#000000" points="847.2929,-197.708 837.2929,-201.2079 847.2929,-204.708 847.2929,-197.708"/>
-</g>
-<!-- module~pf_mod_hooks -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node9" class="node">
-<title>module~pf_mod_hooks</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node9"><a xlink:href=".././module/pf_mod_hooks.html" xlink:title="pf_mod_hooks">
-<polygon fill="#337ab7" stroke="#337ab7" points="457,-57.2079 374,-57.2079 374,-33.2079 457,-33.2079 457,-57.2079"/>
-<text text-anchor="middle" x="415.5" y="-42.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_hooks</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_hooks -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge8" class="edge">
-<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_hooks</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-22.2079C514.8445,-13.7293 479.2242,-21.2013 453.0297,-29.8224"/>
-<polygon fill="#000000" stroke="#000000" points="451.7718,-26.5543 443.4819,-33.1519 454.0767,-33.1639 451.7718,-26.5543"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M875.49,-105.96C863.19,-102.68 849.62,-99.38 837,-96.97 800.72,-90.07 759.32,-85.24 727.65,-82.18"/>
+<polygon fill="#000000" stroke="#000000" points="727.59,-78.66 717.31,-81.21 726.94,-85.63 727.59,-78.66"/>
 </g>
 <!-- module~pf_mod_restrict -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node10" class="node">
+<g id="module~~pf_mod_parallel~~UsesGraph_node7" class="node">
 <title>module~pf_mod_restrict</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node10"><a xlink:href=".././module/pf_mod_restrict.html" xlink:title="pf_mod_restrict">
-<polygon fill="#337ab7" stroke="#337ab7" points="589,-74.2079 502,-74.2079 502,-50.2079 589,-50.2079 589,-74.2079"/>
-<text text-anchor="middle" x="545.5" y="-59.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_restrict</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node7"><a xlink:href="../module/pf_mod_restrict.html" xlink:title="pf_mod_restrict">
+<polygon fill="#337ab7" stroke="#337ab7" points="588.5,-169.97 502.5,-169.97 502.5,-145.97 588.5,-145.97 588.5,-169.97"/>
+<text text-anchor="middle" x="545.5" y="-155.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_restrict</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_restrict -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge9" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge6" class="edge">
 <title>module~pf_mod_parallel&#45;&gt;module~pf_mod_restrict</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M675.5,-104.2079C658.1108,-102.8453 617.7907,-89.1844 586.6293,-77.8068"/>
-<polygon fill="#000000" stroke="#000000" points="587.4679,-74.3857 576.8744,-74.2114 585.047,-80.9538 587.4679,-74.3857"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C642.32,-195.51 607.47,-183.99 582.27,-173.94"/>
+<polygon fill="#000000" stroke="#000000" points="583.35,-170.6 572.77,-170.04 580.69,-177.08 583.35,-170.6"/>
 </g>
-<!-- module~pf_mod_results&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge11" class="edge">
-<title>module~pf_mod_results&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M502.2053,-134.979C477.0802,-129.3627 444.7195,-123.6557 415.5,-123.2079"/>
+<!-- module~pf_mod_results -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node8" class="node">
+<title>module~pf_mod_results</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node8"><a xlink:href="../module/pf_mod_results.html" xlink:title="pf_mod_results">
+<polygon fill="#337ab7" stroke="#337ab7" points="588,-89.97 503,-89.97 503,-65.97 588,-65.97 588,-89.97"/>
+<text text-anchor="middle" x="545.5" y="-75.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_results</text>
+</a>
 </g>
-<!-- module~pf_mod_results&#45;&gt;module~pf_mod_utils -->
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_results -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge7" class="edge">
+<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_results</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M897.58,-130C857.9,-153.9 762.55,-204.55 676.5,-197.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C620.64,-198.77 639.96,-137.74 598,-103.97 593.91,-100.68 589.34,-97.65 584.65,-94.91"/>
+<polygon fill="#000000" stroke="#000000" points="586.05,-91.69 575.59,-90 582.72,-97.84 586.05,-91.69"/>
+</g>
+<!-- module~pf_mod_timer -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node9" class="node">
+<title>module~pf_mod_timer</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node9"><a xlink:href="../module/pf_mod_timer.html" xlink:title="pf_mod_timer">
+<polygon fill="#337ab7" stroke="#337ab7" points="324,-168.97 245,-168.97 245,-144.97 324,-144.97 324,-168.97"/>
+<text text-anchor="middle" x="284.5" y="-154.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge8" class="edge">
+<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C559.86,-200.24 528.2,-223.89 416.5,-197.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-197.97C385.5,-190.79 353.49,-180.63 328.62,-172.22"/>
+<polygon fill="#000000" stroke="#000000" points="329.7,-168.89 319.11,-168.98 327.44,-175.52 329.7,-168.89"/>
+</g>
+<!-- module~pf_mod_utils -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node10" class="node">
+<title>module~pf_mod_utils</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node10"><a xlink:href="../module/pf_mod_utils.html" xlink:title="pf_mod_utils">
+<polygon fill="#337ab7" stroke="#337ab7" points="452,-129.97 379,-129.97 379,-105.97 452,-105.97 452,-129.97"/>
+<text text-anchor="middle" x="415.5" y="-115.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_utils</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_parallel&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge9" class="edge">
+<title>module~pf_mod_parallel&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-197.97C631.02,-198.61 638.24,-153.46 598,-136.97 554.32,-119.08 500,-115.58 462.23,-115.78"/>
+<polygon fill="#000000" stroke="#000000" points="461.98,-112.28 452.04,-115.93 462.08,-119.28 461.98,-112.28"/>
+</g>
+<!-- module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge10" class="edge">
-<title>module~pf_mod_results&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M516.9709,-158.2779C498.2593,-166.1944 473.5858,-176.6332 453.2545,-185.2349"/>
-<polygon fill="#000000" stroke="#000000" points="451.8084,-182.0463 443.9625,-189.1661 454.5359,-188.493 451.8084,-182.0463"/>
+<title>module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M758.75,-105.97C747.12,-102.01 734.02,-97.55 721.75,-93.38"/>
+<polygon fill="#000000" stroke="#000000" points="722.73,-90.01 712.14,-90.1 720.47,-96.64 722.73,-90.01"/>
 </g>
 <!-- iso_c_binding -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node12" class="node">
+<g id="module~~pf_mod_parallel~~UsesGraph_node11" class="node">
 <title>iso_c_binding</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node12"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
-<polygon fill="#337ab7" stroke="#337ab7" points="78,-172.2079 0,-172.2079 0,-148.2079 78,-148.2079 78,-172.2079"/>
-<text text-anchor="middle" x="39" y="-157.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_c_binding</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node11"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-133.97 0,-133.97 0,-109.97 78,-109.97 78,-133.97"/>
+<text text-anchor="middle" x="39" y="-119.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge12" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge11" class="edge">
 <title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.779,-160.2079C105.5601,-160.2079 96.8358,-160.2079 88.3581,-160.2079"/>
-<polygon fill="#000000" stroke="#000000" points="88.1899,-156.708 78.1899,-160.2079 88.1899,-163.708 88.1899,-156.708"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.8,-121.97C105.62,-121.97 96.92,-121.97 88.47,-121.97"/>
+<polygon fill="#000000" stroke="#000000" points="88.34,-118.47 78.34,-121.97 88.34,-125.47 88.34,-118.47"/>
+</g>
+<!-- module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge12" class="edge">
+<title>module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M373.97,-244.33C348.03,-246.86 314.02,-247.3 285.5,-237.97"/>
 </g>
 <!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge16" class="edge">
-<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M492.9367,-115.7957C469.3698,-119.9795 441.1574,-123.6011 415.5,-123.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M415.5,-123.2079C357.2778,-122.3156 340.9305,-106.8477 284.5,-121.2079"/>
-</g>
-<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge15" class="edge">
-<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M515.1959,-116.3144C494.2825,-124.5135 468.2876,-134.3548 457,-137.2079 416.3537,-147.4818 369.1332,-153.6671 334.384,-157.1788"/>
-<polygon fill="#000000" stroke="#000000" points="333.6364,-153.7349 324.0212,-158.1844 334.3125,-160.7021 333.6364,-153.7349"/>
-</g>
-<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge13" class="edge">
-<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M507.6398,-116.3C502.4556,-118.8082 497.4079,-121.7612 493,-125.2079 471.4289,-142.0755 476.9755,-156.4781 457,-175.2079 453.8602,-178.152 450.3392,-180.9484 446.7107,-183.5404"/>
-<polygon fill="#000000" stroke="#000000" points="444.5829,-180.7516 438.1777,-189.191 448.4478,-186.588 444.5829,-180.7516"/>
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M522.91,-250.13C497.94,-262.89 455.28,-280.76 416.5,-277.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-277.97C354.63,-273.66 342.55,-256.63 285.5,-237.97"/>
 </g>
 <!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_hooks -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge14" class="edge">
 <title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_hooks</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M514.2457,-92.1552C507.2146,-89.3195 499.8178,-86.2378 493,-83.2079 478.0908,-76.5822 461.8454,-68.719 448.0971,-61.8694"/>
-<polygon fill="#000000" stroke="#000000" points="449.5326,-58.6738 439.025,-57.3169 446.393,-64.9303 449.5326,-58.6738"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M492.81,-237.97C484.42,-237.97 475.74,-237.97 467.38,-237.97"/>
+<polygon fill="#000000" stroke="#000000" points="467.37,-234.47 457.37,-237.97 467.37,-241.47 467.37,-234.47"/>
 </g>
-<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge19" class="edge">
-<title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M244.7893,-160.9025C232.4164,-160.8073 218.5951,-160.701 205.5589,-160.6007"/>
-<polygon fill="#000000" stroke="#000000" points="205.3418,-157.099 195.3151,-160.5219 205.2879,-164.0988 205.3418,-157.099"/>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge15" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M510.92,-225.96C485.32,-217.18 449.05,-205.52 416.5,-197.97"/>
 </g>
-<!-- module~pf_mod_mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node11" class="node">
-<title>module~pf_mod_mpi</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node11"><a xlink:href=".././module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
-<polygon fill="#337ab7" stroke="#337ab7" points="190.5,-273.2079 118.5,-273.2079 118.5,-249.2079 190.5,-249.2079 190.5,-273.2079"/>
-<text text-anchor="middle" x="154.5" y="-258.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_mpi</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge17" class="edge">
-<title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M268.819,-173.2703C246.2725,-190.6137 204.5204,-222.7307 178.1971,-242.9794"/>
-<polygon fill="#000000" stroke="#000000" points="176.0289,-240.2315 170.2367,-249.1028 180.2969,-245.7799 176.0289,-240.2315"/>
-</g>
-<!-- module~pf_mod_stop -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node14" class="node">
-<title>module~pf_mod_stop</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node14"><a xlink:href=".././module/pf_mod_stop.html" xlink:title="pf_mod_stop">
-<polygon fill="#337ab7" stroke="#337ab7" points="192,-214.2079 117,-214.2079 117,-190.2079 192,-190.2079 192,-214.2079"/>
-<text text-anchor="middle" x="154.5" y="-199.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_stop</text>
-</a>
-</g>
-</g>
-<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_stop -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge18" class="edge">
-<title>module~pf_mod_timer&#45;&gt;module~pf_mod_stop</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M246.1988,-173.2875C232.3243,-177.6633 216.4855,-182.6587 201.9201,-187.2524"/>
-<polygon fill="#000000" stroke="#000000" points="200.5638,-184.0101 192.0796,-190.3559 202.6693,-190.686 200.5638,-184.0101"/>
-</g>
-<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_results -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge20" class="edge">
-<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_results</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M646.9709,-189.1379C628.2593,-181.2215 603.5858,-170.7827 583.2545,-162.181"/>
-<polygon fill="#000000" stroke="#000000" points="584.5359,-158.9228 573.9625,-158.2498 581.8084,-165.3696 584.5359,-158.9228"/>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge16" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M534.43,-225.89C518.85,-207.55 487.48,-172.05 457,-145.97 452.96,-142.52 448.5,-139.09 444.05,-135.88"/>
+<polygon fill="#000000" stroke="#000000" points="445.85,-132.87 435.64,-130.03 441.85,-138.61 445.85,-132.87"/>
 </g>
 <!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge23" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge18" class="edge">
 <title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-203.2079C520.1184,-206.9488 515.3925,-214.6861 493,-227.2079 456.7965,-247.4528 456.2426,-271.4245 415.5,-279.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M415.5,-279.2079C403.4701,-281.5061 255.7707,-209.9841 188.042,-176.7519"/>
-<polygon fill="#000000" stroke="#000000" points="189.5571,-173.5967 179.0384,-172.3285 186.4704,-179.8795 189.5571,-173.5967"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M651.12,-65.97C625.97,-54.19 584.45,-37.97 546.5,-37.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-37.97C487.61,-37.97 473.23,-42.28 416.5,-37.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-37.97C332.65,-31.76 299.53,28.21 231,-16.97 197.09,-39.33 222.49,-71.08 195,-100.97 194.11,-101.94 193.17,-102.87 192.19,-103.76"/>
+<polygon fill="#000000" stroke="#000000" points="189.86,-101.13 183.96,-109.93 194.06,-106.73 189.86,-101.13"/>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_results -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge19" class="edge">
+<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_results</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M633.65,-77.97C622.44,-77.97 610.15,-77.97 598.41,-77.97"/>
+<polygon fill="#000000" stroke="#000000" points="598.28,-74.47 588.28,-77.97 598.28,-81.47 598.28,-74.47"/>
 </g>
 <!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_utils -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge21" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge20" class="edge">
 <title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M633.7084,-199.0889C608.1091,-198.4737 574.7534,-198.8964 545.5,-203.2079"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M545.5,-203.2079C518.1447,-207.2397 487.2022,-206.955 462.3694,-205.5616"/>
-<polygon fill="#000000" stroke="#000000" points="462.3323,-202.0522 452.129,-204.906 461.8849,-209.0379 462.3323,-202.0522"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-37.97C499.06,-37.97 456.45,-74.68 433.69,-98.36"/>
+<polygon fill="#000000" stroke="#000000" points="431,-96.12 426.75,-105.82 436.12,-100.88 431,-96.12"/>
 </g>
 <!-- module~pf_mod_comm_mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_node13" class="node">
+<g id="module~~pf_mod_parallel~~UsesGraph_node12" class="node">
 <title>module~pf_mod_comm_mpi</title>
-<g id="a_module~~pf_mod_parallel~~UsesGraph_node13"><a xlink:href=".././module/pf_mod_comm_mpi.html" xlink:title="pf_mod_comm_mpi">
-<polygon fill="#337ab7" stroke="#337ab7" points="338,-291.2079 231,-291.2079 231,-267.2079 338,-267.2079 338,-291.2079"/>
-<text text-anchor="middle" x="284.5" y="-276.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_mod_comm_mpi</text>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node12"><a xlink:href="../module/pf_mod_comm_mpi.html" xlink:title="pf_mod_comm_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="338,-49.97 231,-49.97 231,-25.97 338,-25.97 338,-49.97"/>
+<text text-anchor="middle" x="284.5" y="-35.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_comm_mpi</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge22" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge17" class="edge">
 <title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M415.5,-279.2079C393.8045,-283.3526 369.7164,-284.3525 348.1736,-283.9973"/>
-<polygon fill="#000000" stroke="#000000" points="348.238,-280.4978 338.1494,-283.7336 348.0539,-287.4954 348.238,-280.4978"/>
-</g>
-<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge26" class="edge">
-<title>module~pf_mod_utils&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M406.5523,-189.1308C386.5443,-163.7251 335.8928,-108.1296 284.5,-121.2079"/>
-</g>
-<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_timer -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge25" class="edge">
-<title>module~pf_mod_utils&#45;&gt;module~pf_mod_timer</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.6606,-189.9593C364.6308,-185.6753 348.4158,-180.7242 333.4374,-176.1506"/>
-<polygon fill="#000000" stroke="#000000" points="334.3947,-172.7835 323.8085,-173.2105 332.3504,-179.4783 334.3947,-172.7835"/>
-</g>
-<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_stop -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge24" class="edge">
-<title>module~pf_mod_utils&#45;&gt;module~pf_mod_stop</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.9342,-201.348C332.7335,-201.525 253.1178,-201.8301 202.1842,-202.0252"/>
-<polygon fill="#000000" stroke="#000000" points="202.0724,-198.5255 192.086,-202.0639 202.0993,-205.5255 202.0724,-198.5255"/>
-</g>
-<!-- module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge27" class="edge">
-<title>module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M752.8688,-201.2079C744.6519,-201.2079 735.9467,-201.2079 727.4553,-201.2079"/>
-<polygon fill="#000000" stroke="#000000" points="727.2508,-197.708 717.2507,-201.2079 727.2507,-204.708 727.2508,-197.708"/>
-</g>
-<!-- module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge28" class="edge">
-<title>module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M400.9938,-57.3284C378.0352,-75.6042 331.1306,-109.3415 284.5,-121.2079"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-37.97C393.01,-36.34 369.44,-35.94 348.4,-36.07"/>
+<polygon fill="#000000" stroke="#000000" points="348.25,-32.57 338.29,-36.17 348.32,-39.57 348.25,-32.57"/>
 </g>
 <!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge32" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge21" class="edge">
 <title>module~pf_mod_restrict&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M519.9638,-50.079C483.6717,-32.977 420.9367,-3.9709 415.5,-5.2079"/>
-</g>
-<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_timer -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge31" class="edge">
-<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_timer</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M513.7572,-74.2483C466.6625,-92.1118 378.2444,-125.6497 326.0494,-145.4478"/>
-<polygon fill="#000000" stroke="#000000" points="324.5384,-142.2775 316.4297,-149.0966 327.021,-148.8225 324.5384,-142.2775"/>
-</g>
-<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_utils -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge29" class="edge">
-<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M507.2322,-74.2638C502.1637,-76.768 497.257,-79.7295 493,-83.2079 491.8886,-84.116 450.8819,-146.9158 428.9793,-180.5157"/>
-<polygon fill="#000000" stroke="#000000" points="425.8848,-178.8537 423.3572,-189.1426 431.7494,-182.6756 425.8848,-178.8537"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-159.97C348.22,-169.79 349.18,-258.8 285.5,-237.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.5,-237.97C232.57,-221.32 190.39,-171.41 169.54,-142.78"/>
+<polygon fill="#000000" stroke="#000000" points="172.18,-140.44 163.54,-134.3 166.46,-144.48 172.18,-140.44"/>
 </g>
 <!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_hooks -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge30" class="edge">
+<g id="module~~pf_mod_parallel~~UsesGraph_edge22" class="edge">
 <title>module~pf_mod_restrict&#45;&gt;module~pf_mod_hooks</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M501.8502,-56.4999C490.6683,-55.0376 478.5381,-53.4514 467.0013,-51.9427"/>
-<polygon fill="#000000" stroke="#000000" points="467.424,-48.4683 457.0545,-50.642 466.5163,-55.4092 467.424,-48.4683"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M525.06,-170.12C503.6,-183.53 468.88,-205.24 444.49,-220.48"/>
+<polygon fill="#000000" stroke="#000000" points="442.33,-217.7 435.7,-225.97 446.04,-223.64 442.33,-217.7"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge23" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M502.48,-155.87C477.39,-155.29 444.97,-155.76 416.5,-159.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-159.97C388.13,-163.88 358.4,-163.51 334.13,-161.99"/>
+<polygon fill="#000000" stroke="#000000" points="334.32,-158.49 324.09,-161.28 333.82,-165.48 334.32,-158.49"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge24" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M506.1,-145.97C492.21,-141.63 476.41,-136.7 461.98,-132.19"/>
+<polygon fill="#000000" stroke="#000000" points="462.84,-128.79 452.25,-129.15 460.75,-135.47 462.84,-128.79"/>
+</g>
+<!-- module~pf_mod_results&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge25" class="edge">
+<title>module~pf_mod_results&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M502.9,-79.08C442.61,-81.19 327.57,-87.09 231,-102.97 222.56,-104.36 213.69,-106.22 205.1,-108.24"/>
+<polygon fill="#000000" stroke="#000000" points="204.09,-104.89 195.21,-110.66 205.75,-111.69 204.09,-104.89"/>
+</g>
+<!-- module~pf_mod_results&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge26" class="edge">
+<title>module~pf_mod_results&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M506.1,-89.98C492.21,-94.31 476.41,-99.25 461.98,-103.76"/>
+<polygon fill="#000000" stroke="#000000" points="460.75,-100.48 452.25,-106.8 462.84,-107.16 460.75,-100.48"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge27" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M244.75,-146.38C232.2,-142.95 218.11,-139.09 204.9,-135.48"/>
+<polygon fill="#000000" stroke="#000000" points="205.57,-132.04 195,-132.78 203.73,-138.79 205.57,-132.04"/>
+</g>
+<!-- module~pf_mod_mpi -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node13" class="node">
+<title>module~pf_mod_mpi</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node13"><a xlink:href="../module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="190.5,-49.97 118.5,-49.97 118.5,-25.97 190.5,-25.97 190.5,-49.97"/>
+<text text-anchor="middle" x="154.5" y="-35.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge28" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M250.8,-144.86C243.69,-141.17 236.62,-136.57 231,-130.97 205.65,-105.72 219.98,-84.59 195,-58.97 194.08,-58.04 193.12,-57.13 192.11,-56.26"/>
+<polygon fill="#000000" stroke="#000000" points="193.93,-53.25 183.79,-50.19 189.81,-58.91 193.93,-53.25"/>
+</g>
+<!-- module~pf_mod_stop -->
+<g id="module~~pf_mod_parallel~~UsesGraph_node14" class="node">
+<title>module~pf_mod_stop</title>
+<g id="a_module~~pf_mod_parallel~~UsesGraph_node14"><a xlink:href="../module/pf_mod_stop.html" xlink:title="pf_mod_stop">
+<polygon fill="#337ab7" stroke="#337ab7" points="192,-91.97 117,-91.97 117,-67.97 192,-67.97 192,-91.97"/>
+<text text-anchor="middle" x="154.5" y="-77.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_stop</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge29" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M256.12,-144.92C247.83,-140.87 238.84,-136.08 231,-130.97 213.55,-119.61 212.29,-112.59 195,-100.97 193.11,-99.71 191.14,-98.45 189.13,-97.23"/>
+<polygon fill="#000000" stroke="#000000" points="190.6,-94.04 180.19,-92.09 187.12,-100.11 190.6,-94.04"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge30" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.5,-116.97C257.69,-115.29 228.92,-116.17 205.2,-117.63"/>
+<polygon fill="#000000" stroke="#000000" points="204.77,-114.15 195.03,-118.31 205.24,-121.13 204.77,-114.15"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge32" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.91,-128.73C364.96,-132.95 348.74,-137.86 333.76,-142.38"/>
+<polygon fill="#000000" stroke="#000000" points="332.7,-139.05 324.14,-145.29 334.73,-145.75 332.7,-139.05"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge31" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.87,-118.79C352.95,-119.12 317.01,-119.03 285.5,-116.97"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.5,-116.97C252.32,-114.94 218.41,-104.75 193.33,-95.58"/>
+<polygon fill="#000000" stroke="#000000" points="194.43,-92.26 183.84,-92.01 191.96,-98.81 194.43,-92.26"/>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge33" class="edge">
+<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M254.69,-50.06C246.7,-53.99 238.24,-58.7 231,-63.97 212.45,-77.48 213.35,-87.2 195,-100.97 193.42,-102.16 191.76,-103.32 190.05,-104.45"/>
+<polygon fill="#000000" stroke="#000000" points="188.02,-101.58 181.29,-109.76 191.65,-107.57 188.02,-101.58"/>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_parallel~~UsesGraph_edge34" class="edge">
+<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.7,-37.97C220.79,-37.97 210.5,-37.97 200.84,-37.97"/>
+<polygon fill="#000000" stroke="#000000" points="200.65,-34.47 190.65,-37.97 200.65,-41.47 200.65,-34.47"/>
 </g>
 <!-- mpi -->
 <g id="module~~pf_mod_parallel~~UsesGraph_node15" class="node">
 <title>mpi</title>
 <g id="a_module~~pf_mod_parallel~~UsesGraph_node15"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
-<polygon fill="#337ab7" stroke="#337ab7" points="66,-273.2079 12,-273.2079 12,-249.2079 66,-249.2079 66,-273.2079"/>
-<text text-anchor="middle" x="39" y="-258.8079" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">mpi</text>
+<polygon fill="#337ab7" stroke="#337ab7" points="66,-49.97 12,-49.97 12,-25.97 66,-25.97 66,-49.97"/>
+<text text-anchor="middle" x="39" y="-35.57" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_mpi&#45;&gt;mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge33" class="edge">
-<title>module~pf_mod_mpi&#45;&gt;mpi</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.272,-261.2079C105.0127,-261.2079 89.987,-261.2079 76.6097,-261.2079"/>
-<polygon fill="#000000" stroke="#000000" points="76.2999,-257.708 66.2999,-261.2079 76.2998,-264.708 76.2999,-257.708"/>
-</g>
-<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype -->
 <g id="module~~pf_mod_parallel~~UsesGraph_edge35" class="edge">
-<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M251.1808,-267.1925C243.9318,-263.4975 236.7278,-258.8715 231,-253.2079 205.5595,-228.0528 220.1115,-206.6915 195,-181.2079 193.9577,-180.1501 192.8507,-179.1347 191.6943,-178.161"/>
-<polygon fill="#000000" stroke="#000000" points="193.6808,-175.2789 183.503,-172.3355 189.6239,-180.9834 193.6808,-175.2789"/>
-</g>
-<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi -->
-<g id="module~~pf_mod_parallel~~UsesGraph_edge34" class="edge">
-<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.8735,-271.7827C220.803,-270.3883 210.3566,-268.9419 200.5422,-267.583"/>
-<polygon fill="#000000" stroke="#000000" points="200.971,-264.1091 190.5854,-266.2044 200.0109,-271.0429 200.971,-264.1091"/>
+<title>module~pf_mod_mpi&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.21,-37.97C104.96,-37.97 89.88,-37.97 76.53,-37.97"/>
+<polygon fill="#000000" stroke="#000000" points="76.25,-34.47 66.25,-37.97 76.25,-41.47 76.25,-34.47"/>
 </g>
 </g>
 </svg>
-</div><script>var panmodulepf_mod_parallelUsesGraph = svgPanZoom('#modulepf_mod_parallelUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+</div>                <script>
+                  var panmodulepf_mod_parallelUsesGraph = svgPanZoom('#modulepf_mod_parallelUsesGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsesGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsesGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="490pt" height="32pt"
  viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
 <!-- Module -->
 <g id="node1" class="node">
 <title>Module</title>
 <polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
-<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
 </g>
 <!-- Submodule -->
 <g id="node2" class="node">
 <title>Submodule</title>
 <polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,0 139.5,0 139.5,-24"/>
-<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
 </g>
 <!-- Subroutine -->
 <g id="node3" class="node">
 <title>Subroutine</title>
 <polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,0 222,0 222,-24"/>
-<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
 </g>
 <!-- Function -->
 <g id="node4" class="node">
 <title>Function</title>
 <polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,0 294,0 294,-24"/>
-<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
 </g>
 <!-- Program -->
 <g id="node5" class="node">
 <title>Program</title>
 <polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,0 366,0 366,-24"/>
-<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
 </g>
 <!-- This Page&#39;s Entity -->
 <g id="node6" class="node">
 <title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="#000000" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
-<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
 
-    
-    <p>Solid arrows point from a submodule to the (sub)module which it is
-    descended from. Dashed arrows point from a module or program unit to 
-    modules which it uses.
-    </p>
-    </div></div></div></div>
-      </li>
-      
-      </ul>
-    </div>
-    
-
-    
-    
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Used by</h3>
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
       </div>
-      <ul class="list-group">
-  
-  
-  <li class="list-group-item">
-    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    </div>
+
+          <div class="card">
+      <h3 class="card-header card-title bg-light">Used by</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: module~~pf_mod_parallel~~UsedByGraph Pages: 1 -->
 <svg id="modulepf_mod_parallelUsedByGraph" width="187pt" height="32pt"
  viewBox="0.00 0.00 187.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="module~~pf_mod_parallel~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>module~~pf_mod_parallel~~UsedByGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 183,-28 183,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 183,-28 183,4 -4,4"/>
 <!-- module~pf_mod_parallel -->
 <g id="module~~pf_mod_parallel~~UsedByGraph_node1" class="node">
 <title>module~pf_mod_parallel</title>
-<polygon fill="none" stroke="#000000" points="89,-24 0,-24 0,0 89,0 89,-24"/>
-<text text-anchor="middle" x="44.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_mod_parallel</text>
+<polygon fill="none" stroke="black" points="89,-24 0,-24 0,0 89,0 89,-24"/>
+<text text-anchor="middle" x="44.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_parallel</text>
 </g>
 <!-- module~pfasst -->
 <g id="module~~pf_mod_parallel~~UsedByGraph_node2" class="node">
 <title>module~pfasst</title>
-<g id="a_module~~pf_mod_parallel~~UsedByGraph_node2"><a xlink:href=".././module/pfasst.html" xlink:title="pfasst">
+<g id="a_module~~pf_mod_parallel~~UsedByGraph_node2"><a xlink:href="../module/pfasst.html" xlink:title="pfasst">
 <polygon fill="#337ab7" stroke="#337ab7" points="179,-24 125,-24 125,0 179,0 179,-24"/>
-<text text-anchor="middle" x="152" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pfasst</text>
+<text text-anchor="middle" x="152" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pfasst</text>
 </a>
 </g>
 </g>
 <!-- module~pfasst&#45;&gt;module~pf_mod_parallel -->
 <g id="module~~pf_mod_parallel~~UsedByGraph_edge1" class="edge">
 <title>module~pfasst&#45;&gt;module~pf_mod_parallel</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M124.8732,-12C117.0099,-12 108.1295,-12 99.2138,-12"/>
-<polygon fill="#000000" stroke="#000000" points="99.185,-8.5001 89.1849,-12 99.1849,-15.5001 99.185,-8.5001"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M124.92,-12C117.12,-12 108.26,-12 99.36,-12"/>
+<polygon fill="#000000" stroke="#000000" points="99.34,-8.5 89.34,-12 99.34,-15.5 99.34,-8.5"/>
 </g>
 </g>
 </svg>
-</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsedByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsedByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="490pt" height="32pt"
  viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
 <!-- Module -->
 <g id="node1" class="node">
 <title>Module</title>
 <polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
-<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
 </g>
 <!-- Submodule -->
 <g id="node2" class="node">
 <title>Submodule</title>
 <polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,0 139.5,0 139.5,-24"/>
-<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
 </g>
 <!-- Subroutine -->
 <g id="node3" class="node">
 <title>Subroutine</title>
 <polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,0 222,0 222,-24"/>
-<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
 </g>
 <!-- Function -->
 <g id="node4" class="node">
 <title>Function</title>
 <polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,0 294,0 294,-24"/>
-<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
 </g>
 <!-- Program -->
 <g id="node5" class="node">
 <title>Program</title>
 <polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,0 366,0 366,-24"/>
-<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
 </g>
 <!-- This Page&#39;s Entity -->
 <g id="node6" class="node">
 <title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="#000000" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
-<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
 
-    
-    <p>Solid arrows point from a submodule to the (sub)module which it is
-    descended from. Dashed arrows point from a module or program unit to 
-    modules which it uses.
-    </p>
-    </div></div></div></div>
-  </li>
-  
-      </ul>
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
     </div>
-    
 
-    <br>
-
-    <section class="visible-xs visible-sm hidden-md">
-      
-<h3>Contents</h3>
- 
+      <br>
 
 
 
@@ -794,1006 +750,787 @@
 
 
 
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
-  <div class="list-group">
-    <div id="subs-1" class="panel-collapse collapse">
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_pfasst_run">pf_pfasst_run</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_predictor">pf_predictor</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_residual">pf_check_residual</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_convergence_block">pf_check_convergence_block</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_block_run">pf_block_run</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle">pf_Vcycle</a>
-      
-      <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle_pysdc">pf_Vcycle_pySDC</a>
-      
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
-    
-
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
-    
-
-    
-    <section>
-    <h2>Subroutines</h2>
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_pfasst_run"></span><h3>
-public subroutine <a href='../proc/pf_pfasst_run.html'>pf_pfasst_run</a>(pf, q0, dt, tend, nsteps, qend, flags)
-    
-    
-   
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_pfasst_run"></span> <h3>public  subroutine <a href='../proc/pf_pfasst_run.html'>pf_pfasst_run</a>(pf, q0, dt, tend, nsteps, qend, flags)  
 </h3></div>
-  <div class="panel-body">
-       
-    
+    <div class="card-body">
+          
+  <p>This is the main interface to pfasst.
+It examines the parameters and decides which subroutine to call
+to execute the code correctly
+Set the number of time steps to do
+The user can either pass in the number of time steps or
+pass in the time step size and length of run
+Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~108"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+<p>The complete PFASST structure</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~3"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>q0</strong></td>
+            <td>
+<p>The initial condition</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~44"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+<p>The time step for each processor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tend~2"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tend</strong></td>
+            <td>
+<p>The final time of run</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsteps~5"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsteps</strong></td>
+            <td>
+<p>The number of time steps</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qend~2"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qend</strong></td>
+            <td>
+<p>The computed solution at tend</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~101"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong>(:)</td>
+            <td>
+<p>User defnined flags</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
 
 
-
-
-
-
-
-<p>This is the main interface to pfasst.
-  It examines the parameters and decides which subroutine to call
-  to execute the code correctly
-  Set the number of time steps to do
-  The user can either pass in the number of time steps or
-  pass in the time step size and length of run
-  Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>target</td><td>::</td>
-  <td><strong>pf</strong></td><td><p>The complete PFASST structure</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>q0</strong></td><td><p>The initial condition</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dt</strong></td><td><p>The time step for each processor</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tend</strong></td><td><p>The final time of run</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>nsteps</strong></td><td><p>The number of time steps</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(inout),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>qend</strong></td><td><p>The computed solution at tend</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong>(:)</td><td><p>User defnined flags</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_predictor"></span><h3>
-public subroutine <a href='../proc/pf_predictor.html'>pf_predictor</a>(pf, t0, dt, flags)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>PFASST Predictor.
-  Subroutine  to initialize the solution on each processor
-  The goal is to have a solution at each level and each node set to a consistent value
-  When this is called, the value of q0 at the fine level on each processor has been set somehow (see q0_style below)</p><a href="../proc/pf_predictor.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>target</td><td>::</td>
-  <td><strong>pf</strong></td><td><p>PFASST main data structure</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>t0</strong></td><td><p>Initial time of this processor</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dt</strong></td><td><p>time step</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong>(:)</td><td><p>User defined flags</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_check_residual"></span><h3>
-public subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>(pf, level_index, residual_converged)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>Subroutine to test residuals to determine if the current processor has converged.</p>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>logical,</td>
-  <td>intent(out)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>residual_converged</strong></td><td><p>Return true if residual is below tolerances</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_check_convergence_block"></span><h3>
-public subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_convergence_block</a>(pf, level_index, send_tag)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>Subroutine to check if the current processor has converged and
- to update the next processor on the status
- Note that if the previous processor hasn't converged yet
- (pstatus), the current processor can't be converged yet either
- Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_block.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>send_tag</strong></td><td><p>identifier for status send and receive</p></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_block_run"></span><h3>
-public subroutine <a href='../proc/pf_block_run.html'>pf_block_run</a>(pf, q0, dt, nsteps, qend, flags)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>PFASST controller for block mode
-  When starting a new block, broadcast new initial conditions to all procs
-  For initial block, this is done when initial conditions are set
- Reset some flags
-  Pack away your last solution
-  Everyone resets their q0
-  Just stick qend in q0
-  Update the step and t0 variables for new block
- Call the predictor to get an initial guess on all levels and all processors</p><a href="../proc/pf_block_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>target</td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>q0</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dt</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>nsteps</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),</td>
-  <td>intent(inout),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>qend</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong>(:)</td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_vcycle"></span><h3>
-public subroutine <a href='../proc/pf_vcycle.html'>pf_Vcycle</a>(pf, iteration, t0, dt, level_index_c, level_index_f, flags)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>Execute a Vcycle between levels nfine and ncoarse</p><a href="../proc/pf_vcycle.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>target</td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>iteration</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>t0</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dt</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index_c</strong></td><td><p>Coarsest level of Vcycle</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index_f</strong></td><td><p>Finest level of Vcycle</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    
-  <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="proc-pf_vcycle_pysdc"></span><h3>
-public subroutine <a href='../proc/pf_vcycle_pysdc.html'>pf_Vcycle_pySDC</a>(pf, iteration, t0, dt, level_index_c, level_index_f, flags)
-    
-    
-   
-</h3></div>
-  <div class="panel-body">
-       
-    
-
-
-
-
-
-
-
-<p>Execute a V-cycle between levels nfine and ncoarse like in pySDC</p><a href="../proc/pf_vcycle_pysdc.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),</td>
-  <td>intent(inout),</td>
-  <td></td>
-  
-  <td>target</td><td>::</td>
-  <td><strong>pf</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>iteration</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>t0</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>real(kind=pfdp),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>dt</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index_c</strong></td><td><p>Coarsest level of V-cycle</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>level_index_f</strong></td><td><p>Finest level of V-cycle</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>integer,</td>
-  <td>intent(in),</td>
-  <td>optional</td>
-  
-  <td></td><td>::</td>
-  <td><strong>flags</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-  </div>
-  </div>
-
-    
-    </section>    
-    <br>
-    
-    
-    
     </div>
   </div>
 
-  
-    <hr>    
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_predictor"></span> <h3>public  subroutine <a href='../proc/pf_predictor.html'>pf_predictor</a>(pf, t0, dt, flags)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>PFASST Predictor.
+ Subroutine  to initialize the solution on each processor
+ The goal is to have a solution at each level and each node set to a consistent value
+ When this is called, the value of q0 at the fine level on each processor has been set somehow (see q0_style below)</p><a href="../proc/pf_predictor.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~109"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+<p>PFASST main data structure</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0~29"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t0</strong></td>
+            <td>
+<p>Initial time of this processor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~45"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+<p>time step</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~102"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong>(:)</td>
+            <td>
+<p>User defined flags</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_residual"></span> <h3>public  subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>(pf, level_index, residual_converged)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Subroutine to test residuals to determine if the current processor has converged.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~110"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~97"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-residual_converged"></span>
+              logical,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>residual_converged</strong></td>
+            <td>
+<p>Return true if residual is below tolerances</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_convergence_block"></span> <h3>public  subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_convergence_block</a>(pf, level_index, send_tag)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Subroutine to check if the current processor has converged and
+to update the next processor on the status
+Note that if the previous processor hasn't converged yet
+(pstatus), the current processor can't be converged yet either
+Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_block.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~111"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~98"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-send_tag"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>send_tag</strong></td>
+            <td>
+<p>identifier for status send and receive</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_block_run"></span> <h3>public  subroutine <a href='../proc/pf_block_run.html'>pf_block_run</a>(pf, q0, dt, nsteps, qend, flags)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>PFASST controller for block mode
+ When starting a new block, broadcast new initial conditions to all procs
+ For initial block, this is done when initial conditions are set
+Reset some flags
+ Pack away your last solution
+ Everyone resets their q0
+ Just stick qend in q0
+ Update the step and t0 variables for new block
+Call the predictor to get an initial guess on all levels and all processors</p><a href="../proc/pf_block_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~112"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~4"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>q0</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~46"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsteps~6"></span>
+              integer,
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsteps</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qend~3"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qend</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~103"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_vcycle"></span> <h3>public  subroutine <a href='../proc/pf_vcycle.html'>pf_Vcycle</a>(pf, iteration, t0, dt, level_index_c, level_index_f, flags)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Execute a Vcycle between levels nfine and ncoarse</p><a href="../proc/pf_vcycle.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~113"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iteration"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iteration</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0~30"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t0</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~47"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_c~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_c</strong></td>
+            <td>
+<p>Coarsest level of Vcycle</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_f"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_f</strong></td>
+            <td>
+<p>Finest level of Vcycle</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~104"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_vcycle_pysdc"></span> <h3>public  subroutine <a href='../proc/pf_vcycle_pysdc.html'>pf_Vcycle_pySDC</a>(pf, iteration, t0, dt, level_index_c, level_index_f, flags)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Execute a V-cycle between levels nfine and ncoarse like in pySDC</p><a href="../proc/pf_vcycle_pysdc.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~114"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iteration~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iteration</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0~31"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t0</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~48"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_c~3"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_c</strong></td>
+            <td>
+<p>Coarsest level of V-cycle</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_f~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_f</strong></td>
+            <td>
+<p>Finest level of V-cycle</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~105"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+
+
+    </div>
+  </div>
+
+      <hr>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-      <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
-          <p class="text-right">
-            Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
-          </p>
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
-      </div>
-      <br>
-      </div> <!-- /container -->    
+        <br>
+      </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
--->
-    <script src="../js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../js/ie10-viewport-bug-workaround.js"></script>
-
-    <!-- MathJax JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-      });
-    </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-    <script src="../tipuesearch/tipuesearch_content.js"></script>
-    <script src="../tipuesearch/tipuesearch_set.js"></script>
-    <script src="../tipuesearch/tipuesearch.js"></script>
-    
-    
   </body>
 </html>

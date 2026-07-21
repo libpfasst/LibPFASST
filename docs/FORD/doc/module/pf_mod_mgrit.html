@@ -1,0 +1,3124 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="The library for running PFASST">
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>pf_mod_MGRIT &ndash; LibPFASST</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
+    <link href="../css/local.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>pf_mod_MGRIT
+      <small>Module</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 7.0% of total for modules and submodules.">951 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_mgrit.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_mgrit.f90.html'>pf_mgrit.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">pf_mod_MGRIT</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#types-0"
+         aria-expanded="false" aria-controls="types-0">
+         <h4 class="card-header bg-primary text-white">Derived Types</h4>
+      </a>
+      <div id="types-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#type-int_vector">int_vector</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#type-mgrit_level_data">mgrit_level_data</a>
+        </div>
+      </div>
+    </div>
+
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-mgrit_initialize">mgrit_initialize</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-fc_setup">FC_Setup</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-pf_mgrit_run">pf_MGRIT_run</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-pf_mgrit_v_cycle">pf_MGRIT_v_cycle</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-fcf_relax">FCF_Relax</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-idealinterp">IdealInterp</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-f_relax">F_Relax</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-c_relax">C_Relax</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-mgrit_send_recv">mgrit_send_recv</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-mgrit_send">mgrit_send</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-mgrit_recv">mgrit_recv</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-exactsolve">ExactSolve</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-initexactsolve">InitExactSolve</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-restrict">Restrict</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-injectrestrictpoint">InjectRestrictPoint</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-residualnorm_cpoints_l2norm">ResidualNorm_Cpoints_L2norm</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-pointrelax">PointRelax</a>
+            <a class="list-group-item" href="../module/pf_mod_mgrit.html#proc-resnorm">ResNorm</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+  
+  
+  
+  
+  
+
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      <p>Module of routines to run MGRIT</p>
+<br>          <div class="card mb-4">
+      <h3 class="card-header card-title bg-light">Uses</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <ul class="list-inline">
+                  <li class="list-inline-item"><a href='pf_mod_timer.html'>pf_mod_timer</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_interpolate.html'>pf_mod_interpolate</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_comm.html'>pf_mod_comm</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_pfasst.html'>pf_mod_pfasst</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_results.html'>pf_mod_results</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_hooks.html'>pf_mod_hooks</a></li>
+                  <li class="list-inline-item"><a href='http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm'>mpi</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_restrict.html'>pf_mod_restrict</a></li>
+              </ul>
+            </li>
+            <li class="list-group-item">
+              <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: module~~pf_mod_mgrit~~UsesGraph Pages: 1 -->
+<svg id="modulepf_mod_mgritUsesGraph" width="641pt" height="262pt"
+ viewBox="0.00 0.00 641.00 261.82" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_mgrit~~UsesGraph" class="graph" transform="scale(0.66 0.66) rotate(0) translate(4 392.2)">
+<title>module~~pf_mod_mgrit~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-392.2 966,-392.2 966,4 -4,4"/>
+<!-- module~pf_mod_mgrit -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node1" class="node">
+<title>module~pf_mod_mgrit</title>
+<polygon fill="none" stroke="black" points="962,-238.29 873,-238.29 873,-214.29 962,-214.29 962,-238.29"/>
+<text text-anchor="middle" x="917.5" y="-223.89" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_MGRIT</text>
+</g>
+<!-- module~pf_mod_comm -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node2" class="node">
+<title>module~pf_mod_comm</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node2"><a xlink:href="../module/pf_mod_comm.html" xlink:title="pf_mod_comm">
+<polygon fill="#337ab7" stroke="#337ab7" points="837,-238.29 753,-238.29 753,-214.29 837,-214.29 837,-238.29"/>
+<text text-anchor="middle" x="795" y="-223.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_comm</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_comm -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge1" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_comm</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M873,-226.29C864.66,-226.29 855.85,-226.29 847.3,-226.29"/>
+<polygon fill="#000000" stroke="#000000" points="847.03,-222.79 837.03,-226.29 847.03,-229.79 847.03,-222.79"/>
+</g>
+<!-- module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node3" class="node">
+<title>module~pf_mod_dtype</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node3"><a xlink:href="../module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<polygon fill="#337ab7" stroke="#337ab7" points="195,-149.29 114,-149.29 114,-125.29 195,-125.29 195,-149.29"/>
+<text text-anchor="middle" x="154.5" y="-134.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_dtype</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge2" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-386.29C468.25,-386.29 445.43,-393.95 374,-367.29 329.24,-350.58 329.25,-325.48 285.5,-306.29"/>
+</g>
+<!-- module~pf_mod_hooks -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node4" class="node">
+<title>module~pf_mod_hooks</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node4"><a xlink:href="../module/pf_mod_hooks.html" xlink:title="pf_mod_hooks">
+<polygon fill="#337ab7" stroke="#337ab7" points="457,-358.29 374,-358.29 374,-334.29 457,-334.29 457,-358.29"/>
+<text text-anchor="middle" x="415.5" y="-343.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_hooks</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_hooks -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge3" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_hooks</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-366.29C617.37,-359.08 604.08,-386.29 546.5,-386.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-386.29C510.85,-386.29 474.39,-373.54 449.03,-362.43"/>
+<polygon fill="#000000" stroke="#000000" points="450.43,-359.23 439.88,-358.29 447.54,-365.6 450.43,-359.23"/>
+</g>
+<!-- module~pf_mod_interpolate -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node5" class="node">
+<title>module~pf_mod_interpolate</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node5"><a xlink:href="../module/pf_mod_interpolate.html" xlink:title="pf_mod_interpolate">
+<polygon fill="#337ab7" stroke="#337ab7" points="598,-278.29 493,-278.29 493,-254.29 598,-254.29 598,-278.29"/>
+<text text-anchor="middle" x="545.5" y="-263.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_interpolate</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_interpolate -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge4" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_interpolate</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M794,-366.29C742.45,-374.66 728.31,-372.82 676.5,-366.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-366.29C649.05,-363.08 595.15,-313.94 566.07,-285.77"/>
+<polygon fill="#000000" stroke="#000000" points="568.17,-282.92 558.57,-278.43 563.27,-287.93 568.17,-282.92"/>
+</g>
+<!-- module~pf_mod_pfasst -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node6" class="node">
+<title>module~pf_mod_pfasst</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node6"><a xlink:href="../module/pf_mod_pfasst.html" xlink:title="pf_mod_pfasst">
+<polygon fill="#337ab7" stroke="#337ab7" points="717,-238.29 634,-238.29 634,-214.29 717,-214.29 717,-238.29"/>
+<text text-anchor="middle" x="675.5" y="-223.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_pfasst</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge5" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M912.15,-238.54C899.87,-270.68 861.52,-355.64 796,-366.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M794,-366.29C732.93,-376.21 696.73,-289.81 682.94,-248.05"/>
+<polygon fill="#000000" stroke="#000000" points="686.26,-246.96 679.91,-238.48 679.59,-249.07 686.26,-246.96"/>
+</g>
+<!-- module~pf_mod_restrict -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node7" class="node">
+<title>module~pf_mod_restrict</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node7"><a xlink:href="../module/pf_mod_restrict.html" xlink:title="pf_mod_restrict">
+<polygon fill="#337ab7" stroke="#337ab7" points="588.5,-358.29 502.5,-358.29 502.5,-334.29 588.5,-334.29 588.5,-358.29"/>
+<text text-anchor="middle" x="545.5" y="-343.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_restrict</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_restrict -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge6" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_restrict</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-366.29C649.52,-363.14 621.91,-358.92 598.75,-355.17"/>
+<polygon fill="#000000" stroke="#000000" points="599.22,-351.7 588.79,-353.54 598.09,-358.6 599.22,-351.7"/>
+</g>
+<!-- module~pf_mod_results -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node8" class="node">
+<title>module~pf_mod_results</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node8"><a xlink:href="../module/pf_mod_results.html" xlink:title="pf_mod_results">
+<polygon fill="#337ab7" stroke="#337ab7" points="588,-198.29 503,-198.29 503,-174.29 588,-174.29 588,-198.29"/>
+<text text-anchor="middle" x="545.5" y="-183.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_results</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_results -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge7" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_results</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-186.29C649.6,-182.63 621.68,-182.21 598.29,-182.88"/>
+<polygon fill="#000000" stroke="#000000" points="598.1,-179.38 588.23,-183.24 598.35,-186.38 598.1,-179.38"/>
+</g>
+<!-- module~pf_mod_timer -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node9" class="node">
+<title>module~pf_mod_timer</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node9"><a xlink:href="../module/pf_mod_timer.html" xlink:title="pf_mod_timer">
+<polygon fill="#337ab7" stroke="#337ab7" points="324,-86.29 245,-86.29 245,-62.29 324,-62.29 324,-86.29"/>
+<text text-anchor="middle" x="284.5" y="-71.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge8" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-74.29C388.64,-67.06 358.72,-66.6 334.2,-68.16"/>
+<polygon fill="#000000" stroke="#000000" points="333.76,-64.68 324.05,-68.93 334.29,-71.66 333.76,-64.68"/>
+</g>
+<!-- module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node10" class="node">
+<title>module~pf_mod_utils</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node10"><a xlink:href="../module/pf_mod_utils.html" xlink:title="pf_mod_utils">
+<polygon fill="#337ab7" stroke="#337ab7" points="452,-126.29 379,-126.29 379,-102.29 452,-102.29 452,-126.29"/>
+<text text-anchor="middle" x="415.5" y="-111.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_utils</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge9" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-108.29C518.18,-99.45 487.1,-100.66 462.16,-104.21"/>
+<polygon fill="#000000" stroke="#000000" points="461.55,-100.77 452.23,-105.8 462.65,-107.68 461.55,-100.77"/>
+</g>
+<!-- mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node11" class="node">
+<title>mpi</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node11"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="66,-66.29 12,-66.29 12,-42.29 66,-42.29 66,-66.29"/>
+<text text-anchor="middle" x="39" y="-51.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_mgrit&#45;&gt;mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge10" class="edge">
+<title>module~pf_mod_mgrit&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M875.49,-214.28C863.19,-211 849.62,-207.69 837,-205.29 766.43,-191.86 747.57,-196.72 676.5,-186.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M674.5,-186.29C631.37,-177.36 636.94,-143.87 598,-123.29 576.92,-112.15 569.1,-115.87 546.5,-108.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M544.5,-108.29C488.7,-89.56 473.19,-90.13 416.5,-74.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-74.29C376.29,-63.61 375.71,-40.62 338,-28.29 243.22,2.71 210.8,8.66 114,-15.29 96.93,-19.51 79.46,-28.46 65.78,-36.72"/>
+<polygon fill="#000000" stroke="#000000" points="63.57,-33.98 56.97,-42.27 67.3,-39.9 63.57,-33.98"/>
+</g>
+<!-- module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge11" class="edge">
+<title>module~pf_mod_comm&#45;&gt;module~pf_mod_pfasst</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M752.9,-226.29C744.72,-226.29 736.03,-226.29 727.55,-226.29"/>
+<polygon fill="#000000" stroke="#000000" points="727.37,-222.79 717.37,-226.29 727.37,-229.79 727.37,-222.79"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node12" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node12"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-149.29 0,-149.29 0,-125.29 78,-125.29 78,-149.29"/>
+<text text-anchor="middle" x="39" y="-134.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge12" class="edge">
+<title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.8,-137.29C105.62,-137.29 96.92,-137.29 88.47,-137.29"/>
+<polygon fill="#000000" stroke="#000000" points="88.34,-133.79 78.34,-137.29 88.34,-140.79 88.34,-133.79"/>
+</g>
+<!-- module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge13" class="edge">
+<title>module~pf_mod_hooks&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M373.92,-336.03C348.12,-328.95 314.28,-318.6 285.5,-306.29"/>
+</g>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge14" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-230.29C350.61,-211.69 346.44,-333.02 285.5,-306.29"/>
+</g>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_hooks -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge15" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_hooks</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M525.06,-278.44C503.6,-291.85 468.88,-313.55 444.49,-328.79"/>
+<polygon fill="#000000" stroke="#000000" points="442.33,-326.02 435.7,-334.29 446.04,-331.95 442.33,-326.02"/>
+</g>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge16" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M500.9,-254.24C476.12,-247.33 444.54,-238.45 416.5,-230.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-230.29C361.78,-214.94 373.26,-175.37 338,-133.29 326.8,-119.93 313.78,-105.28 303.5,-93.93"/>
+<polygon fill="#000000" stroke="#000000" points="305.89,-91.35 296.57,-86.31 300.71,-96.06 305.89,-91.35"/>
+</g>
+<!-- module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge17" class="edge">
+<title>module~pf_mod_interpolate&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M533.74,-254.17C523.25,-242.31 506.89,-223.68 493,-207.29 471.9,-182.39 448.09,-153.28 432.72,-134.35"/>
+<polygon fill="#000000" stroke="#000000" points="435.31,-131.98 426.29,-126.42 429.87,-136.39 435.31,-131.98"/>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge19" class="edge">
+<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M663.69,-238.36C649.98,-252.76 624.88,-276.28 598,-287.29 522.94,-318.03 497.37,-312.47 416.5,-306.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M414.5,-306.29C357.27,-302.78 338,-329.32 285.5,-306.29"/>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_results -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge20" class="edge">
+<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_results</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M636.1,-214.29C623.18,-210.25 608.59,-205.69 595,-201.44"/>
+<polygon fill="#000000" stroke="#000000" points="595.91,-198.06 585.32,-198.42 593.82,-204.74 595.91,-198.06"/>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge21" class="edge">
+<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M653.76,-214.1C647.25,-209.97 640.15,-205.17 634,-200.29 616.52,-186.41 617.34,-176.43 598,-165.29 555.61,-140.87 500.86,-127.58 462.62,-120.75"/>
+<polygon fill="#000000" stroke="#000000" points="462.75,-117.22 452.3,-118.99 461.57,-124.12 462.75,-117.22"/>
+</g>
+<!-- module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node13" class="node">
+<title>module~pf_mod_comm_mpi</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node13"><a xlink:href="../module/pf_mod_comm_mpi.html" xlink:title="pf_mod_comm_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="338,-166.29 231,-166.29 231,-142.29 338,-142.29 338,-166.29"/>
+<text text-anchor="middle" x="284.5" y="-151.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_comm_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge18" class="edge">
+<title>module~pf_mod_pfasst&#45;&gt;module~pf_mod_comm_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M633.89,-223.74C596.95,-221.02 541.03,-215.89 493,-207.29 438.28,-197.49 376.7,-181.06 334.94,-169.08"/>
+<polygon fill="#000000" stroke="#000000" points="335.87,-165.71 325.29,-166.29 333.92,-172.43 335.87,-165.71"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge22" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M518.23,-334.22C492.83,-323.49 452.95,-309.07 416.5,-306.29"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_hooks -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge23" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_hooks</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M502.23,-346.29C491.19,-346.29 479.18,-346.29 467.73,-346.29"/>
+<polygon fill="#000000" stroke="#000000" points="467.42,-342.79 457.42,-346.29 467.42,-349.79 467.42,-342.79"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge24" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M525.14,-334.12C507.47,-323.07 480.6,-306.39 457,-292.29 420.42,-270.43 400.8,-277.42 374,-244.29 341.39,-203.96 363.79,-178.29 338,-133.29 329.66,-118.74 317.31,-104.62 306.68,-93.85"/>
+<polygon fill="#000000" stroke="#000000" points="308.91,-91.14 299.32,-86.64 304.01,-96.14 308.91,-91.14"/>
+</g>
+<!-- module~pf_mod_restrict&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge25" class="edge">
+<title>module~pf_mod_restrict&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M531.84,-334.06C520.6,-322.71 504.25,-304.95 493,-287.29 476.04,-260.66 441.41,-176.45 425.21,-136.17"/>
+<polygon fill="#000000" stroke="#000000" points="428.39,-134.69 421.43,-126.71 421.89,-137.3 428.39,-134.69"/>
+</g>
+<!-- module~pf_mod_results&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge26" class="edge">
+<title>module~pf_mod_results&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M502.97,-186.59C466.96,-188.44 414.44,-195.03 374,-216.29 324.34,-242.39 337.08,-328.36 285.5,-306.29"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.5,-306.29C219.14,-278.06 179.58,-197.92 163.63,-159.02"/>
+<polygon fill="#000000" stroke="#000000" points="166.85,-157.65 159.92,-149.64 160.34,-160.23 166.85,-157.65"/>
+</g>
+<!-- module~pf_mod_results&#45;&gt;module~pf_mod_utils -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge27" class="edge">
+<title>module~pf_mod_results&#45;&gt;module~pf_mod_utils</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M519.68,-174.22C511.15,-169.95 501.59,-165.03 493,-160.29 476.75,-151.32 458.96,-140.67 444.63,-131.88"/>
+<polygon fill="#000000" stroke="#000000" points="446.11,-128.68 435.76,-126.41 442.44,-134.64 446.11,-128.68"/>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge28" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M258.82,-86.43C239.08,-96.15 211.18,-109.88 189.35,-120.63"/>
+<polygon fill="#000000" stroke="#000000" points="187.53,-117.62 180.1,-125.18 190.62,-123.9 187.53,-117.62"/>
+</g>
+<!-- module~pf_mod_mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node14" class="node">
+<title>module~pf_mod_mpi</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node14"><a xlink:href="../module/pf_mod_mpi.html" xlink:title="pf_mod_mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="190.5,-90.29 118.5,-90.29 118.5,-66.29 190.5,-66.29 190.5,-90.29"/>
+<text text-anchor="middle" x="154.5" y="-75.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_mpi</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge29" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M244.75,-75.5C230.89,-75.93 215.16,-76.42 200.8,-76.87"/>
+<polygon fill="#000000" stroke="#000000" points="200.52,-73.38 190.63,-77.19 200.74,-80.38 200.52,-73.38"/>
+</g>
+<!-- module~pf_mod_stop -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_node15" class="node">
+<title>module~pf_mod_stop</title>
+<g id="a_module~~pf_mod_mgrit~~UsesGraph_node15"><a xlink:href="../module/pf_mod_stop.html" xlink:title="pf_mod_stop">
+<polygon fill="#337ab7" stroke="#337ab7" points="192,-48.29 117,-48.29 117,-24.29 192,-24.29 192,-48.29"/>
+<text text-anchor="middle" x="154.5" y="-33.89" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_stop</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_timer&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge30" class="edge">
+<title>module~pf_mod_timer&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M244.75,-62.78C231.37,-58.81 216.23,-54.32 202.28,-50.17"/>
+<polygon fill="#000000" stroke="#000000" points="202.95,-46.72 192.37,-47.23 200.96,-53.43 202.95,-46.72"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge31" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.76,-117.46C333.71,-121.46 256.03,-128.36 205.21,-132.87"/>
+<polygon fill="#000000" stroke="#000000" points="204.76,-129.4 195.11,-133.77 205.38,-136.37 204.76,-129.4"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_timer -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge33" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_timer</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M378.91,-103.25C364.96,-98.93 348.74,-93.9 333.76,-89.25"/>
+<polygon fill="#000000" stroke="#000000" points="334.73,-85.89 324.14,-86.27 332.66,-92.57 334.73,-85.89"/>
+</g>
+<!-- module~pf_mod_utils&#45;&gt;module~pf_mod_stop -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge32" class="edge">
+<title>module~pf_mod_utils&#45;&gt;module~pf_mod_stop</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M393.76,-102.1C387.25,-97.97 380.15,-93.17 374,-88.29 356.52,-74.41 358.26,-62.63 338,-53.29 295.21,-33.55 240.86,-30.96 202.64,-32.28"/>
+<polygon fill="#000000" stroke="#000000" points="202.15,-28.8 192.31,-32.75 202.46,-35.79 202.15,-28.8"/>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge34" class="edge">
+<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_dtype</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.7,-147.27C222.28,-146.16 213.59,-145 205.24,-143.89"/>
+<polygon fill="#000000" stroke="#000000" points="205.64,-140.42 195.27,-142.57 204.72,-147.36 205.64,-140.42"/>
+</g>
+<!-- module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge35" class="edge">
+<title>module~pf_mod_comm_mpi&#45;&gt;module~pf_mod_mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M263.22,-142.25C242.09,-129.7 208.79,-109.93 184.8,-95.69"/>
+<polygon fill="#000000" stroke="#000000" points="186.5,-92.62 176.11,-90.53 182.92,-98.64 186.5,-92.62"/>
+</g>
+<!-- module~pf_mod_mpi&#45;&gt;mpi -->
+<g id="module~~pf_mod_mgrit~~UsesGraph_edge36" class="edge">
+<title>module~pf_mod_mpi&#45;&gt;mpi</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.21,-70.83C104.83,-68 89.59,-64.77 76.13,-61.93"/>
+<polygon fill="#000000" stroke="#000000" points="76.76,-58.48 66.25,-59.84 75.31,-65.33 76.76,-58.48"/>
+</g>
+</g>
+</svg>
+</div>                <script>
+                  var panmodulepf_mod_mgritUsesGraph = svgPanZoom('#modulepf_mod_mgritUsesGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#UsesGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="UsesGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="490pt" height="32pt"
+ viewBox="0.00 0.00 489.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 485.5,-28 485.5,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="139.5,-24 72.5,-24 72.5,0 139.5,0 139.5,-24"/>
+<text text-anchor="middle" x="106" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="222,-24 158,-24 158,0 222,0 222,-24"/>
+<text text-anchor="middle" x="190" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="294,-24 240,-24 240,0 294,0 294,-24"/>
+<text text-anchor="middle" x="267" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="366,-24 312,-24 312,0 366,0 366,-24"/>
+<text text-anchor="middle" x="339" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="481.5,-24 384.5,-24 384.5,0 481.5,0 481.5,-24"/>
+<text text-anchor="middle" x="433" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a submodule to the (sub)module which it is
+descended from. Dashed arrows point from a module or program unit to 
+modules which it uses.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+      
+      <br>
+
+
+
+
+
+
+        <section>
+          <h2>Derived Types</h2>
+              <div class="card">
+    <div class="card-header codesum">
+      <span class="anchor" id="type-int_vector"></span>
+      <h3>
+        type, public&nbsp;::&nbsp;
+        <a href='../type/int_vector.html'>int_vector</a>
+        
+      </h3>
+    </div>
+    <div class="card-body">
+      
+
+        <h4>Components</h4>
+          <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-val~14"></span>
+              integer,
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>val</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum">
+      <span class="anchor" id="type-mgrit_level_data"></span>
+      <h3>
+        type, public&nbsp;::&nbsp;
+        <a href='../type/mgrit_level_data.html'>mgrit_level_data</a>
+        
+      </h3>
+    </div>
+    <div class="card-body">
+      
+
+        <h4>Components</h4>
+          <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nt"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nt</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nt_glob"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nt_glob</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~77"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0_glob"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>T0_glob</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tfin_glob"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Tfin_glob</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0~46"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t0</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tfin"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tfin</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-res_norm_loc"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>res_norm_loc</strong>(1)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-res_norm_index"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>res_norm_index</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cycle_phase"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cycle_phase</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fcf_flag"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>FCF_flag</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fas_flag"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>FAS_flag</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-setup_start_coarse_flag"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>setup_start_coarse_flag</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-f_blocks"></span>
+              type(<a href='../type/int_vector.html'>int_vector</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>f_blocks</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-c_pts"></span>
+              integer,
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>c_pts</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-g~16"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>g</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qc"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>qc</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qc_prev"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>qc_prev</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qc_fas"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>qc_fas</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-r~34"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>r</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qc_boundary"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>qc_boundary</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qc_fas_boundary"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>qc_fas_boundary</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q_temp"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>q_temp</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>Q0</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-g_temp"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>g_temp</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-send_to_rank"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>send_to_rank</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-recv_from_rank"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>recv_from_rank</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rank_shifted"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rank_shifted</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-coarsest_level"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>coarsest_level</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-f_pts_flag"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>f_pts_flag</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-c_pts_flag"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>c_pts_flag</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mgrit_initialize"></span> <h3>public  subroutine <a href='../proc/mgrit_initialize.html'>mgrit_initialize</a>(pf, mg_ld, T0_glob, Tfin_glob, Nt_start, coarsen_factor, FAS_flag, FCF_flag, start_coarse_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~168"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t0_glob~2"></span>
+              real(kind=pfdp)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>T0_glob</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tfin_glob~2"></span>
+              real(kind=pfdp)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Tfin_glob</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nt_start"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nt_start</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-coarsen_factor"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>coarsen_factor</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fas_flag~2"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>FAS_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fcf_flag~2"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>FCF_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-start_coarse_flag"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>start_coarse_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-fc_setup"></span> <h3>public  subroutine <a href='../proc/fc_setup.html'>FC_Setup</a>(Nc, Nf, coarsen_factor, f_blocks, c_pts)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nc"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nf"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Nf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-coarsen_factor~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>coarsen_factor</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-f_blocks~2"></span>
+              type(<a href='../type/int_vector.html'>int_vector</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>f_blocks</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-c_pts~2"></span>
+              integer,
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>c_pts</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_mgrit_run"></span> <h3>public  subroutine <a href='../proc/pf_mgrit_run.html'>pf_MGRIT_run</a>(pf, mg_ld, Q0, qend)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Do the MGRIT algorithm
+ Allocate stuff for holding results </p><a href="../proc/pf_mgrit_run.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~169"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+<p>The complete PFASST structure</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~2"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~2"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Q0</strong></td>
+            <td>
+<p>The initial condition</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qend~8"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qend</strong></td>
+            <td>
+<p>The computed solution at tend</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_mgrit_v_cycle"></span> <h3>public  subroutine <a href='../proc/pf_mgrit_v_cycle.html'>pf_MGRIT_v_cycle</a>(pf, mg_ld, iteration)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Execute a MGRIT V-cycle (iteration)
+ It is assumed that we have two levels and two nodes here
+ When this is called the previous coarse integrator result should be stored in Q(1)
+ and the MGRIT iteration in qend (both on coarse level).  If this is called
+ directly after the predictor, these will be the same thing
+FCF-relaxation on finest grid
+Restrict residual
+FCF-relaxation on intermediate grids
+Coarsest grid solve</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~170"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~3"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iteration~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iteration</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-fcf_relax"></span> <h3>public  subroutine <a href='../proc/fcf_relax.html'>FCF_Relax</a>(pf, mg_ld, level_index, iteration)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~171"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~4"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~168"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iteration~5"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iteration</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-idealinterp"></span> <h3>public  subroutine <a href='../proc/idealinterp.html'>IdealInterp</a>(pf, mg_ld, iteration, zero_rhs_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~172"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~5"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-iteration~6"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>iteration</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_rhs_flag~4"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_rhs_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-f_relax"></span> <h3>public  subroutine <a href='../proc/f_relax.html'>F_Relax</a>(pf, mg_ld, level_index, zero_rhs_flag, interp_flag, zero_c_pts_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Do a single step
+Add g to the result
+Interpolate to fine level</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~173"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~6"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~170"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_rhs_flag~5"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_rhs_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-interp_flag~4"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>interp_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_c_pts_flag~4"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_c_pts_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-c_relax"></span> <h3>public  subroutine <a href='../proc/c_relax.html'>C_Relax</a>(pf, mg_ld, level_index, zero_rhs_flag, interp_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~174"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~7"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~171"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_rhs_flag~6"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_rhs_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-interp_flag~5"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>interp_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mgrit_send_recv"></span> <h3>public  subroutine <a href='../proc/mgrit_send_recv.html'>mgrit_send_recv</a>(pf, mg_ld, level_index, send_flag, recv_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~175"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~8"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~172"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-send_flag~3"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>send_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-recv_flag~3"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>recv_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mgrit_send"></span> <h3>public  subroutine <a href='../proc/mgrit_send.html'>mgrit_send</a>(pf, mg_ld, level_index, tag, blocking)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~176"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~9"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~173"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tag~16"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-blocking~7"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>blocking</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mgrit_recv"></span> <h3>public  subroutine <a href='../proc/mgrit_recv.html'>mgrit_recv</a>(pf, mg_ld, level_index, tag, blocking)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~177"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~10"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~174"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tag~17"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-blocking~8"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>blocking</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-exactsolve"></span> <h3>public  subroutine <a href='../proc/exactsolve.html'>ExactSolve</a>(pf, mg_ld, level_index)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~178"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~11"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~175"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-initexactsolve"></span> <h3>public  subroutine <a href='../proc/initexactsolve.html'>InitExactSolve</a>(pf, mg_ld, Q0, level_index)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~179"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~12"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~3"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Q0</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~176"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-restrict"></span> <h3>public  subroutine <a href='../proc/restrict.html'>Restrict</a>(pf, mg_ld, level_index_c, level_index_f)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~180"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~13"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_c~7"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_c</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_f~9"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_f</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-injectrestrictpoint"></span> <h3>public  subroutine <a href='../proc/injectrestrictpoint.html'>InjectRestrictPoint</a>(pf, mg_ld, gci, level_index_c, level_index_f, i_c, i_f, zero_rhs_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~181"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~14"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-gci"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>gci</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_c~8"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_c</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index_f~10"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index_f</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-i_c~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>i_c</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-i_f~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>i_f</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_rhs_flag~9"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_rhs_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-residualnorm_cpoints_l2norm"></span> <h3>public  subroutine <a href='../proc/residualnorm_cpoints_l2norm.html'>ResidualNorm_Cpoints_L2norm</a>(pf, mg_ld, level_index, zero_rhs_flag)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~182"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~15"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~177"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zero_rhs_flag~10"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zero_rhs_flag</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-pointrelax"></span> <h3>public  subroutine <a href='../proc/pointrelax.html'>PointRelax</a>(pf, mg_ld, level_index, n, q0, qend)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~183"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~16"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~178"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~70"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>n</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~7"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>q0</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qend~10"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qend</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-resnorm"></span> <h3>public  subroutine <a href='../proc/resnorm.html'>ResNorm</a>(pf, mg_ld, level_index, r, i, norm_type)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~184"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~17"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~179"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-r~35"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>r</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-i~114"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>i</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-norm_type"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>norm_type</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+
+
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+  </body>
+</html>

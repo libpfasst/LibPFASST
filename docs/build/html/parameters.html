@@ -1,19 +1,17 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Parameters and variables &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -21,7 +19,7 @@
     <link rel="next" title="Sweepers" href="sweepers.html" />
     <link rel="prev" title="Tutorial" href="tutorial.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -33,7 +31,8 @@
         <li class="right" >
           <a href="tutorial.html" title="Tutorial"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Parameters and variables</a></li> 
       </ul>
     </div>  
 
@@ -42,8 +41,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="parameters-and-variables">
-<h1>Parameters and variables<a class="headerlink" href="#parameters-and-variables" title="Permalink to this headline">¶</a></h1>
+  <section id="parameters-and-variables">
+<h1>Parameters and variables<a class="headerlink" href="#parameters-and-variables" title="Link to this heading">¶</a></h1>
 <p>The LibPFASST library has many parameters that control the
 behavior of the PFASST algorithm and can be changed by the
 user.  This section lists all the parameters and describes
@@ -56,8 +55,8 @@ their default value or PFASST will not execute.</p>
 parameters through input files or the command line and
 how to choose certain parameters to achieve particular
 variants of PFASST.</p>
-<div class="section" id="types-of-parameters">
-<h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Permalink to this headline">¶</a></h2>
+<section id="types-of-parameters">
+<h2>Types of parameters<a class="headerlink" href="#types-of-parameters" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>LibPFASST static parameters:  are hard coded and cannot be changed at run time</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> mandatory parameters: must be reassigned at run time because
@@ -72,124 +71,129 @@ the use of default values will result in default execution.</p></li>
 <li><p>local optional parameters: specified by the user application and
 unrelated to the workings of LibPFASST</p></li>
 </ul>
-</div>
-<div class="section" id="pfasst-static-parameters">
-<h2>pfasst static parameters<a class="headerlink" href="#pfasst-static-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="pfasst-static-parameters">
+<h2>pfasst static parameters<a class="headerlink" href="#pfasst-static-parameters" title="Link to this heading">¶</a></h2>
 <p>The parameters at the top of the file <cite>src/pf_dtype.f90</cite> are all set
 at compile time and can’t be changed at runtime.  The only parameter
 here of interest to the user is</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span> <span class="k">parameter</span> <span class="kd">::</span> <span class="n">pfdp</span> <span class="o">=</span> <span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">307</span><span class="p">)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pfdp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">selected_real_kind</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">307</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>which controls the precision of all floating point numbers (or at
 least all those using <code class="docutils literal notranslate"><span class="pre">pfdp</span></code> in the declaration).</p>
-</div>
-<div class="section" id="mandatory-pfasst-parameters">
-<h2>Mandatory pfasst parameters<a class="headerlink" href="#mandatory-pfasst-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="mandatory-pfasst-parameters">
+<h2>Mandatory pfasst parameters<a class="headerlink" href="#mandatory-pfasst-parameters" title="Link to this heading">¶</a></h2>
 <p>The parameters defined in type <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> in <cite>src/pf_dtype.f90</cite>
 are all given a default value.  Currently only the variable
 <code class="docutils literal notranslate"><span class="pre">nlevels</span></code> is given a problematic default.  Hence setting this
 variable on the command line or in an initialization file is mandatory</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  The main PFASST data type which includes pretty much everything</span>
-<span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
-   <span class="c">!&gt; === Mandatory pfasst parameters (must be set on command line or input file)  ===</span>
-   <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nlevels</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c">!! number of pfasst levels</span>
+<span class="k">type</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_pfasst_t</span>
+<span class="w">   </span><span class="c">!&gt; === Mandatory pfasst parameters (must be set on command line or input file)  ===</span>
+<span class="w">   </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nlevels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">             </span><span class="c">!! number of pfasst levels</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="optional-pfasst-parameters">
-<h2>Optional pfasst parameters<a class="headerlink" href="#optional-pfasst-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="optional-pfasst-parameters">
+<h2>Optional pfasst parameters<a class="headerlink" href="#optional-pfasst-parameters" title="Link to this heading">¶</a></h2>
 <p>The remaining variables in the specification of <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code> are given
 default values as below:</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt;  ===  Optional pfasst parameters ====</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">!! number of PFASST iterations to do</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>  <span class="c">!! type of nodes</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_composite_nodes</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_no_left_q</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">niters</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="w">                   </span><span class="c">!! number of PFASST iterations to do</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MINiters</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">                 </span><span class="c">!! minimum number of PFASST iterations to do</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">qtype</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">SDC_GAUSS_LOBATTO</span><span class="w">   </span><span class="c">!! type of nodes</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_proper_nodes</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">   </span><span class="c">!! usage of proper nodes instead of node restriction - if true uses Gauss nodes in coarsening</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_composite_nodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w"> </span><span class="c">!! usage of composite nodes - level nodes are given by repeating coarsest node-set (base is nnodes on coarsest level)</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_no_left_q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">       </span><span class="c">!! don&#39;t use left hand end point</span>
 
 <span class="c">! --  level dependent parameters</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c">!!  number of sweeps at each levels</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span><span class="mi">1</span>   <span class="c">!!  number of sweeps during predictor</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>          <span class="c">!! number of nodes</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w">       </span><span class="c">!! number of sweeps at each levels</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="mi">1</span><span class="w">   </span><span class="c">!! number of sweeps during predictor</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span><span class="w">          </span><span class="c">!! number of nodes</span>
 
 <span class="c">! --  tolerances</span>
-<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  absolute convergence tolerance</span>
-<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">rel_res_tol</span> <span class="o">=</span> <span class="mf">0.d0</span>   <span class="c">!!  relative convergence tolerance</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">abs_res_tol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.d0</span><span class="w">   </span><span class="c">!!  absolute convergence tolerance</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rel_res_tol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.d0</span><span class="w">   </span><span class="c">!!  relative convergence tolerance</span>
 
 <span class="c">! --  predictor options  (should be set before pfasst_run is called)</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">PFASST_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  true if the PFASST type predictor is used</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">pipeline_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_burn</span> <span class="o">=</span>  <span class="mi">1</span>       <span class="c">!!  number of sdc sweeps to perform during coarse level burn in</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">q0_style</span> <span class="o">=</span>  <span class="mi">0</span>           <span class="c">!!  q0 can take 3 values</span>
-                                   <span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
-                                   <span class="c">!!  1:  The q0 at each processor is valid</span>
-                                   <span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps_burn</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="mi">1</span><span class="w">       </span><span class="c">!!  number of sdc sweeps to perform during coarse level burn-in</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RK_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">       </span><span class="c">!! decides if RK steps are used instead of the sweeps (if false default PFASST burn-in is used)</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PFASST_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">    </span><span class="c">!!  true if the PFASST type predictor is used</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pipeline_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w"> </span><span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">q0_style</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="mi">0</span><span class="w">           </span><span class="c">!!  q0 can take 3 values</span>
+<span class="w">                                   </span><span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
+<span class="w">                                   </span><span class="c">!!  1:  The q0 at each processor is valid</span>
+<span class="w">                                   </span><span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
 
 
 <span class="c">! --  run options  (should be set before pfasst_run is called)</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_pysdc_V</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">sweep_at_conv</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  decides if one final sweep after convergence is done</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_Sform</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  True if Qmat type of stepping is used</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">99</span>          <span class="c">!! iteration cutoff for tau inclusion</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Vcycle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">         </span><span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_pysdc_V</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">   </span><span class="c">!!  decides if Vcycles are done</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sweep_at_conv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w"> </span><span class="c">!!  decides if one final sweep after convergence is done</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Finterp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">       </span><span class="c">!!  True if transfer functions operate on rhs</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_LUq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">        </span><span class="c">!!  True if LU type implicit matrix is used</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_Sform</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">     </span><span class="c">!!  True if Qmat type of stepping is used</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">taui0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">99</span><span class="w">             </span><span class="c">!! iteration cutoff for tau inclusion</span>
 
 
 <span class="c">! -- RK and Parareal options</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_sdc_sweeper</span> <span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!! decides if SDC sweeper is used (can be turned off for pure parareal)</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_rk_stepper</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!! decides if RK steps are used instead of the sweeps</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>  <span class="c">!! number of runge-kutta steps per time step</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">RK_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>        <span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_sdc_sweeper</span><span class="w"> </span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">   </span><span class="c">!! decides if SDC sweeper is used</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_rk_stepper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">  </span><span class="c">!! decides if RK steps are used instead of the sweeps</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w">  </span><span class="c">!! number of runge-kutta steps per time step</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rk_order</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! order of runge-kutta method per level</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rk_nstages</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w"> </span><span class="c">!! number of runge-kutta stages per level</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RK_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">         </span><span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
 
 <span class="c">! -- misc</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">debug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">          </span><span class="c">!!  If true, debug diagnostics are printed</span>
 
 <span class="c">! -- controller for the results</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!!  Will save residuals every time they are set</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_delta_q0</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>   <span class="c">!!  Will save change in initial condition</span>
-<span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  Will save errors, but set_error must be called externally</span>
-<span class="kt">integer</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="mi">2</span>        <span class="c">!!  0=none, 1=total only, 2=all, 3=all and echo</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_residuals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">  </span><span class="c">!!  Will save residuals every time they are set</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_delta_q0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">   </span><span class="c">!!  Will save change in initial condition</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_errors</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">    </span><span class="c">!!  Will save errors, but set_error must be called externally</span>
+<span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">       </span><span class="c">!!  Will save a jason file of run parameters</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_timings</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">        </span><span class="c">!!  0=none, 1=total only, 2=all, 3=all and echo</span>
+<span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_solutions</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">      </span><span class="c">!!  0=none, 1=end, 2=all time steps, 3=all iterations</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="mandatory-level-parameters">
-<h2>Mandatory level parameters<a class="headerlink" href="#mandatory-level-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="mandatory-level-parameters">
+<h2>Mandatory level parameters<a class="headerlink" href="#mandatory-level-parameters" title="Link to this heading">¶</a></h2>
 <p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, the  variable
 <code class="docutils literal notranslate"><span class="pre">mpibuflen</span></code> is given the default values -1.  This must be
 changed to the length of the mpi buffer required by the user’s data type
 per level as the levels are  initialized.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!  ===Mandatory level parameters===</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">mpibuflen</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! size of solution in pfdp units</span>
+<span class="kt">integer</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">mpibuflen</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! size of solution in pfdp units</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="optional-level-parameters">
-<h2>Optional level parameters<a class="headerlink" href="#optional-level-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="optional-level-parameters">
+<h2>Optional level parameters<a class="headerlink" href="#optional-level-parameters" title="Link to this heading">¶</a></h2>
 <blockquote>
 <div><p>In the specification of <code class="docutils literal notranslate"><span class="pre">pf_level_t</span></code>, there are a set of parameters that are given values from the corresponding copies in the <code class="docutils literal notranslate"><span class="pre">pf_pfasst_t</span></code>.  This redundancy is simply for convenience.</p>
 </div></blockquote>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!  level parameters set by the pfasst_t values</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="nb">index</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! level number (1 is the coarsest)</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nnodes</span>       <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc nodes</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsteps_rk</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of rk steps to perform</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>   <span class="c">!! number of sdc sweeps to perform</span>
-<span class="kt">integer</span>  <span class="kd">::</span> <span class="n">nsweeps_pred</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>      <span class="c">!! number of coarse sdc sweeps to perform predictor in predictor</span>
-<span class="kt">logical</span>     <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>   <span class="c">!! interpolate functions instead of solutions</span>
+<span class="kt">integer</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="nb">index</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! level number (1 is the coarsest)</span>
+<span class="kt">integer</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">nnodes</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! number of sdc nodes</span>
+<span class="kt">integer</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! number of sdc sweeps to perform</span>
+<span class="kt">integer</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! number of coarse sdc sweeps to perform predictor in predictor</span>
+<span class="kt">logical</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">Finterp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">   </span><span class="c">!! interpolate functions instead of solutions</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="mandatory-local-parameters">
-<h2>Mandatory local parameters<a class="headerlink" href="#mandatory-local-parameters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="mandatory-local-parameters">
+<h2>Mandatory local parameters<a class="headerlink" href="#mandatory-local-parameters" title="Link to this heading">¶</a></h2>
 <p>In the call to run pfasst</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">q0</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tend</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">qend</span><span class="p">)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf_pfasst_run</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">q0</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">tend</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">,</span><span class="w"> </span><span class="n">qend</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The variables <code class="docutils literal notranslate"><span class="pre">q0</span></code>, <code class="docutils literal notranslate"><span class="pre">dt</span></code>, and <code class="docutils literal notranslate"><span class="pre">tend</span></code> must be included.  The
 variable <code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is optional, if it is not included, then
 <code class="docutils literal notranslate"><span class="pre">nsteps</span></code> is set to</p>
-<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span> <span class="o">=</span> <span class="nb">ceiling</span><span class="p">(</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="n">pf</span><span class="p">%</span><span class="n">state</span><span class="p">%</span><span class="n">nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">ceiling</span><span class="p">(</span><span class="n">tend</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Finally, <code class="docutils literal notranslate"><span class="pre">qend</span></code> is also optional and returns the final solution.</p>
@@ -201,11 +205,11 @@ line by adding the file name directly after the executable.  The
 alternative input file must be specified first before any command line
 parameter specifications (see next section).</p>
 </div></blockquote>
-</div>
-<div class="section" id="file-input-for-pfasst-variables">
-<h2>File input for pfasst  variables<a class="headerlink" href="#file-input-for-pfasst-variables" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="file-input-for-pfasst-variables">
+<h2>File input for pfasst  variables<a class="headerlink" href="#file-input-for-pfasst-variables" title="Link to this heading">¶</a></h2>
 <p>The pfasst parameters are specified in a namelist <code class="docutils literal notranslate"><span class="pre">PF_PARAMS</span></code>
-defined in routine <code class="docutils literal notranslate"><span class="pre">pf_read_opts</span></code> in <cite>src/pf_options.f90</cite>.  This
+defined in routine <code class="docutils literal notranslate"><span class="pre">pf_read_opts</span></code> in <cite>src/pf_pfasst.f90</cite>.  This
 routine is called from <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code> in <cite>src/pf_pfasst.f90</cite>
 (which is typically called when initializing PFASST).  If no file is
 specified in the call to <code class="docutils literal notranslate"><span class="pre">pf_pfasst_create</span></code>, then no file is read.
@@ -215,26 +219,26 @@ value of</p>
 <blockquote>
 <div><p>pfasst_nml = “my_file.nml”</p>
 </div></blockquote>
-<p>either in the local input file or the command line  pfasst_nml=\”my_file.nml\”</p>
-</div>
-<div class="section" id="command-line-input">
-<h2>Command line input<a class="headerlink" href="#command-line-input" title="Permalink to this headline">¶</a></h2>
+<p>either in the local input file or the command line  pfasst_nml=\\”my_file.nml\\”</p>
+</section>
+<section id="command-line-input">
+<h2>Command line input<a class="headerlink" href="#command-line-input" title="Link to this heading">¶</a></h2>
 <p>All the variables in the namelist <code class="docutils literal notranslate"><span class="pre">PF_PARAMS</span></code> can be modified by
 simply specifying their value on the command line.  There is only one
 caveat to this in that any parameters must be specified after the
 (optional) input file specification.  For example</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpirun -n <span class="m">20</span> main.exe  myinput.nml <span class="nv">niters</span><span class="o">=</span><span class="m">10</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>main.exe<span class="w">  </span>myinput.nml<span class="w"> </span><span class="nv">niters</span><span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>would set the input file to <cite>myinput.nml</cite> and then over-ride any
 specified value of niters with the value 10. Command line options
 over-ride input files values.</p>
-</div>
-<div class="section" id="variables-for-the-predictor">
-<h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="variables-for-the-predictor">
+<h2>Variables for the predictor<a class="headerlink" href="#variables-for-the-predictor" title="Link to this heading">¶</a></h2>
 <p>The two variables <code class="docutils literal notranslate"><span class="pre">pipeline_pred</span></code> and <code class="docutils literal notranslate"><span class="pre">PFASST_pred</span></code> determine how the
 predictor works.  The different combinations of these variables and
-the parameter nsweeps_pred on the coarsest level great some subtle
+the parameter <code class="docutils literal notranslate"><span class="pre">nsweeps_pred</span></code> on the coarsest level great some subtle
 differences in how the predictor performs.</p>
 <p>Some cases:</p>
 <ol class="arabic simple">
@@ -276,17 +280,19 @@ caveat about t0 is still valid.</p></li>
 The first consists of the process of giving every processor an initial
 value which is consistent with t0 at that processor.  This can be done
 without communication in all cases.  Then,  additional sweeps are done if specified with communication if necessary.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Parameters and variables</a><ul>
 <li><a class="reference internal" href="#types-of-parameters">Types of parameters</a></li>
 <li><a class="reference internal" href="#pfasst-static-parameters">pfasst static parameters</a></li>
@@ -302,12 +308,17 @@ without communication in all cases.  Then,  additional sweeps are done if specif
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="tutorial.html"
-                        title="previous chapter">Tutorial</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="sweepers.html"
-                        title="next chapter">Sweepers</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="tutorial.html"
+                          title="previous chapter">Tutorial</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="sweepers.html"
+                          title="next chapter">Sweepers</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -315,21 +326,21 @@ without communication in all cases.  Then,  additional sweeps are done if specif
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -341,12 +352,13 @@ without communication in all cases.  Then,  additional sweeps are done if specif
         <li class="right" >
           <a href="tutorial.html" title="Tutorial"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Parameters and variables</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

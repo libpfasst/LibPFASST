@@ -1,0 +1,763 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="The library for running PFASST">
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>PointRelax &ndash; LibPFASST</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
+    <link href="../css/local.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>PointRelax
+      <small>Subroutine</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.1% of total for procedures.">13 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_mgrit.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_mgrit.f90.html'>pf_mgrit.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_mgrit.html'>pf_mod_MGRIT</a></li>
+            <li class="breadcrumb-item active" aria-current="page">PointRelax</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/pointrelax.html#src">PointRelax</a>
+      </div>
+    </div>
+
+
+  </div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public  subroutine PointRelax(pf, mg_ld, level_index, n, q0, qend)  
+</h2>
+    
+
+
+
+    <h3>Arguments</h3>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~183"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~16"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~178"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~70"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>n</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0~7"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>q0</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qend~10"></span>
+              class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qend</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <br>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Calls</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~pointrelax~~CallsGraph Pages: 1 -->
+<svg id="procpointrelaxCallsGraph" width="176pt" height="32pt"
+ viewBox="0.00 0.00 176.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pointrelax~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~pointrelax~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 172,-28 172,4 -4,4"/>
+<!-- proc~pointrelax -->
+<g id="proc~~pointrelax~~CallsGraph_node1" class="node">
+<title>proc~pointrelax</title>
+<polygon fill="none" stroke="black" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">PointRelax</text>
+</g>
+<!-- do_n_steps -->
+<g id="proc~~pointrelax~~CallsGraph_node2" class="node">
+<title>do_n_steps</title>
+<polygon fill="#777777" stroke="#777777" points="168,-24 100,-24 100,0 168,0 168,-24"/>
+<text text-anchor="middle" x="134" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">do_n_steps</text>
+</g>
+<!-- proc~pointrelax&#45;&gt;do_n_steps -->
+<g id="proc~~pointrelax~~CallsGraph_edge1" class="edge">
+<title>proc~pointrelax&#45;&gt;do_n_steps</title>
+<path fill="none" stroke="#000000" d="M64.09,-12C72.16,-12 81,-12 89.58,-12"/>
+<polygon fill="#000000" stroke="#000000" points="89.85,-15.5 99.85,-12 89.85,-8.5 89.85,-15.5"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Called by</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~pointrelax~~CalledByGraph Pages: 1 -->
+<svg id="procpointrelaxCalledByGraph" width="635pt" height="230pt"
+ viewBox="0.00 0.00 635.00 230.33" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~pointrelax~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 226.33)">
+<title>proc~~pointrelax~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-226.33 631,-226.33 631,4 -4,4"/>
+<!-- proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_node1" class="node">
+<title>proc~pointrelax</title>
+<polygon fill="none" stroke="black" points="627,-111.92 563,-111.92 563,-87.92 627,-87.92 627,-111.92"/>
+<text text-anchor="middle" x="595" y="-97.52" font-family="Helvetica,sans-Serif" font-size="10.50">PointRelax</text>
+</g>
+<!-- proc~c_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_node2" class="node">
+<title>proc~c_relax</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node2"><a xlink:href="../proc/c_relax.html" xlink:title="C_Relax">
+<polygon fill="#d9534f" stroke="#d9534f" points="471.5,-132.92 417.5,-132.92 417.5,-108.92 471.5,-108.92 471.5,-132.92"/>
+<text text-anchor="middle" x="444.5" y="-118.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">C_Relax</text>
+</a>
+</g>
+</g>
+<!-- proc~c_relax&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge1" class="edge">
+<title>proc~c_relax&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M471.71,-117.21C494.2,-114.03 527,-109.39 552.97,-105.72"/>
+<polygon fill="#000000" stroke="#000000" points="553.5,-109.18 562.91,-104.31 552.52,-102.25 553.5,-109.18"/>
+</g>
+<!-- proc~exactsolve -->
+<g id="proc~~pointrelax~~CalledByGraph_node3" class="node">
+<title>proc~exactsolve</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node3"><a xlink:href="../proc/exactsolve.html" xlink:title="ExactSolve">
+<polygon fill="#d9534f" stroke="#d9534f" points="325,-48.92 260,-48.92 260,-24.92 325,-24.92 325,-48.92"/>
+<text text-anchor="middle" x="292.5" y="-34.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ExactSolve</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge2" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M323.26,-24.88C369.41,-8.22 459.89,16.4 527,-15.92 553.87,-28.85 573.3,-58.38 584.11,-78.74"/>
+<polygon fill="#000000" stroke="#000000" points="581.1,-80.53 588.72,-87.88 587.35,-77.38 581.1,-80.53"/>
+</g>
+<!-- proc~injectrestrictpoint -->
+<g id="proc~~pointrelax~~CalledByGraph_node6" class="node">
+<title>proc~injectrestrictpoint</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node6"><a xlink:href="../proc/injectrestrictpoint.html" xlink:title="InjectRestrictPoint">
+<polygon fill="#d9534f" stroke="#d9534f" points="493.5,-48.92 395.5,-48.92 395.5,-24.92 493.5,-24.92 493.5,-48.92"/>
+<text text-anchor="middle" x="444.5" y="-34.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">InjectRestrictPoint</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~injectrestrictpoint -->
+<g id="proc~~pointrelax~~CalledByGraph_edge12" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~injectrestrictpoint</title>
+<path fill="none" stroke="#000000" d="M325.31,-36.92C342.75,-36.92 364.91,-36.92 385.32,-36.92"/>
+<polygon fill="#000000" stroke="#000000" points="385.48,-40.42 395.48,-36.92 385.48,-33.42 385.48,-40.42"/>
+</g>
+<!-- proc~f_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_node4" class="node">
+<title>proc~f_relax</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node4"><a xlink:href="../proc/f_relax.html" xlink:title="F_Relax">
+<polygon fill="#d9534f" stroke="#d9534f" points="471.5,-174.92 417.5,-174.92 417.5,-150.92 471.5,-150.92 471.5,-174.92"/>
+<text text-anchor="middle" x="444.5" y="-160.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">F_Relax</text>
+</a>
+</g>
+</g>
+<!-- proc~f_relax&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge3" class="edge">
+<title>proc~f_relax&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M471.87,-158.27C488.17,-154.88 509.28,-149.53 527,-141.92 541.92,-135.5 557.36,-126.05 569.65,-117.73"/>
+<polygon fill="#000000" stroke="#000000" points="571.77,-120.52 577.99,-111.94 567.78,-114.77 571.77,-120.52"/>
+</g>
+<!-- proc~initexactsolve -->
+<g id="proc~~pointrelax~~CalledByGraph_node5" class="node">
+<title>proc~initexactsolve</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node5"><a xlink:href="../proc/initexactsolve.html" xlink:title="InitExactSolve">
+<polygon fill="#d9534f" stroke="#d9534f" points="211,-214.92 132,-214.92 132,-190.92 211,-190.92 211,-214.92"/>
+<text text-anchor="middle" x="171.5" y="-200.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">InitExactSolve</text>
+</a>
+</g>
+</g>
+<!-- proc~initexactsolve&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge4" class="edge">
+<title>proc~initexactsolve&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M211.08,-210.6C279.19,-222.15 423.3,-237.31 527,-183.92 553.37,-170.34 572.82,-141.23 583.79,-121.11"/>
+<polygon fill="#000000" stroke="#000000" points="586.98,-122.56 588.48,-112.07 580.77,-119.33 586.98,-122.56"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge5" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M493.73,-46.73C504.87,-49.71 516.53,-53.41 527,-57.92 541.92,-64.33 557.36,-73.78 569.65,-82.1"/>
+<polygon fill="#000000" stroke="#000000" points="567.78,-85.06 577.99,-87.89 571.77,-79.31 567.78,-85.06"/>
+</g>
+<!-- proc~residualnorm_cpoints_l2norm -->
+<g id="proc~~pointrelax~~CalledByGraph_node7" class="node">
+<title>proc~residualnorm_cpoints_l2norm</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node7"><a xlink:href="../proc/residualnorm_cpoints_l2norm.html" xlink:title="ResidualNorm_Cpoints_L2norm">
+<polygon fill="#d9534f" stroke="#d9534f" points="527,-90.92 362,-90.92 362,-66.92 527,-66.92 527,-90.92"/>
+<text text-anchor="middle" x="444.5" y="-76.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ResidualNorm_Cpoints_L2norm</text>
+</a>
+</g>
+</g>
+<!-- proc~residualnorm_cpoints_l2norm&#45;&gt;proc~pointrelax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge6" class="edge">
+<title>proc~residualnorm_cpoints_l2norm&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M527.14,-90.46C535.95,-91.71 544.61,-92.93 552.64,-94.07"/>
+<polygon fill="#000000" stroke="#000000" points="552.39,-97.57 562.78,-95.5 553.37,-90.63 552.39,-97.57"/>
+</g>
+<!-- proc~fcf_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_node8" class="node">
+<title>proc~fcf_relax</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node8"><a xlink:href="../proc/fcf_relax.html" xlink:title="FCF_Relax">
+<polygon fill="#d9534f" stroke="#d9534f" points="326,-132.92 259,-132.92 259,-108.92 326,-108.92 326,-132.92"/>
+<text text-anchor="middle" x="292.5" y="-118.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FCF_Relax</text>
+</a>
+</g>
+</g>
+<!-- proc~fcf_relax&#45;&gt;proc~c_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge7" class="edge">
+<title>proc~fcf_relax&#45;&gt;proc~c_relax</title>
+<path fill="none" stroke="#000000" d="M326.05,-120.92C350.02,-120.92 382.63,-120.92 407.4,-120.92"/>
+<polygon fill="#000000" stroke="#000000" points="407.49,-124.42 417.49,-120.92 407.49,-117.42 407.49,-124.42"/>
+</g>
+<!-- proc~fcf_relax&#45;&gt;proc~f_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge9" class="edge">
+<title>proc~fcf_relax&#45;&gt;proc~f_relax</title>
+<path fill="none" stroke="#000000" d="M326.16,-131.26C337.48,-134.75 350.27,-138.61 362,-141.92 376.82,-146.1 393.26,-150.39 407.46,-154"/>
+<polygon fill="#000000" stroke="#000000" points="406.81,-157.45 417.36,-156.5 408.52,-150.66 406.81,-157.45"/>
+</g>
+<!-- proc~fcf_relax&#45;&gt;proc~residualnorm_cpoints_l2norm -->
+<g id="proc~~pointrelax~~CalledByGraph_edge14" class="edge">
+<title>proc~fcf_relax&#45;&gt;proc~residualnorm_cpoints_l2norm</title>
+<path fill="none" stroke="#000000" d="M326.16,-110.57C337.48,-107.08 350.27,-103.22 362,-99.92 369.51,-97.8 377.44,-95.65 385.29,-93.57"/>
+<polygon fill="#000000" stroke="#000000" points="386.35,-96.91 395.14,-90.99 384.58,-90.14 386.35,-96.91"/>
+</g>
+<!-- proc~idealinterp -->
+<g id="proc~~pointrelax~~CalledByGraph_node9" class="node">
+<title>proc~idealinterp</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node9"><a xlink:href="../proc/idealinterp.html" xlink:title="IdealInterp">
+<polygon fill="#d9534f" stroke="#d9534f" points="324.5,-174.92 260.5,-174.92 260.5,-150.92 324.5,-150.92 324.5,-174.92"/>
+<text text-anchor="middle" x="292.5" y="-160.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">IdealInterp</text>
+</a>
+</g>
+</g>
+<!-- proc~idealinterp&#45;&gt;proc~f_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge10" class="edge">
+<title>proc~idealinterp&#45;&gt;proc~f_relax</title>
+<path fill="none" stroke="#000000" d="M324.58,-162.92C348.61,-162.92 381.92,-162.92 407.18,-162.92"/>
+<polygon fill="#000000" stroke="#000000" points="407.46,-166.42 417.46,-162.92 407.46,-159.42 407.46,-166.42"/>
+</g>
+<!-- proc~pf_mgrit_run -->
+<g id="proc~~pointrelax~~CalledByGraph_node10" class="node">
+<title>proc~pf_mgrit_run</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node10"><a xlink:href="../proc/pf_mgrit_run.html" xlink:title="pf_MGRIT_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="84,-174.92 0,-174.92 0,-150.92 84,-150.92 84,-174.92"/>
+<text text-anchor="middle" x="42" y="-160.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_run&#45;&gt;proc~initexactsolve -->
+<g id="proc~~pointrelax~~CalledByGraph_edge11" class="edge">
+<title>proc~pf_mgrit_run&#45;&gt;proc~initexactsolve</title>
+<path fill="none" stroke="#000000" d="M81.25,-174.92C94.12,-178.95 108.65,-183.51 122.19,-187.76"/>
+<polygon fill="#000000" stroke="#000000" points="121.24,-191.13 131.83,-190.78 123.34,-184.45 121.24,-191.13"/>
+</g>
+<!-- proc~pf_mgrit_run&#45;&gt;proc~idealinterp -->
+<g id="proc~~pointrelax~~CalledByGraph_edge16" class="edge">
+<title>proc~pf_mgrit_run&#45;&gt;proc~idealinterp</title>
+<path fill="none" stroke="#000000" d="M84.03,-162.92C129.95,-162.92 203.92,-162.92 250.01,-162.92"/>
+<polygon fill="#000000" stroke="#000000" points="250.25,-166.42 260.25,-162.92 250.25,-159.42 250.25,-166.42"/>
+</g>
+<!-- proc~pf_mgrit_v_cycle -->
+<g id="proc~~pointrelax~~CalledByGraph_node11" class="node">
+<title>proc~pf_mgrit_v_cycle</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node11"><a xlink:href="../proc/pf_mgrit_v_cycle.html" xlink:title="pf_MGRIT_v_cycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="223,-132.92 120,-132.92 120,-108.92 223,-108.92 223,-132.92"/>
+<text text-anchor="middle" x="171.5" y="-118.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_v_cycle</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle -->
+<g id="proc~~pointrelax~~CalledByGraph_edge18" class="edge">
+<title>proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle</title>
+<path fill="none" stroke="#000000" d="M79.54,-150.88C93.41,-146.31 109.39,-141.04 124.06,-136.21"/>
+<polygon fill="#000000" stroke="#000000" points="125.56,-139.41 133.96,-132.95 123.37,-132.76 125.56,-139.41"/>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~exactsolve -->
+<g id="proc~~pointrelax~~CalledByGraph_edge8" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~exactsolve</title>
+<path fill="none" stroke="#000000" d="M188.57,-108.8C205.79,-95.91 234.03,-75.05 259,-57.92 260.62,-56.8 262.29,-55.67 263.99,-54.54"/>
+<polygon fill="#000000" stroke="#000000" points="266.05,-57.37 272.48,-48.95 262.2,-51.53 266.05,-57.37"/>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~fcf_relax -->
+<g id="proc~~pointrelax~~CalledByGraph_edge15" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~fcf_relax</title>
+<path fill="none" stroke="#000000" d="M223.31,-120.92C231.75,-120.92 240.43,-120.92 248.65,-120.92"/>
+<polygon fill="#000000" stroke="#000000" points="248.76,-124.42 258.76,-120.92 248.76,-117.42 248.76,-124.42"/>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~idealinterp -->
+<g id="proc~~pointrelax~~CalledByGraph_edge17" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~idealinterp</title>
+<path fill="none" stroke="#000000" d="M206.6,-132.95C220.33,-137.8 236.28,-143.42 250.62,-148.49"/>
+<polygon fill="#000000" stroke="#000000" points="249.65,-151.86 260.25,-151.88 251.98,-145.26 249.65,-151.86"/>
+</g>
+<!-- proc~restrict -->
+<g id="proc~~pointrelax~~CalledByGraph_node12" class="node">
+<title>proc~restrict</title>
+<g id="a_proc~~pointrelax~~CalledByGraph_node12"><a xlink:href="../proc/restrict.html" xlink:title="Restrict">
+<polygon fill="#d9534f" stroke="#d9534f" points="319.5,-90.92 265.5,-90.92 265.5,-66.92 319.5,-66.92 319.5,-90.92"/>
+<text text-anchor="middle" x="292.5" y="-76.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Restrict</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~restrict -->
+<g id="proc~~pointrelax~~CalledByGraph_edge19" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~restrict</title>
+<path fill="none" stroke="#000000" d="M206.6,-108.88C221.92,-103.47 240.02,-97.09 255.55,-91.6"/>
+<polygon fill="#000000" stroke="#000000" points="257.07,-94.78 265.34,-88.15 254.74,-88.18 257.07,-94.78"/>
+</g>
+<!-- proc~restrict&#45;&gt;proc~injectrestrictpoint -->
+<g id="proc~~pointrelax~~CalledByGraph_edge13" class="edge">
+<title>proc~restrict&#45;&gt;proc~injectrestrictpoint</title>
+<path fill="none" stroke="#000000" d="M319.77,-70.56C332.48,-66.59 347.99,-61.86 362,-57.92 369.51,-55.8 377.44,-53.65 385.29,-51.57"/>
+<polygon fill="#000000" stroke="#000000" points="386.35,-54.91 395.14,-48.99 384.58,-48.14 386.35,-54.91"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+
+
+    
+    
+
+    
+    
+
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">PointRelax</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">q0</span><span class="p">,</span><span class="w"> </span><span class="n">qend</span><span class="p">)</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(:)</span>
+<span class="w">     </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">n</span>
+<span class="w">     </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">q0</span><span class="p">,</span><span class="w"> </span><span class="n">qend</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_lev</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_lev</span>
+<span class="w">     </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">t0n</span>
+
+<span class="w">     </span><span class="n">mg_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+<span class="w">     </span><span class="n">pf_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+
+<span class="w">     </span><span class="n">t0n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kt">real</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">pfdp</span><span class="p">)</span>
+<span class="w">     </span><span class="k">call </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">stepper</span><span class="p">%</span><span class="n">do_n_steps</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">t0n</span><span class="p">,</span><span class="w"> </span><span class="n">q0</span><span class="p">,</span><span class="w"> </span><span class="n">qend</span><span class="p">,</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">  </span><span class="k">end subroutine </span><span class="n">PointRelax</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+  </body>
+</html>

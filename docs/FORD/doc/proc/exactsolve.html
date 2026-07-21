@@ -1,0 +1,934 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="The library for running PFASST">
+    <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>ExactSolve &ndash; LibPFASST</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
+    <link href="../css/local.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">LibPFASST </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>ExactSolve
+      <small>Subroutine</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title=" 0.3% of total for procedures.">65 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_mgrit.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_mgrit.f90.html'>pf_mgrit.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_mgrit.html'>pf_mod_MGRIT</a></li>
+            <li class="breadcrumb-item active" aria-current="page">ExactSolve</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../proc/exactsolve.html#src">ExactSolve</a>
+      </div>
+    </div>
+
+
+  </div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public  subroutine ExactSolve(pf, mg_ld, level_index)  
+</h2>
+    
+
+
+
+    <h3>Arguments</h3>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~178"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mg_ld~11"></span>
+              type(<a href='../type/mgrit_level_data.html'>mgrit_level_data</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              allocatable, target
+            </td>
+            <td>::</td>
+            <td><strong>mg_ld</strong>(:)</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~175"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <br>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Calls</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~exactsolve~~CallsGraph Pages: 1 -->
+<svg id="procexactsolveCallsGraph" width="628pt" height="496pt"
+ viewBox="0.00 0.00 628.00 496.37" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~exactsolve~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 492.37)">
+<title>proc~~exactsolve~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-492.37 624,-492.37 624,4 -4,4"/>
+<!-- proc~exactsolve -->
+<g id="proc~~exactsolve~~CallsGraph_node1" class="node">
+<title>proc~exactsolve</title>
+<polygon fill="none" stroke="black" points="65,-316 0,-316 0,-292 65,-292 65,-316"/>
+<text text-anchor="middle" x="32.5" y="-301.6" font-family="Helvetica,sans-Serif" font-size="10.50">ExactSolve</text>
+</g>
+<!-- axpy -->
+<g id="proc~~exactsolve~~CallsGraph_node2" class="node">
+<title>axpy</title>
+<polygon fill="#777777" stroke="#777777" points="295,-348 241,-348 241,-324 295,-324 295,-348"/>
+<text text-anchor="middle" x="268" y="-333.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">axpy</text>
+</g>
+<!-- proc~exactsolve&#45;&gt;axpy -->
+<g id="proc~~exactsolve~~CallsGraph_edge1" class="edge">
+<title>proc~exactsolve&#45;&gt;axpy</title>
+<path fill="none" stroke="#000000" d="M65.48,-308.38C108.7,-314.31 185.55,-324.84 230.83,-331.04"/>
+<polygon fill="#000000" stroke="#000000" points="230.42,-334.52 240.81,-332.41 231.37,-327.58 230.42,-334.52"/>
+</g>
+<!-- copy -->
+<g id="proc~~exactsolve~~CallsGraph_node3" class="node">
+<title>copy</title>
+<polygon fill="#777777" stroke="#777777" points="295,-390 241,-390 241,-366 295,-366 295,-390"/>
+<text text-anchor="middle" x="268" y="-375.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">copy</text>
+</g>
+<!-- proc~exactsolve&#45;&gt;copy -->
+<g id="proc~~exactsolve~~CallsGraph_edge2" class="edge">
+<title>proc~exactsolve&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M65.32,-315.68C76.56,-319.7 89.3,-324.16 101,-328 145.58,-342.63 197.41,-357.98 231.14,-367.75"/>
+<polygon fill="#000000" stroke="#000000" points="230.42,-371.19 241,-370.6 232.36,-364.46 230.42,-371.19"/>
+</g>
+<!-- interpolate -->
+<g id="proc~~exactsolve~~CallsGraph_node4" class="node">
+<title>interpolate</title>
+<polygon fill="#777777" stroke="#777777" points="181.5,-66 118.5,-66 118.5,-42 181.5,-42 181.5,-66"/>
+<text text-anchor="middle" x="150" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">interpolate</text>
+</g>
+<!-- proc~exactsolve&#45;&gt;interpolate -->
+<g id="proc~~exactsolve~~CallsGraph_edge3" class="edge">
+<title>proc~exactsolve&#45;&gt;interpolate</title>
+<path fill="none" stroke="#000000" d="M34.01,-291.83C36.12,-255.53 46.88,-146.45 101,-80 103.55,-76.87 106.59,-74.05 109.87,-71.54"/>
+<polygon fill="#000000" stroke="#000000" points="111.99,-74.34 118.42,-65.92 108.15,-68.49 111.99,-74.34"/>
+</g>
+<!-- proc~injectrestrictpoint -->
+<g id="proc~~exactsolve~~CallsGraph_node5" class="node">
+<title>proc~injectrestrictpoint</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node5"><a xlink:href="../proc/injectrestrictpoint.html" xlink:title="InjectRestrictPoint">
+<polygon fill="#d9534f" stroke="#d9534f" points="199,-272 101,-272 101,-248 199,-248 199,-272"/>
+<text text-anchor="middle" x="150" y="-257.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">InjectRestrictPoint</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~injectrestrictpoint -->
+<g id="proc~~exactsolve~~CallsGraph_edge4" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~injectrestrictpoint</title>
+<path fill="none" stroke="#000000" d="M65.06,-291.98C78.3,-286.93 93.87,-281 107.99,-275.62"/>
+<polygon fill="#000000" stroke="#000000" points="109.38,-278.84 117.48,-272.01 106.89,-272.3 109.38,-278.84"/>
+</g>
+<!-- proc~mgrit_recv -->
+<g id="proc~~exactsolve~~CallsGraph_node6" class="node">
+<title>proc~mgrit_recv</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node6"><a xlink:href="../proc/mgrit_recv.html" xlink:title="mgrit_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="299,-474 237,-474 237,-450 299,-450 299,-474"/>
+<text text-anchor="middle" x="268" y="-459.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~mgrit_recv -->
+<g id="proc~~exactsolve~~CallsGraph_edge5" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~mgrit_recv</title>
+<path fill="none" stroke="#000000" d="M35.58,-316.38C40.91,-343.91 57.82,-410.21 101,-441 137.6,-467.09 190.59,-469.32 226.8,-466.99"/>
+<polygon fill="#000000" stroke="#000000" points="227.3,-470.46 237,-466.19 226.75,-463.48 227.3,-470.46"/>
+</g>
+<!-- proc~mgrit_send -->
+<g id="proc~~exactsolve~~CallsGraph_node7" class="node">
+<title>proc~mgrit_send</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node7"><a xlink:href="../proc/mgrit_send.html" xlink:title="mgrit_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="301,-432 235,-432 235,-408 301,-408 301,-432"/>
+<text text-anchor="middle" x="268" y="-417.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_send</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~mgrit_send -->
+<g id="proc~~exactsolve~~CallsGraph_edge6" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~mgrit_send</title>
+<path fill="none" stroke="#000000" d="M47.14,-316.43C60.22,-327.85 80.88,-344.69 101,-356 141.06,-378.53 190.64,-396.49 225.14,-407.58"/>
+<polygon fill="#000000" stroke="#000000" points="224.3,-410.99 234.89,-410.67 226.41,-404.31 224.3,-410.99"/>
+</g>
+<!-- proc~mgrit_send_recv -->
+<g id="proc~~exactsolve~~CallsGraph_node8" class="node">
+<title>proc~mgrit_send_recv</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node8"><a xlink:href="../proc/mgrit_send_recv.html" xlink:title="mgrit_send_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="195.5,-432 104.5,-432 104.5,-408 195.5,-408 195.5,-432"/>
+<text text-anchor="middle" x="150" y="-417.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mgrit_send_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~mgrit_send_recv -->
+<g id="proc~~exactsolve~~CallsGraph_edge7" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~mgrit_send_recv</title>
+<path fill="none" stroke="#000000" d="M40.23,-316.09C51.07,-334.69 73.94,-370.65 101,-394 104.66,-397.16 108.78,-400.1 113.01,-402.77"/>
+<polygon fill="#000000" stroke="#000000" points="111.37,-405.86 121.78,-407.87 114.9,-399.82 111.37,-405.86"/>
+</g>
+<!-- proc~pf_start_timer -->
+<g id="proc~~exactsolve~~CallsGraph_node9" class="node">
+<title>proc~pf_start_timer</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node9"><a xlink:href="../proc/pf_start_timer.html" xlink:title="pf_start_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="520,-246 441,-246 441,-222 520,-222 520,-246"/>
+<text text-anchor="middle" x="480.5" y="-231.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_start_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge8" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M36.49,-291.81C43.44,-265.81 63.09,-204.42 101,-169 148.16,-124.93 171.71,-125.69 235,-113 309.08,-98.14 339.04,-76.15 405,-113 442.81,-134.12 463.8,-183.19 473.26,-211.93"/>
+<polygon fill="#000000" stroke="#000000" points="470.03,-213.33 476.33,-221.85 476.71,-211.26 470.03,-213.33"/>
+</g>
+<!-- proc~pf_stop_timer -->
+<g id="proc~~exactsolve~~CallsGraph_node10" class="node">
+<title>proc~pf_stop_timer</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node10"><a xlink:href="../proc/pf_stop_timer.html" xlink:title="pf_stop_timer">
+<polygon fill="#d9534f" stroke="#d9534f" points="519.5,-330 441.5,-330 441.5,-306 519.5,-306 519.5,-330"/>
+<text text-anchor="middle" x="480.5" y="-315.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop_timer</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge9" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M34.47,-316.41C37.63,-347.7 50.6,-430.01 101,-468 148.86,-504.07 175.17,-479.66 235,-483 264.29,-484.63 273.68,-493.69 301,-483 375.99,-453.65 438.37,-376.37 465.27,-338.93"/>
+<polygon fill="#000000" stroke="#000000" points="468.43,-340.51 471.33,-330.32 462.71,-336.48 468.43,-340.51"/>
+</g>
+<!-- proc~pointrelax -->
+<g id="proc~~exactsolve~~CallsGraph_node11" class="node">
+<title>proc~pointrelax</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node11"><a xlink:href="../proc/pointrelax.html" xlink:title="PointRelax">
+<polygon fill="#d9534f" stroke="#d9534f" points="300,-146 236,-146 236,-122 300,-122 300,-146"/>
+<text text-anchor="middle" x="268" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">PointRelax</text>
+</a>
+</g>
+</g>
+<!-- proc~exactsolve&#45;&gt;proc~pointrelax -->
+<g id="proc~~exactsolve~~CallsGraph_edge10" class="edge">
+<title>proc~exactsolve&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M44.78,-291.73C57.68,-278.05 79.75,-255.67 101,-239 145.26,-204.27 201.42,-170.69 235.76,-151.21"/>
+<polygon fill="#000000" stroke="#000000" points="237.84,-154.05 244.84,-146.1 234.41,-147.95 237.84,-154.05"/>
+</g>
+<!-- setval -->
+<g id="proc~~exactsolve~~CallsGraph_node12" class="node">
+<title>setval</title>
+<polygon fill="#777777" stroke="#777777" points="177,-24 123,-24 123,0 177,0 177,-24"/>
+<text text-anchor="middle" x="150" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">setval</text>
+</g>
+<!-- proc~exactsolve&#45;&gt;setval -->
+<g id="proc~~exactsolve~~CallsGraph_edge11" class="edge">
+<title>proc~exactsolve&#45;&gt;setval</title>
+<path fill="none" stroke="#000000" d="M32.97,-291.79C31.84,-250.3 33.59,-112.83 101,-33 104.43,-28.93 108.8,-25.63 113.5,-22.95"/>
+<polygon fill="#000000" stroke="#000000" points="115.26,-25.99 122.79,-18.54 112.26,-19.67 115.26,-25.99"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;axpy -->
+<g id="proc~~exactsolve~~CallsGraph_edge12" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;axpy</title>
+<path fill="none" stroke="#000000" d="M170.72,-272.1C179.43,-277.51 189.77,-284 199,-290 212.94,-299.07 228.3,-309.43 240.89,-318.01"/>
+<polygon fill="#000000" stroke="#000000" points="239.28,-321.15 249.5,-323.91 243.23,-315.37 239.28,-321.15"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;copy -->
+<g id="proc~~exactsolve~~CallsGraph_edge13" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M159.88,-272.3C174.25,-291.7 204.15,-330.01 235,-357 236.13,-357.98 237.3,-358.96 238.51,-359.92"/>
+<polygon fill="#000000" stroke="#000000" points="236.61,-362.86 246.75,-365.93 240.74,-357.21 236.61,-362.86"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge14" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M165.86,-247.73C188.87,-228.78 230.93,-194.42 235,-193 306.31,-168.04 331.82,-174.19 405,-193 422.83,-197.58 440.96,-207.43 454.88,-216.32"/>
+<polygon fill="#000000" stroke="#000000" points="453.1,-219.34 463.36,-221.96 456.97,-213.51 453.1,-219.34"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge15" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M179.34,-272.01C215.25,-286.52 279.42,-310.09 337,-319 366.87,-323.62 374.78,-319.2 405,-319 413.46,-318.94 422.46,-318.85 431.17,-318.74"/>
+<polygon fill="#000000" stroke="#000000" points="431.26,-322.24 441.22,-318.61 431.17,-315.24 431.26,-322.24"/>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~pointrelax -->
+<g id="proc~~exactsolve~~CallsGraph_edge16" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~pointrelax</title>
+<path fill="none" stroke="#000000" d="M159.9,-247.98C174.55,-228.54 205.1,-189.42 235,-160 237.53,-157.52 240.27,-155.02 243.06,-152.61"/>
+<polygon fill="#000000" stroke="#000000" points="245.41,-155.21 250.87,-146.13 240.94,-149.82 245.41,-155.21"/>
+</g>
+<!-- proc~resnorm -->
+<g id="proc~~exactsolve~~CallsGraph_node17" class="node">
+<title>proc~resnorm</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node17"><a xlink:href="../proc/resnorm.html" xlink:title="ResNorm">
+<polygon fill="#d9534f" stroke="#d9534f" points="297,-268 239,-268 239,-244 297,-244 297,-268"/>
+<text text-anchor="middle" x="268" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">ResNorm</text>
+</a>
+</g>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;proc~resnorm -->
+<g id="proc~~exactsolve~~CallsGraph_edge17" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;proc~resnorm</title>
+<path fill="none" stroke="#000000" d="M199.19,-258.34C208.96,-258 219.11,-257.65 228.49,-257.33"/>
+<polygon fill="#000000" stroke="#000000" points="228.82,-260.82 238.69,-256.98 228.58,-253.82 228.82,-260.82"/>
+</g>
+<!-- restrict -->
+<g id="proc~~exactsolve~~CallsGraph_node18" class="node">
+<title>restrict</title>
+<polygon fill="#777777" stroke="#777777" points="295,-226 241,-226 241,-202 295,-202 295,-226"/>
+<text text-anchor="middle" x="268" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">restrict</text>
+</g>
+<!-- proc~injectrestrictpoint&#45;&gt;restrict -->
+<g id="proc~~exactsolve~~CallsGraph_edge18" class="edge">
+<title>proc~injectrestrictpoint&#45;&gt;restrict</title>
+<path fill="none" stroke="#000000" d="M181.48,-247.91C196.71,-241.87 215.24,-234.53 231.15,-228.22"/>
+<polygon fill="#000000" stroke="#000000" points="232.66,-231.38 240.66,-224.44 230.08,-224.88 232.66,-231.38"/>
+</g>
+<!-- proc~pf_recv -->
+<g id="proc~~exactsolve~~CallsGraph_node15" class="node">
+<title>proc~pf_recv</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node15"><a xlink:href="../proc/pf_recv.html" xlink:title="pf_recv">
+<polygon fill="#d9534f" stroke="#d9534f" points="398,-310 344,-310 344,-286 398,-286 398,-310"/>
+<text text-anchor="middle" x="371" y="-295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_recv</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_recv&#45;&gt;proc~pf_recv -->
+<g id="proc~~exactsolve~~CallsGraph_edge19" class="edge">
+<title>proc~mgrit_recv&#45;&gt;proc~pf_recv</title>
+<path fill="none" stroke="#000000" d="M290.94,-449.92C294.58,-447.29 298.11,-444.3 301,-441 333.05,-404.45 353.68,-350.4 363.42,-320.3"/>
+<polygon fill="#000000" stroke="#000000" points="366.88,-320.96 366.52,-310.37 360.2,-318.88 366.88,-320.96"/>
+</g>
+<!-- proc~pf_send -->
+<g id="proc~~exactsolve~~CallsGraph_node16" class="node">
+<title>proc~pf_send</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node16"><a xlink:href="../proc/pf_send.html" xlink:title="pf_send">
+<polygon fill="#d9534f" stroke="#d9534f" points="398,-268 344,-268 344,-244 398,-244 398,-268"/>
+<text text-anchor="middle" x="371" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_send</text>
+</a>
+</g>
+</g>
+<!-- proc~mgrit_send&#45;&gt;proc~pf_send -->
+<g id="proc~~exactsolve~~CallsGraph_edge20" class="edge">
+<title>proc~mgrit_send&#45;&gt;proc~pf_send</title>
+<path fill="none" stroke="#000000" d="M292.05,-407.8C295.4,-405.25 298.54,-402.31 301,-399 334.69,-353.6 302.99,-322.16 337,-277 337.55,-276.26 338.14,-275.55 338.76,-274.85"/>
+<polygon fill="#000000" stroke="#000000" points="341.15,-277.4 346.23,-268.11 336.46,-272.21 341.15,-277.4"/>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;copy -->
+<g id="proc~~exactsolve~~CallsGraph_edge21" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;copy</title>
+<path fill="none" stroke="#000000" d="M184.24,-407.96C198.96,-402.64 216.3,-396.36 231.29,-390.93"/>
+<polygon fill="#000000" stroke="#000000" points="232.54,-394.2 240.75,-387.5 230.16,-387.62 232.54,-394.2"/>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;proc~mgrit_recv -->
+<g id="proc~~exactsolve~~CallsGraph_edge22" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;proc~mgrit_recv</title>
+<path fill="none" stroke="#000000" d="M184.24,-432.04C197.73,-436.92 213.42,-442.6 227.49,-447.69"/>
+<polygon fill="#000000" stroke="#000000" points="226.33,-451 236.92,-451.11 228.71,-444.42 226.33,-451"/>
+</g>
+<!-- proc~mgrit_send_recv&#45;&gt;proc~mgrit_send -->
+<g id="proc~~exactsolve~~CallsGraph_edge23" class="edge">
+<title>proc~mgrit_send_recv&#45;&gt;proc~mgrit_send</title>
+<path fill="none" stroke="#000000" d="M195.52,-420C205.09,-420 215.18,-420 224.67,-420"/>
+<polygon fill="#000000" stroke="#000000" points="224.67,-423.5 234.67,-420 224.67,-416.5 224.67,-423.5"/>
+</g>
+<!-- mpi_wtime -->
+<g id="proc~~exactsolve~~CallsGraph_node14" class="node">
+<title>mpi_wtime</title>
+<polygon fill="#777777" stroke="#777777" points="620,-288 556,-288 556,-264 620,-264 620,-288"/>
+<text text-anchor="middle" x="588" y="-273.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi_wtime</text>
+</g>
+<!-- proc~pf_start_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~exactsolve~~CallsGraph_edge24" class="edge">
+<title>proc~pf_start_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M511.73,-246.04C522.77,-250.43 535.42,-255.47 547.17,-260.14"/>
+<polygon fill="#000000" stroke="#000000" points="546.18,-263.52 556.76,-263.96 548.77,-257.01 546.18,-263.52"/>
+</g>
+<!-- proc~pf_stop_timer&#45;&gt;mpi_wtime -->
+<g id="proc~~exactsolve~~CallsGraph_edge25" class="edge">
+<title>proc~pf_stop_timer&#45;&gt;mpi_wtime</title>
+<path fill="none" stroke="#000000" d="M511.73,-305.96C522.77,-301.57 535.42,-296.53 547.17,-291.86"/>
+<polygon fill="#000000" stroke="#000000" points="548.77,-294.99 556.76,-288.04 546.18,-288.48 548.77,-294.99"/>
+</g>
+<!-- do_n_steps -->
+<g id="proc~~exactsolve~~CallsGraph_node13" class="node">
+<title>do_n_steps</title>
+<polygon fill="#777777" stroke="#777777" points="405,-146 337,-146 337,-122 405,-122 405,-146"/>
+<text text-anchor="middle" x="371" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">do_n_steps</text>
+</g>
+<!-- proc~pointrelax&#45;&gt;do_n_steps -->
+<g id="proc~~exactsolve~~CallsGraph_edge26" class="edge">
+<title>proc~pointrelax&#45;&gt;do_n_steps</title>
+<path fill="none" stroke="#000000" d="M300.13,-134C308.46,-134 317.62,-134 326.49,-134"/>
+<polygon fill="#000000" stroke="#000000" points="326.7,-137.5 336.7,-134 326.7,-130.5 326.7,-137.5"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge27" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M391.01,-285.98C407.95,-275.3 431.49,-260.55 441,-255 443.19,-253.72 445.45,-252.42 447.75,-251.13"/>
+<polygon fill="#000000" stroke="#000000" points="449.54,-254.14 456.58,-246.22 446.14,-248.02 449.54,-254.14"/>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge29" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M398.02,-302.84C408.02,-304.7 419.78,-306.89 431.2,-309.01"/>
+<polygon fill="#000000" stroke="#000000" points="430.64,-312.47 441.11,-310.86 431.92,-305.59 430.64,-312.47"/>
+</g>
+<!-- proc~pf_stop -->
+<g id="proc~~exactsolve~~CallsGraph_node20" class="node">
+<title>proc~pf_stop</title>
+<g id="a_proc~~exactsolve~~CallsGraph_node20"><a xlink:href="../proc/pf_stop.html" xlink:title="pf_stop">
+<polygon fill="#d9534f" stroke="#d9534f" points="507.5,-288 453.5,-288 453.5,-264 507.5,-264 507.5,-288"/>
+<text text-anchor="middle" x="480.5" y="-273.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stop</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_recv&#45;&gt;proc~pf_stop -->
+<g id="proc~~exactsolve~~CallsGraph_edge28" class="edge">
+<title>proc~pf_recv&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M398.02,-292.67C411.65,-289.88 428.56,-286.42 443.44,-283.38"/>
+<polygon fill="#000000" stroke="#000000" points="444.25,-286.79 453.34,-281.35 442.85,-279.93 444.25,-286.79"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_start_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge30" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_start_timer</title>
+<path fill="none" stroke="#000000" d="M398.02,-250.67C407.92,-248.65 419.55,-246.27 430.87,-243.95"/>
+<polygon fill="#000000" stroke="#000000" points="431.6,-247.38 440.69,-241.94 430.2,-240.52 431.6,-247.38"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_stop_timer -->
+<g id="proc~~exactsolve~~CallsGraph_edge32" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_stop_timer</title>
+<path fill="none" stroke="#000000" d="M391.81,-268.04C405.55,-276.31 424.29,-287.48 441,-297 443.34,-298.33 445.76,-299.7 448.21,-301.06"/>
+<polygon fill="#000000" stroke="#000000" points="446.58,-304.16 457.03,-305.92 449.96,-298.03 446.58,-304.16"/>
+</g>
+<!-- proc~pf_send&#45;&gt;proc~pf_stop -->
+<g id="proc~~exactsolve~~CallsGraph_edge31" class="edge">
+<title>proc~pf_send&#45;&gt;proc~pf_stop</title>
+<path fill="none" stroke="#000000" d="M398.02,-260.84C411.65,-263.38 428.56,-266.52 443.44,-269.29"/>
+<polygon fill="#000000" stroke="#000000" points="442.87,-272.75 453.34,-271.13 444.15,-265.86 442.87,-272.75"/>
+</g>
+<!-- norm -->
+<g id="proc~~exactsolve~~CallsGraph_node19" class="node">
+<title>norm</title>
+<polygon fill="#777777" stroke="#777777" points="398,-226 344,-226 344,-202 398,-202 398,-226"/>
+<text text-anchor="middle" x="371" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">norm</text>
+</g>
+<!-- proc~resnorm&#45;&gt;norm -->
+<g id="proc~~exactsolve~~CallsGraph_edge33" class="edge">
+<title>proc~resnorm&#45;&gt;norm</title>
+<path fill="none" stroke="#000000" d="M297.13,-244.3C308.65,-239.51 322.11,-233.92 334.3,-228.84"/>
+<polygon fill="#000000" stroke="#000000" points="335.86,-231.99 343.75,-224.92 333.17,-225.52 335.86,-231.99"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+  <h3 class="card-title">Called by</h3>
+      </div>
+      <div class="card-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: proc~~exactsolve~~CalledByGraph Pages: 1 -->
+<svg id="procexactsolveCalledByGraph" width="332pt" height="32pt"
+ viewBox="0.00 0.00 332.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~exactsolve~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~exactsolve~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 328,-28 328,4 -4,4"/>
+<!-- proc~exactsolve -->
+<g id="proc~~exactsolve~~CalledByGraph_node1" class="node">
+<title>proc~exactsolve</title>
+<polygon fill="none" stroke="black" points="324,-24 259,-24 259,0 324,0 324,-24"/>
+<text text-anchor="middle" x="291.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">ExactSolve</text>
+</g>
+<!-- proc~pf_mgrit_v_cycle -->
+<g id="proc~~exactsolve~~CalledByGraph_node2" class="node">
+<title>proc~pf_mgrit_v_cycle</title>
+<g id="a_proc~~exactsolve~~CalledByGraph_node2"><a xlink:href="../proc/pf_mgrit_v_cycle.html" xlink:title="pf_MGRIT_v_cycle">
+<polygon fill="#d9534f" stroke="#d9534f" points="223,-24 120,-24 120,0 223,0 223,-24"/>
+<text text-anchor="middle" x="171.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_v_cycle</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_v_cycle&#45;&gt;proc~exactsolve -->
+<g id="proc~~exactsolve~~CalledByGraph_edge1" class="edge">
+<title>proc~pf_mgrit_v_cycle&#45;&gt;proc~exactsolve</title>
+<path fill="none" stroke="#000000" d="M223.23,-12C231.75,-12 240.5,-12 248.76,-12"/>
+<polygon fill="#000000" stroke="#000000" points="248.91,-15.5 258.91,-12 248.91,-8.5 248.91,-15.5"/>
+</g>
+<!-- proc~pf_mgrit_run -->
+<g id="proc~~exactsolve~~CalledByGraph_node3" class="node">
+<title>proc~pf_mgrit_run</title>
+<g id="a_proc~~exactsolve~~CalledByGraph_node3"><a xlink:href="../proc/pf_mgrit_run.html" xlink:title="pf_MGRIT_run">
+<polygon fill="#d9534f" stroke="#d9534f" points="84,-24 0,-24 0,0 84,0 84,-24"/>
+<text text-anchor="middle" x="42" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_MGRIT_run</text>
+</a>
+</g>
+</g>
+<!-- proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle -->
+<g id="proc~~exactsolve~~CalledByGraph_edge2" class="edge">
+<title>proc~pf_mgrit_run&#45;&gt;proc~pf_mgrit_v_cycle</title>
+<path fill="none" stroke="#000000" d="M84.04,-12C92.21,-12 100.94,-12 109.6,-12"/>
+<polygon fill="#000000" stroke="#000000" points="109.7,-15.5 119.7,-12 109.7,-8.5 109.7,-15.5"/>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.48.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="641pt" height="29pt"
+ viewBox="0.00 0.00 641.00 29.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.92 0.92) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 692.5,-28 692.5,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-24 0,-24 0,0 64,0 64,-24"/>
+<text text-anchor="middle" x="32" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-24 82,-24 82,0 136,0 136,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="209.5,-24 154.5,-24 154.5,0 209.5,0 209.5,-24"/>
+<text text-anchor="middle" x="182" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Type Bound Procedure -->
+<g id="node4" class="node">
+<title>Type Bound Procedure</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="348.5,-24 227.5,-24 227.5,0 348.5,0 348.5,-24"/>
+<text text-anchor="middle" x="288" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type Bound Procedure</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node5" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="501,-24 367,-24 367,0 501,0 501,-24"/>
+<text text-anchor="middle" x="434" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node6" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="573,-24 519,-24 519,0 573,0 573,-24"/>
+<text text-anchor="middle" x="546" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node7" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="688.5,-24 591.5,-24 591.5,0 688.5,0 688.5,-24"/>
+<text text-anchor="middle" x="640" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a procedure to one which it calls. Dashed 
+arrows point from an interface to procedures which implement that interface.
+This could include the module procedures in a generic interface or the
+implementation in a submodule of an interface in a parent module.
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+
+
+    
+    
+
+    
+    
+
+
+
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">subroutine </span><span class="n">ExactSolve</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">)</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_pfasst_t</span><span class="p">),</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(:)</span>
+<span class="w">     </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">level_index</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">level_index_f</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">lev</span>
+<span class="w">     </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">gi</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">ii</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nlevels</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">zero_rhs_flag</span><span class="p">,</span><span class="w"> </span><span class="n">send_flag</span><span class="p">,</span><span class="w"> </span><span class="n">recv_flag</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">mgrit_level_data</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">,</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">,</span><span class="w"> </span><span class="n">mg_finest_lev</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_lev</span><span class="p">,</span><span class="w"> </span><span class="n">pf_f_lev</span>
+
+<span class="w">     </span><span class="n">mg_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+<span class="w">     </span><span class="n">nlevels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">nlevels</span>
+<span class="w">     </span><span class="n">level_index_f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">level_index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+
+<span class="w">     </span><span class="n">mg_f_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">level_index_f</span><span class="p">)</span>
+<span class="w">     </span><span class="n">mg_finest_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)</span>
+
+<span class="w">     </span><span class="n">pf_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index</span><span class="p">)</span>
+<span class="w">     </span><span class="n">pf_f_lev</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">levels</span><span class="p">(</span><span class="n">level_index_f</span><span class="p">)</span>
+
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)%</span><span class="n">FAS_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">Nt</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        call </span><span class="n">pf_f_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_boundary</span><span class="p">)</span>
+<span class="w">        </span><span class="n">send_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">f_pts_flag</span>
+<span class="w">        </span><span class="n">recv_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">c_pts_flag</span>
+<span class="w">        </span><span class="k">call </span><span class="n">mgrit_send_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">,</span><span class="w"> </span><span class="n">send_flag</span><span class="p">,</span><span class="w"> </span><span class="n">recv_flag</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">recv_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">           call </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_fas_boundary</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_boundary</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end if</span>
+<span class="k">     end if</span>
+
+<span class="k">     if</span><span class="w"> </span><span class="p">(</span><span class="n">mg_lev</span><span class="p">%</span><span class="n">Nt</span><span class="w"> </span><span class="p">.</span><span class="n">gt</span><span class="p">.</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">res_norm_loc</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_pfdp</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mg_lev</span><span class="p">%</span><span class="n">rank_shifted</span><span class="w"> </span><span class="p">.</span><span class="n">gt</span><span class="p">.</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="w"> </span><span class="p">.</span><span class="n">gt</span><span class="p">.</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">           call </span><span class="n">mgrit_recv</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="k">           if</span><span class="w"> </span><span class="p">(</span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)%</span><span class="n">FAS_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">              call </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_lev</span><span class="p">%</span><span class="n">Q0</span><span class="p">)</span>
+<span class="w">           </span><span class="k">else</span>
+<span class="k">              call </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">setval</span><span class="p">(</span><span class="mf">0.0_pfdp</span><span class="p">);</span>
+<span class="w">           </span><span class="k">end if</span>
+<span class="k">        end if</span>
+
+<span class="w">        </span><span class="c">!call pf_lev%ulevel%factory%create_single(gi, level_index, pf_lev%lev_shape)</span>
+<span class="w">        </span><span class="k">do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="n">mg_lev</span><span class="p">%</span><span class="n">Nt</span>
+<span class="w">           </span><span class="n">ii</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">c_pts</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="w">           </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">level_index_f</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="n">nlevels</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">               </span><span class="n">zero_rhs_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span>
+<span class="w">           </span><span class="k">else</span>
+<span class="k">               </span><span class="n">zero_rhs_flag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">           </span><span class="k">end if</span>
+<span class="k">           call </span><span class="n">InjectRestrictPoint</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">g_temp</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">ii</span><span class="p">,</span><span class="w"> </span><span class="n">zero_rhs_flag</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">copy</span><span class="p">(</span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc_prev</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+<span class="w">           </span><span class="k">call </span><span class="n">PointRelax</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">,</span><span class="w"> </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">g_temp</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">pf_lev</span><span class="p">%</span><span class="n">q0</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">pf_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">)</span>
+
+<span class="w">           </span><span class="k">call </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">q_temp</span><span class="p">%</span><span class="n">copy</span><span class="p">(</span><span class="n">pf_lev</span><span class="p">%</span><span class="n">qend</span><span class="p">)</span>
+<span class="w">           </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)%</span><span class="n">FAS_flag</span><span class="w"> </span><span class="p">.</span><span class="n">eqv</span><span class="p">.</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">(</span><span class="n">mg_ld</span><span class="p">(</span><span class="n">nlevels</span><span class="p">)%</span><span class="n">cycle_phase</span><span class="w"> </span><span class="p">.</span><span class="n">gt</span><span class="p">.</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">              call </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">q_temp</span><span class="p">%</span><span class="n">axpy</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">qc_fas</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="w">           </span><span class="k">end if</span>
+<span class="k">           call </span><span class="n">pf_start_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">T_INTERPOLATE</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">pf_f_lev</span><span class="p">%</span><span class="n">ulevel</span><span class="p">%</span><span class="n">interpolate</span><span class="p">(</span><span class="n">pf_f_lev</span><span class="p">,</span><span class="w"> </span><span class="n">pf_lev</span><span class="p">,</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">q_temp</span><span class="p">,</span><span class="w"> </span><span class="n">mg_lev</span><span class="p">%</span><span class="n">q_temp</span><span class="p">,</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">t0</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">pf_stop_timer</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">T_INTERPOLATE</span><span class="p">,</span><span class="w"> </span><span class="n">level_index_f</span><span class="p">)</span>
+<span class="w">           </span><span class="k">call </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">qc</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">axpy</span><span class="p">(</span><span class="mf">1.0_pfdp</span><span class="p">,</span><span class="w"> </span><span class="n">mg_f_lev</span><span class="p">%</span><span class="n">q_temp</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end do</span>
+<span class="w">        </span><span class="c">!call pf_lev%ulevel%factory%destroy_single(gi)</span>
+
+<span class="w">        </span><span class="c">!pf_f_lev%residual = mg_f_lev%res_norm_loc(1)</span>
+<span class="w">        </span><span class="c">!pf_lev%residual = 0.0_pfdp</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">pf</span><span class="p">%</span><span class="n">rank</span><span class="w"> </span><span class="p">.</span><span class="n">lt</span><span class="p">.</span><span class="w"> </span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">.</span><span class="nb">and</span><span class="p">.</span><span class="w"> </span><span class="p">(</span><span class="n">pf</span><span class="p">%</span><span class="n">comm</span><span class="p">%</span><span class="n">nproc</span><span class="w"> </span><span class="p">.</span><span class="n">gt</span><span class="p">.</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">           call </span><span class="n">mgrit_send</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="n">mg_ld</span><span class="p">,</span><span class="w"> </span><span class="n">level_index</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.)</span>
+<span class="w">        </span><span class="k">end if</span>
+
+<span class="k">     end if</span>
+<span class="k">  end subroutine </span><span class="n">ExactSolve</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+  </body>
+</html>

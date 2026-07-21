@@ -1,26 +1,24 @@
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Output &#8212; LIBPFASST 1.1 documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=f11ead97" />
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/documentation_options.js?v=56dcb7b8"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="prev" title="Data encapsulation" href="encap.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -29,7 +27,8 @@
         <li class="right" >
           <a href="encap.html" title="Data encapsulation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Output</a></li> 
       </ul>
     </div>  
 
@@ -38,23 +37,23 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="output">
-<h1>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h1>
+  <section id="output">
+<h1>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h1>
 <p>There are two main ways to produce output automatically from LibPFASST, namely through the setting of <a class="reference internal" href="#hooks">hooks</a> and the output of the <a class="reference internal" href="#results">results</a> module.</p>
-<div class="section" id="hooks">
-<h2>hooks<a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
+<section id="hooks">
+<h2>hooks<a class="headerlink" href="#hooks" title="Link to this heading">¶</a></h2>
 <p>The first output possibility is through the use of what are called hooks, which are user defined subroutines that can be called from many different places in the source code.  These are typically set in the users main routine.  For example in <cite>LibPFASST/Tutorials/EX2_Dahlquist/src/main.f90</cite>  a hook is added by the statement.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="c">!&gt; add some hooks for output</span>
-<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">PF_POST_ITERATION</span><span class="p">,</span> <span class="n">echo_error</span><span class="p">)</span>
+<span class="k">call </span><span class="n">pf_add_hook</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">PF_POST_ITERATION</span><span class="p">,</span><span class="w"> </span><span class="n">echo_error</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will force a call to  the user-supplied subroutine <code class="docutils literal notranslate"><span class="pre">echo_error</span></code> (supplied locally in the file <cite>src/hooks.f90</cite>) after every PFASST iteration. The second parameter specifies the level on which the hooks should be called with the value -1 indicating all levels.  See the file
 <cite>LibPFASST/src/pf_hooks.f90</cite> for a list of hook locations.</p>
-</div>
-<div class="section" id="results">
-<h2>results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="results">
+<h2>results<a class="headerlink" href="#results" title="Link to this heading">¶</a></h2>
 <p>LibPFASST contains the module <code class="docutils literal notranslate"><span class="pre">pf_mod_results</span></code> which is used to collect information about the run during a call to LibPFASST.
-The destination of the output can be changed from the default directory <cite>dat/outdir</cite> to an arbitrary path by specifying the variable <code class="docutils literal notranslate"><span class="pre">outdir</span></code> in the <code class="docutils literal notranslate"><span class="pre">PF</span></code> namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\”my_outdir\”.  The collection and output of the results can be controlled by the parameters <code class="docutils literal notranslate"><span class="pre">save_residuals</span></code>, <code class="docutils literal notranslate"><span class="pre">save_delta_q0</span></code>, <code class="docutils literal notranslate"><span class="pre">save_errors</span></code>, and <code class="docutils literal notranslate"><span class="pre">save_timings</span></code>.  The first will determine if the residuals are saved internally and
+The destination of the output can be changed from the default directory <cite>dat/outdir</cite> to an arbitrary path by specifying the variable <code class="docutils literal notranslate"><span class="pre">outdir</span></code> in the <code class="docutils literal notranslate"><span class="pre">PF</span></code> namelist.  As with all input flags, this can be done on the command line with the syntax outdir=\\”my_outdir\\”.  The collection and output of the results can be controlled by the parameters <code class="docutils literal notranslate"><span class="pre">save_residuals</span></code>, <code class="docutils literal notranslate"><span class="pre">save_delta_q0</span></code>, <code class="docutils literal notranslate"><span class="pre">save_errors</span></code>, and <code class="docutils literal notranslate"><span class="pre">save_timings</span></code>.  The first will determine if the residuals are saved internally and
 then output to the directory <cite>my_outdir/residuals</cite> after the completion of the iterations.  The second does essentially the change in intial conditions at each processor.  The third controls the behavior for errors. The last is for the output of
 timings of various parts of the code and is an integer which can be set to 0,1,2, or 3.</p>
 <ol class="arabic simple" start="0">
@@ -80,32 +79,34 @@ For example, in the Tutorial <a class="reference internal" href="tutorial.html#t
 </div>
 <p>At the moment, the easiest way to understand the output file formats is probably to consult the code in <cite>src/pf_results.f90</cite>, e.g.</p>
 <div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="k">do </span><span class="n">klevel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">nlevs</span>
-   <span class="k">do </span><span class="n">kblock</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">nblocks</span>
-      <span class="n">nstep</span><span class="o">=</span><span class="p">(</span><span class="n">kblock</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nprocs</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
-      <span class="k">do </span><span class="n">kiter</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">niters</span>
-         <span class="k">do </span><span class="n">ksweep</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">this</span><span class="p">%</span><span class="n">max_nsweeps</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">rstream</span><span class="p">,</span><span class="mi">101</span> <span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span> <span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksweep</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_errors</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">estream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>  <span class="n">ksweep</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_delta_q0</span><span class="p">)</span> <span class="k">write</span><span class="p">(</span><span class="n">qstream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span> <span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">delta_q0</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span> <span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ksweep</span><span class="p">)</span>
-         <span class="k">end do</span>
+<span class="w">   </span><span class="k">do </span><span class="n">kblock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">nblocks</span>
+<span class="w">      </span><span class="n">nstep</span><span class="o">=</span><span class="p">(</span><span class="n">kblock</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">this</span><span class="p">%</span><span class="n">nprocs</span><span class="o">+</span><span class="n">this</span><span class="p">%</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">      </span><span class="k">do </span><span class="n">kiter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">niters</span>
+<span class="w">         </span><span class="k">do </span><span class="n">ksweep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">max_nsweeps</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_residuals</span><span class="p">)</span><span class="w"> </span><span class="k">write</span><span class="p">(</span><span class="n">rstream</span><span class="p">,</span><span class="mi">101</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">residuals</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span><span class="w"> </span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">ksweep</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_errors</span><span class="p">)</span><span class="w"> </span><span class="k">write</span><span class="p">(</span><span class="n">estream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span><span class="w"> </span><span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">errors</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="n">ksweep</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">this</span><span class="p">%</span><span class="n">save_delta_q0</span><span class="p">)</span><span class="w"> </span><span class="k">write</span><span class="p">(</span><span class="n">qstream</span><span class="p">,</span><span class="mi">101</span><span class="p">)</span><span class="w"> </span><span class="n">klevel</span><span class="p">,</span><span class="n">nstep</span><span class="p">,</span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="p">,</span><span class="n">ksweep</span><span class="p">,</span><span class="n">this</span><span class="p">%</span><span class="n">delta_q0</span><span class="p">(</span><span class="n">klevel</span><span class="p">,</span><span class="w"> </span><span class="n">kblock</span><span class="p">,</span><span class="n">kiter</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">ksweep</span><span class="p">)</span>
+<span class="w">         </span><span class="k">end do</span>
 <span class="k">      end do</span>
-<span class="k">   </span><span class="n">enddo</span>
-<span class="n">enddo</span>
-<span class="mi">101</span> <span class="k">format</span><span class="p">(</span><span class="n">I3</span><span class="p">,</span><span class="n">I10</span><span class="p">,</span> <span class="n">I10</span><span class="p">,</span><span class="n">I5</span><span class="p">,</span> <span class="n">I4</span><span class="p">,</span> <span class="n">e22</span><span class="p">.</span><span class="mi">14</span><span class="p">)</span>
+<span class="k">   enddo</span>
+<span class="k">enddo</span>
+<span class="mi">101</span><span class="w"> </span><span class="k">format</span><span class="p">(</span><span class="n">I3</span><span class="p">,</span><span class="n">I10</span><span class="p">,</span><span class="w"> </span><span class="n">I10</span><span class="p">,</span><span class="n">I5</span><span class="p">,</span><span class="w"> </span><span class="n">I4</span><span class="p">,</span><span class="w"> </span><span class="n">e22</span><span class="p">.</span><span class="mi">14</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The output files are set up to allow easy input into Python post-processing routines using  <code class="docutils literal notranslate"><span class="pre">json.load</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.loadtxt</span></code> routines (or equivalents).</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Output</a><ul>
 <li><a class="reference internal" href="#hooks">hooks</a></li>
 <li><a class="reference internal" href="#results">results</a></li>
@@ -113,9 +114,12 @@ For example, in the Tutorial <a class="reference internal" href="tutorial.html#t
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="encap.html"
-                        title="previous chapter">Data encapsulation</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="encap.html"
+                          title="previous chapter">Data encapsulation</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -123,21 +127,21 @@ For example, in the Tutorial <a class="reference internal" href="tutorial.html#t
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -146,12 +150,13 @@ For example, in the Tutorial <a class="reference internal" href="tutorial.html#t
         <li class="right" >
           <a href="encap.html" title="Data encapsulation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">LIBPFASST 1.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Output</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    &#169; <a href="copyright.html">Copyright</a> 2018, Matthew Emmett, Michael Minion, Brandon Krull, Sebastian Goetschel, Francois Hamon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     </div>
   </body>
 </html>

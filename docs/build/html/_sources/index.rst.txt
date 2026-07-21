@@ -20,6 +20,7 @@ LibPFASST is a Fortran implementation of the PFASST algorithm.
 * :doc:`Tutorial <tutorial>` - getting started and basic usage.
 * :doc:`Parameters <parameters>` - controlling the behavior of LibPFASST
 * :doc:`Sweepers <sweepers>` - sweepers provided by LibPFASST
+* :doc:`Steppers <steppers>` - steppers provided by LibPFASST
 * :doc:`Data encapsulation <encap>` - data encapsulations provided by LibPFASST
 * :doc:`Output <output>`      - controlling the behavior of LibPFASST  
 .. * :doc:`Overview <overview>` - design and interface overview.
