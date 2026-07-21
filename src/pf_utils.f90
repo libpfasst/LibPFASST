@@ -187,11 +187,11 @@ contains
     integer :: m
     class(pf_level_t), pointer :: lev    !!  points to current level
     lev => pf%levels(level_index)   !!  Assign level pointer
-!     which = 1
-!     if(present(flags)) which = flags
+    !which = 1
+    !if(present(flags)) which = flags
     
-!     mystep = 1
-!     if(present(step)) mystep = step
+    !mystep = 1
+    !if(present(step)) mystep = step
     
     do m = 1, lev%nnodes
        call lev%ulevel%sweeper%evaluate(pf,level_index, t(m), m, flags=flags, step=step)
@@ -330,6 +330,7 @@ contains
     write(f_string,"(*(G0,:,','))") q
     q_string=adjustr('['//trim(f_string)//']')
   end function convert_int_array
+  
   function wrap_timer_name(tname) result(q_string)
     character(len=10)::  tname
     character(len=12)::  q_string

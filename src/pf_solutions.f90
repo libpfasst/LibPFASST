@@ -92,7 +92,9 @@ contains
     
     nx = SIZE(uex)
     do i = 1, nx
-       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp) 
+       x = Lx*REAL(i-1,pfdp)/REAL(nx,pfdp)            ! computes solution at beginning of time block
+       !x = Lx*REAL(i,pfdp)/REAL(nx,pfdp)             ! computes solution at end of time block
+       !x = Lx*(REAL(i-1,pfdp)+HALF)/REAL(nx,pfdp)    ! computes solution at center of time block
        uex(i) = ad_cos_ex(t, x,nu,v,kfreq(1),Lx)
     end do
 
@@ -393,21 +395,22 @@ contains
     real(pfdp), intent(in)  :: Lx        
     real(pfdp)  :: u
 
-    real(pfdp) :: rn,ts,xs,a,b,c,phi,dphi,o1,o2
+    real(pfdp) :: rn,ts,xs,eps
     integer :: n,nterms
 
     nterms = 100
     u=0.0_pfdp
-    xs=x
+    xs= two_pi * x / Lx - qpi    ! adjust domain to -pi <= x <= pi
     ts=t
+    eps = 1.0_pfdp               ! amplitude of initial sine wave
 
     if (t .gt. 0.0_pfdp) then
        do n =  nterms,1,-1
           rn = REAL(n,pfdp)
-          u=u - 2.0_pfdp*bessel_jn(n,nu*rn*ts)/(rn*ts)*sin(rn*xs)
+          u=u - 2.0_pfdp*bessel_jn(n,eps*rn*ts)/(rn*ts)*sin(rn*xs)
        end do
     else
-       u=-sin(xs)    
+       u=-eps * sin(xs)    
     end if
 
   end function burg_sin_ex

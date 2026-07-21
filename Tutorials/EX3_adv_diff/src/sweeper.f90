@@ -47,7 +47,7 @@ contains
 
   !>  Routine to initialize sweeper (bypasses imex sweeper initialize)
   subroutine initialize(this, pf,level_index)
-    use probin, only:  imex_stat, v ,nu,fd_ord
+    use probin, only:  imex_stat, v, nu, fd_ord, Lx
     class(my_sweeper_t), intent(inout) :: this
     type(pf_pfasst_t),   intent(inout),target :: pf
     integer,             intent(in)    :: level_index
@@ -76,7 +76,7 @@ contains
 
     !>  Set up the FFT 
     allocate(this%fft_tool)
-    call this%fft_tool%fft_setup([nx],1)
+    call this%fft_tool%fft_setup([nx],1,[Lx])
 
     !>  Define spectral derivatitive operators
     allocate(lap(nx))
@@ -150,7 +150,7 @@ contains
     yvec  => get_array1d(y)
     fvec => get_array1d(f)
     fft => this%fft_tool
-
+    
     ! Apply spectral operators using the FFT convolution function
     select case (piece)
     case (1)  ! Explicit piece
@@ -161,7 +161,6 @@ contains
        print *,'Bad case for piece in f_eval ', piece
        call exit(0)
     end select
-
   end subroutine f_eval
 
   ! Solve for y and return f2 also
@@ -180,13 +179,14 @@ contains
     real(pfdp),      pointer :: yvec(:), rhsvec(:), fvec(:)
     type(pf_fft_t),     pointer :: fft
 
-    !  Grab the arrays from the encaps
+    !> Grab the arrays from the encaps
     yvec  => get_array1d(y)
     rhsvec => get_array1d(rhs)
     fvec => get_array1d(f)
 
+    !> Catch fully explicit case    
     if (imex_stat .eq. 0)  then
-       print *,'We should not be calling fcomp for fully explicit'
+       print *,'WARNING: We should not be calling f_comp for fully explicit!'
        yvec=rhsvec
        fvec=0.0_pfdp
        return
@@ -220,16 +220,16 @@ contains
 
   !> Routine to return the exact solution
   subroutine exact(t, yex)
-    use probin, only: nu, v,kfreq,Lx,ic_type
+    use probin, only: nu,vx,vy,kfreq,Lx,Ly,ic_type
     real(pfdp), intent(in)  :: t
     real(pfdp), intent(out) :: yex(:)
 
 
     !  Call exact solution from Libpfasst for ad problem
     if (ic_type .eq. 1) then
-       call exact_ad_cos(t,yex,nu,v,kfreq,Lx)  ! Cosine wave
+       call exact_ad_cos(t,yex,nu,[vx,vy],[kfreq,kfreq],[Lx,Ly])  ! Cosine wave
     else
-       call exact_ad_exp(t,yex,nu,v,Lx)   !  Exponential
+       call exact_ad_exp(t,yex,nu,[vx,vy],[Lx,Ly])   !  Exponential
     endif
   end subroutine exact
 

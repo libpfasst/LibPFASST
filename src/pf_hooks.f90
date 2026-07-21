@@ -58,9 +58,9 @@ contains
   !> Subroutine to add a procedure to the hook on the given level
   subroutine pf_add_hook(pf, level_index, hook, proc)
     type(pf_pfasst_t), intent(inout) :: pf            !! main pfasst structure
-    integer,           intent(in)    :: level_index     !! which pfasst level to add hook
+    integer,           intent(in)    :: level_index   !! which pfasst level to add hook
     integer,           intent(in)    :: hook          !! which hook to add
-    procedure(pf_hook_p)             :: proc          !! precudre to call from hook
+    procedure(pf_hook_p)             :: proc          !! procedure to call from hook
 
     integer :: l   !
 

@@ -34,9 +34,9 @@ contains
   !>  Allocate and initialize FFT structure
   subroutine fft_setup(this, grid_shape, ndim, grid_size)
     class(pf_fft_t), intent(inout) :: this
-    integer,              intent(in   ) :: ndim
-    integer,              intent(in   ) :: grid_shape(ndim)
-    real(pfdp), optional, intent(in   ) :: grid_size(ndim)    
+    integer,         intent(in   ) :: ndim
+    integer,         intent(in   ) :: grid_shape(ndim)
+    real(pfdp),      intent(in   ) :: grid_size(ndim)    
       
     integer     :: nx,ny,nz
     integer     :: i,j,k
@@ -54,8 +54,7 @@ contains
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
     allocate(this%wsavex(this%lensavx),stat=ierr)
     if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)        
-    this%Lx = 1.0_pfdp
-    if(present(grid_size)) this%Lx = grid_size(1)
+    this%Lx = grid_size(1)
     !  Initialize FFT
     call ZFFTI( nx, this%wsavex )
     
@@ -69,8 +68,7 @@ contains
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
        allocate(this%wsavey(this%lensavy),stat=ierr)
        if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
-       this%Ly = 1.0_pfdp
-       if(present(grid_size)) this%Ly = grid_size(2)
+       this%Ly = grid_size(2)
        !  Initialize FFT
        call ZFFTI( ny, this%wsavey)
        
@@ -84,8 +82,7 @@ contains
           if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
           allocate(this%wsavez(this%lensavz),stat=ierr)
           if (ierr /=0) call pf_stop(__FILE__,__LINE__,'allocate fail, error=',ierr)    
-          this%Lz = 1.0_pfdp
-          if(present(grid_size)) this%Lz = grid_size(3)
+          this%Lz = grid_size(3)
           !  Initialize FFT
           call ZFFTI( nz, this%wsavez)
        endif

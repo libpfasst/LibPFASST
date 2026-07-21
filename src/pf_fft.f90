@@ -59,9 +59,9 @@ module pf_mod_fft_abs
      subroutine pf_fft_s_p(this, grid_shape, ndim, grid_size)
        import pf_fft_abs_t,pfdp
        class(pf_fft_abs_t), intent(inout) :: this
-       integer,              intent(in   ) :: ndim
-       integer,              intent(in   ) :: grid_shape(ndim)
-       real(pfdp), optional, intent(in   ) :: grid_size(ndim)
+       integer,             intent(in   ) :: ndim
+       integer,             intent(in   ) :: grid_shape(ndim)
+       real(pfdp),          intent(in   ) :: grid_size(ndim)
      end subroutine pf_fft_s_p
      subroutine pf_fft_p(this)
        import pf_fft_abs_t,pfdp
