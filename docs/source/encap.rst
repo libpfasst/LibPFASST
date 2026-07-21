@@ -13,6 +13,7 @@ Curently, the provided encaps include
 * ``zndarray``: An N-dimensional complex array
 * ``zndsysarray``: System of complex ndarrays
 * ``ndarray_oc``:  Optimal control version of ndarray
+* ``amrex_mfab``:  Offers interface to AMReX and encapsulation for AMReX Multi FAB data
 
 A discussion of how to construct an encapsulation is included in the 2nd tutorial.  
 The advanced user might also consider the encapsulations

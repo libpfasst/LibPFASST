@@ -86,7 +86,7 @@ contains
 
     do k = 1,nsweeps   !!  Loop over sweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k
 
        ! compute integrals and add fas correction
@@ -109,11 +109,11 @@ contains
        ! do the time-stepping
        if (k .eq. 1) then
           call lev%Q(1)%copy(lev%q0)
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+          call pf_start_timer(pf, T_FEVAL,level_index)          
           call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1),1)
           call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,2),2)
           call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,3),3)
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
+          call pf_stop_timer(pf, T_FEVAL,level_index)          
        endif
        
        t = t0
@@ -129,9 +129,9 @@ contains
           call this%rhs%axpy(1.0_pfdp, lev%I(m))
           !  Add the starting value
           call this%rhs%axpy(1.0_pfdp, lev%Q(1))
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_FCOMP,level_index)          
+          call pf_start_timer(pf, T_FCOMP,level_index)          
           call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index, lev%F(m+1,2),2)
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FCOMP,level_index)                    
+          call pf_stop_timer(pf, T_FCOMP,level_index)                    
           
           !  Now we need to do the final subtraction for the f3 piece
           call this%rhs%copy(Lev%Q(m+1))       
@@ -140,18 +140,18 @@ contains
           end do
           
           call this%rhs%axpy(-1.0_pfdp, this%I3(m))
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_FCOMP,level_index)                    
+          call pf_start_timer(pf, T_FCOMP,level_index)                    
           call this%f_comp(lev%Q(m+1), t, dt*this%QtilI(m,m+1), this%rhs, level_index, lev%F(m+1,3),3)
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FCOMP,level_index)                    
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+          call pf_stop_timer(pf, T_FCOMP,level_index)                    
+          call pf_start_timer(pf, T_FEVAL,level_index)          
           call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,1),1)
           call this%f_eval(lev%Q(m+1), t, level_index, lev%F(m+1,2),2)
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
+          call pf_stop_timer(pf, T_FEVAL,level_index)          
        end do
        
        call pf_residual(pf, level_index, dt)
        call lev%qend%copy(lev%Q(lev%nnodes))
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
+       call pf_stop_timer(pf, T_SWEEP,level_index)
        
        call call_hooks(pf, level_index, PF_POST_SWEEP)
     end do  !  End loop on sweeps
@@ -261,11 +261,11 @@ contains
 
     type(pf_level_t), pointer:: lev
     lev => pf%levels(level_index)   !  Assign level pointer
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)          
+    call pf_start_timer(pf, T_FEVAL,level_index)          
     call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1),1)
     call this%f_eval(lev%Q(m), t, level_index, lev%F(m,2),2)
     call this%f_eval(lev%Q(m), t, level_index, lev%F(m,3),3)       
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)          
+    call pf_stop_timer(pf, T_FEVAL,level_index)          
   end subroutine misdcQ_evaluate
 
   !> Subroutine to evaluate the function values at all nodes

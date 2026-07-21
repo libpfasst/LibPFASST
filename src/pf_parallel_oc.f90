@@ -33,12 +33,12 @@ contains
     if(present(flags)) then
        if(flags(1)==2) then
           which = 2                ! if we are computing an adjoint, predict and sweep backward-in-time
-          dir = 2                  ! communication has to be backwards as well
+          dir = -1                 ! communication has to be backwards as well
        end if
        if(flags(1)==0) which = 0   ! sweep forward and backward simultaneously on two components, communication only forwards
     end if
     call call_hooks(pf, 1, PF_PRE_PREDICTOR)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_PREDICTOR)
+    call pf_start_timer(pf, T_PREDICTOR)
 
     if (pf%debug) print*, 'DEBUG --', pf%rank, 'beginning predictor'
 
@@ -80,14 +80,15 @@ contains
        !! If RK_pred is true, just do some RK_steps
        if (pf%RK_pred .or. which==2) then  !  Use Runge-Kutta to get the coarse initial data
           !  Get new initial conditions
-          call pf_recv(pf, c_lev, 100000+pf%rank, .true., dir)
+          call pf_recv(pf, c_lev, 100000+pf%rank, .true., dir=dir,which=which)
 
           !  Do a RK_step
           call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1, which )
           !  Send forward/backward
-          if (dir == 1) send_tag = 100000+pf%rank+1
-          if (dir == 2) send_tag = 100000+pf%rank-1
-          call pf_send(pf, c_lev, send_tag, .false., dir)
+!          if (dir == 1) send_tag = 100000+pf%rank+1
+          !          if (dir == 2) send_tag = 100000+pf%rank-1
+          send_tag = 100000+pf%rank+dir          
+          call pf_send(pf, c_lev, send_tag, .false., dir=dir,which=which)
        else  !  Normal PFASST burn in
           burnin_sweeps = pf%rank+1
           if(which == 2) then
@@ -145,18 +146,19 @@ contains
           pf%state%iter =-(pf%rank + 1) -k
 
           !  Get new initial conditions
-          call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank+k, .true., dir)
+          call pf_recv(pf, c_lev, c_lev%index*110000+pf%rank+k, .true., dir=dir,which=which)
 
           !  Do a sweep
           call c_lev%ulevel%sweeper%sweep(pf, c_lev%index, t0, dt, 1, which)
           !  Send forward/backward
-          if (dir == 1) send_tag = c_lev%index*1110000+pf%rank+1+k
-          if (dir == 2) send_tag = c_lev%index*1110000+pf%rank-1+k
-          call pf_send(pf, c_lev, send_tag, .false., dir)
+!          if (dir == 1) send_tag = c_lev%index*1110000+pf%rank+1+k
+          !          if (dir == 2) send_tag = c_lev%index*1110000+pf%rank-1+k
+          send_tag = c_lev%index*1110000+pf%rank+dir+k          
+          call pf_send(pf, c_lev, send_tag, .false., dir=dir,which=which)
        end do ! k = 1, c_lev%nsweeps_pred-1
       else  !  Don't pipeline
         !  Get new initial conditions
-        call pf_recv(pf, c_lev, c_lev%index*100000+pf%rank, .true., dir)
+        call pf_recv(pf, c_lev, c_lev%index*100000+pf%rank, .true., dir=dir,which=which)
 
         !  Do sweeps
 !         if(which == 0 .or. which == 1) call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred, 1) !1 ! why only state?
@@ -164,9 +166,10 @@ contains
 !         if(which == 2)                 call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, c_lev%nsweeps_pred, 2) !which
         if(which == 2)                 call c_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, my_coarse_sweeps, 2) !which
         !  Send forward/backward
-        if (dir == 1) send_tag = c_lev%index*100000+pf%rank+1
-        if (dir == 2) send_tag = c_lev%index*100000+pf%rank-1
-        call pf_send(pf, c_lev, send_tag, .false., dir)
+!        if (dir == 1) send_tag = c_lev%index*100000+pf%rank+1
+!        if (dir == 2) send_tag = c_lev%index*100000+pf%rank-1
+        send_tag = c_lev%index*100000+pf%rank+dir
+        call pf_send(pf, c_lev, send_tag, .false., dir=dir,which=which)
       endif  ! (Pipeline_pred .eq. .true) then
     end if ! pf%state%finest_level > 1
 
@@ -195,7 +198,7 @@ contains
 
   end if
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_PREDICTOR)
+    call pf_stop_timer(pf, T_PREDICTOR)
     call call_hooks(pf, -1, PF_POST_PREDICTOR)
 
     pf%state%iter   = 0
@@ -270,7 +273,7 @@ contains
     if (present(flags)) which = flags
     ! send forward by default, even if sweeping on both components; send backwards if sweeping on p only
     dir = 1
-    if(which == 2) dir = 2
+    if(which == 2) dir = -1
 
     call call_hooks(pf, 1, PF_PRE_CONVERGENCE)
 
@@ -278,14 +281,14 @@ contains
     call pf_check_residual_oc(pf, level_index, residual_converged)
 
     !>  Until I hear the previous processor is done, recieve it's status
-    if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, send_tag, dir)
+    if (pf%state%pstatus /= PF_STATUS_CONVERGED) call pf_recv_status(pf, send_tag, dir=dir)
 
     !>  Check to see if I am converged
     converged = .false.
     if (residual_converged) then
        if (pf%rank == 0 .and. dir==1) then
           converged = .true.
-       elseif (pf%rank == pf%comm%nproc-1 .and. dir==2) then
+       elseif (pf%rank == pf%comm%nproc-1 .and. dir==-1) then
           converged = .true.
        else  !  I am not the first/last processor, so I need to check the previous one
           if (pf%state%pstatus == PF_STATUS_CONVERGED) converged = .true.
@@ -299,12 +302,12 @@ contains
           !  If I am converged for the first time
           !  then flip my flag and send the last status update
           pf%state%status = PF_STATUS_CONVERGED
-          call pf_send_status(pf, send_tag, dir)
+          call pf_send_status(pf, send_tag, dir=dir)
        end if
     else
        !  I am not converged, send the news
        pf%state%status = PF_STATUS_ITERATING
-       call pf_send_status(pf, send_tag, dir)
+       call pf_send_status(pf, send_tag, dir=dir)
     end if
 
     call call_hooks(pf, 1, PF_POST_CONVERGENCE)
@@ -316,6 +319,7 @@ contains
   !>  On calling, it is assumed that the levels are already loaded with the initial guesses
   !>
   subroutine pf_pfasst_block_oc(pf, dt, nsteps, predict, flags, step)
+    use pf_mod_mpi, only: MPI_REQUEST_NULL
     type(pf_pfasst_t), intent(inout), target :: pf
     real(pfdp),        intent(in)    :: dt
     integer,           intent(in)    :: nsteps
@@ -330,13 +334,13 @@ contains
 
     logical :: converged, qbroadcast
     logical :: did_post_step_hook
-    if (pf%save_timings > 0) call pf_start_timer(pf, T_TOTAL)
+    call pf_start_timer(pf, T_TOTAL)
 
     which = 1
     if (present(flags)) which = flags
     ! send forward by default, even if sweeping on both components; send backwards if sweeping on p only
     dir = 1
-    if(which == 2) dir = 2
+    if(which == 2) dir = -1
     pred_flags(1) = which
 
     if( present(step) ) then
@@ -355,7 +359,7 @@ contains
     pf%state%mysteps = 0
     pf%state%status  = PF_STATUS_PREDICTOR
     pf%state%pstatus = PF_STATUS_PREDICTOR
-    pf%comm%statreq  = -66
+    pf%comm%statreq  = MPI_REQUEST_NULL
     pf%state%nsteps  = nsteps
 !     pf%state%component = which
 
@@ -383,7 +387,7 @@ contains
     !pf%state%pfblock = k ! has to be set in pf_optimization_flex to current step
                           ! this is relevant for save_residuals
     do j = 1, pf%niters
-      if (pf%save_timings > 1) call pf_start_timer(pf, T_ITERATION)
+      call pf_start_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_PRE_ITERATION)
 
       pf%state%iter = j
@@ -395,7 +399,7 @@ contains
       !  Check for convergence
       call pf_check_convergence_oc(pf, pf%state%finest_level, send_tag=1111*k+j, flags=dir)
 
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_ITERATION)
+      call pf_stop_timer(pf, T_ITERATION)
       call call_hooks(pf, -1, PF_POST_ITERATION)
 
       !  If we are converged, exit block
@@ -409,8 +413,9 @@ contains
     call call_hooks(pf, -1, PF_POST_BLOCK)
 
     
-    !  call pf_dump_results(pf)
-    if (pf%save_timings > 0) call pf_stop_timer(pf, T_TOTAL)
+    call pf_stop_timer(pf, T_TOTAL)
+    ! call dump_results(pf%results)
+    call dump_timingsl(pf%results,pf)
   end subroutine pf_pfasst_block_oc
 
   subroutine pf_v_cycle_oc(pf, iteration, t0, dt, level_index_c,level_index_f, flags)
@@ -430,14 +435,15 @@ contains
     if(present(flags)) which = flags
     ! send forward by default, even if sweeping on both components; send backwards if sweeping on p only
     dir = 1
-    if(which == 2) dir = 2 !
+    if(which == 2) dir = -1 !
 
 
     !>  Post the nonblocking receives on the all the levels that will be recieving later
     !>    (for single level this will be skipped)
     do level_index = level_index_c+1, level_index_f
        f_lev => pf%levels(level_index)
-       call pf_post(pf, f_lev, f_lev%index*10000+iteration, dir)
+       call pf_post(pf, f_lev, f_lev%index*10000+iteration, dir=dir)
+       !call pf_post(pf, f_lev, f_lev%index*10000+iteration, dir)       
     end do
 
     !> move from fine to coarse doing sweeps
@@ -445,7 +451,7 @@ contains
        f_lev => pf%levels(level_index);
        c_lev => pf%levels(level_index-1)
        call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps, which)
-       call pf_send(pf, f_lev, level_index*10000+iteration, .false., dir)
+       call pf_send(pf, f_lev, level_index*10000+iteration, .false., dir=dir,which=which)
        call restrict_time_space_fas(pf, t0, dt, level_index, flags=which)
        call save(pf, c_lev, which)
     end do
@@ -455,14 +461,14 @@ contains
     f_lev => pf%levels(level_index)
     if (pf%pipeline_pred) then
        do j = 1, f_lev%nsweeps
-          call pf_recv(pf, f_lev, f_lev%index*10000+iteration+j, .true., dir)
+          call pf_recv(pf, f_lev, f_lev%index*10000+iteration+j, .true., dir=dir,which=which)
           call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, 1, which)
-          call pf_send(pf, f_lev, f_lev%index*10000+iteration+j, .false., dir)
+          call pf_send(pf, f_lev, f_lev%index*10000+iteration+j, .false., dir=dir,which=which)
        end do
     else
-       call pf_recv(pf, f_lev, f_lev%index*10000+iteration, .true., dir)
+       call pf_recv(pf, f_lev, f_lev%index*10000+iteration, .true., dir=dir,which=which)
        call f_lev%ulevel%sweeper%sweep(pf, level_index, t0, dt, f_lev%nsweeps, which)
-       call pf_send(pf, f_lev, f_lev%index*10000+iteration, .false., dir)
+       call pf_send(pf, f_lev, f_lev%index*10000+iteration, .false., dir=dir,which=which)
     endif
 
 
@@ -475,7 +481,7 @@ contains
        if ((flags .eq. 0) .or. (flags .eq. 1))  call f_lev%qend%copy(f_lev%Q(f_lev%nnodes), flags=1)
        if (flags .eq. 2)                        call f_lev%q0%copy(f_lev%Q(1), flags=2)
 
-       call pf_recv(pf, f_lev, level_index*10000+iteration, .false., dir)
+       call pf_recv(pf, f_lev, level_index*10000+iteration, .false., dir=dir,which=which)
 
        if (pf%rank /= 0) then
           ! interpolate increment to q0 -- the fine initial condition

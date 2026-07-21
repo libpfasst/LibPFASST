@@ -248,7 +248,7 @@ contains
 
     do k = 1, nsweeps
        call call_hooks(pf, level_index, PF_PRE_SWEEP)
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,level_index)
+       call pf_start_timer(pf, T_SWEEP,level_index)
        pf%state%sweep=k
 
       ! NOTE: ensure that lev%F has been properly initialized here      
@@ -257,9 +257,9 @@ contains
       end do
       if (k .eq. 1) then ! Is this necessary? it seems that lev%F(j,1) = F(lev%(Q,q)) or F_old definition above line would be incorrect or is it zero initially?
          call lev%Q(1)%copy(lev%q0)
-         if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)         
+         call pf_start_timer(pf, T_FEVAL,level_index)         
          call this%f_eval(lev%Q(1), t0, level_index, lev%F(1,1))      ! compute F_j^{[k+1]}
-         if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)         
+         call pf_stop_timer(pf, T_FEVAL,level_index)         
       end if
       t = t0
       do j = 1, nnodes - 1
@@ -273,15 +273,15 @@ contains
             call lev%Q(j+1)%axpy(-1.0_pfdp, lev%tauQ(j-1))
           end if
        end if
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)       
+       call pf_start_timer(pf, T_FEVAL,level_index)       
        call this%f_eval(lev%Q(j+1), t, level_index, lev%F(j+1,1))      			! compute F_j^{[k+1]}
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+       call pf_stop_timer(pf, T_FEVAL,level_index)
       end do  !  Substepping over nodes
 
 
-      call pf_residual(pf, level_index, dt)
+      if (pf%save_residuals) call pf_residual(pf, level_index, dt)
       call lev%qend%copy(lev%Q(lev%nnodes))
-      if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,level_index)
+      call pf_stop_timer(pf, T_SWEEP,level_index)
       call call_hooks(pf, level_index, PF_POST_SWEEP)
 
    end do  !  Sweeps
@@ -417,9 +417,9 @@ contains
 
     type(pf_level_t), pointer :: lev
     lev => pf%levels(level_index)   !  Assign level pointer
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_FEVAL,level_index)
+    call pf_start_timer(pf, T_FEVAL,level_index)
     call this%f_eval(lev%Q(m), t, level_index, lev%F(m,1))
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_FEVAL,level_index)
+    call pf_stop_timer(pf, T_FEVAL,level_index)
   end subroutine exp_evaluate
 
   ! EVALUATE_ALL: evaluate the nonlinear term at all nodes =================

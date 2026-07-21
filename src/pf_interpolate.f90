@@ -35,7 +35,7 @@ contains
     c_lev => pf%levels(level_index-1) ! coarse level
 
     call call_hooks(pf, level_index, PF_PRE_INTERP_ALL)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE,level_index)
+    call pf_start_timer(pf, T_INTERPOLATE,level_index)
     
     
     step = pf%state%step+1
@@ -73,7 +73,6 @@ contains
     !> either interpolate function values or recompute them
     if (F_INTERP) then         !  Interpolating F
        do p = 1,SIZE(c_lev%F(1,:))
-          print *,'p in interp',p
           do m = 1, c_lev%nnodes
              call f_lev%c_delta(m)%setval(0.0_pfdp, flags)
              call f_lev%cf_delta(m)%setval(0.0_pfdp, flags)
@@ -105,7 +104,7 @@ contains
     deallocate(c_times,f_times)
 
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_ALL)
   end subroutine interpolate_time_space
 
@@ -121,7 +120,7 @@ contains
 
 
     call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, f_lev%index )
+    call pf_start_timer(pf, T_INTERPOLATE, f_lev%index )
 
 
     call c_lev%delta_q0%setval(0.0_pfdp,flags)
@@ -137,7 +136,7 @@ contains
     !> update fine inital condition
 
     call f_lev%q0%axpy(-1.0_pfdp, f_lev%delta_q0, flags)
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
   end subroutine interpolate_q0
@@ -151,7 +150,7 @@ contains
     class(pf_level_t),  intent(inout) :: c_lev  !!  coarse level
     
     call call_hooks(pf, f_lev%index, PF_PRE_INTERP_Q0)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_INTERPOLATE, f_lev%index)
+    call pf_start_timer(pf, T_INTERPOLATE, f_lev%index)
     
     call c_lev%delta_q0%setval(0.0_pfdp)
     call f_lev%delta_q0%setval(0.0_pfdp)
@@ -167,7 +166,7 @@ contains
     !> update fine inital condition
     call f_lev%qend%axpy(-1.0_pfdp, f_lev%delta_q0, flags=2)
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
+    call pf_stop_timer(pf, T_INTERPOLATE,f_lev%index)
     call call_hooks(pf, f_lev%index, PF_POST_INTERP_Q0)
 
 

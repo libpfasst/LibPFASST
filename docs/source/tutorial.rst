@@ -277,12 +277,25 @@ Example 6
 
 Space-time parallel solving of IMEX advection-diffusion equation in 1D, 2D and 3D using LibPFASST for parallel time-integration and AMReX together with the `pf_amrex_encap.f90` for space-parallel solving of the explicit and implicit parts.  
 
+.. math::
+
+  \c_t  = - v \nabla c + D \nabla^2 c
+
 Problem: AMReX requires definition of dimension on compile time -> can compile LibAMReX for each dimension, see `compiling libamrex`_
 -> need to point `pf_amrex_encap.f90` to the correct libamrex when compiling LibPFASST -> currently we need to rebuild LibPFASST when the dimensionality of our problem / tutorial changes
 -> then need to rebuild our Tutorial again
 
 
-
-
-
 .. _`compiling libamrex`: https://pfasst.lbl.govhttps://amrex-codes.github.io/amrex/docs_html/BuildingAMReX.html#building-libamrex
+additional information can also be found in `Makefile.examples/Makefile.AMReX``
+
+Example 7
+---------
+
+.. _tut7:
+
+Space-time parallel solving of 1D Burgers equation in 1D using LibPFASST for parallel time-integration and AMReX together with the `pf_amrex_encap.f90` for space-parallel solving of the explicit and implicit parts.  
+
+.. math::
+
+  \u_t  = - u \nabla u + \nu \nabla^2 u

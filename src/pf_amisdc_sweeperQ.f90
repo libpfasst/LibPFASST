@@ -43,7 +43,7 @@ contains
     class(pf_encap_t), allocatable :: S2(:), S3(:)
 
 
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_SWEEP,lev%index)
+    call pf_start_timer(pf, T_SWEEP,lev%index)
    
     call lev%ulevel%factory%create_array(S2,lev%nnodes-1,lev%index,lev%lev_shape)
     call lev%ulevel%factory%create_array(S3,lev%nnodes-1,lev%index,lev%lev_shape)
@@ -131,7 +131,7 @@ contains
     call lev%ulevel%factory%destroy_single(QA)
     call lev%ulevel%factory%destroy_single(QB)
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_SWEEP,lev%index)
+    call pf_stop_timer(pf, T_SWEEP,lev%index)
 
 
   end subroutine sweep_coupled_implicit_terms
