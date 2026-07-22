@@ -92,19 +92,19 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 2.9% of total for modules and submodules.">393 statements</a>
+                 title=" 2.3% of total for modules and submodules.">318 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/pf_fftpack.f90"> Source File</a>
+              <a href="../src/pf_fftw.f90"> Source File</a>
             </li>
         </ul>
       </div>
       <div class="col">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-end mb-0">
-                <li class="breadcrumb-item"><a href='../sourcefile/pf_fftpack.f90.html'>pf_fftpack.f90</a></li>
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_fftw.f90.html'>pf_fftw.f90</a></li>
             <li class="breadcrumb-item active" aria-current="page">pf_mod_fftpackage</li>
           </ol>
         </nav>
@@ -142,7 +142,7 @@
       </a>
       <div id="types-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#type-pf_fft_t~2">pf_fft_t</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#type-pf_fft_t">pf_fft_t</a>
         </div>
       </div>
     </div>
@@ -155,16 +155,16 @@
       </a>
       <div id="subs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fft_setup~2">fft_setup</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fft_destroy~2">fft_destroy</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fftf~2">fftf</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fftb~2">fftb</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_1d~2">interp_1d</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_2d~2">interp_2d</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_3d~2">interp_3d</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_1d~2">zinterp_1d</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_2d~2">zinterp_2d</a>
-            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_3d~2">zinterp_3d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fft_setup">fft_setup</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fft_destroy">fft_destroy</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fftf">fftf</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-fftb">fftb</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_1d">interp_1d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_2d">interp_2d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-interp_3d">interp_3d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_1d">zinterp_1d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_2d">zinterp_2d</a>
+            <a class="list-group-item" href="../module/pf_mod_fftpackage.html#proc-zinterp_3d">zinterp_3d</a>
         </div>
       </div>
     </div>
@@ -183,17 +183,22 @@
     </div>
 
     <div class="col-md-9" id='text'>
-      <p>Module for using fftpack.  This is the default fft package when fftw is not used as
-indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p>
+      <p>Module for providing FFTs based on fftw
+To use this module, fftw must be installed.
+This can be done by the libpfasst make system with the command
+make fftw3
+You also have to specify USE_FFTW=TRUE in Makefile.defaults and
+make clean is recommended before remake</p>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
       <div class="card-body">
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_c_binding'>iso_c_binding</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
                   <li class="list-inline-item"><a href='pf_mod_fft_abs.html'>pf_mod_fft_abs</a></li>
                   <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -203,94 +208,101 @@ indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p>
 <!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: module~~pf_mod_fftpackage~~UsesGraph Pages: 1 -->
-<svg id="modulepf_mod_fftpackageUsesGraph" width="641pt" height="108pt"
- viewBox="0.00 0.00 641.00 107.76" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="module~~pf_mod_fftpackage~~UsesGraph" class="graph" transform="scale(0.93 0.93) rotate(0) translate(4 112)">
+<svg id="modulepf_mod_fftpackageUsesGraph" width="641pt" height="138pt"
+ viewBox="0.00 0.00 641.00 137.58" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~pf_mod_fftpackage~~UsesGraph" class="graph" transform="scale(0.93 0.93) rotate(0) translate(4 144.1)">
 <title>module~~pf_mod_fftpackage~~UsesGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-112 686,-112 686,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-144.1 686,-144.1 686,4 -4,4"/>
 <!-- module~pf_mod_fftpackage -->
 <g id="module~~pf_mod_fftpackage~~UsesGraph_node1" class="node">
 <title>module~pf_mod_fftpackage</title>
-<polygon fill="none" stroke="black" points="682,-67 578,-67 578,-43 682,-43 682,-67"/>
-<text text-anchor="middle" x="630" y="-52.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_fftpackage</text>
+<polygon fill="none" stroke="black" points="682,-108 578,-108 578,-84 682,-84 682,-108"/>
+<text text-anchor="middle" x="630" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_mod_fftpackage</text>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~pf_mod_fftpackage~~UsesGraph_node2" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="78,-128 0,-128 0,-104 78,-104 78,-128"/>
+<text text-anchor="middle" x="39" y="-113.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~pf_mod_fftpackage&#45;&gt;iso_c_binding -->
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge1" class="edge">
+<title>module~pf_mod_fftpackage&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M269.5,-136C206.94,-130.08 134.72,-123.9 88.27,-120"/>
+<polygon fill="#000000" stroke="#000000" points="88.44,-116.5 78.19,-119.15 87.86,-123.48 88.44,-116.5"/>
 </g>
 <!-- module~pf_mod_dtype -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_node2" class="node">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_node3" class="node">
 <title>module~pf_mod_dtype</title>
-<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node2"><a xlink:href="../module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
+<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node3"><a xlink:href="../module/pf_mod_dtype.html" xlink:title="pf_mod_dtype">
 <polygon fill="#337ab7" stroke="#337ab7" points="195,-108 114,-108 114,-84 195,-84 195,-108"/>
 <text text-anchor="middle" x="154.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_dtype</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_fftpackage&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge1" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge2" class="edge">
 <title>module~pf_mod_fftpackage&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M583.61,-67.02C570.27,-70.27 555.61,-73.55 542,-76 472.17,-88.57 454.19,-88.95 383.5,-95"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M585.47,-108.01C571.67,-111.42 556.28,-114.79 542,-117 422.9,-135.43 391.58,-146.28 271.5,-136"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M269.5,-136C241.12,-133.32 210.75,-122.21 188.5,-112.38"/>
+<polygon fill="#000000" stroke="#000000" points="189.73,-109.1 179.18,-108.13 186.83,-115.47 189.73,-109.1"/>
 </g>
 <!-- module~pf_mod_fft_abs -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_node3" class="node">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_node4" class="node">
 <title>module~pf_mod_fft_abs</title>
-<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node3"><a xlink:href="../module/pf_mod_fft_abs.html" xlink:title="pf_mod_fft_abs">
-<polygon fill="#337ab7" stroke="#337ab7" points="542,-67 455,-67 455,-43 542,-43 542,-67"/>
-<text text-anchor="middle" x="498.5" y="-52.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_fft_abs</text>
+<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node4"><a xlink:href="../module/pf_mod_fft_abs.html" xlink:title="pf_mod_fft_abs">
+<polygon fill="#337ab7" stroke="#337ab7" points="542,-108 455,-108 455,-84 542,-84 542,-108"/>
+<text text-anchor="middle" x="498.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_fft_abs</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_fftpackage&#45;&gt;module~pf_mod_fft_abs -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge2" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge3" class="edge">
 <title>module~pf_mod_fftpackage&#45;&gt;module~pf_mod_fft_abs</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M577.82,-55C569.47,-55 560.82,-55 552.43,-55"/>
-<polygon fill="#000000" stroke="#000000" points="552.38,-51.5 542.38,-55 552.38,-58.5 552.38,-51.5"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M577.82,-96C569.47,-96 560.82,-96 552.43,-96"/>
+<polygon fill="#000000" stroke="#000000" points="552.38,-92.5 542.38,-96 552.38,-99.5 552.38,-92.5"/>
 </g>
 <!-- module~pf_mod_utils -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_node4" class="node">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_node5" class="node">
 <title>module~pf_mod_utils</title>
-<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node4"><a xlink:href="../module/pf_mod_utils.html" xlink:title="pf_mod_utils">
-<polygon fill="#337ab7" stroke="#337ab7" points="419,-66 346,-66 346,-42 419,-42 419,-66"/>
-<text text-anchor="middle" x="382.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_utils</text>
+<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node5"><a xlink:href="../module/pf_mod_utils.html" xlink:title="pf_mod_utils">
+<polygon fill="#337ab7" stroke="#337ab7" points="419,-68 346,-68 346,-44 419,-44 419,-68"/>
+<text text-anchor="middle" x="382.5" y="-53.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_utils</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_fftpackage&#45;&gt;module~pf_mod_utils -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge3" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge4" class="edge">
 <title>module~pf_mod_fftpackage&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M587.77,-42.93C573.41,-39.3 557.12,-35.8 542,-34 503.6,-29.43 493.31,-28.74 455,-34 446.46,-35.17 437.51,-37.09 428.94,-39.3"/>
-<polygon fill="#000000" stroke="#000000" points="427.83,-35.97 419.1,-41.98 429.67,-42.73 427.83,-35.97"/>
-</g>
-<!-- iso_c_binding -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_node5" class="node">
-<title>iso_c_binding</title>
-<g id="a_module~~pf_mod_fftpackage~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
-<polygon fill="#337ab7" stroke="#337ab7" points="78,-108 0,-108 0,-84 78,-84 78,-108"/>
-<text text-anchor="middle" x="39" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
-</a>
-</g>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M583.61,-83.98C570.27,-80.73 555.61,-77.45 542,-75 504.38,-68.23 461.3,-63.24 429.55,-60.08"/>
+<polygon fill="#000000" stroke="#000000" points="429.54,-56.56 419.24,-59.07 428.86,-63.53 429.54,-56.56"/>
 </g>
 <!-- module~pf_mod_dtype&#45;&gt;iso_c_binding -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge4" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge5" class="edge">
 <title>module~pf_mod_dtype&#45;&gt;iso_c_binding</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.8,-96C105.62,-96 96.92,-96 88.47,-96"/>
-<polygon fill="#000000" stroke="#000000" points="88.34,-92.5 78.34,-96 88.34,-99.5 88.34,-92.5"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M113.8,-103C105.53,-104.45 96.73,-106 88.19,-107.51"/>
+<polygon fill="#000000" stroke="#000000" points="87.58,-104.06 78.34,-109.24 88.79,-110.96 87.58,-104.06"/>
 </g>
 <!-- module~pf_mod_fft_abs&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge5" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge6" class="edge">
 <title>module~pf_mod_fft_abs&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M474.26,-67.06C451.75,-77.78 416.31,-92.19 383.5,-95"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M381.5,-95C332.79,-99.17 320.17,-90.37 271.5,-95"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M454.91,-93.77C409.41,-91.9 335.21,-90.36 271.5,-96"/>
 </g>
 <!-- module~pf_mod_fft_abs&#45;&gt;module~pf_mod_utils -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge6" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge7" class="edge">
 <title>module~pf_mod_fft_abs&#45;&gt;module~pf_mod_utils</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M454.73,-54.62C446.37,-54.55 437.58,-54.47 429.14,-54.4"/>
-<polygon fill="#000000" stroke="#000000" points="429.09,-50.9 419.06,-54.31 429.03,-57.9 429.09,-50.9"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M463.3,-84C452.13,-80.08 439.56,-75.67 427.76,-71.53"/>
+<polygon fill="#000000" stroke="#000000" points="428.67,-68.14 418.07,-68.13 426.35,-74.74 428.67,-68.14"/>
 </g>
 <!-- module~pf_mod_utils&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge7" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge8" class="edge">
 <title>module~pf_mod_utils&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M359.58,-66.08C337.94,-77.05 303.56,-91.95 271.5,-95"/>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M269.5,-95C248.53,-96.99 225.29,-97.5 205.29,-97.42"/>
-<polygon fill="#000000" stroke="#000000" points="205.19,-93.92 195.16,-97.32 205.12,-100.92 205.19,-93.92"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M359.13,-68.06C337.45,-78.78 303.28,-93.18 271.5,-96"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M269.5,-96C248.51,-97.86 225.27,-98.17 205.28,-97.9"/>
+<polygon fill="#000000" stroke="#000000" points="205.21,-94.4 195.14,-97.71 205.08,-101.4 205.21,-94.4"/>
 </g>
 <!-- module~pf_mod_stop -->
 <g id="module~~pf_mod_fftpackage~~UsesGraph_node6" class="node">
@@ -302,37 +314,37 @@ indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p>
 </g>
 </g>
 <!-- module~pf_mod_utils&#45;&gt;module~pf_mod_stop -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge8" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge9" class="edge">
 <title>module~pf_mod_utils&#45;&gt;module~pf_mod_stop</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M345.76,-42.36C334.42,-38.97 321.77,-35.51 310,-33 274.2,-25.36 233.12,-19.93 202.32,-16.51"/>
-<polygon fill="#000000" stroke="#000000" points="202.61,-13.02 192.29,-15.43 201.86,-19.98 202.61,-13.02"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M346.15,-43.92C334.72,-40.34 321.91,-36.66 310,-34 274.13,-25.98 232.89,-20.28 202.04,-16.7"/>
+<polygon fill="#000000" stroke="#000000" points="202.33,-13.21 192,-15.56 201.55,-20.16 202.33,-13.21"/>
 </g>
 <!-- module~pf_mod_timer -->
 <g id="module~~pf_mod_fftpackage~~UsesGraph_node7" class="node">
 <title>module~pf_mod_timer</title>
 <g id="a_module~~pf_mod_fftpackage~~UsesGraph_node7"><a xlink:href="../module/pf_mod_timer.html" xlink:title="pf_mod_timer">
-<polygon fill="#337ab7" stroke="#337ab7" points="310,-66 231,-66 231,-42 310,-42 310,-66"/>
-<text text-anchor="middle" x="270.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
+<polygon fill="#337ab7" stroke="#337ab7" points="310,-67 231,-67 231,-43 310,-43 310,-67"/>
+<text text-anchor="middle" x="270.5" y="-52.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_mod_timer</text>
 </a>
 </g>
 </g>
 <!-- module~pf_mod_utils&#45;&gt;module~pf_mod_timer -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge9" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge10" class="edge">
 <title>module~pf_mod_utils&#45;&gt;module~pf_mod_timer</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M345.79,-54C337.58,-54 328.72,-54 320.07,-54"/>
-<polygon fill="#000000" stroke="#000000" points="320.07,-50.5 310.07,-54 320.07,-57.5 320.07,-50.5"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M345.79,-55.68C337.58,-55.6 328.72,-55.52 320.07,-55.44"/>
+<polygon fill="#000000" stroke="#000000" points="320.1,-51.94 310.07,-55.35 320.04,-58.94 320.1,-51.94"/>
 </g>
 <!-- module~pf_mod_timer&#45;&gt;module~pf_mod_dtype -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge10" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge11" class="edge">
 <title>module~pf_mod_timer&#45;&gt;module~pf_mod_dtype</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M236.83,-66.04C224.67,-70.52 210.68,-75.67 197.78,-80.42"/>
-<polygon fill="#000000" stroke="#000000" points="196.35,-77.22 188.17,-83.96 198.77,-83.79 196.35,-77.22"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M235.91,-67.08C224.3,-71.25 211.13,-75.99 198.85,-80.41"/>
+<polygon fill="#000000" stroke="#000000" points="197.47,-77.19 189.24,-83.87 199.84,-83.77 197.47,-77.19"/>
 </g>
 <!-- module~pf_mod_timer&#45;&gt;module~pf_mod_stop -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge12" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge13" class="edge">
 <title>module~pf_mod_timer&#45;&gt;module~pf_mod_stop</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M236.83,-41.96C224.67,-37.48 210.68,-32.33 197.78,-27.58"/>
-<polygon fill="#000000" stroke="#000000" points="198.77,-24.21 188.17,-24.04 196.35,-30.78 198.77,-24.21"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M237.44,-42.91C224.83,-38.15 210.19,-32.63 196.8,-27.58"/>
+<polygon fill="#000000" stroke="#000000" points="197.91,-24.26 187.32,-24 195.44,-30.81 197.91,-24.26"/>
 </g>
 <!-- module~pf_mod_mpi -->
 <g id="module~~pf_mod_fftpackage~~UsesGraph_node8" class="node">
@@ -344,10 +356,10 @@ indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p>
 </g>
 </g>
 <!-- module~pf_mod_timer&#45;&gt;module~pf_mod_mpi -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge11" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge12" class="edge">
 <title>module~pf_mod_timer&#45;&gt;module~pf_mod_mpi</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.9,-54C221.22,-54 210.74,-54 200.77,-54"/>
-<polygon fill="#000000" stroke="#000000" points="200.6,-50.5 190.6,-54 200.6,-57.5 200.6,-50.5"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M230.9,-54.66C221.22,-54.58 210.74,-54.48 200.77,-54.4"/>
+<polygon fill="#000000" stroke="#000000" points="200.64,-50.9 190.6,-54.31 200.57,-57.9 200.64,-50.9"/>
 </g>
 <!-- mpi -->
 <g id="module~~pf_mod_fftpackage~~UsesGraph_node9" class="node">
@@ -359,7 +371,7 @@ indicated by setting the USE_FFTW=FALSE in Makefile.defauls</p>
 </g>
 </g>
 <!-- module~pf_mod_mpi&#45;&gt;mpi -->
-<g id="module~~pf_mod_fftpackage~~UsesGraph_edge13" class="edge">
+<g id="module~~pf_mod_fftpackage~~UsesGraph_edge14" class="edge">
 <title>module~pf_mod_mpi&#45;&gt;mpi</title>
 <path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M118.21,-54C104.96,-54 89.88,-54 76.53,-54"/>
 <polygon fill="#000000" stroke="#000000" points="76.25,-50.5 66.25,-54 76.25,-57.5 76.25,-50.5"/>
@@ -457,15 +469,15 @@ modules which it uses.
           <h2>Derived Types</h2>
               <div class="card">
     <div class="card-header codesum">
-      <span class="anchor" id="type-pf_fft_t~2"></span>
+      <span class="anchor" id="type-pf_fft_t"></span>
       <h3>
         type, public, extends(<a href='../type/pf_fft_abs_t.html'>pf_fft_abs_t</a>)&nbsp;::&nbsp;
-        <a href='../type/pf_fft_t~2.html'>pf_fft_t</a>
+        <a href='../type/pf_fft_t.html'>pf_fft_t</a>
         
       </h3>
     </div>
     <div class="card-body">
-      <p>Variables and storage for FFT</p>
+      <p>Variables and storage for FFTW</p>
 
         <h4>Components</h4>
           <table class="table table-striped varlist">
@@ -480,7 +492,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-nx"></span>
+              <span class="anchor" id="variable-nx~2"></span>
               integer,
             </td>
               <td>public</td>
@@ -497,7 +509,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-ny"></span>
+              <span class="anchor" id="variable-ny~2"></span>
               integer,
             </td>
               <td>public</td>
@@ -514,7 +526,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-nz"></span>
+              <span class="anchor" id="variable-nz~2"></span>
               integer,
             </td>
               <td>public</td>
@@ -531,7 +543,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-ndim~3"></span>
+              <span class="anchor" id="variable-ndim~6"></span>
               integer,
             </td>
               <td>public</td>
@@ -701,58 +713,41 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-lensavx"></span>
-              integer,
+              <span class="anchor" id="variable-ffftw"></span>
+              type(c_ptr),
             </td>
               <td>public</td>
             <td>
               
             </td>
             <td>::</td>
-            <td><strong>lensavx</strong></td>
+            <td><strong>ffftw</strong></td>
                 <td></td>
                 <td></td>
             <td>
-<p>workspace lengths</p>
+<p>fftw pointers</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-lensavy"></span>
-              integer,
+              <span class="anchor" id="variable-ifftw"></span>
+              type(c_ptr),
             </td>
               <td>public</td>
             <td>
               
             </td>
             <td>::</td>
-            <td><strong>lensavy</strong></td>
+            <td><strong>ifftw</strong></td>
                 <td></td>
                 <td></td>
             <td>
-<p>workspace lengths</p>
+<p>fftw pointers</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-lensavz"></span>
-              integer,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>lensavz</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-<p>workspace lengths</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-normfact~2"></span>
+              <span class="anchor" id="variable-normfact"></span>
               real(kind=pfdp),
             </td>
               <td>public</td>
@@ -767,108 +762,6 @@ modules which it uses.
 <p>normalization factor</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-wsavex"></span>
-              real(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>wsavex</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-wsavey"></span>
-              real(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>wsavey</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-wsavez"></span>
-              real(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>wsavez</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-workhatx"></span>
-              complex(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>workhatx</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-workhaty"></span>
-              complex(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>workhaty</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-workhatz"></span>
-              complex(kind=pfdp),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>workhatz</strong>(:)</td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
     </tbody>
   </table>
 
@@ -880,77 +773,77 @@ modules which it uses.
           <tbody>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-fft~2'>fft</a></strong> => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-fft~3'>fft</a></strong> => fft_1d, fft_2d, fft_3d, zfft_1d, zfft_2d, zfft_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-ifft~2'>ifft</a></strong> => ifft_1d, ifft_2d, ifft_3d, izfft_1d, izfft_2d, izfft_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-ifft~3'>ifft</a></strong> => ifft_1d, ifft_2d, ifft_3d, izfft_1d, izfft_2d, izfft_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-conv~2'>conv</a></strong> => conv_1d, conv_2d, conv_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-conv~3'>conv</a></strong> => conv_1d, conv_2d, conv_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-dealias~5'>dealias</a></strong> => dealias_1d, dealias_2d, dealias_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-dealias~5'>dealias</a></strong> => dealias_1d, dealias_2d, dealias_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-zconv~2'>zconv</a></strong> => zconv_1d, zconv_2d, zconv_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-zconv~2'>zconv</a></strong> => zconv_1d, zconv_2d, zconv_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-get_wk_ptr~3'>get_wk_ptr</a></strong> => get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-get_wk_ptr~2'>get_wk_ptr</a></strong> => get_wk_ptr_1d, get_wk_ptr_2d, get_wk_ptr_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-make_lap~2'>make_lap</a></strong> => make_lap_1d, make_lap_2d, make_lap_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-make_lap~2'>make_lap</a></strong> => make_lap_1d, make_lap_2d, make_lap_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-make_ilap~2'>make_ilap</a></strong> => make_ilap_1d, make_ilap_2d, make_ilap_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-make_ilap~2'>make_ilap</a></strong> => make_ilap_1d, make_ilap_2d, make_ilap_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-make_deriv~2'>make_deriv</a></strong> => make_deriv_1d, make_deriv_2d, make_deriv_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-make_deriv~2'>make_deriv</a></strong> => make_deriv_1d, make_deriv_2d, make_deriv_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-restrict~3'>restrict</a></strong> => restrict_1d, restrict_2d, restrict_3d, zrestrict_1d, zrestrict_2d, zrestrict_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-restrict~3'>restrict</a></strong> => restrict_1d, restrict_2d, restrict_3d, zrestrict_1d, zrestrict_2d, zrestrict_3d</td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-fft_setup~3'>fft_setup</a></strong></td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_setup'>fft_setup</a></strong></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-fft_destroy~3'>fft_destroy</a></strong></td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-fft_destroy'>fft_destroy</a></strong></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-fftf~3'>fftf</a></strong></td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-fftf'>fftf</a></strong></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-fftb~3'>fftb</a></strong></td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-fftb'>fftb</a></strong></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  generic, public ::
-  <strong><a href='../type/pf_fft_t~2.html#boundprocedure-interp~2'>interp</a></strong> => interp_1d, interp_2d, interp_3d, zinterp_1d, zinterp_2d, zinterp_3d</td>
+  <strong><a href='../type/pf_fft_t.html#boundprocedure-interp'>interp</a></strong> => interp_1d, interp_2d, interp_3d, zinterp_1d, zinterp_2d, zinterp_3d</td>
                   <td></td>
               </tr>
           </tbody>
@@ -965,11 +858,11 @@ modules which it uses.
         <section>
           <h2>Subroutines</h2>
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-fft_setup~2"></span> <h3>public  subroutine <a href='../proc/fft_setup~2.html'>fft_setup</a>(this, grid_shape, ndim, grid_size)  
+    <div class="card-header codesum"><span class="anchor" id="proc-fft_setup"></span> <h3>public  subroutine <a href='../proc/fft_setup.html'>fft_setup</a>(this, grid_shape, ndim, grid_size)  
 </h3></div>
     <div class="card-body">
           
-  <p>Allocate and initialize FFT structure</p>
+  <p>Initialize the package</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -984,8 +877,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~145"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~91"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -999,7 +892,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-grid_shape~3"></span>
+              <span class="anchor" id="variable-grid_shape"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1014,7 +907,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-ndim~7"></span>
+              <span class="anchor" id="variable-ndim~5"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1029,7 +922,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-grid_size~3"></span>
+              <span class="anchor" id="variable-grid_size"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1050,11 +943,11 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-fft_destroy~2"></span> <h3>public  subroutine <a href='../proc/fft_destroy~2.html'>fft_destroy</a>(this)  
+    <div class="card-header codesum"><span class="anchor" id="proc-fft_destroy"></span> <h3>public  subroutine <a href='../proc/fft_destroy.html'>fft_destroy</a>(this)  
 </h3></div>
     <div class="card-body">
           
-  <p>Deallocate and destroy fft structures</p>
+  <p>Destroy the package</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1069,8 +962,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~146"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~92"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1090,11 +983,11 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-fftf~2"></span> <h3>public  subroutine <a href='../proc/fftf~2.html'>fftf</a>(this)  
+    <div class="card-header codesum"><span class="anchor" id="proc-fftf"></span> <h3>public  subroutine <a href='../proc/fftf.html'>fftf</a>(this)  
 </h3></div>
     <div class="card-body">
           
-  <p>Forward fft call</p>
+  <p>Routine to take foreward FFT</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1109,8 +1002,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~147"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~93"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1130,7 +1023,47 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-fftb~2"></span> <h3>public  subroutine <a href='../proc/fftb~2.html'>fftb</a>(this)  
+    <div class="card-header codesum"><span class="anchor" id="proc-fftb"></span> <h3>public  subroutine <a href='../proc/fftb.html'>fftb</a>(this)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Routine to take inverse or backward FFT</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-this~94"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-interp_1d"></span> <h3>public  subroutine <a href='../proc/interp_1d.html'>interp_1d</a>(this, yvec_c, fft_f, yvec_f, order)  
 </h3></div>
     <div class="card-body">
           
@@ -1149,48 +1082,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~148"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
-            </td>
-<td>intent(inout)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-    </div>
-  </div>
-
-              <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-interp_1d~2"></span> <h3>public  subroutine <a href='../proc/interp_1d~2.html'>interp_1d</a>(this, yvec_c, fft_f, yvec_f, order)  
-</h3></div>
-    <div class="card-body">
-          
-  
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-this~149"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~95"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1204,7 +1097,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_c~7"></span>
+              <span class="anchor" id="variable-yvec_c"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1219,8 +1112,8 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fft_f~4"></span>
-              type(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-fft_f"></span>
+              type(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(in),</td>
               <td></td>            <td>
@@ -1234,7 +1127,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_f~7"></span>
+              <span class="anchor" id="variable-yvec_f"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout),</td>
@@ -1249,7 +1142,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-order~11"></span>
+              <span class="anchor" id="variable-order"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1270,7 +1163,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-interp_2d~2"></span> <h3>public  subroutine <a href='../proc/interp_2d~2.html'>interp_2d</a>(this, yvec_c, fft_f, yvec_f)  
+    <div class="card-header codesum"><span class="anchor" id="proc-interp_2d"></span> <h3>public  subroutine <a href='../proc/interp_2d.html'>interp_2d</a>(this, yvec_c, fft_f, yvec_f)  
 </h3></div>
     <div class="card-body">
           
@@ -1289,8 +1182,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~150"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~96"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1304,7 +1197,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_c~8"></span>
+              <span class="anchor" id="variable-yvec_c~2"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1319,8 +1212,8 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fft_f~5"></span>
-              type(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-fft_f~2"></span>
+              type(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(in),</td>
               <td></td>            <td>
@@ -1334,7 +1227,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_f~8"></span>
+              <span class="anchor" id="variable-yvec_f~2"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout),</td>
@@ -1355,7 +1248,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-interp_3d~2"></span> <h3>public  subroutine <a href='../proc/interp_3d~2.html'>interp_3d</a>(this, yvec_c, fft_f, yvec_f)  
+    <div class="card-header codesum"><span class="anchor" id="proc-interp_3d"></span> <h3>public  subroutine <a href='../proc/interp_3d.html'>interp_3d</a>(this, yvec_c, fft_f, yvec_f)  
 </h3></div>
     <div class="card-body">
           
@@ -1374,8 +1267,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~151"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~97"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1389,10 +1282,10 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_c~9"></span>
+              <span class="anchor" id="variable-yvec_c~3"></span>
               real(kind=pfdp),
             </td>
-<td>intent(inout),</td>
+<td>intent(in),</td>
               <td></td>            <td>
               pointer
             </td>
@@ -1404,8 +1297,8 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fft_f~6"></span>
-              type(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-fft_f~3"></span>
+              type(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(in),</td>
               <td></td>            <td>
@@ -1419,7 +1312,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yvec_f~9"></span>
+              <span class="anchor" id="variable-yvec_f~3"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout),</td>
@@ -1440,7 +1333,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_1d~2"></span> <h3>public  subroutine <a href='../proc/zinterp_1d~2.html'>zinterp_1d</a>(this, yhat_c, yhat_f)  
+    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_1d"></span> <h3>public  subroutine <a href='../proc/zinterp_1d.html'>zinterp_1d</a>(this, yhat_c, yhat_f)  
 </h3></div>
     <div class="card-body">
           
@@ -1459,8 +1352,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~152"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~98"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1474,7 +1367,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_c~7"></span>
+              <span class="anchor" id="variable-yhat_c"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1489,7 +1382,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_f~7"></span>
+              <span class="anchor" id="variable-yhat_f"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(inout),</td>
@@ -1510,7 +1403,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_2d~2"></span> <h3>public  subroutine <a href='../proc/zinterp_2d~2.html'>zinterp_2d</a>(this, yhat_c, yhat_f)  
+    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_2d"></span> <h3>public  subroutine <a href='../proc/zinterp_2d.html'>zinterp_2d</a>(this, yhat_c, yhat_f)  
 </h3></div>
     <div class="card-body">
           
@@ -1529,8 +1422,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~153"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~99"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1544,7 +1437,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_c~8"></span>
+              <span class="anchor" id="variable-yhat_c~2"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1559,7 +1452,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_f~8"></span>
+              <span class="anchor" id="variable-yhat_f~2"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(inout),</td>
@@ -1580,11 +1473,11 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_3d~2"></span> <h3>public  subroutine <a href='../proc/zinterp_3d~2.html'>zinterp_3d</a>(this, yhat_c, yhat_f)  
+    <div class="card-header codesum"><span class="anchor" id="proc-zinterp_3d"></span> <h3>public  subroutine <a href='../proc/zinterp_3d.html'>zinterp_3d</a>(this, yhat_c, yhat_f)  
 </h3></div>
     <div class="card-body">
           
-  <p>Interpolate from coarse  level to fine</p>
+  
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1599,8 +1492,8 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~154"></span>
-              class(<a href='../type/pf_fft_t~2.html'>pf_fft_t</a>),
+              <span class="anchor" id="variable-this~100"></span>
+              class(<a href='../type/pf_fft_t.html'>pf_fft_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1614,7 +1507,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_c~9"></span>
+              <span class="anchor" id="variable-yhat_c~3"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(in),</td>
@@ -1629,7 +1522,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-yhat_f~9"></span>
+              <span class="anchor" id="variable-yhat_f~3"></span>
               complex(kind=pfdp),
             </td>
 <td>intent(inout),</td>

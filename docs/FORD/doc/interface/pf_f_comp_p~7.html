@@ -97,15 +97,15 @@
 
             <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/pf_misdc_sweeper.f90"> Source File</a>
+              <a href="../src/pf_imexR_sweeper.f90"> Source File</a>
             </li>
         </ul>
       </div>
       <div class="col">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-end mb-0">
-                <li class="breadcrumb-item"><a href='../sourcefile/pf_misdc_sweeper.f90.html'>pf_misdc_sweeper.f90</a></li>
-                <li class="breadcrumb-item"><a href='../module/pf_mod_misdc.html'>pf_mod_misdc</a></li>
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_imexr_sweeper.f90.html'>pf_imexR_sweeper.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_imexr_sweeper.html'>pf_mod_imexR_sweeper</a></li>
             <li class="breadcrumb-item active" aria-current="page">pf_f_comp_p</li>
           </ol>
         </nav>
@@ -155,7 +155,7 @@
     
     <div class="col-md-9" id='text'>
       <h2>interface <br>
-      public  subroutine pf_f_comp_p(this, y, t, dt, rhs, level, f, piece)  
+      public  subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)  
 </h2>    
 
     
@@ -173,8 +173,8 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~266"></span>
-              class(<a href='../type/pf_misdc_t.html'>pf_misdc_t</a>),
+              <span class="anchor" id="variable-this~226"></span>
+              class(<a href='../type/pf_imexr_sweeper_t.html'>pf_imexR_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -188,7 +188,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~27"></span>
+              <span class="anchor" id="variable-y~52"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -198,12 +198,12 @@
             <td>::</td>
             <td><strong>y</strong></td>
             <td>
-                
+                <p>Solution of implicit solve</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t~53"></span>
+              <span class="anchor" id="variable-t~98"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -213,12 +213,12 @@
             <td>::</td>
             <td><strong>t</strong></td>
             <td>
-                
+                <p>Time of solve</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~64"></span>
+              <span class="anchor" id="variable-dtq~6"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -226,14 +226,14 @@
               
             </td>
             <td>::</td>
-            <td><strong>dt</strong></td>
+            <td><strong>dtq</strong></td>
             <td>
-                
+                <p>dt*quadrature weight</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-rhs~13"></span>
+              <span class="anchor" id="variable-rhs~16"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -243,12 +243,12 @@
             <td>::</td>
             <td><strong>rhs</strong></td>
             <td>
-                
+                <p>RHS for solve</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level~14"></span>
+              <span class="anchor" id="variable-level_index~128"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -256,9 +256,9 @@
               
             </td>
             <td>::</td>
-            <td><strong>level</strong></td>
+            <td><strong>level_index</strong></td>
             <td>
-                
+                <p>Level index</p>
             </td>
         </tr>
         <tr>
@@ -273,12 +273,12 @@
             <td>::</td>
             <td><strong>f</strong></td>
             <td>
-                
+                <p>f_2 of solution y</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-piece~14"></span>
+              <span class="anchor" id="variable-piece~13"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -288,12 +288,15 @@
             <td>::</td>
             <td><strong>piece</strong></td>
             <td>
-                
+                <p>Which piece to evaluate</p>
             </td>
         </tr>
     </tbody>
   </table>
 
+    <h3>Description</h3>
+    <p>The interface to the routine to do implicit solve 
+i.e, solve the equation y - dtq*f_2(y) =rhs</p>
     <br>
 
  </div>

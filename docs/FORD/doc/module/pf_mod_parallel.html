@@ -146,8 +146,8 @@
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_pfasst_run">pf_pfasst_run</a>
             <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_predictor">pf_predictor</a>
-            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_residual">pf_check_residual</a>
-            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_convergence_block">pf_check_convergence_block</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_residual~2">pf_check_residual</a>
+            <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_check_convergence_block~2">pf_check_convergence_block</a>
             <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_block_run">pf_block_run</a>
             <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle">pf_Vcycle</a>
             <a class="list-group-item" href="../module/pf_mod_parallel.html#proc-pf_vcycle_pysdc">pf_Vcycle_pySDC</a>
@@ -176,13 +176,13 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='pf_mod_timer.html'>pf_mod_timer</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_interpolate.html'>pf_mod_interpolate</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_comm.html'>pf_mod_comm</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_results.html'>pf_mod_results</a></li>
-                  <li class="list-inline-item"><a href='pf_mod_restrict.html'>pf_mod_restrict</a></li>
                   <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_timer.html'>pf_mod_timer</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_results.html'>pf_mod_results</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_comm.html'>pf_mod_comm</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_restrict.html'>pf_mod_restrict</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_interpolate.html'>pf_mod_interpolate</a></li>
                   <li class="list-inline-item"><a href='pf_mod_hooks.html'>pf_mod_hooks</a></li>
                   <li class="list-inline-item"><a href='pf_mod_pfasst.html'>pf_mod_pfasst</a></li>
               </ul>
@@ -778,7 +778,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~108"></span>
+              <span class="anchor" id="variable-pf~173"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -793,7 +793,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-q0~3"></span>
+              <span class="anchor" id="variable-q0~5"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -808,7 +808,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~44"></span>
+              <span class="anchor" id="variable-dt~85"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout)</td>
@@ -823,7 +823,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-tend~2"></span>
+              <span class="anchor" id="variable-tend~4"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -853,7 +853,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-qend~2"></span>
+              <span class="anchor" id="variable-qend~8"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -868,7 +868,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~101"></span>
+              <span class="anchor" id="variable-flags~188"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -911,7 +911,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~109"></span>
+              <span class="anchor" id="variable-pf~174"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -926,7 +926,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~29"></span>
+              <span class="anchor" id="variable-t0~49"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -941,7 +941,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~45"></span>
+              <span class="anchor" id="variable-dt~86"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout)</td>
@@ -956,7 +956,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~102"></span>
+              <span class="anchor" id="variable-flags~189"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -977,7 +977,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_residual"></span> <h3>public  subroutine <a href='../proc/pf_check_residual.html'>pf_check_residual</a>(pf, level_index, residual_converged)  
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_residual~2"></span> <h3>public  subroutine <a href='../proc/pf_check_residual~2.html'>pf_check_residual</a>(pf, level_index, residual_converged)  
 </h3></div>
     <div class="card-body">
           
@@ -996,7 +996,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~110"></span>
+              <span class="anchor" id="variable-pf~175"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1011,7 +1011,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~97"></span>
+              <span class="anchor" id="variable-level_index~190"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1026,7 +1026,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-residual_converged"></span>
+              <span class="anchor" id="variable-residual_converged~5"></span>
               logical,
             </td>
 <td>intent(out)</td>
@@ -1047,7 +1047,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_convergence_block"></span> <h3>public  subroutine <a href='../proc/pf_check_convergence_block.html'>pf_check_convergence_block</a>(pf, level_index, send_tag)  
+    <div class="card-header codesum"><span class="anchor" id="proc-pf_check_convergence_block~2"></span> <h3>public  subroutine <a href='../proc/pf_check_convergence_block~2.html'>pf_check_convergence_block</a>(pf, level_index, send_tag)  
 </h3></div>
     <div class="card-body">
           
@@ -1055,7 +1055,7 @@ Allocate stuff for holding results</p><a href="../proc/pf_pfasst_run.html" class
 to update the next processor on the status
 Note that if the previous processor hasn't converged yet
 (pstatus), the current processor can't be converged yet either
-Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_block.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_block~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1070,7 +1070,7 @@ Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_bloc
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~111"></span>
+              <span class="anchor" id="variable-pf~176"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1085,7 +1085,7 @@ Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_bloc
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~98"></span>
+              <span class="anchor" id="variable-level_index~191"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1100,7 +1100,7 @@ Check to see if tolerances are met</p><a href="../proc/pf_check_convergence_bloc
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-send_tag"></span>
+              <span class="anchor" id="variable-send_tag~4"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1148,7 +1148,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~112"></span>
+              <span class="anchor" id="variable-pf~177"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1163,7 +1163,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-q0~4"></span>
+              <span class="anchor" id="variable-q0~6"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -1178,7 +1178,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~46"></span>
+              <span class="anchor" id="variable-dt~87"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout)</td>
@@ -1208,7 +1208,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-qend~3"></span>
+              <span class="anchor" id="variable-qend~9"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1223,7 +1223,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~103"></span>
+              <span class="anchor" id="variable-flags~190"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1263,7 +1263,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~113"></span>
+              <span class="anchor" id="variable-pf~178"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1278,7 +1278,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-iteration"></span>
+              <span class="anchor" id="variable-iteration~6"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1293,7 +1293,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~30"></span>
+              <span class="anchor" id="variable-t0~50"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1308,7 +1308,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~47"></span>
+              <span class="anchor" id="variable-dt~88"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1323,7 +1323,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index_c~2"></span>
+              <span class="anchor" id="variable-level_index_c~9"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1338,7 +1338,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index_f"></span>
+              <span class="anchor" id="variable-level_index_f~10"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1353,7 +1353,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~104"></span>
+              <span class="anchor" id="variable-flags~191"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1393,7 +1393,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~114"></span>
+              <span class="anchor" id="variable-pf~179"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1408,7 +1408,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-iteration~2"></span>
+              <span class="anchor" id="variable-iteration~7"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1423,7 +1423,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~31"></span>
+              <span class="anchor" id="variable-t0~51"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1438,7 +1438,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~48"></span>
+              <span class="anchor" id="variable-dt~89"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1453,7 +1453,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index_c~3"></span>
+              <span class="anchor" id="variable-level_index_c~10"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1468,7 +1468,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index_f~2"></span>
+              <span class="anchor" id="variable-level_index_f~11"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1483,7 +1483,7 @@ Call the predictor to get an initial guess on all levels and all processors</p><
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~105"></span>
+              <span class="anchor" id="variable-flags~192"></span>
               integer,
             </td>
 <td>intent(in),</td>

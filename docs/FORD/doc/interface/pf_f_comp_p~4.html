@@ -92,20 +92,20 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title=" 0.1% of total for procedures.">34 statements</a>
+                 title=" 0.1% of total for procedures.">22 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/pf_imexQ_oc_sweeper.f90"> Source File</a>
+              <a href="../src/pf_misdcQ_sweeper.f90"> Source File</a>
             </li>
         </ul>
       </div>
       <div class="col">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-end mb-0">
-                <li class="breadcrumb-item"><a href='../sourcefile/pf_imexq_oc_sweeper.f90.html'>pf_imexQ_oc_sweeper.f90</a></li>
-                <li class="breadcrumb-item"><a href='../module/pf_mod_imexq_oc.html'>pf_mod_imexQ_oc</a></li>
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_misdcq_sweeper.f90.html'>pf_misdcQ_sweeper.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_misdcq.html'>pf_mod_misdcQ</a></li>
             <li class="breadcrumb-item active" aria-current="page">pf_f_comp_p</li>
           </ol>
         </nav>
@@ -154,11 +154,9 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>interface</h2>
-      <p>This is the interface for the routine to compute the RHS function values</p>
-      <br>
-      <h2>public  subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece, flags)  
-</h2>
+      <h2>interface <br>
+      public  subroutine pf_f_comp_p(this, y, t, dtq, rhs, level_index, f, piece)  
+</h2>    
 
     
 
@@ -175,8 +173,8 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~234"></span>
-              class(<a href='../type/pf_imexq_oc_t.html'>pf_imexQ_oc_t</a>),
+              <span class="anchor" id="variable-this~166"></span>
+              class(<a href='../type/pf_misdcq_t.html'>pf_misdcQ_t</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -190,7 +188,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~20"></span>
+              <span class="anchor" id="variable-y~12"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -200,12 +198,12 @@
             <td>::</td>
             <td><strong>y</strong></td>
             <td>
-                <p>Solution of implicit solve</p>
+                <p>Solution of implicit solve </p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t~37"></span>
+              <span class="anchor" id="variable-t~24"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -220,7 +218,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dtq~4"></span>
+              <span class="anchor" id="variable-dtq~3"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -250,7 +248,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~112"></span>
+              <span class="anchor" id="variable-level_index~63"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -265,7 +263,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-f~14"></span>
+              <span class="anchor" id="variable-f~12"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -275,7 +273,7 @@
             <td>::</td>
             <td><strong>f</strong></td>
             <td>
-                <p>f_2 of solution y</p>
+                <p>f_n of solution y</p>
             </td>
         </tr>
         <tr>
@@ -293,26 +291,11 @@
                 <p>Which piece to evaluate</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-flags~116"></span>
-              integer,
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>flags</strong></td>
-            <td>
-                
-            </td>
-        </tr>
     </tbody>
   </table>
 
     <h3>Description</h3>
-    <p>Solve the equation y - dtq*f_2(y) =rhs</p>
+    <p>Solve the equation <script type="math/tex">y - dtq*f_n(y) =rhs </script> where n is given by the argument piece</p>
     <br>
 
  </div>

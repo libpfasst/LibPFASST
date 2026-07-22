@@ -97,15 +97,15 @@
 
             <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/pf_ndsysarray_encap.f90"> Source File</a>
+              <a href="../src/pf_zndsysarray_encap.f90"> Source File</a>
             </li>
         </ul>
       </div>
       <div class="col">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-end mb-0">
-                <li class="breadcrumb-item"><a href='../sourcefile/pf_ndsysarray_encap.f90.html'>pf_ndsysarray_encap.f90</a></li>
-                <li class="breadcrumb-item"><a href='../module/pf_mod_ndsysarray.html'>pf_mod_ndsysarray</a></li>
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_zndsysarray_encap.f90.html'>pf_zndsysarray_encap.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_zndsysarray.html'>pf_mod_zndsysarray</a></li>
             <li class="breadcrumb-item active" aria-current="page">get_array3d</li>
           </ol>
         </nav>
@@ -178,7 +178,7 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~107"></span>
+              <span class="anchor" id="variable-x~85"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in),</td>
@@ -193,7 +193,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-n~57"></span>
+              <span class="anchor" id="variable-n~56"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -208,7 +208,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~165"></span>
+              <span class="anchor" id="variable-flags~117"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -226,8 +226,8 @@
 
       <h3>Return Value
         <small>
-          <span class="anchor" id="variable-r~25"></span>
-          real(kind=pfdp), pointer, (:,:,:)
+          <span class="anchor" id="variable-r~20"></span>
+          complex(kind=pfdp), pointer, (:,:,:)
         </small>
       </h3>
       
@@ -392,17 +392,17 @@ implementation in a submodule of an interface in a parent module.
 <span class="w">    </span><span class="k">class</span><span class="p">(</span><span class="n">pf_encap_t</span><span class="p">),</span><span class="w"> </span><span class="k">target</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span>
 <span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">n</span>
 <span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w">           </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="w">   </span><span class="p">),</span><span class="w"> </span><span class="k">optional</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">flags</span>
-<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">r</span><span class="p">(:,:,:)</span>
+<span class="w">    </span><span class="kt">complex</span><span class="p">(</span><span class="n">pfdp</span><span class="p">),</span><span class="w"> </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">r</span><span class="p">(:,:,:)</span>
 
 <span class="w">    </span><span class="k">select type</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="w">    </span><span class="k">type is</span><span class="w"> </span><span class="p">(</span><span class="n">pf_ndsysarray_t</span><span class="p">)</span>
-<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w">   </span><span class="c">!  Return pointer to whole array</span>
+<span class="w">    </span><span class="k">type is</span><span class="w"> </span><span class="p">(</span><span class="n">pf_zndsysarray_t</span><span class="p">)</span>
+<span class="w">       </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w">        </span><span class="c">!  Return the whole array  </span>
 <span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">%</span><span class="n">ndim</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 <span class="k">             </span><span class="n">r</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">%</span><span class="n">flatarray</span>
 <span class="w">          </span><span class="k">else</span>
 <span class="k">             call </span><span class="n">pf_stop</span><span class="p">(</span><span class="err">__</span><span class="n">FILE__</span><span class="p">,</span><span class="err">__</span><span class="n">LINE__</span><span class="p">,</span><span class="s1">&#39;bad dimension, must be 2. ndim=&#39;</span><span class="p">,</span><span class="n">x</span><span class="p">%</span><span class="n">ndim</span><span class="p">)</span>
 <span class="w">          </span><span class="k">end if</span>
-<span class="k">       else</span><span class="w">         </span><span class="c">!  Return pointer to nth component</span>
+<span class="k">       else</span><span class="w">                     </span><span class="c">!  Return the nth component</span>
 <span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">%</span><span class="n">ndim</span><span class="w"> </span><span class="p">.</span><span class="n">eq</span><span class="p">.</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
 <span class="k">             </span><span class="n">r</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">arr_shape</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">x</span><span class="p">%</span><span class="n">flatarray</span><span class="p">(</span><span class="n">x</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">x</span><span class="p">%</span><span class="n">ndof</span><span class="o">*</span><span class="n">n</span><span class="p">)</span>
 <span class="w">          </span><span class="k">else</span>

@@ -143,7 +143,7 @@
             <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#interface-pf_expsweepsubstep">pf_expSweepSubstep</a>
             <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#interface-pf_expresidualsubstep">pf_expResidualSubstep</a>
             <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#interface-pf_f_eval_p~11">pf_f_eval_p</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#interface-pf_comp_dt_p~4">pf_comp_dt_p</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#interface-pf_comp_dt_p~5">pf_comp_dt_p</a>
         </div>
       </div>
     </div>
@@ -169,15 +169,15 @@
       </a>
       <div id="subs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_initialize~2">exp_initialize</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_sweep~2">exp_sweep</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_integrate~2">exp_integrate</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_residual~2">exp_residual</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_spreadq0~2">exp_spreadq0</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_compute_dt~2">exp_compute_dt</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_evaluate~2">exp_evaluate</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_evaluate_all~2">exp_evaluate_all</a>
-            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_destroy~2">exp_destroy</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_initialize">exp_initialize</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_sweep">exp_sweep</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_integrate">exp_integrate</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_residual">exp_residual</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_spreadq0">exp_spreadq0</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_compute_dt">exp_compute_dt</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_evaluate">exp_evaluate</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_evaluate_all">exp_evaluate_all</a>
+            <a class="list-group-item" href="../module/pf_mod_fexp_sweeper.html#proc-exp_destroy">exp_destroy</a>
         </div>
       </div>
     </div>
@@ -211,8 +211,8 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
                   <li class="list-inline-item"><a href='pf_mod_utils.html'>pf_mod_utils</a></li>
+                  <li class="list-inline-item"><a href='pf_mod_dtype.html'>pf_mod_dtype</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -468,7 +468,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~334"></span>
+              <span class="anchor" id="variable-this~305"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -513,7 +513,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~79"></span>
+              <span class="anchor" id="variable-dt~71"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -543,7 +543,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-f~6"></span>
+              <span class="anchor" id="variable-f~5"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -606,7 +606,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~335"></span>
+              <span class="anchor" id="variable-this~306"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -651,7 +651,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~80"></span>
+              <span class="anchor" id="variable-dt~72"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -681,7 +681,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-f~7"></span>
+              <span class="anchor" id="variable-f~6"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -729,7 +729,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~336"></span>
+              <span class="anchor" id="variable-this~307"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -744,7 +744,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~58"></span>
+              <span class="anchor" id="variable-y~64"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -759,7 +759,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t~110"></span>
+              <span class="anchor" id="variable-t~109"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -774,7 +774,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~180"></span>
+              <span class="anchor" id="variable-level_index~157"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -789,7 +789,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-f~21"></span>
+              <span class="anchor" id="variable-f~23"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -812,7 +812,7 @@ modules which it uses.
 
               <div class="card">
     <div class="card-header bg-light codesum">
-      <span class="anchor" id="interface-pf_comp_dt_p~4"></span>
+      <span class="anchor" id="interface-pf_comp_dt_p~5"></span>
       <h3>        interface
       </h3>
     </div>
@@ -837,7 +837,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~337"></span>
+              <span class="anchor" id="variable-this~308"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -852,7 +852,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~59"></span>
+              <span class="anchor" id="variable-y~65"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -867,7 +867,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t~111"></span>
+              <span class="anchor" id="variable-t~110"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -882,7 +882,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~181"></span>
+              <span class="anchor" id="variable-level_index~158"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -897,7 +897,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~81"></span>
+              <span class="anchor" id="variable-dt~73"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout)</td>
@@ -983,7 +983,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-nodes~5"></span>
+              <span class="anchor" id="variable-nodes~3"></span>
               real(kind=pfdp),
             </td>
               <td>public,</td>
@@ -1000,7 +1000,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-eta~2"></span>
+              <span class="anchor" id="variable-eta"></span>
               real(kind=pfdp),
             </td>
               <td>public,</td>
@@ -1034,7 +1034,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-newf~2"></span>
+              <span class="anchor" id="variable-newf"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
               <td>public,</td>
@@ -1075,57 +1075,57 @@ modules which it uses.
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-initialize~16'>initialize</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_initialize~2.html'>exp_initialize</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-initialize~14'>initialize</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_initialize.html'>exp_initialize</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-sweep~14'>sweep</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_sweep~2.html'>exp_sweep</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-sweep~12'>sweep</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_sweep.html'>exp_sweep</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-evaluate~12'>evaluate</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_evaluate~2.html'>exp_evaluate</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-evaluate~11'>evaluate</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_evaluate.html'>exp_evaluate</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-integrate~13'>integrate</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_integrate~2.html'>exp_integrate</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-integrate~12'>integrate</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_integrate.html'>exp_integrate</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-residual~13'>residual</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_residual~2.html'>exp_residual</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-residual~11'>residual</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_residual.html'>exp_residual</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-spreadq0~10'>spreadq0</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_spreadq0~2.html'>exp_spreadq0</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-spreadq0~9'>spreadq0</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_spreadq0.html'>exp_spreadq0</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-compute_dt~7'>compute_dt</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_compute_dt~2.html'>exp_compute_dt</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-compute_dt~6'>compute_dt</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_compute_dt.html'>exp_compute_dt</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-evaluate_all~12'>evaluate_all</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_evaluate_all~2.html'>exp_evaluate_all</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-evaluate_all~11'>evaluate_all</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_evaluate_all.html'>exp_evaluate_all</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-destroy~17'>destroy</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_destroy~2.html'>exp_destroy</a></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-destroy~14'>destroy</a></strong> => <a href='/prog/lib/LibPFASST/docs/FORD/doc/proc/exp_destroy.html'>exp_destroy</a></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-exp_destroy~2'>exp_destroy</a></strong></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-exp_destroy'>exp_destroy</a></strong></td>
                   <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-exp_initialize~2'>exp_initialize</a></strong></td>
+  <strong><a href='../type/pf_fexp_sweeper_t.html#boundprocedure-exp_initialize'>exp_initialize</a></strong></td>
                   <td></td>
               </tr>
           </tbody>
@@ -1140,7 +1140,7 @@ modules which it uses.
         <section>
           <h2>Subroutines</h2>
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_initialize~2"></span> <h3>public  subroutine <a href='../proc/exp_initialize~2.html'>exp_initialize</a>(this, pf, level_index)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_initialize"></span> <h3>public  subroutine <a href='../proc/exp_initialize.html'>exp_initialize</a>(this, pf, level_index)  
 </h3></div>
     <div class="card-body">
           
@@ -1159,7 +1159,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~338"></span>
+              <span class="anchor" id="variable-this~309"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1174,7 +1174,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~185"></span>
+              <span class="anchor" id="variable-pf~138"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1189,7 +1189,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~182"></span>
+              <span class="anchor" id="variable-level_index~159"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1210,7 +1210,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_sweep~2"></span> <h3>public  subroutine <a href='../proc/exp_sweep~2.html'>exp_sweep</a>(this, pf, level_index, t0, dt, nsweeps, flags)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_sweep"></span> <h3>public  subroutine <a href='../proc/exp_sweep.html'>exp_sweep</a>(this, pf, level_index, t0, dt, nsweeps, flags)  
 </h3></div>
     <div class="card-body">
           
@@ -1229,7 +1229,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~339"></span>
+              <span class="anchor" id="variable-this~310"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1244,7 +1244,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~186"></span>
+              <span class="anchor" id="variable-pf~139"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1259,7 +1259,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~183"></span>
+              <span class="anchor" id="variable-level_index~160"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1274,7 +1274,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~48"></span>
+              <span class="anchor" id="variable-t0~41"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1289,7 +1289,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~82"></span>
+              <span class="anchor" id="variable-dt~74"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1304,7 +1304,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-nsweeps~14"></span>
+              <span class="anchor" id="variable-nsweeps~10"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1319,7 +1319,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~181"></span>
+              <span class="anchor" id="variable-flags~160"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1340,7 +1340,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_integrate~2"></span> <h3>public  subroutine <a href='../proc/exp_integrate~2.html'>exp_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintsdc, flags)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_integrate"></span> <h3>public  subroutine <a href='../proc/exp_integrate.html'>exp_integrate</a>(this, pf, level_index, qSDC, fSDC, dt, fintsdc, flags)  
 </h3></div>
     <div class="card-body">
           
@@ -1359,7 +1359,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~340"></span>
+              <span class="anchor" id="variable-this~311"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1374,7 +1374,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~187"></span>
+              <span class="anchor" id="variable-pf~140"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1389,7 +1389,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~184"></span>
+              <span class="anchor" id="variable-level_index~161"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1404,7 +1404,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-qsdc~13"></span>
+              <span class="anchor" id="variable-qsdc~12"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -1419,7 +1419,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fsdc~13"></span>
+              <span class="anchor" id="variable-fsdc~12"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(in)</td>
@@ -1434,7 +1434,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~83"></span>
+              <span class="anchor" id="variable-dt~75"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1449,7 +1449,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fintsdc~2"></span>
+              <span class="anchor" id="variable-fintsdc"></span>
               class(<a href='../type/pf_encap_t.html'>pf_encap_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1464,7 +1464,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~182"></span>
+              <span class="anchor" id="variable-flags~161"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1485,11 +1485,11 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_residual~2"></span> <h3>public  subroutine <a href='../proc/exp_residual~2.html'>exp_residual</a>(this, pf, level_index, dt, flags)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_residual"></span> <h3>public  subroutine <a href='../proc/exp_residual.html'>exp_residual</a>(this, pf, level_index, dt, flags)  
 </h3></div>
     <div class="card-body">
           
-  <p>Compute the integral of F from t_n to t_m at each node</p><a href="../proc/exp_residual~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Compute the integral of F from t_n to t_m at each node</p><a href="../proc/exp_residual.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1504,7 +1504,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~341"></span>
+              <span class="anchor" id="variable-this~312"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1519,7 +1519,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~188"></span>
+              <span class="anchor" id="variable-pf~141"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1534,7 +1534,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~185"></span>
+              <span class="anchor" id="variable-level_index~162"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1549,7 +1549,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~84"></span>
+              <span class="anchor" id="variable-dt~76"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1564,7 +1564,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~183"></span>
+              <span class="anchor" id="variable-flags~162"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1585,7 +1585,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_spreadq0~2"></span> <h3>public  subroutine <a href='../proc/exp_spreadq0~2.html'>exp_spreadq0</a>(this, pf, level_index, t0, flags, step)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_spreadq0"></span> <h3>public  subroutine <a href='../proc/exp_spreadq0.html'>exp_spreadq0</a>(this, pf, level_index, t0, flags, step)  
 </h3></div>
     <div class="card-body">
           
@@ -1604,7 +1604,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~342"></span>
+              <span class="anchor" id="variable-this~313"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1619,7 +1619,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~189"></span>
+              <span class="anchor" id="variable-pf~142"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1634,7 +1634,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~186"></span>
+              <span class="anchor" id="variable-level_index~163"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1649,7 +1649,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~49"></span>
+              <span class="anchor" id="variable-t0~42"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1664,7 +1664,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~184"></span>
+              <span class="anchor" id="variable-flags~163"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1679,7 +1679,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-step~36"></span>
+              <span class="anchor" id="variable-step~33"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1700,7 +1700,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_compute_dt~2"></span> <h3>public  subroutine <a href='../proc/exp_compute_dt~2.html'>exp_compute_dt</a>(this, pf, level_index, t0, dt, flags)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_compute_dt"></span> <h3>public  subroutine <a href='../proc/exp_compute_dt.html'>exp_compute_dt</a>(this, pf, level_index, t0, dt, flags)  
 </h3></div>
     <div class="card-body">
           
@@ -1720,7 +1720,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~343"></span>
+              <span class="anchor" id="variable-this~314"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1735,7 +1735,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~190"></span>
+              <span class="anchor" id="variable-pf~143"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1750,7 +1750,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~187"></span>
+              <span class="anchor" id="variable-level_index~164"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1765,7 +1765,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-t0~50"></span>
+              <span class="anchor" id="variable-t0~43"></span>
               real(kind=pfdp),
             </td>
 <td>intent(in)</td>
@@ -1780,7 +1780,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-dt~85"></span>
+              <span class="anchor" id="variable-dt~77"></span>
               real(kind=pfdp),
             </td>
 <td>intent(inout)</td>
@@ -1795,7 +1795,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~185"></span>
+              <span class="anchor" id="variable-flags~164"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -1816,7 +1816,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_evaluate~2"></span> <h3>public  subroutine <a href='../proc/exp_evaluate~2.html'>exp_evaluate</a>(this, pf, level_index, t, m, flags, step)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_evaluate"></span> <h3>public  subroutine <a href='../proc/exp_evaluate.html'>exp_evaluate</a>(this, pf, level_index, t, m, flags, step)  
 </h3></div>
     <div class="card-body">
           
@@ -1835,7 +1835,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~344"></span>
+              <span class="anchor" id="variable-this~315"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -1850,7 +1850,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~191"></span>
+              <span class="anchor" id="variable-pf~144"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -1865,7 +1865,137 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~188"></span>
+              <span class="anchor" id="variable-level_index~165"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>level_index</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t~112"></span>
+              real(kind=pfdp),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t</strong></td>
+            <td>
+<p>Time at which to evaluate</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-m~76"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>m</strong></td>
+            <td>
+<p>Node at which to evaluate</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flags~165"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flags</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-step~34"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>step</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_evaluate_all"></span> <h3>public  subroutine <a href='../proc/exp_evaluate_all.html'>exp_evaluate_all</a>(this, pf, level_index, t, flags, step)  
+</h3></div>
+    <div class="card-body">
+          
+  
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-this~316"></span>
+              class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf~145"></span>
+              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              target
+            </td>
+            <td>::</td>
+            <td><strong>pf</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-level_index~166"></span>
               integer,
             </td>
 <td>intent(in)</td>
@@ -1888,136 +2018,6 @@ modules which it uses.
               
             </td>
             <td>::</td>
-            <td><strong>t</strong></td>
-            <td>
-<p>Time at which to evaluate</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-m~74"></span>
-              integer,
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>m</strong></td>
-            <td>
-<p>Node at which to evaluate</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-flags~186"></span>
-              integer,
-            </td>
-<td>intent(in),</td>
-              <td>optional</td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>flags</strong></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-step~37"></span>
-              integer,
-            </td>
-<td>intent(in),</td>
-              <td>optional</td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>step</strong></td>
-            <td>
-
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-    </div>
-  </div>
-
-              <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_evaluate_all~2"></span> <h3>public  subroutine <a href='../proc/exp_evaluate_all~2.html'>exp_evaluate_all</a>(this, pf, level_index, t, flags, step)  
-</h3></div>
-    <div class="card-body">
-          
-  
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-this~345"></span>
-              class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
-            </td>
-<td>intent(inout)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-pf~192"></span>
-              type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
-            </td>
-<td>intent(inout),</td>
-              <td></td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>pf</strong></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-level_index~189"></span>
-              integer,
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>level_index</strong></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-t~114"></span>
-              real(kind=pfdp),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
             <td><strong>t</strong>(:)</td>
             <td>
 <p>Array of times at each node</p>
@@ -2025,7 +2025,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-flags~187"></span>
+              <span class="anchor" id="variable-flags~166"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -2040,7 +2040,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-step~38"></span>
+              <span class="anchor" id="variable-step~35"></span>
               integer,
             </td>
 <td>intent(in),</td>
@@ -2061,7 +2061,7 @@ modules which it uses.
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-exp_destroy~2"></span> <h3>public  subroutine <a href='../proc/exp_destroy~2.html'>exp_destroy</a>(this, pf, level_index)  
+    <div class="card-header codesum"><span class="anchor" id="proc-exp_destroy"></span> <h3>public  subroutine <a href='../proc/exp_destroy.html'>exp_destroy</a>(this, pf, level_index)  
 </h3></div>
     <div class="card-body">
           
@@ -2080,7 +2080,7 @@ modules which it uses.
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~346"></span>
+              <span class="anchor" id="variable-this~317"></span>
               class(<a href='../type/pf_fexp_sweeper_t.html'>pf_fexp_sweeper_t</a>),
             </td>
 <td>intent(inout)</td>
@@ -2095,7 +2095,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-pf~193"></span>
+              <span class="anchor" id="variable-pf~146"></span>
               type(<a href='../type/pf_pfasst_t.html'>pf_pfasst_t</a>),
             </td>
 <td>intent(inout),</td>
@@ -2110,7 +2110,7 @@ modules which it uses.
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-level_index~190"></span>
+              <span class="anchor" id="variable-level_index~167"></span>
               integer,
             </td>
 <td>intent(in)</td>

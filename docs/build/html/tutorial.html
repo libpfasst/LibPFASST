@@ -240,17 +240,19 @@ function evaluations in spectral space, e.g.</p>
 <h2>Example 6<a class="headerlink" href="#example-6" title="Link to this heading">¶</a></h2>
 <p id="tut6">Space-time parallel solving of IMEX advection-diffusion equation in 1D, 2D and 3D using LibPFASST for parallel time-integration and AMReX together with the <cite>pf_amrex_encap.f90</cite> for space-parallel solving of the explicit and implicit parts.</p>
 <div class="math notranslate nohighlight">
-\[\c_t  = - v \nabla c + D \nabla^2 c\]</div>
-<p>Problem: AMReX requires definition of dimension on compile time -&gt; can compile LibAMReX for each dimension, see <a class="reference external" href="https://pfasst.lbl.govhttps://amrex-codes.github.io/amrex/docs_html/BuildingAMReX.html#building-libamrex">compiling libamrex</a>
--&gt; need to point <cite>pf_amrex_encap.f90</cite> to the correct libamrex when compiling LibPFASST -&gt; currently we need to rebuild LibPFASST when the dimensionality of our problem / tutorial changes
--&gt; then need to rebuild our Tutorial again</p>
+\[u_t  = - v \nabla u + D \nabla^2 u\]</div>
+<p>Change of dimensionality: AMReX requires definition of dimension at compile time
+1. Compile LibAMReX for each dimension, see <a class="reference external" href="https://pfasst.lbl.govhttps://amrex-codes.github.io/amrex/docs_html/BuildingAMReX.html#building-libamrex">compiling libamrex</a>
+2. Point <cite>pf_amrex_encap.f90</cite> to the correct libamrex when compiling LibPFASST
+-&gt; currently we need to rebuild core LibPFASST <cite>pf_amrex_encap.f90</cite> when the dimensionality of our problem changes
+3. Rebuild our Tutorial again</p>
 <p>additional information can also be found in <cite>Makefile.examples/Makefile.AMReX`</cite></p>
 </section>
 <section id="example-7">
 <h2>Example 7<a class="headerlink" href="#example-7" title="Link to this heading">¶</a></h2>
 <p id="tut7">Space-time parallel solving of 1D Burgers equation in 1D using LibPFASST for parallel time-integration and AMReX together with the <cite>pf_amrex_encap.f90</cite> for space-parallel solving of the explicit and implicit parts.</p>
 <div class="math notranslate nohighlight">
-\[\u_t  = - u \nabla u + \nu \nabla^2 u\]</div>
+\[u_t  = - u \nabla u + \nu \nabla^2 u\]</div>
 </section>
 </section>
 
