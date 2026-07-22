@@ -1,1426 +1,1412 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-   
-   <meta name="description" content="The library for running PFASST">
-    
+      <meta name="description" content="The library for running PFASST">
     <meta name="author" content="Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli" >
     <link rel="icon" href="../favicon.png">
 
     <title>pf_pfasst_t &ndash; LibPFASST </title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-    
-    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-    
-    
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    <script src="../js/jquery-2.1.3.min.js"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
-
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">LibPFASST </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-        
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-              data-toggle="dropdown" role="button"
-              aria-haspopup="true"
-     aria-expanded="false">Contents <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          
-              
-            <li><a href="../lists/files.html">Source Files</a></li>
-        
-        
-        
-            <li><a href="../lists/modules.html">Modules</a></li>
-        
-            
-                                
-            <li><a href="../lists/procedures.html">Procedures</a></li>
-        
-               
-            <li><a href="../lists/types.html">Derived Types</a></li>
-        
-        
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/namelists.html">Namelists</a>
+                </li>
             </ul>
-            </li>
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
-
-
-
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
-
-                             
-<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
-
-
-          </ul>
-        
-        <form action="../search.html" class="navbar-form navbar-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
         </div>
-<!--
-        <button type="submit" class="btn btn-default">Submit</button>
--->
-        </form>
-        
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+      </nav>
+    </div>
 
     <div class="container">
-    
-  
   <div class="row">
     <h1>pf_pfasst_t
-    <small>Derived Type</small>
-    
+      <small>Derived Type</small>
+      
     </h1>
-    
-<div class="row">
-  <div class="col-lg-12">
-<div class="well well-sm">
-  <ul class="list-inline" style="margin-bottom:0px;display:inline">
-     
-     
-     
-     
-    
-    
-     <li><i class="fa fa-list-ol"></i>
-       <a data-toggle="tooltip"
-    data-placement="bottom" data-html="true"
-    title="<p> 5.3% of total for derived types.</p>Including implementation: 43 statements,  0.5% of total for derived types.">43 statements</a>
-     </li> 
-     
-     
-     
-    <li><i class="fa fa-code"></i><a href="../src/pf_dtype.f90"> Source File</a></li>
-     
-     
-  </ul>
-  <ol class="breadcrumb in-well text-right">
-  
-    
-     <li><a href='../sourcefile/pf_dtype.f90.html'>pf_dtype.f90</a></li>
-    
-     <li><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></li>
-    
-  
-     <li class="active">pf_pfasst_t</li>
-  </ol>
-</div>
-</div>
-</div>
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-  })
-</script>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a></li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title="<p> 5.6% of total for derived types.</p>Including implementation: 48 statements,  0.6% of total for derived types.">48 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/pf_dtype.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/pf_dtype.f90.html'>pf_dtype.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/pf_mod_dtype.html'>pf_mod_dtype</a></li>
+            <li class="breadcrumb-item active" aria-current="page">pf_pfasst_t</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
+  </script>
 
   </div>
   
   <div class="row">
     <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
-    
-<div id="sidebar">
+      <div id="sidebar">
+      <h3>Contents</h3>
   
-<h3>Contents</h3>
- 
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-0">Variables</a></h3></div>
-  <div id="vars-0" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nlevels">nlevels</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-niters%7E2">niters</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-qtype%7E4">qtype</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_proper_nodes%7E2">use_proper_nodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_composite_nodes%7E2">use_composite_nodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_no_left_q%7E2">use_no_left_q</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps%7E2">nsweeps</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_pred%7E2">nsweeps_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nnodes%7E3">nnodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-abs_res_tol">abs_res_tol</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rel_res_tol">rel_res_tol</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pfasst_pred">PFASST_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pipeline_pred">pipeline_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_burn">nsweeps_burn</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-q0_style">q0_style</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-vcycle">Vcycle</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_pysdc_v">use_pysdc_V</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-sweep_at_conv">sweep_at_conv</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-finterp%7E2">Finterp</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_luq%7E2">use_LUq</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sform">use_Sform</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-taui0">taui0</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sdc_sweeper">use_sdc_sweeper</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_rk_stepper">use_rk_stepper</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsteps_rk%7E2">nsteps_rk</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rk_pred">RK_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-debug%7E2">debug</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_residuals%7E2">save_residuals</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_delta_q0%7E2">save_delta_q0</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_errors%7E2">save_errors</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_timings">save_timings</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rank%7E2">rank</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-state">state</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-levels">levels</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-comm%7E2">comm</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-results">results</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-hooks">hooks</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nhooks">nhooks</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_timers">pf_timers</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_runtimes">pf_runtimes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-outdir">outdir</a>
-      
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#vars-0"
+         aria-expanded="false" aria-controls="vars-0">
+         <h4 class="card-header bg-primary text-white">Variables</h4>
+      </a>
+      <div id="vars-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nlevels~3">nlevels</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-niters~3">niters</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-miniters~2">MINiters</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-qtype~4">qtype</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_proper_nodes~3">use_proper_nodes</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_composite_nodes~3">use_composite_nodes</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_no_left_q~3">use_no_left_q</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps~7">nsweeps</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_pred~3">nsweeps_pred</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nnodes~12">nnodes</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-abs_res_tol~2">abs_res_tol</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rel_res_tol~2">rel_res_tol</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pfasst_pred~2">PFASST_pred</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pipeline_pred~2">pipeline_pred</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_burn~2">nsweeps_burn</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-q0_style~2">q0_style</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-vcycle~2">Vcycle</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_pysdc_v~2">use_pysdc_V</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-sweep_at_conv~2">sweep_at_conv</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-finterp~3">Finterp</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_luq~3">use_LUq</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sform~2">use_Sform</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-taui0~2">taui0</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sdc_sweeper~2">use_sdc_sweeper</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_rk_stepper~2">use_rk_stepper</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsteps_rk~3">nsteps_rk</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rk_order">rk_order</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rk_nstages">rk_nstages</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rk_pred~2">RK_pred</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-debug~3">debug</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_residuals~3">save_residuals</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_delta_q0~3">save_delta_q0</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_errors~3">save_errors</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_json">save_json</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_timings~2">save_timings</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_solutions~2">save_solutions</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rank~9">rank</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-state">state</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-levels">levels</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-comm~3">comm</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-results">results</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-hooks">hooks</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nhooks">nhooks</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_timers">pf_timers</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_runtimes">pf_runtimes</a>
+            <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-outdir~2">outdir</a>
+        </div>
+      </div>
     </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    <div class="card card-primary">
+      <div class="card-header text-left"><h3 class="card-title">Source Code</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="../type/pf_pfasst_t.html#src">pf_pfasst_t</a>
+      </div>
+    </div>
+
+
   </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../type/pf_pfasst_t.html#src">pf_pfasst_t</a>
-  </div>
-</div>
-
-
-
-</div>
 
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>type, public :: pf_pfasst_t</h2>
+      <h2 id="type-def-statement">
+        type, public :: pf_pfasst_t</h2>
     <p>The main PFASST data type which includes pretty much everythingl</p>
-    <br>
-    
-    <div class="panel panel-default">
-      <div class="panel-heading">
-  <h3 class="panel-title">Inherits</h3>
-      </div>
-      <div class="panel-body">
-    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<br>      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Inherits</h3>
+        </div>
+        <div class="card-body">
+          <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: type~~pf_pfasst_t~~InheritsGraph Pages: 1 -->
-<svg id="typepf_pfasst_tInheritsGraph" width="641pt" height="217pt"
- viewBox="0.00 0.00 641.00 217.45" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="type~~pf_pfasst_t~~InheritsGraph" class="graph" transform="scale(.667 .667) rotate(0) translate(4 322)">
+<svg id="typepf_pfasst_tInheritsGraph" width="641pt" height="163pt"
+ viewBox="0.00 0.00 641.00 162.60" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~pf_pfasst_t~~InheritsGraph" class="graph" transform="scale(0.67 0.67) rotate(0) translate(4 238)">
 <title>type~~pf_pfasst_t~~InheritsGraph</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-322 957,-322 957,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-238 950,-238 950,4 -4,4"/>
 <!-- type~pf_pfasst_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_node1" class="node">
 <title>type~pf_pfasst_t</title>
-<polygon fill="none" stroke="#000000" points="953,-213 888,-213 888,-189 953,-189 953,-213"/>
-<text text-anchor="middle" x="920.5" y="-198.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">pf_pfasst_t</text>
-</g>
-<!-- type~pf_hook_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node2" class="node">
-<title>type~pf_hook_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node2"><a xlink:href=".././type/pf_hook_t.html" xlink:title="pf_hook_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="751,-318 691,-318 691,-294 751,-294 751,-318"/>
-<text text-anchor="middle" x="721" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_hook_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_pfasst_t&#45;&gt;type~pf_hook_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_edge5" class="edge">
-<title>type~pf_pfasst_t&#45;&gt;type~pf_hook_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M914.8295,-213.0942C906.971,-228.4973 891.2936,-254.8133 870,-269 837.4165,-290.7085 793.1674,-299.6864 761.3685,-303.396"/>
-<polygon fill="#000000" stroke="#000000" points="760.6816,-299.9484 751.0967,-304.4628 761.4048,-306.9109 760.6816,-299.9484"/>
-<text text-anchor="middle" x="821.5" y="-303.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">hooks</text>
+<polygon fill="none" stroke="black" points="946,-129 881,-129 881,-105 946,-105 946,-129"/>
+<text text-anchor="middle" x="913.5" y="-114.6" font-family="Helvetica,sans-Serif" font-size="10.50">pf_pfasst_t</text>
 </g>
 <!-- type~pf_comm_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node3" class="node">
+<g id="type~~pf_pfasst_t~~InheritsGraph_node2" class="node">
 <title>type~pf_comm_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node3"><a xlink:href=".././type/pf_comm_t.html" xlink:title="pf_comm_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="754,-276 688,-276 688,-252 754,-252 754,-276"/>
-<text text-anchor="middle" x="721" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_comm_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node2"><a xlink:href="../type/pf_comm_t.html" xlink:title="pf_comm_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="747.5,-234 681.5,-234 681.5,-210 747.5,-210 747.5,-234"/>
+<text text-anchor="middle" x="714.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_comm_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_pfasst_t&#45;&gt;type~pf_comm_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge3" class="edge">
 <title>type~pf_pfasst_t&#45;&gt;type~pf_comm_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M902.4523,-213.1162C893.1011,-218.9328 881.2988,-225.581 870,-230 835.628,-243.4429 794.6182,-252.3153 764.3318,-257.6151"/>
-<polygon fill="#000000" stroke="#000000" points="763.3732,-254.2273 754.0949,-259.3424 764.5379,-261.1298 763.3732,-254.2273"/>
-<text text-anchor="middle" x="821.5" y="-257.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">comm</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M907,-129.09C899.36,-144.48 884.06,-170.79 863,-185 831.64,-206.16 789.17,-215.23 757.86,-219.11"/>
+<polygon fill="#000000" stroke="#000000" points="757.25,-215.65 747.7,-220.23 758.02,-222.61 757.25,-215.65"/>
+<text text-anchor="middle" x="814.5" y="-219.4" font-family="Helvetica,sans-Serif" font-size="9.50">comm</text>
 </g>
-<!-- type~pf_state_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node4" class="node">
-<title>type~pf_state_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node4"><a xlink:href=".././type/pf_state_t.html" xlink:title="pf_state_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="751,-234 691,-234 691,-210 751,-210 751,-234"/>
-<text text-anchor="middle" x="721" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_state_t</text>
+<!-- type~pf_hook_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_node3" class="node">
+<title>type~pf_hook_t</title>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node3"><a xlink:href="../type/pf_hook_t.html" xlink:title="pf_hook_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="744.5,-192 684.5,-192 684.5,-168 744.5,-168 744.5,-192"/>
+<text text-anchor="middle" x="714.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_hook_t</text>
 </a>
 </g>
 </g>
-<!-- type~pf_pfasst_t&#45;&gt;type~pf_state_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_edge1" class="edge">
-<title>type~pf_pfasst_t&#45;&gt;type~pf_state_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M887.5566,-204.4677C852.8587,-208.1201 798.2011,-213.8736 761.0392,-217.7853"/>
-<polygon fill="#000000" stroke="#000000" points="760.6314,-214.3088 751.0528,-218.8366 761.3642,-221.2704 760.6314,-214.3088"/>
-<text text-anchor="middle" x="821.5" y="-218.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">state</text>
-</g>
-<!-- type~pf_timer_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node5" class="node">
-<title>type~pf_timer_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node5"><a xlink:href=".././type/pf_timer_t.html" xlink:title="pf_timer_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="751.5,-192 690.5,-192 690.5,-168 751.5,-168 751.5,-192"/>
-<text text-anchor="middle" x="721" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_timer_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_pfasst_t&#45;&gt;type~pf_timer_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_edge6" class="edge">
-<title>type~pf_pfasst_t&#45;&gt;type~pf_timer_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M887.9721,-194.7295C882.0094,-193.7151 875.8293,-192.7524 870,-192 833.5074,-187.2897 791.7328,-184.1161 761.7207,-182.2218"/>
-<polygon fill="#000000" stroke="#000000" points="761.8184,-178.7213 751.6235,-181.6047 761.3914,-185.7083 761.8184,-178.7213"/>
-<text text-anchor="middle" x="821.5" y="-194.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">pf_timers, pf_runtimes</text>
-</g>
-<!-- type~pf_results_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node6" class="node">
-<title>type~pf_results_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node6"><a xlink:href=".././type/pf_results_t.html" xlink:title="pf_results_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="755,-150 687,-150 687,-126 755,-126 755,-150"/>
-<text text-anchor="middle" x="721" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_results_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_pfasst_t&#45;&gt;type~pf_results_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_edge4" class="edge">
-<title>type~pf_pfasst_t&#45;&gt;type~pf_results_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M904.4849,-188.7418C894.9382,-181.9891 882.3132,-173.9891 870,-169 836.2656,-155.3314 795.6914,-147.3968 765.4071,-142.983"/>
-<polygon fill="#000000" stroke="#000000" points="765.5376,-139.4678 755.1524,-141.565 764.5787,-146.4018 765.5376,-139.4678"/>
-<text text-anchor="middle" x="821.5" y="-171.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">results</text>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_hook_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_edge5" class="edge">
+<title>type~pf_pfasst_t&#45;&gt;type~pf_hook_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M894.84,-129.12C885.68,-134.94 874.11,-141.59 863,-146 827.61,-160.06 785.02,-169.1 754.73,-174.29"/>
+<polygon fill="#000000" stroke="#000000" points="753.85,-170.89 744.55,-175.97 754.99,-177.8 753.85,-170.89"/>
+<text text-anchor="middle" x="814.5" y="-173.4" font-family="Helvetica,sans-Serif" font-size="9.50">hooks</text>
 </g>
 <!-- type~pf_level_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node7" class="node">
+<g id="type~~pf_pfasst_t~~InheritsGraph_node4" class="node">
 <title>type~pf_level_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node7"><a xlink:href=".././type/pf_level_t.html" xlink:title="pf_level_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="750,-108 692,-108 692,-84 750,-84 750,-108"/>
-<text text-anchor="middle" x="721" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_level_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node4"><a xlink:href="../type/pf_level_t.html" xlink:title="pf_level_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="743.5,-150 685.5,-150 685.5,-126 743.5,-126 743.5,-150"/>
+<text text-anchor="middle" x="714.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_level_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_pfasst_t&#45;&gt;type~pf_level_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge2" class="edge">
 <title>type~pf_pfasst_t&#45;&gt;type~pf_level_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M915.275,-188.862C907.7095,-172.7944 892.1446,-144.7773 870,-130 837.1835,-108.1012 792.2219,-100.171 760.2945,-97.3705"/>
-<polygon fill="#000000" stroke="#000000" points="760.2352,-93.8565 750.003,-96.6046 759.7157,-100.8372 760.2352,-93.8565"/>
-<text text-anchor="middle" x="821.5" y="-132.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">levels</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M880.85,-120.37C846.3,-124.06 790.98,-129.95 753.95,-133.9"/>
+<polygon fill="#000000" stroke="#000000" points="753.14,-130.47 743.56,-135.01 753.88,-137.43 753.14,-130.47"/>
+<text text-anchor="middle" x="814.5" y="-134.4" font-family="Helvetica,sans-Serif" font-size="9.50">levels</text>
+</g>
+<!-- type~pf_results_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_node5" class="node">
+<title>type~pf_results_t</title>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node5"><a xlink:href="../type/pf_results_t.html" xlink:title="pf_results_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="748,-108 681,-108 681,-84 748,-84 748,-108"/>
+<text text-anchor="middle" x="714.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_results_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_results_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_edge4" class="edge">
+<title>type~pf_pfasst_t&#45;&gt;type~pf_results_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M880.89,-110.77C874.96,-109.74 868.8,-108.76 863,-108 827.95,-103.4 787.96,-100.28 758.47,-98.37"/>
+<polygon fill="#000000" stroke="#000000" points="758.31,-94.86 748.11,-97.73 757.88,-101.84 758.31,-94.86"/>
+<text text-anchor="middle" x="814.5" y="-110.4" font-family="Helvetica,sans-Serif" font-size="9.50">results</text>
+</g>
+<!-- type~pf_state_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_node6" class="node">
+<title>type~pf_state_t</title>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node6"><a xlink:href="../type/pf_state_t.html" xlink:title="pf_state_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="744.5,-66 684.5,-66 684.5,-42 744.5,-42 744.5,-66"/>
+<text text-anchor="middle" x="714.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_state_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_state_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_edge1" class="edge">
+<title>type~pf_pfasst_t&#45;&gt;type~pf_state_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M896.83,-104.74C887.49,-97.99 875.11,-89.99 863,-85 827.94,-70.57 785.3,-62.54 754.91,-58.29"/>
+<polygon fill="#000000" stroke="#000000" points="755.07,-54.78 744.7,-56.94 754.16,-61.72 755.07,-54.78"/>
+<text text-anchor="middle" x="814.5" y="-87.4" font-family="Helvetica,sans-Serif" font-size="9.50">state</text>
+</g>
+<!-- type~pf_timer_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_node7" class="node">
+<title>type~pf_timer_t</title>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node7"><a xlink:href="../type/pf_timer_t.html" xlink:title="pf_timer_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="745,-24 684,-24 684,0 745,0 745,-24"/>
+<text text-anchor="middle" x="714.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_timer_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_pfasst_t&#45;&gt;type~pf_timer_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_edge6" class="edge">
+<title>type~pf_pfasst_t&#45;&gt;type~pf_timer_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M907.44,-104.87C900.09,-88.81 884.91,-60.81 863,-46 830.92,-24.32 786.9,-16.33 755.32,-13.46"/>
+<polygon fill="#000000" stroke="#000000" points="755.36,-9.95 745.12,-12.67 754.82,-16.93 755.36,-9.95"/>
+<text text-anchor="middle" x="814.5" y="-48.4" font-family="Helvetica,sans-Serif" font-size="9.50">pf_timers, pf_runtimes</text>
 </g>
 <!-- type~pf_encap_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_node8" class="node">
 <title>type~pf_encap_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node8"><a xlink:href=".././type/pf_encap_t.html" xlink:title="pf_encap_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="224.5,-150 158.5,-150 158.5,-126 224.5,-126 224.5,-150"/>
-<text text-anchor="middle" x="191.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_encap_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node8"><a xlink:href="../type/pf_encap_t.html" xlink:title="pf_encap_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="224.5,-192 158.5,-192 158.5,-168 224.5,-168 224.5,-192"/>
+<text text-anchor="middle" x="191.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_encap_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_level_t&#45;&gt;type~pf_encap_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge8" class="edge">
 <title>type~pf_level_t&#45;&gt;type~pf_encap_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M691.8028,-104.9826C684.4259,-106.9409 676.4752,-108.7876 669,-110 510.6037,-135.6892 319.2694,-138.55 234.9701,-138.4086"/>
-<polygon fill="#000000" stroke="#000000" points="234.7633,-134.908 224.752,-138.3755 234.7406,-141.908 234.7633,-134.908"/>
-<text text-anchor="middle" x="460.5" y="-140.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">Q, pQ, R, I, Fflt, Frkflt, tauQ, pFflt, q0, delta_q0, qend, F, pF, cf_delta, c_delta, f_encap_array_c</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M685.42,-146.91C678.19,-148.9 670.36,-150.78 663,-152 506.64,-178.03 317.51,-180.7 234.73,-180.46"/>
+<polygon fill="#000000" stroke="#000000" points="234.72,-176.96 224.71,-180.41 234.69,-183.96 234.72,-176.96"/>
+<text text-anchor="middle" x="457.5" y="-182.4" font-family="Helvetica,sans-Serif" font-size="9.50">Q, pQ, R, I, Fflt, Frkflt, tauQ, pFflt, q0, delta_q0, qend, F, pF, cf_delta, c_delta, f_encap_array_c</text>
 </g>
 <!-- type~pf_sdcmats_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_node9" class="node">
 <title>type~pf_sdcmats_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node9"><a xlink:href=".././type/pf_sdcmats_t.html" xlink:title="pf_sdcmats_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="229.5,-108 153.5,-108 153.5,-84 229.5,-84 229.5,-108"/>
-<text text-anchor="middle" x="191.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sdcmats_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node9"><a xlink:href="../type/pf_sdcmats_t.html" xlink:title="pf_sdcmats_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="229.5,-150 153.5,-150 153.5,-126 229.5,-126 229.5,-150"/>
+<text text-anchor="middle" x="191.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_sdcmats_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_level_t&#45;&gt;type~pf_sdcmats_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge9" class="edge">
 <title>type~pf_level_t&#45;&gt;type~pf_sdcmats_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M691.7776,-96C604.9131,-96 347.6468,-96 239.8621,-96"/>
-<polygon fill="#000000" stroke="#000000" points="239.6036,-92.5001 229.6036,-96 239.6036,-99.5001 239.6036,-92.5001"/>
-<text text-anchor="middle" x="460.5" y="-98.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">sdcmats</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M685.49,-138C600.7,-138 346.16,-138 239.9,-138"/>
+<polygon fill="#000000" stroke="#000000" points="239.79,-134.5 229.79,-138 239.79,-141.5 239.79,-134.5"/>
+<text text-anchor="middle" x="457.5" y="-140.4" font-family="Helvetica,sans-Serif" font-size="9.50">sdcmats</text>
 </g>
 <!-- type~pf_user_level_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_node10" class="node">
 <title>type~pf_user_level_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node10"><a xlink:href=".././type/pf_user_level_t.html" xlink:title="pf_user_level_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="234,-66 149,-66 149,-42 234,-42 234,-66"/>
-<text text-anchor="middle" x="191.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_user_level_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node10"><a xlink:href="../type/pf_user_level_t.html" xlink:title="pf_user_level_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="234,-108 149,-108 149,-84 234,-84 234,-108"/>
+<text text-anchor="middle" x="191.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_user_level_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_level_t&#45;&gt;type~pf_user_level_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge7" class="edge">
 <title>type~pf_level_t&#45;&gt;type~pf_user_level_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M691.8028,-87.0174C684.4259,-85.0591 676.4752,-83.2124 669,-82 516.2306,-57.2234 332.8217,-53.6821 244.353,-53.5886"/>
-<polygon fill="#000000" stroke="#000000" points="244.2974,-50.0885 234.2988,-53.5926 244.3002,-57.0885 244.2974,-50.0885"/>
-<text text-anchor="middle" x="460.5" y="-84.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">ulevel</text>
-</g>
-<!-- type~pf_sweeper_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node11" class="node">
-<title>type~pf_sweeper_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node11"><a xlink:href=".././type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-108 0,-108 0,-84 77,-84 77,-108"/>
-<text text-anchor="middle" x="38.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_sweeper_t</text>
-</a>
-</g>
-</g>
-<!-- type~pf_user_level_t&#45;&gt;type~pf_sweeper_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_edge11" class="edge">
-<title>type~pf_user_level_t&#45;&gt;type~pf_sweeper_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.881,-65.6993C129.6681,-70.9735 106.8822,-77.2284 87.0164,-82.6818"/>
-<polygon fill="#000000" stroke="#000000" points="85.9456,-79.3462 77.2289,-85.3686 87.7987,-86.0965 85.9456,-79.3462"/>
-<text text-anchor="middle" x="113" y="-81.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">sweeper</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M685.42,-129.09C678.19,-127.1 670.36,-125.22 663,-124 512.33,-98.92 331.24,-95.53 244.19,-95.53"/>
+<polygon fill="#000000" stroke="#000000" points="244.04,-92.03 234.05,-95.55 244.06,-99.03 244.04,-92.03"/>
+<text text-anchor="middle" x="457.5" y="-126.4" font-family="Helvetica,sans-Serif" font-size="9.50">ulevel</text>
 </g>
 <!-- type~pf_factory_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node12" class="node">
+<g id="type~~pf_pfasst_t~~InheritsGraph_node11" class="node">
 <title>type~pf_factory_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node12"><a xlink:href=".././type/pf_factory_t.html" xlink:title="pf_factory_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-66 4,-66 4,-42 73,-42 73,-66"/>
-<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_factory_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node11"><a xlink:href="../type/pf_factory_t.html" xlink:title="pf_factory_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-150 4,-150 4,-126 73,-126 73,-150"/>
+<text text-anchor="middle" x="38.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_factory_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_user_level_t&#45;&gt;type~pf_factory_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge10" class="edge">
 <title>type~pf_user_level_t&#45;&gt;type~pf_factory_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.881,-54C128.4578,-54 103.9974,-54 83.2987,-54"/>
-<polygon fill="#000000" stroke="#000000" points="83.1673,-50.5001 73.1673,-54 83.1672,-57.5001 83.1673,-50.5001"/>
-<text text-anchor="middle" x="113" y="-56.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">factory</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.84,-107.59C128.43,-113.26 103.87,-120.1 83.2,-125.85"/>
+<polygon fill="#000000" stroke="#000000" points="82.1,-122.52 73.4,-128.57 83.97,-129.26 82.1,-122.52"/>
+<text text-anchor="middle" x="113" y="-123.4" font-family="Helvetica,sans-Serif" font-size="9.50">factory</text>
 </g>
 <!-- type~pf_stepper_t -->
-<g id="type~~pf_pfasst_t~~InheritsGraph_node13" class="node">
+<g id="type~~pf_pfasst_t~~InheritsGraph_node12" class="node">
 <title>type~pf_stepper_t</title>
-<g id="a_type~~pf_pfasst_t~~InheritsGraph_node13"><a xlink:href=".././type/pf_stepper_t.html" xlink:title="pf_stepper_t">
-<polygon fill="#5cb85c" stroke="#5cb85c" points="75,-24 2,-24 2,0 75,0 75,-24"/>
-<text text-anchor="middle" x="38.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">pf_stepper_t</text>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node12"><a xlink:href="../type/pf_stepper_t.html" xlink:title="pf_stepper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="75,-108 2,-108 2,-84 75,-84 75,-108"/>
+<text text-anchor="middle" x="38.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_stepper_t</text>
 </a>
 </g>
 </g>
 <!-- type~pf_user_level_t&#45;&gt;type~pf_stepper_t -->
 <g id="type~~pf_pfasst_t~~InheritsGraph_edge12" class="edge">
 <title>type~pf_user_level_t&#45;&gt;type~pf_stepper_t</title>
-<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.881,-42.3007C128.9725,-36.8356 105.2275,-30.3174 84.8704,-24.7291"/>
-<polygon fill="#000000" stroke="#000000" points="85.7506,-21.3413 75.1808,-22.0692 83.8975,-28.0916 85.7506,-21.3413"/>
-<text text-anchor="middle" x="113" y="-38.4" font-family="Helvetica,sans-Serif" font-size="9.50" fill="#000000">stepper</text>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.84,-96C129.21,-96 105.74,-96 85.59,-96"/>
+<polygon fill="#000000" stroke="#000000" points="85.39,-92.5 75.39,-96 85.39,-99.5 85.39,-92.5"/>
+<text text-anchor="middle" x="113" y="-98.4" font-family="Helvetica,sans-Serif" font-size="9.50">stepper</text>
+</g>
+<!-- type~pf_sweeper_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_node13" class="node">
+<title>type~pf_sweeper_t</title>
+<g id="a_type~~pf_pfasst_t~~InheritsGraph_node13"><a xlink:href="../type/pf_sweeper_t.html" xlink:title="pf_sweeper_t">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="77,-66 0,-66 0,-42 77,-42 77,-66"/>
+<text text-anchor="middle" x="38.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">pf_sweeper_t</text>
+</a>
+</g>
+</g>
+<!-- type~pf_user_level_t&#45;&gt;type~pf_sweeper_t -->
+<g id="type~~pf_pfasst_t~~InheritsGraph_edge11" class="edge">
+<title>type~pf_user_level_t&#45;&gt;type~pf_sweeper_t</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M148.84,-84.41C129.65,-79.07 106.78,-72.71 86.92,-67.19"/>
+<polygon fill="#000000" stroke="#000000" points="87.73,-63.78 77.15,-64.47 85.85,-70.53 87.73,-63.78"/>
+<text text-anchor="middle" x="113" y="-80.4" font-family="Helvetica,sans-Serif" font-size="9.50">sweeper</text>
 </g>
 </g>
 </svg>
-</div><script>var pantypepf_pfasst_tInheritsGraph = svgPanZoom('#typepf_pfasst_tInheritsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
-    <p>Nodes of different colours represent the following: </p>
-    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+</div>                <script>
+                  var pantypepf_pfasst_tInheritsGraph = svgPanZoom('#typepf_pfasst_tInheritsGraph',
+                    {zoomEnabled: true, controlIconsEnabled: true, fit: true, center: true,}
+                  );
+                </script>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#InheritsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="InheritsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+<!-- Generated by graphviz version 2.48.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="178pt" height="32pt"
  viewBox="0.00 0.00 177.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 173.5,-28 173.5,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 173.5,-28 173.5,4 -4,4"/>
 <!-- Type -->
 <g id="node1" class="node">
 <title>Type</title>
 <polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
-<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Type</text>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
 </g>
 <!-- This Page&#39;s Entity -->
 <g id="node2" class="node">
 <title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="#000000" points="169.5,-24 72.5,-24 72.5,0 169.5,0 169.5,-24"/>
-<text text-anchor="middle" x="121" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+<polygon fill="none" stroke="black" points="169.5,-24 72.5,-24 72.5,0 169.5,0 169.5,-24"/>
+<text text-anchor="middle" x="121" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
 
-    
-    <p>Solid arrows point from a derived type to the parent type which it
-    extends. Dashed arrows point from a derived type to the other
-    types it contains as a components, with a label listing the name(s) of
-    said component(s).
-    </p>
-    </div></div></div></div>
+<p>Solid arrows point from a derived type to the parent type which it
+extends. Dashed arrows point from a derived type to the other
+types it contains as a components, with a label listing the name(s) of
+said component(s).
+</p>
+ </div>
+            </div>
+          </div>
+        </div>
+        </div>
       </div>
-    </div>
-    
-    
     <br>
 
-    <section class="visible-xs visible-sm hidden-md">
-      
-<h3>Contents</h3>
- 
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#vars-1">Variables</a></h3></div>
-  <div id="vars-1" class="panel-collapse collapse">
-    <div class="list-group">
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nlevels">nlevels</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-niters%7E2">niters</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-qtype%7E4">qtype</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_proper_nodes%7E2">use_proper_nodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_composite_nodes%7E2">use_composite_nodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_no_left_q%7E2">use_no_left_q</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps%7E2">nsweeps</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_pred%7E2">nsweeps_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nnodes%7E3">nnodes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-abs_res_tol">abs_res_tol</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rel_res_tol">rel_res_tol</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pfasst_pred">PFASST_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pipeline_pred">pipeline_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsweeps_burn">nsweeps_burn</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-q0_style">q0_style</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-vcycle">Vcycle</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_pysdc_v">use_pysdc_V</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-sweep_at_conv">sweep_at_conv</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-finterp%7E2">Finterp</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_luq%7E2">use_LUq</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sform">use_Sform</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-taui0">taui0</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_sdc_sweeper">use_sdc_sweeper</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-use_rk_stepper">use_rk_stepper</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nsteps_rk%7E2">nsteps_rk</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rk_pred">RK_pred</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-debug%7E2">debug</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_residuals%7E2">save_residuals</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_delta_q0%7E2">save_delta_q0</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_errors%7E2">save_errors</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-save_timings">save_timings</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-rank%7E2">rank</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-state">state</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-levels">levels</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-comm%7E2">comm</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-results">results</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-hooks">hooks</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-nhooks">nhooks</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_timers">pf_timers</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-pf_runtimes">pf_runtimes</a>
-      
-      <a class="list-group-item" href="../type/pf_pfasst_t.html#variable-outdir">outdir</a>
-      
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="panel panel-primary">
-  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
-  <div class="list-group">
-    <a class="list-group-item" href="../type/pf_pfasst_t.html#src">pf_pfasst_t</a>
-  </div>
-</div>
-
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
-    
     <section>
     <h2>Components</h2>
-    
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th><th>Visibility</th>
-
-<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nlevels"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nlevels</strong></td><td> =</td><td>-1</td><td><p>=== Mandatory pfasst parameters (must be set on command line or input file)  ===
- number of pfasst levels</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-niters%7E2"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>niters</strong></td><td> =</td><td>5</td><td><p>===  Optional pfasst parameters ====
- number of PFASST iterations to do</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-qtype%7E4"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>qtype</strong></td><td> =</td><td>SDC_GAUSS_LOBATTO</td><td><p>type of nodes</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_proper_nodes%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_proper_nodes</strong></td><td> =</td><td>.false.</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_composite_nodes%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_composite_nodes</strong></td><td> =</td><td>.false.</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_no_left_q%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_no_left_q</strong></td><td> =</td><td>.false.</td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nsweeps%7E2"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nsweeps</strong>(PF_MAXLEVS)</td><td> =</td><td>1</td><td><p>number of sweeps at each levels</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nsweeps_pred%7E2"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nsweeps_pred</strong>(PF_MAXLEVS)</td><td> =</td><td>1</td><td><p>number of sweeps during predictor</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nnodes%7E3"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nnodes</strong>(PF_MAXLEVS)</td><td> =</td><td>3</td><td><p>number of nodes</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-abs_res_tol"></span>real(kind=pfdp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>abs_res_tol</strong></td><td> =</td><td>0.0_pfdp</td><td><p>absolute convergence tolerance</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-rel_res_tol"></span>real(kind=pfdp),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>rel_res_tol</strong></td><td> =</td><td>0.0_pfdp</td><td><p>relative convergence tolerance</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-pfasst_pred"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>PFASST_pred</strong></td><td> =</td><td>.true.</td><td><p>true if the PFASST type predictor is used</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-pipeline_pred"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>pipeline_pred</strong></td><td> =</td><td>.false.</td><td><p>true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nsweeps_burn"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nsweeps_burn</strong></td><td> =</td><td>1</td><td><p>number of sdc sweeps to perform during coarse level burn in</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-q0_style"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>q0_style</strong></td><td> =</td><td>0</td><td><p>q0 can take 3 values
-  0:  Only the q0 at t=0 is valid  (default)
-  1:  The q0 at each processor is valid
-  2:  q0 and all nodes at each processor is valid</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-vcycle"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>Vcycle</strong></td><td> =</td><td>.true.</td><td><p>decides if Vcycles are done</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_pysdc_v"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_pysdc_V</strong></td><td> =</td><td>.false.</td><td><p>decides if Vcycles are done</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-sweep_at_conv"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>sweep_at_conv</strong></td><td> =</td><td>.false.</td><td><p>decides if one final sweep after convergence is done</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-finterp%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>Finterp</strong></td><td> =</td><td>.false.</td><td><p>True if transfer functions operate on rhs</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_luq%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_LUq</strong></td><td> =</td><td>.true.</td><td><p>True if LU type implicit matrix is used</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_sform"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_Sform</strong></td><td> =</td><td>.false.</td><td><p>True if Qmat type of stepping is used</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-taui0"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>taui0</strong></td><td> =</td><td>-99</td><td><p>iteration cutoff for tau inclusion</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_sdc_sweeper"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_sdc_sweeper</strong></td><td> =</td><td>.true.</td><td><p>decides if SDC sweeper is used </p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-use_rk_stepper"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>use_rk_stepper</strong></td><td> =</td><td>.false.</td><td><p>decides if RK steps are used instead of the sweeps</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nsteps_rk%7E2"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nsteps_rk</strong>(PF_MAXLEVS)</td><td> =</td><td>-1</td><td><p>number of runge-kutta steps per time step</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-rk_pred"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>RK_pred</strong></td><td> =</td><td>.false.</td><td><p>true if the coarse level is initialized with Runge-Kutta instead of PFASST</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-debug%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>debug</strong></td><td> =</td><td>.false.</td><td><p>If true, debug diagnostics are printed</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-save_residuals%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>save_residuals</strong></td><td> =</td><td>.true.</td><td><p>If true, residuals are saved and output</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-save_delta_q0%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>save_delta_q0</strong></td><td> =</td><td>.true.</td><td><p>If true, delta_q0 is  saved and output</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-save_errors%7E2"></span>logical,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>save_errors</strong></td><td> =</td><td>.true.</td><td><p>If true, errors  are saved and output</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-save_timings"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>save_timings</strong></td><td> =</td><td>2</td><td><p>0=none, 1=total only, 2=all, 3=all and echo</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-rank%7E2"></span>integer,</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>rank</strong></td><td> =</td><td>-1</td><td><p>rank of current processor</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-state"></span>type(<a href='../type/pf_state_t.html'>pf_state_t</a>),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>state</strong></td><td></td><td></td><td><p>pf objects
-  Describes where in the algorithm  is</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-levels"></span>type(<a href='../type/pf_level_t.html'>pf_level_t</a>),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>levels</strong>(:)</td><td></td><td></td><td><p>Holds the levels</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-comm%7E2"></span>type(<a href='../type/pf_comm_t.html'>pf_comm_t</a>),</td>
-  
-  <td>public,</td>
-  <td>pointer</td><td>::</td>
-  <td><strong>comm</strong></td><td></td><td></td><td><p>Points to communicator</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-results"></span>type(<a href='../type/pf_results_t.html'>pf_results_t</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>results</strong></td><td></td><td></td><td><p>Hold results for each level</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-hooks"></span>type(<a href='../type/pf_hook_t.html'>pf_hook_t</a>),</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>hooks</strong>(:,:,:)</td><td></td><td></td><td><p>hooks variables
-  Holds the hooks</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nhooks"></span>integer,</td>
-  
-  <td>public,</td>
-  <td>allocatable</td><td>::</td>
-  <td><strong>nhooks</strong>(:,:)</td><td></td><td></td><td><p>Holds the number hooks</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-pf_timers"></span>type(<a href='../type/pf_timer_t.html'>pf_timer_t</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>pf_timers</strong></td><td></td><td></td><td><p>timing variables</p></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-pf_runtimes"></span>type(<a href='../type/pf_timer_t.html'>pf_timer_t</a>),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>pf_runtimes</strong></td><td></td><td></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-outdir"></span>character(len=256),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>outdir</strong></td><td></td><td></td><td><p>output directory</p></td>
-  
-</tr>
-
-</tbody>
-</table>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nlevels~3"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nlevels</strong></td>
+<td> =</td>
+                <td>-1</td>
+            <td>
+                <p>=== Mandatory pfasst parameters (must be set on command line or input file)  ===
+number of pfasst levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-niters~3"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>niters</strong></td>
+<td> =</td>
+                <td>5</td>
+            <td>
+                <p>===  Optional pfasst parameters ====
+number of PFASST iterations to do</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-miniters~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>MINiters</strong></td>
+<td> =</td>
+                <td>0</td>
+            <td>
+                <p>MIN number of PFASST iterations to do</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-qtype~4"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>qtype</strong></td>
+<td> =</td>
+                <td>SDC_GAUSS_LOBATTO</td>
+            <td>
+                <p>type of nodes</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_proper_nodes~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_proper_nodes</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_composite_nodes~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_composite_nodes</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_no_left_q~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_no_left_q</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsweeps~7"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsweeps</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>1</td>
+            <td>
+                <p>number of sweeps at each levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsweeps_pred~3"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsweeps_pred</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>1</td>
+            <td>
+                <p>number of sweeps during predictor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nnodes~12"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nnodes</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>3</td>
+            <td>
+                <p>number of nodes</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-abs_res_tol~2"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>abs_res_tol</strong></td>
+<td> =</td>
+                <td>0.0_pfdp</td>
+            <td>
+                <p>absolute convergence tolerance</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rel_res_tol~2"></span>
+              real(kind=pfdp),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rel_res_tol</strong></td>
+<td> =</td>
+                <td>0.0_pfdp</td>
+            <td>
+                <p>relative convergence tolerance</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pfasst_pred~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>PFASST_pred</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>true if the PFASST type predictor is used</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pipeline_pred~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pipeline_pred</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsweeps_burn~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsweeps_burn</strong></td>
+<td> =</td>
+                <td>1</td>
+            <td>
+                <p>number of sdc sweeps to perform during coarse level burn in</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-q0_style~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>q0_style</strong></td>
+<td> =</td>
+                <td>0</td>
+            <td>
+                <p>q0 can take 3 values
+0:  Only the q0 at t=0 is valid  (default)
+1:  The q0 at each processor is valid
+2:  q0 and all nodes at each processor is valid</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vcycle~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Vcycle</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>decides if Vcycles are done</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_pysdc_v~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_pysdc_V</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>decides if Vcycles are done</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-sweep_at_conv~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>sweep_at_conv</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>decides if one final sweep after convergence is done</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-finterp~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Finterp</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>True if transfer functions operate on rhs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_luq~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_LUq</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>True if LU type implicit matrix is used</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_sform~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_Sform</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>True if Qmat type of stepping is used</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-taui0~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>taui0</strong></td>
+<td> =</td>
+                <td>-99</td>
+            <td>
+                <p>iteration cutoff for tau inclusion</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_sdc_sweeper~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_sdc_sweeper</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>decides if SDC sweeper is used </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-use_rk_stepper~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>use_rk_stepper</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>decides if RK steps are used instead of the sweeps</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nsteps_rk~3"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nsteps_rk</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>-1</td>
+            <td>
+                <p>number of runge-kutta steps per time step</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rk_order"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rk_order</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>-1</td>
+            <td>
+                <p>order of runge-kutta method per level</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rk_nstages"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rk_nstages</strong>(PF_MAXLEVS)</td>
+<td> =</td>
+                <td>-1</td>
+            <td>
+                <p>number of runge-kutta stages per level</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rk_pred~2"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>RK_pred</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>true if the coarse level is initialized with Runge-Kutta instead of PFASST</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-debug~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>debug</strong></td>
+<td> =</td>
+                <td>.false.</td>
+            <td>
+                <p>If true, debug diagnostics are printed</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_residuals~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_residuals</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>Will save residuals every time they are set</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_delta_q0~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_delta_q0</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>Will save change in initial condition</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_errors~3"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_errors</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>Will save errors, but set_error must be called externally</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_json"></span>
+              logical,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_json</strong></td>
+<td> =</td>
+                <td>.true.</td>
+            <td>
+                <p>Will save a jason file of run parameters</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_timings~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_timings</strong></td>
+<td> =</td>
+                <td>2</td>
+            <td>
+                <p>0=none, 1=total only, 2=all, 3=all and echo</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-save_solutions~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>save_solutions</strong></td>
+<td> =</td>
+                <td>0</td>
+            <td>
+                <p>0=none, 1=end, 2=all time steps, 3=all iterations</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rank~9"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rank</strong></td>
+<td> =</td>
+                <td>-1</td>
+            <td>
+                <p>rank of current processor</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-state"></span>
+              type(<a href='pf_state_t.html'>pf_state_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>state</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>pf objects
+ Describes where in the algorithm  is</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-levels"></span>
+              type(<a href='pf_level_t.html'>pf_level_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>levels</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>Holds the levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-comm~3"></span>
+              type(<a href='pf_comm_t.html'>pf_comm_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>comm</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>Points to communicator</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-results"></span>
+              type(<a href='pf_results_t.html'>pf_results_t</a>),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>results</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>Hold results for each level</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hooks"></span>
+              type(<a href='pf_hook_t.html'>pf_hook_t</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>hooks</strong>(:,:,:)</td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>hooks variables
+ Holds the hooks</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nhooks"></span>
+              integer,
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>nhooks</strong>(:,:)</td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>Holds the number hooks</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf_timers"></span>
+              type(<a href='pf_timer_t.html'>pf_timer_t</a>),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf_timers</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>timing variables</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pf_runtimes"></span>
+              type(<a href='pf_timer_t.html'>pf_timer_t</a>),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pf_runtimes</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-outdir~2"></span>
+              character(len=256),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>outdir</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                <p>output directory</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
 
     </section>
     <br>
     
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
     <section>
     <h3><span class="anchor" id="src"></span>Source Code</h3>
-    <div class="highlight"><pre><span></span>  <span class="k">type</span> <span class="kd">::</span> <span class="n">pf_pfasst_t</span>
-     <span class="c">!&gt; === Mandatory pfasst parameters (must be set on command line or input file)  ===</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nlevels</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c">!! number of pfasst levels</span>
+    <div class="hl codehilite"><pre><span></span><span class="w">  </span><span class="k">type</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_pfasst_t</span>
+<span class="w">     </span><span class="c">!&gt; === Mandatory pfasst parameters (must be set on command line or input file)  ===</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nlevels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">             </span><span class="c">!! number of pfasst levels</span>
 
-     <span class="c">!&gt;  ===  Optional pfasst parameters ====</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">niters</span>  <span class="o">=</span> <span class="mi">5</span>             <span class="c">!! number of PFASST iterations to do</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">qtype</span>   <span class="o">=</span> <span class="n">SDC_GAUSS_LOBATTO</span>  <span class="c">!! type of nodes</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_proper_nodes</span> <span class="o">=</span>  <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_composite_nodes</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_no_left_q</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">     </span><span class="c">!&gt;  ===  Optional pfasst parameters ====</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">niters</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="w">             </span><span class="c">!! number of PFASST iterations to do</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">MINiters</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">           </span><span class="c">!! MIN number of PFASST iterations to do</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">qtype</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">SDC_GAUSS_LOBATTO</span><span class="w">  </span><span class="c">!! type of nodes</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_proper_nodes</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_composite_nodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_no_left_q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
 
-     <span class="c">! --  level dependent parameters</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>       <span class="c">!!  number of sweeps at each levels</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span> <span class="o">=</span><span class="mi">1</span>   <span class="c">!!  number of sweeps during predictor</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span>          <span class="c">!! number of nodes</span>
+<span class="w">     </span><span class="c">! --  level dependent parameters</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w">       </span><span class="c">!!  number of sweeps at each levels</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps_pred</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="mi">1</span><span class="w">   </span><span class="c">!!  number of sweeps during predictor</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nnodes</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=</span><span class="mi">3</span><span class="w">          </span><span class="c">!! number of nodes</span>
 
-     <span class="c">! --  tolerances</span>
-     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">abs_res_tol</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>   <span class="c">!!  absolute convergence tolerance</span>
-     <span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span> <span class="kd">::</span> <span class="n">rel_res_tol</span> <span class="o">=</span> <span class="mf">0.0_pfdp</span>   <span class="c">!!  relative convergence tolerance</span>
+<span class="w">     </span><span class="c">! --  tolerances</span>
+<span class="w">     </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">abs_res_tol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_pfdp</span><span class="w">   </span><span class="c">!!  absolute convergence tolerance</span>
+<span class="w">     </span><span class="kt">real</span><span class="p">(</span><span class="n">pfdp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rel_res_tol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0_pfdp</span><span class="w">   </span><span class="c">!!  relative convergence tolerance</span>
 
-     <span class="c">! --  predictor options  (should be set before pfasst_run is called)</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">PFASST_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  true if the PFASST type predictor is used</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">pipeline_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsweeps_burn</span> <span class="o">=</span>  <span class="mi">1</span>       <span class="c">!!  number of sdc sweeps to perform during coarse level burn in</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">q0_style</span> <span class="o">=</span>  <span class="mi">0</span>           <span class="c">!!  q0 can take 3 values</span>
-                                        <span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
-                                        <span class="c">!!  1:  The q0 at each processor is valid</span>
-                                        <span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
-
-
-     <span class="c">! --  run options  (should be set before pfasst_run is called)</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Vcycle</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_pysdc_V</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  decides if Vcycles are done</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">sweep_at_conv</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!!  decides if one final sweep after convergence is done</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">Finterp</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>    <span class="c">!!  True if transfer functions operate on rhs</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_LUq</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>     <span class="c">!!  True if LU type implicit matrix is used</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_Sform</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>  <span class="c">!!  True if Qmat type of stepping is used</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">taui0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">99</span>          <span class="c">!! iteration cutoff for tau inclusion</span>
+<span class="w">     </span><span class="c">! --  predictor options  (should be set before pfasst_run is called)</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">PFASST_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">    </span><span class="c">!!  true if the PFASST type predictor is used</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pipeline_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w"> </span><span class="c">!!  true if coarse sweeps after burn in are pipelined  (if nsweeps_pred&gt;1 on coarse level)</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsweeps_burn</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="mi">1</span><span class="w">       </span><span class="c">!!  number of sdc sweeps to perform during coarse level burn in</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">q0_style</span><span class="w"> </span><span class="o">=</span><span class="w">  </span><span class="mi">0</span><span class="w">           </span><span class="c">!!  q0 can take 3 values</span>
+<span class="w">                                        </span><span class="c">!!  0:  Only the q0 at t=0 is valid  (default)</span>
+<span class="w">                                        </span><span class="c">!!  1:  The q0 at each processor is valid</span>
+<span class="w">                                        </span><span class="c">!!  2:  q0 and all nodes at each processor is valid</span>
 
 
-     <span class="c">! -- RK and Parareal options</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_sdc_sweeper</span> <span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!! decides if SDC sweeper is used </span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">use_rk_stepper</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span> <span class="c">!! decides if RK steps are used instead of the sweeps</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span> <span class="c">!! number of runge-kutta steps per time step</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">RK_pred</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>        <span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
+<span class="w">     </span><span class="c">! --  run options  (should be set before pfasst_run is called)</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Vcycle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">         </span><span class="c">!!  decides if Vcycles are done</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_pysdc_V</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">         </span><span class="c">!!  decides if Vcycles are done</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">sweep_at_conv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w"> </span><span class="c">!!  decides if one final sweep after convergence is done</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">Finterp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">    </span><span class="c">!!  True if transfer functions operate on rhs</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_LUq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">     </span><span class="c">!!  True if LU type implicit matrix is used</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_Sform</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">  </span><span class="c">!!  True if Qmat type of stepping is used</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">taui0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">99</span><span class="w">          </span><span class="c">!! iteration cutoff for tau inclusion</span>
 
-     <span class="c">! -- misc</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">debug</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>         <span class="c">!!  If true, debug diagnostics are printed</span>
 
-     <span class="c">! -- controller for the results </span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_residuals</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>  <span class="c">!!  If true, residuals are saved and output</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_delta_q0</span> <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>   <span class="c">!!  If true, delta_q0 is  saved and output</span>
-     <span class="kt">logical</span> <span class="kd">::</span> <span class="n">save_errors</span>  <span class="o">=</span> <span class="p">.</span><span class="n">true</span><span class="p">.</span>    <span class="c">!!  If true, errors  are saved and output</span>
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">save_timings</span>  <span class="o">=</span> <span class="mi">2</span>         <span class="c">!!  0=none, 1=total only, 2=all, 3=all and echo</span>
+<span class="w">     </span><span class="c">! -- RK and Parareal options</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_sdc_sweeper</span><span class="w"> </span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">   </span><span class="c">!! decides if SDC sweeper is used </span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">use_rk_stepper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">  </span><span class="c">!! decides if RK steps are used instead of the sweeps</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nsteps_rk</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w">  </span><span class="c">!! number of runge-kutta steps per time step</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rk_order</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w">   </span><span class="c">!! order of runge-kutta method per level</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rk_nstages</span><span class="p">(</span><span class="n">PF_MAXLEVS</span><span class="p">)</span><span class="o">=-</span><span class="mi">1</span><span class="w"> </span><span class="c">!! number of runge-kutta stages per level</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">RK_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">         </span><span class="c">!!  true if the coarse level is initialized with Runge-Kutta instead of PFASST</span>
 
-     <span class="kt">integer</span> <span class="kd">::</span> <span class="n">rank</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>            <span class="c">!! rank of current processor</span>
+<span class="w">     </span><span class="c">! -- misc</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">debug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span><span class="w">         </span><span class="c">!!  If true, debug diagnostics are printed</span>
 
-     <span class="c">!&gt; pf objects</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_state_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">state</span>   <span class="c">!!  Describes where in the algorithm  is</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">levels</span><span class="p">(:)</span> <span class="c">!! Holds the levels</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_comm_t</span><span class="p">),</span>  <span class="k">pointer</span> <span class="kd">::</span> <span class="n">comm</span>    <span class="c">!! Points to communicator</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">results</span>   <span class="c">!!  Hold results for each level</span>
- 
-     <span class="c">!&gt; hooks variables</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_hook_t</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">hooks</span><span class="p">(:,:,:)</span>  <span class="c">!!  Holds the hooks</span>
-     <span class="kt">integer</span><span class="p">,</span>  <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">nhooks</span><span class="p">(:,:)</span>   <span class="c">!!  Holds the number hooks</span>
+<span class="w">     </span><span class="c">! -- controller for the results </span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_residuals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">  </span><span class="c">!!  Will save residuals every time they are set</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_delta_q0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">   </span><span class="c">!!  Will save change in initial condition</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_errors</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">    </span><span class="c">!!  Will save errors, but set_error must be called externally</span>
+<span class="w">     </span><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">true</span><span class="p">.</span><span class="w">       </span><span class="c">!!  Will save a jason file of run parameters</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_timings</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">        </span><span class="c">!!  0=none, 1=total only, 2=all, 3=all and echo</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">save_solutions</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">      </span><span class="c">!!  0=none, 1=end, 2=all time steps, 3=all iterations</span>
 
-     <span class="c">!&gt; timing variables</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_timer_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf_timers</span>
-     <span class="k">type</span><span class="p">(</span><span class="n">pf_timer_t</span><span class="p">)</span> <span class="kd">::</span> <span class="n">pf_runtimes</span>
-     <span class="c">!&gt; output directory</span>
-     <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span> <span class="kd">::</span> <span class="n">outdir</span>
+<span class="w">     </span><span class="kt">integer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">rank</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">            </span><span class="c">!! rank of current processor</span>
 
-  <span class="k">end type </span><span class="n">pf_pfasst_t</span>
+<span class="w">     </span><span class="c">!&gt; pf objects</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_state_t</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">state</span><span class="w">   </span><span class="c">!!  Describes where in the algorithm  is</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_level_t</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">levels</span><span class="p">(:)</span><span class="w"> </span><span class="c">!! Holds the levels</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_comm_t</span><span class="p">),</span><span class="w">  </span><span class="k">pointer</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">comm</span><span class="w">    </span><span class="c">!! Points to communicator</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_results_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">results</span><span class="w">   </span><span class="c">!!  Hold results for each level</span>
+<span class="w"> </span>
+<span class="w">     </span><span class="c">!&gt; hooks variables</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_hook_t</span><span class="p">),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">hooks</span><span class="p">(:,:,:)</span><span class="w">  </span><span class="c">!!  Holds the hooks</span>
+<span class="w">     </span><span class="kt">integer</span><span class="p">,</span><span class="w">  </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">nhooks</span><span class="p">(:,:)</span><span class="w">   </span><span class="c">!!  Holds the number hooks</span>
+
+<span class="w">     </span><span class="c">!&gt; timing variables</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_timer_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_timers</span>
+<span class="w">     </span><span class="k">type</span><span class="p">(</span><span class="n">pf_timer_t</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">pf_runtimes</span>
+<span class="w">     </span><span class="c">!&gt; output directory</span>
+<span class="w">     </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">outdir</span>
+
+<span class="w">  </span><span class="k">end type </span><span class="n">pf_pfasst_t</span>
 </pre></div>
 
     </section>
     
-    
     </div>
   </div>
 
-
-    <hr>    
+      <hr>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-      <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2020 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
-          <p class="text-right">
-            Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
-          </p>
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              LibPFASST
+ was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli<br>              &copy; 2026 <a rel="license" href="http://www.freebsd.org/copyright/freebsd-doc-license.html">FreeBSD Documentation License</a>
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> LibPFASST was developed by Matthew Emmett. Michael Minion, Sebastian Goetschel, Brandon Krull, Francois Hamon, Tomasso Buvoli</p></div>
-      </div>
-      <br>
-      </div> <!-- /container -->    
+        <br>
+      </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-<!--
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
--->
-    <script src="../js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../js/ie10-viewport-bug-workaround.js"></script>
-
-    <!-- MathJax JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-      });
-    </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    
-    <script src="../tipuesearch/tipuesearch_content.js"></script>
-    <script src="../tipuesearch/tipuesearch_set.js"></script>
-    <script src="../tipuesearch/tipuesearch.js"></script>
-    
-    
   </body>
 </html>

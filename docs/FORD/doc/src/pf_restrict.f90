@@ -43,7 +43,7 @@ contains
     if(present(mystep)) step = mystep
     
     call call_hooks(pf, level_index, PF_PRE_RESTRICT_ALL)
-    if (pf%save_timings > 1) call pf_start_timer(pf, T_RESTRICT, level_index)
+    call pf_start_timer(pf, T_RESTRICT, level_index)
     
 
     allocate(c_times(c_lev%nnodes),stat=ierr)
@@ -99,7 +99,7 @@ contains
        
     end if
 
-    if (pf%save_timings > 1) call pf_stop_timer(pf, T_RESTRICT,level_index)
+    call pf_stop_timer(pf, T_RESTRICT,level_index)
     call call_hooks(pf, level_index, PF_POST_RESTRICT_ALL)
 
     deallocate(c_times)

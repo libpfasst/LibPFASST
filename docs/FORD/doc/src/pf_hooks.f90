@@ -90,18 +90,18 @@ contains
     pf%state%hook = hook
     if (level_index == -1) then  ! Do to all levels
        do l = 1, pf%nlevels
-          if (pf%save_timings > 1) call pf_start_timer(pf, T_HOOKS,l)
+          call pf_start_timer(pf, T_HOOKS,l)
           do i = 1, pf%nhooks(l,hook)
              call pf%hooks(l,hook,i)%proc(pf,l)
           end do
-          if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,l)
+          call pf_stop_timer(pf, T_HOOKS,l)
        end do
     else  ! Do to just level level_index
-       if (pf%save_timings > 1) call pf_start_timer(pf, T_HOOKS,level_index)
+       call pf_start_timer(pf, T_HOOKS,level_index)
        do i = 1, pf%nhooks(level_index,hook)
           call pf%hooks(level_index,hook,i)%proc(pf,level_index)
        end do
-       if (pf%save_timings > 1) call pf_stop_timer(pf, T_HOOKS,level_index)
+       call pf_stop_timer(pf, T_HOOKS,level_index)
     end if
 
 
