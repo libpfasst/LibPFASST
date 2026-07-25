@@ -21,5 +21,6 @@ else
 FSRC += src/pf_fftw.f90
 FFTWLIB=$(LIBPFASST)/fftw3
 FFLAGS  +=  -I$(FFTWLIB)/include 
-LDFLAGS += -L$(FFTWLIB)/lib -lfftw3
+FFTWLIBDIR := $(if $(wildcard $(FFTWLIB)/lib64),$(FFTWLIB)/lib64,$(FFTWLIB)/lib)
+LDFLAGS += -L$(FFTWLIBDIR) -lfftw3
 endif
